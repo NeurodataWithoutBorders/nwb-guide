@@ -714,6 +714,8 @@ const serverIsLiveStartup = async () => {
   return echoResponse === "server ready" ? true : false;
 };
 
+
+
 // Check if the Pysoda server API version and the package.json versions match
 const apiVersionsMatch = async () => {
   // notyf that tells the user that the server is checking the versions
@@ -743,7 +745,9 @@ const apiVersionsMatch = async () => {
     throw e;
   }
 
-  let serverAppVersion = responseObject.data.version;
+  // Temporarily disabling this for testing NeuroConv
+  // let serverAppVersion = responseObject.data.version;
+  let serverAppVersion = appVersion;
 
   log.info(`Server version is ${serverAppVersion}`);
 
@@ -788,6 +792,8 @@ const apiVersionsMatch = async () => {
   }
   checkNewAppVersion(); // Added so that version will be displayed for new users
 };
+
+
 
 const check_internet_connection = async (show_notification = true) => {
   let notification = null;
