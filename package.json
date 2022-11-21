@@ -1,8 +1,8 @@
 {
-  "name": "soda-for-sparc",
-  "productName": "SODA for SPARC",
-  "version": "9.4.1",
-  "description": "Keep Calm and Curate ",
+  "name": "neuroconv-app",
+  "productName": "NeuroConv",
+  "version": "0.0.1",
+  "description": "",
   "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=development electron .",
@@ -15,22 +15,16 @@
     "python-onefile-build": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist",
     "postinstall": "electron-builder install-app-deps",
     "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
-    "commit": "cz",
-    "prepare": "husky install"
   },
   "lint-staged": {
     "./**/*.{html|css|js|md|yml}": [
       "npm run format"
     ]
   },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
+  "config": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/fairdataihub/SODA-for-SPARC.git"
+    "url": "https://github.com/catalystneuro/neuroconv-app.git"
   },
   "build": {
     "appId": "com.fairdataihub.sodaforsparc",
