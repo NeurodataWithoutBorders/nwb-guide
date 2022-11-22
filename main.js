@@ -278,7 +278,7 @@ function initialize() {
       height: 735,
       center: true,
       show: false,
-      icon: __dirname + "/assets/menu-icon/soda_icon.png",
+      icon: __dirname + "/assets/img/logo-neuroconv.png",
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,
@@ -293,10 +293,10 @@ function initialize() {
     mainWindow.loadURL(path.join("file://", __dirname, "/index.html"));
 
     const splash = new BrowserWindow({
-      width: 220,
-      height: 190,
+      width: 315,
+      height: 315,
       frame: false,
-      icon: __dirname + "/assets/menu-icon/soda_icon.png",
+      icon: __dirname + "/assets/img/logo-neuroconv.png",
       alwaysOnTop: true,
       transparent: true,
     });
