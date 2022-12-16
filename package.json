@@ -89,11 +89,11 @@
     },
     "publish": {
       "provider": "github",
-      "repository": "https://github.com/fairdataihub/SODA-for-SPARC.git"
+      "repository": "https://github.com/catalystneuro/neuroconv-app.git"
     }
   },
   "keywords": [],
-  "author": "SODA Team",
+  "author": "CatalystNeuro",
   "license": "MIT",
   "dependencies": {
     "@electron/remote": "2.0.8",

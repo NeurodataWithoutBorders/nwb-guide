@@ -293,8 +293,8 @@ function initialize() {
     mainWindow.loadURL(path.join("file://", __dirname, "/index.html"));
 
     const splash = new BrowserWindow({
-      width: 315,
-      height: 315,
+      width: 340,
+      height: 340,
       frame: false,
       icon: __dirname + "/assets/img/logo-neuroconv.png",
       alwaysOnTop: true,
