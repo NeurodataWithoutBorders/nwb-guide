@@ -4,6 +4,9 @@ from enum import Enum
 
 # namespaces enums
 class NamespaceEnum(Enum):
+
+    NEUROCONV = "neuroconv"
+
     MANAGE_DATASETS = "manage_datasets"
     # VALIDATE_DATASET = "validate_dataset"
     CURATE_DATASETS = "curate_datasets"
@@ -23,6 +26,9 @@ def configure_namespaces():
     """
     Create namespaces for each pysoda file: pysoda ( now manage_datasets), prepare_metadata, etc
     """
+    # CatalystNeuro: Added neuroconv namespace
+    neuroconv_namespace = Namespace(NamespaceEnum.NEUROCONV.value, description='Routes for handling neuroconv requests')
+    namespaces[NamespaceEnum.NEUROCONV] = neuroconv_namespace
 
     manage_datasets_namespace = Namespace(NamespaceEnum.MANAGE_DATASETS.value, description='Routes for handling manage datsets functionality')
     namespaces[NamespaceEnum.MANAGE_DATASETS] = manage_datasets_namespace

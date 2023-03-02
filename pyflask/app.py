@@ -23,7 +23,6 @@ configureRouteHandlers(api)
 
 api.init_app(app)
 
-
 @api.route("/sodaforsparc_server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
     def get(self):
@@ -35,7 +34,6 @@ class Shutdown(Resource):
             return
 
         func()
-
 
 if __name__ == '__main__':
     port = sys.argv[1]
