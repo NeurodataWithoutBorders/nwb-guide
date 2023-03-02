@@ -695,7 +695,7 @@ const run_pre_flight_checks = async (check_update = true) => {
       //   });
       //   resolve(false);
       // }
-      resolve(true)
+      resolve(true);
     }
   });
 };
@@ -787,8 +787,6 @@ const apiVersionsMatch = async () => {
 
   checkNewAppVersion(); // Added so that version will be displayed for new users
 };
-
-
 
 const check_internet_connection = async (show_notification = true) => {
   let notification = null;
