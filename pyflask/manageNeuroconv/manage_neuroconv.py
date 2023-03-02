@@ -1,17 +1,18 @@
-import neuroconv.datainterfaces as ndi
-import inspect
-import os
-    
-interface_keys = list(filter(lambda key: 'Interface' in key, dir(ndi)))
-interface_info = list(map(lambda key: {
-    'name': key,
-    'category': os.path.basename(os.path.dirname(os.path.dirname(inspect.getfile(getattr(ndi, key))))),
-}, interface_keys))
+from neuroconv.datainterfaces import interfaces_by_category
+from neuroconv import NWBConverter
 
-interfaces = dict(zip(interface_keys, map(lambda key: getattr(ndi, key), interface_keys)))
+interfaces = {}
+interface_info = {}
 
-# desired_interfaces = ['SpikeGLXRecordingInterface', 'DeepLabCutInterface']
-
+for category in interfaces_by_category:
+    for name in interfaces_by_category[category]:
+        if (name not in interface_info.keys()): 
+            interface = interfaces_by_category[category][name]
+            interfaces[interface.__name__] = interface
+            interface_info[name] = {'tags': [], 'name': interface.__name__}
+        interface_info[name]['tags'].append(category)
+        
+print(interface_info)
 def get_all_interfaces():
     """
     Function used to get the list of all interfaces
@@ -24,16 +25,14 @@ def get_schema(interface):
     """
     Function used to get schema for a single interface
     """
+    if (not interface): interface = interface_info.keys() # get schema for all interfaces
 
-    return interfaces[interface].get_source_schema()
+    # Single Interface
+    if (isinstance(interface, str)): return interfaces[interface_info[interface]['name']].get_source_schema()
+    
+    # Combine Multiple Interfaces
+    class CustomNWBConverter(NWBConverter):
+        data_interface_classes = dict(zip(interface, map(lambda name: interfaces[interface_info[name]['name']], interface)))
 
-def get_schemas(selected_interfaces):
-    """
-    Function used to get schema for select interfaces
-    """
-    if (not selected_interfaces):
-        selected_interfaces = interface_keys # get schema for all interfaces
-
-    schema = list(map(lambda name: interfaces[name].get_source_schema(), selected_interfaces))
-    return dict(zip(selected_interfaces, schema))
+    return CustomNWBConverter.get_source_schema()
    

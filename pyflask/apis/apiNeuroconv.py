@@ -3,7 +3,6 @@ from namespaces import get_namespace, NamespaceEnum
 from manageNeuroconv import (
     get_all_interfaces,
     get_schema,
-    get_schemas
 )
 from errorHandlers import notBadRequestException
 
@@ -47,7 +46,7 @@ class Schemas(Resource):
       interfaces = args['interfaces']
       print(interfaces)
       try:
-        return get_schemas(interfaces)
+        return get_schema(interfaces)
       except Exception as e:
           if notBadRequestException(e):
               api.abort(500, str(e))
