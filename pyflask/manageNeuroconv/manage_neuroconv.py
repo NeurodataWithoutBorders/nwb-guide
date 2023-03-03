@@ -1,5 +1,7 @@
 from neuroconv.datainterfaces import interfaces_by_category
 from neuroconv import NWBConverter
+import inspect
+import os
 
 interfaces = {}
 interface_info = {}
@@ -9,10 +11,16 @@ for category in interfaces_by_category:
         if (name not in interface_info.keys()): 
             interface = interfaces_by_category[category][name]
             interfaces[interface.__name__] = interface
-            interface_info[name] = {'tags': [], 'name': interface.__name__}
-        interface_info[name]['tags'].append(category)
+            interface_info[name] = {
+                'tags': [], 
+                'name': interface.__name__, 
+                'category': os.path.basename(os.path.dirname(os.path.dirname(inspect.getfile(interface))))
+            }
+
+        info = interface_info[name]
+        # if (info.category != category): info['tags'].append(category)
+        info['tags'].append(category)
         
-print(interface_info)
 def get_all_interfaces():
     """
     Function used to get the list of all interfaces

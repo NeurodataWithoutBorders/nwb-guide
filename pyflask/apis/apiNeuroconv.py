@@ -44,7 +44,6 @@ class Schemas(Resource):
   def get(self):
       args = parser.parse_args()
       interfaces = args['interfaces']
-      print(interfaces)
       try:
         return get_schema(interfaces)
       except Exception as e:

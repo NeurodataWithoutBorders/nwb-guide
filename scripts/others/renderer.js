@@ -443,9 +443,13 @@ const startupServerAndApiCheck = async () => {
   }
 
   apiVersionChecked = true;
+
+  handleDataFormats()
+
 };
 
 startupServerAndApiCheck();
+
 
 // Check if we are connected to the Pysoda server
 // Check app version on current app and display in the side bar
@@ -9112,12 +9116,12 @@ function gettingStarted() {
 
 function sodaVideo() {
   document.getElementById("overview-column-1").blur();
-  shell.openExternal("https://docs.sodaforsparc.io/docs/getting-started/user-interface");
+  shell.openExternal("https://www.nwb.org/documentation/");
 }
 
 function directToDocumentation() {
   shell.openExternal(
-    "https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda"
+    "https://www.nwb.org/documentation/"
   );
   document.getElementById("overview-column-2").blur();
   // window.open('https://docs.sodaforsparc.io', '_blank');
@@ -9134,9 +9138,11 @@ document.getElementById("doc-btn").addEventListener("click", directToDocumentati
 document
   .getElementById("home-button-interface-instructions-link")
   .addEventListener("click", sodaVideo);
+  
 document
   .getElementById("home-button-guided-mode-link")
   .addEventListener("click", directToGuidedMode);
+
 document
   .getElementById("home-button-free-form-mode-link")
   .addEventListener("click", directToFreeFormMode);
@@ -9205,3 +9211,108 @@ tippy("#datasetPathDisplay", {
   theme: "soda",
   maxWidth: "100%",
 });
+
+
+  // ---------------------------------------------------------------------------
+  // --------------------------- ADDED FOR NWB GUIDE ---------------------------
+  // ---------------------------------------------------------------------------
+
+  async function handleDataFormats () {
+    // ADDED FOR NWB GUIDE
+    const dataFormatsForm = document.getElementById('neuroconv-data-formats-form')
+    // const dataFormats = document.getElementById('neuroconv-data-formats')
+    const getSchema = document.getElementById('neuroconv-get-schema')
+  
+    const base = `http://127.0.0.1:${port}`
+    const formats = await fetch(`${base}/neuroconv`)
+      .then(res => res.json())
+    
+    // const intentation = '\xa0\xa0\xa0\xa0'
+    let categories = {}
+    for (let name in formats) {
+  
+      const format = formats[name]
+  
+      let firstCategory = categories[format.category]
+      if (!firstCategory) {
+        // const category = document.createElement('optgroup')
+        // category.label = format.category
+        // dataFormats.appendChild(category)
+
+        const fieldset  = document.createElement('fieldset')
+        const legend = document.createElement('legend')
+        legend.textContent = format.category
+        fieldset.appendChild(legend)
+        dataFormatsForm.appendChild(fieldset)
+
+        firstCategory = categories[format.category] = {
+          // select: category,
+          form: fieldset,
+          categories: {}
+        }
+      }
+  
+      // Place in tag div OR category div
+      const tags = format.tags.filter(tag => tag !== format.category)
+      const toHoldOption = tags.length ? tags.map(tag => {
+        if (!firstCategory.categories[tag]) {
+          // const category = document.createElement('optgroup')
+          // category.label = `${intentation}${tag}`
+          // dataFormats.appendChild(category)
+
+          const fieldset  = document.createElement('fieldset')
+          const legend = document.createElement('legend')
+          legend.textContent = tag
+          fieldset.appendChild(legend)
+          firstCategory.form.appendChild(fieldset)
+
+          firstCategory.categories[tag] = {
+            // select: category,
+            form: fieldset
+          }
+        }
+  
+        return firstCategory.categories[tag]
+      }) : [firstCategory]
+  
+      toHoldOption.forEach(info => {
+        // const select = info.select
+        // const form = info.form
+        // const option = document.createElement('option')
+        // option.value = name
+        // option.innerHTML = `${select === firstCategory.select ? '' : intentation }${name}`
+        // select.appendChild(option)
+
+        const form = info.form
+        const div = document.createElement('div')
+        const input = document.createElement('input')
+        input.type = 'checkbox'
+        input.value = name
+        input.name = name
+        div.appendChild(input)
+        const label = document.createElement('label')
+        label.for = name
+        label.textContent = name
+        div.appendChild(label)
+        form.appendChild(div)
+      })
+    }
+  
+    // // NOTE: Not using the selector at the moment
+    // let selectData
+    // dataFormats.addEventListener('input', event => {
+    //   selectData = Array.from(event.target.selectedOptions).reduce((data, opt) => {
+    //     data.push(opt.value)
+    //     return data
+    //   }, [])
+    // })
+  
+    getSchema.onclick = async ( ) => {
+      const formdata = new FormData(dataFormatsForm)
+      const selected = Array.from(formdata.values()) // selectData
+      if (selected && selected.length) {
+        const schema = await fetch(`${base}/neuroconv/schema?interfaces=${selected.join(',')}`).then(res => res.json())
+        console.log(selected, schema)
+      }
+    }
+  }
