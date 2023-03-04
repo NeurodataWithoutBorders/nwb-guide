@@ -403,7 +403,7 @@ const startupServerAndApiCheck = async () => {
 
     await Swal.fire({
       icon: "error",
-      html: `Something went wrong while initializing NWB GUIDE background services. Please restart SODA and try again. If this issue occurs multiple times, please email <a href='mailto:help@fairdataihub.org'>help@fairdataihub.org</a>.`,
+      html: `Something went wrong while initializing NWB GUIDE background services. Please restart the application and try again. If this issue occurs multiple times, please raise an issue.`,
       heightAuto: false,
       backdrop: "rgba(0,0,0, 0.4)",
       confirmButtonText: "Restart now",
