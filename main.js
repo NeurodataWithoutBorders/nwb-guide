@@ -117,21 +117,25 @@ const createPyProc = async () => {
       if (guessPackaged()) {
         log.info("Application is packaged");
         pyflaskProcess = require("child_process").execFile(script, [port], {
-          stdio: "ignore",
+          // stdio: "ignore",
         });
       } else {
         log.info("Application is not packaged");
         pyflaskProcess = require("child_process").spawn("python", [script, port], {
-          stdio: "ignore",
+          // stdio: "ignore",
         });
       }
 
       if (pyflaskProcess != null) {
         console.log("child process success on port " + port);
         log.info("child process success on port " + port);
-      } else {
-        console.error("child process failed to start on port" + port);
-      }
+
+        // Listen for errors from Python process
+        pyflaskProcess.stderr.on('data', function(data) {
+          console.log("[python]:", data.toString());
+        });
+
+      } else console.error("child process failed to start on port" + port);
 
       selectedPort = port;
     })

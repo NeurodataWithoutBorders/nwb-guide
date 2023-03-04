@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, reqparse # , request
 from namespaces import get_namespace, NamespaceEnum
 from manageNeuroconv import (
-    get_all_interfaces,
+    get_all_interface_info,
     get_schema,
 )
 from errorHandlers import notBadRequestException
@@ -18,7 +18,7 @@ class AllInterfaces(Resource):
   def get(self):
 
     try:
-      return get_all_interfaces()
+      return get_all_interface_info()
     except Exception as e:
         if notBadRequestException(e):
             api.abort(500, str(e))
