@@ -38,22 +38,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           git_email: "fairdataihub@gmail.com"
           git_name: "fairdataihub-bot"
-
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.6
-
-      - name: Install black
-        run: pip install black
-
-      - name: Run Black
-        uses: wearerequired/lint-action@v1
-        with:
-          black: true
-          black_dir: "./src/pysoda"
-          commit_message: "style: 🎨 fix code style issues with ${linter}"
-          auto_fix: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          git_email: "fairdataihub@gmail.com"
-          git_name: "fairdataihub-bot"
