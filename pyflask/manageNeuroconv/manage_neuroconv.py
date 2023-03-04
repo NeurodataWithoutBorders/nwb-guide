@@ -21,7 +21,7 @@ for category in interfaces_by_category:
         # if (info.category != category): info['tags'].append(category)
         info['tags'].append(category)
         
-def get_all_interfaces():
+def get_all_interface_info() -> dict:
     """
     Function used to get the list of all interfaces
     """
