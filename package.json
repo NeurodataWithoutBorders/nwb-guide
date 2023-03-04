@@ -5,10 +5,6 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "app:dev": "vite --config vite.config.ts",
-    "server:dev": "cd pyflask && python -m flask run --port 4242",
-    "dev": "run-p server:dev app:dev",
-
     "start": "NODE_ENV=development electron .",
     "build-win": "electron-builder build --win --publish never",
     "build-mac": "electron-builder build --mac --publish never",
