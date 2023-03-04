@@ -8,6 +8,8 @@
     "app:dev": "vite --config vite.config.ts",
     "server:dev": "cd pyflask && python -m flask run --port 4242",
     "dev": "run-p server:dev app:dev",
+    
+    "test": "pytest pyflask/tests/ -s",
 
     "start": "NODE_ENV=development electron .",
     "build-win": "electron-builder build --win --publish never",
