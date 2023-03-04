@@ -131,10 +131,9 @@ const createPyProc = async () => {
         log.info("child process success on port " + port);
 
         // Listen for errors from Python process
-        pyflaskProcess.stderr.on('data', function(data) {
+        pyflaskProcess.stderr.on("data", function (data) {
           console.log("[python]:", data.toString());
         });
-
       } else console.error("child process failed to start on port" + port);
 
       selectedPort = port;
