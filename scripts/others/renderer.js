@@ -621,7 +621,6 @@ const serverIsLiveStartup = async () => {
   return echoResponse === "server ready" ? true : false;
 };
 
-
 const check_internet_connection = async (show_notification = true) => {
   let notification = null;
   if (show_notification) {
