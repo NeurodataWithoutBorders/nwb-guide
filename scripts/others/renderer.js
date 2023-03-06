@@ -134,11 +134,6 @@ log.info("Requesting the port");
 const port = ipcRenderer.sendSync("get-port");
 log.info("Port is: " + port);
 
-// set to true once the SODA server has been connected to
-let sodaIsConnected = false;
-// set to true once the API version has been confirmed
-let apiVersionChecked = false;
-
 //log user's OS version //
 log.info("User OS:", os.type(), os.platform(), "version:", os.release());
 console.log("User OS:", os.type(), os.platform(), "version:", os.release());
@@ -351,6 +346,73 @@ let update_downloaded_notification = "";
 const wait = async (delay) => {
   return new Promise((resolve) => setTimeout(resolve, delay));
 };
+// check that the client connected to the server using exponential backoff
+// verify the api versions match
+const startupServerAndApiCheck = async () => {
+  // wait for SWAL to be loaded in
+  await wait(2000);
+
+// Darwin executable starts slowly
+  // use an exponential backoff to wait for the app server to be ready
+  // this will give Mac users more time before receiving a backend server error message
+  // ( during the wait period the server should start )
+  // Bonus:  doesn't stop Windows and Linux users from starting right away
+  // NOTE: backOff is bad at surfacing errors to the console
+  //while variable is false keep requesting, if time exceeds two minutes break
+  let status = false;
+  let time_start = new Date();
+  let error = "";
+  while (true) {
+    try {
+      status = await serverIsLiveStartup();
+    } catch (e) {
+      error = e;
+      status = false;
+    }
+    time_pass = new Date() - time_start;
+    if (status) break;
+    if (time_pass > 120000) break; //break after two minutes
+    await wait(2000);
+  }
+
+  if (!status) {
+    //two minutes pass then handle connection error
+    // SWAL that the server needs to be restarted for the app to work
+    clientError(error);
+    ipcRenderer.send("track-event", "Error", "Establishing Python Connection", error);
+
+    await Swal.fire({
+      icon: "error",
+      html: `Something went wrong while initializing the application's background services. Please restart NWB GUIDE and try again. If this issue occurs multiple times, please open an issue on the <a href='https://github.com/catalystneuro/nwb-guide/issues'>NWB GUDE Issue Tracker</a>.`,
+      heightAuto: false,
+      backdrop: "rgba(0,0,0, 0.4)",
+      confirmButtonText: "Restart now",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    });
+
+    // Restart the app
+    app.relaunch();
+    app.exit();
+  }
+
+  console.log("Connected to Python back-end successfully");
+  log.info("Connected to Python back-end successfully");
+  ipcRenderer.send("track-event", "Success", "Establishing Python Connection");
+
+  // dismiss the Swal
+  Swal.close();
+
+  let nodeStorage = new JSONStorage(app.getPath("userData"));
+  launchAnnouncement = nodeStorage.getItem("announcements");
+  if (launchAnnouncement) {
+    await checkForAnnouncements("announcements");
+    launchAnnouncement = false;
+    nodeStorage.setItem("announcements", false);
+  }
+
+  handleDataFormats(); // Populate multiple select for data formats
+};
 
 startupServerAndApiCheck();
 
@@ -358,13 +420,6 @@ startupServerAndApiCheck();
 // Check app version on current app and display in the side bar
 // Also check the core systems to make sure they are all operational
 ipcRenderer.on("run_pre_flight_checks", async (event, arg) => {
-  // run pre flight checks once the server connection is confirmed
-  // wait until soda is connected to the backend server
-  while (!sodaIsConnected || !apiVersionChecked) {
-    await wait(1000);
-  }
-
-  log.info("Done with startup");
 
   // check integrity of all the core systems
   await run_pre_flight_checks();
@@ -429,179 +484,6 @@ const run_pre_flight_checks = async (check_update = true) => {
         }
       });
       return resolve(false);
-    } else {
-      await wait(500);
-
-      // Check for an API key pair first. Calling the agent check without a config file, causes it to crash.
-      account_present = await check_api_key();
-      if (account_present) {
-        // Check for an installed Pennsieve agent
-        await wait(500);
-        [agent_installed_response, agent_version_response] = await check_agent_installed();
-        // If no agent is installed, download the latest agent from Github and link to their docs for installation instrucations if needed.
-        if (!agent_installed_response) {
-          Swal.fire({
-            icon: "error",
-            title: "Pennsieve Agent error!",
-            html: agent_version_response,
-            heightAuto: false,
-            backdrop: "rgba(0,0,0, 0.4)",
-            showCancelButton: true,
-            reverseButtons: reverseSwalButtons,
-            confirmButtonText: "Download now",
-            cancelButtonText: "Skip for now",
-          }).then(async (result) => {
-            if (result.isConfirmed) {
-              try {
-                let [browser_download_url, latest_agent_version] = await get_latest_agent_version();
-                shell.openExternal(browser_download_url);
-                shell.openExternal("https://docs.pennsieve.io/v1/docs/the-pennsieve-agent");
-              } catch (e) {
-                await Swal.fire({
-                  icon: "error",
-                  text: "We are unable to get the latest version of the Pennsieve Agent. Please try again later. If this issue persists please contact the SODA team at help@fairdataihub.org",
-                  heightAuto: false,
-                  backdrop: "rgba(0,0,0, 0.4)",
-                  showCancelButton: true,
-                  confirmButtonText: "Ok",
-                  showClass: {
-                    popup: "animate__animated animate__zoomIn animate__faster",
-                  },
-                  hideClass: {
-                    popup: "animate__animated animate__zoomOut animate__faster",
-                  },
-                });
-              }
-            }
-          });
-          resolve(false);
-        } else {
-          await wait(500);
-          // Check the installed agent version. We aren't enforcing the min limit yet but is the python version starts enforcing it, we might have to.
-          let browser_download_url,
-            latest_agent_version = "";
-          try {
-            [browser_download_url, latest_agent_version] = await check_agent_installed_version(
-              agent_version_response
-            );
-          } catch (e) {
-            notyf.dismiss(notification);
-            notyf.open({
-              type: "error",
-              message: "Unable to verify that your Pennsieve Agent is up to date.",
-            });
-            log.error("Unable to verify that your Pennsieve Agent is up to date.");
-            console.log(error);
-            log.error(error);
-            return resolve(false);
-          }
-          if (browser_download_url != "") {
-            Swal.fire({
-              icon: "warning",
-              text: "It appears that you are not running the latest version of the Pensieve Agent. We recommend that you update your software and restart SODA for the best experience.",
-              heightAuto: false,
-              backdrop: "rgba(0,0,0, 0.4)",
-              showCancelButton: true,
-              confirmButtonText: "Download now",
-              cancelButtonText: "Skip for now",
-              reverseButtons: reverseSwalButtons,
-              showClass: {
-                popup: "animate__animated animate__zoomIn animate__faster",
-              },
-              hideClass: {
-                popup: "animate__animated animate__zoomOut animate__faster",
-              },
-            }).then(async (result) => {
-              if (result.isConfirmed) {
-                try {
-                  // If there is a newer agent version, download the latest agent from Github and link to their docs for installation instrucations if needed.
-                  [browser_download_url, latest_agent_version] = await get_latest_agent_version();
-                  shell.openExternal(browser_download_url);
-                  shell.openExternal("https://docs.pennsieve.io/v1/docs/the-pennsieve-agent");
-                } catch (e) {
-                  console.log(e);
-                  log.error(e);
-                  await Swal.fire({
-                    icon: "error",
-                    text: "We are unable to get the latest version of the Pennsieve Agent. Please try again later. If this issue persists please contact the SODA team at help@fairdataihub.org",
-                    heightAuto: false,
-                    backdrop: "rgba(0,0,0, 0.4)",
-                    showCancelButton: true,
-                    confirmButtonText: "Ok",
-                    showClass: {
-                      popup: "animate__animated animate__zoomIn animate__faster",
-                    },
-                    hideClass: {
-                      popup: "animate__animated animate__zoomOut animate__faster",
-                    },
-                  });
-                }
-                resolve(false);
-              }
-              if (result.isDismissed) {
-                if (check_update) {
-                  checkNewAppVersion();
-                }
-                await wait(500);
-                notyf.open({
-                  type: "final",
-                  message: "You're all set!",
-                });
-                if (launchAnnouncement) {
-                  await checkForAnnouncements("announcements");
-                  nodeStorage.setItem("announcements", false);
-                  launchAnnouncement = false;
-                }
-                resolve(true);
-              }
-            });
-          } else {
-            if (check_update) {
-              checkNewAppVersion();
-            }
-            await wait(500);
-            notyf.open({
-              type: "final",
-              message: "You're all set!",
-            });
-            if (launchAnnouncement) {
-              await checkForAnnouncements("announcements");
-              nodeStorage.setItem("announcements", false);
-              launchAnnouncement = false;
-            }
-            resolve(true);
-          }
-        }
-      } else {
-        if (check_update) {
-          checkNewAppVersion();
-        }
-        // If there is no API key pair, show the warning and let them add a key. Messages are dissmisable.
-        Swal.fire({
-          icon: "warning",
-          text: "It seems that you have not connected your Pennsieve account with SODA. We highly recommend you do that since most of the features of SODA are connected to Pennsieve. Would you like to do it now?",
-          heightAuto: false,
-          backdrop: "rgba(0,0,0, 0.4)",
-          confirmButtonText: "Yes",
-          showCancelButton: true,
-          reverseButtons: reverseSwalButtons,
-          cancelButtonText: "I'll do it later",
-          showClass: {
-            popup: "animate__animated animate__zoomIn animate__faster",
-          },
-          hideClass: {
-            popup: "animate__animated animate__zoomOut animate__faster",
-          },
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            await openDropdownPrompt(null, "bf");
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        });
-        resolve(false);
-      }
     }
   });
 };
@@ -817,10 +699,6 @@ const get_latest_agent_version = () => {
         reject();
       });
   });
-};
-
-const checkNewAppVersion = () => {
-  ipcRenderer.send("app_version");
 };
 
 // Check app version on current app and display in the side bar
@@ -4207,15 +4085,6 @@ var bfAddAccountBootboxMessage = `<form>
 
 var bfaddaccountTitle = `<h3 style="text-align:center">Connect your Pennsieve account using an API key</h3>`;
 
-// once connected to SODA get the user's accounts
-(async () => {
-  // wait until soda is connected to the backend server
-  while (!sodaIsConnected) {
-    await wait(1000);
-  }
-
-  retrieveBFAccounts();
-})();
 
 // this function is called in the beginning to load bf accounts to a list
 // which will be fed as dropdown options
@@ -9052,64 +8921,64 @@ async function handleDataFormats() {
   const base = `http://127.0.0.1:${port}`;
   const formats = await fetch(`${base}/neuroconv`).then((res) => res.json());
 
+  if (formats.message) {
+    throw new Error(formats.message);
+  }
+
   // const intentation = '\xa0\xa0\xa0\xa0'
-  let categories = {};
+  let modalities = {};
   for (let name in formats) {
     const format = formats[name];
 
-    let firstCategory = categories[format.category];
-    if (!firstCategory) {
-      // const category = document.createElement('optgroup')
-      // category.label = format.category
-      // dataFormats.appendChild(category)
+    let modality = modalities[format.modality];
+    if (!modality) {
+      // const optModality = document.createElement('optgroup')
+      // optModality.label = format.modality
+      // dataFormats.appendChild(optModality)
 
       const fieldset = document.createElement("fieldset");
       const legend = document.createElement("legend");
-      legend.textContent = format.category;
+      legend.textContent = format.modality;
       fieldset.appendChild(legend);
       dataFormatsForm.appendChild(fieldset);
 
-      firstCategory = categories[format.category] = {
-        // select: category,
+      modality = modalities[format.modality] = {
+        // select: optModality,
         form: fieldset,
-        categories: {},
+        techniques: {},
       };
     }
 
-    // Place in tag div OR category div
-    const tags = format.tags.filter((tag) => tag !== format.category);
-    const toHoldOption = tags.length
-      ? tags.map((tag) => {
-          if (!firstCategory.categories[tag]) {
-            // const category = document.createElement('optgroup')
-            // category.label = `${intentation}${tag}`
-            // dataFormats.appendChild(category)
+    // Place in technique or modality div
+    const technique = format.technique
+    let targetInfo = modality
+    if (technique) {
+      if (!modality.techniques[technique]) {
+        // const optTechnique = document.createElement('optgroup')
+        // optTechnique.label = `${intentation}${tag}`
+        // dataFormats.appendChild(optTechnique)
 
-            const fieldset = document.createElement("fieldset");
-            const legend = document.createElement("legend");
-            legend.textContent = tag;
-            fieldset.appendChild(legend);
-            firstCategory.form.appendChild(fieldset);
+        const fieldset = document.createElement("fieldset");
+        const legend = document.createElement("legend");
+        legend.textContent = technique;
+        fieldset.appendChild(legend);
+        modality.form.appendChild(fieldset);
 
-            firstCategory.categories[tag] = {
-              // select: category,
-              form: fieldset,
-            };
-          }
+        targetInfo = modality.techniques[technique] = {
+          // select: optTechnique,
+          form: fieldset,
+        };
+      }
+    }
 
-          return firstCategory.categories[tag];
-        })
-      : [firstCategory];
-
-    toHoldOption.forEach((info) => {
       // const select = info.select
       // const form = info.form
       // const option = document.createElement('option')
       // option.value = name
-      // option.innerHTML = `${select === firstCategory.select ? '' : intentation }${name}`
+      // option.innerHTML = `${select === modality.select ? '' : intentation }${name}`
       // select.appendChild(option)
 
-      const form = info.form;
+      const form = targetInfo.form;
       const div = document.createElement("div");
       const input = document.createElement("input");
       input.type = "checkbox";
@@ -9121,5 +8990,5 @@ async function handleDataFormats() {
       label.textContent = name;
       div.appendChild(label);
       form.appendChild(div);
-    });
   }
+}
