@@ -352,7 +352,7 @@ const startupServerAndApiCheck = async () => {
   // wait for SWAL to be loaded in
   await wait(2000);
 
-// Darwin executable starts slowly
+  // Darwin executable starts slowly
   // use an exponential backoff to wait for the app server to be ready
   // this will give Mac users more time before receiving a backend server error message
   // ( during the wait period the server should start )
@@ -420,7 +420,6 @@ startupServerAndApiCheck();
 // Check app version on current app and display in the side bar
 // Also check the core systems to make sure they are all operational
 ipcRenderer.on("run_pre_flight_checks", async (event, arg) => {
-
   // check integrity of all the core systems
   await run_pre_flight_checks();
 
@@ -4084,7 +4083,6 @@ var bfAddAccountBootboxMessage = `<form>
   </form>`;
 
 var bfaddaccountTitle = `<h3 style="text-align:center">Connect your Pennsieve account using an API key</h3>`;
-
 
 // this function is called in the beginning to load bf accounts to a list
 // which will be fed as dropdown options
@@ -8950,8 +8948,8 @@ async function handleDataFormats() {
     }
 
     // Place in technique or modality div
-    const technique = format.technique
-    let targetInfo = modality
+    const technique = format.technique;
+    let targetInfo = modality;
     if (technique) {
       if (!modality.techniques[technique]) {
         // const optTechnique = document.createElement('optgroup')
@@ -8971,24 +8969,24 @@ async function handleDataFormats() {
       }
     }
 
-      // const select = info.select
-      // const form = info.form
-      // const option = document.createElement('option')
-      // option.value = name
-      // option.innerHTML = `${select === modality.select ? '' : intentation }${name}`
-      // select.appendChild(option)
+    // const select = info.select
+    // const form = info.form
+    // const option = document.createElement('option')
+    // option.value = name
+    // option.innerHTML = `${select === modality.select ? '' : intentation }${name}`
+    // select.appendChild(option)
 
-      const form = targetInfo.form;
-      const div = document.createElement("div");
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.value = name;
-      input.name = name;
-      div.appendChild(input);
-      const label = document.createElement("label");
-      label.for = name;
-      label.textContent = name;
-      div.appendChild(label);
-      form.appendChild(div);
+    const form = targetInfo.form;
+    const div = document.createElement("div");
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = name;
+    input.name = name;
+    div.appendChild(input);
+    const label = document.createElement("label");
+    label.for = name;
+    label.textContent = name;
+    div.appendChild(label);
+    form.appendChild(div);
   }
 }
