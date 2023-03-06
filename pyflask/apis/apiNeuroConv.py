@@ -21,3 +21,28 @@ class AllInterfaces(Resource):
             if notBadRequestException(e):
                 api.abort(500, str(e))
             raise e
+
+@api.route('/schema/<string:interface>')
+class Schema(Resource):
+  @api.doc(responses={200: 'Success', 400: 'Bad Request', 500: "Internal server error"})
+  def get(self, interface):
+
+    try:
+      return get_schema(interface)
+    except Exception as e:
+        if notBadRequestException(e):
+            api.abort(500, str(e))
+        raise e
+
+@api.route('/schema')
+class Schemas(Resource):
+  @api.doc(responses={200: 'Success', 400: 'Bad Request', 500: "Internal server error"})
+  def get(self):
+      args = parser.parse_args()
+      interfaces = args['interfaces']
+      try:
+        return get_schema(interfaces)
+      except Exception as e:
+          if notBadRequestException(e):
+              api.abort(500, str(e))
+          raise e
