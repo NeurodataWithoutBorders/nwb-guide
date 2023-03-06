@@ -1,4 +1,5 @@
 from .apiManageDatasets import api as manage_datasets_resource
+
 # from .apiVersion import api as version_resource
 # from .apiValidator import api as validate_dataset_resource
 from .apiCurate import api as curate_datasets_resource
@@ -10,3 +11,4 @@ from .apiTaxonomy import api as taxonomy_resource
 from .apiUser import api as user_resource
 from .apiDatasets import api as datasets_resource
 from .apiCollections import api as collections_resource
+from .apiNeuroconv import api as neuroconv_resource
