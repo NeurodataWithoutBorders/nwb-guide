@@ -4,9 +4,7 @@ from enum import Enum
 
 # namespaces enums
 class NamespaceEnum(Enum):
-
     NEUROCONV = "neuroconv"
-
     MANAGE_DATASETS = "manage_datasets"
     # VALIDATE_DATASET = "validate_dataset"
     CURATE_DATASETS = "curate_datasets"

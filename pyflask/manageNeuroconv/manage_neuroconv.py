@@ -43,4 +43,3 @@ def get_schema(interface):
         data_interface_classes = dict(zip(interface, map(lambda name: interfaces[interface_info[name]['name']], interface)))
 
     return CustomNWBConverter.get_source_schema()
-   
