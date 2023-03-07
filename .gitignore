@@ -13,7 +13,6 @@ semantic
 semantic.json
 .env
 build/
-package-lock.json
 yarn.lock
 
 app.spec
