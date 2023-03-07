@@ -281,39 +281,8 @@
     <script src="https://jsuites.net/v4/jsuites.js"></script>
     <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
 
-    <script>
-      require("./assets/imports"); // Imports html files into app
-    </script>
-
-    <!-- A script run to set the behaviors of the sidebar and associated links after all DOM content has been loaded -->
-    <script>
-
-      function onDocumentReady(fn) {
-          if (document.readyState === "complete" || document.readyState === "interactive") setTimeout(fn, 1)
-          else document.addEventListener("DOMContentLoaded", fn)
-      }    
-
-      onDocumentReady(() => {
-
-        // Toggle sidebar
-        const sidebar = document.getElementById("sidebarCollapse");
-        sidebar.addEventListener('click', () => {
-          const mainNav = document.getElementById("main-nav");
-          mainNav.classList.toggle("active");
-          sidebar.classList.toggle("active");
-          const section = document.getElementsByClassName("section")[0];
-          section.classList.toggle("fullShown");
-        });
-
-        // Clear all selected links and add selected class to the clicked link
-        document.querySelectorAll('a').forEach((a) => {
-          a.addEventListener('click', () => {
-            a.parentNode.parentNode.querySelectorAll('a').forEach((a) => a.classList.remove('is-selected'))
-            a.classList.add('is-selected')
-          })
-        })
-      });
-    </script>
+    <!-- Main JavaScript Entrypoint -->
+    <script src="./src/index.js" type="module"></script>
 
     <script src="./assets/lotties.js" type="text/javascript"></script>
   </body>
