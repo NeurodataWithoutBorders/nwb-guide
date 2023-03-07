@@ -79,9 +79,14 @@ onDocumentReady(async function () {
     await waitForHtmlSectionsToInsertIntoDOM();
 
     //Synchronously include js files
-    await includeJavaScriptFile("./assets/ex-links.js");
+
+    // Isolate commands that use Electron APIs
+    var userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.indexOf(' electron/') > -1) {
+        await import("./shell-commands.js")
+    }
     await includeJavaScriptFile("./assets/nav.js");
-    await includeJavaScriptFile("./assets/demo-btns.js");
+    // await includeJavaScriptFile("./assets/demo-btns.js");
     await includeJavaScriptFile("./preload.js");
     await includeJavaScriptFile("./src/renderer.js");
     await includeJavaScriptFile("./scripts/others/progressContainer.js");

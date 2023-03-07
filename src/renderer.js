@@ -8805,42 +8805,6 @@ function gatherLogs() {
   });
 }
 
-function gettingStarted() {
-  let getting_started = document.getElementById("main_tabs_view");
-  getting_started.click();
-}
-
-function sodaVideo() {
-  document.getElementById("overview-column-1").blur();
-  shell.openExternal("https://docs.sodaforsparc.io/docs/getting-started/user-interface");
-}
-
-function directToDocumentation() {
-  shell.openExternal(
-    "https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda"
-  );
-  document.getElementById("overview-column-2").blur();
-  // window.open('https://docs.sodaforsparc.io', '_blank');
-}
-const directToGuidedMode = () => {
-  const guidedModeLinkButton = document.getElementById("guided_mode_view");
-  guidedModeLinkButton.click();
-};
-const directToFreeFormMode = () => {
-  const freeFormModeLinkButton = document.getElementById("main_tabs_view");
-  freeFormModeLinkButton.click();
-};
-document.getElementById("doc-btn").addEventListener("click", directToDocumentation);
-document
-  .getElementById("home-button-interface-instructions-link")
-  .addEventListener("click", sodaVideo);
-document
-  .getElementById("home-button-guided-mode-link")
-  .addEventListener("click", directToGuidedMode);
-document
-  .getElementById("home-button-free-form-mode-link")
-  .addEventListener("click", directToFreeFormMode);
-
 let docu_lottie_section = document.getElementById("documentation-section");
 let doc_lottie = document.getElementById("documentation-lottie");
 
