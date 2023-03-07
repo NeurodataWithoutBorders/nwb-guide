@@ -107,7 +107,7 @@ onDocumentReady(async function () {
     // These files rely on global variables (at the top level)
     await includeJavaScriptFile("./scripts/others/tab-effects.js");
     await includeJavaScriptFile("./scripts/metadata-files/datasetDescription.js");
-    await includeJavaScriptFile("./scripts/organize-dataset/organizeDS.js"); 
+    await includeJavaScriptFile("./scripts/organize-dataset/organizeDS.js");
     await includeJavaScriptFile("./scripts/guided-mode/guided-curate-dataset.js");
 });
 
@@ -126,4 +126,4 @@ const includeJavaScriptFile = async (filePath) => {
       document.body.appendChild(script);
     });
   };
-  
+
