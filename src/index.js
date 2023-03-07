@@ -78,48 +78,52 @@ onDocumentReady(async function () {
 
     await waitForHtmlSectionsToInsertIntoDOM();
 
-    //Synchronously include js files
-
-    // Isolate commands that use Electron APIs
+    // -------------------- For Electron Builds --------------------
     var userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.indexOf(' electron/') > -1) {
         await import("./shell-commands.js")
     }
-    await includeJavaScriptFile("./assets/nav.js");
-    // await includeJavaScriptFile("./assets/demo-btns.js");
-    await includeJavaScriptFile("./preload.js");
-    await includeJavaScriptFile("./src/renderer.js");
-    await includeJavaScriptFile("./scripts/others/progressContainer.js");
-    await includeJavaScriptFile("./scripts/others/pennsieveDatasetImporter.js");
+
+    // -------------------- For All Pages --------------------
+    await import("../assets/nav.js");
+    await includeJavaScriptFile("./src/renderer.js"); // NOTE: Must currently provide global variables to the following scripts
+
+    // -------------------- For Specific Pages --------------------
+    // These files only rely on internal variables (at the top level)
+    await import("../scripts/others/progressContainer.js");
+    await import("../scripts/others/pennsieveDatasetImporter.js");
+    await import("../scripts/disseminate/disseminate.js");
+    await import("../scripts/disseminate/prePublishingReview.js");
+    await import("../scripts/manage-dataset/manage-dataset.js");
+    await import("../scripts/organize-dataset/curate-functions.js");
+    await import("../scripts/metadata-files/manifest.js");
+    await import("../scripts/metadata-files/readme-changes.js");
+    await import("../scripts/metadata-files/subjects-samples.js");
+    await import("../scripts/metadata-files/submission.js");
+    await import("../scripts/guided-mode/lottieJSON.js");
+    await import("../scripts/collections/collections.js");
+    await import("../scripts/others/announcements.js");
+
+    // These files rely on global variables (at the top level)
     await includeJavaScriptFile("./scripts/others/tab-effects.js");
-    await includeJavaScriptFile("./scripts/disseminate/disseminate.js");
-    await includeJavaScriptFile("./scripts/disseminate/prePublishingReview.js");
-    await includeJavaScriptFile("./scripts/manage-dataset/manage-dataset.js");
     await includeJavaScriptFile("./scripts/metadata-files/datasetDescription.js");
-    await includeJavaScriptFile("./scripts/organize-dataset/curate-functions.js");
-    await includeJavaScriptFile("./scripts/organize-dataset/organizeDS.js");
-    await includeJavaScriptFile("./scripts/metadata-files/manifest.js");
-    await includeJavaScriptFile("./scripts/metadata-files/readme-changes.js");
-    await includeJavaScriptFile("./scripts/metadata-files/subjects-samples.js");
-    await includeJavaScriptFile("./scripts/metadata-files/submission.js");
-    await includeJavaScriptFile("./scripts/guided-mode/lottieJSON.js");
+    await includeJavaScriptFile("./scripts/organize-dataset/organizeDS.js"); 
     await includeJavaScriptFile("./scripts/guided-mode/guided-curate-dataset.js");
-    await includeJavaScriptFile("./scripts/collections/collections.js");
-    await includeJavaScriptFile("./scripts/others/announcements.js");
 });
 
 const includeJavaScriptFile = async (filePath) => {
     return new Promise((resolve, reject) => {
-        var script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = filePath;
-        script.async = false;
-        script.onload = () => {
-            resolve();
-        };
-        script.onerror = () => {
-            reject("cannot load script " + filePath);
-        };
-        document.body.appendChild(script);
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = filePath;
+      script.async = false;
+      script.onload = () => {
+        resolve();
+      };
+      script.onerror = () => {
+        reject("cannot load script " + filePath);
+      };
+      document.body.appendChild(script);
     });
-};
+  };
+  
