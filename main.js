@@ -293,7 +293,9 @@ function initialize() {
 
     mainWindow = new BrowserWindow(windowOptions);
     require("@electron/remote/main").enable(mainWindow.webContents);
-    mainWindow.loadURL(path.join("file://", __dirname, "/index.html"));
+
+    // mainWindow.loadURL(path.join("file://", __dirname, "/index.html"));
+    mainWindow.loadURL(path.join("file://", __dirname, "/guide.html"));
 
     const splash = new BrowserWindow({
       width: 340,
