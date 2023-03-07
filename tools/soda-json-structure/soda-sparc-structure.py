@@ -1,4 +1,3 @@
-
 """
 This is the json structure used in SODA for the major communication between front and back end
 Details about the different keys are provided below
@@ -11,7 +10,7 @@ dataset-strucuture: contains info about the dataset structure
 2. Each file/folder info is stored in a key refering to the name of the file/folder (including the extension for files). If user renames the file/folder, this key should change to register that.
 3. The files/folders in each folder are stored in a "files"/"folders" key, respectively.
 4. Each file/folder has a subkey "type" which is a string with value either "virtual" (only for folders, if created in SODA), "local", or "bf"
-5. Each non virtual file/folder has a subkey "path" with is a string with value being the absolute path (for local files) or blackfynn id 
+5. Each non virtual file/folder has a subkey "path" with is a string with value being the absolute path (for local files) or blackfynn id
 6. Each non virtual file/folder has a subkey "action" which is an array containing "existing" (if it from an existing local or bf dataset) or "new" (if imported).
 7. If "new", additional "action" could be "renamed". If "existing", addtional "action" could be "renamed", "moved" (if an existing file/folder is moved), and/or "deleted" (if delete is requested in the UI)
 8. If provided, a file with have the subkeys "description" and "additional-metadata" each contain a string value to be later included in the manifest files, if requested
@@ -58,126 +57,110 @@ Notes:
 """
 
 
-
 soda_json_structure = {
     "bf-account-selected": {
         "account-name": "bhavesh-Windows-work",
     },
-    
     "bf-dataset-selected": {
         "dataset-name": "bigdata",
     },
-    
     "dataset-structure": {
         "folders": {
             "code": {
                 "type": "virtual",
-                "folders": {     
-                    "codefolder1": { 
+                "folders": {
+                    "codefolder1": {
                         "type": "virtual",
                         "folders": {
-                            "subfolder1": { 
+                            "subfolder1": {
                                 "type": "virtual",
                                 "files": {
-                                    "some-jpg-image.jpg":{
+                                    "some-jpg-image.jpg": {
                                         "type": "local",
                                         "action": ["new"],
-                                        "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder1\subfolder1\some-jpg-image.jpg",  
+                                        "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder1\subfolder1\some-jpg-image.jpg",
                                         "description": "my jpg description",
                                         "additional-metadata": "my additional jpg metadata",
                                     },
                                 },
                             },
-                            "subfolder2-renamed": { 
+                            "subfolder2-renamed": {
                                 "type": "local",
                                 "action": ["new"],
                                 "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder1\subfolder2",
-                                "folders": { 
-                                    "subsubfolder1":{
+                                "folders": {
+                                    "subsubfolder1": {
                                         "type": "virtual",
                                         "files": {
-                                            "some-source-data.csv":{
+                                            "some-source-data.csv": {
                                                 "type": "local",
                                                 "action": ["new"],
                                                 "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder1\subfolder2\subsubfolder1\some-source-data.csv",
                                                 "description": "my csv description",
                                                 "additional-metadata": "my additional csv metadata",
-                                                "action": ["new"]
+                                                "action": ["new"],
                                             },
                                         },
                                     },
                                 },
                                 "files": {
-                                    "some-png-image.png":{
+                                    "some-png-image.png": {
                                         "type": "local",
                                         "action": ["new"],
                                         "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder1\subfolder2\some-png-image.png",
                                     },
                                 },
                             },
-
                         },
-                     },
-
-                     "codefolder2": { 
+                    },
+                    "codefolder2": {
                         "type": "local",
                         "action": ["new"],
                         "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder2",
-                        "folders": {
-                        },
+                        "folders": {},
                         "files": {
-                            "random-text-file.txt":{
+                            "random-text-file.txt": {
                                 "type": "local",
                                 "action": ["new"],
-                                "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder2\random-text-file.txt"
+                                "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\codefolder2\random-text-file.txt",
                             },
                         },
                     },
                 },
-
-
-
-                "files":{
-                    "some-abaqus-input-renamed.inp": { 
+                "files": {
+                    "some-abaqus-input-renamed.inp": {
                         "type": "local",
                         "action": ["new"],
                         "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\some-abaqus-input.inp",
                         "description": "my inp description",
                         "additional-metadata": "my additional inp metadata",
                     },
-                    "some-abaqus-model.cae": { 
+                    "some-abaqus-model.cae": {
                         "type": "local",
                         "action": ["new"],
                         "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\code\some-abaqus-model.cae",
                         "description": "my cae description",
                         "additional-metadata": "my additional cae metadata",
-                    },   
+                    },
                 },
             },
         },
     },
-        
-    
     "metadata-files": {
-        "submission.xlsx":{
+        "submission.xlsx": {
             "type": "local",
             "action": ["new"],
-            "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\submission.xlsx", 
-            },
-
+            "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\submission.xlsx",
+        },
         "dataset_description.xlsx": {
             "type": "local",
             "action": ["new"],
-            "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\dataset_description.xlsx",  
+            "path": r"C:\Users\Bhavesh\OneDrive - Calmi2\Bhavesh\SPARC\SODA - Phase 2\Code\test-data\virtual_dataset\dataset_description.xlsx",
         },
     },
-
-    
-    "manifest-files":{
+    "manifest-files": {
         "destination": "generate-dataset",
     },
-    
-
     "generate-dataset": {
         "destination": "local",
         "path": r"C:\Users\Bhavesh\Desktop\new-dataset",

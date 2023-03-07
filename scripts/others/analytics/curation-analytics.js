@@ -1,6 +1,6 @@
 /*
     Purpose: Logging analytics for our 'main_curation_function' used to generate datasets in Organize Dataset feature is becoming too complicated
-             to justify keeping it outside of its own functions. 
+             to justify keeping it outside of its own functions.
 
 */
 const { determineDatasetLocation } = require("./analytics-utils");

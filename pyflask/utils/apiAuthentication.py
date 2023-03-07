@@ -1,6 +1,7 @@
 from pennsieve import Pennsieve
 from flask import abort
 
+
 def get_authenticated_ps(pennsieve_account):
     """
     Returns an authenticated pennsieve client object given a Pennsieve account name

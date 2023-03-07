@@ -25,6 +25,7 @@ from pennsieve import Pennsieve
 import pathlib
 from datetime import datetime, timezone
 from namespaces import NamespaceEnum, get_namespace_logger
+
 namespace_logger = get_namespace_logger(NamespaceEnum.ORGANIZE_DATASETS)
 
 from manageDatasets import bf_get_current_user_permission
@@ -62,10 +63,10 @@ forbidden_characters = '<>:"/\|?*'
 forbidden_characters_bf = '\/:*?"<>'
 
 
-
 ### Internal functions
 def TZLOCAL():
     return datetime.now(timezone.utc).astimezone().tzinfo
+
 
 ## these subsequent CheckLeafValue and traverseForLeafNodes functions check for the validity of file paths,
 ## and folder and file size
@@ -94,10 +95,11 @@ def checkLeafValue(leafName, leafNodeValue):
         error = error + leafName + " is empty <br>"
 
     if c > 0:
-        error += "<br>Please remove invalid files/folders from your dataset and try again"
+        error += (
+            "<br>Please remove invalid files/folders from your dataset and try again"
+        )
         curatestatus = "Done"
         abort(400, error)
-
 
     return [True, total_dataset_size - 1]
 
@@ -195,7 +197,11 @@ def generate_dataset_locally(destinationdataset, pathdataset, newdatasetname, js
             abort(400, "Please enter a valid name for new dataset folder")
         if check_forbidden_characters(newdatasetname):
             curatestatus = "Done"
-            abort(400,  "A folder name cannot contain any of the following characters " + forbidden_characters)
+            abort(
+                400,
+                "A folder name cannot contain any of the following characters "
+                + forbidden_characters,
+            )
 
     total_dataset_size = 1
 
@@ -830,9 +836,8 @@ def monitor_local_json_progress():
         "create_soda_json_progress": create_soda_json_progress,
         "create_soda_json_total_items": create_soda_json_total_items,
         "progress_percentage": progress_percentage,
-        "create_soda_json_completed": create_soda_json_completed
+        "create_soda_json_completed": create_soda_json_completed,
     }
-
 
 
 def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
@@ -900,7 +905,7 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
             if file_name.find(ext) != -1:
                 double_ext = True
                 break
-                
+
         extension_from_name = ""
 
         if double_ext == False:
@@ -916,13 +921,11 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
         else:
             return file_name + ("." + extension)
 
-    
-
     def createFolderStructure(subfolder_json, pennsieve_account, manifest):
         # root level folder will pass subfolders into this function and will recursively check if there are subfolders while creating the json structure
         global namespace_logger
         global create_soda_json_progress
-        
+
         collection_id = subfolder_json["path"]
         bf = pennsieve_account
         subfolder = bf._api._get("/packages/" + str(collection_id))
@@ -937,15 +940,17 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                     item_name[0:8] != "manifest"
                 ):  # manifest files are not being included json structure
 
-                    #verify file name first
-                    if("extension" not in children_content):
+                    # verify file name first
+                    if "extension" not in children_content:
                         item_name = verify_file_name(item_name, "")
                     else:
-                        item_name = verify_file_name(item_name, children_content["extension"])
-                        
+                        item_name = verify_file_name(
+                            item_name, children_content["extension"]
+                        )
+
                     ## verify timestamps
                     timestamp = items["content"]["createdAt"]
-                    formatted_timestamp = timestamp.replace('.', ',')
+                    formatted_timestamp = timestamp.replace(".", ",")
                     subfolder_json["files"][item_name] = {
                         "action": ["existing"],
                         "path": item_id,
@@ -956,7 +961,6 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                     for paths in subfolder_json["bfpath"]:
                         subfolder_json["files"][item_name]["bfpath"].append(paths)
 
-                    
                     # creates path for item_name (stored in temp_name)
                     if len(subfolder_json["files"][item_name]["bfpath"]) > 1:
                         temp_name = ""
@@ -974,9 +978,9 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                     if len(manifest.keys()) > 0:
                         if "filename" in manifest:
                             if temp_name in manifest["filename"].values():
-                                location_index = list(manifest["filename"].values()).index(
-                                    temp_name
-                                )
+                                location_index = list(
+                                    manifest["filename"].values()
+                                ).index(temp_name)
                                 if manifest["description"][location_index] != "":
                                     subfolder_json["files"][item_name][
                                         "description"
@@ -986,12 +990,14 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                                         "additional-metadata"
                                     ] = manifest["Additional Metadata"][location_index]
                                 if manifest["file type"][location_index] != "":
-                                        subfolder_json["files"][item_name]["file type"] = manifest["file type"][location_index]
+                                    subfolder_json["files"][item_name][
+                                        "file type"
+                                    ] = manifest["file type"][location_index]
                         elif "File Name" in manifest:
                             if temp_name in manifest["File Name"].values():
-                                location_index = list(manifest["File Name"].values()).index(
-                                    temp_name
-                                )
+                                location_index = list(
+                                    manifest["File Name"].values()
+                                ).index(temp_name)
                                 if manifest["description"][location_index] != "":
                                     subfolder_json["files"][item_name][
                                         "description"
@@ -1001,7 +1007,9 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                                         "additional-metadata"
                                     ] = manifest["Additional Metadata"][location_index]
                                 if manifest["file type"][location_index] != "":
-                                        subfolder_json["files"][item_name]["file type"] = manifest["file type"][location_index]
+                                    subfolder_json["files"][item_name][
+                                        "file type"
+                                    ] = manifest["file type"][location_index]
             else:  # another subfolder found
                 subfolder_json["folders"][item_name] = {
                     "action": ["existing"],
@@ -1103,7 +1111,6 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                     "bfpath": [item_name],
                 }
 
-
     # manifest information is needed so it is looked for before the recursive calls are made
     if len(soda_json_structure["dataset-structure"]["folders"].keys()) != 0:
         for folder in soda_json_structure["dataset-structure"]["folders"].keys():
@@ -1159,6 +1166,7 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
         "import_progress": create_soda_json_progress,
         "import_total_items": create_soda_json_total_items,
     }
+
 
 def monitor_pennsieve_json_progress():
     """

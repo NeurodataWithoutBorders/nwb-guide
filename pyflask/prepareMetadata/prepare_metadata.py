@@ -21,7 +21,11 @@ import numpy as np
 from collections import defaultdict
 from pennsieve import Pennsieve
 import requests
-from errorHandlers import is_file_not_found_exception, is_invalid_file_exception, InvalidDeliverablesDocument
+from errorHandlers import (
+    is_file_not_found_exception,
+    is_invalid_file_exception,
+    InvalidDeliverablesDocument,
+)
 
 from string import ascii_uppercase
 import itertools
@@ -31,16 +35,20 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 from docx import Document
 
-from flask import abort 
+from flask import abort
 
 from manageDatasets import (
     bf_get_current_user_permission,
 )
-from curate import create_high_level_manifest_files_existing_bf_starting_point, get_name_extension
+from curate import (
+    create_high_level_manifest_files_existing_bf_starting_point,
+    get_name_extension,
+)
 
 from pysodaUtils import agent_running
 
 from namespaces import NamespaceEnum, get_namespace_logger
+
 namespace_logger = get_namespace_logger(NamespaceEnum.CURATE_DATASETS)
 
 userpath = expanduser("~")
@@ -56,7 +64,6 @@ def set_template_path(soda_base_path, soda_resources_path):
     """
     global TEMPLATE_PATH
 
-
     # once pysoda has been packaged with pyinstaller
     # it creates an archive that slef extracts to an OS-specific temp directory.
     # Due to this we can no longer use a relative path from the pysoda directory to the file_templates folder.
@@ -69,13 +76,10 @@ def set_template_path(soda_base_path, soda_resources_path):
         TEMPLATE_PATH = join(soda_resources_path, "file_templates")
 
 
-
-
-
 ### Import Data Deliverables document
 def import_milestone(filepath):
     """
-        Import Data Deliverables document
+    Import Data Deliverables document
     """
     doc = Document(filepath)
     try:
@@ -128,7 +132,9 @@ def save_submission_file(upload_boolean, bfaccount, bfdataset, filepath, val_arr
 
     source = join(TEMPLATE_PATH, "submission.xlsx")
 
-    destination = join(METADATA_UPLOAD_BF_PATH, "submission.xlsx") if upload_boolean else filepath
+    destination = (
+        join(METADATA_UPLOAD_BF_PATH, "submission.xlsx") if upload_boolean else filepath
+    )
 
     try:
         shutil.copyfile(source, destination)
@@ -174,10 +180,12 @@ def upload_RC_file(text_string, file_type, bfaccount, bfdataset):
 
     upload_metadata_file(file_type, bfaccount, bfdataset, file_path, True)
 
-    return { "size": size, "filepath": file_path }
+    return {"size": size, "filepath": file_path}
 
 
-def upload_metadata_file(file_type, bfaccount, bfdataset, file_path, delete_after_upload):
+def upload_metadata_file(
+    file_type, bfaccount, bfdataset, file_path, delete_after_upload
+):
     ## check if agent is running in the background
     agent_running()
 
@@ -185,18 +193,19 @@ def upload_metadata_file(file_type, bfaccount, bfdataset, file_path, delete_afte
         bf = Pennsieve(bfaccount)
     except Exception:
         abort(400, "Please select a valid Pennsieve account.")
-    
+
     # check that the Pennsieve dataset is valid
     try:
         myds = bf.get_dataset(bfdataset)
     except Exception:
         abort(400, "Please select a valid Pennsieve dataset.")
 
-
     # check that the user has permissions for uploading and modifying the dataset
     role = bf_get_current_user_permission(bf, myds)
     if role not in ["owner", "manager", "editor"]:
-        abort(403, "You don't have permissions for uploading to this Pennsieve dataset.")
+        abort(
+            403, "You don't have permissions for uploading to this Pennsieve dataset."
+        )
 
     # handle duplicates on Pennsieve: first, obtain the existing file ID
     for i in range(len(myds.items)):
@@ -213,6 +222,7 @@ def upload_metadata_file(file_type, bfaccount, bfdataset, file_path, delete_afte
     if delete_after_upload:
         os.remove(file_path)
 
+
 def excel_columns(start_index=0):
     """
     NOTE: does not support more than 699 contributors/links
@@ -220,7 +230,7 @@ def excel_columns(start_index=0):
     single_letter = list(ascii_uppercase[start_index:])
     two_letter = [a + b for a, b in itertools.product(ascii_uppercase, ascii_uppercase)]
     return single_letter + two_letter
-  
+
 
 def rename_headers(workbook, max_len, start_index):
     """
@@ -258,7 +268,9 @@ def grayout_subheaders(workbook, max_len, start_index):
     headers_list = ["4", "10", "18", "23", "28"]
     columns_list = excel_columns(start_index=start_index)
 
-    for (i, column), no in itertools.product(zip(range(2, max_len + 1), columns_list[1:]), headers_list):
+    for (i, column), no in itertools.product(
+        zip(range(2, max_len + 1), columns_list[1:]), headers_list
+    ):
         cell = workbook[column + no]
         fillColor("B2B2B2", cell)
 
@@ -270,7 +282,9 @@ def grayout_single_value_rows(workbook, max_len, start_index):
 
     columns_list = excel_columns(start_index=start_index)
     row_list = ["2", "3", "5", "6", "9", "11", "12", "13", "17", "29", "30"]
-    for (i, column), no in itertools.product(zip(range(2, max_len + 1), columns_list[1:]), row_list):
+    for (i, column), no in itertools.product(
+        zip(range(2, max_len + 1), columns_list[1:]), row_list
+    ):
         cell = workbook[column + no]
         fillColor("CCCCCC", cell)
 
@@ -497,9 +511,9 @@ samplesTemplateHeaderList = [
     "protocol url or doi",
 ]
 
+
 def upload_code_description_metadata(filepath, bfAccount, bfDataset):
     upload_metadata_file("code_description.xlsx", bfAccount, bfDataset, filepath, False)
-        
 
 
 def save_subjects_file(upload_boolean, bfaccount, bfdataset, filepath, datastructure):
@@ -661,23 +675,25 @@ def convert_subjects_samples_file_to_df(type, filepath, ui_fields):
     if type == "subjects":
         if "subject id" not in list(subjects_df.columns.values):
             abort(
-                400, 
-                "The header 'subject id' is required to import an existing subjects file. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/subjects.xlsx'>template</a> of the subjects file."
+                400,
+                "The header 'subject id' is required to import an existing subjects file. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/subjects.xlsx'>template</a> of the subjects file.",
             )
 
         elif checkEmptyColumn(subjects_df["subject id"]):
             abort(
                 400,
-                "At least 1 'subject id' is required to import an existing subjects file"
+                "At least 1 'subject id' is required to import an existing subjects file",
             )
 
         templateHeaderList = subjectsTemplateHeaderList
 
     else:
-        if "subject id" not in list(subjects_df.columns.values) or "sample id" not in list(subjects_df.columns.values):
+        if "subject id" not in list(
+            subjects_df.columns.values
+        ) or "sample id" not in list(subjects_df.columns.values):
             abort(
                 400,
-                "The headers 'subject id' and 'sample id' are required to import an existing samples file. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/samples.xlsx'>template</a> of the samples file."
+                "The headers 'subject id' and 'sample id' are required to import an existing samples file. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/samples.xlsx'>template</a> of the samples file.",
             )
 
         if checkEmptyColumn(subjects_df["sample id"]) or checkEmptyColumn(
@@ -685,7 +701,7 @@ def convert_subjects_samples_file_to_df(type, filepath, ui_fields):
         ):
             abort(
                 400,
-                "At least 1 'subject id' and 'sample id' pair is required to import an existing samples file"
+                "At least 1 'subject id' and 'sample id' pair is required to import an existing samples file",
             )
 
         templateHeaderList = samplesTemplateHeaderList
@@ -713,7 +729,11 @@ def convert_subjects_samples_file_to_df(type, filepath, ui_fields):
 
     sortMatrix = sortedSubjectsTableData(transpose, ui_fields)
 
-    return {"sample_file_rows": transposeMatrix(sortMatrix)} if type in ["samples.xlsx", "samples"] else {"subject_file_rows": transposeMatrix(sortMatrix)}
+    return (
+        {"sample_file_rows": transposeMatrix(sortMatrix)}
+        if type in ["samples.xlsx", "samples"]
+        else {"subject_file_rows": transposeMatrix(sortMatrix)}
+    )
 
 
 ### function to read existing Pennsieve manifest files and load info into a dictionary
@@ -774,7 +794,6 @@ def checkEmptyColumn(column):
     return False
 
 
-
 ## load/import an existing local or Pennsieve submission.xlsx file
 def load_existing_submission_file(filepath):
 
@@ -815,7 +834,7 @@ def load_existing_submission_file(filepath):
         if key not in DD_df_lower:
             abort(
                 400,
-                "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/submission.xlsx'>template</a> of the submission."
+                "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/submission.xlsx'>template</a> of the submission.",
             )
 
     for header_name in basicHeaders:
@@ -823,7 +842,7 @@ def load_existing_submission_file(filepath):
         if header_name not in set(submissionItems):
             abort(
                 400,
-                "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/submission.xlsx'>template</a> of the submission."
+                "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/submission.xlsx'>template</a> of the submission.",
             )
 
     awardNo = DD_df["Value"][0]
@@ -844,16 +863,15 @@ def load_existing_submission_file(filepath):
 
 # import existing metadata files except Readme and Changes from Pennsieve
 def import_bf_metadata_file(file_type, ui_fields, bfaccount, bfdataset):
-    try: 
+    try:
         bf = Pennsieve(bfaccount)
     except Exception:
         abort(400, "Please select a valid Pennsieve account.")
 
-    try: 
+    try:
         myds = bf.get_dataset(bfdataset)
     except Exception:
         abort(400, "Please select a valid Pennsieve dataset.")
-    
 
     for i in range(len(myds.items)):
 
@@ -874,9 +892,7 @@ def import_bf_metadata_file(file_type, ui_fields, bfaccount, bfdataset):
             elif file_type == "samples.xlsx":
                 return convert_subjects_samples_file_to_df("samples", url, ui_fields)
 
-    abort(400, 
-        f"No {file_type} file was found at the root of the dataset provided."
-    )
+    abort(400, f"No {file_type} file was found at the root of the dataset provided.")
 
 
 # import readme or changes file from Pennsieve
@@ -904,7 +920,7 @@ def import_bf_RC(bfaccount, bfdataset, file_type):
             response = requests.get(url)
             return {"text": response.text}
 
-    abort (400, f"No {file_type} file was found at the root of the dataset provided.")
+    abort(400, f"No {file_type} file was found at the root of the dataset provided.")
 
 
 # path to local SODA folder for saving manifest files
@@ -912,7 +928,7 @@ manifest_folder_path = join(userpath, "SODA", "manifest_files")
 manifest_progress = {
     "total_manifest_files": 0,
     "manifest_files_uploaded": 0,
-    "finished": False
+    "finished": False,
 }
 
 # TODO: NOTE: ESSENTIAL: Remove the manifest_file even if the user does not generate before pulling again.
@@ -941,10 +957,14 @@ def import_bf_manifest_file(soda_json_structure, bfaccount, bfdataset):
     high_level_folders = ["code", "derivative", "docs", "primary", "protocol", "source"]
 
     # handle updating any existing manifest files on Pennsieve
-    update_existing_pennsieve_manifest_files(myds, bf, dataset_structure, high_level_folders)
+    update_existing_pennsieve_manifest_files(
+        myds, bf, dataset_structure, high_level_folders
+    )
 
     # create manifest files from scratch for any high level folders that don't have a manifest file on Pennsieve
-    create_high_level_manifest_files_existing_bf_starting_point(soda_json_structure, high_level_folders, manifest_progress)
+    create_high_level_manifest_files_existing_bf_starting_point(
+        soda_json_structure, high_level_folders, manifest_progress
+    )
 
     # finished with the manifest generation process
     manifest_progress["finished"] = True
@@ -952,7 +972,9 @@ def import_bf_manifest_file(soda_json_structure, bfaccount, bfdataset):
     no_manifest_boolean = False
 
 
-def update_existing_pennsieve_manifest_files(myds, bf, dataset_structure, high_level_folders):
+def update_existing_pennsieve_manifest_files(
+    myds, bf, dataset_structure, high_level_folders
+):
     global manifest_progress
     # handle updating any existing manifest files on Pennsieve
     for i in range(len(myds.items)):
@@ -984,7 +1006,9 @@ def update_existing_pennsieve_manifest_files(myds, bf, dataset_structure, high_l
 
                     high_level_folders.remove(myds.items[i].name)
 
-                    updated_manifest_dict = update_existing_pennsieve_manifest_file(dataset_structure["folders"][myds.items[i].name], manifest_df)
+                    updated_manifest_dict = update_existing_pennsieve_manifest_file(
+                        dataset_structure["folders"][myds.items[i].name], manifest_df
+                    )
 
                     if not exists(join(manifest_folder_path, myds.items[i].name)):
                         # create the path
@@ -1003,39 +1027,62 @@ def update_existing_pennsieve_manifest_files(myds, bf, dataset_structure, high_l
 
 def update_existing_pennsieve_manifest_file(high_level_folder, manifest_df):
     """
-        Given a high level folder and the existing manifest file therein, create a new updated manifest file. 
-        This manifest file needs to have files that only exist in the high level folder. Additionally, it needs to 
-        retain any custom metadata that the user has added to the old manifest file for entries that still exist. 
+    Given a high level folder and the existing manifest file therein, create a new updated manifest file.
+    This manifest file needs to have files that only exist in the high level folder. Additionally, it needs to
+    retain any custom metadata that the user has added to the old manifest file for entries that still exist.
     """
 
-    new_manifest_dict = {'filename': [], 'timestamp': [], 'description': [], 'file type': [], 'Additional Metadata': []}
-    SET_COLUMNS = ['filename', 'timestamp', 'description', 'file type', 'Additional Metadata']
-    for column in manifest_df.columns: 
+    new_manifest_dict = {
+        "filename": [],
+        "timestamp": [],
+        "description": [],
+        "file type": [],
+        "Additional Metadata": [],
+    }
+    SET_COLUMNS = [
+        "filename",
+        "timestamp",
+        "description",
+        "file type",
+        "Additional Metadata",
+    ]
+    for column in manifest_df.columns:
         if column not in new_manifest_dict:
             new_manifest_dict[column] = []
             SET_COLUMNS.append(column)
 
     # convert the old manifest into a dictionary to optimize the lookup time
-    old_manifest_dict = {x:manifest_df[x].values.tolist() for x in manifest_df}
+    old_manifest_dict = {x: manifest_df[x].values.tolist() for x in manifest_df}
 
     # create a mapping of filename to the idx of the row in the old_manidest_dict
-    filename_idx_map = {x:i for i, x in enumerate(manifest_df['filename'])}
+    filename_idx_map = {x: i for i, x in enumerate(manifest_df["filename"])}
 
     # traverse through the high level folder items
-    update_existing_pennsieve_manifest_file_helper(high_level_folder, old_manifest_dict, new_manifest_dict, filename_idx_map, manifest_columns=SET_COLUMNS)
+    update_existing_pennsieve_manifest_file_helper(
+        high_level_folder,
+        old_manifest_dict,
+        new_manifest_dict,
+        filename_idx_map,
+        manifest_columns=SET_COLUMNS,
+    )
 
-    # write the new manifest_df to the correct location as an excel file 
+    # write the new manifest_df to the correct location as an excel file
     return new_manifest_dict
 
 
-def update_existing_pennsieve_manifest_file_helper(folder, old_manifest_dict, new_manifest_dict, filename_idx_map, manifest_columns):
+def update_existing_pennsieve_manifest_file_helper(
+    folder, old_manifest_dict, new_manifest_dict, filename_idx_map, manifest_columns
+):
     """
-        Traverse through each high level folder in the dataset and update the new manifest data frame.
+    Traverse through each high level folder in the dataset and update the new manifest data frame.
     """
 
     if "files" in folder.keys():
         for file in list(folder["files"]):
-            file_path = remove_high_level_folder_from_path(folder["files"][file]["folderpath"]) + f"{file}"
+            file_path = (
+                remove_high_level_folder_from_path(folder["files"][file]["folderpath"])
+                + f"{file}"
+            )
 
             # select the row in the old manifest file that has the same file path as the file in the current folder
             # rationale: this means the file still exists in the user's dataset
@@ -1044,19 +1091,24 @@ def update_existing_pennsieve_manifest_file_helper(folder, old_manifest_dict, ne
             if row_idx is None:
                 for key in new_manifest_dict.keys():
                     if key == "filename":
-                        new_manifest_dict["filename"].append(file_path)   
+                        new_manifest_dict["filename"].append(file_path)
                     elif key == "timestamp":
-                        new_manifest_dict["timestamp"].append(folder["files"][file]["timestamp"]), 
-                    elif key == "description": 
-                        new_manifest_dict["description"].append(folder["files"][file].get("description", ""))
+                        new_manifest_dict["timestamp"].append(
+                            folder["files"][file]["timestamp"]
+                        ),
+                    elif key == "description":
+                        new_manifest_dict["description"].append(
+                            folder["files"][file].get("description", "")
+                        )
                     elif key == "file type":
                         unused_file_name, file_extension = get_name_extension(file)
-                        new_manifest_dict["file type"].append(file_extension), 
+                        new_manifest_dict["file type"].append(file_extension),
                     elif key == "Additional Metadata":
-                        new_manifest_dict["Additional Metadata"].append(folder["files"][file].get("additional-metadata", ""))
+                        new_manifest_dict["Additional Metadata"].append(
+                            folder["files"][file].get("additional-metadata", "")
+                        )
                     else:
                         new_manifest_dict[key].append("")
-                    
 
             else:
                 # add the existing rows to the new manifest dictionary's arrays
@@ -1066,32 +1118,36 @@ def update_existing_pennsieve_manifest_file_helper(folder, old_manifest_dict, ne
 
     if "folders" in folder.keys():
         for current_folder in list(folder["folders"]):
-            update_existing_pennsieve_manifest_file_helper(folder["folders"][current_folder], old_manifest_dict, new_manifest_dict, filename_idx_map, manifest_columns)
+            update_existing_pennsieve_manifest_file_helper(
+                folder["folders"][current_folder],
+                old_manifest_dict,
+                new_manifest_dict,
+                filename_idx_map,
+                manifest_columns,
+            )
 
-    return 
+    return
 
 
 def manifest_creation_progress():
     """
-        Monitors the progress of the manifest creation process.
+    Monitors the progress of the manifest creation process.
     """
     global manifest_progress
 
     return {
-            "manifest_files_uploaded": manifest_progress["manifest_files_uploaded"], 
-            "total_manifest_files": manifest_progress["total_manifest_files"],
-            "finished": manifest_progress["finished"]
-           }
+        "manifest_files_uploaded": manifest_progress["manifest_files_uploaded"],
+        "total_manifest_files": manifest_progress["total_manifest_files"],
+        "finished": manifest_progress["finished"],
+    }
 
 
 def remove_high_level_folder_from_path(paths):
     """
-        Remove the high level folder from the path. This is necessary because the high level folder is not included in the manifest file name entry.
+    Remove the high level folder from the path. This is necessary because the high level folder is not included in the manifest file name entry.
     """
 
     return "" if len(paths) == 1 else "/".join(paths[1:]) + "/"
-
-
 
 
 def copytree(src, dst, symlinks=False, ignore=None):
@@ -1114,7 +1170,6 @@ def returnFileURL(bf_object, item_id):
     file_url_info = bf_object._api._get(
         f"/packages/{str(item_id)}/files/{str(file_id)}"
     )
-
 
     return file_url_info["url"]
 
@@ -1220,31 +1275,33 @@ def load_existing_DD_file(import_type, filepath):
     # check if Metadata Element a.k.a Header column exists
     for key in ["Metadata element", "Description", "Example", "Value"]:
         if key not in DD_df:
-            abort(400, 
-                "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/dataset_description.xlsx'>template</a> of the dataset_description."
+            abort(
+                400,
+                "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/dataset_description.xlsx'>template</a> of the dataset_description.",
             )
 
     if "Metadata element" not in DD_df:
-        abort(400, 
-            "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/dataset_description.xlsx'>template</a> of the dataset_description."
+        abort(
+            400,
+            "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/dataset_description.xlsx'>template</a> of the dataset_description.",
         )
 
     else:
         for header_name in header_list:
             if header_name not in set(DD_df["Metadata element"]):
-                abort(400, 
-                    "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/dataset_description.xlsx'>template</a> of the dataset_description."
+                abort(
+                    400,
+                    "The imported file is not in the correct format. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/dataset_description.xlsx'>template</a> of the dataset_description.",
                 )
 
     if non_empty_1st_value := checkEmptyColumn(DD_df["Value"]):
-        abort(400, 
-            "At least 1 value is required to import an existing dataset_description file"
+        abort(
+            400,
+            "At least 1 value is required to import an existing dataset_description file",
         )
 
     # drop Description and Examples columns
     DD_df = DD_df.drop(columns=["Description", "Example"])
-
-
 
     ## convert DD_df to array of arrays (a matrix)
     DD_matrix = DD_df.to_numpy().tolist()
@@ -1291,10 +1348,7 @@ def edit_bf_manifest_file(edit_action, manifest_type):
     if edit_action == "drop_empty_manifest_columns":
         drop_manifest_empty_columns(manifest_file_location)
 
-    return 
-
-
-    
+    return
 
 
 def drop_manifest_empty_columns(manifest_file_location):
@@ -1304,21 +1358,29 @@ def drop_manifest_empty_columns(manifest_file_location):
 
     # go through each high level folder
     for high_level_folder in high_level_folders:
-        # read the folder's excel file 
+        # read the folder's excel file
         manifest_df = pd.read_excel(
-                        os.path.join(manifest_file_location, high_level_folder, "manifest.xlsx"), engine="openpyxl", usecols=column_check, header=0
-                    )
+            os.path.join(manifest_file_location, high_level_folder, "manifest.xlsx"),
+            engine="openpyxl",
+            usecols=column_check,
+            header=0,
+        )
         custom_columns = []
 
         # get the custom columns from the data frame
-        SET_COLUMNS = ['filename', 'timestamp', 'description', 'file type', 'Additional Metadata']
-        for column in manifest_df.columns: 
+        SET_COLUMNS = [
+            "filename",
+            "timestamp",
+            "description",
+            "file type",
+            "Additional Metadata",
+        ]
+        for column in manifest_df.columns:
             if column not in SET_COLUMNS:
                 custom_columns.append(column)
 
-
         # for each custom column delete the column if all values are null/empty
-        manifest_dict = {x:manifest_df[x].values.tolist() for x in manifest_df}
+        manifest_dict = {x: manifest_df[x].values.tolist() for x in manifest_df}
 
         for column in custom_columns:
             if all([pd.isna(x) for x in manifest_dict[column]]):
@@ -1329,5 +1391,7 @@ def drop_manifest_empty_columns(manifest_file_location):
         edited_manifest_df = pd.DataFrame.from_dict(manifest_dict)
 
         # save the data frame to the manifest folder as an excel file
-        edited_manifest_df.to_excel(os.path.join(manifest_file_location, high_level_folder, "manifest.xlsx"), index=False)
-
+        edited_manifest_df.to_excel(
+            os.path.join(manifest_file_location, high_level_folder, "manifest.xlsx"),
+            index=False,
+        )

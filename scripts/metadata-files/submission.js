@@ -311,7 +311,7 @@ const generateMilestoneRowElement = (dataDescription, milestoneString, dateStrin
       <td class="middle aligned">
         ${milestoneString}
       </td>
-      <td class="middle aligned collapsing"> 
+      <td class="middle aligned collapsing">
         ${dateString}
       </td>
     </tr>
