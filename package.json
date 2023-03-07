@@ -6,6 +6,7 @@
   "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=development electron .",
+    "dev:server": "cd pyflask && python -m flask run --port 4242",
     "build-win": "electron-builder build --win --publish never",
     "build-mac": "electron-builder build --mac --publish never",
     "build-linux": "electron-builder build --linux --publish never",
