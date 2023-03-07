@@ -1,14 +1,18 @@
 import pytest
 import app as flask
 
+
 @pytest.fixture()
-def app(): 
+def app():
     app = flask.app
-    app.config.update({
-        "TESTING": True,
-    })
+    app.config.update(
+        {
+            "TESTING": True,
+        }
+    )
 
     yield app
+
 
 @pytest.fixture()
 def client(app):
@@ -18,6 +22,7 @@ def client(app):
 @pytest.fixture()
 def runner(app):
     return app.test_cli_runner()
+
 
 # @pytest.fixture()
 # def all_interfaces(client):
