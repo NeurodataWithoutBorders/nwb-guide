@@ -7,8 +7,9 @@ userpath = expanduser("~")
 configpath = join(userpath, ".pennsieve", "config.ini")
 PENNSIEVE_URL = "https://api.pennsieve.io"
 
+
 def get_access_token():
-    # get cognito config 
+    # get cognito config
     r = requests.get(f"{PENNSIEVE_URL}/authentication/cognito-config")
     r.raise_for_status()
 
@@ -16,27 +17,29 @@ def get_access_token():
     cognito_region_name = r.json()["region"]
 
     cognito_idp_client = boto3.client(
-    "cognito-idp",
-    region_name=cognito_region_name,
-    aws_access_key_id="",
-    aws_secret_access_key="",
+        "cognito-idp",
+        region_name=cognito_region_name,
+        aws_access_key_id="",
+        aws_secret_access_key="",
     )
-            
+
     login_response = cognito_idp_client.initiate_auth(
-    AuthFlow="USER_PASSWORD_AUTH",
-    AuthParameters={"USERNAME": read_from_config("api_token"), "PASSWORD": read_from_config("api_secret")},
-    ClientId=cognito_app_client_id,
+        AuthFlow="USER_PASSWORD_AUTH",
+        AuthParameters={
+            "USERNAME": read_from_config("api_token"),
+            "PASSWORD": read_from_config("api_secret"),
+        },
+        ClientId=cognito_app_client_id,
     )
 
     # write access token to a file
     with open("access_token.txt", "w") as f:
         f.write(login_response["AuthenticationResult"]["AccessToken"])
-        
+
     return login_response["AuthenticationResult"]["AccessToken"]
 
 
-
-# get a target key's value from the config file 
+# get a target key's value from the config file
 def read_from_config(key):
     config = ConfigParser()
     config.read(configpath)

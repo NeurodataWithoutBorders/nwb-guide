@@ -6,7 +6,14 @@ from flask import request
 api = get_namespace(NamespaceEnum.STARTUP)
 
 parser = api.parser()
-parser.add_argument('arg', type=str, required=True, help='Argument that will be echoed back to the caller', location='args')
+parser.add_argument(
+    "arg",
+    type=str,
+    required=True,
+    help="Argument that will be echoed back to the caller",
+    location="args",
+)
+
 
 @api.route("/echo")
 class Echo(Resource):

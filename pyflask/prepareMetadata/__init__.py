@@ -13,8 +13,8 @@ from .prepare_metadata import (
     import_bf_RC,
     upload_RC_file,
     delete_manifest_dummy_folders,
-    set_template_path, 
+    set_template_path,
     import_bf_manifest_file,
     manifest_creation_progress,
-    edit_bf_manifest_file
+    edit_bf_manifest_file,
 )

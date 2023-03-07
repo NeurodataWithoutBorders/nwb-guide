@@ -1,9 +1,9 @@
 from apis import (
-    manage_datasets_resource, 
-    # validate_dataset_resource, 
-    curate_datasets_resource, 
-    disseminate_datasets_resource, 
-    prepare_metadata_resource, 
+    manage_datasets_resource,
+    # validate_dataset_resource,
+    curate_datasets_resource,
+    disseminate_datasets_resource,
+    prepare_metadata_resource,
     organize_datasets_resource,
     startup_resource,
     taxonomy_resource,
@@ -11,6 +11,7 @@ from apis import (
     datasets_resource,
     collections_resource,
 )
+
 
 def configureRouteHandlers(api):
     """

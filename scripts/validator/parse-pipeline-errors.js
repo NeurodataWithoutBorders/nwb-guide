@@ -1,6 +1,6 @@
 /*
-    Purpose: After running a dataset validation pipeline we get back errors that are not human readable. They get piped through this module 
-             to be 'translated' into something an end user can understand. 
+    Purpose: After running a dataset validation pipeline we get back errors that are not human readable. They get piped through this module
+             to be 'translated' into something an end user can understand.
 
 */
 
@@ -17,9 +17,9 @@ const { ValidationErrorParser } = require("./validation-error-parser.js");
 const { ParsedErrorTranslator } = require("./parsed-error-translator.js");
 const { VALIDATOR_CATEGORIES } = require("./validator-categories.js");
 
-/* 
+/*
 Takes a validation error and parses the features of the error to determine what translation function to use on the error object
-@param {blame: string, message: string, pipeline_stage: string, schema_path: string[], validator: string, validator_value: string[], path: string[]} error  
+@param {blame: string, message: string, pipeline_stage: string, schema_path: string[], validator: string, validator_value: string[], path: string[]} error
          - A validation error from one of the Validator pipelines (either Pennsieve or Local)
 @param string pipeline: "pennsieve" when validating a Pennsieve dataset and "local" when validating a local dataset
 */
@@ -30,9 +30,9 @@ const validationErrorPipeline = (path, errorMessage) => {
   return translatedErrorMessage;
 };
 
-/* 
+/*
 Parse features of the given error message to determine what kind of translation needs to occur to make the message human readable
-@param object error: A validation error from the Validator. 
+@param object error: A validation error from the Validator.
 @param string pipeline: "pennsieve" when validating a Pennsieve dataset and "local" when validating a local dataset
 */
 const getTranslatedErrorMessage = (path, errorMessage) => {

@@ -818,7 +818,7 @@ function showParentSwal(duplicateArray) {
       `
     <div class="caption">
       <p>${htmlSwal}<p><ul style="text-align: start;">${listElements}</ul></p></p>
-    </div>  
+    </div>
     <div class="swal-button-container">
       <button id="skip" class="btn skip-btn" onclick="handleDuplicateImports('skip', '` +
       newList +
@@ -1098,7 +1098,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
             `
           <div class="caption">
             <p>${htmlSwal}<p><ul style="text-align: start;">${listElements}</ul></p></p>
-          </div>  
+          </div>
           <div class="swal-button-container">
             <button id="skip" class="btn skip-btn" onclick="handleDuplicateImports('skip', '` +
             newList +
@@ -1871,7 +1871,7 @@ const addFilesfunction = async (
         `
       <div class="caption">
         <p>${htmlSwal}<p><ul style="text-align:start;">${listElements}</ul></p></p>
-      </div>  
+      </div>
       <div class="swal-button-container">
       <button id="skip" class="btn skip-btn" onclick="handleDuplicateImports('skip', '` +
         list +
