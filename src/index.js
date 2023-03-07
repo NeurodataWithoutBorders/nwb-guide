@@ -83,7 +83,7 @@ onDocumentReady(async function () {
     await includeJavaScriptFile("./assets/nav.js");
     await includeJavaScriptFile("./assets/demo-btns.js");
     await includeJavaScriptFile("./preload.js");
-    await includeJavaScriptFile("./scripts/others/renderer.js");
+    await includeJavaScriptFile("./src/renderer.js");
     await includeJavaScriptFile("./scripts/others/progressContainer.js");
     await includeJavaScriptFile("./scripts/others/pennsieveDatasetImporter.js");
     await includeJavaScriptFile("./scripts/others/tab-effects.js");
