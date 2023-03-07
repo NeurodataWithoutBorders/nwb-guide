@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="https://jsuites.net/v4/jsuites.css" type="text/css" />
     <link rel="stylesheet" href="https://bossanova.uk/jspreadsheet/v4/jexcel.css" type="text/css" />
 
+    <!-- NOTE: This is a deprecated feature since Web Components have made their debut -->
     <link rel="import" href="sections/getting_started/getting_started.html" />
     <link rel="import" href="sections/manage_datasets/manage_datasets.html" />
     <link rel="import" href="sections/post_curation/post_curation.html" />
@@ -61,6 +62,8 @@
     <link rel="import" href="sections/validate/validate_dataset.html" />
     <link rel="import" href="sections/contact-us/contact_us.html" />
     <link rel="import" href="sections/guided_mode/guided_curate_dataset.html" />
+
+    <!-- Peer Dependency: lottie-web (for animations)-->
     <script src="./assets/lotties/license-lottie.js" type="text/javascript"></script>
     <script src="./assets/lotties/overview-lotties.js" type="text/javascript"></script>
     <script src="./assets/lotties/documentation-lotties.js" type="text/javascript"></script>
@@ -280,25 +283,36 @@
 
     <script>
       require("./assets/imports"); // Imports html files into app
-      // require("./assets/ex-links"); // Opens url into external chrome tab instead of in the app
-      // require("./assets/nav"); // Side navigation menu control
-      // require("./assets/demo-btns");
       require("./assets/normalize-shortcuts"); // For normalizing shortcuts across OS
     </script>
 
+    <!-- A script run to set the behaviors of the sidebar and associated links after all DOM content has been loaded -->
     <script>
-      $(document).ready(() => {
-        $("#sidebarCollapse").on("click", function () {
-          $("#main-nav").toggleClass("active");
-          $(this).toggleClass("active");
-          $(".section").toggleClass("fullShown");
+
+      function onDocumentReady(fn) {
+          if (document.readyState === "complete" || document.readyState === "interactive") setTimeout(fn, 1)
+          else document.addEventListener("DOMContentLoaded", fn)
+      }    
+
+      onDocumentReady(() => {
+
+        // Toggle sidebar
+        const sidebar = document.getElementById("sidebarCollapse");
+        sidebar.addEventListener('click', () => {
+          const mainNav = document.getElementById("main-nav");
+          mainNav.classList.toggle("active");
+          sidebar.classList.toggle("active");
+          const section = document.getElementsByClassName("section")[0];
+          section.classList.toggle("fullShown");
         });
-      });
-      $(document).ready(() => {
-        $("a").on("click", function () {
-          $($(this).parents()[1]).find("a").removeClass("is-selected");
-          $(this).addClass("is-selected");
-        });
+
+        // Clear all selected links and add selected class to the clicked link
+        document.querySelectorAll('a').forEach((a) => {
+          a.addEventListener('click', () => {
+            a.parentNode.parentNode.querySelectorAll('a').forEach((a) => a.classList.remove('is-selected'))
+            a.classList.add('is-selected')
+          })
+        })
       });
     </script>
 
