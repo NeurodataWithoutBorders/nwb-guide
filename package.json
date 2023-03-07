@@ -7,6 +7,8 @@
   "scripts": {
     "start": "NODE_ENV=development electron .",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
+    "test": "npm run test:server",
+    "test:server": "pytest pyflask/tests/ -s",
     "build-win": "electron-builder build --win --publish never",
     "build-mac": "electron-builder build --mac --publish never",
     "build-linux": "electron-builder build --linux --publish never",
