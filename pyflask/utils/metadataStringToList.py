@@ -1,4 +1,3 @@
-
 def metadata_string_to_list(metadata_string):
     """
     Converts a metadata string to a list of metadata.
@@ -11,4 +10,12 @@ def metadata_string_to_list(metadata_string):
     if metadata_string is None:
         return []
     else:
-        return list(map(str.strip, metadata_string.strip('][').replace("'", '').replace('"', '').split(',')))
+        return list(
+            map(
+                str.strip,
+                metadata_string.strip("][")
+                .replace("'", "")
+                .replace('"', "")
+                .split(","),
+            )
+        )

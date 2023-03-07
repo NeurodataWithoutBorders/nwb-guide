@@ -1,7 +1,7 @@
 /*
 ******************************************************
 ******************************************************
-Pre-publishing Submission Workflow Section 
+Pre-publishing Submission Workflow Section
 
 Note: Some frontend elements of the workflow are in the renderer.js file as well. They are can be found under postCurationListChange() function.
       All backend requests can be found in the renderer.js file.

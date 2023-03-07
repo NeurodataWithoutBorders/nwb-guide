@@ -8,8 +8,11 @@ api = get_namespace(NamespaceEnum.TAXONOMY)
 
 @api.route("/species")
 class Species(Resource):
-
-    @api.doc(response={200: "Success", 400: "Bad Request", 500: "Internal Server Error"}, description="Get the scientific name for a species", params={"animals_list": "List of animal names"})
+    @api.doc(
+        response={200: "Success", 400: "Bad Request", 500: "Internal Server Error"},
+        description="Get the scientific name for a species",
+        params={"animals_list": "List of animal names"},
+    )
     def get(self):
         data = request.args.to_dict()
 

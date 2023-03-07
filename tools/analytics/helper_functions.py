@@ -7,112 +7,120 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import calendar
 
-SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
-KEY_FILE_LOCATION = 'client_secrets.json'
-VIEW_ID = '234549909'
+SCOPES = ["https://www.googleapis.com/auth/analytics.readonly"]
+KEY_FILE_LOCATION = "client_secrets.json"
+VIEW_ID = "234549909"
 
 
 def initialize_analyticsreporting():
-  """Initializes an Analytics Reporting API V4 service object.
+    """Initializes an Analytics Reporting API V4 service object.
 
-  Returns:
-    An authorized Analytics Reporting API V4 service object.
-  """
-  credentials = ServiceAccountCredentials.from_json_keyfile_name(KEY_FILE_LOCATION, SCOPES)
+    Returns:
+      An authorized Analytics Reporting API V4 service object.
+    """
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        KEY_FILE_LOCATION, SCOPES
+    )
 
-  # Build the service object.
-  analytics = build('analyticsreporting', 'v4', credentials=credentials)
+    # Build the service object.
+    analytics = build("analyticsreporting", "v4", credentials=credentials)
 
-  return analytics
+    return analytics
+
 
 def get_report(analytics, query):
-  """Queries the Analytics Reporting API V4.
+    """Queries the Analytics Reporting API V4.
 
-  Args:
-    analytics: An authorized Analytics Reporting API V4 service object.
-  Returns:
-    The Analytics Reporting API V4 response.
-  """
-  return analytics.reports().batchGet(body=query).execute()
+    Args:
+      analytics: An authorized Analytics Reporting API V4 service object.
+    Returns:
+      The Analytics Reporting API V4 response.
+    """
+    return analytics.reports().batchGet(body=query).execute()
+
 
 def print_response(response):
-  """Parses and prints the Analytics Reporting API V4 response.
+    """Parses and prints the Analytics Reporting API V4 response.
 
-  Args:
-    response: An Analytics Reporting API V4 response.
-  """
-  for report in response.get('reports', []):
-    columnHeader = report.get('columnHeader', {})
-    dimensionHeaders = columnHeader.get('dimensions', [])
-    metricHeaders = columnHeader.get('metricHeader', {}).get('metricHeaderEntries', [])
+    Args:
+      response: An Analytics Reporting API V4 response.
+    """
+    for report in response.get("reports", []):
+        columnHeader = report.get("columnHeader", {})
+        dimensionHeaders = columnHeader.get("dimensions", [])
+        metricHeaders = columnHeader.get("metricHeader", {}).get(
+            "metricHeaderEntries", []
+        )
 
-    for row in report.get('data', {}).get('rows', []):
-      dimensions = row.get('dimensions', [])
-      dateRangeValues = row.get('metrics', [])
+        for row in report.get("data", {}).get("rows", []):
+            dimensions = row.get("dimensions", [])
+            dateRangeValues = row.get("metrics", [])
 
-      for header, dimension in zip(dimensionHeaders, dimensions):
-        print(header + ': ', dimension)
+            for header, dimension in zip(dimensionHeaders, dimensions):
+                print(header + ": ", dimension)
 
-      for i, values in enumerate(dateRangeValues):
-        print('Date range:', str(i))
-        for metricHeader, value in zip(metricHeaders, values.get('values')):
-          print(metricHeader.get('name') + ':', value)
+            for i, values in enumerate(dateRangeValues):
+                print("Date range:", str(i))
+                for metricHeader, value in zip(metricHeaders, values.get("values")):
+                    print(metricHeader.get("name") + ":", value)
+
 
 def progress_bar_counter(dt, ds, update_interval):
-  if update_interval == "Daily":
-    return (ds - dt).days + 1
+    if update_interval == "Daily":
+        return (ds - dt).days + 1
 
-  weeks_counter = 0
-  if update_interval == "Weekly":
-    start = dt - timedelta(days=dt.weekday())
-    end = start + timedelta(days=6)
     weeks_counter = 0
+    if update_interval == "Weekly":
+        start = dt - timedelta(days=dt.weekday())
+        end = start + timedelta(days=6)
+        weeks_counter = 0
 
-    while start <= ds:
-      weeks_counter += 1
-      start = start + timedelta(days=7)
-      end = start + timedelta(days=6)
+        while start <= ds:
+            weeks_counter += 1
+            start = start + timedelta(days=7)
+            end = start + timedelta(days=6)
 
-    return weeks_counter
+        return weeks_counter
 
-  months_counter = 0
-  if update_interval == "Monthly":
-    start = end = dt
-
-    start = start.replace(day=1)
-    end = end.replace(day = calendar.monthrange(start.year, start.month)[1])
     months_counter = 0
+    if update_interval == "Monthly":
+        start = end = dt
 
-    # Get the number of months for the progress bar
-    while start <= ds:
-      months_counter += 1
-      start = start + relativedelta(months=+1)
-      end = start = start.replace(day=1)
-      end = end.replace(day = calendar.monthrange(start.year, start.month)[1])
+        start = start.replace(day=1)
+        end = end.replace(day=calendar.monthrange(start.year, start.month)[1])
+        months_counter = 0
 
-    return months_counter
+        # Get the number of months for the progress bar
+        while start <= ds:
+            months_counter += 1
+            start = start + relativedelta(months=+1)
+            end = start = start.replace(day=1)
+            end = end.replace(day=calendar.monthrange(start.year, start.month)[1])
+
+        return months_counter
+
 
 def next_date_interval(start, end, update_interval):
-  if update_interval == "Daily":
-    start = start + timedelta(days=1)
-    end = start
-    return start, end
+    if update_interval == "Daily":
+        start = start + timedelta(days=1)
+        end = start
+        return start, end
 
-  if update_interval == "Weekly":
-    start = start + timedelta(days=7)
-    end = start + timedelta(days=6)
-    return start, end
+    if update_interval == "Weekly":
+        start = start + timedelta(days=7)
+        end = start + timedelta(days=6)
+        return start, end
 
-  if update_interval == "Monthly":
-    start = start + relativedelta(months=+1)
-    end = start = start.replace(day=1)
-    end = end.replace(day = calendar.monthrange(start.year, start.month)[1])
-    return start, end
+    if update_interval == "Monthly":
+        start = start + relativedelta(months=+1)
+        end = start = start.replace(day=1)
+        end = end.replace(day=calendar.monthrange(start.year, start.month)[1])
+        return start, end
 
-  if update_interval == "No Separation":
-    start = end + relativedelta(months=+1)
-    end = end.replace(day = calendar.monthrange(start.year, start.month)[1])
-    return start, end
+    if update_interval == "No Separation":
+        start = end + relativedelta(months=+1)
+        end = end.replace(day=calendar.monthrange(start.year, start.month)[1])
+        return start, end
 
 
 ###########################################################

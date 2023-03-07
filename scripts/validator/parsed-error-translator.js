@@ -1,5 +1,5 @@
 /*
-Purpose: A dictionary/object with translations for a particular (or form of in some more dynamic cases) validator error. The errors are 
+Purpose: A dictionary/object with translations for a particular (or form of in some more dynamic cases) validator error. The errors are
          translated into a human readable format that describes what the error is, how to fix it, and when applicable, a link to a place in SODA
          where that error can be fixed.
 
@@ -410,7 +410,7 @@ const ParsedErrorTranslator = {
 
   /*
     @param missingField string : represents the required field that was missing from the user's metadata files
-    @param metadataFile string : the metadata file that the given missing field belongs to 
+    @param metadataFile string : the metadata file that the given missing field belongs to
   */
   translateMissingRequiredProperties: (missingField, metadataFile) => {
     let errorExplanation = "";

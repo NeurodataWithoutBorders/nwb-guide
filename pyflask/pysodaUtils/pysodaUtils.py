@@ -1,9 +1,4 @@
-from pennsieve.api.agent import (
-    agent_cmd,
-    agent_cmd,
-    AgentError,
-    socket_address
-)
+from pennsieve.api.agent import agent_cmd, agent_cmd, AgentError, socket_address
 import subprocess
 from websocket import create_connection
 import socket
@@ -40,6 +35,8 @@ def agent_running():
 
 
 forbidden_characters = '<>:"/\|?*'
+
+
 def check_forbidden_characters(my_string):
     """
     Check for forbidden characters in file/folder name
@@ -55,6 +52,8 @@ def check_forbidden_characters(my_string):
 
 
 forbidden_characters_bf = '\/:*?"<>'
+
+
 def check_forbidden_characters_bf(my_string):
     """
     Check for forbidden characters in Pennsieve file/folder name
@@ -68,7 +67,7 @@ def check_forbidden_characters_bf(my_string):
     regex = re.compile(f"[{forbidden_characters_bf}]")
     return regex.search(my_string) is not None or "\\" in r"%r" % my_string
 
-    
+
 def bf_dataset_size():
     """
     Function to get storage size of a dataset on Pennsieve

@@ -863,7 +863,7 @@ const renderSideBar = (activePage) => {
     const dropDownContainer = `
       <div class="guided--nav-bar-section">
         ${dropdDown}
-        ${dropDownContent}  
+        ${dropDownContent}
       </div>
     `;
     navBarHTML += dropDownContainer;
@@ -1575,8 +1575,8 @@ const generateProgressCardElement = (progressFileJSONObj) => {
 
   return `
     <div class="guided--dataset-card">
-      ${progressFileImage /* banner image */}     
-        
+      ${progressFileImage /* banner image */}
+
       <div class="guided--dataset-card-body">
         <div class="guided--dataset-card-row">
           <h1
@@ -1588,7 +1588,7 @@ const generateProgressCardElement = (progressFileJSONObj) => {
           >${progressFileName}</h1>
         </div>
         <div class="guided--dataset-card-row">
-          <h1 
+          <h1
             class="guided--text-dataset-card progress-card-popover"
             data-tippy-content="Dataset subtitle: ${progressFileSubtitle}"
             rel="popover"
@@ -1742,7 +1742,7 @@ const renderManifestCards = () => {
 
 const generateManifestEditCard = (highLevelFolderName) => {
   return `
-    <div class="guided--dataset-card">        
+    <div class="guided--dataset-card">
       <div class="guided--dataset-card-body shrink">
         <div class="guided--dataset-card-row">
           <h1 class="guided--text-dataset-card">
@@ -5216,7 +5216,7 @@ const generateadditionalLinkRowElement = (link, linkType, linkRelation) => {
           type="button"
           class="btn btn-danger btn-sm"
           onclick="deleteAdditionalLink(this)"
-        >   
+        >
           Delete link
         </button>
       </td>
@@ -5242,7 +5242,7 @@ const generateContributorField = (
         data-contributor-first-name="${contributorFirstName ? contributorFirstName : ""}"
         data-contributor-last-name="${contributorLastName ? contributorLastName : ""}"
       >
-        <i 
+        <i
           class="fas fa-times fa-2x"
           style="
             position: absolute;
@@ -5255,7 +5255,7 @@ const generateContributorField = (
         >
         </i>
         <h2 class="guided--text-sub-step">
-          Enter 
+          Enter
           <span class="contributor-first-name">${
             contributorFirstName ? contributorFirstName : "contributor's"
           }</span>'s
@@ -5563,7 +5563,7 @@ const openGuidedEditContributorSwal = async (contibuttorOrcidToEdit) => {
             href="https://orcid.org"
             >sign up for one on orcid.org</a
           >.
-     
+
           </p>
           <label class="guided--form-label mt-md required">Affiliation(s): </label>
           <input id="guided-contributor-affiliation-input"
@@ -5843,7 +5843,7 @@ const openGuidedAddContributorSwal = async () => {
             href="https://orcid.org"
             >sign up for one on orcid.org</a
           >.
-     
+
           </p>
           <label class="guided--form-label mt-md required">Affiliation(s): </label>
           <input id="guided-contributor-affiliation-input"
@@ -6038,7 +6038,7 @@ const generateContributorTableRow = (contributorObj) => {
       <td class="middle aligned collapsing text-center">
         <button
           type="button"
-          class="btn btn-danger btn-sm" 
+          class="btn btn-danger btn-sm"
           onclick="deleteContributor(this, '${contributorOrcid}')"
         >
           Delete
@@ -6087,7 +6087,7 @@ const addContributorField = () => {
   newContributorField.style.position = "relative";
 
   newContributorField.innerHTML = `
-    <i 
+    <i
       class="fas fa-times fa-2x"
       style="
         position: absolute;
@@ -6133,7 +6133,7 @@ const addContributorField = () => {
     <input class="guided-contributor-affiliation-input"
           contenteditable="true"
     />
-  
+
     <label class="guided--form-label required mt-md">Role(s): </label>
     <input class="guided-contributor-role-input"
       contenteditable="true"
@@ -6326,7 +6326,7 @@ const removeProtocolField = (protocolElement) => {
 //TODO: handle new blank protocol fields (when parameter are blank)
 const generateProtocolField = (protocolUrl, protocolType, protocolDescription) => {
   return `
-    <tr 
+    <tr
       class="guided-protocol-field-container"
       data-protocol-url="${protocolUrl}"
       data-protocol-description="${protocolDescription}"
@@ -6351,7 +6351,7 @@ const generateProtocolField = (protocolUrl, protocolType, protocolDescription) =
       <td class="middle aligned collapsing link-name-cell">
         <button
           type="button"
-          class="btn btn-danger btn-sm" 
+          class="btn btn-danger btn-sm"
           onclick=removeProtocolField(this.parentElement.parentElement)
         >
         Delete
@@ -6739,7 +6739,7 @@ const renderSubjectSampleAdditionTable = (subject) => {
               <span class="samples-subjects-pool">${subject.poolName ? subject.poolName : ""}</span>
               <span class="samples-subject-name">${subject.subjectName}</span>
             </div>
-          
+
             Enter a unique sample ID for each sample taken from subject ${subject.subjectName}
             <button
               type="button"
@@ -8384,7 +8384,7 @@ const renderSamplesHighLevelFolderAsideItems = (highLevelFolderName) => {
                 ${subject.samples
                   .map((sample) => {
                     return `
-                    <a 
+                    <a
                       class="${highLevelFolderName}-selection-aside-item selection-aside-item"
                       data-path-suffix="${subject.poolName}/${subject.subjectName}/${sample}"
                       style="padding-left: 1rem; direction: ltr"
@@ -8412,7 +8412,7 @@ const renderSamplesHighLevelFolderAsideItems = (highLevelFolderName) => {
       </div>
         ${subject.samples
           .map((sample) => {
-            return `  
+            return `
               <a
                 class="${highLevelFolderName}-selection-aside-item selection-aside-item"
                 style="direction: ltr; padding-left: 1rem;"
@@ -8565,7 +8565,7 @@ const renderSubjectsHighLevelFolderAsideItems = (highLevelFolderName) => {
   const subjectItems = subjects
     .map((subject) => {
       return `
-          <a 
+          <a
             class="${highLevelFolderName}-selection-aside-item selection-aside-item"
             style="align-self: center; width: 97%; direction: ltr;"
             data-path-suffix="${subject.poolName ? subject.poolName + "/" : ""}${
@@ -8693,7 +8693,7 @@ const renderSubjectsMetadataAsideItems = () => {
   const subjectItems = subjects
     .map((subject) => {
       return `
-          <a 
+          <a
             class="subjects-metadata-aside-item selection-aside-item"
             data-pool-id="${subject.poolName ? subject.poolName : ""}"
           ><span class="subject-metadata-id">${subject.subjectName}</span></a>
@@ -10594,8 +10594,8 @@ $(document).ready(async () => {
           <p>Error message: ${emessage}</p>
           <p>
             Please close the SODA app and restart it again. You will be able to resume your upload
-            in progress by returning to Guided Mode and clicking the "Resume Upload" 
-            button on your dataset's progress card. 
+            in progress by returning to Guided Mode and clicking the "Resume Upload"
+            button on your dataset's progress card.
           </p>
         `,
         showCancelButton: false,
@@ -10836,8 +10836,8 @@ $(document).ready(async () => {
           <p>Error message: ${emessage}</p>
           <p>
             Please close the SODA app and restart it again. You will be able to resume your upload
-            in progress by returning to Guided Mode and clicking the "Resume Upload" 
-            button on your dataset's progress card. 
+            in progress by returning to Guided Mode and clicking the "Resume Upload"
+            button on your dataset's progress card.
           </p>
         `,
           showCancelButton: false,

@@ -1,4 +1,5 @@
-from .configureNamespaces import  namespaces
+from .configureNamespaces import namespaces
+
 
 def get_namespace_logger(namespace_name):
     "Retrieve the attached logger for a specific namespace. Valid namespaces are those within the NamespaceEnum class"
