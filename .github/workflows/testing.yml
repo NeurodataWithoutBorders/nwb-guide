@@ -41,6 +41,4 @@ jobs:
         run: |
           conda activate env-electron-python
           npm ci
-
-      - name: Run backend tests
-        run: pytest pyflask/tests
+          npm run test
