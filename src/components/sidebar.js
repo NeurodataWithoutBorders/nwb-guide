@@ -392,7 +392,7 @@ padding-left: 0;
 export class Sidebar extends LitElement {
 
   static get styles() {
-    return this.shadowRoot ? useGlobalStyles(componentCSS, sheet => sheet.href.includes('bootstrap')) : componentCSS
+    return useGlobalStyles(componentCSS, sheet => sheet.href.includes('bootstrap'), this.shadowRoot)
   }
 
   constructor () {

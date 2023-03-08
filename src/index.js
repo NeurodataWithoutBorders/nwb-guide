@@ -1,2 +1,3 @@
 // Web Components
-import "./components/sidebar.js"; // Include the sidebar component in the application
+import "./components/sidebar.js";
+import "./components/multiselect/index.js"; 

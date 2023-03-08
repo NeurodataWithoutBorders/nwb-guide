@@ -1,12 +1,12 @@
 import { css } from 'lit';
 
-const useGlobalStyles = (componentCSS, condition) => {
-    const styles = Object.values(document.styleSheets).filter(condition)
+const useGlobalStyles = (componentCSS, condition, toApply=true) => {
 
-    if (!styles.length) return componentCSS
+    if (!toApply || !condition) return css([componentCSS])
 
-    const rules = styles.map(sheet => Object.values(sheet.cssRules).map(rule => rule.cssText).join('\n'))
-
+    const sheets = Object.values(document.styleSheets)
+    const selectedSheets = condition instanceof Function ? Object.values(sheets).filter(condition) : sheets
+    const rules = selectedSheets.map(sheet => Object.values(sheet.cssRules).map(rule => rule.cssText).join('\n'))
     return css([componentCSS, ...rules])
 }
 
