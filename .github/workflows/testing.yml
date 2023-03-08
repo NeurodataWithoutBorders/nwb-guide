@@ -31,9 +31,11 @@ jobs:
           git config --global user.name "CI Almighty"
           pip install wheel # Needed for scan image
 
-      - name: Install GUIDE
+      - name: Install GUIDE environment
+        run: conda env create -f tools/anaconda-env/environment-Linux.yml
+
+      - name: Activate GUIDE environment
         run: |
-          conda env create -f tools/anaconda-env/environment-Linux.yml
           conda activate env-electron-python
           npm ci
 
