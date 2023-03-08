@@ -51,7 +51,8 @@ jobs:
           key: ${{ matrix.os }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
         id: cache
 
-      - name: Setup Conda
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Setup fresh environment
         uses: conda-incubator/setup-miniconda@v2
         with:
             miniforge-version: latest
@@ -59,7 +60,12 @@ jobs:
             activate-environment: env-electron-python
             python-version: ${{ matrix.python-version }}
 
+      - if: steps.cache.outputs.cache-hit == 'true'
+        name: Setup cached environment
+        run: conda activate env-electron-python
+
+      - name: Install GUIDE
+        run: npm ci
+
       - name: Run tests
-        run: |
-          npm ci
-          npm run test
+        run: npm run test
