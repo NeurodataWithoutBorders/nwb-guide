@@ -49,7 +49,7 @@ export class MultiSelectForm extends LitElement {
   constructor (props) {
     super()
     Object.assign(this, props)
-  } 
+  }
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
     super.attributeChangedCallback(changedProperties, oldValue, newValue)
@@ -62,17 +62,17 @@ export class MultiSelectForm extends LitElement {
 
     const dataFormatsForm = (this.shadowRoot ?? this).querySelector("#neuroconv-data-formats-form");
 
-    const formats = this.options 
-  
+    const formats = this.options
+
     if (formats.message) {
       throw new Error(formats.message);
     }
-  
+
     // Currently supports two levels of fields
     let modalities = {};
     for (let name in formats) {
       const format = formats[name];
-  
+
       let modality = modalities[format.modality];
       if (!modality) {
         const fieldset = document.createElement("fieldset");
@@ -80,13 +80,13 @@ export class MultiSelectForm extends LitElement {
         legend.textContent = format.modality;
         fieldset.appendChild(legend);
         dataFormatsForm.appendChild(fieldset);
-  
+
         modality = modalities[format.modality] = {
           form: fieldset,
           techniques: {},
         };
       }
-  
+
       // Place in technique or modality div
       const technique = format.technique;
       let targetInfo = modality;
@@ -97,13 +97,13 @@ export class MultiSelectForm extends LitElement {
           legend.textContent = technique;
           fieldset.appendChild(legend);
           modality.form.appendChild(fieldset);
-  
+
           targetInfo = modality.techniques[technique] = {
             form: fieldset,
           };
         }
       }
-  
+
       const form = targetInfo.form;
       const div = document.createElement("div");
       const input = document.createElement("input");

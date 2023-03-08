@@ -399,7 +399,7 @@ export class Sidebar extends LitElement {
     super()
 
     // const { primary, backgroundColor = null, size, label, onClick } = props ?? {}
-  } 
+  }
 
   // This method turns off shadow DOM to allow for global styles (e.g. bootstrap)
   // NOTE: This component checks whether this is active to determine how to handle styles and internal element references
@@ -416,7 +416,7 @@ export class Sidebar extends LitElement {
         toggle.classList.toggle("active");
 
         // TODO: Decide how to grab these elements outside of the component
-        const section = document.getElementsByClassName("section")[0]; 
+        const section = document.getElementsByClassName("section")[0];
         section.classList.toggle("fullShown");
       });
 
