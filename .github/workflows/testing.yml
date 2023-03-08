@@ -15,6 +15,9 @@ jobs:
   testing:
     name: Back-end tests on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
 
     strategy:
       fail-fast: false
@@ -65,7 +68,6 @@ jobs:
             activate-environment: env-electron-python
 
       - name: Run tests
-        shell: bash
         run: |
           npm ci
           npm run test
