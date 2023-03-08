@@ -10,9 +10,7 @@ def integrate_orcid_with_pennsieve(access_code, pennsieve_account):
     """
 
     if access_code == "" or access_code is None:
-        abort(
-            400, "Cannot integrate your ORCID iD to Pennsieve without an access code."
-        )
+        abort(400, "Cannot integrate your ORCID iD to Pennsieve without an access code.")
 
     # verify Pennsieve account
     try:

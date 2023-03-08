@@ -15,9 +15,7 @@ import os
 api = get_namespace(NamespaceEnum.DATASETS)
 
 
-model_get_role_response = api.model(
-    "GetRoleResponse", {"role": fields.String(description="The role of the dataset")}
-)
+model_get_role_response = api.model("GetRoleResponse", {"role": fields.String(description="The role of the dataset")})
 
 
 @api.route("/<string:dataset_name_or_id>/role")
@@ -34,9 +32,7 @@ class DatasetRole(Resource):
     )
 
     @api.expect(parser)
-    @api.doc(
-        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
-    )
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self, dataset_name_or_id):
         args = self.parser.parse_args()
         pennsieve_account = args.get("pennsieve_account")
@@ -51,9 +47,7 @@ class DatasetRole(Resource):
 
 @api.route("/<string:dataset_id>")
 class Dataset(Resource):
-    @api.doc(
-        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
-    )
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self, dataset_id):
 
         try:
@@ -138,9 +132,7 @@ class datasetCollection(Resource):
         collection_tags = data.get("collection")
 
         try:
-            return upload_collection_names(
-                selected_account, dataset_name, collection_tags
-            )
+            return upload_collection_names(selected_account, dataset_name, collection_tags)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -177,9 +169,7 @@ class datasetCollection(Resource):
         collection_ids = data.get("collection")
 
         try:
-            return remove_collection_names(
-                selected_account, dataset_name, collection_ids
-            )
+            return remove_collection_names(selected_account, dataset_name, collection_ids)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -189,14 +179,10 @@ class datasetCollection(Resource):
 @api.route("/open")
 class OpenDataset(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument(
-        "dataset_path", type=str, required=True, help="Dataset name", location="args"
-    )
+    parser.add_argument("dataset_path", type=str, required=True, help="Dataset name", location="args")
 
     @api.expect(parser)
-    @api.doc(
-        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
-    )
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
         args = self.parser.parse_args()
         dataset_path = args.get("dataset_path")

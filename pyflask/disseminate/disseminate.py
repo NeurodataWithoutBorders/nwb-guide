@@ -94,13 +94,9 @@ def bf_reserve_doi(selected_bfaccount, selected_bfdataset):
 
     try:
         selected_dataset_id = myds.id
-        contributors_list = bf._api._get(
-            f"/datasets/{str(selected_dataset_id)}/contributors"
-        )
+        contributors_list = bf._api._get(f"/datasets/{str(selected_dataset_id)}/contributors")
 
-        creators_list = [
-            item["firstName"] + " " + item["lastName"] for item in contributors_list
-        ]
+        creators_list = [item["firstName"] + " " + item["lastName"] for item in contributors_list]
 
         jsonfile = {
             "title": selected_bfdataset,
@@ -136,13 +132,9 @@ def bf_get_publishing_status(selected_bfaccount, selected_bfdataset):
     try:
         selected_dataset_id = myds.id
 
-        review_request_status = bf._api._get(f"/datasets/{str(selected_dataset_id)}")[
-            "publication"
-        ]["status"]
+        review_request_status = bf._api._get(f"/datasets/{str(selected_dataset_id)}")["publication"]["status"]
 
-        publishing_status = bf._api._get(
-            f"/datasets/{str(selected_dataset_id)}/published"
-        )["status"]
+        publishing_status = bf._api._get(f"/datasets/{str(selected_dataset_id)}/published")["status"]
 
         return {
             "publishing_status": review_request_status,
@@ -163,9 +155,7 @@ def construct_publication_qs(publication_type, embargo_release_date):
     )
 
 
-def bf_submit_review_dataset(
-    selected_bfaccount, selected_bfdataset, publication_type, embargo_release_date
-):
+def bf_submit_review_dataset(selected_bfaccount, selected_bfdataset, publication_type, embargo_release_date):
     """
     Function to publish for a selected dataset
 
@@ -201,11 +191,7 @@ def get_publication_type(ps, myds):
     # get the dataset using the id
     ds = ps._api._get(f"/datasets/{myds.id}")
 
-    publication_type = (
-        ds["publication"]["type"]
-        if "publication" in ds and "type" in ds["publication"]
-        else None
-    )
+    publication_type = ds["publication"]["type"] if "publication" in ds and "type" in ds["publication"] else None
 
     if not publication_type:
         abort(400, "Cannot cancel publication of a dataset that is not published.")
@@ -227,9 +213,7 @@ def bf_withdraw_review_dataset(selected_bfaccount, selected_bfdataset):
     publication_type = get_publication_type(ps, myds)
 
     try:
-        ps._api._post(
-            f"/datasets/{myds.id}/publication/cancel?publicationType={publication_type}"
-        )
+        ps._api._post(f"/datasets/{myds.id}/publication/cancel?publicationType={publication_type}")
     except Exception as e:
         if type(e).__name__ == "HTTPError":
             abort(400, e.response.json()["message"])
@@ -265,9 +249,7 @@ def get_files_excluded_from_publishing(selected_dataset, pennsieve_account):
     return {"ignore_files": []}
 
 
-def update_files_excluded_from_publishing(
-    selected_dataset_id, files_excluded_from_publishing
-):
+def update_files_excluded_from_publishing(selected_dataset_id, files_excluded_from_publishing):
     """
     Function to update the files excluded from publishing
 
@@ -340,8 +322,6 @@ def get_metadata_files(selected_dataset, pennsieve_account):
         "metadata_files": [
             child["content"]["name"]
             for child in children
-            if "content" in child
-            and "name" in child["content"]
-            and child["content"]["name"] in METADATA_FILES
+            if "content" in child and "name" in child["content"] and child["content"]["name"] in METADATA_FILES
         ]
     }

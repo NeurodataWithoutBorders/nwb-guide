@@ -12,9 +12,7 @@ def configureLogger(app):
         makedirs(LOG_FOLDER)
 
     # Add the log message handler to the logger
-    handler = logging.handlers.RotatingFileHandler(
-        LOG_PATH, maxBytes=5 * 1024 * 1024, backupCount=3
-    )
+    handler = logging.handlers.RotatingFileHandler(LOG_PATH, maxBytes=5 * 1024 * 1024, backupCount=3)
 
     # create logging formatter
     logFormatter = logging.Formatter(
