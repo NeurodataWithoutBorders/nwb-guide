@@ -17,8 +17,10 @@
     "deploy-mac": "electron-builder build --mac --publish always",
     "deploy-linux": "electron-builder build --linux --publish always",
     "python-onefile-build": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist",
+    "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
     "postinstall": "electron-builder install-app-deps",
-    "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write"
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "lint-staged": {
     "./**/*.{html|css|js|md|yml}": [
@@ -164,6 +166,11 @@
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
     "@fairdataihub/config": "^2.2.1",
+    "@storybook/addon-essentials": "^7.0.0-beta.62",
+    "@storybook/addon-links": "^7.0.0-beta.62",
+    "@storybook/blocks": "^7.0.0-beta.62",
+    "@storybook/web-components": "^7.0.0-beta.62",
+    "@storybook/web-components-vite": "^7.0.0-beta.62",
     "commitizen": "^4.2.5",
     "cz-conventional-changelog": "^3.3.0",
     "electron": "19.0.0",
@@ -173,7 +180,10 @@
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "megasanjay-devmoji": "^1.1.0",
-    "prettier": "^2.3.2"
+    "prettier": "^2.3.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "storybook": "^7.0.0-beta.62"
   },
   "optionalDependencies": {
     "win-node-env": "^0.4.0"
