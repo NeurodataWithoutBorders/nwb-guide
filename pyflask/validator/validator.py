@@ -25,18 +25,18 @@
 #     elif sys.platform == "linux":
 #         return str(Path.home()) + "/.config/" + folder
 #     elif sys.platform == "darwin":
-#         return str(Path.home()) + "/AppData/Local/" + folder 
+#         return str(Path.home()) + "/AppData/Local/" + folder
 
 
-# # validate a local dataset at the target directory 
+# # validate a local dataset at the target directory
 # def val_dataset_local_pipeline(ds_path):
 #     # convert the path to absolute from user's home directory
 #     joined_path = os.path.join(userpath, ds_path.strip())
 
-#     # check that the directory exists 
+#     # check that the directory exists
 #     valid_directory = os.path.isdir(joined_path)
 
-#     # give user an error 
+#     # give user an error
 #     if not valid_directory:
 #         raise OSError(f"The given directory does not exist: {joined_path}")
 
@@ -46,7 +46,7 @@
 #     # validate the dataset
 #     blob = validate(norm_ds_path)
 
-#     # peel out the status object 
+#     # peel out the status object
 #     status = blob.get('status')
 
 #     # peel out the path_error_report object
@@ -62,10 +62,6 @@
 # parent_folder = SparCurPath(local_sparc_dataset_location).expanduser()
 
 
-
-
-
-
 # # for gevent
 # local_dataset_folder_path = ""
 # validation_json = {}
@@ -79,8 +75,8 @@
 # # min template for orthauth config file
 # orthauth_path_secrets_min_template = {
 #     "pennsieve": {
-#         "N:organization:618e8dd9-f8d2-4dc4-9abb-c6aaab2e78a0": { 
-#              "key": "", 
+#         "N:organization:618e8dd9-f8d2-4dc4-9abb-c6aaab2e78a0": {
+#              "key": "",
 #              "secret": ""
 #             }
 #         }
@@ -149,7 +145,7 @@
 
 #     with open(pyontutils_path_config, 'w') as file:
 #         yaml.dump(pyontutils_config, file)
-    
+
 #     # orthauth config folder path
 #     if not os.path.exists(orthauth_path):
 #         orthauth_path.mkdir(parents = True, exist_ok = True)
@@ -167,7 +163,7 @@
 
 #     return add_orthauth_yaml(ps_account)
 
-# # This pipeline first retrieves a datset to a local folder 
+# # This pipeline first retrieves a datset to a local folder
 # # and then validates the local dataset
 # def validate_dataset_pipeline(ps_account, ps_dataset):
 #     # return
@@ -190,14 +186,14 @@
 #         parent_folder.mkdir(parents = True, exist_ok = True)
 
 #     # local_dataset_folder_path = retrieve(id = sparc_dataset, dataset_id = sparc_dataset, project_id = organization, parent_parent_path = parent_folder)
-    
+
 
 #     # def temp_retrieve_function(sparc_dataset, organization, parent_folder):
 #     #     global local_dataset_folder_path
 #     #     gevent.sleep(0)
 #     #     local_dataset_folder_path = retrieve(id = sparc_dataset, dataset_id = sparc_dataset, project_id = organization, parent_parent_path = parent_folder)
 #     #     gevent.sleep(0)
-    
+
 #     # gev = []
 #     # try:
 #     #     # retrieve the dataset from Pennsive. --check for heartbeat errors here
@@ -205,7 +201,7 @@
 #     #         gevent.sleep(0)
 #     #         gev.append(gevent.spawn(temp_retrieve_function, sparc_dataset, organization, parent_folder))
 #     #         gevent.sleep(0)
-#     #         gevent.joinall(gev) 
+#     #         gevent.joinall(gev)
 #     #         gevent.sleep(0)
 #     #         try:
 #     #             gev[0].get()
@@ -232,7 +228,7 @@
 #     #     gevent.sleep(0)
 #     #     gev.append(gevent.spawn(temp_validate_function, local_dataset_folder_path))
 #     #     gevent.sleep(0)
-#     #     gevent.joinall(gev) 
+#     #     gevent.joinall(gev)
 #     #     gevent.sleep(0)
 #     #     try:
 #     #         gev[0].get()
@@ -250,7 +246,7 @@
 #     # path_error_report = {}
 #     # blob = json.dumps(validation_json, indent=4, sort_keys=True, default=str)
 
-#     # Delete the local dataset. 
+#     # Delete the local dataset.
 #     # FUTURE: Look into setting an expiration date for this one.
 #     dir_path = SparCurPath(local_sparc_dataset_location + '/' + sparc_dataset_uuid).expanduser()
 #     try:
@@ -284,7 +280,7 @@
 #     #     global local_dataset_folder_path
 #     #     local_dataset_folder_path = retrieve(id = sparc_dataset, dataset_id = sparc_dataset, project_id = organization, parent_parent_path = parent_folder)
 #     #     return
-    
+
 #     # gev = []
 #     # try:
 #     #     # retrieve the dataset from Pennsive. --check for heartbeat errors here
@@ -293,7 +289,7 @@
 #     #         # gev.append(gevent.spawn(temp_retrieve_function, sparc_dataset, organization, parent_folder))
 #     #         local_dataset_folder_path = retrieve(id = sparc_dataset, dataset_id = sparc_dataset, project_id = organization, parent_parent_path = parent_folder)
 #     #         # gevent.sleep(0)
-#     #         # gevent.joinall(gev) 
+#     #         # gevent.joinall(gev)
 #     #         # gevent.sleep(0)
 #     #         # try:
 #     #         #     gev[0].get()
@@ -305,13 +301,6 @@
 #     #     return str(local_dataset_folder_path)
 #     # except Exception as e:
 #     #     raise e
-
-
-
-
-
-
-
 
 
 # def val_dataset_pipeline(ps_account, ps_dataset):
@@ -332,7 +321,7 @@
 #         gev.append(gevent.spawn(temp_validate_function, Path(sodavalidatorpath)))
 #         # validation_json = validate(local_dataset_folder_path)
 #         gevent.sleep(0)
-#         gevent.joinall(gev) 
+#         gevent.joinall(gev)
 #         # gevent.sleep(0)
 #         try:
 #             gev[0].get()
@@ -355,7 +344,7 @@
 #     #     # no folder present
 #     #     print("Error: %s : %s" % (dir_path, e.strerror))
 
-#     # Delete the local dataset. 
+#     # Delete the local dataset.
 #     # FUTURE: Look into setting an expiration date for this one.
 #     # dir_path = SparCurPath(local_sparc_dataset_location + '/' + sparc_dataset_uuid).expanduser()
 #     # try:

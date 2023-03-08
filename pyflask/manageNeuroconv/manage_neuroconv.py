@@ -25,7 +25,6 @@ def get_all_interface_info() -> dict:
     """
     Function used to get the list of all interfaces
     """
-
     return interface_info
 
 

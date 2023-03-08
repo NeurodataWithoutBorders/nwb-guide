@@ -1,5 +1,5 @@
 from .manage_datasets import (
-    get_pennsieve_api_key_secret, 
+    get_pennsieve_api_key_secret,
     get_number_of_files_and_folders_locally,
     submit_dataset_progress,
     bf_add_account_api_key,
@@ -35,5 +35,5 @@ from .manage_datasets import (
     get_dataset_readme,
     get_dataset_tags,
     update_dataset_tags,
-    scale_image
+    scale_image,
 )

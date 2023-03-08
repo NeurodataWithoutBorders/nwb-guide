@@ -7,7 +7,6 @@ monkey.patch_all()
 from utils import get_dataset, get_authenticated_ps
 
 
-
 def get_all_collections(account):
     """
     Function used to get the collections that belong to an organization
@@ -16,7 +15,6 @@ def get_all_collections(account):
     ps = get_authenticated_ps(account)
 
     return ps._api._get("/collections/")
-
 
 
 def upload_new_names(account, dataset, tags):
@@ -31,11 +29,14 @@ def upload_new_names(account, dataset, tags):
     ps = get_authenticated_ps(account)
 
     try:
-        #get dataset and it's id
+        # get dataset and it's id
         myds = get_dataset(ps, dataset)
         role = bf_get_current_user_permission(ps, myds)
         if role not in ["owner", "manager"]:
-            abort(403, "You do not have permission to view/edit DOI for this Pennsieve dataset.")
+            abort(
+                403,
+                "You do not have permission to view/edit DOI for this Pennsieve dataset.",
+            )
 
     except Exception as e:
         abort(400, "Error: Please select a valid Pennsieve dataset")
@@ -46,5 +47,3 @@ def upload_new_names(account, dataset, tags):
         statusResponses.append(result)
 
     return dict({"collection": statusResponses})
-
-    

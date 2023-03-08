@@ -6,7 +6,7 @@ dependencies:
   - python = 3.9.7
   - PyInstaller = 4.7
   - nodejs = 16.14.2
-  - git = 2.20.1
+  - git = 2.34.1
   - pip
   - pip:
       - chardet == 4.0.0

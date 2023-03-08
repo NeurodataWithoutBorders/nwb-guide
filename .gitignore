@@ -6,13 +6,14 @@ node_modules
 build/api
 pysodadist
 pyflaskdist
-pyflask/ds 
+pyflask/ds
 dist
 src/Users
 semantic
 semantic.json
 .env
 build/
+yarn.lock
 
 app.spec
 
