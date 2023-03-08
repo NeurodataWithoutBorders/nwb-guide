@@ -15,7 +15,7 @@ def get_all_interface_info() -> dict:
     for modality, techniques in interfaces_by_modality_and_technique.items():
         for technique, format_name_to_interface in techniques.items():
             for format_name, interface in format_name_to_interface.items():
-                
+
                 interface_info[interface.__name__] = {  # Note in the full scope, format_name won't be unique
                     "modality": modality,
                     "name": format_name,
@@ -24,6 +24,7 @@ def get_all_interface_info() -> dict:
 
     return interface_info
 
+
 def get_schema(interface):
     """
     Function used to get schema for a single interface
@@ -31,4 +32,4 @@ def get_schema(interface):
 
     # Hard coded for now - eventual goal will be to import this from NeuroConv
     interface_list_subset = [SpikeGLXRecordingInterface, PhySortingInterface]
-    return [x for x in interface_list_subset if x.__name__ == interface][0].get_source_schema() # Single Interface
+    return [x for x in interface_list_subset if x.__name__ == interface][0].get_source_schema()  # Single Interface
