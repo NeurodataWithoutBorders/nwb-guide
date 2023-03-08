@@ -14,12 +14,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-        os: [ubuntu-latest]#, macos-latest, windows-latest]  # Add others later
+        python-version: ["3.9"]
+        os: [ubuntu-latest, macos-latest, windows-latest]  # Add others later
         include:
           - os: ubuntu-latest
             label: tools/anaconda-env/environment-Linux.yml
             prefix: /usr/share/miniconda3/envs/my-env
+
+          - os: macos-latest
+            label: tools/anaconda-env/environment-Mac.yml
+            prefix: /Users/runner/miniconda3/envs/my-env
+
+          - os: windows-latest
+            label: tools/anaconda-env/environment-Windows.yml
+            prefix: C:\Miniconda3\envs\my-env
+
 
     steps:
       - uses: actions/checkout@v3
