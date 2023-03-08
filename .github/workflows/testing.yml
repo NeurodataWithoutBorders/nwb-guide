@@ -62,7 +62,7 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit == 'true'
         name: Setup cached environment
-        run: conda activate env-electron-python
+        run: $CONDA/bin/conda activate env-electron-python
 
       - name: Install GUIDE
         run: npm ci
