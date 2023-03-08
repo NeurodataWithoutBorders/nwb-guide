@@ -1,4 +1,5 @@
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
+from neuroconv import NWBConverter
 
 
 def get_all_interface_info() -> dict:
@@ -16,11 +17,20 @@ def get_all_interface_info() -> dict:
     for modality, techniques in interfaces_by_modality_and_technique.items():
         for technique, format_name_to_interface in techniques.items():
             for format_name, interface in format_name_to_interface.items():
-                # interface = format_name_to_interface
-                interface_info[format_name] = {  # Note in the full scope, format_name won't be unique
+                
+                interface_info[interface.__name__] = {  # Note in the full scope, format_name won't be unique
                     "modality": modality,
-                    "name": interface.__name__,  # Where is this value used in the display?
-                    "technique": technique,  # Is this actually necessary anymore?
+                    "name": format_name,
+                    "technique": technique,
                 }
 
     return interface_info
+
+def get_schema(interface):
+    """
+    Function used to get schema for a single interface
+    """
+
+    # Hard coded for now - eventual goal will be to import this from NeuroConv
+    interface_list_subset = [SpikeGLXRecordingInterface, PhySortingInterface]
+    return [x for x in interface_list_subset if x.__name__ == interface][0].get_source_schema() # Single Interface

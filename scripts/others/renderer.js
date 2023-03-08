@@ -8925,8 +8925,9 @@ async function handleDataFormats() {
 
   // const intentation = '\xa0\xa0\xa0\xa0'
   let modalities = {};
-  for (let name in formats) {
-    const format = formats[name];
+  for (let className in formats) {
+    const format = formats[className];
+    const name = format.name;
 
     let modality = modalities[format.modality];
     if (!modality) {
