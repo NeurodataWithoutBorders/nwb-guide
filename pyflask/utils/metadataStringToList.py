@@ -13,9 +13,6 @@ def metadata_string_to_list(metadata_string):
         return list(
             map(
                 str.strip,
-                metadata_string.strip("][")
-                .replace("'", "")
-                .replace('"', "")
-                .split(","),
+                metadata_string.strip("][").replace("'", "").replace('"', "").split(","),
             )
         )

@@ -77,9 +77,7 @@ def configure_namespaces():
     )
     namespaces[NamespaceEnum.TAXONOMY] = taxonomy_namespace
 
-    user_namespace = Namespace(
-        NamespaceEnum.USER.value, description="Routes for handling user functionality"
-    )
+    user_namespace = Namespace(NamespaceEnum.USER.value, description="Routes for handling user functionality")
     namespaces[NamespaceEnum.USER] = user_namespace
 
     datasets_namespace = Namespace(
@@ -88,9 +86,7 @@ def configure_namespaces():
     )
     namespaces[NamespaceEnum.DATASETS] = datasets_namespace
 
-    collections_namespace = Namespace(
-        NamespaceEnum.COLLECTIONS.value, description="Routes for handling collections"
-    )
+    collections_namespace = Namespace(NamespaceEnum.COLLECTIONS.value, description="Routes for handling collections")
     namespaces[NamespaceEnum.COLLECTIONS] = collections_namespace
 
 

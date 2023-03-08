@@ -7,16 +7,12 @@ api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")
 api = get_namespace(NamespaceEnum.NEUROCONV)
 
 parser = reqparse.RequestParser()
-parser.add_argument(
-    "interfaces", type=str, action="split", help="Interfaces cannot be converted"
-)
+parser.add_argument("interfaces", type=str, action="split", help="Interfaces cannot be converted")
 
 
 @api.route("/")
 class AllInterfaces(Resource):
-    @api.doc(
-        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
-    )
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
 
         try:

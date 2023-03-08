@@ -23,9 +23,7 @@ model_check_empty_files_folders_response = api.model(
     {
         "empty_files": fields.List(fields.String),
         "empty_folders": fields.List(fields.String),
-        "soda_json_structure": fields.String(
-            description="JSON structure of the SODA dataset"
-        ),
+        "soda_json_structure": fields.String(description="JSON structure of the SODA dataset"),
     },
 )
 
@@ -56,15 +54,9 @@ class CheckEmptyFilesFolders(Resource):
 model_main_curation_function_response = api.model(
     "MainCurationFunctionResponse",
     {
-        "main_curate_progress_message": fields.String(
-            description="Progress message from the main curation function"
-        ),
-        "main_total_generate_dataset_size": fields.String(
-            description="Total size of the dataset"
-        ),
-        "main_curation_uploaded_files": fields.Integer(
-            description="Number of files that are being generated. "
-        ),
+        "main_curate_progress_message": fields.String(description="Progress message from the main curation function"),
+        "main_total_generate_dataset_size": fields.String(description="Total size of the dataset"),
+        "main_curation_uploaded_files": fields.Integer(description="Number of files that are being generated. "),
     },
 )
 
@@ -101,24 +93,14 @@ class Curation(Resource):
 model_curation_progress_response = api.model(
     "CurationProgressResponse",
     {
-        "main_curate_status": fields.String(
-            description="Status of the main curation function"
-        ),
-        "start_generate": fields.Integer(
-            description="True if the main curation function is running"
-        ),
-        "main_curate_progress_message": fields.String(
-            description="Progress message from the main curation function"
-        ),
-        "main_total_generate_dataset_size": fields.Integer(
-            description="Total size of the dataset"
-        ),
+        "main_curate_status": fields.String(description="Status of the main curation function"),
+        "start_generate": fields.Integer(description="True if the main curation function is running"),
+        "main_curate_progress_message": fields.String(description="Progress message from the main curation function"),
+        "main_total_generate_dataset_size": fields.Integer(description="Total size of the dataset"),
         "main_generated_dataset_size": fields.Integer(
             description="Size of the dataset that has been generated thus far"
         ),
-        "elapsed_time_formatted": fields.String(
-            description="Elapsed time of the main curation function"
-        ),
+        "elapsed_time_formatted": fields.String(description="Elapsed time of the main curation function"),
     },
 )
 
@@ -146,12 +128,8 @@ model_curation_file_details_response = api.model(
         "current_size_of_uploaded_files": fields.Integer(
             description="Size of the files that have been uploaded thus far. "
         ),
-        "uploaded_folder_counter": fields.Integer(
-            description="Number of folders that have been uploaded thus far. "
-        ),
-        "generated_dataset_id": fields.String(
-            description="ID of the dataset that has been generated. "
-        ),
+        "uploaded_folder_counter": fields.Integer(description="Number of folders that have been uploaded thus far. "),
+        "generated_dataset_id": fields.String(description="ID of the dataset that has been generated. "),
     },
 )
 
@@ -194,9 +172,7 @@ class GenerateManifestFiles(Resource):
         filepath = data.get("filepath")
 
         try:
-            return create_high_level_manifest_files_existing_local_starting_point(
-                filepath
-            )
+            return create_high_level_manifest_files_existing_local_starting_point(filepath)
         except Exception as e:
             api.abort(500, str(e))
 

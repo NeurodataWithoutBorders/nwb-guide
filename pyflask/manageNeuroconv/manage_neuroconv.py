@@ -17,9 +17,7 @@ def get_all_interface_info() -> dict:
         for technique, format_name_to_interface in techniques.items():
             for format_name, interface in format_name_to_interface.items():
                 # interface = format_name_to_interface
-                interface_info[
-                    format_name
-                ] = {  # Note in the full scope, format_name won't be unique
+                interface_info[format_name] = {  # Note in the full scope, format_name won't be unique
                     "modality": modality,
                     "name": interface.__name__,  # Where is this value used in the display?
                     "technique": technique,  # Is this actually necessary anymore?
