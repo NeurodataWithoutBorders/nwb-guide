@@ -5,8 +5,11 @@ on:
   pull_request:
 
 jobs:
-  run:
+  testing:
     name: Minimal and full tests on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    defaults:
+      run:
+        shell: bash -l {0}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
