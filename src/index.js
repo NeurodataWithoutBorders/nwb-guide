@@ -85,5 +85,5 @@ onDocumentReady(async function () {
     }
 
     await import("./nav.js");
-    await import("./renderer.js"); 
+    await import("./renderer.js");
 });

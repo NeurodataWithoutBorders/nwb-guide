@@ -12822,7 +12822,7 @@ async function handleDataFormats() {
 
 
 // -------------------------------------------------------------------------------------------------------------
-// --------------------------------------- From guided-curate-dataset.js --------------------------------------- 
+// --------------------------------------- From guided-curate-dataset.js ---------------------------------------
 // -------------------------------------------------------------------------------------------------------------
 
 const savePageChanges = async (pageBeingLeftID) => {
@@ -25321,7 +25321,7 @@ const guidedSaveParticipantInformation = () => {
 };
 
 
-// Set these as a global variable to remain consistent with the old SODA app 
+// Set these as a global variable to remain consistent with the old SODA app
 // All of these functions are called in HTML
 globalThis.guidedSaveAndExit = guidedSaveAndExit;
 globalThis.validateInput = validateInput

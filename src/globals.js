@@ -42,7 +42,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
       guidedRadioButton.classList.remove("selected");
       guidedRadioButton.classList.remove("not-selected");
       guidedRadioButton.classList.add("basic");
-  
+
       //get the data-next-element attribute
       const elementButtonControls = guidedRadioButton.getAttribute("data-next-element");
       if (elementButtonControls) {
@@ -57,7 +57,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
     const guidedModeSection = document.getElementById("guided_mode-section");
     const guidedDatsetTab = document.getElementById("guided_curate_dataset-tab");
     const guidedNav = document.getElementById("guided-nav");
-  
+
     if (sidebar.classList.contains("active")) {
       sidebar.click();
     }
@@ -70,7 +70,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
 
   const generateProgressCardElement = (progressFileJSONObj) => {
     let progressFileImage = progressFileJSONObj["digital-metadata"]["banner-image-path"] || "";
-  
+
     if (progressFileImage === "") {
       progressFileImage = `
         <img
@@ -104,11 +104,11 @@ const resetGuidedRadioButtons = (parentPageID) => {
     const savedUploadDataProgress =
       progressFileJSONObj["previously-uploaded-data"] &&
       Object.keys(progressFileJSONObj["previously-uploaded-data"]).length > 0;
-  
+
     return `
       <div class="guided--dataset-card">
         ${progressFileImage /* banner image */}
-  
+
         <div class="guided--dataset-card-body">
           <div class="guided--dataset-card-row">
             <h1
@@ -203,7 +203,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
     progressFileJSONdata.sort((a, b) => {
       return new Date(b["last-modified"]) - new Date(a["last-modified"]);
     });
-  
+
     //sort progressFileJSONdata into two rows one with property "previous-guided-upload-dataset-name"
     //and one without property "previous-guided-upload-dataset-name"
     const progressDataAlreadyUploadedToPennsieve = progressFileJSONdata.filter(
@@ -231,7 +231,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
               <b>Click "Datasets in progress" to view local datasets in progress.</b>
             </p>
           `;
-  
+
     //Add the progress cards that have not yet been uploaded to Pennsieve
     //to their container (datasets that do not have the globals.sodaJSONObj["previous-guided-upload-dataset-name"] property)
     document.getElementById("guided-div-resume-progress-cards").innerHTML =
@@ -247,7 +247,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
               <b>Click "Datasets uploaded to Pennsieve" to view local datasets that have already been uploaded to Pennsieve.</b>
             </p>
           `;
-  
+
     tippy(".progress-card-popover", {
       allowHTML: true,
       interactive: true,
@@ -289,19 +289,19 @@ const resetGuidedRadioButtons = (parentPageID) => {
 
   const prepareHomeScreen = async () => {
     //Wipe out existing progress if it exists
-  
+
     moduleExports.resetProgress()
     //Check if Guided-Progress folder exists. If not, create it.
     if (!fs.existsSync(guidedProgressFilePath)) {
       fs.mkdirSync(guidedProgressFilePath, { recursive: true });
     }
-  
+
     resetGuidedRadioButtons("guided-div-dataset-cards-radio-buttons");
-  
+
     const datasetCardsRadioButtonsContainer = document.getElementById(
       "guided-div-dataset-cards-radio-buttons"
     );
-  
+
     const guidedSavedProgressFiles = await readDirAsync(guidedProgressFilePath);
     //render progress resumption cards from progress file array on first page of guided mode
     if (guidedSavedProgressFiles.length != 0) {
@@ -325,7 +325,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
       loop: true,
       autoplay: true,
     });
-  
+
     guidedUnLockSideBar();
   };
 
