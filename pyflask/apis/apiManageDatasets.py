@@ -55,12 +55,8 @@ pennsieveAPIKeyAndSecret = api.model(
     "PennsieveAPIKeyAndSecret",
     {
         "success": fields.String(required=True, description="Success or failure"),
-        "key": fields.String(
-            required=True, description="API key from the Pennsieve platform"
-        ),
-        "secret": fields.String(
-            required=True, description="Secret from the Pennsieve platform"
-        ),
+        "key": fields.String(required=True, description="API key from the Pennsieve platform"),
+        "secret": fields.String(required=True, description="Secret from the Pennsieve platform"),
         "name": fields.String(required=True, description="Name of the user?"),
     },
 )
@@ -124,12 +120,8 @@ class PennsieveAPIKeyAndSecret(Resource):
 getNumberOfFilesAndFoldersLocally = api.model(
     "FilesAndFolders",
     {
-        "totalFiles": fields.Integer(
-            required=True, description="Total number of files in the dataset"
-        ),
-        "totalDir": fields.Integer(
-            required=True, description="Total number of folders in the dataset"
-        ),
+        "totalFiles": fields.Integer(required=True, description="Total number of files in the dataset"),
+        "totalDir": fields.Integer(required=True, description="Total number of folders in the dataset"),
     },
 )
 
@@ -155,14 +147,10 @@ class GetNumberOfFilesAndFoldersLocally(Resource):
         data = self.files_folders_parser.parse_args()
         filepath = data.get("filepath")
 
-        api.logger.info(
-            f" get_number_of_files_and_folders_locally --  args -- filepath: {filepath}"
-        )
+        api.logger.info(f" get_number_of_files_and_folders_locally --  args -- filepath: {filepath}")
 
         if filepath is None:
-            api.abort(
-                400, "Cannot get number of files and folders locally without a filepath"
-            )
+            api.abort(400, "Cannot get number of files and folders locally without a filepath")
 
         try:
             return get_number_of_files_and_folders_locally(filepath)
@@ -174,9 +162,7 @@ class GetNumberOfFilesAndFoldersLocally(Resource):
 successMessage = api.model(
     "SuccessMessage",
     {
-        "message": fields.String(
-            required=True, description="A message indicating success of the operation."
-        ),
+        "message": fields.String(required=True, description="A message indicating success of the operation."),
     },
 )
 
@@ -185,13 +171,9 @@ model_status_options = api.model(
     {
         "id": fields.String(required=True, description="The id of the dataset"),
         "name": fields.String(required=True, description="The name of the dataset"),
-        "displayName": fields.String(
-            required=True, description="The display name of the dataset"
-        ),
+        "displayName": fields.String(required=True, description="The display name of the dataset"),
         "color": fields.String(required=True, description="The color of the dataset"),
-        "inUse": fields.Boolean(
-            required=True, description="Whether the dataset is in use"
-        ),
+        "inUse": fields.Boolean(required=True, description="Whether the dataset is in use"),
     },
 )
 
@@ -203,9 +185,7 @@ model_get_dataset_status_response = api.model(
             required=True,
             description="The status of the dataset",
         ),
-        "current_status": fields.String(
-            required=True, description="The current status of the dataset"
-        ),
+        "current_status": fields.String(required=True, description="The current status of the dataset"),
     },
 )
 
@@ -256,9 +236,7 @@ class BfChangeDatasetStatus(Resource):
         )
 
         try:
-            return bf_change_dataset_status(
-                selected_bfaccount, selected_bfdataset, selected_status
-            )
+            return bf_change_dataset_status(selected_bfaccount, selected_bfdataset, selected_status)
         except Exception as e:
             # something unexpected happened so abort with a 500
             if notBadRequestException(e):
@@ -307,9 +285,7 @@ class BfChangeDatasetStatus(Resource):
 account_list_model = api.model(
     "AccountList",
     {
-        "accounts": fields.List(
-            fields.String, required=True, description="List of the user's accounts"
-        ),
+        "accounts": fields.List(fields.String, required=True, description="List of the user's accounts"),
     },
 )
 
@@ -331,9 +307,7 @@ class BfAccountList(Resource):
 default_account_model = api.model(
     "DefaultAccount",
     {
-        "defaultAccounts": fields.List(
-            fields.String, required=True, description="The default account"
-        ),
+        "defaultAccounts": fields.List(fields.String, required=True, description="The default account"),
     },
 )
 
@@ -428,9 +402,7 @@ class BfGetTeams(Resource):
     def get(self):
         try:
             # get the selected account out of the request args
-            selected_account = self.parser_get_teams.parse_args().get(
-                "selected_account"
-            )
+            selected_account = self.parser_get_teams.parse_args().get("selected_account")
 
             return bf_get_teams(selected_account)
         except Exception as e:
@@ -475,9 +447,7 @@ class BfAccountDetails(Resource):
     def get(self):
         try:
             # get the selected account out of the request args
-            selected_account = self.parser_account_details.parse_args().get(
-                "selected_account"
-            )
+            selected_account = self.parser_account_details.parse_args().get("selected_account")
             return bf_account_details(selected_account)
         except Exception as e:
             if notBadRequestException(e):
@@ -526,9 +496,7 @@ model_account_dataset = api.model(
             required=True,
             description="The name of the dataset for the given Pennsieve account.",
         ),
-        "role": fields.String(
-            required=True, description="The dataset account's role for the dataset"
-        ),
+        "role": fields.String(required=True, description="The dataset account's role for the dataset"),
     },
 )
 
@@ -565,9 +533,7 @@ class BfDatasetAccount(Resource):
     def get(self):
         try:
             # get the selected account out of the request args
-            selected_account = self.parser_dataset_account.parse_args().get(
-                "selected_account"
-            )
+            selected_account = self.parser_dataset_account.parse_args().get("selected_account")
             return bf_dataset_account(selected_account)
         except Exception as e:
             if notBadRequestException(e):
@@ -578,9 +544,7 @@ class BfDatasetAccount(Resource):
 model_get_dataset_subtitle_response = api.model(
     "GetDatasetSubtitleResponse",
     {
-        "subtitle": fields.String(
-            required=True, description="The subtitle for the given dataset."
-        ),
+        "subtitle": fields.String(required=True, description="The subtitle for the given dataset."),
     },
 )
 
@@ -661,9 +625,7 @@ class DatasetSubtitle(Resource):
 model_get_dataset_description_response = api.model(
     "GetDatasetDescriptionResponse",
     {
-        "description": fields.String(
-            required=True, description="The description for the given dataset."
-        ),
+        "description": fields.String(required=True, description="The description for the given dataset."),
     },
 )
 
@@ -733,9 +695,7 @@ class DatasetDescription(Resource):
         input_description = data.get("input_description")
 
         try:
-            return bf_add_description(
-                selected_account, selected_dataset, input_description
-            )
+            return bf_add_description(selected_account, selected_dataset, input_description)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -852,18 +812,14 @@ class DatasetPermissions(Resource):
 
         if scope == "team":
             try:
-                return bf_add_permission_team(
-                    selected_account, selected_dataset, name, input_role
-                )
+                return bf_add_permission_team(selected_account, selected_dataset, name, input_role)
             except Exception as e:
                 if notBadRequestException(e):
                     api.abort(500, str(e))
                 raise e
         else:
             try:
-                return bf_add_permission(
-                    selected_account, selected_dataset, name, input_role
-                )
+                return bf_add_permission(selected_account, selected_dataset, name, input_role)
             except Exception as e:
                 if notBadRequestException(e):
                     api.abort(500, str(e))
@@ -873,9 +829,7 @@ class DatasetPermissions(Resource):
 scale_image_model = api.model(
     "postScaledImage",
     {
-        "scaled_image_path": fields.String(
-            required=True, description="The file path for the scaled image."
-        ),
+        "scaled_image_path": fields.String(required=True, description="The file path for the scaled image."),
     },
 )
 
@@ -909,9 +863,7 @@ class scaleBannerImage(Resource):
 model_get_banner_image_response = api.model(
     "GetBannerImageResponse",
     {
-        "banner_image": fields.String(
-            required=True, description="AWS URI for the dataset banner image."
-        ),
+        "banner_image": fields.String(required=True, description="AWS URI for the dataset banner image."),
     },
 )
 
@@ -981,9 +933,7 @@ class BfBannerImage(Resource):
         input_banner_image_path = data.get("input_banner_image_path")
 
         try:
-            return bf_add_banner_image(
-                selected_account, selected_dataset, input_banner_image_path
-            )
+            return bf_add_banner_image(selected_account, selected_dataset, input_banner_image_path)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -1268,11 +1218,7 @@ class BfAddAccountApiKey(Resource):
 
 model_dataset_folder_response = api.model(
     "DatasetFolderResponse",
-    {
-        "id": fields.String(
-            required=True, description="The ID of the dataset that has been created."
-        )
-    },
+    {"id": fields.String(required=True, description="The ID of the dataset that has been created.")},
 )
 
 
@@ -1376,24 +1322,12 @@ class BfCreateDatasetFolder(Resource):
 model_upload_progress_response = api.model(
     "UploadProgressResponse",
     {
-        "progress": fields.String(
-            required=True, description="The current progress of the upload."
-        ),
-        "submit_dataset_status": fields.String(
-            required=True, description="The status of the upload."
-        ),
-        "submit_print_status": fields.String(
-            required=True, description="The status of the print."
-        ),
-        "total_file_size": fields.Integer(
-            required=True, description="The total size of the file being uploaded."
-        ),
-        "upload_file_size": fields.Integer(
-            required=True, description="The size of the file being uploaded."
-        ),
-        "elapsed_time_formatted": fields.String(
-            required=True, description="The elapsed time of the upload."
-        ),
+        "progress": fields.String(required=True, description="The current progress of the upload."),
+        "submit_dataset_status": fields.String(required=True, description="The status of the upload."),
+        "submit_print_status": fields.String(required=True, description="The status of the print."),
+        "total_file_size": fields.Integer(required=True, description="The total size of the file being uploaded."),
+        "upload_file_size": fields.Integer(required=True, description="The size of the file being uploaded."),
+        "elapsed_time_formatted": fields.String(required=True, description="The elapsed time of the upload."),
     },
 )
 
@@ -1415,15 +1349,11 @@ class BfGetUploadProgress(Resource):
 model_upload_details_response = api.model(
     "UploadDetailsResponse",
     {
-        "uploaded_files": fields.Integer(
-            required=True, description="The number of files uploaded."
-        ),
+        "uploaded_files": fields.Integer(required=True, description="The number of files uploaded."),
         "uploaded_file_size": fields.Integer(
             required=True, description="The size of the file being uploaded in bytes."
         ),
-        "did_fail": fields.Boolean(
-            required=True, description="Whether or not the upload failed."
-        ),
+        "did_fail": fields.Boolean(required=True, description="Whether or not the upload failed."),
         "did_upload": fields.Boolean(
             required=True,
             description="To inform the user that the upload failed and that it failed after uploading data - important for logging upload sessions",
@@ -1452,9 +1382,7 @@ class BfSubmitDatasetUploadDetails(Resource):
 model_get_readme_response = api.model(
     "GetReadmeResponse",
     {
-        "readme": fields.String(
-            required=True, description="The readme for the dataset."
-        ),
+        "readme": fields.String(required=True, description="The readme for the dataset."),
     },
 )
 
@@ -1495,9 +1423,7 @@ class BfGetDatasetReadme(Resource):
         updated_readme = data.get("updated_readme")
 
         try:
-            return update_dataset_readme(
-                selected_account, dataset_name_or_id, updated_readme
-            )
+            return update_dataset_readme(selected_account, dataset_name_or_id, updated_readme)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -1534,9 +1460,7 @@ class BfGetDatasetReadme(Resource):
 model_get_ds_tags = api.model(
     "GetDsTagsResponse",
     {
-        "tags": fields.List(
-            fields.String, required=True, description="The tags for the dataset."
-        ),
+        "tags": fields.List(fields.String, required=True, description="The tags for the dataset."),
     },
 )
 

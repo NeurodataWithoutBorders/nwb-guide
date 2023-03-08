@@ -11,9 +11,7 @@ class Orcid(Resource):
 
     parser = reqparse.RequestParser(bundle_errors=True)
 
-    parser.add_argument(
-        "access_code", type=str, required=True, help="ORCID", location="json"
-    )
+    parser.add_argument("access_code", type=str, required=True, help="ORCID", location="json")
     parser.add_argument(
         "pennsieve_account",
         type=str,
