@@ -30,3 +30,9 @@ def test_multiple_schema_request(client):
     interfaces = ["SpikeGLXRecordingInterface", "PhySortingInterface"][:1]
     response = client.get(f"/neuroconv/schema?interfaces={','.join(interfaces)}", follow_redirects=True)
     check_converter(response.json, interfaces)
+
+# Uses the NWBConverter Class to combine all interfaces
+def test_all_schema_request(client):
+    interfaces = ["SpikeGLXRecordingInterface", "PhySortingInterface"]
+    response = client.get("/neuroconv/schema", follow_redirects=True)
+    check_converter(response.json, interfaces)
