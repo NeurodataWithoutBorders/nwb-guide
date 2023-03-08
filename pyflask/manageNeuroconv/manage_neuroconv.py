@@ -1,5 +1,6 @@
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 
+
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     # Hard coded for now - eventual goal will be to import this from NeuroConv
