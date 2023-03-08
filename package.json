@@ -5,8 +5,11 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "NODE_ENV=development electron .",
+    "start": "npm run build && npm run start:electron",
+    "start:electron": "NODE_ENV=development electron .",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
+    "build": "npm run build:app",
+    "build:app": "vite build",
     "build-win": "electron-builder build --win --publish never",
     "build-mac": "electron-builder build --mac --publish never",
     "build-linux": "electron-builder build --linux --publish never",
@@ -137,6 +140,7 @@
     "jquery": "^3.6.0",
     "jstree": "^3.3.11",
     "jsuites": "^4.9.33",
+    "lit": "^2.6.1",
     "lottie-web": "^5.9.5",
     "mv": "^2.1.1",
     "node-localstorage": "^2.1.6",
@@ -153,7 +157,8 @@
     "universal-analytics": "^0.4.23",
     "uuid": "^8.3.1",
     "v8-compile-cache": "^2.3.0",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "vite": "^4.1.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
