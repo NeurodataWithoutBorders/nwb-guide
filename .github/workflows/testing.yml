@@ -1,0 +1,67 @@
+name: Back-end Tests
+on:
+  schedule:
+    - cron: "0 16 * * *"  # Daily at noon EST
+  pull_request:
+
+concurrency:  # Cancel previous workflows on the same pull request
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CACHE_NUMBER: 1  # increase to reset cache manually
+
+jobs:
+  testing:
+    name: Back-end tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            label: tools/anaconda-env/environment-Linux.yml
+            prefix: /usr/share/miniconda3/envs/env-electron-python
+
+          - os: macos-latest
+            label: tools/anaconda-env/environment-Mac.yml
+            prefix: /Users/runner/miniconda3/envs/env-electron-python
+
+          - os: windows-latest
+            label: tools/anaconda-env/environment-Windows.yml
+            prefix: C:\Miniconda3\envs\env-electron-python
+
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: git fetch --prune --unshallow --tags
+
+      - name: Set cache date
+        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ matrix.prefix }}
+          key: ${{ matrix.os }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+        id: cache
+
+      - name: Setup environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            miniforge-version: latest
+            environment-file: ${{ matrix.label }}
+            activate-environment: env-electron-python
+            python-version: ${{ matrix.python-version }}
+            use-only-tar-bz2: true
+
+      - name: Install GUIDE
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
