@@ -52,7 +52,7 @@ jobs:
         id: cache
 
       - if: steps.cache.outputs.cache-hit != 'true'
-        name: Setup Conda
+        name: Setup fresh Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
             miniforge-version: latest
@@ -61,7 +61,7 @@ jobs:
             python-version: ${{ matrix.python-version }}
 
       - if: steps.cache.outputs.cache-hit == 'true'
-        name: Setup Conda
+        name: Setup cached Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
             miniforge-version: latest
