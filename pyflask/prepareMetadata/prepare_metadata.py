@@ -132,9 +132,7 @@ def save_submission_file(upload_boolean, bfaccount, bfdataset, filepath, val_arr
 
     source = join(TEMPLATE_PATH, "submission.xlsx")
 
-    destination = (
-        join(METADATA_UPLOAD_BF_PATH, "submission.xlsx") if upload_boolean else filepath
-    )
+    destination = join(METADATA_UPLOAD_BF_PATH, "submission.xlsx") if upload_boolean else filepath
 
     try:
         shutil.copyfile(source, destination)
@@ -183,9 +181,7 @@ def upload_RC_file(text_string, file_type, bfaccount, bfdataset):
     return {"size": size, "filepath": file_path}
 
 
-def upload_metadata_file(
-    file_type, bfaccount, bfdataset, file_path, delete_after_upload
-):
+def upload_metadata_file(file_type, bfaccount, bfdataset, file_path, delete_after_upload):
     ## check if agent is running in the background
     agent_running()
 
@@ -203,9 +199,7 @@ def upload_metadata_file(
     # check that the user has permissions for uploading and modifying the dataset
     role = bf_get_current_user_permission(bf, myds)
     if role not in ["owner", "manager", "editor"]:
-        abort(
-            403, "You don't have permissions for uploading to this Pennsieve dataset."
-        )
+        abort(403, "You don't have permissions for uploading to this Pennsieve dataset.")
 
     # handle duplicates on Pennsieve: first, obtain the existing file ID
     for i in range(len(myds.items)):
@@ -247,9 +241,7 @@ def rename_headers(workbook, max_len, start_index):
             workbook[column + "1"] = f"Value {str(i)}"
             cell = workbook[column + "1"]
 
-            blueFill = PatternFill(
-                start_color="9CC2E5", end_color="9CC2E5", fill_type="solid"
-            )
+            blueFill = PatternFill(start_color="9CC2E5", end_color="9CC2E5", fill_type="solid")
 
             font = Font(bold=True)
             cell.fill = blueFill
@@ -268,9 +260,7 @@ def grayout_subheaders(workbook, max_len, start_index):
     headers_list = ["4", "10", "18", "23", "28"]
     columns_list = excel_columns(start_index=start_index)
 
-    for (i, column), no in itertools.product(
-        zip(range(2, max_len + 1), columns_list[1:]), headers_list
-    ):
+    for (i, column), no in itertools.product(zip(range(2, max_len + 1), columns_list[1:]), headers_list):
         cell = workbook[column + no]
         fillColor("B2B2B2", cell)
 
@@ -282,9 +272,7 @@ def grayout_single_value_rows(workbook, max_len, start_index):
 
     columns_list = excel_columns(start_index=start_index)
     row_list = ["2", "3", "5", "6", "9", "11", "12", "13", "17", "29", "30"]
-    for (i, column), no in itertools.product(
-        zip(range(2, max_len + 1), columns_list[1:]), row_list
-    ):
+    for (i, column), no in itertools.product(zip(range(2, max_len + 1), columns_list[1:]), row_list):
         cell = workbook[column + no]
         fillColor("CCCCCC", cell)
 
@@ -320,19 +308,13 @@ def populate_study_info(workbook, val_obj):
     workbook["D17"] = val_obj["study collection title"]
 
     ## study organ system
-    for i, column in zip(
-        range(len(val_obj["study organ system"])), excel_columns(start_index=3)
-    ):
+    for i, column in zip(range(len(val_obj["study organ system"])), excel_columns(start_index=3)):
         workbook[column + "14"] = val_obj["study organ system"][i]
     ## study approach
-    for i, column in zip(
-        range(len(val_obj["study approach"])), excel_columns(start_index=3)
-    ):
+    for i, column in zip(range(len(val_obj["study approach"])), excel_columns(start_index=3)):
         workbook[column + "15"] = val_obj["study approach"][i]
     ## study technique
-    for i, column in zip(
-        range(len(val_obj["study technique"])), excel_columns(start_index=3)
-    ):
+    for i, column in zip(range(len(val_obj["study technique"])), excel_columns(start_index=3)):
         workbook[column + "16"] = val_obj["study technique"][i]
 
     return max(
@@ -344,18 +326,14 @@ def populate_study_info(workbook, val_obj):
 
 def populate_contributor_info(workbook, val_array):
     ## award info
-    for i, column in zip(
-        range(len(val_array["funding"])), excel_columns(start_index=3)
-    ):
+    for i, column in zip(range(len(val_array["funding"])), excel_columns(start_index=3)):
         workbook[column + "8"] = val_array["funding"][i]
 
     ### Acknowledgments
     workbook["D9"] = val_array["acknowledgment"]
 
     ### Contributors
-    for contributor, column in zip(
-        val_array["contributors"], excel_columns(start_index=3)
-    ):
+    for contributor, column in zip(val_array["contributors"], excel_columns(start_index=3)):
         workbook[column + "19"] = contributor["conName"]
         workbook[column + "20"] = contributor["conID"]
         workbook[column + "21"] = contributor["conAffliation"]
@@ -420,9 +398,7 @@ def save_ds_description_file(
 
     study_array_len = populate_study_info(ws1, val_obj_study)
 
-    (funding_array, contributor_role_array) = populate_contributor_info(
-        ws1, val_arr_con
-    )
+    (funding_array, contributor_role_array) = populate_contributor_info(ws1, val_arr_con)
 
     related_info_len = populate_related_info(ws1, val_arr_related_info)
 
@@ -436,9 +412,7 @@ def save_ds_description_file(
     funding_len = len(funding_array)
 
     # obtain length for formatting compliance purpose
-    max_len = max(
-        keyword_len, funding_len, no_contributors, related_info_len, study_array_len
-    )
+    max_len = max(keyword_len, funding_len, no_contributors, related_info_len, study_array_len)
 
     rename_headers(ws1, max_len, 3)
     grayout_subheaders(ws1, max_len, 3)
@@ -453,9 +427,7 @@ def save_ds_description_file(
 
     ## if generating directly on Pennsieve, then call upload function and then delete the destination path
     if upload_boolean:
-        upload_metadata_file(
-            "dataset_description.xlsx", bfaccount, bfdataset, destination, True
-        )
+        upload_metadata_file("dataset_description.xlsx", bfaccount, bfdataset, destination, True)
 
     return {"size": size}
 
@@ -540,9 +512,7 @@ def save_subjects_file(upload_boolean, bfaccount, bfdataset, filepath, datastruc
     sortMatrix = sortedSubjectsTableData(mandatoryFields, templateHeaderList)
 
     if refinedOptionalFields:
-        refinedDatastructure = transposeMatrix(
-            np.concatenate((sortMatrix, refinedOptionalFields))
-        )
+        refinedDatastructure = transposeMatrix(np.concatenate((sortMatrix, refinedOptionalFields)))
     else:
         refinedDatastructure = transposeMatrix(sortMatrix)
     #
@@ -553,14 +523,10 @@ def save_subjects_file(upload_boolean, bfaccount, bfdataset, filepath, datastruc
 
     # 2. see if the length of datastructure[0] == length of datastructure. If yes, go ahead. If no, add new columns from headers[n-1] onward.
     headers_no = len(refinedDatastructure[0])
-    orangeFill = PatternFill(
-        start_color="FFD965", end_color="FFD965", fill_type="solid"
-    )
+    orangeFill = PatternFill(start_color="FFD965", end_color="FFD965", fill_type="solid")
 
     # gevent.sleep(0)
-    for column, header in zip(
-        excel_columns(start_index=11), refinedDatastructure[0][11:headers_no]
-    ):
+    for column, header in zip(excel_columns(start_index=11), refinedDatastructure[0][11:headers_no]):
         cell = column + str(1)
         ws1[cell] = header
         ws1[cell].fill = orangeFill
@@ -612,9 +578,7 @@ def save_samples_file(upload_boolean, bfaccount, bfdataset, filepath, datastruct
     sortMatrix = sortedSubjectsTableData(mandatoryFields, templateHeaderList)
 
     if refinedOptionalFields:
-        refinedDatastructure = transposeMatrix(
-            np.concatenate((sortMatrix, refinedOptionalFields))
-        )
+        refinedDatastructure = transposeMatrix(np.concatenate((sortMatrix, refinedOptionalFields)))
     else:
         refinedDatastructure = transposeMatrix(sortMatrix)
 
@@ -622,13 +586,9 @@ def save_samples_file(upload_boolean, bfaccount, bfdataset, filepath, datastruct
 
     # 2. see if the length of datastructure[0] == length of datastructure. If yes, go ahead. If no, add new columns from headers[n-1] onward.
     headers_no = len(refinedDatastructure[0])
-    orangeFill = PatternFill(
-        start_color="FFD965", end_color="FFD965", fill_type="solid"
-    )
+    orangeFill = PatternFill(start_color="FFD965", end_color="FFD965", fill_type="solid")
     # gevent.sleep(0)
-    for column, header in zip(
-        excel_columns(start_index=9), refinedDatastructure[0][9:headers_no]
-    ):
+    for column, header in zip(excel_columns(start_index=9), refinedDatastructure[0][9:headers_no]):
         cell = column + str(1)
         ws1[cell] = header
         ws1[cell].fill = orangeFill
@@ -664,9 +624,7 @@ def column_check(x):
 # import an existing subjects/samples files from an excel file
 def convert_subjects_samples_file_to_df(type, filepath, ui_fields):
 
-    subjects_df = pd.read_excel(
-        filepath, engine="openpyxl", usecols=column_check, header=0
-    )
+    subjects_df = pd.read_excel(filepath, engine="openpyxl", usecols=column_check, header=0)
     subjects_df = subjects_df.dropna(axis=0, how="all")
     subjects_df = subjects_df.replace(np.nan, "", regex=True)
     subjects_df = subjects_df.applymap(str)
@@ -688,17 +646,13 @@ def convert_subjects_samples_file_to_df(type, filepath, ui_fields):
         templateHeaderList = subjectsTemplateHeaderList
 
     else:
-        if "subject id" not in list(
-            subjects_df.columns.values
-        ) or "sample id" not in list(subjects_df.columns.values):
+        if "subject id" not in list(subjects_df.columns.values) or "sample id" not in list(subjects_df.columns.values):
             abort(
                 400,
                 "The headers 'subject id' and 'sample id' are required to import an existing samples file. Please refer to the new SPARC Dataset Structure (SDS) 2.0.0 <a target='_blank' href='https://github.com/SciCrunch/sparc-curation/blob/master/resources/DatasetTemplate/samples.xlsx'>template</a> of the samples file.",
             )
 
-        if checkEmptyColumn(subjects_df["sample id"]) or checkEmptyColumn(
-            subjects_df["sample id"]
-        ):
+        if checkEmptyColumn(subjects_df["sample id"]) or checkEmptyColumn(subjects_df["sample id"]):
             abort(
                 400,
                 "At least 1 'subject id' and 'sample id' pair is required to import an existing samples file",
@@ -764,15 +718,9 @@ def sortedSubjectsTableData(matrix, fields):
                 sortedMatrix.append(column)
                 break
 
-    customHeaderMatrix = [
-        column for column in matrix if column[0].lower() not in fields
-    ]
+    customHeaderMatrix = [column for column in matrix if column[0].lower() not in fields]
 
-    return (
-        np.concatenate((sortedMatrix, customHeaderMatrix)).tolist()
-        if customHeaderMatrix
-        else sortedMatrix
-    )
+    return np.concatenate((sortedMatrix, customHeaderMatrix)).tolist() if customHeaderMatrix else sortedMatrix
 
 
 # transpose a matrix (array of arrays)
@@ -798,9 +746,7 @@ def checkEmptyColumn(column):
 def load_existing_submission_file(filepath):
 
     try:
-        DD_df = pd.read_excel(
-            filepath, engine="openpyxl", usecols=column_check, header=0
-        )
+        DD_df = pd.read_excel(filepath, engine="openpyxl", usecols=column_check, header=0)
 
     except Exception as e:
         if is_file_not_found_exception(e):
@@ -957,9 +903,7 @@ def import_bf_manifest_file(soda_json_structure, bfaccount, bfdataset):
     high_level_folders = ["code", "derivative", "docs", "primary", "protocol", "source"]
 
     # handle updating any existing manifest files on Pennsieve
-    update_existing_pennsieve_manifest_files(
-        myds, bf, dataset_structure, high_level_folders
-    )
+    update_existing_pennsieve_manifest_files(myds, bf, dataset_structure, high_level_folders)
 
     # create manifest files from scratch for any high level folders that don't have a manifest file on Pennsieve
     create_high_level_manifest_files_existing_bf_starting_point(
@@ -972,9 +916,7 @@ def import_bf_manifest_file(soda_json_structure, bfaccount, bfdataset):
     no_manifest_boolean = False
 
 
-def update_existing_pennsieve_manifest_files(
-    myds, bf, dataset_structure, high_level_folders
-):
+def update_existing_pennsieve_manifest_files(myds, bf, dataset_structure, high_level_folders):
     global manifest_progress
     # handle updating any existing manifest files on Pennsieve
     for i in range(len(myds.items)):
@@ -996,13 +938,9 @@ def update_existing_pennsieve_manifest_files(
                     item_id = myds.items[i][j].id
                     url = returnFileURL(bf, item_id)
 
-                    manifest_df = pd.read_excel(
-                        url, engine="openpyxl", usecols=column_check, header=0
-                    )
+                    manifest_df = pd.read_excel(url, engine="openpyxl", usecols=column_check, header=0)
 
-                    filepath = join(
-                        manifest_folder_path, myds.items[i].name, "manifest.xlsx"
-                    )
+                    filepath = join(manifest_folder_path, myds.items[i].name, "manifest.xlsx")
 
                     high_level_folders.remove(myds.items[i].name)
 
@@ -1079,10 +1017,7 @@ def update_existing_pennsieve_manifest_file_helper(
 
     if "files" in folder.keys():
         for file in list(folder["files"]):
-            file_path = (
-                remove_high_level_folder_from_path(folder["files"][file]["folderpath"])
-                + f"{file}"
-            )
+            file_path = remove_high_level_folder_from_path(folder["files"][file]["folderpath"]) + f"{file}"
 
             # select the row in the old manifest file that has the same file path as the file in the current folder
             # rationale: this means the file still exists in the user's dataset
@@ -1093,13 +1028,9 @@ def update_existing_pennsieve_manifest_file_helper(
                     if key == "filename":
                         new_manifest_dict["filename"].append(file_path)
                     elif key == "timestamp":
-                        new_manifest_dict["timestamp"].append(
-                            folder["files"][file]["timestamp"]
-                        ),
+                        new_manifest_dict["timestamp"].append(folder["files"][file]["timestamp"]),
                     elif key == "description":
-                        new_manifest_dict["description"].append(
-                            folder["files"][file].get("description", "")
-                        )
+                        new_manifest_dict["description"].append(folder["files"][file].get("description", ""))
                     elif key == "file type":
                         unused_file_name, file_extension = get_name_extension(file)
                         new_manifest_dict["file type"].append(file_extension),
@@ -1167,9 +1098,7 @@ def returnFileURL(bf_object, item_id):
 
     file_details = bf_object._api._get(f"/packages/{str(item_id)}/view")
     file_id = file_details[0]["content"]["id"]
-    file_url_info = bf_object._api._get(
-        f"/packages/{str(item_id)}/files/{str(file_id)}"
-    )
+    file_url_info = bf_object._api._get(f"/packages/{str(item_id)}/files/{str(file_id)}")
 
     return file_url_info["url"]
 
@@ -1185,9 +1114,7 @@ def recursive_item_path_create(folder, path):
             if "folderpath" not in folder["folders"][item]:
                 folder["folders"][item]["folderpath"] = path[:]
                 folder["folders"][item]["folderpath"].append(item)
-            recursive_item_path_create(
-                folder["folders"][item], folder["folders"][item]["folderpath"][:]
-            )
+            recursive_item_path_create(folder["folders"][item], folder["folders"][item]["folderpath"][:])
 
     return
 
@@ -1203,9 +1130,7 @@ def load_existing_DD_file(import_type, filepath):
     if import_type == "bf":
         try:
 
-            DD_df = pd.read_excel(
-                filepath, engine="openpyxl", usecols=column_check, header=0
-            )
+            DD_df = pd.read_excel(filepath, engine="openpyxl", usecols=column_check, header=0)
 
         except:
             raise Exception(
@@ -1222,9 +1147,7 @@ def load_existing_DD_file(import_type, filepath):
             for r in sheet.rows:
                 col.writerow([cell.value for cell in r])
 
-        DD_df = pd.DataFrame(
-            pd.read_csv(tf.name, encoding="ISO-8859-1", usecols=column_check, header=0)
-        )
+        DD_df = pd.DataFrame(pd.read_csv(tf.name, encoding="ISO-8859-1", usecols=column_check, header=0))
 
     DD_df = DD_df.dropna(axis=0, how="all")
     DD_df = DD_df.replace(np.nan, "", regex=True)

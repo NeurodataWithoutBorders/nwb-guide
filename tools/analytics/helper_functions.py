@@ -18,9 +18,7 @@ def initialize_analyticsreporting():
     Returns:
       An authorized Analytics Reporting API V4 service object.
     """
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        KEY_FILE_LOCATION, SCOPES
-    )
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(KEY_FILE_LOCATION, SCOPES)
 
     # Build the service object.
     analytics = build("analyticsreporting", "v4", credentials=credentials)
@@ -48,9 +46,7 @@ def print_response(response):
     for report in response.get("reports", []):
         columnHeader = report.get("columnHeader", {})
         dimensionHeaders = columnHeader.get("dimensions", [])
-        metricHeaders = columnHeader.get("metricHeader", {}).get(
-            "metricHeaderEntries", []
-        )
+        metricHeaders = columnHeader.get("metricHeader", {}).get("metricHeaderEntries", [])
 
         for row in report.get("data", {}).get("rows", []):
             dimensions = row.get("dimensions", [])

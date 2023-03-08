@@ -95,9 +95,7 @@ def checkLeafValue(leafName, leafNodeValue):
         error = error + leafName + " is empty <br>"
 
     if c > 0:
-        error += (
-            "<br>Please remove invalid files/folders from your dataset and try again"
-        )
+        error += "<br>Please remove invalid files/folders from your dataset and try again"
         curatestatus = "Done"
         abort(400, error)
 
@@ -141,9 +139,7 @@ def createFiles(jsonpath, fileKey, distdir, listallfiles):
 
 
 def ignore_empty_high_level_folders(jsonObject):
-    items_to_delete = [
-        folder for folder in jsonObject.keys() if len(jsonObject[folder].keys()) == 0
-    ]
+    items_to_delete = [folder for folder in jsonObject.keys() if len(jsonObject[folder].keys()) == 0]
 
     for item in items_to_delete:
         del jsonObject[item]
@@ -199,8 +195,7 @@ def generate_dataset_locally(destinationdataset, pathdataset, newdatasetname, js
             curatestatus = "Done"
             abort(
                 400,
-                "A folder name cannot contain any of the following characters "
-                + forbidden_characters,
+                "A folder name cannot contain any of the following characters " + forbidden_characters,
             )
 
     total_dataset_size = 1
@@ -280,10 +275,7 @@ def create_folder_level_manifest(jsonpath, jsondescription):
                 countpath = -1
                 for pathname in allfiles:
                     countpath += 1
-                    if (
-                        basename(pathname) == "manifest.csv"
-                        or basename(pathname) == "manifest.xlsx"
-                    ):
+                    if basename(pathname) == "manifest.csv" or basename(pathname) == "manifest.xlsx":
                         allfiles.pop(countpath)
                         alldescription.pop(countpath)
 
@@ -299,20 +291,12 @@ def create_folder_level_manifest(jsonpath, jsondescription):
                                 gevent.sleep(0)
                                 filepath = pathlib.Path(paths) / subdir / file
                                 mtime = filepath.stat().st_mtime
-                                lastmodtime = datetime.fromtimestamp(mtime).astimezone(
-                                    local_timezone
-                                )
-                                timestamp.append(
-                                    lastmodtime.isoformat()
-                                    .replace(".", ",")
-                                    .replace("+00:00", "Z")
-                                )
+                                lastmodtime = datetime.fromtimestamp(mtime).astimezone(local_timezone)
+                                timestamp.append(lastmodtime.isoformat().replace(".", ",").replace("+00:00", "Z"))
                                 full_filename = filepath.name
 
                                 if folder == "main":  # if file in main folder
-                                    filename.append(
-                                        full_filename
-                                    ) if folder == "" else filename.append(
+                                    filename.append(full_filename) if folder == "" else filename.append(
                                         join(folder, full_filename)
                                     )
                                 else:
@@ -322,14 +306,10 @@ def create_folder_level_manifest(jsonpath, jsondescription):
                                     if subdirname == ".":
                                         filename.append(join(key, full_filename))
                                     else:
-                                        filename.append(
-                                            join(key, subdirname, full_filename)
-                                        )
+                                        filename.append(join(key, subdirname, full_filename))
 
                                 fileextension = splitext(full_filename)[1]
-                                if (
-                                    not fileextension
-                                ):  # if empty (happens e.g. with Readme files)
+                                if not fileextension:  # if empty (happens e.g. with Readme files)
                                     fileextension = "None"
                                 filetype.append(fileextension)
                                 filedescription.append("")
@@ -340,22 +320,14 @@ def create_folder_level_manifest(jsonpath, jsondescription):
                         file = filepath.name
                         filename.append(file)
                         mtime = filepath.stat().st_mtime
-                        lastmodtime = datetime.fromtimestamp(mtime).astimezone(
-                            local_timezone
-                        )
-                        timestamp.append(
-                            lastmodtime.isoformat()
-                            .replace(".", ",")
-                            .replace("+00:00", "Z")
-                        )
+                        lastmodtime = datetime.fromtimestamp(mtime).astimezone(local_timezone)
+                        timestamp.append(lastmodtime.isoformat().replace(".", ",").replace("+00:00", "Z"))
                         filedescription.append(alldescription[countpath])
                         if isdir(paths):
                             filetype.append("folder")
                         else:
                             fileextension = splitext(file)[1]
-                            if (
-                                not fileextension
-                            ):  # if empty (happens e.g. with Readme files)
+                            if not fileextension:  # if empty (happens e.g. with Readme files)
                                 fileextension = "None"
                             filetype.append(fileextension)
 
@@ -562,9 +534,7 @@ def create_dataset(recursivePath, jsonStructure, listallfiles):
                 mycopyfile_with_metadata(srcfile, distfile)
 
 
-def create_soda_json_object_backend(
-    soda_json_structure, root_folder_path, irregularFolders, replaced
-):
+def create_soda_json_object_backend(soda_json_structure, root_folder_path, irregularFolders, replaced):
     """
     Function for importing files from local machine into json structure
     """
@@ -597,10 +567,7 @@ def create_soda_json_object_backend(
         lastSlash = folder_path.rfind("/") + 1
         folder_name = folder_path[lastSlash:]
         if folder_name in replaced:
-            folder_name = (
-                folder_path[:lastSlash]
-                + dataset_structure[folder_name]["original-name"]
-            )
+            folder_name = folder_path[:lastSlash] + dataset_structure[folder_name]["original-name"]
         # finds the last / in the path and that is the folder name
         if folder_path in irregularFolders:
             index_check = irregularFolders.index(folder_path)
@@ -617,79 +584,48 @@ def create_soda_json_object_backend(
                 if entry[0:1] != "." and entry[0:8] != "manifest":
                     # no hidden files or manifest files included
                     if folder_name in soda_json_structure["starting-point"]:
-                        if (
-                            soda_json_structure["starting-point"][folder_name]["path"]
-                            != ""
-                        ):
+                        if soda_json_structure["starting-point"][folder_name]["path"] != "":
                             # checks if there is a path to a manifest
-                            manifest_path = soda_json_structure["starting-point"][
-                                folder_name
-                            ]["path"]
+                            manifest_path = soda_json_structure["starting-point"][folder_name]["path"]
                             ext_index = manifest_path.rfind(".")
                             extension = manifest_path[ext_index:]
                             if extension == ".xlsx":
-                                for key in soda_json_structure["starting-point"][
-                                    folder_name
-                                ]["manifest"]:
+                                for key in soda_json_structure["starting-point"][folder_name]["manifest"]:
                                     # description metadata
                                     if key["filename"] == entry:
                                         if key["description"] != "":
-                                            manifest_object["description"] = key[
-                                                "description"
-                                            ]
+                                            manifest_object["description"] = key["description"]
                                         else:
                                             manifest_object["description"] = ""
                                     # additional metadata
                                     if key["Additional Metadata"] != "":
-                                        manifest_object["additional-metadata"] = key[
-                                            "Additional Metadata"
-                                        ]
+                                        manifest_object["additional-metadata"] = key["Additional Metadata"]
                                     else:
                                         manifest_object["additional-metadata"] = ""
                             elif extension == ".csv":
-                                for key in soda_json_structure["starting-point"][
-                                    folder_name
-                                ]["manifest"]:
+                                for key in soda_json_structure["starting-point"][folder_name]["manifest"]:
                                     if (
-                                        soda_json_structure["starting-point"][
-                                            folder_name
-                                        ]["manifest"][key]["filename"]
+                                        soda_json_structure["starting-point"][folder_name]["manifest"][key]["filename"]
                                         == entry
                                     ):
                                         if (
-                                            soda_json_structure["starting-point"][
-                                                folder_name
-                                            ][key]["description"]
+                                            soda_json_structure["starting-point"][folder_name][key]["description"]
                                             != None
                                         ):
-                                            manifest_object[
-                                                "description"
-                                            ] = soda_json_structure["starting-point"][
+                                            manifest_object["description"] = soda_json_structure["starting-point"][
                                                 folder_name
-                                            ][
-                                                key
-                                            ][
-                                                "description"
-                                            ]
+                                            ][key]["description"]
                                         else:
                                             manifest_object["description"] = ""
                                     if (
-                                        soda_json_structure["starting-point"][
-                                            folder_name
-                                        ]["manifest"][key]["Additional Metadata"]
-                                        != None
-                                    ):
-                                        manifest_object[
-                                            "additional-metadata"
-                                        ] = soda_json_structure["starting-point"][
-                                            folder_name
-                                        ][
-                                            "manifest"
-                                        ][
-                                            key
-                                        ][
+                                        soda_json_structure["starting-point"][folder_name]["manifest"][key][
                                             "Additional Metadata"
                                         ]
+                                        != None
+                                    ):
+                                        manifest_object["additional-metadata"] = soda_json_structure["starting-point"][
+                                            folder_name
+                                        ]["manifest"][key]["Additional Metadata"]
                                     else:
                                         manifest_object["additional-metadata"] = ""
                     # create json
@@ -714,12 +650,8 @@ def create_soda_json_object_backend(
                         "action": ["existing"],
                         "original-name": entry,
                     }
-                    for folder in dataset_structure["folders"][modified_name][
-                        "folders"
-                    ]:
-                        updated_path = dataset_structure["folders"][modified_name][
-                            folder
-                        ]["path"]
+                    for folder in dataset_structure["folders"][modified_name]["folders"]:
+                        updated_path = dataset_structure["folders"][modified_name][folder]["path"]
                         recursive_structure_create(
                             dataset_structure["folders"][modified_name][folder],
                             updated_path,
@@ -735,9 +667,7 @@ def create_soda_json_object_backend(
 
         for folder in dataset_structure["folders"]:
             updated_path = dataset_structure["folders"][folder]["path"]
-            recursive_structure_create(
-                dataset_structure["folders"][folder], updated_path
-            )
+            recursive_structure_create(dataset_structure["folders"][folder], updated_path)
 
     # BEGIN
 
@@ -806,9 +736,7 @@ def create_soda_json_object_backend(
             soda_json_structure["starting-point"][folder]["path"] = temp_file_path_csv
             soda_json_structure["starting-point"][folder]["manifest"] = json_format
         if os.path.exists(temp_xlsx) == True:
-            temp_file_path_xlsx = (
-                root_folder_path + "/" + folder + "/" + "manifest.xlsx"
-            )
+            temp_file_path_xlsx = root_folder_path + "/" + folder + "/" + "manifest.xlsx"
             excel_data = pd.read_excel(temp_file_path_xlsx, sheet_name="Sheet1")
             excel_data.fillna("", inplace=True)
             json_format = excel_data.to_dict(orient="records")
@@ -828,9 +756,7 @@ def monitor_local_json_progress():
     global create_soda_json_completed
     global create_soda_json_total_items
     global create_soda_json_progress
-    progress_percentage = (
-        create_soda_json_progress / create_soda_json_total_items
-    ) * 100
+    progress_percentage = (create_soda_json_progress / create_soda_json_total_items) * 100
 
     return {
         "create_soda_json_progress": create_soda_json_progress,
@@ -911,10 +837,7 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
         if double_ext == False:
             extension_from_name = os.path.splitext(file_name)[1]
         else:
-            extension_from_name = (
-                os.path.splitext(os.path.splitext(file_name)[0])[1]
-                + os.path.splitext(file_name)[1]
-            )
+            extension_from_name = os.path.splitext(os.path.splitext(file_name)[0])[1] + os.path.splitext(file_name)[1]
 
         if extension_from_name == ("." + extension):
             return file_name
@@ -936,17 +859,13 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
             item_id = items["content"]["id"]
             if item_id[2:9] == "package":
                 # if it is a file name check if there are additional manifest information to attach to files
-                if (
-                    item_name[0:8] != "manifest"
-                ):  # manifest files are not being included json structure
+                if item_name[0:8] != "manifest":  # manifest files are not being included json structure
 
                     # verify file name first
                     if "extension" not in children_content:
                         item_name = verify_file_name(item_name, "")
                     else:
-                        item_name = verify_file_name(
-                            item_name, children_content["extension"]
-                        )
+                        item_name = verify_file_name(item_name, children_content["extension"])
 
                     ## verify timestamps
                     timestamp = items["content"]["createdAt"]
@@ -964,52 +883,44 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                     # creates path for item_name (stored in temp_name)
                     if len(subfolder_json["files"][item_name]["bfpath"]) > 1:
                         temp_name = ""
-                        for i in range(
-                            len(subfolder_json["files"][item_name]["bfpath"])
-                        ):
+                        for i in range(len(subfolder_json["files"][item_name]["bfpath"])):
                             if i == 0:
                                 continue
-                            temp_name += (
-                                subfolder_json["files"][item_name]["bfpath"][i] + "/"
-                            )
+                            temp_name += subfolder_json["files"][item_name]["bfpath"][i] + "/"
                         temp_name += item_name
                     else:
                         temp_name = item_name
                     if len(manifest.keys()) > 0:
                         if "filename" in manifest:
                             if temp_name in manifest["filename"].values():
-                                location_index = list(
-                                    manifest["filename"].values()
-                                ).index(temp_name)
+                                location_index = list(manifest["filename"].values()).index(temp_name)
                                 if manifest["description"][location_index] != "":
-                                    subfolder_json["files"][item_name][
-                                        "description"
-                                    ] = manifest["description"][location_index]
+                                    subfolder_json["files"][item_name]["description"] = manifest["description"][
+                                        location_index
+                                    ]
                                 if manifest["Additional Metadata"] != "":
-                                    subfolder_json["files"][item_name][
-                                        "additional-metadata"
-                                    ] = manifest["Additional Metadata"][location_index]
+                                    subfolder_json["files"][item_name]["additional-metadata"] = manifest[
+                                        "Additional Metadata"
+                                    ][location_index]
                                 if manifest["file type"][location_index] != "":
-                                    subfolder_json["files"][item_name][
-                                        "file type"
-                                    ] = manifest["file type"][location_index]
+                                    subfolder_json["files"][item_name]["file type"] = manifest["file type"][
+                                        location_index
+                                    ]
                         elif "File Name" in manifest:
                             if temp_name in manifest["File Name"].values():
-                                location_index = list(
-                                    manifest["File Name"].values()
-                                ).index(temp_name)
+                                location_index = list(manifest["File Name"].values()).index(temp_name)
                                 if manifest["description"][location_index] != "":
-                                    subfolder_json["files"][item_name][
-                                        "description"
-                                    ] = manifest["description"][location_index]
+                                    subfolder_json["files"][item_name]["description"] = manifest["description"][
+                                        location_index
+                                    ]
                                 if manifest["Additional Metadata"] != "":
-                                    subfolder_json["files"][item_name][
-                                        "additional-metadata"
-                                    ] = manifest["Additional Metadata"][location_index]
+                                    subfolder_json["files"][item_name]["additional-metadata"] = manifest[
+                                        "Additional Metadata"
+                                    ][location_index]
                                 if manifest["file type"][location_index] != "":
-                                    subfolder_json["files"][item_name][
-                                        "file type"
-                                    ] = manifest["file type"][location_index]
+                                    subfolder_json["files"][item_name]["file type"] = manifest["file type"][
+                                        location_index
+                                    ]
             else:  # another subfolder found
                 subfolder_json["folders"][item_name] = {
                     "action": ["existing"],
@@ -1063,9 +974,7 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
         role = bf_get_current_user_permission(bf, myds)
         if role not in ["owner", "manager", "editor"]:
             curatestatus = "Done"
-            error.append(
-                "You don't have permissions for uploading to this Pennsieve dataset"
-            )
+            error.append("You don't have permissions for uploading to this Pennsieve dataset")
             raise Exception(error)
     except Exception as e:
         raise e
@@ -1114,9 +1023,7 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
     # manifest information is needed so it is looked for before the recursive calls are made
     if len(soda_json_structure["dataset-structure"]["folders"].keys()) != 0:
         for folder in soda_json_structure["dataset-structure"]["folders"].keys():
-            collection_id = soda_json_structure["dataset-structure"]["folders"][folder][
-                "path"
-            ]
+            collection_id = soda_json_structure["dataset-structure"]["folders"][folder]["path"]
             subfolder = bf._api._get("/packages/" + str(collection_id))
             children_content = subfolder["children"]
             manifest_dict[folder] = {}
@@ -1126,13 +1033,9 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                 package_id = items["content"]["id"]
                 if package_name in manifest_sparc:
                     # item is manifest
-                    file_details = bf._api._get(
-                        "/packages/" + str(package_id) + "/view"
-                    )
+                    file_details = bf._api._get("/packages/" + str(package_id) + "/view")
                     file_id = file_details[0]["content"]["id"]
-                    manifest_url = bf._api._get(
-                        "/packages/" + str(package_id) + "/files/" + str(file_id)
-                    )
+                    manifest_url = bf._api._get("/packages/" + str(package_id) + "/files/" + str(file_id))
                     df = ""
                     try:
                         if package_name.lower() == "manifest.xlsx":
@@ -1143,21 +1046,15 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
                             df = df.fillna("")
                         manifest_dict[folder].update(df.to_dict())
                     except Exception as e:
-                        manifest_error_message.append(
-                            items["parent"]["content"]["name"]
-                        )
-            subfolder_section = soda_json_structure["dataset-structure"]["folders"][
-                folder
-            ]
+                        manifest_error_message.append(items["parent"]["content"]["name"])
+            subfolder_section = soda_json_structure["dataset-structure"]["folders"][folder]
 
             if folder in manifest_dict:
                 createFolderStructure(
                     subfolder_section, bf, manifest_dict[folder]
                 )  # passing item's json and the collection ID
 
-    success_message = (
-        "Data files under a valid high-level SPARC folders have been imported"
-    )
+    success_message = "Data files under a valid high-level SPARC folders have been imported"
     create_soda_json_completed = 1
     return {
         "soda_object": soda_json_structure,
@@ -1178,9 +1075,7 @@ def monitor_pennsieve_json_progress():
     global create_soda_json_progress
 
     if create_soda_json_progress != 0:
-        progress_percentage = (
-            create_soda_json_progress / create_soda_json_total_items
-        ) * 100
+        progress_percentage = (create_soda_json_progress / create_soda_json_total_items) * 100
     else:
         progress_percentage = 0
     return {
