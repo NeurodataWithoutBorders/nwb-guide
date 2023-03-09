@@ -391,8 +391,9 @@ padding-left: 0;
 
 export class Sidebar extends LitElement {
 
+  // NOTE: Dependent on having assets/css/nav.css in the project
   static get styles() {
-    return useGlobalStyles(componentCSS, sheet => sheet.href.includes('bootstrap'), this.shadowRoot)
+    return useGlobalStyles(componentCSS, sheet => sheet.href && sheet.href.includes('bootstrap'), this.shadowRoot)
   }
 
   constructor () {
@@ -417,7 +418,7 @@ export class Sidebar extends LitElement {
 
         // TODO: Decide how to grab these elements outside of the component
         const section = document.getElementsByClassName("section")[0];
-        section.classList.toggle("fullShown");
+        if (section) section.classList.toggle("fullShown");
       });
 
       this.insertAdjacentElement('beforebegin', toggle) // This is a hack to get the button to behave properly in the app styling

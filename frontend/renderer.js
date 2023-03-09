@@ -4300,7 +4300,13 @@ const startupServerAndApiCheck = async () => {
     nodeStorage.setItem("announcements", false);
   }
 
-  handleDataFormats(); // Populate multiple select for data formats
+
+   // Update the options on the multi-select form
+   const multiselectEl = document.getElementById("neuroconv-define-formats");
+   const base = `http://127.0.0.1:${port}`;
+   const multiselectOptions = await fetch(`${base}/neuroconv`).then((res) => res.json());
+   multiselectEl.setAttribute("options", JSON.stringify(multiselectOptions))
+   
 };
 
 startupServerAndApiCheck();
@@ -12733,93 +12739,6 @@ tippy("#datasetPathDisplay", {
   theme: "soda",
   maxWidth: "100%",
 });
-
-// ---------------------------------------------------------------------------
-// --------------------------- ADDED FOR NWB GUIDE ---------------------------
-// ---------------------------------------------------------------------------
-
-async function handleDataFormats() {
-  // ADDED FOR NWB GUIDE
-  const dataFormatsForm = document.getElementById("neuroconv-data-formats-form");
-  // const dataFormats = document.getElementById('neuroconv-data-formats')
-  const getSchema = document.getElementById("neuroconv-get-schema");
-
-  const base = `http://127.0.0.1:${port}`;
-  const formats = await fetch(`${base}/neuroconv`).then((res) => res.json());
-
-  if (formats.message) {
-    throw new Error(formats.message);
-  }
-
-  // const intentation = '\xa0\xa0\xa0\xa0'
-  let modalities = {};
-  for (let name in formats) {
-    const format = formats[name];
-
-    let modality = modalities[format.modality];
-    if (!modality) {
-      // const optModality = document.createElement('optgroup')
-      // optModality.label = format.modality
-      // dataFormats.appendChild(optModality)
-
-      const fieldset = document.createElement("fieldset");
-      const legend = document.createElement("legend");
-      legend.textContent = format.modality;
-      fieldset.appendChild(legend);
-      dataFormatsForm.appendChild(fieldset);
-
-      modality = modalities[format.modality] = {
-        // select: optModality,
-        form: fieldset,
-        techniques: {},
-      };
-    }
-
-    // Place in technique or modality div
-    const technique = format.technique;
-    let targetInfo = modality;
-    if (technique) {
-      if (!modality.techniques[technique]) {
-        // const optTechnique = document.createElement('optgroup')
-        // optTechnique.label = `${intentation}${tag}`
-        // dataFormats.appendChild(optTechnique)
-
-        const fieldset = document.createElement("fieldset");
-        const legend = document.createElement("legend");
-        legend.textContent = technique;
-        fieldset.appendChild(legend);
-        modality.form.appendChild(fieldset);
-
-        targetInfo = modality.techniques[technique] = {
-          // select: optTechnique,
-          form: fieldset,
-        };
-      }
-    }
-
-    // const select = info.select
-    // const form = info.form
-    // const option = document.createElement('option')
-    // option.value = name
-    // option.innerHTML = `${select === modality.select ? '' : intentation }${name}`
-    // select.appendChild(option)
-
-    const form = targetInfo.form;
-    const div = document.createElement("div");
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.value = name;
-    input.name = name;
-    div.appendChild(input);
-    const label = document.createElement("label");
-    label.for = name;
-    label.textContent = name;
-    div.appendChild(label);
-    form.appendChild(div);
-  }
-}
-
-
 
 // -------------------------------------------------------------------------------------------------------------
 // --------------------------------------- From guided-curate-dataset.js ---------------------------------------

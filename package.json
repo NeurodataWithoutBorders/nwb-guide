@@ -7,11 +7,11 @@
   "scripts": {
     "start": "npm run build && npm run start:electron",
     "start:electron": "NODE_ENV=development electron .",
-    "dev:server": "cd pyflask && python -m flask run --port 4242",
+    "dev:server": "cd backend && python -m flask run --port 4242",
     "build": "npm run build:app",
     "build:app": "vite build",
     "test": "npm run test:server",
-    "test:server": "pytest pyflask/tests/ -s",
+    "test:server": "pytest backend/tests/ -s",
     "build-win": "electron-builder build --win --publish never",
     "build-mac": "electron-builder build --mac --publish never",
     "build-linux": "electron-builder build --linux --publish never",
