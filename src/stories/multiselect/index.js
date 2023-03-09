@@ -4,9 +4,13 @@ import { LitElement, css, html } from 'lit';
 
 const componentCSS = `
 
-* {
-  box-sizing: border-box;
-}
+    * {
+      box-sizing: border-box;
+    }
+
+    :host {
+      display: inline-block;
+    }
 
     :host > div {
       border: 1px solid #ccc;
@@ -19,7 +23,6 @@ const componentCSS = `
     form {
         display: grid;
         gap: 2ch;
-        max-inline-size: 30ch;
     }
 
     @media (pointer: coarse) {
@@ -34,7 +37,6 @@ const componentCSS = `
 
         & > div + div {
             margin-block-start: 2ch;
-            color: red;
         }
     }
     
