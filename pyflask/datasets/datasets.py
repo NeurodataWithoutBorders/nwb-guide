@@ -75,9 +75,7 @@ def upload_collection_names(account, dataset, tags):
         dataset_id = myds.id
         role = bf_get_current_user_permission(ps, myds)
         if role not in ["owner", "manager"]:
-            abort(
-                403, "You do not have permissions to view/edit DOI for this Pennsieve"
-            )
+            abort(403, "You do not have permissions to view/edit DOI for this Pennsieve")
 
     except Exception as e:
         abort(400, "Error: Please select a valid Pennsieve dataset")

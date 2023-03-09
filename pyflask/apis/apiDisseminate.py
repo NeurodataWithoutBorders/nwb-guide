@@ -21,9 +21,7 @@ model_success_message_response = api.model(
     {"message": fields.String(required=True, description="Success message")},
 )
 
-model_get_doi_response = api.model(
-    "DOIResponse", {"doi": fields.String(required=True, description="DOI")}
-)
+model_get_doi_response = api.model("DOIResponse", {"doi": fields.String(required=True, description="DOI")})
 
 
 @api.route("/datasets/<string:dataset_name_or_id>/doi")
@@ -125,9 +123,7 @@ class BfIgnoreFiles(Resource):
         selected_bfaccount = data.get("selected_account")
 
         try:
-            return get_files_excluded_from_publishing(
-                dataset_name_or_id, selected_bfaccount
-            )
+            return get_files_excluded_from_publishing(dataset_name_or_id, selected_bfaccount)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -155,9 +151,7 @@ class BfIgnoreFiles(Resource):
         ignore_files = data.get("ignore_files")
 
         try:
-            return update_files_excluded_from_publishing(
-                dataset_name_or_id, ignore_files
-            )
+            return update_files_excluded_from_publishing(dataset_name_or_id, ignore_files)
         except Exception as e:
             # if exception is an HTTPError then check if 400 or 500
             if type(e).__name__ == "HTTPError":
@@ -169,11 +163,7 @@ class BfIgnoreFiles(Resource):
 
 model_metadata_files_response = api.model(
     "MetadataFilesResponse",
-    {
-        "metadata_files": fields.List(
-            fields.String, required=True, description="Metadata files"
-        )
-    },
+    {"metadata_files": fields.List(fields.String, required=True, description="Metadata files")},
 )
 
 
@@ -213,12 +203,8 @@ class BfMetadataFiles(Resource):
 model_publishing_status_response = api.model(
     "PublishingStatusResponse",
     {
-        "publishing_status": fields.String(
-            required=True, description="Publishing status"
-        ),
-        "review_request_status": fields.String(
-            required=True, description="Review request status"
-        ),
+        "publishing_status": fields.String(required=True, description="Publishing status"),
+        "review_request_status": fields.String(required=True, description="Review request status"),
     },
 )
 
