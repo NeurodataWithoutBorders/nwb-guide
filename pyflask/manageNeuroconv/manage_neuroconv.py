@@ -28,7 +28,7 @@ def get_all_interface_info() -> dict:
     return interface_info
 
 
-def get_combined_schema(interface_class_names: Optional[List[str]]) -> dict:
+def get_combined_schema(interface_class_names: List[str]) -> dict:
     """
     Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
     """
