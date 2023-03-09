@@ -5,8 +5,7 @@
 const fs = require("fs-extra");
 const os = require("os");
 const path = require("path");
-const { ipcRenderer, BrowserWindow } = require("electron");
-const Editor = require("@toast-ui/editor");
+const { ipcRenderer } = require("electron");
 const remote = require("@electron/remote");
 const { Notyf } = require("notyf");
 const imageDataURI = require("image-data-uri");
@@ -16,22 +15,16 @@ require("v8-compile-cache");
 const Tagify = require("@yaireo/tagify");
 const https = require("https");
 const electron = require("electron");
-const bootbox = require("bootbox");
 const DragSelect = require("dragselect");
-const excelToJson = require("convert-excel-to-json");
-const csvToJson = require("convert-csv-to-json");
 const Jimp = require("jimp");
 const { JSONStorage } = require("node-localstorage");
 const tippy = require("tippy.js").default;
 const introJs = require("intro.js");
-const selectpicker = require("bootstrap-select");
+require("bootstrap-select") // Provides a method on certain HTML Elements
 
-const { homedir } = require("os");
-const diskCheck = require("check-disk-space").default;
 const validator = require("validator");
 const doiRegex = require("doi-regex");
 const lottie = require("lottie-web");
-const select2 = require("select2")();
 const DragSort = require("@yaireo/dragsort");
 
 // TODO: Test with a build
@@ -50,12 +43,7 @@ const { hasConnectedAccountWithPennsieve } = require("./frontend/authentication/
 const api = require("./frontend/api/api");
 
 const axios = require("axios").default;
-
 const DatePicker = require("tui-date-picker"); /* CommonJS */
-const excel4node = require("excel4node");
-
-const { backOff } = require("exponential-backoff");
-
 const globals = require("./frontend/globals");
 
 // -----------------------------------------------------------------------------------
@@ -12536,143 +12524,8 @@ const scaleBannerImage = async (imagePath) => {
   }
 };
 
-function openFeedbackForm() {
-  let feedback_btn = document.getElementById("feedback-btn");
-  if (!feedback_btn.classList.contains("is-open")) {
-    feedback_btn.click();
-  }
-  setTimeout(() => {
-    document.getElementById("feedback-btn").scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, 5);
-}
-function gatherLogs() {
-  //function will be used to gather all logs on all OS's
-  let homedir = os.homedir();
-  let file_path = "";
-  let clientLogsPath = "";
-  let serverLogsPath = path.join(homedir, "SODA", "logs");
-  let logFiles = ["main.log", "renderer.log", "out.log", "api.log"];
-
-  if (os.platform() === "darwin") {
-    clientLogsPath = path.join(homedir, "/Library/Logs/SODA for SPARC/");
-  } else if (os.platform() === "win32") {
-    clientLogsPath = path.join(homedir, "AppData", "Roaming", "SODA for SPARC", "logs");
-  } else {
-    clientLogsPath = path.join(homedir, ".config", "SODA for SPARC", "logs");
-  }
-
-  Swal.fire({
-    title: "Select a destination to create log folder",
-    html: `<div style="margin-bottom:1rem;"><p>Please note that any log files that are in your destination already will be overwritten.</p></div><input class="form-control" id="selected-log-destination" type="text" readonly="" placeholder="Select a destination">`,
-    heightAuto: false,
-    showCancelButton: true,
-    allowOutsideClick: false,
-    allowEscapeKey: true,
-    didOpen: () => {
-      let swal_alert_confirm = document.getElementsByClassName("swal2-confirm swal2-styled")[0];
-      swal_alert_confirm.setAttribute("disabled", true);
-
-      let log_destination_input = document.getElementById("selected-log-destination");
-      log_destination_input.addEventListener("click", function () {
-        ipcRenderer.send("open-file-dialog-log-destination");
-      });
-      ipcRenderer.on("selected-log-folder", (event, result) => {
-        file_path = result["filePaths"][0];
-        if (file_path != undefined) {
-          log_destination_input.value = file_path;
-          swal_alert_confirm.removeAttribute("disabled");
-        } else {
-          Swal.showValidationMessage(`Please enter a destination`);
-        }
-      });
-    },
-    preConfirm: () => {
-      let log_destination_input = document.getElementById("selected-log-destination");
-      if (log_destination_input.value === "" || log_destination_input.value === undefined) {
-        Swal.showValidationMessage(`Please enter a destination`);
-      }
-    },
-  }).then((result) => {
-    if (result.isConfirmed === true) {
-      if (file_path !== undefined || file_path !== "") {
-        Swal.fire({
-          title: "Creating log folder",
-          html: "Please wait...",
-          // timer: 5000,
-          allowEscapeKey: false,
-          allowOutsideClick: false,
-          heightAuto: false,
-          backdrop: "rgba(0,0,0, 0.4)",
-          timerProgressBar: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
-
-        let log_folder = path.join(file_path, "/SODA-For-SPARC-Logs/");
-        try {
-          fs.mkdirSync(log_folder, { recursive: true });
-          // destination will be created or overwritten by default.
-          for (const logFile of logFiles) {
-            let logFilePath;
-            let missingLog = false;
-            if (logFile === "out.log") {
-              logFilePath = path.join(homedir, ".pennsieve", logFile);
-              if (!fs.existsSync(logFilePath)) missingLog = true;
-            } else if (logFile === "api.log") {
-              logFilePath = path.join(serverLogsPath, logFile);
-              if (!fs.existsSync(logFilePath)) missingLog = true;
-            } else {
-              logFilePath = path.join(clientLogsPath, logFile);
-              if (!fs.existsSync(logFilePath)) missingLog = true;
-            }
-            if (!missingLog) {
-              let log_copy = path.join(log_folder, logFile);
-
-              fs.copyFileSync(logFilePath, log_copy);
-            }
-          }
-          Swal.close();
-
-          Swal.fire({
-            title: "Success!",
-            text: `Successfully created SODA-For-SPARC-Logs in ${file_path}`,
-            icon: "success",
-            showConfirmButton: true,
-            heightAuto: false,
-            backdrop: "rgba(0,0,0, 0.4)",
-            didOpen: () => {
-              if (document.getElementsByClassName("swal2-loader").length > 0) {
-                document.getElementsByClassName("swal2-loader")[0].style.display = "none";
-                document.getElementsByClassName("swal2-confirm swal2-styled")[0].style.display =
-                  "block";
-              }
-            },
-          });
-        } catch (error) {
-          clientError(error);
-          Swal.fire({
-            title: "Failed to create log folder!",
-            text: error,
-            icon: "error",
-            showConfirmButton: true,
-            heightAuto: false,
-            backdrop: "rgba(0,0,0, 0.4)",
-            didOpen: () => {
-              if (document.getElementsByClassName("swal2-loader").length > 0) {
-                document.getElementsByClassName("swal2-loader")[0].style.display = "none";
-                document.getElementsByClassName("swal2-confirm swal2-styled")[0].style.display =
-                  "block";
-              }
-            },
-          });
-        }
-      }
-    }
-  });
+globalThis.gatherLogs = () => {
+  throw new Error('This feature was removed for NWB GUIDE. Please contact the developers if you need this feature.')
 }
 
 let docu_lottie_section = document.getElementById("documentation-section");
