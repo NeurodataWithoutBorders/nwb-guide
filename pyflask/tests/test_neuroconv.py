@@ -1,5 +1,6 @@
 from jsonschema import validate
 
+
 def get_converter_output_schema(interfaces):
     return {
         "type": "object",
@@ -29,24 +30,29 @@ def get_converter_output_schema(interfaces):
 # Accesses the dictionary of all interfaces and their metadata
 def test_get_all_interfaces(client):
     all_interfaces = client.get("/neuroconv", follow_redirects=True).json
-    validate(all_interfaces, schema={
-        "type": "object",
-        "patternProperties": {
-            "^.*Interface$": {
-                "type": "object",
-                "properties": {
-                    "modality": {"type": "string"},
-                    "name": {"type": "string"},
-                    "technique": {"type": "string"},
+    validate(
+        all_interfaces,
+        schema={
+            "type": "object",
+            "patternProperties": {
+                "^.*Interface$": {
+                    "type": "object",
+                    "properties": {
+                        "modality": {"type": "string"},
+                        "name": {"type": "string"},
+                        "technique": {"type": "string"},
+                    },
                 }
-            }
-        }
-    })
+            },
+        },
+    )
+
 
 # Test single interface schema request
 def test_single_schema_request(client):
     data = client.get("/neuroconv/schema/SpikeGLXRecordingInterface", follow_redirects=True).json
     validate(data, schema=get_converter_output_schema(["SpikeGLXRecordingInterface"]))
+
 
 # Uses the NWBConverter Class to combine multiple interfaces
 def test_multiple_schema_request(client):

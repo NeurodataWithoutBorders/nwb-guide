@@ -25,9 +25,7 @@ class AllInterfaces(Resource):
 
 @api.route("/schema/<string:interface>")
 class Schema(Resource):
-    @api.doc(
-        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
-    )
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self, interface):
 
         try:
@@ -36,7 +34,8 @@ class Schema(Resource):
             if notBadRequestException(e):
                 api.abort(500, str(e))
             raise e
-        
+
+
 @api.route("/schema")
 class Schemas(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
