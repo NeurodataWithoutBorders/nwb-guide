@@ -10,9 +10,9 @@ all_interfaces_schema = {
                 "modality": {"type": "string"},
                 "name": {"type": "string"},
                 "technique": {"type": "string"},
-            }
+            },
         }
-    }
+    },
 }
 
 
@@ -21,6 +21,7 @@ all_interfaces_schema = {
 def test_get_all_interfaces(client):
     all_interfaces = client.get("/neuroconv", follow_redirects=True).json
     validate(all_interfaces, schema=all_interfaces_schema)
+
 
 # Uses the NWBConverter Class to combine multiple interfaces
 def test_multiple_schema_request(client):
@@ -44,11 +45,12 @@ def test_multiple_schema_request(client):
                             "properties": {"type": "object"},
                             "required": {"type": "array"},
                         },
-                    } for interface in interfaces
+                    }
+                    for interface in interfaces
                 },
-                "additionalProperties":False
+                "additionalProperties": False,
             },
-        }
+        },
     }
 
     validate(data, schema=converter_output_schema)
