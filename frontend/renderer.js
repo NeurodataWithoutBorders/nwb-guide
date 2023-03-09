@@ -35,19 +35,19 @@ const select2 = require("select2")();
 const DragSort = require("@yaireo/dragsort");
 
 // TODO: Test with a build
-const { datasetUploadSession } = require("./src/analytics/upload-session-tracker");
+const { datasetUploadSession } = require("./frontend/analytics/upload-session-tracker");
 
 const {
   logCurationErrorsToAnalytics,
   logCurationSuccessToAnalytics,
-} = require("./src/analytics/curation-analytics");
-const { determineDatasetLocation } = require("./src/analytics/analytics-utils");
+} = require("./frontend/analytics/curation-analytics");
+const { determineDatasetLocation } = require("./frontend/analytics/analytics-utils");
 const {
   clientError,
   userErrorMessage,
-} = require("./src/http-error-handler/error-handler");
-const { hasConnectedAccountWithPennsieve } = require("./src/authentication/auth");
-const api = require("./src/api/api");
+} = require("./frontend/http-error-handler/error-handler");
+const { hasConnectedAccountWithPennsieve } = require("./frontend/authentication/auth");
+const api = require("./frontend/api/api");
 
 const axios = require("axios").default;
 
@@ -56,7 +56,7 @@ const excel4node = require("excel4node");
 
 const { backOff } = require("exponential-backoff");
 
-const globals = require("./src/globals");
+const globals = require("./frontend/globals");
 
 // -----------------------------------------------------------------------------------
 // ------------------------------ Previously manage-dataset.js ------------------------------

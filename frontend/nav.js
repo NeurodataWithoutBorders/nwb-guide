@@ -1,4 +1,4 @@
-const globals = require("./src/globals.js");
+const globals = require("./frontend/globals.js");
 
 // function to hide the sidebar and disable the sidebar expand button
 function forceActionSidebar(action) {
