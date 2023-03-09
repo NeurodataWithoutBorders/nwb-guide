@@ -417,7 +417,7 @@ export class Sidebar extends LitElement {
 
         // TODO: Decide how to grab these elements outside of the component
         const section = document.getElementsByClassName("section")[0];
-        section.classList.toggle("fullShown");
+        if (section) section.classList.toggle("fullShown");
       });
 
       this.insertAdjacentElement('beforebegin', toggle) // This is a hack to get the button to behave properly in the app styling
