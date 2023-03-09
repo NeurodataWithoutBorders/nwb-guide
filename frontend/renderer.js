@@ -4306,7 +4306,7 @@ const startupServerAndApiCheck = async () => {
    const base = `http://127.0.0.1:${port}`;
    const multiselectOptions = await fetch(`${base}/neuroconv`).then((res) => res.json());
    multiselectEl.setAttribute("options", JSON.stringify(multiselectOptions))
-   
+
 };
 
 startupServerAndApiCheck();
