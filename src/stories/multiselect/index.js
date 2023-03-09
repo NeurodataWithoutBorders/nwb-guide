@@ -34,6 +34,7 @@ const componentCSS = `
 
         & > div + div {
             margin-block-start: 2ch;
+            color: red;
         }
     }
     
