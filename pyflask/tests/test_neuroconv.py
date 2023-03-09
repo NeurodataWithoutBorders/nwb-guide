@@ -16,11 +16,12 @@ def get_converter_output_schema(interfaces):
                             "properties": {"type": "object"},
                             "required": {"type": "array"},
                         },
-                    } for interface in interfaces
+                    }
+                    for interface in interfaces
                 },
-                "additionalProperties":False
+                "additionalProperties": False,
             },
-        }
+        },
     }
 
 
