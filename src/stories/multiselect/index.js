@@ -3,6 +3,19 @@ import { LitElement, css, html } from 'lit';
 // Adapted from https://web.dev/building-a-multi-select-component/
 
 const componentCSS = `
+
+* {
+  box-sizing: border-box;
+}
+
+    :host > div {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      padding: 25px;
+      display: inline-block;
+    }
+
     form {
         display: grid;
         gap: 2ch;
@@ -17,10 +30,15 @@ const componentCSS = `
 
     fieldset {
         padding: 2ch;
+        border: 1px solid gray;
 
         & > div + div {
             margin-block-start: 2ch;
         }
+    }
+    
+    legend {
+        font-weight: bold;
     }
 
     fieldset > div {
@@ -32,8 +50,6 @@ const componentCSS = `
 
 export class MultiSelectForm extends LitElement {
 
-  header = 'Multi-Select Form'
-  options = {}
 
   static get styles() {
     return css([componentCSS])
@@ -41,19 +57,18 @@ export class MultiSelectForm extends LitElement {
 
   static get properties() {
     return {
-      header: { type: String, reflect: true },
       options: { type: Object, reflect: true }
     };
   }
 
-  constructor (props) {
+  constructor (props = {}) {
     super()
-    Object.assign(this, props)
+    this.options = props.options ?? {}
   }
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
     super.attributeChangedCallback(changedProperties, oldValue, newValue)
-    if (changedProperties === 'options' || changedProperties === 'header') this.requestUpdate()
+    if (changedProperties === 'options') this.requestUpdate()
   }
 
 
@@ -70,8 +85,9 @@ export class MultiSelectForm extends LitElement {
 
     // Currently supports two levels of fields
     let modalities = {};
-    for (let name in formats) {
-      const format = formats[name];
+    for (let className in formats) {
+      const format = formats[className];
+      const name = format.name ?? className;
 
       let modality = modalities[format.modality];
       if (!modality) {
@@ -91,7 +107,9 @@ export class MultiSelectForm extends LitElement {
       const technique = format.technique;
       let targetInfo = modality;
       if (technique) {
-        if (!modality.techniques[technique]) {
+
+        targetInfo = modality.techniques[technique]
+        if (!targetInfo) {
           const fieldset = document.createElement("fieldset");
           const legend = document.createElement("legend");
           legend.textContent = technique;
@@ -121,9 +139,11 @@ export class MultiSelectForm extends LitElement {
 
   render() {
     return html`
-        <h2>${this.header}</h2>
-        <form id="neuroconv-data-formats-form">
-        </form>
+      <div>
+          <form id="neuroconv-data-formats-form">
+          <slot></slot>
+          </form>
+      </div>
     `;
   }
 };
