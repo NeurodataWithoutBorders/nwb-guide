@@ -7,34 +7,6 @@ button:focus {
   outline: none;
 }
 
-/* Multi Select Form */
-/* https://web.dev/building-a-multi-select-component/ */
-form {
-  display: grid;
-  gap: 2ch;
-  max-inline-size: 30ch;
-}
-
-@media (pointer: coarse) {
-  select[multiple] {
-    display: block;
-  }
-}
-
-fieldset {
-  padding: 2ch;
-
-  & > div + div {
-    margin-block-start: 2ch;
-  }
-}
-
-fieldset > div {
-  display: flex;
-  gap: 2ch;
-  align-items: baseline;
-}
-
 /* SODA */
 
 .wide-swal {
