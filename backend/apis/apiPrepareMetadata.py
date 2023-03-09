@@ -40,15 +40,9 @@ model_save_submission_file_response = api.model(
 model_get_submission_file_response = api.model(
     "getSubmissionFileResponse",
     {
-        "SPARC Award number": fields.String(
-            required=True, description="SPARC Award number"
-        ),
-        "Milestone achieved": fields.List(
-            fields.String, required=True, description="Milestone achieved"
-        ),
-        "Milestone completion date": fields.String(
-            required=True, description="Milestone completion date"
-        ),
+        "SPARC Award number": fields.String(required=True, description="SPARC Award number"),
+        "Milestone achieved": fields.List(fields.String, required=True, description="Milestone achieved"),
+        "Milestone completion date": fields.String(required=True, description="Milestone completion date"),
     },
 )
 
@@ -111,9 +105,7 @@ class SaveSubmissionFile(Resource):
             )
 
         try:
-            return save_submission_file(
-                upload_boolean, bfaccount, bfdataset, filepath, json_str
-            )
+            return save_submission_file(upload_boolean, bfaccount, bfdataset, filepath, json_str)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -150,9 +142,7 @@ model_upload_RC_file_response = api.model(
     "uploadRCFileResponse",
     {
         "size": fields.Integer(required=True, description="Size of the file in bytes"),
-        "filepath": fields.String(
-            required=True, description="Path to the file on the user's machine"
-        ),
+        "filepath": fields.String(required=True, description="Path to the file on the user's machine"),
     },
 )
 
@@ -211,9 +201,7 @@ class RCFile(Resource):
             raise e
 
     parser_create_RC_file = parser_get_RC_file.copy()
-    parser_create_RC_file.add_argument(
-        "text", type=str, help="Text of the file", location="json", required=True
-    )
+    parser_create_RC_file.add_argument("text", type=str, help="Text of the file", location="json", required=True)
 
     @api.expect(parser_create_RC_file)
     @api.marshal_with(model_upload_RC_file_response, 200, False)
@@ -239,11 +227,7 @@ class RCFile(Resource):
 
 model_list_of_string = api.model(
     "basicListOfString",
-    {
-        "list_of_string": fields.List(
-            fields.String, required=True, description="List of strings"
-        )
-    },
+    {"list_of_string": fields.List(fields.String, required=True, description="List of strings")},
 )
 
 model_get_ds_description_file_response = api.model(
@@ -280,9 +264,7 @@ model_get_ds_description_file_response = api.model(
 model_save_ds_description_file_response = api.model(
     "saveDSDescriptionFileResponse",
     {
-        "size": fields.Integer(
-            required=True, description="Path to the file on the user's machine"
-        ),
+        "size": fields.Integer(required=True, description="Path to the file on the user's machine"),
     },
 )
 
@@ -326,28 +308,14 @@ class DatasetDescriptionFile(Resource):
             raise e
 
     parser_dataset_description_file = reqparse.RequestParser(bundle_errors=True)
-    parser_dataset_description_file.add_argument(
-        "dataset_str", type=dict, required=True, location="json"
-    )
+    parser_dataset_description_file.add_argument("dataset_str", type=dict, required=True, location="json")
     parser_dataset_description_file.add_argument("filepath", type=str, location="json")
-    parser_dataset_description_file.add_argument(
-        "upload_boolean", type=boolean, required=True, location="args"
-    )
-    parser_dataset_description_file.add_argument(
-        "selected_account", type=str, location="json"
-    )
-    parser_dataset_description_file.add_argument(
-        "selected_dataset", type=str, location="json"
-    )
-    parser_dataset_description_file.add_argument(
-        "study_str", type=dict, required=True, location="json"
-    )
-    parser_dataset_description_file.add_argument(
-        "contributor_str", type=dict, required=True, location="json"
-    )
-    parser_dataset_description_file.add_argument(
-        "related_info_str", type=list, required=True, location="json"
-    )
+    parser_dataset_description_file.add_argument("upload_boolean", type=boolean, required=True, location="args")
+    parser_dataset_description_file.add_argument("selected_account", type=str, location="json")
+    parser_dataset_description_file.add_argument("selected_dataset", type=str, location="json")
+    parser_dataset_description_file.add_argument("study_str", type=dict, required=True, location="json")
+    parser_dataset_description_file.add_argument("contributor_str", type=dict, required=True, location="json")
+    parser_dataset_description_file.add_argument("related_info_str", type=list, required=True, location="json")
 
     @api.expect(parser_dataset_description_file)
     @api.marshal_with(model_save_ds_description_file_response, 200, False)
@@ -437,9 +405,7 @@ class CodeDescriptionFile(Resource):
         selected_dataset = data.get("selected_dataset")
 
         try:
-            return upload_code_description_metadata(
-                filepath, selected_account, selected_dataset
-            )
+            return upload_code_description_metadata(filepath, selected_account, selected_dataset)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -507,9 +473,7 @@ class SubjectsFile(Resource):
             )
 
         if not upload_boolean and not filepath:
-            api.abort(
-                400, "To save a subjects file on the user's machine provide a filepath."
-            )
+            api.abort(400, "To save a subjects file on the user's machine provide a filepath.")
 
         try:
             return save_subjects_file(
@@ -575,18 +539,14 @@ class SubjectsFile(Resource):
 model_save_samples_result = api.model(
     "SaveSamplesResult",
     {
-        "size": fields.Integer(
-            description="The size of the sample file that was saved through SODA."
-        ),
+        "size": fields.Integer(description="The size of the sample file that was saved through SODA."),
     },
 )
 
 model_field_sub_sam_list = api.model(
     "FieldSubSamList",
     {
-        "field": fields.List(
-            fields.String, description="Subject or samples field values"
-        ),
+        "field": fields.List(fields.String, description="Subject or samples field values"),
     },
 )
 
@@ -844,9 +804,7 @@ class ImportBFMetadataFile(Resource):
             )
 
         try:
-            return import_bf_metadata_file(
-                file_type, ui_fields, selected_account, selected_dataset
-            )
+            return import_bf_metadata_file(file_type, ui_fields, selected_account, selected_dataset)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -883,9 +841,7 @@ class SetTemplatePath(Resource):
         resourcesPath = data.get("resourcesPath")
 
         if basepath is None and resourcesPath is None:
-            return api.abort(
-                400, "Missing required parameters: basepath, resourcesPath"
-            )
+            return api.abort(400, "Missing required parameters: basepath, resourcesPath")
 
         try:
             return set_template_path(basepath, resourcesPath)
@@ -977,9 +933,7 @@ class GenerateManifestFilesPennsieve(Resource):
             )
 
         try:
-            return import_bf_manifest_file(
-                soda_json_object, selected_account, selected_dataset
-            )
+            return import_bf_manifest_file(soda_json_object, selected_account, selected_dataset)
         except Exception as e:
             api.abort(500, str(e))
 
@@ -994,9 +948,7 @@ class GenerateManifestFilesPennsieve(Resource):
         manifest_type = data.get("type")
 
         if not edit_action or not manifest_type:
-            api.abort(
-                400, "Cannot edit manifest files without the action and type provided."
-            )
+            api.abort(400, "Cannot edit manifest files without the action and type provided.")
 
         try:
             return edit_bf_manifest_file(edit_action, manifest_type)
@@ -1013,9 +965,7 @@ manifest_creation_progress_model = api.model(
         "manifest_files_uploaded": fields.Integer(
             description="Total amount of manifest files that have been created for the client."
         ),
-        "finished": fields.Boolean(
-            description="Whether or not the manifest creation process has finished."
-        ),
+        "finished": fields.Boolean(description="Whether or not the manifest creation process has finished."),
     },
 )
 

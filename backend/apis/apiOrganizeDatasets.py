@@ -160,9 +160,7 @@ class ImportDataset(Resource):
         replaced = data.get("replaced")
 
         try:
-            return create_soda_json_object_backend(
-                sodajsonobject, root_folder_path, irregular_folders, replaced
-            )
+            return create_soda_json_object_backend(sodajsonobject, root_folder_path, irregular_folders, replaced)
         except Exception as e:
             api.abort(500, str(e))
 

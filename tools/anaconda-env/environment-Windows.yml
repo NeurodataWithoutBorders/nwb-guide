@@ -28,3 +28,4 @@ dependencies:
       - opencv-python == 4.5.3.56
       - certifi == 2021.10.8
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main
+      - pytest == 7.2.2
