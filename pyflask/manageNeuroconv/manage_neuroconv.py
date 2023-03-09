@@ -1,4 +1,6 @@
+from typing import List, Optional
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
+from neuroconv import datainterfaces, NWBConverter
 
 
 def get_all_interface_info() -> dict:
@@ -26,24 +28,13 @@ def get_all_interface_info() -> dict:
     return interface_info
 
 
-def get_combined_schema(interfaces):
+def get_combined_schema(interface_class_names: Optional[List[str]]) -> dict:
     """
     Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
     """
 
-    # Hard coded for now - eventual goal will be to import this from NeuroConv
-    interface_list_subset = [SpikeGLXRecordingInterface, PhySortingInterface]
-
-    if not interfaces:
-        interfaces = [x.__name__ for x in interface_list_subset]  # get schema for all interfaces
-
     # Combine Multiple Interfaces
     class CustomNWBConverter(NWBConverter):
-        data_interface_classes = dict(
-            zip(
-                interfaces,
-                map(lambda name: [x for x in interface_list_subset if x.__name__ == name][0], interfaces),
-            )
-        )
+        data_interface_classes = {interface: getattr(datainterfaces, interface) for interface in interface_class_names}
 
     return CustomNWBConverter.get_source_schema()
