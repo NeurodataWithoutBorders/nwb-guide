@@ -6,14 +6,14 @@
   "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=development electron .",
-    "dev:server": "cd pyflask && python -m flask run --port 4242",
+    "dev:server": "cd backend && python -m flask run --port 4242",
     "build-win": "electron-builder build --win --publish never",
     "build-mac": "electron-builder build --mac --publish never",
     "build-linux": "electron-builder build --linux --publish never",
     "deploy-win": "electron-builder build --win --publish always",
     "deploy-mac": "electron-builder build --mac --publish always",
     "deploy-linux": "electron-builder build --linux --publish always",
-    "python-onefile-build": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist",
+    "python-onefile-build": "python -m PyInstaller --onefile --clean ./backend/app.py --distpath ./backend/dist",
     "postinstall": "electron-builder install-app-deps",
     "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write"
   },
@@ -37,7 +37,7 @@
       "!build/",
       "!api.spec",
       "!Users/",
-      "!pyflask/",
+      "!backend/",
       "!docs/"
     ],
     "win": {
@@ -59,7 +59,7 @@
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "extraResources": [
         {
-          "from": "./pyflaskdist/app"
+          "from": "./backend/dist/app"
         },
         {
           "from": "./file_templates",
@@ -73,7 +73,7 @@
       "icon": "assets/app-icon/png/icon.png",
       "extraResources": [
         {
-          "from": "./pyflaskdist/app"
+          "from": "./backend/dist/app"
         },
         {
           "from": "./file_templates",

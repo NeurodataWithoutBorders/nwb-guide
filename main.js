@@ -30,8 +30,8 @@ const nodeStorage = new JSONStorage(app.getPath("userData"));
  *************************************************************/
 
 // flask setup environment variables
-const PY_FLASK_DIST_FOLDER = "pyflaskdist";
-const PY_FLASK_FOLDER = "pyflask";
+const PY_FLASK_DIST_FOLDER = "backend/dist";
+const PY_FLASK_FOLDER = "backend";
 const PY_FLASK_MODULE = "app";
 let pyflaskProcess = null;
 
