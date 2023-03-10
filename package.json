@@ -22,7 +22,8 @@
     "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
     "postinstall": "electron-builder install-app-deps",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "chromatic": "npx chromatic"
   },
   "lint-staged": {
     "./**/*.{html|css|js|md|yml}": [
@@ -32,7 +33,7 @@
   "config": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/catalystneuro/neuroconv-app.git"
+    "url": "git+https://github.com/catalystneuro/neuroconv-app.git"
   },
   "build": {
     "appId": "com.fairdataihub.sodaforsparc",
@@ -101,7 +102,9 @@
     }
   },
   "keywords": [],
-  "author": "CatalystNeuro",
+  "author": {
+    "name": "CatalystNeuro"
+  },
   "license": "MIT",
   "dependencies": {
     "@electron/remote": "2.0.8",
@@ -162,7 +165,8 @@
     "uuid": "^8.3.1",
     "v8-compile-cache": "^2.3.0",
     "validator": "^13.7.0",
-    "vite": "^4.1.4"
+    "vite": "^4.1.4",
+    "win-node-env": "^0.4.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
@@ -173,6 +177,7 @@
     "@storybook/blocks": "^7.0.0-beta.62",
     "@storybook/web-components": "^7.0.0-beta.62",
     "@storybook/web-components-vite": "^7.0.0-beta.62",
+    "chromatic": "^6.17.1",
     "commitizen": "^4.2.5",
     "cz-conventional-changelog": "^3.3.0",
     "electron": "19.0.0",
@@ -189,5 +194,11 @@
   },
   "optionalDependencies": {
     "win-node-env": "^0.4.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/catalystneuro/neuroconv-app/issues"
+  },
+  "readme": "ERROR: No README data found!",
+  "homepage": "https://github.com/catalystneuro/neuroconv-app#readme",
+  "_id": "neuroconv-app@0.0.1"
 }
