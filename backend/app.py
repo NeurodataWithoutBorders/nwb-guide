@@ -2,6 +2,7 @@ from __future__ import print_function
 
 # import config
 from flask import Flask, request
+from flask_cors import CORS
 
 # from flask_cors import CORS
 from namespaces import configure_namespaces
@@ -17,6 +18,11 @@ from os import getenv
 
 app = Flask(__name__)
 
+# Enable CORS if the environment variable ENABLE_CORS is set
+if getenv("ENABLE_CORS", 'False').lower() in ('true', '1', 't'):
+    CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
+
 configureLogger(app)
 
 api = configureAPI()
@@ -24,7 +30,6 @@ api = configureAPI()
 configureRouteHandlers(api)
 
 api.init_app(app)
-
 
 @api.route("/sodaforsparc_server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
