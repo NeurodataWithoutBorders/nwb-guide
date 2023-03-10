@@ -1,21 +1,13 @@
-const tippy = require("tippy.js").default;
-const lottie = require("lottie-web");
+// const tippy = require("tippy.js").default;
+// const lottie = require("lottie-web");
+// import tippy from "tippy.js";
+import lottie from "lottie-web";
 
+// const fs = require("fs");
+// const path = require("path");
+// var guidedProgressFilePath = path.join(homeDirectory, "SODA", "Guided-Progress");
 
-// export default {
-//     sodaJSONObj: {},
-//     datasetStructureJSONObj: {},
-//     subjectsTableData: [],
-//     samplesTableData: []
-// }
-
-const fs = require("fs");
-const path = require("path");
-const remote = require("@electron/remote");
-const app = remote.app;
-const homeDirectory = app.getPath("home");
-
-var guidedProgressFilePath = path.join(homeDirectory, "SODA", "Guided-Progress");
+export const port = 4242
 
 const templateArray = [
     "submission.xlsx",
@@ -248,40 +240,42 @@ const resetGuidedRadioButtons = (parentPageID) => {
             </p>
           `;
 
-    tippy(".progress-card-popover", {
-      allowHTML: true,
-      interactive: true,
-    });
+    // tippy(".progress-card-popover", {
+    //   allowHTML: true,
+    //   interactive: true,
+    // });
   };
 
   const readDirAsync = async (path) => {
-    return new Promise((resolve, reject) => {
-      fs.readdir(path, (error, result) => {
-        if (error) {
-          throw new Error(error);
-        } else {
-          resolve(result);
-        }
-      });
-    });
+    return []
+    // return new Promise((resolve, reject) => {
+    //   fs.readdir(path, (error, result) => {
+    //     if (error) {
+    //       throw new Error(error);
+    //     } else {
+    //       resolve(result);
+    //     }
+    //   });
+    // });
   };
 
   const readFileAsync = async (path) => {
-    return new Promise((resolve, reject) => {
-      fs.readFile(path, "utf-8", (error, result) => {
-        if (error) {
-          throw new Error(error);
-        } else {
-          resolve(JSON.parse(result));
-        }
-      });
-    });
+    return {}
+    // return new Promise((resolve, reject) => {
+    //   fs.readFile(path, "utf-8", (error, result) => {
+    //     if (error) {
+    //       throw new Error(error);
+    //     } else {
+    //       resolve(JSON.parse(result));
+    //     }
+    //   });
+    // });
   };
 
   const getAllProgressFileData = async (progressFiles) => {
     return Promise.all(
       progressFiles.map((progressFile) => {
-        let progressFilePath = path.join(guidedProgressFilePath, progressFile);
+        let progressFilePath = progressFile //path.join(guidedProgressFilePath, progressFile);
         return readFileAsync(progressFilePath);
       })
     );
@@ -291,10 +285,10 @@ const resetGuidedRadioButtons = (parentPageID) => {
     //Wipe out existing progress if it exists
 
     moduleExports.resetProgress()
-    //Check if Guided-Progress folder exists. If not, create it.
-    if (!fs.existsSync(guidedProgressFilePath)) {
-      fs.mkdirSync(guidedProgressFilePath, { recursive: true });
-    }
+    // //Check if Guided-Progress folder exists. If not, create it.
+    // if (!fs.existsSync(guidedProgressFilePath)) {
+    //   fs.mkdirSync(guidedProgressFilePath, { recursive: true });
+    // }
 
     resetGuidedRadioButtons("guided-div-dataset-cards-radio-buttons");
 
@@ -302,7 +296,7 @@ const resetGuidedRadioButtons = (parentPageID) => {
       "guided-div-dataset-cards-radio-buttons"
     );
 
-    const guidedSavedProgressFiles = await readDirAsync(guidedProgressFilePath);
+    const guidedSavedProgressFiles =await readDirAsync(); //guidedProgressFilePath);
     //render progress resumption cards from progress file array on first page of guided mode
     if (guidedSavedProgressFiles.length != 0) {
       // $("#guided-continue-curation-header").text(
@@ -345,4 +339,5 @@ const resetGuidedRadioButtons = (parentPageID) => {
     nextQuestionID: "" // Will be set with the next page ID
 }
 
-module.exports = moduleExports
+export default moduleExports
+// module.exports = moduleExports

@@ -283,7 +283,7 @@ function initialize() {
       show: false,
       icon: __dirname + "/assets/img/logo-neuroconv.png",
       webPreferences: {
-        nodeIntegration: true,
+        nodeIntegration: true, // NOTE: This is true so we can still support Electron-only features—though we will try to steer clear of them.
         enableRemoteModule: true,
         contextIsolation: false,
         sandbox: false,

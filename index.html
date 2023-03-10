@@ -69,8 +69,10 @@
     <script src="./assets/lotties/documentation-lotties.js" type="text/javascript"></script>
     <script src="./assets/lotties//contact-us-lotties.js" type="text/javascript"></script>
 
-    <!-- Main JavaScript Entrypoint -->
-    <script src="./dist/nwb-guide.js" type="module"></script>
+    <!-- Obligatory inclusion of jQuery based on SODA DOM manipulation strategy -->
+    <script src="node_modules/jquery/dist/jquery.min.js"></script> <!-- Vite -->
+    <script> if (navigator.userAgent.toLowerCase().indexOf(' electron/') > -1) window.$ = window.jQuery = require("jquery"); </script> <!-- Electron -->
+    
 
     <style>
       #notification {
@@ -116,20 +118,22 @@
       <main id="content" class="content js-content"></main>
     </div>
 
-    <script>
-      window.$ = window.jQuery = require("jquery");
-    </script>
     <script src="node_modules/cropperjs/dist/cropper.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/fomantic-ui/dist/components/accordion.js"></script>
     <script src="node_modules/jstree/dist/jstree.min.js"></script>
     <script src="node_modules/@tarekraafat/autocomplete.js/dist/autoComplete.js"></script>
-    <script src="node_modules/sweetalert2/dist/sweetalert2.min.js"></script>
     <script src="https://jsuites.net/v4/jsuites.js"></script>
     <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
+    <script src="node_modules/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 
-    <!-- Must run this after everything else is available -->
-    <script src="./frontend/vanilla.js" type="module"></script>
+    <script type="module">
+      import { addReadyCallback } from "./frontend/loadHTMLAsynchronously.js" // Load all HTML
+      addReadyCallback(async () => {
+        const isElectron = (await import('./frontend/electron/index.js')).default // Load Electron-specific assets
+        if (!isElectron) await import("./frontend/index.js") // Load dev frontend if not in Electron context
+      })
+    </script>
 
     <script src="./assets/lotties.js" type="text/javascript"></script>
   </body>

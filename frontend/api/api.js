@@ -341,4 +341,4 @@ const api = {
   uploadNewTags,
 };
 
-module.exports = api;
+export default api;

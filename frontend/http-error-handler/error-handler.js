@@ -3,10 +3,9 @@
  *
  * @param {error} error - A general or Axios error object
  */
-function clientError(error) {
+export function clientError(error) {
   // Handles gneral errors and getting basic information from Axios errors
   console.error(error);
-  log.error(JSON.stringify(error));
 
   // Handle logging for Axios errors in greater detail
   if (error.response) {
@@ -14,20 +13,10 @@ function clientError(error) {
     let error_status = error.response.status;
     let error_headers = error.response.headers;
 
-    log.error("Error message: " + JSON.stringify(error_message));
-    log.error("Response Status: " + JSON.stringify(error_status));
-    log.error("Request config: ");
-    log.error(JSON.stringify(error.config));
-    log.error("Response Headers: ");
-    log.error(JSON.stringify(error_headers));
-
     console.log(`Error caused from: ${error_message}`);
     console.log(`Response Status: ${error_status}`);
     console.log("Headers:");
     console.log(error_headers);
-  } else if (error.request) {
-    // The request was made but no response was received
-    log.error(error.request);
   }
 }
 
@@ -37,7 +26,7 @@ function clientError(error) {
  * @param {Error} error - The error object. Can be a general Error or an Axios subclass.
  * @returns {string} - The error message to display to the user
  */
-function userErrorMessage(error) {
+export function userErrorMessage(error) {
   let errorMessage = "";
   if (error.response) {
     // The request was made and the server responded with a status code
@@ -56,5 +45,3 @@ function userErrorMessage(error) {
 
   return errorMessage;
 }
-
-module.exports = { clientError, userErrorMessage };

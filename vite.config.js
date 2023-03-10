@@ -9,4 +9,8 @@ export default defineConfig({
       formats: ['iife'],
     },
   },
+
+  server: {
+    open: 'index.html'
+  }
 });

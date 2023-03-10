@@ -1,5 +1,5 @@
-// determine if we are working with a Local, Saved, or Pennsieve dataset in the current Curation flow
-function determineDatasetLocation() {
+// determine if we are working with a Local, Saved, or Pennsieve dataset in the current Curation flowexprt 
+export function determineDatasetLocation() {
   let location = "";
 
   if ("starting-point" in sodaJSONObj) {
@@ -41,5 +41,3 @@ function determineDatasetLocation() {
 
   return location;
 }
-
-module.exports = { determineDatasetLocation };

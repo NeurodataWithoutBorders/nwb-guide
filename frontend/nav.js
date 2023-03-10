@@ -1,4 +1,10 @@
-const globals = require("./frontend/globals.js");
+
+import globals from "./globals.js";
+
+function onDocumentReady(fn) {
+  if (document.readyState === "complete" || document.readyState === "interactive") setTimeout(fn, 1)
+  else document.addEventListener("DOMContentLoaded", fn)
+}
 
 // function to hide the sidebar and disable the sidebar expand button
 function forceActionSidebar(action) {
@@ -201,18 +207,23 @@ function hideAllSectionsAndDeselectButtons() {
   });
 }
 
-showMainContent();
+onDocumentReady(() => {
 
-// Set of functions for the footer shortcuts between sections
-// only required for when switching between section where the menu needs to change
-// TO DISCUSS - add these for all return buttons and pulse the button on return maybe?
-// Should help if people lose their position
-$("#shortcut-navigate-to-organize").on("click", () => {
-  $("#prepare_dataset_tab").click();
-  $("#organize_dataset_btn").click();
-});
+  showMainContent();
 
-$("#shortcut-navigate-to-create_submission").on("click", () => {
-  $("#prepare_metadata_tab").click();
-  $("#create_submission_btn").click();
-});
+  // Set of functions for the footer shortcuts between sections
+  // only required for when switching between section where the menu needs to change
+  // TO DISCUSS - add these for all return buttons and pulse the button on return maybe?
+  // Should help if people lose their position
+  $("#shortcut-navigate-to-organize").on("click", () => {
+    $("#prepare_dataset_tab").click();
+    $("#organize_dataset_btn").click();
+  });
+
+  $("#shortcut-navigate-to-create_submission").on("click", () => {
+    $("#prepare_metadata_tab").click();
+    $("#create_submission_btn").click();
+  });
+
+})
+

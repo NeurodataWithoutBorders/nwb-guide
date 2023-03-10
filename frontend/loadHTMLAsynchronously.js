@@ -8,6 +8,13 @@ function onDocumentReady(fn) {
 // TODO: Remove this once we have a Web Component solution
 // ---------------------------------------------------------
 
+let ready = false
+let callbacks = []  
+export const addReadyCallback = (callback) => {
+    if (ready) callback()
+    else callbacks.push(callback)
+}
+
 // adds the apps HTML pages to the DOM
 onDocumentReady(async function () {
     const links = document.querySelectorAll('link[rel="import"]');
@@ -57,12 +64,8 @@ onDocumentReady(async function () {
 
     await waitForHtmlSectionsToInsertIntoDOM();
 
-    // -------------------- For Electron Builds --------------------
-    var userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.indexOf(' electron/') > -1) {
-        await import("./shell-commands.js")
-    }
-
-    await import("./nav.js");
-    await import("./renderer.js");
+    ready = true
+    callbacks.forEach(f => f())
 });
+
+

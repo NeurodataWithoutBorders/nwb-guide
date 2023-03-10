@@ -3,7 +3,7 @@
              to justify keeping it outside of its own functions.
 
 */
-const { determineDatasetLocation } = require("./analytics-utils");
+import { determineDatasetLocation } from "./analytics-utils.js";
 
 const BUCKET_SIZE = 500;
 
@@ -25,7 +25,7 @@ const editingExistingLocalDataset = () => {
 };
 
 // Sends detailed information about failures that occur when using the Organize Dataset's upload/generation feature to Analytics; Used for providing usage numbers to NIH
-const logCurationErrorsToAnalytics = async (
+export const logCurationErrorsToAnalytics = async (
   uploadedFiles,
   uploadedFilesSize,
   dataset_destination,
@@ -252,7 +252,7 @@ const logCurationErrorsToAnalytics = async (
  * @param {number} uploadedFiles
  * @param {boolean} guidedMode
  */
-const logCurationSuccessToAnalytics = async (
+export const logCurationSuccessToAnalytics = async (
   manifest_files_requested,
   main_total_generate_dataset_size,
   dataset_name,
@@ -401,9 +401,4 @@ const logCurationSuccessToAnalytics = async (
       }
     });
   }
-};
-
-module.exports = {
-  logCurationErrorsToAnalytics,
-  logCurationSuccessToAnalytics,
 };
