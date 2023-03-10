@@ -129,8 +129,12 @@
 
     <script type="module">
       import { addReadyCallback } from "./frontend/loadHTMLAsynchronously.js" // Load all HTML
+      import { isElectron } from "./frontend/electron/check.js"
+
       addReadyCallback(async () => {
-        const isElectron = (await import('./frontend/electron/index.js')).default // Load Electron-specific assets
+        await import('./frontend/electron/index.js') // Load Electron-specific assets
+
+        console.log("Electron context: ", isElectron)
         if (!isElectron) await import("./frontend/index.js") // Load dev frontend if not in Electron context
       })
     </script>
