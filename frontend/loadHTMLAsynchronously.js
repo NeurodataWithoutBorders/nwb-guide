@@ -9,7 +9,7 @@ function onDocumentReady(fn) {
 // ---------------------------------------------------------
 
 let ready = false
-let callbacks = []  
+let callbacks = []
 export const addReadyCallback = (callback) => {
     if (ready) callback()
     else callbacks.push(callback)
@@ -67,5 +67,3 @@ onDocumentReady(async function () {
     ready = true
     callbacks.forEach(f => f())
 });
-
-

@@ -1,4 +1,4 @@
-// determine if we are working with a Local, Saved, or Pennsieve dataset in the current Curation flowexprt 
+// determine if we are working with a Local, Saved, or Pennsieve dataset in the current Curation flowexprt
 export function determineDatasetLocation() {
   let location = "";
 

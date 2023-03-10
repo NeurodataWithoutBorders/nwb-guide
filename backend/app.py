@@ -19,9 +19,9 @@ from os import getenv
 app = Flask(__name__)
 
 # Enable CORS if the environment variable ENABLE_CORS is set
-if getenv("ENABLE_CORS", 'False').lower() in ('true', '1', 't'):
+if getenv("ENABLE_CORS", "False").lower() in ("true", "1", "t"):
     CORS(app)
-    app.config['CORS_HEADERS'] = 'Content-Type'
+    app.config["CORS_HEADERS"] = "Content-Type"
 
 configureLogger(app)
 
@@ -30,6 +30,7 @@ api = configureAPI()
 configureRouteHandlers(api)
 
 api.init_app(app)
+
 
 @api.route("/sodaforsparc_server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
