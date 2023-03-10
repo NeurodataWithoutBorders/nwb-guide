@@ -295,7 +295,7 @@ function initialize() {
     require("@electron/remote/main").enable(mainWindow.webContents);
 
     // mainWindow.loadURL(path.join("file://", __dirname, "/soda.html"));
-    mainWindow.loadURL(path.join("file://", __dirname, "/guide.html"));
+    mainWindow.loadURL(path.join("file://", __dirname, "/index.html"));
 
     const splash = new BrowserWindow({
       width: 340,
