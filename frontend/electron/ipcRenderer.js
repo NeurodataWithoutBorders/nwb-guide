@@ -13,7 +13,7 @@ ipcRenderer.on("app_version", (event, arg) => {
     ipcRenderer.removeAllListeners("app_version");
     version.innerText = arg.version;
   });
-  
+
   // Check for update and show the pop up box
   ipcRenderer.on("update_available", () => {
     ipcRenderer.removeAllListeners("update_available");
@@ -28,14 +28,14 @@ ipcRenderer.on("app_version", (event, arg) => {
       message: "A new update is available. Downloading now...",
     });
   });
-  
+
   // Restart the app for update. Does not restart on macos
   const restartApp = async () => {
     notyf.open({
       type: "app_update_warning",
       message: "Closing SODA now...",
     });
-  
+
     ipcRenderer.send(
       "track-event",
       "App Update",
@@ -61,7 +61,7 @@ const downloadTemplates = (templateItem, destinationFolder) => {
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
       });
-  
+
       ipcRenderer.send("track-event", "Error", `Download Template - ${templateItem}`);
     } else {
       fs.createReadStream(templatePath).pipe(fs.createWriteStream(destinationPath));
@@ -82,7 +82,7 @@ const downloadTemplates = (templateItem, destinationFolder) => {
       downloadTemplates(filename, path[0]);
     }
   });
-  
+
   ipcRenderer.on("selected-DDD-download-folder", (event, path, filename) => {
     if (path.length > 0) {
       downloadTemplates(filename, path[0]);
@@ -138,10 +138,10 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
         Swal.showLoading();
       },
     }).then((result) => {});
-  
+
     let bfdataset = document.getElementById("bf_dataset_load_subjects").innerText.trim();
     try {
-      
+
       let save_locally = await client.post(
         `/prepare_metadata/subjects_file`,
         {
@@ -156,16 +156,16 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
           },
         }
       );
-  
+
       let res = save_locally.data;
-  
+
       Swal.fire({
         title: "The subjects.xlsx file has been successfully generated at the specified location.",
         icon: "success",
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
       });
-  
+
       // log the success to Pennsieve
       logMetadataForAnalytics(
         "Success",
@@ -174,14 +174,14 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
         "Generate",
         uploadBFBoolean ? Destinations.PENNSIEVE : Destinations.LOCAL
       );
-  
+
       // log the size of the metadata file that was generated at varying levels of granularity
       const size = res;
       logMetadataSizeForAnalytics(uploadBFBoolean, "subjects.xlsx", size);
     } catch (error) {
       clientError(error);
       let emessage = userErrorMessage(error);
-  
+
       Swal.fire({
         title: "Failed to generate the subjects.xlsx file.",
         html: emessage,
@@ -189,7 +189,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
         backdrop: "rgba(0,0,0, 0.4)",
         icon: "error",
       });
-  
+
       // log the error to analytics
       logMetadataForAnalytics(
         "Error",
@@ -202,7 +202,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
   }
 
   globalThis.generateSubjectsFileHelper = generateSubjectsFileHelper; // For parity with SODA
-  
+
   // generate samples file
   ipcRenderer.on("selected-generate-metadata-samples", (event, dirpath, filename) => {
     if (dirpath.length > 0) {
@@ -254,7 +254,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
       }
     }
   });
-  
+
   async function generateSamplesFileHelper(uploadBFBoolean) {
     if (uploadBFBoolean) {
       var { value: continueProgress } = await Swal.fire({
@@ -302,7 +302,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
         Swal.showLoading();
       },
     }).then((result) => {});
-  
+
     try {
       let samplesFileResponse = await client.post(
         "prepare_metadata/samples_file",
@@ -318,14 +318,14 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
           },
         }
       );
-  
+
       Swal.fire({
         title: "The samples.xlsx file has been successfully generated at the specified location.",
         icon: "success",
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
       });
-  
+
       logMetadataForAnalytics(
         "Success",
         MetadataAnalyticsPrefix.SAMPLES,
@@ -333,7 +333,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
         "Generate",
         uploadBFBoolean ? Destinations.PENNSIEVE : Destinations.LOCAL
       );
-  
+
       // log the size of the metadata file that was generated at varying levels of granularity
       const { size } = samplesFileResponse.data;
       logMetadataSizeForAnalytics(uploadBFBoolean, "samples.xlsx", size);
@@ -347,7 +347,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
         backdrop: "rgba(0,0,0, 0.4)",
         icon: "error",
       });
-  
+
       logMetadataForAnalytics(
         "Error",
         MetadataAnalyticsPrefix.SAMPLES,
@@ -357,7 +357,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
       );
     }
   }
-  
+
   // import Primary folder
   ipcRenderer.on("selected-local-primary-folder", (event, primaryFolderPath) => {
     if (primaryFolderPath.length > 0) {
@@ -369,7 +369,7 @@ async function generateSubjectsFileHelper(uploadBFBoolean) {
       importPrimaryFolderSamples(primaryFolderPath[0]);
     }
   });
-  
+
 
 /*
 ******************************************************
@@ -396,7 +396,7 @@ function logMetadataForAnalytics(
   ) {
     // the name of the action being logged
     let actionName = analyticsActionPrefix;
-  
+
     // check if only logging the prefix or all levels of granularity
     if (
       granularity === AnalyticsGranularity.PREFIX ||
@@ -405,7 +405,7 @@ function logMetadataForAnalytics(
       // log the prefix, category of the event
       ipcRenderer.send("track-event", `${category}`, actionName);
     }
-  
+
     // check if the user provided an action to be part of the action name
     if (action !== "") {
       // update the action name with the given action
@@ -415,7 +415,7 @@ function logMetadataForAnalytics(
       // so we can fix the log call by including an appropriate action
       actionName = actionName + " - " + "(not set)";
     }
-  
+
     // check if the user wants to log the action without the destination
     if (
       granularity === AnalyticsGranularity.ACTION ||
@@ -425,7 +425,7 @@ function logMetadataForAnalytics(
       // track every time the user wanted to generate a metadata file or everytime the user wanted to use a pre-existing metadata file
       ipcRenderer.send("track-event", `${category}`, actionName, action, 1);
     }
-  
+
     if (
       granularity === AnalyticsGranularity.ACTION_WITH_DESTINATION ||
       granularity === AnalyticsGranularity.ALL_LEVELS ||
@@ -441,7 +441,7 @@ function logMetadataForAnalytics(
       }
     }
   }
-  
+
   // Log the size of a metadata file that was created locally or uploaded to Pennsieve
   // Inputs:
   //    uploadBFBoolean: boolean - True when the metadata file was created on Pennsieve; false when the Metadata file was created locally
@@ -454,7 +454,7 @@ function logMetadataForAnalytics(
       "Size of Total Metadata Files Generated",
       size
     );
-  
+
     let fileNameToPrefixMapping = {
       dataset_description: MetadataAnalyticsPrefix.DATASET_DESCRIPTION,
       submission: MetadataAnalyticsPrefix.SUBMISSION,
@@ -464,14 +464,14 @@ function logMetadataForAnalytics(
       changes: MetadataAnalyticsPrefix.CHANGES,
       manifest: MetadataAnalyticsPrefix.MANIFEST,
     };
-  
+
     // remove the extension from the metadata file's name
     let metadataFileWithoutExtension = metadataFileName.slice(0, metadataFileName.indexOf("."));
-  
+
     // get the appropriate prefix for logging the given metadata file's size
     let currentMetadataLoggingPrefix =
       fileNameToPrefixMapping[`${metadataFileWithoutExtension.toLowerCase()}`];
-  
+
     // log the size to analytics using the Action as a root logging level
     // that aggregates the size of all metadata files of a particular type created through SODA
     ipcRenderer.send(
@@ -481,10 +481,10 @@ function logMetadataForAnalytics(
       "Size",
       size
     );
-  
+
     // get the destination of the metadata file
     let destination = uploadBFBoolean ? "Pennsieve" : "Local";
-  
+
     // log the size of the metadata file along with its location; label is the selected dataset's ID or a note informing us the dataset is stored locally
     ipcRenderer.send(
       "track-event",
@@ -494,7 +494,7 @@ function logMetadataForAnalytics(
       size
     );
   }
-  
+
   // get the size of a file in bytes given a path to a file
   const getFileSizeInBytes = (path) => {
     return new Promise((resolve, reject) => {
@@ -508,7 +508,7 @@ function logMetadataForAnalytics(
       });
     });
   };
-  
+
   const MetadataAnalyticsPrefix = {
     DATASET_DESCRIPTION: "Prepare Metadata - dataset_description",
     MANIFEST: "Prepare Metadata - manifest",
@@ -518,7 +518,7 @@ function logMetadataForAnalytics(
     CHANGES: "Prepare Metadata - changes",
     SUBMISSION: "Prepare Metadata - submission",
   };
-  
+
   const ManageDatasetsAnalyticsPrefix = {
     MANAGE_DATASETS_CREATE_DATASET: "Manage Datasets - Create a new dataset",
     MANAGE_DATASETS_RENAME_DATASET: "Manage Datasets - Rename an existing dataset",
@@ -532,17 +532,17 @@ function logMetadataForAnalytics(
     MANAGE_DATASETS_UPLOAD_LOCAL_DATASET: "Manage Datasets - Upload Local Dataset",
     MANAGE_DATASETS_CHANGE_STATUS: "Manage Datasets - Change Dataset Status",
   };
-  
+
   const DisseminateDatasetsAnalyticsPrefix = {
     DISSEMINATE_REVIEW: "Disseminate Datasets - Pre-publishing Review",
     DISSEMINATE_CURATION_TEAM: "Disseminate Datasets - Share with Curation Team",
     DISSEMINATE_SPARC_CONSORTIUM: "Disseminate Datasets - Share with SPARC Consortium",
   };
-  
+
   const PrepareDatasetsAnalyticsPrefix = {
     CURATE: "Prepare Datasets - Organize dataset",
   };
-  
+
   const AnalyticsGranularity = {
     PREFIX: "prefix",
     ACTION: "action",
@@ -550,20 +550,20 @@ function logMetadataForAnalytics(
     ACTION_AND_ACTION_WITH_DESTINATION: "action and action with destination",
     ALL_LEVELS: "all levels of granularity",
   };
-  
+
   const Destinations = {
     LOCAL: "Local",
     PENNSIEVE: "Pennsieve",
     SAVED: "Saved",
     NEW: "New",
   };
-  
+
   const Actions = {
     GENERATE: "Generate",
     EXISTING: "Existing",
     NEW: "New",
   };
-  
+
   function logCurationForAnalytics(
     category,
     analyticsActionPrefix,
@@ -576,10 +576,10 @@ function logMetadataForAnalytics(
     if (!actions) {
       return;
     }
-  
+
     // the name of the action being logged
     let actionName = analyticsActionPrefix;
-  
+
     // check if only logging the prefix or all levels of granularity
     if (
       granularity === AnalyticsGranularity.PREFIX ||
@@ -588,7 +588,7 @@ function logMetadataForAnalytics(
       // log the prefix, category of the event
       ipcRenderer.send("track-event", `${category}`, actionName);
     }
-  
+
     // check if the user wants to log the action(s)
     if (
       granularity === AnalyticsGranularity.ACTION ||
@@ -601,11 +601,11 @@ function logMetadataForAnalytics(
         actionName = actionName + " - " + actions[idx];
         ipcRenderer.send("track-event", `${category}`, actionName, actions[idx], 1);
       }
-  
+
       // reset the action's name
       actionName = analyticsActionPrefix;
     }
-  
+
     // check if the user wants to log the action(s) with the destination
     if (
       granularity === AnalyticsGranularity.ACTION_WITH_DESTINATION ||
@@ -617,12 +617,12 @@ function logMetadataForAnalytics(
         // track the action
         actionName = actionName + " - " + actions[idx];
       }
-  
+
       if (!generalLog) {
         // add the location
         actionName = actionName + " - " + location;
       }
-  
+
       // determine logging format
       if (location === Destinations.PENNSIEVE) {
         // use the datasetid as a label and do not add an aggregation value
@@ -633,37 +633,37 @@ function logMetadataForAnalytics(
       }
     }
   }
-  
+
   function getMetadataFileNameFromStatus(metadataFileStatus) {
     // get the UI text that displays the file path
     let filePath = metadataFileStatus.text();
-  
+
     let fileName = path.basename(filePath);
-  
+
     // remove the extension
     fileName = fileName.slice(0, fileName.indexOf("."));
-  
+
     return fileName;
   }
-  
+
   function determineLocationFromStatus(metadataFileStatus) {
     let filePath = metadataFileStatus.text();
-  
+
     // determine if the user imported from Pennsieve or Locally
     let pennsieveFile = filePath.toUpperCase().includes("Pennsieve".toUpperCase());
-  
+
     return pennsieveFile;
   }
-  
+
   function logGeneralOperationsForAnalytics(category, analyticsPrefix, granularity, actions) {
     // if no actions to log return
     if (!actions) {
       return;
     }
-  
+
     // the name of the action being logged
     let actionName = analyticsPrefix;
-  
+
     // check if only logging the prefix or all levels of granularity
     if (
       granularity === AnalyticsGranularity.PREFIX ||
@@ -672,7 +672,7 @@ function logMetadataForAnalytics(
       // log the prefix, category of the event
       ipcRenderer.send("track-event", `${category}`, actionName);
     }
-  
+
     // check if the user wants to log the action(s)
     if (
       granularity === AnalyticsGranularity.ACTION ||
@@ -686,7 +686,7 @@ function logMetadataForAnalytics(
       }
     }
   }
-  
+
 
 ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
     if (index === 0) {
@@ -694,23 +694,23 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
     }
     $("#submit_prepublishing_review-spinner").hide();
   });
-  
+
   ipcRenderer.on("warning-publish-dataset-again-selection", (event, index) => {
     if (index === 0) {
       submitReviewDataset();
     }
     $("#submit_prepublishing_review-spinner").hide();
   });
-  
+
   async function submitReviewDataset(embargoReleaseDate) {
     $("#para-submit_prepublishing_review-status").text("");
     bfRefreshPublishingDatasetStatusBtn.disabled = true;
     var selectedBfAccount = defaultBfAccount;
     var selectedBfDataset = defaultBfDataset;
-  
+
     // title text
     let title = "";
-  
+
     // check if the user has selected any files they want to be hidden to the public upon publication (aka ignored/excluded files)
     // set the loading message title accordingly
     if (excludedFilesInPublicationFlow()) {
@@ -718,7 +718,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
     } else {
       title = "Submitting dataset for pre-publishing review";
     }
-  
+
     // show a SWAL loading message until the submit for prepublishing flow is successful or fails
     Swal.fire({
       title: title,
@@ -733,7 +733,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         Swal.showLoading();
       },
     });
-  
+
     // if there are excluded files upload them to Pennsieve so they will not be viewable to the public upon publication
     if (excludedFilesInPublicationFlow()) {
       // get the excluded files from the excluded files list in the third step of the pre-publishing review submission flow
@@ -751,9 +751,9 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
           AnalyticsGranularity.ALL_LEVELS,
           ["Updating excluded files"]
         );
-  
+
         var emessage = userErrorMessage(error);
-  
+
         // alert the user of the error
         Swal.fire({
           backdrop: "rgba(0,0,0, 0.4)",
@@ -774,7 +774,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         return;
       }
     }
-  
+
     try {
       await api.submitDatasetForPublication(
         selectedBfAccount,
@@ -790,9 +790,9 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         AnalyticsGranularity.ALL_LEVELS,
         ["Submit dataset"]
       );
-  
+
       var emessage = userErrorMessage(error);
-  
+
       // alert the user of an error
       Swal.fire({
         backdrop: "rgba(0,0,0, 0.4)",
@@ -809,14 +809,14 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
           popup: "animate__animated animate__zoomOut animate__faster",
         },
       });
-  
+
       // stop execution
       return;
     }
-  
+
     // update the publishing status UI element
     await showPublishingStatus("noClear");
-  
+
     // track success
     logGeneralOperationsForAnalytics(
       "Success",
@@ -824,7 +824,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
       AnalyticsGranularity.ALL_LEVELS,
       ["Submit dataset"]
     );
-  
+
     // alert the user the submission was successful
     Swal.fire({
       backdrop: "rgba(0,0,0, 0.4)",
@@ -840,7 +840,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         popup: "animate__animated animate__zoomOut animate__faster",
       },
     });
-  
+
     await transitionFreeFormMode(
       document.querySelector("#begin-prepublishing-btn"),
       "submit_prepublishing_review-question-2",
@@ -857,13 +857,13 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         document.getElementById("para-organize-datasets-loading").style.display = "block";
         document.getElementById("para-organize-datasets-loading").innerHTML =
           "<span>Please wait...</span>";
-  
-        
-  
+
+
+
         try {
           await client.post(
             `/organize_datasets/datasets`,
-  
+
             {
               generation_type: "create-new",
               generation_destination_path: filepath[0],
@@ -877,7 +877,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
               timeout: 0,
             }
           );
-  
+
           document.getElementById("para-organize-datasets-error").style.display = "none";
           document.getElementById("para-organize-datasets-success").style.display = "block";
           document.getElementById("para-organize-datasets-success").innerHTML =
@@ -892,12 +892,12 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
       }
     }
   });
-  
+
   //////////// FILE BROWSERS to import existing files and folders /////////////////////
   organizeDSaddFiles.addEventListener("click", function () {
     ipcRenderer.send("open-files-organize-datasets-dialog");
   });
-  
+
   ipcRenderer.on("selected-files-organize-datasets", async (event, path) => {
     var filtered = getGlobalPath(globals.organizeDSglobalPath);
     var myPath = getRecursivePath(filtered.slice(1), datasetStructureJSONObj);
@@ -944,7 +944,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
           spinner_icon.setAttribute("class", "ui large active inline loader icon-wrapper");
           background.setAttribute("class", "loading-items-background");
           background.setAttribute("id", "loading-items-background-overlay");
-  
+
           spinner_container.append(spinner_icon);
           document.body.prepend(background);
           document.body.prepend(spinner_container);
@@ -972,11 +972,11 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
       }
     }
   });
-  
+
   organizeDSaddFolders.addEventListener("click", function () {
     ipcRenderer.send("open-folders-organize-datasets-dialog");
   });
-  
+
   ipcRenderer.on("selected-folders-organize-datasets", async (event, pathElement) => {
     var footer = `<a style='text-decoration: none !important' class='swal-popover' data-content='A folder name cannot contain any of the following special characters: <br> ${nonAllowedCharacters}' rel='popover' data-html='true' data-placement='right' data-trigger='hover'>What characters are not allowed?</a>`;
     irregularFolderArray = [];
@@ -1017,7 +1017,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
               spinner_icon.setAttribute("class", "ui large active inline loader icon-wrapper");
               background.setAttribute("class", "loading-items-background");
               background.setAttribute("id", "loading-items-background-overlay");
-  
+
               spinner_container.append(spinner_icon);
               document.body.prepend(background);
               document.body.prepend(spinner_container);
@@ -1047,7 +1047,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
               spinner_icon.setAttribute("class", "ui large active inline loader icon-wrapper");
               background.setAttribute("class", "loading-items-background");
               background.setAttribute("id", "loading-items-background-overlay");
-  
+
               spinner_container.append(spinner_icon);
               document.body.prepend(background);
               document.body.prepend(spinner_container);
@@ -1079,7 +1079,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
           spinner_icon.setAttribute("class", "ui large active inline loader icon-wrapper");
           background.setAttribute("class", "loading-items-background");
           background.setAttribute("id", "loading-items-background-overlay");
-  
+
           spinner_container.append(spinner_icon);
           document.body.prepend(background);
           document.body.prepend(spinner_container);
@@ -1100,7 +1100,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
       }
     }
   });
-  
+
   const addFoldersfunction = async (action, nonallowedFolderArray, folderArray, currentLocation) => {
     let importToast = new Notyf({
       position: { x: "right", y: "bottom" },
@@ -1124,7 +1124,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
     var importedFolders = {};
     var duplicateFolders = [];
     var folderPath = [];
-  
+
     if (JSON.stringify(currentLocation["folders"]) !== "{}") {
       for (var folder in currentLocation["folders"]) {
         uiFolders[folder] = 1;
@@ -1138,7 +1138,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
       });
-  
+
       // log the error
       logCurationForAnalytics(
         "Error",
@@ -1155,7 +1155,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         var j = 1;
         var originalFolderName = path.basename(folderArray[i]);
         var renamedFolderName = originalFolderName;
-  
+
         if (originalFolderName in currentLocation["folders"]) {
           //folder matches object key
           folderPath.push(folderArray[i]);
@@ -1185,7 +1185,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
             }
           }
         }
-  
+
         if (nonallowedFolderArray.includes(folderArray[i])) {
           if (action !== "ignore" && action !== "") {
             if (action === "remove") {
@@ -1233,7 +1233,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
           }
         }
       }
-  
+
       if (Object.keys(importedFolders).length > 0) {
         for (var element in importedFolders) {
           currentLocation["folders"][element] = {
@@ -1270,7 +1270,7 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
         }
         hideMenu("folder", menuFolder, menuHighLevelFolders, menuFile);
         hideMenu("high-level-folder", menuFolder, menuHighLevelFolders, menuFile);
-  
+
         // log the success
         logCurationForAnalytics(
           "Success",
@@ -1282,8 +1282,8 @@ ipcRenderer.on("warning-publish-dataset-selection", (event, index) => {
       }
     }
   };
-  
-  
+
+
 
 
 // SAVE FILE ORG
@@ -1296,7 +1296,7 @@ ipcRenderer.on("save-file-organization-dialog", (event) => {
       event.sender.send("selected-saveorganizationfile", filename);
     });
   });
-  
+
 
 
 ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepath) => {
@@ -1365,7 +1365,7 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                   $("#para-continue-location-dataset-getting-started").text("");
                   return;
                 }
-  
+
                 let numb = document.getElementById("local_dataset_number");
                 numb.innerText = "0%";
                 progressBar_rightSide = document.getElementById("left-side_less_than_50");
@@ -1374,25 +1374,25 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                 progressBar_leftSide.style.transform = `rotate(0deg)`;
                 document.getElementById("loading_local_dataset").style.display = "block";
                 globals.sodaJSONObj["starting-point"]["local-path"] = filepath[0];
-  
+
                 let root_folder_path = $("#input-destination-getting-started-locally").attr(
                   "placeholder"
                 );
-  
+
                 let local_progress = setInterval(progressReport, 500);
                 async function progressReport() {
                   try {
                     let monitorProgressResponse = await client.get(
                       `/organize_datasets/datasets/import/progress`
                     );
-  
+
                     let { data } = monitorProgressResponse;
                     percentage_amount = data["progress_percentage"].toFixed(2);
                     finished = data["create_soda_json_completed"];
-  
+
                     progressBar_rightSide = document.getElementById("left-side_less_than_50");
                     progressBar_leftSide = document.getElementById("right-side_greater_than_50");
-  
+
                     numb.innerText = percentage_amount + "%";
                     if (percentage_amount <= 50) {
                       progressBar_rightSide.style.transform = `rotate(${
@@ -1406,7 +1406,7 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                         percentage_amount * 0.01 * 180
                       }deg)`;
                     }
-  
+
                     if (finished === 1) {
                       progressBar_leftSide.style.transform = `rotate(180deg)`;
                       numb.innerText = "100%";
@@ -1445,13 +1445,13 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
               progressBar_rightSide.style.transform = `rotate(0deg)`;
               let numb = document.getElementById("local_dataset_number");
               numb.innerText = "0%";
-  
+
               action = "";
               globals.sodaJSONObj["starting-point"]["local-path"] = filepath[0];
               let root_folder_path = $("#input-destination-getting-started-locally").attr(
                 "placeholder"
               );
-  
+
               let percentage_amount = 0;
               let local_progress = setInterval(progressReport, 500);
               async function progressReport() {
@@ -1459,13 +1459,13 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                   let monitorProgressResponse = await client.get(
                     `/organize_datasets/datasets/import/progress`
                   );
-  
+
                   let { data } = monitorProgressResponse;
                   percentage_amount = data["progress_percentage"].toFixed(2);
                   finished = data["create_soda_json_completed"];
                   progressBar_rightSide = document.getElementById("left-side_less_than_50");
                   progressBar_leftSide = document.getElementById("right-side_greater_than_50");
-  
+
                   numb.innerText = percentage_amount + "%";
                   if (percentage_amount <= 50) {
                     progressBar_rightSide.style.transform = `rotate(${
@@ -1482,7 +1482,7 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                   if (finished === 1) {
                     progressBar_leftSide.style.transform = `rotate(180deg)`;
                     numb.innerText = "100%";
-  
+
                     clearInterval(local_progress);
                     progressBar_rightSide.classList.remove("notransition");
                     populate_existing_folders(datasetStructureJSONObj);
@@ -1508,7 +1508,7 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                   clearInterval(local_progress);
                 }
               }
-  
+
               try {
                 let importLocalDatasetResponse = await client.post(
                   `/organize_datasets/datasets/import`,
@@ -1557,7 +1557,7 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                 $("#para-continue-location-dataset-getting-started").text("");
               }
             });
-  
+
             // log the failure to select an appropriate folder to analytics
             logMetadataForAnalytics(
               "Error",
@@ -1574,16 +1574,16 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
       $("#para-continue-location-dataset-getting-started").text("");
     }
   });
-  
+
   ipcRenderer.on("guided-selected-local-destination-datasetCurate", (event, filepath) => {
     if (filepath.length > 0) {
       if (filepath != null) {
         globals.sodaJSONObj["starting-point"]["local-path"] = "";
         globals.sodaJSONObj["starting-point"]["type"] = "local";
-  
+
         $("#guided-input-destination-getting-started-locally").val(filepath[0]);
         $(".guidedDatasetPath").text(filepath[0]);
-  
+
         valid_dataset = verify_sparc_folder(filepath[0]);
         if (valid_dataset == true) {
           var action = "";
@@ -1622,9 +1622,9 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
                 return;
               }
               globals.sodaJSONObj["starting-point"]["local-path"] = filepath[0];
-  
+
               let root_folder_path = $("#guided-input-destination-getting-started-locally").val();
-  
+
               create_json_object(action, globals.sodaJSONObj, root_folder_path);
               datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
               populate_existing_folders(datasetStructureJSONObj);
@@ -1672,7 +1672,7 @@ ipcRenderer.on("selected-local-destination-datasetCurate", async (event, filepat
     } else {
     }
   });
-  
+
 
 ipcRenderer.on("selected-local-destination-datasetCurate-generate", (event, filepath) => {
     if (filepath.length > 0) {
@@ -1706,9 +1706,9 @@ ipcRenderer.on("selected-metadataCurate", (event, mypath) => {
           .basename(mypath[0])
           .slice(0, path.basename(mypath[0]).indexOf("."));
         var extension = path.basename(mypath[0]).slice(path.basename(mypath[0]).indexOf("."));
-  
+
         let file_size = 0;
-  
+
         try {
           if (fs.existsSync(mypath[0])) {
             let stats = fs.statSync(mypath[0]);
@@ -1718,14 +1718,14 @@ ipcRenderer.on("selected-metadataCurate", (event, mypath) => {
           console.error(err);
           document.getElementById(metadataParaElement).innerHTML =
             "<span style='color:red'>Your SPARC metadata file does not exist or is unreadable. Please verify that you are importing the correct metadata file from your system. </span>";
-  
+
           return;
         }
-  
+
         if (file_size == 0) {
           document.getElementById(metadataParaElement).innerHTML =
             "<span style='color:red'>Your SPARC metadata file is empty! Please verify that you are importing the correct metadata file from your system.</span>";
-  
+
           return;
         }
         if (metadataWithoutExtension === metadataIndividualFile) {
@@ -1746,7 +1746,7 @@ ipcRenderer.on("selected-metadataCurate", (event, mypath) => {
               const metadataFileType = dragDropContainer.dataset.codeMetadataFileType;
               //save the path of the metadata file to the json object
               globals.sodaJSONObj["dataset-metadata"]["code-metadata"][metadataFileType] = mypath[0];
-  
+
               const lottieContainer = dragDropContainer.querySelector(
                 ".code-metadata-lottie-container"
               );
@@ -1777,7 +1777,7 @@ ipcRenderer.on("selected-manifest-folder", async (event, result) => {
       $("body").addClass("waiting");
       let manifest_destination = result["filePaths"][0];
       let manifest_state = {};
-  
+
       if ("manifest-files" in globals.sodaJSONObj) {
         manifest_state = globals.sodaJSONObj["manifest-files"];
         globals.sodaJSONObj["manifest-files"]["local-destination"] = manifest_destination;
@@ -1786,20 +1786,20 @@ ipcRenderer.on("selected-manifest-folder", async (event, result) => {
         globals.sodaJSONObj["manifest-files"] = {};
         globals.sodaJSONObj["manifest-files"]["local-destination"] = manifest_destination;
       }
-  
+
       delete_imported_manifest();
-  
+
       let temp_sodaJSONObj = JSON.parse(JSON.stringify(globals.sodaJSONObj));
       let dataset_name = "Undetermined";
-  
+
       recursive_remove_deleted_files(temp_sodaJSONObj["dataset-structure"]);
-  
+
       if ("bf-dataset-selected" in globals.sodaJSONObj) {
         if ("dataset-name" in globals.sodaJSONObj) {
           dataset_name = globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"];
         }
       }
-  
+
       try {
         await client.post(
           `/curate_datasets/manifest_files`,
@@ -1809,7 +1809,7 @@ ipcRenderer.on("selected-manifest-folder", async (event, result) => {
           },
           { timeout: 0 }
         );
-  
+
         $("body").removeClass("waiting");
         logCurationForAnalytics(
           "Success",
@@ -1821,7 +1821,7 @@ ipcRenderer.on("selected-manifest-folder", async (event, result) => {
       } catch (error) {
         clientError(error);
         $("body").removeClass("waiting");
-  
+
         // log the error to analytics
         logCurationForAnalytics(
           "Error",

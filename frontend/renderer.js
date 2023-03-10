@@ -199,7 +199,7 @@ $("#button-create-bf-new-dataset").click(async () => {
     let selectedbfaccount = defaultBfAccount;
     let bfNewDatasetName = $("#bf-new-dataset-name").val();
 
-    
+
 
     $("#button-create-bf-new-dataset").prop("disabled", true);
 
@@ -242,7 +242,7 @@ $("#button-create-bf-new-dataset").click(async () => {
         },
       });
 
-      
+
 
       $("#button-create-bf-new-dataset").hide();
 
@@ -269,11 +269,11 @@ $("#button-create-bf-new-dataset").click(async () => {
         bfNewDatasetName
       );
 
-      
+
 
       datasetList = [];
       datasetList = await api.getDatasetsForAccount(defaultBfAccount);
-      
+
 
       $(".bf-dataset-span").html(bfNewDatasetName);
 
@@ -381,7 +381,7 @@ $("#button-rename-dataset").on("click", async () => {
         return;
       }
 
-      
+
       defaultBfDataset = renamedDatasetName;
       $(".bf-dataset-span").html(renamedDatasetName);
       refreshDatasetList();
@@ -413,7 +413,7 @@ $("#button-rename-dataset").on("click", async () => {
         renamedDatasetName
       );
 
-      
+
 
       try {
         datasetList = [];
@@ -452,7 +452,7 @@ $("#button-add-permission-pi").click(async () => {
     },
   }).then(async (result) => {
     if (result.isConfirmed) {
-      
+
 
       Swal.fire({
         title: "Changing PI Owner of dataset",
@@ -490,7 +490,7 @@ $("#button-add-permission-pi").click(async () => {
         );
 
         let res = bf_change_owner.data.message;
-        
+
 
         ipcRenderer.send(
           "track-event",
@@ -559,7 +559,7 @@ const showCurrentPermission = async () => {
     return;
   }
 
-  
+
 
   try {
     let permissions = await api.getDatasetPermissions(selectedBfAccount, selectedBfDataset);
@@ -592,7 +592,7 @@ const addPermissionUser = async (
   selectedUser,
   selectedRole
 ) => {
-  
+
 
   let bf_add_permission;
   try {
@@ -643,7 +643,7 @@ const addPermissionUser = async (
     backdrop: "rgba(0,0,0, 0.4)",
   });
 
-  
+
 
   logGeneralOperationsForAnalytics(
     "Success",
@@ -686,7 +686,7 @@ const addPermissionUser = async (
 // Add permission for user //
 $("#button-add-permission-user").click(() => {
   setTimeout(() => {
-    
+
 
     Swal.fire({
       title: `Adding a permission for your selected user`,
@@ -714,7 +714,7 @@ $("#button-add-permission-user").click(() => {
 // Add permission for team
 $("#button-add-permission-team").click(async () => {
   setTimeout(async () => {
-    
+
 
     Swal.fire({
       title: `Adding a permission for your selected team`,
@@ -752,7 +752,7 @@ $("#button-add-permission-team").click(async () => {
       );
 
       let res = bf_add_team_permission.data.message;
-      
+
       logGeneralOperationsForAnalytics(
         "Success",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_PERMISSIONS,
@@ -828,8 +828,8 @@ $("#button-add-subtitle").click(async () => {
     let selectedBfDataset = defaultBfDataset;
     let inputSubtitle = $("#bf-dataset-subtitle").val().trim();
 
-    
-    
+
+
 
     try {
       await client.put(
@@ -845,7 +845,7 @@ $("#button-add-subtitle").click(async () => {
         }
       );
 
-      
+
 
       $("#ds-description").val(inputSubtitle);
 
@@ -909,7 +909,7 @@ const showCurrentSubtitle = async () => {
     return;
   }
 
-  
+
 
   document.getElementById("ds-description").innerHTML = "Loading...";
   document.getElementById("ds-description").disabled = true;
@@ -973,7 +973,7 @@ const showCurrentDescription = async () => {
     $("#ds-isa-warning").css("display", "none");
   }
 
-  
+
 
   // get the dataset readme
   let readme;
@@ -1003,7 +1003,7 @@ const showCurrentDescription = async () => {
     parsedReadme = createParsedReadme(readme);
   } catch (error) {
     // log the error and send it to analytics
-    
+
     console.error(error);
 
     logGeneralOperationsForAnalytics(
@@ -1154,7 +1154,7 @@ $("#ds-close-btn").click(() => {
 // I: user_markdown_input: A string that holds the user's markdown text.
 // Merges user readme file changes with the original readme file.
 const addDescription = async (selectedBfDataset, userMarkdownInput) => {
-  
+
 
   Swal.fire({
     title: determineSwalLoadingMessage($("#button-add-description")),
@@ -1541,7 +1541,7 @@ $("#edit_banner_image_button").click(async () => {
         } else if (imageExtension.toLowerCase() == "jpg") {
           $("#image-banner").attr("src", "data:image/jpg;base64," + img_base64);
         } else {
-          
+
           Swal.fire({
             icon: "error",
             text: "An error occurred when importing the image. Please try again later.",
@@ -1560,7 +1560,7 @@ $("#edit_banner_image_button").click(async () => {
           return;
         }
       } else {
-        
+
 
         Swal.fire({
           icon: "error",
@@ -1580,7 +1580,7 @@ $("#edit_banner_image_button").click(async () => {
         return;
       }
     } else {
-      
+
 
       Swal.fire({
         icon: "error",
@@ -2024,7 +2024,7 @@ const showCurrentBannerImage = async () => {
     return;
   }
 
-  
+
 
   $("#banner_image_loader").show();
 
@@ -2179,7 +2179,7 @@ const showCurrentTags = async () => {
     return;
   }
 
-  
+
 
   // remove all of the tags from the current input
   datasetTagsTagify.removeAllTags();
@@ -2257,7 +2257,7 @@ $("#button-add-license").click(async () => {
     let selectedBfDataset = defaultBfDataset;
     let selectedLicense = "Creative Commons Attribution";
 
-    
+
     try {
       await client.put(
         `/manage_datasets/bf_license`,
@@ -2329,7 +2329,7 @@ const showCurrentLicense = async () => {
     return;
   }
 
-  
+
 
   try {
     let bf_get_license = await client.get(`/manage_datasets/bf_license`, {
@@ -2453,7 +2453,7 @@ function walk(directory, filepaths = []) {
 const logFilesForUpload = (upload_folder_path) => {
   const foundFiles = walk(upload_folder_path);
   foundFiles.forEach((item) => {
-    
+
   });
 };
 
@@ -2524,7 +2524,7 @@ $("#button-submit-dataset").click(async () => {
   var selectedbfaccount = defaultBfAccount;
   var selectedbfdataset = defaultBfDataset;
 
-  
+
   logFilesForUpload(pathSubmitDataset.placeholder);
 
   // start the upload session
@@ -2561,7 +2561,7 @@ $("#button-submit-dataset").click(async () => {
         block: "start",
       });
 
-      
+
 
       // can tell us how many successful upload sessions a dataset ID had (the value is implicitly set to 1 via Total Events query in Analytics) within a given timeframe
       ipcRenderer.send(
@@ -2809,7 +2809,7 @@ $("#button-submit-dataset").click(async () => {
       countDone++;
 
       if (countDone > 1) {
-        
+
         if (success_upload === true) {
           organizeDatasetButton.disabled = false;
           organizeDatasetButton.className = "btn_animated generate-btn";
@@ -2971,7 +2971,7 @@ $("#bf_list_dataset_status").on("change", async () => {
   let selectedBfDataset = defaultBfDataset;
   let selectedStatusOption = bfListDatasetStatus.options[bfListDatasetStatus.selectedIndex].text;
 
-  
+
 
   try {
     let bf_change_dataset_status = await client.put(`/manage_datasets/bf_dataset_status`, {
@@ -3047,7 +3047,7 @@ async function showCurrentDatasetStatus(callback) {
     return;
   }
 
-  
+
 
   try {
     let bf_dataset_status = await client.get(`/manage_datasets/bf_dataset_status`, {
@@ -4145,7 +4145,7 @@ const startupChecks = async () => {
       error = e;
       status = false;
     }
-    if (status) break; 
+    if (status) break;
     if (new Date() - time_start > waitTime) break;
     await wait(2000);
   }
@@ -4191,7 +4191,7 @@ startupChecks();
 
 // Run a set of functions that will check all the core systems to verify that a user can upload datasets with no issues.
 async function run_pre_flight_checks (check_update = true) {
-  
+
   return new Promise(async (resolve) => {
     let connection_response = "";
 
@@ -4237,7 +4237,7 @@ const serverIsLiveStartup = async () => {
 
   return echoResponse === "server ready" ? true : false;
 };
- 
+
 async function check_internet_connection(show_notification = true) {
   let notification = null;
   if (show_notification) {
@@ -4247,12 +4247,12 @@ async function check_internet_connection(show_notification = true) {
     });
   }
   await wait(800);
-  
+
 
   connected_to_internet = navigator.onLine;
   if (connected_to_internet) {
     console.log("Connected to the internet");
-      
+
       if (show_notification) {
         notyf.dismiss(notification);
         notyf.open({
@@ -4566,12 +4566,12 @@ function sendHTTPsRequestAirtable(options, varSuccess) {
     if (res.statusCode === 200) {
       varSuccess = true;
     } else {
-      
+
       console.error(res);
       varSuccess = false;
     }
     res.on("error", (error) => {
-      
+
       console.error(error);
     });
     return res;
@@ -4830,7 +4830,7 @@ function parseJson(path) {
     contentJson = JSON.parse(content);
     return contentJson;
   } catch (error) {
-    
+
     console.log(error);
     return {};
   }
@@ -5166,7 +5166,7 @@ function changeAwardInputDsDescription() {
       });
     function done(err) {
       if (err) {
-        
+
         console.error(err);
         return;
       }
@@ -5291,7 +5291,7 @@ function loadContributorInfo(lastName, firstName) {
     }),
     function done(err) {
       if (err) {
-        
+
         console.error(err);
         return;
       }
@@ -6110,7 +6110,7 @@ function withdrawDatasetSubmission() {
   // then check if it can be withdrawn, then withdraw it
   // catch any uncaught errors at this level (aka greacefully catch any exceptions to alert the user we cannot withdraw their dataset)
   showPublishingStatus(withdrawDatasetCheck).catch((error) => {
-    
+
     console.error(error);
     var emessage = userError(error);
     Swal.fire({
@@ -6379,7 +6379,7 @@ function refreshBfTeamsList(teamList) {
         confirm_click_account_function();
       })
       .catch((error) => {
-        
+
         console.error(error);
         confirm_click_account_function();
       });
@@ -8785,7 +8785,7 @@ document.getElementById("button-generate").addEventListener("click", async funct
   let { data } = emptyFilesFoldersResponse;
 
   document.getElementById("para-please-wait-new-curate").innerHTML = "Please wait...";
-  
+
   let errorMessage = "";
   error_files = data["empty_files"];
   //bring duplicate outside
@@ -8987,7 +8987,7 @@ async function initiate_generate() {
       uploadedFiles = data["main_curation_uploaded_files"];
 
       $("#sidebarCollapse").prop("disabled", false);
-      
+
 
       // log relevant curation details about the dataset generation/Upload to Google Analytics
       logCurationSuccessToAnalytics(
@@ -9106,7 +9106,7 @@ async function initiate_generate() {
 
       document.getElementById("para-new-curate-progress-bar-error-status").innerHTML =
         "<span style='color: red;'>" + emessage + "</span>";
-      
+
       organizeDataset_option_buttons.style.display = "flex";
       organizeDataset.disabled = false;
       organizeDataset.className = "content-button is-selected";
@@ -9208,7 +9208,7 @@ async function initiate_generate() {
       $("#sidebarCollapse").prop("disabled", false);
       countDone++;
       if (countDone > 1) {
-        
+
         statusBarClone.remove();
         sparc_container.style.display = "inline";
         if (successful === true) {
@@ -9863,8 +9863,8 @@ $("#validate_dataset_bttn").on("click", async () => {
     timeout: 0,
   });
 
-  
-  
+
+
 
   $("#dataset_validator_status").text("Please wait while we retrieve the dataset...");
   $("#dataset_validator_spinner").show();
@@ -9892,7 +9892,7 @@ $("#validate_dataset_bttn").on("click", async () => {
       method: "get",
     });
   } catch (err) {
-    
+
     console.error(error);
     $("#dataset_validator_spinner").hide();
     $("#dataset_validator_status").html(`<span style='color: red;'> ${error}</span>`);
@@ -9910,7 +9910,7 @@ $("#validate_dataset_bttn").on("click", async () => {
       method: "get",
     });
   } catch (error) {
-    
+
     console.error(error);
     $("#dataset_validator_spinner").hide();
     $("#dataset_validator_status").html(`<span style='color: red;'> ${error}</span>`);
@@ -19574,7 +19574,7 @@ $(document).ready(async () => {
     userUUID,
     selectedRole
   ) => {
-    
+
 
     const userPermissionUploadElement = `
         <tr id="guided-dataset-${userUUID}-permissions-upload-tr" class="permissions-upload-tr">
@@ -19618,11 +19618,11 @@ $(document).ready(async () => {
       );
       guidedUploadStatusIcon(`guided-dataset-${userUUID}-permissions-upload-status`, "success");
       userPermissionUploadStatusText.innerHTML = `${selectedRole} permissions granted to user: ${userName}`;
-      
+
     } catch (error) {
       guidedUploadStatusIcon(`guided-dataset-${userUUID}-permissions-upload-status`, "error");
       userPermissionUploadStatusText.innerHTML = `Failed to grant ${selectedRole} permissions to ${userName}`;
-      
+
       console.error(error);
       let emessage = userError(error);
       throw error;
@@ -19691,11 +19691,11 @@ $(document).ready(async () => {
       );
       guidedUploadStatusIcon(`guided-dataset-${teamString}-permissions-upload-status`, "success");
       teamPermissionUploadStatusText.innerHTML = `${selectedRole} permissions granted to team: ${teamString}`;
-      
+
     } catch (error) {
       guidedUploadStatusIcon(`guided-dataset-${teamString}-permissions-upload-status`, "error");
       teamPermissionUploadStatusText.innerHTML = `Failed to grant ${selectedRole} permissions to ${teamString}`;
-      
+
       console.error(error);
       let emessage = userError(error);
       throw error;
@@ -20444,7 +20444,7 @@ $(document).ready(async () => {
         main_total_generate_dataset_size = curationRes["main_total_generate_dataset_size"];
         uploadedFiles = curationRes["main_curation_uploaded_files"];
         $("#sidebarCollapse").prop("disabled", false);
-        
+
 
         // log relevant curation details about the dataset generation/Upload to Google Analytics
         logCurationSuccessToAnalytics(
@@ -20613,7 +20613,7 @@ $(document).ready(async () => {
       //If the curate function is complete, clear the interval
       if (main_curate_status === "Done") {
         $("#sidebarCollapse").prop("disabled", false);
-        
+
         // then show the sidebar again
         // forceActionSidebar("show");
         clearInterval(timerProgress);
@@ -20842,7 +20842,7 @@ $(document).ready(async () => {
     fs.writeFile(destinationPath, data, (err) => {
       if (err) {
         console.log(err);
-        
+
         var emessage = userError(error);
         Swal.fire({
           title: `Failed to generate the existing ${type}.txt file`,
@@ -20863,7 +20863,7 @@ $(document).ready(async () => {
         fs.rename(destinationPath, newName, async (err) => {
           if (err) {
             console.log(err);
-            
+
             Swal.fire({
               title: `Failed to generate the ${type}.txt file`,
               html: err,
@@ -21089,7 +21089,7 @@ $(document).ready(async () => {
 
       openPage(targetPageID);
     } catch (error) {
-      
+
       error.map((error) => {
         // get the total number of words in error.message
         if (error.type === "notyf") {
