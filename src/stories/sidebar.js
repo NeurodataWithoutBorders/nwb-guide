@@ -430,6 +430,9 @@ export class Sidebar extends LitElement {
           a.classList.add('is-selected')
         })
       })
+
+      const gettingStarted = (this.shadowRoot ?? this).querySelector("#getting_starting_tab");
+      gettingStarted.click()
   }
 
   render() {

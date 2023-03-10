@@ -204,7 +204,6 @@ overview_observer.observe(over_view_section, {
   attributes: true,
   attributeFilter: ["class"],
 });
-document.getElementById("getting_starting_tab").click();
 
 //////////////////////////////////
 // Connect to Python back-end
@@ -906,24 +905,6 @@ const delayAnimation = 250;
 //////////////////////////////////
 // Operations on JavaScript end only
 //////////////////////////////////
-
-// Sidebar Navigation //
-var open = false;
-const openSidebar = (buttonElement) => {
-  if (!open) {
-    ipcRenderer.send("resize-window", "up");
-    $("#main-nav").css("width", "250px");
-    $("#SODA-logo").css("display", "block");
-    $(buttonSidebarIcon).css("display", "none");
-    open = true;
-  } else {
-    ipcRenderer.send("resize-window", "down");
-    $("#main-nav").css("width", "70px");
-    $("#SODA-logo").css("display", "block");
-    $(buttonSidebarIcon).css("display", "none");
-    open = false;
-  }
-};
 
 // Assign dragable area in the code to allow for dragging and selecting items//
 let drag_event_fired = false;
