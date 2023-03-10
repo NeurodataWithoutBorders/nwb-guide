@@ -410,6 +410,12 @@ const startupServerAndApiCheck = async () => {
     launchAnnouncement = false;
     nodeStorage.setItem("announcements", false);
   }
+
+  // Update the options on the multi-select form
+  const multiselectEl = document.getElementById("neuroconv-define-formats");
+  const base = `http://127.0.0.1:${port}`;
+  const multiselectOptions = await fetch(`${base}/neuroconv`).then((res) => res.json());
+  multiselectEl.setAttribute("options", JSON.stringify(multiselectOptions))
 };
 
 startupServerAndApiCheck();
