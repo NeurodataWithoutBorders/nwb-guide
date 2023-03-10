@@ -1,1 +1,1 @@
-from .manage_neuroconv import get_all_interface_info
+from .manage_neuroconv import get_all_interface_info, get_combined_schema
