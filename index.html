@@ -133,8 +133,6 @@
 
       addReadyCallback(async () => {
         await import('./frontend/electron/index.js') // Load Electron-specific assets
-
-        console.log("Electron context: ", isElectron)
         if (!isElectron) await import("./frontend/index.js") // Load dev frontend if not in Electron context
       })
     </script>
