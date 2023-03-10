@@ -36,7 +36,7 @@ const componentCSS = `
             margin-block-start: 2ch;
         }
     }
-    
+
     legend {
         font-weight: bold;
     }

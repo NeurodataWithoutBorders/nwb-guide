@@ -15,7 +15,7 @@ Default.args = {
       modality: 'Modality 1',
       technique: 'Technique 1',
     },
-    
+
     option2: {
       name: 'Option 2',
       modality: 'Modality 1',
