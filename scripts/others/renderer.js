@@ -48,14 +48,14 @@ const DatePicker = require("tui-date-picker"); /* CommonJS */
 const excel4node = require("excel4node");
 
 const { currentConTable } = require("../../preload.js");
-const { 
-  parseJson, 
-  airtableConfigPath, 
-  port, 
-  metadataPath, 
-  Tagify, 
-  lottie, 
-  createDragSort 
+const {
+  parseJson,
+  airtableConfigPath,
+  port,
+  metadataPath,
+  Tagify,
+  lottie,
+  createDragSort
 } = globals;
 
 // const prevent_sleep_id = "";

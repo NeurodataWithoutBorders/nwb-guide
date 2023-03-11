@@ -1,6 +1,6 @@
 const { electron = {}, JSONStorage, app } = require('../../src/electron/index.js').default
 
-const { 
+const {
   lottie,
 } = require('../globals.js')
 

@@ -1,15 +1,15 @@
 const globals = require("../globals.js");
-const { 
-  joinPath, 
-  parseJson, 
-  airtableConfigPath, 
-  Tagify, 
+const {
+  joinPath,
+  parseJson,
+  airtableConfigPath,
+  Tagify,
   tippy,
   lottie,
-  createDragSort, 
-  guidedResetProgressVariables, 
-  guidedProgressFilePath, 
-  guidedManifestFilePath 
+  createDragSort,
+  guidedResetProgressVariables,
+  guidedProgressFilePath,
+  guidedManifestFilePath
 } = globals;
 
 const { electron = {}, fs } = require("../../src/electron/index.js").default;
@@ -11184,7 +11184,7 @@ $(document).ready(async () => {
 
     if (!fs) onError(new Error("Cannot save RC file without fs module."))
     else fs.writeFile(destinationPath, data, (err) => {
-      if (err) onError(err) 
+      if (err) onError(err)
       else {
         if (type === "changes") {
           var newName = joinPath(path.dirname(destinationPath), "CHANGES.txt");
