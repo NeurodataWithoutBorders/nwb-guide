@@ -1,6 +1,10 @@
 /*
 This file contains all of the functions related to the submission.xlsx file
 */
+const globals = require("../globals.js");
+const { parseJson, lottie } = globals;
+const { electron = {} } = require("../../src/electron/index.js").default;
+const { ipcRenderer } = electron;
 
 // event listeners for opendropdown prompt
 document.querySelectorAll(".submission-change-current-account").forEach((element) => {
@@ -209,11 +213,11 @@ const helpMilestoneSubmission = async (curationMode) => {
           },
         ];
 
-        //save the unselected milestones into sodaJSONObj
-        sodaJSONObj["dataset-metadata"]["submission-metadata"]["temp-imported-milestones"] =
+        //save the unselected milestones into globals.sodaJSONObj
+        globals.sodaJSONObj["dataset-metadata"]["submission-metadata"]["temp-imported-milestones"] =
           guidedMilestoneData;
 
-        sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"] = filepath;
+        globals.sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"] = filepath;
 
         renderMilestoneSelectionTable(guidedMilestoneData);
 
@@ -339,9 +343,9 @@ const getCheckedMilestones = () => {
 };
 
 const openDDDimport = async (curationMode) => {
-  let filepath = await ipcRenderer.invoke("open-file-dialog-data-deliverables");
+  let filepath = await ipcRenderer?.invoke("open-file-dialog-data-deliverables");
   if (filepath.length > 0) {
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       "Prepare Metadata - submission - import-DDD",
@@ -349,7 +353,7 @@ const openDDDimport = async (curationMode) => {
       1
     );
     if (curationMode === "guided") {
-      sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"] = filepath[0];
+      globals.sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"] = filepath[0];
       let swal_container = document.getElementsByClassName("swal2-popup")[0];
       let swal_actions = document.getElementsByClassName("swal2-actions")[0];
       let swal_content = document.getElementsByClassName("swal2-content")[0];
@@ -487,7 +491,7 @@ const submissionDateInput = document.getElementById("submission-completion-date"
 var submissionDestinationPath = "";
 
 $(document).ready(function () {
-  ipcRenderer.on("selected-existing-submission", (event, filepath) => {
+  ipcRenderer?.on("selected-existing-submission", (event, filepath) => {
     if (filepath.length > 0) {
       if (filepath !== null) {
         document.getElementById("existing-submission-file-destination").placeholder = filepath[0];
@@ -512,7 +516,7 @@ $(document).ready(function () {
     }
   });
   // generate submission file
-  ipcRenderer.on("selected-destination-generate-submission-locally", (event, dirpath) => {
+  ipcRenderer?.on("selected-destination-generate-submission-locally", (event, dirpath) => {
     if (dirpath.length > 0) {
       document.getElementById("input-destination-generate-submission-locally").placeholder =
         dirpath[0];
@@ -576,7 +580,7 @@ const checkStorage = (id) => {
         },
       });
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         "Prepare Metadata - Generate - Check Storage Space",
@@ -588,7 +592,7 @@ const checkStorage = (id) => {
       return;
     }
 
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       "Prepare Metadata - Generate - Check Storage Space",
@@ -857,7 +861,7 @@ $("#submission-completion-date").change(function () {
 
 $("#input-milestone-select-reupload").click(function () {
   document.getElementById("para-milestone-document-info-long-reupload").style.display = "none";
-  ipcRenderer.send("open-file-dialog-milestone-doc-reupload");
+  ipcRenderer?.send("open-file-dialog-milestone-doc-reupload");
 });
 
 $("#cancel-reupload-DDD").click(function () {
@@ -897,7 +901,7 @@ function showExistingSubmissionFile(type) {
       reverseButtons: reverseSwalButtons,
     }).then((boolean) => {
       if (boolean.isConfirmed) {
-        ipcRenderer.send(`open-file-dialog-existing-submission`);
+        ipcRenderer?.send(`open-file-dialog-existing-submission`);
         document.getElementById(`existing-submission-file-destination`).placeholder = "Browse here";
         $(`#div-confirm-existing-submission-import`).hide();
         $($(`#div-confirm-existing-submission-import button`)[0]).hide();
@@ -905,12 +909,12 @@ function showExistingSubmissionFile(type) {
       }
     });
   } else {
-    ipcRenderer.send(`open-file-dialog-existing-submission`);
+    ipcRenderer?.send(`open-file-dialog-existing-submission`);
   }
 }
 
 function openFileBrowserDestination(metadataType) {
-  ipcRenderer.send(`open-destination-generate-${metadataType}-locally`);
+  ipcRenderer?.send(`open-destination-generate-${metadataType}-locally`);
 }
 
 function importExistingSubmissionFile(type) {

@@ -1,3 +1,9 @@
+const globals = require("../globals.js");
+// exportObject.globals.already_created_elem = [];
+// exportObject.globals.listed_count = 0;
+// exportObject.globals.start = 0;
+// exportObject.globals.preprended_items = 0;
+// exportObject.globals.amount = 500;
 //// option to show tool-tips for high-level folders
 function showTooltips(ev) {
   var folderName = ev.parentElement.innerText;
@@ -413,7 +419,7 @@ function renameFolder(
   event1, //this
   organizeCurrentLocation, //current section of My_folder
   itemElement, //the elements in the container with items
-  inputGlobal, //datasetStructureJSONObj
+  inputGlobal, //globals.datasetStructureJSONObj
   uiItem, //container with the folders
   singleUIItem //class name
 ) {
@@ -579,7 +585,7 @@ function renameFolder(
             myPath[type][returnedName]["action"].push("renamed");
           }
           /// list items again with updated JSON obj
-          // start = 0;
+          // globals.globals.start = 0;
           // listItems(myPath, "#items", 500);
           // getInFolder(
           //   singleUIItem,
@@ -817,7 +823,7 @@ function showParentSwal(duplicateArray) {
     html:
       `
     <div class="caption">
-      <p>${htmlSwal}<p><ul style="text-align: start;">${listElements}</ul></p></p>
+      <p>${htmlSwal}<p><ul style="text-align: globals.start;">${listElements}</ul></p></p>
     </div>
     <div class="swal-button-container">
       <button id="skip" class="btn skip-btn" onclick="handleDuplicateImports('skip', '` +
@@ -931,7 +937,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
 
   var filtered = getGlobalPath(organizeDSglobalPath);
 
-  var myPath = getRecursivePath(filtered.slice(1), datasetStructureJSONObj);
+  var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
 
   //SKIP OPTION
   if (btnId === "skip") {
@@ -1097,7 +1103,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
           html:
             `
           <div class="caption">
-            <p>${htmlSwal}<p><ul style="text-align: start;">${listElements}</ul></p></p>
+            <p>${htmlSwal}<p><ul style="text-align: globals.start;">${listElements}</ul></p></p>
           </div>
           <div class="swal-button-container">
             <button id="skip" class="btn skip-btn" onclick="handleDuplicateImports('skip', '` +
@@ -1291,7 +1297,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
                   action: ["new", "renamed"],
                 };
                 listItems(myPath, "#items");
-                getInFolder("#items", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+                getInFolder("#items", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
                 hideMenu("folder", menuFolder, menuHighLevelFolders, menuFile);
                 hideMenu("high-level-folder", menuFolder, menuHighLevelFolders, menuFile);
               }
@@ -1322,7 +1328,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
 
                 $("#items").html(appendString);
                 listItems(myPath, "#items");
-                getInFolder("#items", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+                getInFolder("#items", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
               }
             }
           }
@@ -1482,7 +1488,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
                 }
               }
               listItems(myPath, "#items");
-              getInFolder("#items", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+              getInFolder("#items", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
             } else {
               let justName = checkboxes[i].id.substring(0, removeExt);
               let ext = checkboxes[i].id.substring(removeExt, checkboxes[i].id.length);
@@ -1503,7 +1509,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
                 }
               }
               listItems(myPath, "#items");
-              getInFolder("#items", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+              getInFolder("#items", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
             }
           }
           let section = organizeDSglobalPath.value;
@@ -1703,7 +1709,7 @@ const addFilesfunction = async (
     }
     await Swal.fire({
       title:
-        "The following files have an unexpected name starting with a period. How should we handle them?",
+        "The following files have an unexpected name globals.starting with a period. How should we handle them?",
       html:
         "<div style='max-height:300px; overflow-y:auto'>" + hiddenFiles.join("</br>") + "</div>",
       heightAuto: false,
@@ -1870,7 +1876,7 @@ const addFilesfunction = async (
       html:
         `
       <div class="caption">
-        <p>${htmlSwal}<p><ul style="text-align:start;">${listElements}</ul></p></p>
+        <p>${htmlSwal}<p><ul style="text-align:globals.start;">${listElements}</ul></p></p>
       </div>
       <div class="swal-button-container">
       <button id="skip" class="btn skip-btn" onclick="handleDuplicateImports('skip', '` +
@@ -1915,8 +1921,8 @@ const addFilesfunction = async (
   // now handle non-allowed duplicates (show message), allowed duplicates (number duplicates & append to UI),
   // and regular files (append to UI)
   if (Object.keys(regularFiles).length > 0) {
-    start = 0;
-    listed_count = 0;
+    globals.globals.start = 0;
+    globals.listed_count = 0;
     $("#items").empty();
     for (var element in regularFiles) {
       currentLocation["files"][regularFiles[element]["basename"]] = {
@@ -1993,26 +1999,24 @@ function check_dataset_value() {
   }
   if (dataset_path.value != "My_dataset_folder/") {
     var filtered = getGlobalPath(dataset_path);
-    var myPath = getRecursivePath(filtered.slice(1), datasetStructureJSONObj);
-    amount = 500;
+    var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
+    globals.amount = 500;
     listItems(myPath, "items", 500);
-    getInFolder(".single-item", "#items", dataset_path, datasetStructureJSONObj);
+    getInFolder(".single-item", "#items", dataset_path, globals.datasetStructureJSONObj);
     beginScrollListen();
   }
 }
 observeElement(dataset_path, "value", check_dataset_value);
 
-var amount = 500;
-
 function beginScrollListen() {
-  amount = 500;
+  globals.amount = 500;
   item_box.addEventListener("scroll", lazyLoad);
 }
 
 async function lazyLoad() {
-  let total_items = already_created_elem.length;
+  let total_items = globals.already_created_elem.length;
   let filtered = getGlobalPath(dataset_path);
-  let myPath = getRecursivePath(filtered.slice(1), datasetStructureJSONObj);
+  let myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
 
   //if there's less than 20 items event listener will be removed
 
@@ -2032,7 +2036,7 @@ async function lazyLoad() {
       ) {
         //for rerendering on scroll up
         //monitors when user scrolls back up to prepend elements
-        let array_select = preprended_items - 1;
+        let array_select = globals.preprended_items - 1;
         let remove_limit = 5; //only prepend 500 elements at a time
         let load_spinner = `
         <div id="items_container">
@@ -2043,7 +2047,7 @@ async function lazyLoad() {
         item_box.children[0].remove(); //remove loading spinner
         //add elements back to top of item_box
         for (let i = 0; i < remove_limit; i++) {
-          $(uiItems).prepend(already_created_elem[array_select]); //adding on scroll up
+          $(uiItems).prepend(globals.already_created_elem[array_select]); //adding on scroll up
           array_select--;
         }
         array_select += 1;
@@ -2056,7 +2060,7 @@ async function lazyLoad() {
             item_box.children[0].remove();
           }
         }
-        await getInFolder(".single-item", "#items", dataset_path, datasetStructureJSONObj);
+        await getInFolder(".single-item", "#items", dataset_path, globals.datasetStructureJSONObj);
 
         if (item_box.lastChild.id === "items_container") {
           item_box.lastChild.remove();
@@ -2073,10 +2077,10 @@ async function lazyLoad() {
             item_box.lastChild.remove();
           }
         }
-        listed_count -= 5;
-        start -= 5;
-        amount -= 500;
-        preprended_items -= 5;
+        globals.listed_count -= 5;
+        globals.globals.start -= 5;
+        globals.amount -= 500;
+        globals.preprended_items -= 5;
         $("#items").append(load_spinner); //loading spinner reattached
         item_box.lastChild.style.setProperty("margin-top", "5px");
         item_box.lastChild.style.setProperty("margin-bottom", "30px");
@@ -2085,7 +2089,7 @@ async function lazyLoad() {
   }
 
   //all items have been fully rendered
-  if (listed_count === total_items) {
+  if (globals.listed_count === total_items) {
     if (item_box.childElementCount != 0) {
       if (item_box.lastChild.id === "items_container") {
         item_box.removeChild(item_box.lastChild);
@@ -2095,20 +2099,16 @@ async function lazyLoad() {
     if (item_box.scrollTop + 50 > item_box.scrollHeight - item_box.offsetHeight) {
       //user scrolls down, render more items if available
       let wait4items = new Promise(async (resolved) => {
-        amount += 500;
-        await listItems(myPath, uiItems, amount);
-        // add_items_to_view(already_created_elem, 400);
-        await getInFolder(".single-item", "#items", dataset_path, datasetStructureJSONObj);
+        globals.amount += 500;
+        await listItems(myPath, uiItems, globals.amount);
+        // add_items_to_view(globals.already_created_elem, 400);
+        await getInFolder(".single-item", "#items", dataset_path, globals.datasetStructureJSONObj);
         resolved();
       });
     }
   }
 }
 
-already_created_elem = [];
-let listed_count = 0;
-let start = 0;
-let preprended_items = 0;
 async function add_items_to_view(list, amount_req, reset) {
   uiItems = "#items";
   let elements_req = amount_req / 100; //array stores 100 elements per index
@@ -2118,18 +2118,18 @@ async function add_items_to_view(list, amount_req, reset) {
     <div id="item_load" class="ui medium active inline loader icon-wrapper">
     </div>
   </div>`;
-  if (already_created_elem.length === 0) {
-    listed_count = already_created_elem.length;
+  if (globals.already_created_elem.length === 0) {
+    globals.listed_count = globals.already_created_elem.length;
   }
   if (reset === true || dataset_path === "My_dataset_folder/") {
     $("#items").empty();
 
-    start = 0;
-    listed_count = 0;
+    globals.start = 0;
+    globals.listed_count = 0;
     element_items = item_box.childElementCount;
   }
-  start = listed_count;
-  listed_count = 0;
+  globals.start = globals.listed_count;
+  globals.listed_count = 0;
 
   //remove loading spinners before adding more files
   if (item_box.lastChild != undefined) {
@@ -2147,11 +2147,11 @@ async function add_items_to_view(list, amount_req, reset) {
   }
 
   //folders and files stored in one array
-  already_created_elem = list[0].concat(list[1]);
+  globals.already_created_elem = list[0].concat(list[1]);
 
   if (element_items >= 1000) {
     //at most we want 1000 items rendered
-    preprended_items += 5;
+    globals.preprended_items += 5;
 
     for (let i = 0; i < 500; i++) {
       item_box.children[0].remove();
@@ -2160,30 +2160,22 @@ async function add_items_to_view(list, amount_req, reset) {
     item_box.children[0].style.setProperty("margin-top", "20px");
   }
 
-  for (let i = start; i < elements_req; i++) {
-    if (i < already_created_elem.length) {
-      $(uiItems).append(already_created_elem[i]);
-      listed_count += 1;
+  for (let i = globals.start; i < elements_req; i++) {
+    if (i < globals.already_created_elem.length) {
+      $(uiItems).append(globals.already_created_elem[i]);
+      globals.listed_count += 1;
     } else {
       break;
     }
   }
-  listed_count += start;
-  start = listed_count;
+  globals.listed_count += globals.start;
+  globals.start = globals.listed_count;
   if ($(uiItems).children().length >= 500) {
     $(uiItems).append(load_spinner);
     item_box.lastChild.style.setProperty("margin-top", "5px");
     item_box.lastChild.style.setProperty("margin-bottom", "30px");
   }
 }
-
-const resetLazyLoading = () => {
-  already_created_elem = [];
-  listed_count = 0;
-  start = 0;
-  preprended_items = 0;
-  amount = 500;
-};
 
 ///// function to load details to show in display once
 ///// users click Show details

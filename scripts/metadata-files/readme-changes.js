@@ -1,3 +1,6 @@
+const { electron = {} } = require("../../src/electron/index.js").default;
+const { ipcRenderer } = electron;
+
 // event listeners for changes open dropdown prompts
 document.querySelectorAll(".changes-change-current-account").forEach((element) => {
   element.addEventListener("click", function () {
@@ -151,7 +154,7 @@ async function generateRCFiles(uploadBFBoolean, fileType) {
       );
     }
   } else {
-    ipcRenderer.send(`open-destination-generate-${fileType}-locally`);
+    ipcRenderer?.send(`open-destination-generate-${fileType}-locally`);
   }
 }
 
@@ -159,7 +162,7 @@ var changesDestinationPath = "";
 var readmeDestinationPath = "";
 
 $(document).ready(function () {
-  ipcRenderer.on("selected-destination-generate-changes-locally", (event, dirpath, filename) => {
+  ipcRenderer?.on("selected-destination-generate-changes-locally", (event, dirpath, filename) => {
     filename = "CHANGES.txt";
     if (dirpath.length > 0) {
       var destinationPath = path.join(dirpath[0], filename);
@@ -175,7 +178,7 @@ $(document).ready(function () {
         "Browse here";
     }
   });
-  ipcRenderer.on("selected-destination-generate-readme-locally", (event, dirpath, filename) => {
+  ipcRenderer?.on("selected-destination-generate-readme-locally", (event, dirpath, filename) => {
     filename = "README.txt";
     let data = $("#textarea-create-readme").val().trim();
     if (dirpath.length > 0) {
@@ -192,7 +195,7 @@ $(document).ready(function () {
     }
   });
 
-  ipcRenderer.on("selected-existing-changes", (event, filepath) => {
+  ipcRenderer?.on("selected-existing-changes", (event, filepath) => {
     if (filepath.length > 0) {
       if (filepath !== null) {
         document.getElementById("existing-changes-file-destination").placeholder = filepath[0];
@@ -223,7 +226,7 @@ $(document).ready(function () {
     }
   });
 
-  ipcRenderer.on("selected-existing-readme", (event, filepath) => {
+  ipcRenderer?.on("selected-existing-readme", (event, filepath) => {
     if (filepath.length > 0) {
       if (filepath !== null) {
         document.getElementById("existing-readme-file-destination").placeholder = filepath[0];
@@ -433,7 +436,7 @@ function showExistingRCFile(type) {
       reverseButtons: reverseSwalButtons,
     }).then((boolean) => {
       if (boolean.isConfirmed) {
-        ipcRenderer.send(`open-file-dialog-existing-${type}`);
+        ipcRenderer?.send(`open-file-dialog-existing-${type}`);
         document.getElementById(`existing-${type}-file-destination`).placeholder = "Browse here";
         $(`#div-confirm-existing-${type}-import`).hide();
         $($(`#div-confirm-existing-${type}-import button`)[0]).hide();
@@ -441,7 +444,7 @@ function showExistingRCFile(type) {
       }
     });
   } else {
-    ipcRenderer.send(`open-file-dialog-existing-${type}`);
+    ipcRenderer?.send(`open-file-dialog-existing-${type}`);
   }
 }
 
@@ -646,7 +649,7 @@ function loadExistingRCFile(filepath, type) {
         icon: "error",
       });
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         `Prepare Metadata - ${type} - Existing - Local`,
@@ -654,7 +657,7 @@ function loadExistingRCFile(filepath, type) {
         1
       );
 
-      ipcRenderer.send("track-event", "Error", `Prepare Metadata - ${type}`);
+      ipcRenderer?.send("track-event", "Error", `Prepare Metadata - ${type}`);
     } else {
       // populate textarea
       $(`#textarea-create-${type}`).val(data);

@@ -1,3 +1,6 @@
+const { electron = {} } = require("../../src/electron/index.js").default;
+const { ipcRenderer } = electron;
+
 // Tracks if bf_request_and_populate_dataset has has an error
 let importError = false;
 
@@ -80,14 +83,14 @@ var bf_request_and_populate_dataset = async (
 
     let data = filesFoldersResponse.data;
 
-    ipcRenderer.send("track-event", "Success", "Retrieve Dataset - Pennsieve", defaultBfDatasetId);
+    ipcRenderer?.send("track-event", "Success", "Retrieve Dataset - Pennsieve", defaultBfDatasetId);
 
     return data;
   } catch (error) {
     importError = true;
     progressContainer.style.display = "none";
     clientError(error);
-    ipcRenderer.send("track-event", "Error", "Retrieve Dataset - Pennsieve", defaultBfDatasetId);
+    ipcRenderer?.send("track-event", "Error", "Retrieve Dataset - Pennsieve", defaultBfDatasetId);
     throw Error(userErrorMessage(error));
   }
 };

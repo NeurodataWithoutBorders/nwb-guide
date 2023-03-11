@@ -9,7 +9,7 @@ function docReady(fn) {
 }
 
 // adds the apps HTML pages to the DOM
-document.addEventListener("DOMContentLoaded", async function () {
+docReady(async function () {
   const links = document.querySelectorAll('link[rel="import"]');
   let contentIndex = document.querySelector("#content");
 
@@ -58,42 +58,25 @@ document.addEventListener("DOMContentLoaded", async function () {
   await waitForHtmlSectionsToInsertIntoDOM();
 
   //Synchronously include js files
-  await includeJavaScriptFile("./assets/ex-links.js");
-  await includeJavaScriptFile("./assets/nav.js");
-  await includeJavaScriptFile("./assets/demo-btns.js");
-  await includeJavaScriptFile("./preload.js");
-  await includeJavaScriptFile("./scripts/others/renderer.js");
-  await includeJavaScriptFile("./scripts/others/progressContainer.js");
-  await includeJavaScriptFile("./scripts/others/pennsieveDatasetImporter.js");
-  await includeJavaScriptFile("./scripts/others/tab-effects.js");
-  await includeJavaScriptFile("./scripts/disseminate/disseminate.js");
-  await includeJavaScriptFile("./scripts/disseminate/prePublishingReview.js");
-  await includeJavaScriptFile("./scripts/manage-dataset/manage-dataset.js");
-  await includeJavaScriptFile("./scripts/metadata-files/datasetDescription.js");
-  await includeJavaScriptFile("./scripts/organize-dataset/curate-functions.js");
-  await includeJavaScriptFile("./scripts/organize-dataset/organizeDS.js");
-  await includeJavaScriptFile("./scripts/metadata-files/manifest.js");
-  await includeJavaScriptFile("./scripts/metadata-files/readme-changes.js");
-  await includeJavaScriptFile("./scripts/metadata-files/subjects-samples.js");
-  await includeJavaScriptFile("./scripts/metadata-files/submission.js");
-  await includeJavaScriptFile("./scripts/guided-mode/lottieJSON.js");
-  await includeJavaScriptFile("./scripts/guided-mode/guided-curate-dataset.js");
-  await includeJavaScriptFile("./scripts/collections/collections.js");
-  await includeJavaScriptFile("./scripts/others/announcements.js");
+  require("./ex-links.js");
+  require("./nav.js");
+  require("./demo-btns.js");
+  require("../scripts/others/renderer.js");
+  require("../scripts/others/progressContainer.js");
+  require("../scripts/others/pennsieveDatasetImporter.js");
+  require("../scripts/others/tab-effects.js");
+  require("../scripts/disseminate/disseminate.js");
+  require("../scripts/disseminate/prePublishingReview.js");
+  require("../scripts/manage-dataset/manage-dataset.js");
+  require("../scripts/metadata-files/datasetDescription.js");
+  require("../scripts/organize-dataset/curate-functions.js");
+  require("../scripts/organize-dataset/organizeDS.js");
+  require("../scripts/metadata-files/manifest.js");
+  require("../scripts/metadata-files/readme-changes.js");
+  require("../scripts/metadata-files/subjects-samples.js");
+  require("../scripts/metadata-files/submission.js");
+  require("../scripts/guided-mode/lottieJSON.js");
+  require("../scripts/guided-mode/guided-curate-dataset.js");
+  require("../scripts/collections/collections.js");
+  require("../scripts/others/announcements.js");
 });
-
-const includeJavaScriptFile = async (filePath) => {
-  return new Promise((resolve, reject) => {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = filePath;
-    script.async = false;
-    script.onload = () => {
-      resolve();
-    };
-    script.onerror = () => {
-      reject("cannot load script " + filePath);
-    };
-    document.body.appendChild(script);
-  });
-};

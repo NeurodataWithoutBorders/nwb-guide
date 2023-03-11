@@ -1,6 +1,7 @@
-const { platform } = require("os");
-
-const { copyFile, readdir } = require("fs").promises;
+const { electron = {}, fs } = require("../../src/electron/index.js").default;
+const globals = require("../globals.js").default;
+const { copyFile, readdir } = fs.promises;
+const { ipcRenderer } = electron;
 
 // opendropdown event listeners
 document.querySelectorAll(".manifest-change-current-account").forEach((element) => {
@@ -22,11 +23,11 @@ const guidedJsTreePreviewManifest = document.getElementById(
 );
 
 function showLocalDatasetManifest() {
-  ipcRenderer.send("open-file-dialog-local-dataset-manifest-purpose");
+  ipcRenderer?.send("open-file-dialog-local-dataset-manifest-purpose");
 }
 
 function selectManifestGenerationLocation() {
-  ipcRenderer.send("open-file-dialog-local-dataset-manifest-generate-purpose");
+  ipcRenderer?.send("open-file-dialog-local-dataset-manifest-generate-purpose");
 }
 
 const openDirectoryAtManifestGenerationLocation = (generationLocation) => {
@@ -55,7 +56,7 @@ function openFolder(generationLocation) {
 }
 
 $(document).ready(function () {
-  ipcRenderer.on("selected-local-dataset-manifest-purpose", (event, folderPath) => {
+  ipcRenderer?.on("selected-local-dataset-manifest-purpose", (event, folderPath) => {
     if (folderPath.length > 0) {
       if (folderPath !== null) {
         document.getElementById("input-manifest-local-folder-dataset").placeholder = folderPath[0];
@@ -76,7 +77,7 @@ $(document).ready(function () {
     }
   });
 
-  ipcRenderer.on("selected-local-dataset-manifest-generate-purpose", (event, folderPath) => {
+  ipcRenderer?.on("selected-local-dataset-manifest-generate-purpose", (event, folderPath) => {
     if (folderPath.length <= 0 || folderPath === null) {
       document.getElementById("input-manifest-local-gen-location").placeholder = "Browse here";
       return;
@@ -321,7 +322,7 @@ $(document).ready(function () {
         homeDirectory,
         "SODA",
         "Guided-Manifest-Files",
-        sodaJSONObj["digital-metadata"]["name"],
+        globals.sodaJSONObj["digital-metadata"]["name"],
         parentFolderName
       );
       var selectedManifestFilePath = path.join(localFolderPath, "manifest.xlsx");
@@ -520,10 +521,10 @@ async function generateManifestPrecheck(manifestEditBoolean, ev) {
   }
 
   exitCurate();
-  sodaJSONObj["starting-point"] = {};
-  sodaJSONObj["dataset-structure"] = {};
-  datasetStructureJSONObj = { folders: {}, files: {} };
-  sodaJSONObj["metadata-files"] = {};
+  globals.sodaJSONObj["starting-point"] = {};
+  globals.sodaJSONObj["dataset-structure"] = {};
+  globals.datasetStructureJSONObj = { folders: {}, files: {} };
+  globals.sodaJSONObj["metadata-files"] = {};
   let continueProgressValidateDataset = true;
   let continueProgressEmptyFolder = true;
   var titleTerm = "folder";
@@ -609,7 +610,7 @@ async function generateManifest(action, type, manifestEditBoolean, ev) {
         "#input-manifest-local-gen-location"
       ).placeholder;
     }
-    sodaJSONObj["starting-point"]["local-path"] = finalManifestGenerationPath;
+    globals.sodaJSONObj["starting-point"]["local-path"] = finalManifestGenerationPath;
 
     //checking size of local folder path
     checkDiskSpace(finalManifestGenerationPath).then(async (diskSpace) => {
@@ -655,23 +656,23 @@ async function generateManifest(action, type, manifestEditBoolean, ev) {
           Destinations.LOCAL
         );
 
-        sodaJSONObj["starting-point"]["type"] = "local";
+        globals.sodaJSONObj["starting-point"]["type"] = "local";
         // if the manifest is going to be recreated post edits
         if (manifestEditBoolean) {
           localDatasetFolderPath = $("#input-manifest-local-folder-dataset").attr("placeholder");
         }
 
-        create_json_object(action, sodaJSONObj, localDatasetFolderPath);
-        datasetStructureJSONObj = sodaJSONObj["dataset-structure"];
-        populate_existing_folders(datasetStructureJSONObj);
-        populate_existing_metadata(sodaJSONObj);
-        sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
-        sodaJSONObj["bf-account-selected"] = {};
-        sodaJSONObj["bf-dataset-selected"] = {};
-        sodaJSONObj["generate-dataset"] = {};
+        create_json_object(action, globals.sodaJSONObj, localDatasetFolderPath);
+        globals.datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
+        populate_existing_folders(globals.datasetStructureJSONObj);
+        populate_existing_metadata(globals.sodaJSONObj);
+        globals.sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
+        globals.sodaJSONObj["bf-account-selected"] = {};
+        globals.sodaJSONObj["bf-dataset-selected"] = {};
+        globals.sodaJSONObj["generate-dataset"] = {};
         // check for empty folders/sub-folders
         let continueProgressEmptyFolder = await checkEmptySubFolders(
-          sodaJSONObj["dataset-structure"]
+          globals.sodaJSONObj["dataset-structure"]
         );
         if (continueProgressEmptyFolder === false) {
           Swal.fire({
@@ -700,7 +701,7 @@ async function generateManifest(action, type, manifestEditBoolean, ev) {
 
         // check for no SPARC folders on a Pennsieve datasets (already include check for a local dataset)
         let continueProgressNoSPARCFolders = await checkNoSparcFolders(
-          sodaJSONObj["dataset-structure"]
+          globals.sodaJSONObj["dataset-structure"]
         );
         if (continueProgressNoSPARCFolders === true) {
           Swal.fire({
@@ -728,7 +729,7 @@ async function generateManifest(action, type, manifestEditBoolean, ev) {
 
         // check for invalid high level folders in a dataset
         let continueProgressInvalidFolders = await checkInvalidHighLevelFolders(
-          sodaJSONObj["dataset-structure"]
+          globals.sodaJSONObj["dataset-structure"]
         );
         if (continueProgressInvalidFolders === true) {
           Swal.fire({
@@ -763,8 +764,8 @@ async function generateManifest(action, type, manifestEditBoolean, ev) {
     if (manifestEditBoolean) {
       generateAfterEdits();
     } else {
-      sodaJSONObj["bf-account-selected"] = { "account-name": defaultBfAccount };
-      sodaJSONObj["bf-dataset-selected"] = { "dataset-name": defaultBfDataset };
+      globals.sodaJSONObj["bf-account-selected"] = { "account-name": defaultBfAccount };
+      globals.sodaJSONObj["bf-dataset-selected"] = { "dataset-name": defaultBfDataset };
       extractBFDatasetForManifestFile(false, defaultBfAccount, defaultBfDataset, ev);
     }
   }
@@ -773,24 +774,24 @@ async function generateManifest(action, type, manifestEditBoolean, ev) {
 async function generateManifestHelper() {
   updateJSONStructureManifestGenerate();
   // now call the upload function including generating the manifest file(s)
-  if (sodaJSONObj["starting-point"]["type"] === "local") {
-    sodaJSONObj["starting-point"]["type"] = "new";
+  if (globals.sodaJSONObj["starting-point"]["type"] === "local") {
+    globals.sodaJSONObj["starting-point"]["type"] = "new";
   }
   let dataset_name = "";
   let dataset_destination = "";
 
-  if ("bf-dataset-selected" in sodaJSONObj) {
-    dataset_name = sodaJSONObj["bf-dataset-selected"]["dataset-name"];
+  if ("bf-dataset-selected" in globals.sodaJSONObj) {
+    dataset_name = globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"];
     dataset_destination = "Pennsieve";
-  } else if ("generate-dataset" in sodaJSONObj) {
-    if ("destination" in sodaJSONObj["generate-dataset"]) {
-      let destination = sodaJSONObj["generate-dataset"]["destination"];
+  } else if ("generate-dataset" in globals.sodaJSONObj) {
+    if ("destination" in globals.sodaJSONObj["generate-dataset"]) {
+      let destination = globals.sodaJSONObj["generate-dataset"]["destination"];
       if (destination == "local") {
-        dataset_name = sodaJSONObj["generate-dataset"]["dataset-name"];
+        dataset_name = globals.sodaJSONObj["generate-dataset"]["dataset-name"];
         dataset_destination = "Local";
       }
       if (destination == "bf") {
-        dataset_name = sodaJSONObj["generate-dataset"]["dataset-name"];
+        dataset_name = globals.sodaJSONObj["generate-dataset"]["dataset-name"];
         dataset_destination = "Pennsieve";
       }
     }
@@ -809,7 +810,7 @@ async function generateManifestHelper() {
 
 async function generateManifestPreview(e) {
   // open a file dialog so the user can select their dataset folder
-  let folderPath = await ipcRenderer.invoke("open-manifest-preview-location");
+  let folderPath = await ipcRenderer?.invoke("open-manifest-preview-location");
 
   // set final generation destination to the user's selected location
   finalManifestGenerationPath = folderPath[0];
@@ -836,17 +837,17 @@ const dropEmptyManifestColumns = async () => {
 };
 
 function updateJSONStructureManifestGenerate() {
-  let starting_point = sodaJSONObj["starting-point"]["type"];
-  if (sodaJSONObj["starting-point"]["type"] == "bf") {
-    sodaJSONObj["generate-dataset"] = {
+  let starting_point = globals.sodaJSONObj["starting-point"]["type"];
+  if (globals.sodaJSONObj["starting-point"]["type"] == "bf") {
+    globals.sodaJSONObj["generate-dataset"] = {
       destination: "bf",
       "generate-option": "existing-bf",
     };
   }
-  if (sodaJSONObj["starting-point"]["type"] == "local") {
-    var localDestination = path.dirname(sodaJSONObj["starting-point"]["local-path"]);
-    var newDatasetName = path.basename(sodaJSONObj["starting-point"]["local-path"]);
-    sodaJSONObj["generate-dataset"] = {
+  if (globals.sodaJSONObj["starting-point"]["type"] == "local") {
+    var localDestination = path.dirname(globals.sodaJSONObj["starting-point"]["local-path"]);
+    var newDatasetName = path.basename(globals.sodaJSONObj["starting-point"]["local-path"]);
+    globals.sodaJSONObj["generate-dataset"] = {
       destination: "local",
       path: $("#input-manifest-local-folder-dataset").attr("placeholder"),
       "dataset-name": newDatasetName,
@@ -855,13 +856,13 @@ function updateJSONStructureManifestGenerate() {
       "generate-option": "new",
     };
     // delete bf account and dataset keys
-    if ("bf-account-selected" in sodaJSONObj) {
-      delete sodaJSONObj["bf-account-selected"];
+    if ("bf-account-selected" in globals.sodaJSONObj) {
+      delete globals.sodaJSONObj["bf-account-selected"];
     }
-    if ("bf-dataset-selected" in sodaJSONObj) {
-      delete sodaJSONObj["bf-dataset-selected"];
+    if ("bf-dataset-selected" in globals.sodaJSONObj) {
+      delete globals.sodaJSONObj["bf-dataset-selected"];
     }
-    sodaJSONObj["starting-point"]["type"] = "new";
+    globals.sodaJSONObj["starting-point"]["type"] = "new";
   }
 }
 
@@ -891,13 +892,13 @@ async function initiate_generate_manifest_local(manifestEditBoolean, originalDat
 
     if (moveFinishedBool) {
       resetManifest(true);
-      // reset sodaJSONObj
-      sodaJSONObj = {
+      // reset globals.sodaJSONObj
+      globals.sodaJSONObj = {
         "starting-point": { type: "" },
         "dataset-structure": {},
         "metadata-files": {},
       };
-      datasetStructureJSONObj = {
+      globals.datasetStructureJSONObj = {
         folders: {},
         files: {},
         type: "",
@@ -937,18 +938,18 @@ async function initiate_generate_manifest_bf() {
   let dataset_name = "";
   let dataset_destination = "";
 
-  if ("bf-dataset-selected" in sodaJSONObj) {
-    dataset_name = sodaJSONObj["bf-dataset-selected"]["dataset-name"];
+  if ("bf-dataset-selected" in globals.sodaJSONObj) {
+    dataset_name = globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"];
     dataset_destination = "Pennsieve";
-  } else if ("generate-dataset" in sodaJSONObj) {
-    if ("destination" in sodaJSONObj["generate-dataset"]) {
-      let destination = sodaJSONObj["generate-dataset"]["destination"];
+  } else if ("generate-dataset" in globals.sodaJSONObj) {
+    if ("destination" in globals.sodaJSONObj["generate-dataset"]) {
+      let destination = globals.sodaJSONObj["generate-dataset"]["destination"];
       if (destination == "local") {
-        dataset_name = sodaJSONObj["generate-dataset"]["dataset-name"];
+        dataset_name = globals.sodaJSONObj["generate-dataset"]["dataset-name"];
         dataset_destination = "Local";
       }
       if (destination == "bf") {
-        dataset_name = sodaJSONObj["generate-dataset"]["dataset-name"];
+        dataset_name = globals.sodaJSONObj["generate-dataset"]["dataset-name"];
         dataset_destination = "Pennsieve";
       }
     }
@@ -961,7 +962,7 @@ async function initiate_generate_manifest_bf() {
     curationResponse = await client.post(
       `/curate_datasets/curation`,
       {
-        soda_json_structure: sodaJSONObj,
+        soda_json_structure: globals.sodaJSONObj,
       },
       {
         timeout: 0,
@@ -971,7 +972,7 @@ async function initiate_generate_manifest_bf() {
     clientError(error);
     file_counter = 0;
     folder_counter = 0;
-    get_num_files_and_folders(sodaJSONObj["dataset-structure"]);
+    get_num_files_and_folders(globals.sodaJSONObj["dataset-structure"]);
 
     try {
       datasetList = [];
@@ -996,11 +997,11 @@ async function initiate_generate_manifest_bf() {
     let destination = "";
 
     // determine if working with a Local dataset or Pennsieve
-    if ("bf-dataset-selected" in sodaJSONObj) {
+    if ("bf-dataset-selected" in globals.sodaJSONObj) {
       destination = "Pennsieve";
-    } else if ("generate-dataset" in sodaJSONObj) {
-      if ("destination" in sodaJSONObj["generate-dataset"]) {
-        destination = sodaJSONObj["generate-dataset"]["destination"];
+    } else if ("generate-dataset" in globals.sodaJSONObj) {
+      if ("destination" in globals.sodaJSONObj["generate-dataset"]) {
+        destination = globals.sodaJSONObj["generate-dataset"]["destination"];
       }
     }
 
@@ -1020,20 +1021,20 @@ async function initiate_generate_manifest_bf() {
 
   let high_level_folder_num = 0;
   if (manifest_files_requested) {
-    if ("dataset-structure" in sodaJSONObj) {
-      if ("folders" in sodaJSONObj["dataset-structure"]) {
-        for (folder in sodaJSONObj["dataset-structure"]["folders"]) {
+    if ("dataset-structure" in globals.sodaJSONObj) {
+      if ("folders" in globals.sodaJSONObj["dataset-structure"]) {
+        for (folder in globals.sodaJSONObj["dataset-structure"]["folders"]) {
           high_level_folder_num += 1;
         }
       }
     }
   }
   // determine if working with a Local dataset or Pennsieve
-  if ("bf-dataset-selected" in sodaJSONObj) {
+  if ("bf-dataset-selected" in globals.sodaJSONObj) {
     destination = "Pennsieve";
-  } else if ("generate-dataset" in sodaJSONObj) {
-    if ("destination" in sodaJSONObj["generate-dataset"]) {
-      destination = sodaJSONObj["generate-dataset"]["destination"];
+  } else if ("generate-dataset" in globals.sodaJSONObj) {
+    if ("destination" in globals.sodaJSONObj["generate-dataset"]) {
+      destination = globals.sodaJSONObj["generate-dataset"]["destination"];
     }
   }
 
@@ -1047,7 +1048,7 @@ async function initiate_generate_manifest_bf() {
   );
 
   // log the amount of high level manifest files that were created
-  ipcRenderer.send(
+  ipcRenderer?.send(
     "track-event",
     "Success",
     MetadataAnalyticsPrefix.MANIFEST + " - Generate - Number of Files ",
@@ -1057,12 +1058,12 @@ async function initiate_generate_manifest_bf() {
 
   logMetadataSizeForAnalytics(destination === "Pennsieve" ? true : false, "manifest.xlsx", res[1]);
 
-  sodaJSONObj = {
+  globals.sodaJSONObj = {
     "starting-point": { type: "" },
     "dataset-structure": {},
     "metadata-files": {},
   };
-  datasetStructureJSONObj = {
+  globals.datasetStructureJSONObj = {
     folders: {},
     files: {},
     type: "",
@@ -1300,7 +1301,7 @@ async function extractBFDatasetForManifestFile(editBoolean, bfaccount, bfdataset
   var result;
   try {
     var res = await bf_request_and_populate_dataset(
-      sodaJSONObj,
+      globals.sodaJSONObj,
       document.getElementById("loading_pennsieve_dataset_manifest"),
       false
     );
@@ -1335,26 +1336,26 @@ async function extractBFDatasetForManifestFile(editBoolean, bfaccount, bfdataset
 
     $("#bf_dataset_create_manifest").text("None");
     $("#div-check-bf-create-manifest").hide();
-    sodaJSONObj["bf-dataset-selected"]["dataset-name"] = "";
+    globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"] = "";
     return;
   } else {
-    sodaJSONObj = result[1]["soda_object"];
-    if (JSON.stringify(sodaJSONObj["dataset-structure"]) !== "{}") {
-      datasetStructureJSONObj = sodaJSONObj["dataset-structure"];
+    globals.sodaJSONObj = result[1]["soda_object"];
+    if (JSON.stringify(globals.sodaJSONObj["dataset-structure"]) !== "{}") {
+      globals.datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
     } else {
-      datasetStructureJSONObj = { folders: {}, files: {} };
+      globals.datasetStructureJSONObj = { folders: {}, files: {} };
     }
-    sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
-    sodaJSONObj["generate-dataset"] = {
+    globals.sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
+    globals.sodaJSONObj["generate-dataset"] = {
       destination: "bf",
       "generate-option": "existing-bf",
     };
-    sodaJSONObj["starting-point"] = { type: "bf" };
+    globals.sodaJSONObj["starting-point"] = { type: "bf" };
 
-    populate_existing_folders(datasetStructureJSONObj);
-    populate_existing_metadata(sodaJSONObj);
+    populate_existing_folders(globals.datasetStructureJSONObj);
+    populate_existing_metadata(globals.sodaJSONObj);
 
-    let continueProgressEmptyFolder = await checkEmptySubFolders(sodaJSONObj["dataset-structure"]);
+    let continueProgressEmptyFolder = await checkEmptySubFolders(globals.sodaJSONObj["dataset-structure"]);
 
     if (!continueProgressEmptyFolder) {
       hideProgressContainer(progressContainer);
@@ -1430,7 +1431,7 @@ async function extractBFDatasetForManifestFile(editBoolean, bfaccount, bfdataset
     }
 
     // check for no SPARC folders on a Pennsieve datasets (already include check for a local dataset)
-    let continueProgressNoSPARCFolders = checkNoSparcFolders(sodaJSONObj["dataset-structure"]);
+    let continueProgressNoSPARCFolders = checkNoSparcFolders(globals.sodaJSONObj["dataset-structure"]);
     if (continueProgressNoSPARCFolders === true) {
       Swal.fire({
         title: "Failed to generate the manifest files.",
@@ -1484,7 +1485,7 @@ async function extractBFDatasetForManifestFile(editBoolean, bfaccount, bfdataset
       $("#Question-prepare-manifest-4").removeClass("show");
       $("#Question-prepare-manifest-4").removeClass("prev");
       $(ev).hide();
-      loadDSTreePreviewManifest(sodaJSONObj["dataset-structure"]);
+      loadDSTreePreviewManifest(globals.sodaJSONObj["dataset-structure"]);
 
       // hide the loading bar's text
       document.querySelector("#loading_pennsieve_dataset_manifest_span").style.visibility =
@@ -1504,7 +1505,7 @@ function extractBFManifestFile() {
       .post(
         "/prepare_metadata/manifest_files/pennsieve",
         {
-          soda_json_object: sodaJSONObj,
+          soda_json_object: globals.sodaJSONObj,
           selected_account: defaultBfAccount,
           selected_dataset: defaultBfDataset,
         },
@@ -1749,12 +1750,12 @@ async function generateManifestFolderLocallyForEdit(ev) {
   }
 
   exitCurate();
-  sodaJSONObj["starting-point"] = {};
-  sodaJSONObj["dataset-structure"] = {};
-  datasetStructureJSONObj = { folders: {}, files: {} };
-  sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
-  sodaJSONObj["metadata-files"] = {};
-  sodaJSONObj["generate-dataset"] = {};
+  globals.sodaJSONObj["starting-point"] = {};
+  globals.sodaJSONObj["dataset-structure"] = {};
+  globals.datasetStructureJSONObj = { folders: {}, files: {} };
+  globals.sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
+  globals.sodaJSONObj["metadata-files"] = {};
+  globals.sodaJSONObj["generate-dataset"] = {};
   var titleTerm = "folder";
   if (type === "local") {
     Swal.fire({
@@ -1785,17 +1786,17 @@ async function generateManifestFolderLocallyForEdit(ev) {
       return;
     }
 
-    sodaJSONObj["starting-point"]["local-path"] = localDatasetFolderPath;
-    sodaJSONObj["starting-point"]["type"] = "local";
-    create_json_object("", sodaJSONObj, localDatasetFolderPath);
-    datasetStructureJSONObj = sodaJSONObj["dataset-structure"];
-    populate_existing_folders(datasetStructureJSONObj);
-    populate_existing_metadata(sodaJSONObj);
-    sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
-    sodaJSONObj["bf-account-selected"] = {};
-    sodaJSONObj["bf-dataset-selected"] = {};
-    sodaJSONObj["generate-dataset"] = {};
-    continueProgressEmptyFolder = await checkEmptySubFolders(sodaJSONObj["dataset-structure"]);
+    globals.sodaJSONObj["starting-point"]["local-path"] = localDatasetFolderPath;
+    globals.sodaJSONObj["starting-point"]["type"] = "local";
+    create_json_object("", globals.sodaJSONObj, localDatasetFolderPath);
+    globals.datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
+    populate_existing_folders(globals.datasetStructureJSONObj);
+    populate_existing_metadata(globals.sodaJSONObj);
+    globals.sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
+    globals.sodaJSONObj["bf-account-selected"] = {};
+    globals.sodaJSONObj["bf-dataset-selected"] = {};
+    globals.sodaJSONObj["generate-dataset"] = {};
+    continueProgressEmptyFolder = await checkEmptySubFolders(globals.sodaJSONObj["dataset-structure"]);
 
     if (continueProgressEmptyFolder === false) {
       Swal.fire({
@@ -1821,15 +1822,15 @@ async function generateManifestFolderLocallyForEdit(ev) {
     createManifestLocally("local", true, "");
   } else {
     // Case 2: bf dataset
-    sodaJSONObj["bf-account-selected"] = { "account-name": defaultBfAccount };
-    sodaJSONObj["bf-dataset-selected"] = { "dataset-name": defaultBfDataset };
+    globals.sodaJSONObj["bf-account-selected"] = { "account-name": defaultBfAccount };
+    globals.sodaJSONObj["bf-dataset-selected"] = { "dataset-name": defaultBfDataset };
     extractBFDatasetForManifestFile(true, defaultBfAccount, defaultBfDataset, ev);
   }
 }
 
 async function createManifestLocally(type, editBoolean, originalDataset) {
   var generatePath = "";
-  sodaJSONObj["manifest-files"]["local-destination"] = path.join(homeDirectory, "SODA");
+  globals.sodaJSONObj["manifest-files"]["local-destination"] = path.join(homeDirectory, "SODA");
 
   if (type === "local") {
     generatePath = localDatasetFolderPath;
@@ -1843,7 +1844,7 @@ async function createManifestLocally(type, editBoolean, originalDataset) {
       `/curate_datasets/manifest_files`,
       {
         generate_purpose: editBoolean ? "edit-manifest" : "",
-        soda_json_object: sodaJSONObj,
+        soda_json_object: globals.sodaJSONObj,
       },
       { timeout: 0 }
     );
@@ -1885,7 +1886,7 @@ async function createManifestLocally(type, editBoolean, originalDataset) {
         $("#preview-manifest-fake-confirm").click();
         $("#Question-prepare-manifest-4").removeClass("show");
         $("#Question-prepare-manifest-4").removeClass("prev");
-        loadDSTreePreviewManifest(sodaJSONObj["dataset-structure"]);
+        loadDSTreePreviewManifest(globals.sodaJSONObj["dataset-structure"]);
       } catch (error) {
         clientError(error);
         let emessage = userErrorMessage(error);
@@ -1931,13 +1932,13 @@ async function createManifestLocally(type, editBoolean, originalDataset) {
 
       if (moveFinishedBool) {
         resetManifest(true);
-        // reset sodaJSONObj
-        sodaJSONObj = {
+        // reset globals.sodaJSONObj
+        globals.sodaJSONObj = {
           "starting-point": { type: "" },
           "dataset-structure": {},
           "metadata-files": {},
         };
-        datasetStructureJSONObj = {
+        globals.datasetStructureJSONObj = {
           folders: {},
           files: {},
           type: "",
@@ -2190,8 +2191,8 @@ function checkInvalidHighLevelFolders(datasetStructure) {
 // function to generate edited manifest files onto Pennsieve (basically just upload the local SODA Manifest Files folder to Pennsieve)
 async function generateAfterEdits() {
   let dir = path.join(homeDirectory, "SODA", "manifest_files");
-  // set up sodaJSonObject
-  sodaJSONObj = {
+  // set up globals.sodaJSONObject
+  globals.sodaJSONObj = {
     "bf-account-selected": {},
     "bf-dataset-selected": {},
     "dataset-structure": {},
@@ -2199,15 +2200,15 @@ async function generateAfterEdits() {
     "generate-dataset": {},
     "starting-point": {},
   };
-  sodaJSONObj["starting-point"]["local-path"] = dir;
-  sodaJSONObj["starting-point"]["type"] = "local";
-  create_json_object_include_manifest("", sodaJSONObj, dir);
-  datasetStructureJSONObj = sodaJSONObj["dataset-structure"];
-  populate_existing_folders(datasetStructureJSONObj);
-  populate_existing_metadata(sodaJSONObj);
-  sodaJSONObj["bf-account-selected"] = { "account-name": defaultBfAccount };
-  sodaJSONObj["bf-dataset-selected"] = { "dataset-name": defaultBfDataset };
-  sodaJSONObj["generate-dataset"] = {
+  globals.sodaJSONObj["starting-point"]["local-path"] = dir;
+  globals.sodaJSONObj["starting-point"]["type"] = "local";
+  create_json_object_include_manifest("", globals.sodaJSONObj, dir);
+  globals.datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
+  populate_existing_folders(globals.datasetStructureJSONObj);
+  populate_existing_metadata(globals.sodaJSONObj);
+  globals.sodaJSONObj["bf-account-selected"] = { "account-name": defaultBfAccount };
+  globals.sodaJSONObj["bf-dataset-selected"] = { "dataset-name": defaultBfDataset };
+  globals.sodaJSONObj["generate-dataset"] = {
     destination: "bf",
     "if-existing": "merge",
     "if-existing-files": "replace",

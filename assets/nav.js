@@ -1,3 +1,19 @@
+const globals = require("../scripts/globals.js")
+
+const { guidedPrepareHomeScreen } = require("../scripts/guided-mode/guided-curate-dataset.js");
+
+// function to hide the sidebar and disable the sidebar expand button
+function forceActionSidebar(action) {
+  if (action === "show") {
+    $("#sidebarCollapse").removeClass("active");
+    $("#main-nav").removeClass("active");
+  } else {
+    $("#sidebarCollapse").addClass("active");
+    $("#main-nav").addClass("active");
+    // $("#sidebarCollapse").prop("disabled", false);
+  }
+}
+
 // this variable is here to keep track of when the Organize datasets/Continue button is enabled or disabled
 document.body.addEventListener("click", (event) => {
   if (event.target.dataset.section) {
@@ -24,7 +40,7 @@ async function handleSectionTrigger(event) {
 
   if (sectionId === "organize-section") {
     //reset lazyloading values
-    resetLazyLoading();
+    globals.resetLazyLoading();
     //Transition file explorer elements to freeform mode
     scroll_box = document.querySelector("#organize-dataset-tab");
     $(".shared-folder-structure-element").appendTo($("#free-form-folder-structure-container"));
@@ -59,7 +75,7 @@ async function handleSectionTrigger(event) {
     // keys if the user has started the first step. The user must
     // be warned because Guided Mode uses shared variables and FF progress
     // must be wiped out.
-    if (Object.keys(sodaJSONObj).length > 0) {
+    if (Object.keys(globals.sodaJSONObj).length > 0) {
       //get the element with data-next="Question-getting-started-BF-account"
       const buttonContinueExistingPennsieve = document.querySelector(
         '[data-next="Question-getting-started-BF-account"]'
@@ -114,10 +130,9 @@ async function handleSectionTrigger(event) {
         return;
       }
     }
-    sodaJSONObj = {};
-    datasetStructureJSONObj = {};
-    subjectsTableData = [];
-    samplesTableData = [];
+
+
+    globals.guidedResetProgressVariables()
 
     //Transition file explorer elements to guided mode
     organizeDSglobalPath = document.getElementById("guided-input-global-path");
@@ -125,7 +140,7 @@ async function handleSectionTrigger(event) {
     dataset_path = document.getElementById("guided-input-global-path");
     scroll_box = document.querySelector("#guided-body");
     itemsContainer.innerHTML = "";
-    resetLazyLoading();
+    globals.resetLazyLoading();
     freeFormItemsContainer.classList.remove("freeform-file-explorer"); //add styling for free form mode
     freeFormButtons.classList.remove("freeform-file-explorer-buttons");
     $(".shared-folder-structure-element").appendTo($("#guided-folder-structure-container"));

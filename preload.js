@@ -1,6 +1,11 @@
 // Purpose: Will become preload.js in the future. For now it is a place to put global variables/functions that are defined in javascript files
 //          needed by the renderer process in order to run.
 
+const electron = require("./src/electron/index.js").default.electron ?? {};
+const ipcRenderer = electron.ipcRenderer;
+
+const SODA_SPARC_API_KEY = "SODA-Pennsieve";
+
 // Contributors table for the dataset description editing page
 const currentConTable = document.getElementById("table-current-contributors");
 
@@ -529,7 +534,7 @@ const openDropdownPrompt = async (ev, dropdown, show_timer = true) => {
             $(".svg-change-current-account.dataset").css("display", "block");
           }
         });
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           "Selecting dataset",
@@ -589,7 +594,7 @@ const openDropdownPrompt = async (ev, dropdown, show_timer = true) => {
             $("#create_new_bf_dataset_btn").click();
           }
         });
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           "Selecting dataset",
@@ -776,7 +781,7 @@ const openDropdownPrompt = async (ev, dropdown, show_timer = true) => {
 
         // log a map of datasetId to dataset name to analytics
         // this will be used to help us track private datasets which are not trackable using a datasetId alone
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Dataset ID to Dataset Name Map",
           defaultBfDatasetId,
@@ -807,7 +812,11 @@ const openDropdownPrompt = async (ev, dropdown, show_timer = true) => {
       $("body").removeClass("waiting");
       $(".svg-change-current-account.dataset").css("display", "block");
       $(".ui.active.green.inline.loader.small").css("display", "none");
-      ipcRenderer.send("track-event", "Success", "Selecting dataset", defaultBfDatasetId, 1);
+      ipcRenderer?.send("track-event", "Success", "Selecting dataset", defaultBfDatasetId, 1);
     }, 10);
   }
 };
+
+module.exports = {
+  currentConTable
+}
