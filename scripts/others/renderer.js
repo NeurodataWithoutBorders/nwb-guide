@@ -185,7 +185,6 @@ overview_observer.observe(over_view_section, {
   attributes: true,
   attributeFilter: ["class"],
 });
-document.getElementById("getting_starting_tab").click();
 
 //////////////////////////////////
 // Connect to Python back-end
