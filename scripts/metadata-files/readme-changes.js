@@ -1,5 +1,8 @@
-const { electron = {} } = require("../../src/electron/index.js").default;
-const { ipcRenderer } = electron;
+
+// const { ipcRenderer } = electron;
+
+import dependencies from "../../src/electron/index.js";
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 // event listeners for changes open dropdown prompts
 document.querySelectorAll(".changes-change-current-account").forEach((element) => {

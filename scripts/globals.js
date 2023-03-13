@@ -1,12 +1,24 @@
 
-const { fs, app, path, log, port } = require('../src/electron/index.js').default
-const exportObject = {}
+import dependencies from '../src/electron/index.js'
+import Tagify from '@yaireo/tagify'
+import DragSort from '@yaireo/dragsort'
+import tippy from 'tippy.js'
+import lottie from 'lottie-web'
 
-exportObject.Tagify = require("@yaireo/tagify");
-const DragSort = exportObject.DragSort = require("@yaireo/dragsort");
+const { fs, app, path, log, port } = dependencies
 
-exportObject.tippy = require("tippy.js").default;
-exportObject.lottie = require("lottie-web");
+
+const exportObject = {
+  Tagify,
+  DragSort,
+  tippy,
+  lottie,
+
+  // Elements filled when needed
+  organizeDSglobalPath: '',
+  dataset_path: '',
+}
+
 
 // ---------- NWB GUIDE Helpers ----------
 const joinPath = exportObject.joinPath = (...args) => path?.join(...args);
@@ -70,11 +82,11 @@ exportObject.preprended_items = 0;
 exportObject.amount = 500;
 
 exportObject.resetLazyLoading = () => {
-  already_created_elem = [];
-  listed_count = 0;
-  start = 0;
-  preprended_items = 0;
-  amount = 500;
+  exportObject.already_created_elem = [];
+  exportObject.listed_count = 0;
+  exportObject.start = 0;
+  exportObject.preprended_items = 0;
+  exportObject.amount = 500;
 };
 
 ///////////////////// Prepare Metadata Section ////////////////////////////////
@@ -100,4 +112,4 @@ const allCollectionTags = exportObject.allCollectionTags = {};
 const currentTags = exportObject.currentTags = {};
 const currentCollectionTags = exportObject.currentCollectionTags = [];
 
-module.exports = exportObject
+export default exportObject

@@ -390,6 +390,8 @@ function checkValidRenameInput(
       }
     }
     var itemDivElements = document.getElementById("items").children;
+
+    const organizeDSglobalPath = globals.organizeDSglobalPath;
     let organizeCurrentLocation = organizeDSglobalPath;
     renameFolder(event, organizeCurrentLocation, itemDivElements);
     if (duplicate) {
@@ -935,6 +937,7 @@ function handleDuplicateImports(btnId, duplicateArray, curationMode) {
     ],
   });
 
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var filtered = getGlobalPath(organizeDSglobalPath);
 
   var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
@@ -1613,6 +1616,7 @@ const addFilesfunction = async (
     }
 
     // check if dataset structure level is at high level folder
+    const organizeDSglobalPath =  globals.organizeDSglobalPath;
     var slashCount = organizeDSglobalPath.value.trim().split("/").length - 1;
     if (slashCount === 1) {
       if (loadingContainer != undefined) {
@@ -1966,7 +1970,6 @@ const addFilesfunction = async (
 };
 
 //create intersection observ
-let scroll_box = document.querySelector("#organize-dataset-tab");
 let item_box = document.querySelector("#items");
 let dataset_path = document.getElementById("input-global-path");
 

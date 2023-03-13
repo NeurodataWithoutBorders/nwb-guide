@@ -1,4 +1,4 @@
-const electron = require("../../../src/electron/index.js").default.electron ?? {};
+const electron = require("../../../src/electron/index.js").electron ?? {};
 const ipcRenderer = electron.ipcRenderer;
 
 const informationBtn = document.getElementById("information-dialog");

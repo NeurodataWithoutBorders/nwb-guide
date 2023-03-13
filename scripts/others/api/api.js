@@ -320,7 +320,7 @@ const uploadCollectionTags = async (account, dataset, tags) => {
   }
 };
 
-const api = {
+export {
   getUserInformation,
   getDataset,
   getDatasetReadme,
@@ -340,5 +340,3 @@ const api = {
   removeCollectionTags,
   uploadNewTags,
 };
-
-module.exports = api;

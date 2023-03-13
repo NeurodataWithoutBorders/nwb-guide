@@ -1,7 +1,9 @@
-const globals = require("../globals.js");
+
+import globals from "../globals.js";
 const { parseJson, protocolConfigPath } = globals;
-const { electron = {} } = require("../../src/electron/index.js").default;
-const { ipcRenderer } = electron;
+
+import dependencies from "../../src/electron/index.js";
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 // event listeners for open dropdown prompt
 document.querySelectorAll(".subjects-change-current-account").forEach((element) => {

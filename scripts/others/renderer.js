@@ -2,52 +2,57 @@
 // Import required modules
 //////////////////////////////////
 
-const { electron = {}, path, os = {}, fs, log, https, JSONStorage, app } = require("../../src/electron/index.js").default;
+import dependencies from '../../src/electron/index.js'
+const { isElectron, electron = {}, path, os, fs, log, https, JSONStorage, app, Airtable } = dependencies //require("../../src/electron/index.js");
 const { ipcRenderer, shell } = electron;
 
-const globals = require("../globals.js")
+import globals from '../globals.js'
 
-const { check_forbidden_characters_bf } = require("../guided-mode/guided-curate-dataset.js");
 
-const { Notyf } = require("notyf");
 
-const Editor = require("@toast-ui/editor");
+import  { check_forbidden_characters_bf } from '../manage-dataset/manage-dataset.js'
 
-const Airtable = require("airtable");
-const bootbox = require("bootbox");
-const DragSelect = require("dragselect");
-const excelToJson = require("convert-excel-to-json");
-const csvToJson = require("convert-csv-to-json");
-const Jimp = require("jimp");
-const introJs = require("intro.js");
+import { Notyf } from 'notyf'
+import Cropper from 'cropperjs'
+import Swal from 'sweetalert2'
 
-const { homedir } = os;
-const diskCheck = require("check-disk-space").default;
-const validator = require("validator");
-const doiRegex = require("doi-regex");
-const select2 = require("select2")();
+
+import DragSelect from 'dragselect'
+
+// const { homedir } = os;
+
+
+
+
 
 // TODO: Test with a build
-const { datasetUploadSession } = require("./analytics/upload-session-tracker");
 
-const {
-  logCurationErrorsToAnalytics,
-  logCurationSuccessToAnalytics,
-} = require("./analytics/curation-analytics");
-const { determineDatasetLocation } = require("./analytics/analytics-utils");
-const {
-  clientError,
-  userErrorMessage,
-} = require("./http-error-handler/error-handler");
-const { hasConnectedAccountWithPennsieve } = require("./authentication/auth");
-const api = require("./api/api");
+import { datasetUploadSession } from './analytics/upload-session-tracker.js'
 
-const axios = require("axios").default;
+// const {
+//   logCurationErrorsToAnalytics,
+//   logCurationSuccessToAnalytics,
 
-const DatePicker = require("tui-date-picker"); /* CommonJS */
-const excel4node = require("excel4node");
+import { logCurationErrorsToAnalytics, logCurationSuccessToAnalytics } from './analytics/curation-analytics.js'
 
-const { currentConTable } = require("../../preload.js");
+import { determineDatasetLocation } from './analytics/analytics-utils.js'
+// const {
+//   clientError,
+//   userErrorMessage,
+
+import { clientError, userErrorMessage } from './http-error-handler/error-handler.js'
+
+import * as api from './api/api.js'
+
+import axios from 'axios'
+
+
+import DatePicker from 'tui-date-picker'
+
+
+
+import { currentConTable } from '../../preload.js'
+
 const {
   parseJson,
   airtableConfigPath,
@@ -102,14 +107,14 @@ const clearQueue = () => {
   //* check if there was an error in the subprocess that prevented it from launching
   if (child.error !== undefined) {
     console.error(child.error);
-    log.error(child.error);
+    log?.error(child.error);
     return;
   }
 
   //* if Pennsieve had an error outputed to the console log it for debugging
   if (child.stderr !== null && child.stderr.length > 0) {
     console.error(child.stderr.toString("utf8"));
-    log.error(child.stderr.toString("utf8"));
+    log?.error(child.stderr.toString("utf8"));
     return;
   }
 };
@@ -329,16 +334,8 @@ const wait = async (delay) => {
 // check that the client connected to the server using exponential backoff
 // verify the api versions match
 const startupServerAndApiCheck = async () => {
-  // wait for SWAL to be loaded in
-  await wait(2000);
-
-  // Darwin executable starts slowly
-  // use an exponential backoff to wait for the app server to be ready
-  // this will give Mac users more time before receiving a backend server error message
-  // ( during the wait period the server should start )
-  // Bonus:  doesn't stop Windows and Linux users from starting right away
-  // NOTE: backOff is bad at surfacing errors to the console
-  //while variable is false keep requesting, if time exceeds two minutes break
+ 
+  const waitTime = 1000*60*(isElectron ? 2 : 0.1); // Wait 2 seconds if in electron context
   let status = false;
   let time_start = new Date();
   let error = "";
@@ -349,9 +346,8 @@ const startupServerAndApiCheck = async () => {
       error = e;
       status = false;
     }
-    time_pass = new Date() - time_start;
     if (status) break;
-    if (time_pass > 120000) break; //break after two minutes
+    if (new Date() - time_start > waitTime) break; //break after two minutes
     await wait(2000);
   }
 
@@ -361,42 +357,46 @@ const startupServerAndApiCheck = async () => {
     clientError(error);
     ipcRenderer?.send("track-event", "Error", "Establishing Python Connection", error);
 
-    await Swal.fire({
-      icon: "error",
-      html: `Something went wrong while initializing the application's background services. Please restart NWB GUIDE and try again. If this issue occurs multiple times, please open an issue on the <a href='https://github.com/catalystneuro/nwb-guide/issues'>NWB GUDE Issue Tracker</a>.`,
-      heightAuto: false,
-      backdrop: "rgba(0,0,0, 0.4)",
-      confirmButtonText: "Restart now",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-    });
+    if (isElectron) {
+      await Swal.fire({
+        icon: "error",
+        html: `Something went wrong while initializing the application's background services. Please restart NWB GUIDE and try again. If this issue occurs multiple times, please open an issue on the <a href='https://github.com/catalystneuro/nwb-guide/issues'>NWB GUDE Issue Tracker</a>.`,
+        heightAuto: false,
+        backdrop: "rgba(0,0,0, 0.4)",
+        confirmButtonText: "Restart now",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
 
-    // Restart the app
-    app.relaunch();
-    app.exit();
+      // Restart the app
+      app.relaunch();
+      app.exit();
+    } else console.warn('Python server was not found in development mode.')
+  } else {
+    console.log("Connected to Python back-end successfully");
+    log?.info("Connected to Python back-end successfully");
+    ipcRenderer?.send("track-event", "Success", "Establishing Python Connection");
+
+    // Update the options on the multi-select form
+    const multiselectEl = document.getElementById("neuroconv-define-formats");
+    const base = `http://127.0.0.1:${port}`;
+    const multiselectOptions = await fetch(`${base}/neuroconv`).then((res) => res.json());
+    console.log('Setting formats', multiselectOptions )
+    multiselectEl.setAttribute("options", JSON.stringify(multiselectOptions))
   }
-
-  console.log("Connected to Python back-end successfully");
-  log.info("Connected to Python back-end successfully");
-  ipcRenderer?.send("track-event", "Success", "Establishing Python Connection");
 
   // dismiss the Swal
   Swal.close();
 
-  let nodeStorage = new JSONStorage(app?.getPath("userData"));
-  launchAnnouncement = nodeStorage.getItem("announcements");
-  if (launchAnnouncement) {
-    await checkForAnnouncements("announcements");
-    launchAnnouncement = false;
-    nodeStorage.setItem("announcements", false);
+  if (JSONStorage) {
+    let nodeStorage = new JSONStorage(app?.getPath("userData"));
+    launchAnnouncement = nodeStorage.getItem("announcements");
+    if (launchAnnouncement) {
+      await checkForAnnouncements("announcements");
+      launchAnnouncement = false;
+      nodeStorage.setItem("announcements", false);
+    }
   }
-
-  // Update the options on the multi-select form
-  const multiselectEl = document.getElementById("neuroconv-define-formats");
-  const base = `http://127.0.0.1:${port}`;
-  const multiselectOptions = await fetch(`${base}/neuroconv`).then((res) => res.json());
-  console.log('Setting formats', multiselectOptions )
-  multiselectEl.setAttribute("options", JSON.stringify(multiselectOptions))
 };
 
 startupServerAndApiCheck();
@@ -439,10 +439,10 @@ const run_pre_flight_checks = async (check_update = true) => {
   log.info("Running pre flight checks");
   return new Promise(async (resolve) => {
     let connection_response = "";
-    let agent_installed_response = "";
-    let agent_version_response = "";
-    let account_present = false;
-    let nodeStorage = new JSONStorage(app?.getPath("userData"));
+    // let agent_installed_response = "";
+    // let agent_version_response = "";
+    // let account_present = false;
+    // let nodeStorage = new JSONStorage(app?.getPath("userData"));
 
     // Check the internet connection and if available check the rest.
     connection_response = await check_internet_connection();
@@ -497,23 +497,10 @@ const check_internet_connection = async (show_notification = true) => {
   }
   await wait(800);
 
-  return require("dns").resolve("www.google.com", async (err) => {
-    if (err) {
-      console.error("No internet connection");
-      log.error("No internet connection");
-      ipcRenderer?.send("warning-no-internet-connection");
-      if (show_notification) {
-        notyf.dismiss(notification);
-        notyf.open({
-          type: "error",
-          message: "Not connected to internet",
-        });
-      }
-      connected_to_internet = false;
-      return connected_to_internet;
-    } else {
-      console.log("Connected to the internet");
-      log.info("Connected to the internet");
+  connected_to_internet = navigator.onLine;
+  if (connected_to_internet) {
+    console.log("Connected to the internet");
+
       if (show_notification) {
         notyf.dismiss(notification);
         notyf.open({
@@ -521,10 +508,19 @@ const check_internet_connection = async (show_notification = true) => {
           message: "Connected to the internet",
         });
       }
-      connected_to_internet = true;
-      return connected_to_internet;
+  } else {
+      console.error("No internet connection");
+      // if (electronImports.ipcRenderer) electronImports.ipcRenderer.send("warning-no-internet-connection"); // NOTE: Proposed syntax t continue accessing the ipcRenderer
+      if (show_notification) {
+        notyf.dismiss(notification);
+        notyf.open({
+          type: "error",
+          message: "Not connected to internet",
+        });
+      }
     }
-  });
+
+    return navigator.onLine;
 };
 
 const check_api_key = async () => {
@@ -648,7 +644,7 @@ const get_latest_agent_version = () => {
       .done((release_res) => {
         let release = release_res[0];
         let latest_agent_version = release.tag_name;
-        if (process.platform == "darwin") {
+        if (globalThis.process?.platform == "darwin") {
           reverseSwalButtons = true;
           release.assets.forEach((asset, index) => {
             let file_name = asset.name;
@@ -657,7 +653,7 @@ const get_latest_agent_version = () => {
             }
           });
         }
-        if (process.platform == "win32") {
+        if (globalThis.process?.platform == "win32") {
           reverseSwalButtons = false;
           release.assets.forEach((asset, index) => {
             let file_name = asset.name;
@@ -666,7 +662,7 @@ const get_latest_agent_version = () => {
             }
           });
         }
-        if (process.platform == "linux") {
+        if (globalThis.process?.platform == "linux") {
           reverseSwalButtons = false;
           release.assets.forEach((asset, index) => {
             let file_name = asset.name;
@@ -717,7 +713,7 @@ ipcRenderer?.on("update_downloaded", async () => {
     `User OS-${os.platform()}-${os.release()}- SODAv${app.getVersion()}`
   );
   notyf.dismiss(update_available_notification);
-  if (process.platform == "darwin") {
+  if (globalThis.process?.platform == "darwin") {
     update_downloaded_notification = notyf.open({
       type: "app_update_warning",
       message:
@@ -770,8 +766,6 @@ const downloadDescription = document.getElementById("a-description");
 const downloadManifest = document.getElementById("a-manifest");
 
 /////// New Organize Datasets /////////////////////
-let organizeDSglobalPath = "";
-
 const organizeDSbackButton = document.getElementById("button-back");
 const organizeDSaddFiles = document.getElementById("add-files");
 const organizeDSaddNewFolder = document.getElementById("new-folder");
@@ -921,7 +915,7 @@ dragselect_area.subscribe("dragstart", ({ items, event, isDragging }) => {
 ///////////////////// Prepare Metadata Section ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-if (process.platform === "linux") {
+if (globalThis.process?.platform === "linux") {
   //check if data exists inside of the Soda folder, and if it does, move it into the capitalized SODA folder
   if (fs.existsSync(path.join(homeDirectory, "Soda"))) {
     //copy the folder contents of home/Soda to home/SODA
@@ -1074,7 +1068,7 @@ function sendHTTPsRequestAirtable(options, varSuccess) {
 loadAwardData();
 
 /////////////////////// Download Metadata Templates ////////////////////////////
-templateArray = [
+const templateArray = [
   "submission.xlsx",
   "dataset_description.xlsx",
   "subjects.xlsx",
@@ -1698,7 +1692,7 @@ function createMetadataDir() {
   try {
     fs.mkdirSync(metadataPath, { recursive: true });
   } catch (error) {
-    log.error(error);
+    log?.error(error);
     console.log(error);
   }
 }
@@ -2673,14 +2667,6 @@ function postCurationListChange() {
 }
 
 // upload banner image //
-const Cropper = require("cropperjs");
-const { default: Swal } = require("sweetalert2");
-const { waitForDebugger } = require("inspector");
-const { resolve } = require("path");
-const { background } = require("jimp");
-const { rename } = require("fs");
-const { resolveSoa } = require("dns");
-const internal = require("stream");
 var cropOptions = {
   aspectRatio: 1,
   movable: false,
@@ -3720,6 +3706,7 @@ var highLevelFolderToolTip = {
 
 /// back button Curate
 organizeDSbackButton.addEventListener("click", function () {
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var slashCount = organizeDSglobalPath.value.trim().split("/").length - 1;
   if (slashCount !== 1) {
     var filtered = getGlobalPath(organizeDSglobalPath);
@@ -3734,7 +3721,7 @@ organizeDSbackButton.addEventListener("click", function () {
     }
     // construct UI with files and folders
     $("#items").empty();
-    already_created_elem = [];
+    globals.already_created_elem = [];
     let items = loadFileFolder(myPath); //array -
     let total_item_count = items[1].length + items[0].length;
     //we have some items to display
@@ -3748,6 +3735,7 @@ organizeDSbackButton.addEventListener("click", function () {
 // Add folder button
 organizeDSaddNewFolder.addEventListener("click", function (event) {
   event.preventDefault();
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var slashCount = organizeDSglobalPath.value.trim().split("/").length - 1;
   if (slashCount !== 1) {
     var newFolderName = "New Folder";
@@ -4014,33 +4002,6 @@ var bfAddAccountBootboxMessage = `<form>
 
 var bfaddaccountTitle = `<h3 style="text-align:center">Connect your Pennsieve account using an API key</h3>`;
 
-// this function is called in the beginning to load bf accounts to a list
-// which will be fed as dropdown options
-async function retrieveBFAccounts() {
-  bfAccountOptions = [];
-  bfAccountOptionsStatus = "";
-
-  if (hasConnectedAccountWithPennsieve()) {
-    client
-      .get("manage_datasets/bf_account_list")
-      .then((res) => {
-        let accounts = res.data;
-        for (const myitem in accounts) {
-          bfAccountOptions[accounts[myitem]] = accounts[myitem];
-        }
-
-        showDefaultBFAccount();
-      })
-      .catch((error) => {
-        // clientError(error)
-        bfAccountOptionsStatus = error;
-      });
-  } else {
-    bfAccountOptionsStatus = "No account connected";
-  }
-  return [bfAccountOptions, bfAccountOptionsStatus];
-}
-
 let defaultAccountDetails = "";
 async function showDefaultBFAccount() {
   try {
@@ -4210,6 +4171,8 @@ organizeDSaddFiles.addEventListener("click", function () {
 });
 
 ipcRenderer?.on("selected-files-organize-datasets", async (event, path) => {
+
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var filtered = getGlobalPath(organizeDSglobalPath);
   var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
   let hidden_files_present = false;
@@ -4291,6 +4254,8 @@ organizeDSaddFolders.addEventListener("click", function () {
 ipcRenderer?.on("selected-folders-organize-datasets", async (event, pathElement) => {
   var footer = `<a style='text-decoration: none !important' class='swal-popover' data-content='A folder name cannot contain any of the following special characters: <br> ${nonAllowedCharacters}' rel='popover' data-html='true' data-placement='right' data-trigger='hover'>What characters are not allowed?</a>`;
   irregularFolderArray = [];
+
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var filtered = getGlobalPath(organizeDSglobalPath);
   var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
   for (var ele of pathElement) {
@@ -4441,6 +4406,8 @@ const addFoldersfunction = async (action, nonallowedFolderArray, folderArray, cu
       uiFolders[folder] = 1;
     }
   }
+
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var slashCount = organizeDSglobalPath.value.trim().split("/").length - 1;
   if (slashCount === 1) {
     Swal.fire({
@@ -4609,6 +4576,7 @@ async function drop(ev) {
   filesElement = ev.dataTransfer.files;
   targetElement = ev.target;
   // get global path
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var currentPath = organizeDSglobalPath.value;
   var jsonPathArray = currentPath.split("/");
   var filtered = jsonPathArray.slice(1).filter(function (el) {
@@ -4813,6 +4781,8 @@ const dropHelper = async (
     if (statsObj.isFile()) {
       var nonAllowedDuplicate = false;
       var originalFileName = path.parse(itemPath).base;
+
+      const organizeDSglobalPath = globals.organizeDSglobalPath;
       var slashCount = organizeDSglobalPath.value.trim().split("/").length - 1;
       const fileNameRegex = /[^-a-zA-z0-9]/g;
 
@@ -5210,6 +5180,8 @@ const dropHelper = async (
       $(appendString).appendTo(ev2);
     }
     listItems(myPath, "#items", 500, (reset = true));
+
+    const organizeDSglobalPath = globals.organizeDSglobalPath;
     getInFolder(".single-item", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
     if (Object.keys(importedFolders).length > 1) {
       importToast.open({
@@ -5405,6 +5377,7 @@ function folderContextMenu(event) {
   $(".menu.reg-folder li")
     .unbind()
     .click(function () {
+      const organizeDSglobalPath = globals.organizeDSglobalPath;
       if ($(this).attr("id") === "reg-folder-rename") {
         var itemDivElements = document.getElementById("items").children;
         renameFolder(
@@ -5430,6 +5403,7 @@ function folderContextMenu(event) {
   $(".menu.high-level-folder li")
     .unbind()
     .click(function () {
+      const organizeDSglobalPath = globals.organizeDSglobalPath;
       if ($(this).attr("id") === "high-folder-rename") {
         var itemDivElements = document.getElementById("items").children;
         renameFolder(
@@ -5464,6 +5438,7 @@ function fileContextMenu(event) {
   $(".menu.file li")
     .unbind()
     .click(function () {
+      const organizeDSglobalPath = globals.organizeDSglobalPath;
       if ($(this).attr("id") === "file-rename") {
         var itemDivElements = document.getElementById("items").children;
         renameFolder(
@@ -5658,6 +5633,8 @@ function sortObjByKeys(object) {
 const listItems = async (jsonObj, uiItem, amount_req, reset) => {
   //allow amount to choose how many elements to create
   //break elements into sets of 100
+
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   const rootFolders = ["primary", "source", "derivative"];
   if (organizeDSglobalPath.id === "guided-input-global-path") {
     const splitPathCheck = (num, button) => {
@@ -6111,7 +6088,7 @@ const getInFolder = (singleUIItem, uiItem, currentLocation, globalObj) => {
         currentLocation.value = "My_dataset_folder/" + filtered.join("/") + "/";
       }
       $("#items").empty();
-      already_created_elem = [];
+      globals.already_created_elem = [];
       let items = loadFileFolder(myPath);
       //we have some items to display
       listItems(myPath, "#items", 500, (reset = true));
@@ -6131,6 +6108,7 @@ function sliceStringByValue(string, endingValue) {
 var fileNameForEdit;
 ///// Option to manage description for files
 function manageDesc(ev) {
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var fileName = ev.parentElement.innerText;
   /// get current location of files in JSON object
   var filtered = getGlobalPath(organizeDSglobalPath);
@@ -6151,6 +6129,7 @@ function manageDesc(ev) {
 }
 
 function updateFileDetails(ev) {
+  const organizeDSglobalPath = globals.organizeDSglobalPath;
   var fileName = fileNameForEdit;
   var filtered = getGlobalPath(organizeDSglobalPath);
   var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
@@ -8596,7 +8575,16 @@ function openFeedbackForm() {
     });
   }, 5);
 }
+
+// NOTE: This function is only available in Electron
 function gatherLogs() {
+
+  if (!isElectron) {
+    const gatherLogsButton = document.getElementById("gather-logs-button");
+    gatherLogsButton.setAttribute("disabled", "");
+    throw new Error('This function is only available in Electron')
+  }
+
   //function will be used to gather all logs on all OS's
   let homedir = os.homedir();
   let file_path = "";
@@ -8728,13 +8716,18 @@ function gettingStarted() {
   getting_started.click();
 }
 
+function openLink(url) {
+  if (shell) shell.openExternal(url);
+  else window.open(url, "_blank")
+}
+
 function sodaVideo() {
   document.getElementById("overview-column-1").blur();
-  shell.openExternal("https://docs.sodaforsparc.io/docs/getting-started/user-interface");
+  openLink("https://docs.sodaforsparc.io/docs/getting-started/user-interface")
 }
 
 function directToDocumentation() {
-  shell.openExternal(
+  openLink(
     "https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda"
   );
   document.getElementById("overview-column-2").blur();
@@ -8826,6 +8819,9 @@ globals.tippy("#datasetPathDisplay", {
 
 
 // Expose variables to other files
-module.exports = {
+export {
   notyf
 }
+
+
+window.gatherLogs = gatherLogs;

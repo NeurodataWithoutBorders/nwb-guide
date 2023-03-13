@@ -1,12 +1,17 @@
-const { electron = {}, JSONStorage, app } = require('../../src/electron/index.js').default
 
-const {
-  lottie,
-} = require('../globals.js')
+import dependencies from '../../src/electron/index.js'
+const { fs, app, path, log } = dependencies
 
-const { notyf } = require("../others/renderer.js")
+import globals from "../globals.js"
+const { lottie } = globals 
+// const {
+//   lottie,
 
-const ipcRenderer = electron.ipcRenderer;
+
+
+import { notyf } from "../others/renderer.js"
+
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 const bfDatasetSubtitle = document.querySelector("#bf-dataset-subtitle");
 const bfDatasetSubtitleCharCount = document.querySelector("#para-char-count-metadata");
@@ -3075,7 +3080,7 @@ async function showCurrentDatasetStatus(callback) {
 }
 
 
-module.exports = {
+export {
   countCharacters,
   check_forbidden_characters_bf
 }
