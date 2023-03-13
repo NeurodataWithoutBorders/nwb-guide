@@ -189,7 +189,7 @@ function hideAllModals() {
   Array.prototype.forEach.call(modals, (modal) => {
     modal.classList.remove("is-shown");
   });
-  
+
   const sidebar = document.querySelector("nwb-sidebar");
   sidebar.showMainContent();
 }

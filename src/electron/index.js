@@ -2,8 +2,8 @@
 import isElectron from './check.js'
 
 // NOTE: This file scopes all use of the require import syntax beneath the isElectron conditional statement.
-let electronExports = { 
-    isElectron, 
+let electronExports = {
+    isElectron,
     port: 4242  // Assume port number
 }
 if (isElectron) {

@@ -334,7 +334,7 @@ const wait = async (delay) => {
 // check that the client connected to the server using exponential backoff
 // verify the api versions match
 const startupServerAndApiCheck = async () => {
- 
+
   const waitTime = 1000*60*(isElectron ? 2 : 0.1); // Wait 2 seconds if in electron context
   let status = false;
   let time_start = new Date();

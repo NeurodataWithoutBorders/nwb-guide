@@ -3,7 +3,7 @@ import dependencies from '../../src/electron/index.js'
 const { fs, app, path, log } = dependencies
 
 import globals from "../globals.js"
-const { lottie } = globals 
+const { lottie } = globals
 // const {
 //   lottie,
 

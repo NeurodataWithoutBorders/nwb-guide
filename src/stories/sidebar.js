@@ -415,7 +415,7 @@ export class Sidebar extends LitElement {
     if (content) content.classList.add("is-shown"); // NOTE: This remains outside the app
     else console.warn("Could not find content element");
   }
-  
+
 
   updated(){
       // Toggle sidebar
