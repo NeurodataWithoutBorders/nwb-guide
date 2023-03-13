@@ -16,14 +16,11 @@ export const addReadyCallback = (callback) => {
 
 // adds the apps HTML pages to the DOM
 onDocumentReady(async function () {
+
+    // NOTE: This is a bottleneck on load times for the Vite dev server
     const links = document.querySelectorAll('link[rel="import"]');
     let contentIndex = document.querySelector("#content");
-
-    // Array that will contain all of the sectionIDs that are to be
-    // inserted into contentIndex
     let sectionIds = [];
-
-    // Import and add each page to the DOM
     for (const link of links) {
         let doc = await fetch(link.href, {
             headers: {
@@ -40,8 +37,6 @@ onDocumentReady(async function () {
         contentIndex.innerHTML += content;
     }
 
-    //Check to see if the links have been added to the DOM
-    //If not, try again in 100ms
     const waitForHtmlSectionsToInsertIntoDOM = () => {
         return new Promise((resolve) => {
             let interval = setInterval(() => {
@@ -63,6 +58,7 @@ onDocumentReady(async function () {
 
     await waitForHtmlSectionsToInsertIntoDOM();
 
+    // Run arbitrary callbacks
     ready = true
     callbacks.forEach(f => f())
 });
