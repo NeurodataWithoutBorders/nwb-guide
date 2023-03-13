@@ -1,5 +1,7 @@
-const { rgba } = require("jimp");
-const { relative } = require("path");
+const { JSONStorage, app } = require('../../src/electron/index.js').default
+
+const globals = require('../globals.js');
+const { progressFilePath } = globals;
 
 // JSON object of all the tabs
 var allParentStepsJSON = {
@@ -77,7 +79,7 @@ const showParentTab = (tabNow, nextOrPrev) => {
     highLevelFoldersDisableOptions();
   } else {
     if (tabNow === 3) {
-      if (Object.keys(datasetStructureJSONObj["folders"]).includes("code")) {
+      if (Object.keys(globals.datasetStructureJSONObj["folders"]).includes("code")) {
         $(".metadata-button.button-generate-dataset.code-metadata").css("display", "block");
         $(".flex-row-container.code-metadata").css("display", "flex");
       } else {
@@ -155,8 +157,8 @@ const showParentTab = (tabNow, nextOrPrev) => {
     $("#nextBtn").css("display", "none");
 
     let dataset_name = fill_info_details();
-    datasetStructureJSONObj["files"] = sodaJSONObj["metadata-files"];
-    showTreeViewPreview(false, false, false, dataset_name, jstreePreview, datasetStructureJSONObj);
+    globals.datasetStructureJSONObj["files"] = globals.sodaJSONObj["metadata-files"];
+    showTreeViewPreview(false, false, false, dataset_name, jstreePreview, globals.datasetStructureJSONObj);
     $("#Question-preview-dataset-details").show();
     $("#Question-preview-dataset-details").children().show();
     $("#Question-generate-dataset-generate-div").show();
@@ -169,10 +171,10 @@ const showParentTab = (tabNow, nextOrPrev) => {
 const fill_info_details = () => {
   let new_dataset_name = "My_dataset_folder";
   $(".card-container.generate-preview").remove();
-  if (sodaJSONObj["starting-point"]["type"] === "bf") {
-    add_card_detail("Pennsieve account", sodaJSONObj["bf-account-selected"]["account-name"]);
-    add_card_detail("Dataset name", sodaJSONObj["bf-dataset-selected"]["dataset-name"]);
-    new_dataset_name = sodaJSONObj["bf-dataset-selected"]["dataset-name"];
+  if (globals.sodaJSONObj["starting-point"]["type"] === "bf") {
+    add_card_detail("Pennsieve account", globals.sodaJSONObj["bf-account-selected"]["account-name"]);
+    add_card_detail("Dataset name", globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"]);
+    new_dataset_name = globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"];
     if (manifestFileCheck.checked) {
       add_card_detail("Manifest files", "Requested from SODA", 1, "pulse-manifest-checkbox", true);
     } else {
@@ -180,19 +182,19 @@ const fill_info_details = () => {
     }
   }
   if (
-    sodaJSONObj["starting-point"]["type"] === "local" ||
-    sodaJSONObj["starting-point"]["type"] === "new"
+    globals.sodaJSONObj["starting-point"]["type"] === "local" ||
+    globals.sodaJSONObj["starting-point"]["type"] === "new"
   ) {
     // replace existing dataset when starting from local
     if ($('input[name="generate-1"]:checked')[0].id === "generate-local-existing") {
       add_card_detail(
         "Current dataset location",
-        sodaJSONObj["starting-point"]["local-path"],
+        globals.sodaJSONObj["starting-point"]["local-path"],
         1,
         "Question-generate-dataset",
         true
       );
-      new_dataset_name = require("path").basename(sodaJSONObj["starting-point"]["local-path"]);
+      new_dataset_name = require("path").basename(globals.sodaJSONObj["starting-point"]["local-path"]);
       if (manifestFileCheck.checked) {
         add_card_detail(
           "Manifest files",
@@ -205,8 +207,8 @@ const fill_info_details = () => {
         add_card_detail("Manifest files", "Not requested", 2, "pulse-manifest-checkbox", true);
       }
     } else if ($('input[name="generate-1"]:checked')[0].id === "generate-local-desktop") {
-      if (sodaJSONObj["starting-point"]["type"] === "local") {
-        add_card_detail("Original dataset location", sodaJSONObj["starting-point"]["local-path"]);
+      if (globals.sodaJSONObj["starting-point"]["type"] === "local") {
+        add_card_detail("Original dataset location", globals.sodaJSONObj["starting-point"]["local-path"]);
       }
       add_card_detail(
         "New dataset location",
@@ -235,8 +237,8 @@ const fill_info_details = () => {
         add_card_detail("Manifest files", "Not requested", 2, "pulse-manifest-checkbox", true);
       }
     } else if ($('input[name="generate-1"]:checked')[0].id === "generate-upload-BF") {
-      if (sodaJSONObj["starting-point"]["type"] === "local") {
-        add_card_detail("Original dataset location", sodaJSONObj["starting-point"]["local-path"]);
+      if (globals.sodaJSONObj["starting-point"]["type"] === "local") {
+        add_card_detail("Original dataset location", globals.sodaJSONObj["starting-point"]["local-path"]);
       }
 
       add_card_detail("New dataset location", "Pennsieve", 1, "Question-generate-dataset", true);
@@ -477,23 +479,23 @@ const nextPrev = (n) => {
   if (x[currentTab].id === "high-level-folders-tab") {
     $("#items").empty();
     $("#items").append(already_created_elem);
-    getInFolder(".single-item", "#items", dataset_path, datasetStructureJSONObj);
+    getInFolder(".single-item", "#items", dataset_path, globals.datasetStructureJSONObj);
   }
   if (x[currentTab].id === "high-level-folders-tab" || x[currentTab].id === "metadata-files-tab") {
     organizeLandingUIEffect();
     // delete datasetStructureObject["files"] value (with metadata files (if any)) that was added only for the Preview tree view
-    if ("files" in datasetStructureJSONObj) {
-      datasetStructureJSONObj["files"] = {};
+    if ("files" in globals.datasetStructureJSONObj) {
+      globals.datasetStructureJSONObj["files"] = {};
     }
     // delete manifest files added for treeview
-    for (var highLevelFol in datasetStructureJSONObj["folders"]) {
+    for (var highLevelFol in globals.datasetStructureJSONObj["folders"]) {
       if (
-        "manifest.xlsx" in datasetStructureJSONObj["folders"][highLevelFol]["files"] &&
-        datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"][
+        "manifest.xlsx" in globals.datasetStructureJSONObj["folders"][highLevelFol]["files"] &&
+        globals.datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"][
           "forTreeview"
         ] === true
       ) {
-        delete datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"];
+        delete globals.datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"];
       }
     }
   }
@@ -501,7 +503,7 @@ const nextPrev = (n) => {
   if (
     n === 1 &&
     x[currentTab].id === "organize-dataset-tab" &&
-    sodaJSONObj["dataset-structure"] === { folders: {} }
+    globals.sodaJSONObj["dataset-structure"] === { folders: {} }
   ) {
     Swal.fire({
       icon: "warning",
@@ -536,15 +538,15 @@ const nextPrev = (n) => {
     var requiredFiles = ["submission", "dataset_description", "subjects", "README"];
     let missingFiles = [];
     var withoutExtMetadataArray = [];
-    if (!("metadata-files" in sodaJSONObj)) {
-      sodaJSONObj["metadata-files"] = {};
+    if (!("metadata-files" in globals.sodaJSONObj)) {
+      globals.sodaJSONObj["metadata-files"] = {};
     }
-    if (Object.keys(sodaJSONObj["dataset-structure"]["folders"]).includes("code")) {
+    if (Object.keys(globals.sodaJSONObj["dataset-structure"]["folders"]).includes("code")) {
       requiredFiles.push("code_description");
     }
 
-    if (Object.keys(sodaJSONObj["metadata-files"]).length > 0) {
-      Object.keys(sodaJSONObj["metadata-files"]).forEach((element) => {
+    if (Object.keys(globals.sodaJSONObj["metadata-files"]).length > 0) {
+      Object.keys(globals.sodaJSONObj["metadata-files"]).forEach((element) => {
         let file_name = path.parse(element).name;
         if (!element.includes("-DELETED")) {
           withoutExtMetadataArray.push(path.parse(element).name);
@@ -609,7 +611,7 @@ const nextPrev = (n) => {
     }
   } else if (
     x[currentTab].id === "preview-dataset-tab" &&
-    sodaJSONObj["starting-point"]["type"] == "bf"
+    globals.sodaJSONObj["starting-point"]["type"] == "bf"
   ) {
     $(x[currentTab]).removeClass("tab-active");
 
@@ -618,7 +620,7 @@ const nextPrev = (n) => {
     $("#nextBtn").prop("disabled", false);
   } else if (
     x[currentTab].id === "manifest-file-tab" &&
-    sodaJSONObj["starting-point"]["type"] == "bf"
+    globals.sodaJSONObj["starting-point"]["type"] == "bf"
   ) {
     // cj -skip step 6
     $(x[currentTab]).removeClass("tab-active");
@@ -633,8 +635,8 @@ const nextPrev = (n) => {
     showParentTab(currentTab, n);
   } else if (
     x[currentTab].id === "manifest-file-tab" &&
-    (sodaJSONObj["starting-point"]["type"] === "new" ||
-      sodaJSONObj["starting-point"]["type"] === "local")
+    (globals.sodaJSONObj["starting-point"]["type"] === "new" ||
+      globals.sodaJSONObj["starting-point"]["type"] === "local")
   ) {
     $(x[currentTab]).removeClass("tab-active");
     currentTab = currentTab + n;
@@ -649,7 +651,7 @@ const nextPrev = (n) => {
     $(dataset_location).text("At which location should we generate the dataset?");
 
     // Show/or hide the replace existing button
-    if (sodaJSONObj["starting-point"]["type"] === "local") {
+    if (globals.sodaJSONObj["starting-point"]["type"] === "local") {
       $("#generate-dataset-replace-existing").show();
       $("#generate-dataset-replace-existing").children().show();
     } else {
@@ -751,7 +753,7 @@ function showSubTab(section, tab, input) {
 // function to check if certain high level folders already chosen and have files/sub-folders
 // then disable the option (users cannot un-choose)
 const highLevelFoldersDisableOptions = () => {
-  var highLevelFolderOptions = datasetStructureJSONObj["folders"];
+  var highLevelFolderOptions = globals.datasetStructureJSONObj["folders"];
   if (highLevelFolderOptions) {
     for (var folder of highLevelFolders) {
       if (Object.keys(highLevelFolderOptions).includes(folder)) {
@@ -791,20 +793,20 @@ $(".parent-tabs, .folder-input-check").click(function () {
   due to some unique element restrictions the option-card div has
 */
 
-// raise warning before wiping out existing sodaJSONObj
+// raise warning before wiping out existing globals.sodaJSONObj
 // show warning message
 const raiseWarningGettingStarted = (ev) => {
   return new Promise((resolve) => {
     if (
       !(
-        JSON.stringify(sodaJSONObj) === "{}" ||
-        JSON.stringify(sodaJSONObj) ===
+        JSON.stringify(globals.sodaJSONObj) === "{}" ||
+        JSON.stringify(globals.sodaJSONObj) ===
           '{"starting-point":{"type":"new"},"dataset-structure":{},"metadata-files":{}}' ||
-        JSON.stringify(sodaJSONObj) ===
+        JSON.stringify(globals.sodaJSONObj) ===
           '{"starting-point":{"type":""},"dataset-structure":{},"metadata-files":{}}' ||
-        JSON.stringify(sodaJSONObj) ===
+        JSON.stringify(globals.sodaJSONObj) ===
           '{"bf-account-selected":{},"bf-dataset-selected":{},"dataset-structure":{},"metadata-files":{},"manifest-files":{},"generate-dataset":{},"starting-point":{ "type": "local","local-path":""}}' ||
-        JSON.stringify(sodaJSONObj) ===
+        JSON.stringify(globals.sodaJSONObj) ===
           '{"bf-account-selected":{"account-name":{}}, "bf-dataset-selected":{"dataset-name":{}}, "dataset-structure":{},"metadata-files":{}, "manifest-files":{}, "generate-dataset":{}, "starting-point": {"type": "bf"}}'
       )
     ) {
@@ -1020,11 +1022,11 @@ async function transitionSubQuestions(ev, currentDiv, parentDiv, button, categor
       $($($("#div-getting-started-prepare-new").parents()[0]).siblings().children()).addClass(
         "non-selected"
       );
-      sodaJSONObj["starting-point"] = {};
-      sodaJSONObj["starting-point"]["type"] = "new";
-      sodaJSONObj["dataset-structure"] = {};
-      datasetStructureJSONObj = { folders: {}, files: {} };
-      sodaJSONObj["metadata-files"] = {};
+      globals.sodaJSONObj["starting-point"] = {};
+      globals.sodaJSONObj["starting-point"]["type"] = "new";
+      globals.sodaJSONObj["dataset-structure"] = {};
+      globals.datasetStructureJSONObj = { folders: {}, files: {} };
+      globals.sodaJSONObj["metadata-files"] = {};
       reset_ui();
       setTimeout(() => {
         $("#nextBtn").prop("disabled", false);
@@ -1036,7 +1038,7 @@ async function transitionSubQuestions(ev, currentDiv, parentDiv, button, categor
       // in case users have existing, non-empty SODA object structure due to previous progress option was selected prior to this "existing-bf" option
       $("#Question-getting-started-existing-BF-account").show();
       $("#Question-getting-started-existing-BF-account").children().show();
-      if (sodaJSONObj["dataset-structure"] != {}) {
+      if (globals.sodaJSONObj["dataset-structure"] != {}) {
         reset_ui();
         $("#nextBtn").prop("disabled", false);
       }
@@ -1048,7 +1050,7 @@ async function transitionSubQuestions(ev, currentDiv, parentDiv, button, categor
       $("#generate-local-existing").is(":checked") &&
       currentDiv === "Question-generate-dataset"
     ) {
-      let starting_point = sodaJSONObj["starting-point"]["local-path"];
+      let starting_point = globals.sodaJSONObj["starting-point"]["local-path"];
 
       Swal.fire({
         icon: "info",
@@ -1075,7 +1077,7 @@ async function transitionSubQuestions(ev, currentDiv, parentDiv, button, categor
 
   if (ev.getAttribute("data-next") === "Question-getting-started-locally-destination") {
     if ($("#existing-local").is(":checked") && currentDiv == "Question-getting-started-1") {
-      sodaJSONObj = {
+      globals.sodaJSONObj = {
         "bf-account-selected": {},
         "bf-dataset-selected": {},
         "dataset-structure": {},
@@ -1094,7 +1096,7 @@ async function transitionSubQuestions(ev, currentDiv, parentDiv, button, categor
   }
 }
 
-// Create the dataset structure for sodaJSONObj
+// Create the dataset structure for globals.sodaJSONObj
 const create_json_object = (action, sodaJSONObj, root_folder_path) => {
   high_level_sparc_folders = ["code", "derivative", "docs", "primary", "protocol", "source"];
   high_level_metadata_sparc = [
@@ -1299,31 +1301,31 @@ const recursive_structure_create = (
       !/(^|\/)\.[^\/\.]/g.test(file) && //not a hidden file
       high_level_folder != dataset_folder
     ) {
-      if (sodaJSONObj["starting-point"][high_level_folder]["path"] !== "") {
-        extension = path.extname(sodaJSONObj["starting-point"][high_level_folder]["path"]);
+      if (globals.sodaJSONObj["starting-point"][high_level_folder]["path"] !== "") {
+        extension = path.extname(globals.sodaJSONObj["starting-point"][high_level_folder]["path"]);
         if (extension == ".xlsx") {
           temp_current_file_path = current_file_path.replace("\\", "/");
 
           relative_path = temp_current_file_path.replace(root_folder_path + "/", "");
 
-          for (item in sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
+          for (item in globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
             if (
-              sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["A"] ==
+              globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["A"] ==
               relative_path
             ) {
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"] != undefined
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"] != undefined
               ) {
                 manifest_object["description"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"];
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"];
               } else {
                 manifest_object["description"] = "";
               }
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"] != undefined
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"] != undefined
               ) {
                 manifest_object["additional-metadata"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"];
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"];
               } else {
                 manifest_object["additional-metadata"] = "";
               }
@@ -1332,27 +1334,27 @@ const recursive_structure_create = (
         } else if (extension == ".csv") {
           temp_current_file_path = current_file_path.replace("\\", "/");
           relative_path = temp_current_file_path.replace(root_folder_path + "/", "");
-          for (item in sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
+          for (item in globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
             if (
-              sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["filename"] ==
+              globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["filename"] ==
               relative_path
             ) {
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"] !=
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"] !=
                 undefined
               ) {
                 manifest_object["description"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"];
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"];
               } else {
                 manifest_object["description"] = "";
               }
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
                   "AdditionalMetadata"
                 ] != undefined
               ) {
                 manifest_object["additional-metadata"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
                     "AdditionalMetadata"
                   ];
               } else {
@@ -1444,29 +1446,29 @@ const recursive_structure_create_include_manifest = (
       !/(^|\/)\.[^\/\.]/g.test(file) && //not a hidden file
       high_level_folder != dataset_folder
     ) {
-      if (sodaJSONObj["starting-point"][high_level_folder]["path"] !== "") {
-        extension = path.extname(sodaJSONObj["starting-point"][high_level_folder]["path"]);
+      if (globals.sodaJSONObj["starting-point"][high_level_folder]["path"] !== "") {
+        extension = path.extname(globals.sodaJSONObj["starting-point"][high_level_folder]["path"]);
         if (extension == ".xlsx") {
           temp_current_file_path = current_file_path.replace("\\", "/");
           relative_path = temp_current_file_path.replace(root_folder_path + "/", "");
-          for (item in sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
+          for (item in globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
             if (
-              sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["A"] ==
+              globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["A"] ==
               relative_path
             ) {
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"] != undefined
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"] != undefined
               ) {
                 manifest_object["description"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"];
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["C"];
               } else {
                 manifest_object["description"] = "";
               }
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"] != undefined
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"] != undefined
               ) {
                 manifest_object["additional-metadata"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"];
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["E"];
               } else {
                 manifest_object["additional-metadata"] = "";
               }
@@ -1475,27 +1477,27 @@ const recursive_structure_create_include_manifest = (
         } else if (extension == ".csv") {
           temp_current_file_path = current_file_path.replace("\\", "/");
           relative_path = temp_current_file_path.replace(root_folder_path + "/", "");
-          for (item in sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
+          for (item in globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"]) {
             if (
-              sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["filename"] ==
+              globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["filename"] ==
               relative_path
             ) {
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"] !=
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"] !=
                 undefined
               ) {
                 manifest_object["description"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"];
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item]["description"];
               } else {
                 manifest_object["description"] = "";
               }
               if (
-                sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
+                globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
                   "AdditionalMetadata"
                 ] != undefined
               ) {
                 manifest_object["additional-metadata"] =
-                  sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
+                  globals.sodaJSONObj["starting-point"][high_level_folder]["manifest"][item][
                     "AdditionalMetadata"
                   ];
               } else {
@@ -1618,7 +1620,7 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
   if (currentDiv === "Question-getting-started-BF-dataset") {
     $("#nextBtn").prop("disabled", true);
     // $("#button-confirm-bf-dataset-getting-started").prop("disabled", true);
-    sodaJSONObj = {
+    globals.sodaJSONObj = {
       "bf-account-selected": {
         "account-name": {},
       },
@@ -1634,8 +1636,8 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
       },
     };
 
-    sodaJSONObj["bf-account-selected"]["account-name"] = $("#current-bf-account").text();
-    sodaJSONObj["bf-dataset-selected"]["dataset-name"] = $("#current-bf-dataset").text();
+    globals.sodaJSONObj["bf-account-selected"]["account-name"] = $("#current-bf-account").text();
+    globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"] = $("#current-bf-dataset").text();
     $("#para-continue-bf-dataset-getting-started").text("");
     $("body").addClass("waiting");
     $("#button-confirm-bf-dataset-getting-started").prop("disabled", true);
@@ -1647,7 +1649,7 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
     let manifestErrorMessage = [];
     try {
       let data = await bf_request_and_populate_dataset(
-        sodaJSONObj,
+        globals.sodaJSONObj,
         document.querySelector("#loading_pennsieve_dataset-organize"),
         true
       );
@@ -1670,7 +1672,7 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
       showHideDropdownButtons("dataset", "hide");
       $("#current-bf-dataset").text("None");
       $(datasetPermissionDiv).find("#curatebfdatasetlist").val("Select dataset").trigger("change");
-      sodaJSONObj["bf-dataset-selected"]["dataset-name"] = "";
+      globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"] = "";
       $("#button-confirm-bf-dataset-getting-started").prop("disabled", false);
       $("body").removeClass("waiting");
 
@@ -1715,14 +1717,14 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
         },
       }).then((response) => {
         if (response.isConfirmed) {
-          sodaJSONObj = sodaObject;
-          if (JSON.stringify(sodaJSONObj["dataset-structure"]) !== "{}") {
-            datasetStructureJSONObj = sodaJSONObj["dataset-structure"];
+          globals.sodaJSONObj = sodaObject;
+          if (JSON.stringify(globals.sodaJSONObj["dataset-structure"]) !== "{}") {
+            globals.datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
           } else {
-            datasetStructureJSONObj = { folders: {}, files: {} };
+            globals.datasetStructureJSONObj = { folders: {}, files: {} };
           }
-          populate_existing_folders(datasetStructureJSONObj);
-          populate_existing_metadata(sodaJSONObj);
+          populate_existing_folders(globals.datasetStructureJSONObj);
+          populate_existing_metadata(globals.sodaJSONObj);
           $("#nextBtn").prop("disabled", false);
           $("#para-continue-bf-dataset-getting-started").text("Please continue below.");
           showHideDropdownButtons("dataset", "show");
@@ -1740,15 +1742,15 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
         }
       });
     } else {
-      sodaJSONObj = sodaObject;
-      if (JSON.stringify(sodaJSONObj["dataset-structure"]) !== "{}") {
-        datasetStructureJSONObj = sodaJSONObj["dataset-structure"];
+      globals.sodaJSONObj = sodaObject;
+      if (JSON.stringify(globals.sodaJSONObj["dataset-structure"]) !== "{}") {
+        globals.datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
       } else {
-        datasetStructureJSONObj = { folders: {}, files: {} };
+        globals.datasetStructureJSONObj = { folders: {}, files: {} };
       }
 
-      populate_existing_folders(datasetStructureJSONObj);
-      populate_existing_metadata(sodaJSONObj);
+      populate_existing_folders(globals.datasetStructureJSONObj);
+      populate_existing_metadata(globals.sodaJSONObj);
       $("#nextBtn").prop("disabled", false);
       $("#para-continue-bf-dataset-getting-started").text("Please continue below.");
       showHideDropdownButtons("dataset", "show");
@@ -1829,7 +1831,7 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
   if (ev.getAttribute("data-next") === "Question-getting-started-final") {
     if ($("#existing-bf").is(":checked")) {
       $("#nextBtn").prop("disabled", true);
-      if (sodaJSONObj["dataset-structure"] != {}) {
+      if (globals.sodaJSONObj["dataset-structure"] != {}) {
         $("#nextBtn").prop("disabled", false);
       }
     }
@@ -1837,7 +1839,7 @@ async function transitionSubQuestionsButton(ev, currentDiv, parentDiv, button, c
 
   if (ev.getAttribute("data-next") === "input-destination-getting-started-locally") {
     if ($("#existing-local").is(":checked") && currentDiv == "Question-getting-started-1") {
-      sodaJSONObj = {
+      globals.sodaJSONObj = {
         "bf-account-selected": {},
         "bf-dataset-selected": {},
         "dataset-structure": {},
@@ -1988,7 +1990,7 @@ const transitionFreeFormMode = async (ev, currentDiv, parentDiv, button, categor
   $("#para-submit_prepublishing_review-status").text("");
 
   if (ev.getAttribute("data-next") === "div_make_pi_owner_permissions") {
-    let nodeStorage = new JSONStorage(app.getPath("userData"));
+    let nodeStorage = new JSONStorage(app?.getPath("userData"));
     let previous_choice = nodeStorage.getItem("previously_selected_PI");
     if ($(`#bf_list_users_pi option[value='${previous_choice}']`).length > 0) {
       $("#bf_list_users_pi").val(previous_choice);
@@ -2155,10 +2157,10 @@ async function switchMetadataRCQuestion(metadataRCFileType) {
 }
 // 2. Subjects and Samples (MetadataSubSam)
 async function switchMetadataSubSamQuestions(metadataSubSamFile) {
-  var tableData = subjectsTableData;
+  var tableData = globals.subjectsTableData;
   var singularName = "subject";
   if (metadataSubSamFile === "samples") {
-    tableData = samplesTableData;
+    tableData = globals.samplesTableData;
     singularName = "sample";
   }
 
@@ -2176,9 +2178,9 @@ async function switchMetadataSubSamQuestions(metadataSubSamFile) {
       $(`#existing-${metadataSubSamFile}-file-destination`).val("");
       tableData = [];
       if (metadataSubSamFile === "samples") {
-        samplesTableData = tableData;
+        globals.samplesTableData = tableData;
       } else {
-        subjectsTableData = tableData;
+        globals.subjectsTableData = tableData;
       }
       // delete table rows except headers
       $(`#table-${metadataSubSamFile} tr:gt(0)`).remove();
@@ -2290,12 +2292,12 @@ async function switchMetadataManifestQuestion() {
           timeout: 0,
         });
 
-        sodaJSONObj = {
+        globals.sodaJSONObj = {
           "starting-point": { type: "" },
           "dataset-structure": {},
           "metadata-files": {},
         };
-        datasetStructureJSONObj = {
+        globals.datasetStructureJSONObj = {
           folders: {},
           files: {},
           type: "",
@@ -2710,7 +2712,7 @@ const populateOrganizeDatasetUI = (currentLocation, datasetFolder) => {
 
     //dont know here
     listItems(currentLocation, "#items");
-    getInFolder(".single-item", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+    getInFolder(".single-item", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
     hideMenu("folder", menuFolder, menuHighLevelFolders, menuFile);
     hideMenu("high-level-folder", menuFolder, menuHighLevelFolders, menuFile);
   });
@@ -2722,13 +2724,13 @@ const populateOrganizeDatasetUI = (currentLocation, datasetFolder) => {
 // Step 3: Dataset structure
 
 const updateJSONStructureDSstructure = () => {
-  sodaJSONObj["dataset-structure"] = datasetStructureJSONObj;
+  globals.sodaJSONObj["dataset-structure"] = globals.datasetStructureJSONObj;
   // check if dataset-structure key is empty (no high-level folders are included)
   if (
-    JSON.stringify(sodaJSONObj["dataset-structure"]) === "{}" ||
-    JSON.stringify(sodaJSONObj["dataset-structure"]["folders"]) === "{}"
+    JSON.stringify(globals.sodaJSONObj["dataset-structure"]) === "{}" ||
+    JSON.stringify(globals.sodaJSONObj["dataset-structure"]["folders"]) === "{}"
   ) {
-    delete sodaJSONObj["dataset-structure"];
+    delete globals.sodaJSONObj["dataset-structure"];
   }
 };
 
@@ -2764,36 +2766,36 @@ const updateJSONStructureMetadataFiles = () => {
       invalidOptionsList,
       codeDescriptionFilePath,
       "code_description",
-      sodaJSONObj
+      globals.sodaJSONObj
     );
     populateMetadataObject(
       invalidOptionsList,
       codeParamMetadataFilePath,
       "code_parameters",
-      sodaJSONObj
+      globals.sodaJSONObj
     );
     populateMetadataObject(
       invalidOptionsList,
       outputsMetadataFilePath,
       "outputs_metadata",
-      sodaJSONObj
+      globals.sodaJSONObj
     );
   }
 
-  populateMetadataObject(invalidOptionsList, submissionFilePath, "submission", sodaJSONObj);
+  populateMetadataObject(invalidOptionsList, submissionFilePath, "submission", globals.sodaJSONObj);
   populateMetadataObject(
     invalidOptionsList,
     dsDescriptionFilePath,
     "dataset_description",
-    sodaJSONObj
+    globals.sodaJSONObj
   );
-  populateMetadataObject(invalidOptionsList, subjectsFilePath, "subjects", sodaJSONObj);
-  populateMetadataObject(invalidOptionsList, samplesFilePath, "samples", sodaJSONObj);
-  populateMetadataObject(invalidOptionsList, readmeFilePath, "README", sodaJSONObj);
-  populateMetadataObject(invalidOptionsList, changesFilePath, "CHANGES", sodaJSONObj);
+  populateMetadataObject(invalidOptionsList, subjectsFilePath, "subjects", globals.sodaJSONObj);
+  populateMetadataObject(invalidOptionsList, samplesFilePath, "samples", globals.sodaJSONObj);
+  populateMetadataObject(invalidOptionsList, readmeFilePath, "README", globals.sodaJSONObj);
+  populateMetadataObject(invalidOptionsList, changesFilePath, "CHANGES", globals.sodaJSONObj);
 
-  if (JSON.stringify(sodaJSONObj["metadata-files"]) === "{}") {
-    delete sodaJSONObj["metadata-files"];
+  if (JSON.stringify(globals.sodaJSONObj["metadata-files"]) === "{}") {
+    delete globals.sodaJSONObj["metadata-files"];
   }
 };
 
@@ -2801,14 +2803,14 @@ const updateJSONStructureMetadataFiles = () => {
 // update JSON object with manifest file information
 const updateJSONStructureManifest = () => {
   if (manifestFileCheck.checked) {
-    if ("manifest-files" in sodaJSONObj) {
+    if ("manifest-files" in globals.sodaJSONObj) {
       // cj this might need to be changed
-      sodaJSONObj["manifest-files"]["destination"] = "generate-dataset";
+      globals.sodaJSONObj["manifest-files"]["destination"] = "generate-dataset";
     } else {
-      sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
+      globals.sodaJSONObj["manifest-files"] = { destination: "generate-dataset" };
     }
   } else {
-    delete sodaJSONObj["manifest-files"];
+    delete globals.sodaJSONObj["manifest-files"];
   }
 };
 
@@ -2846,20 +2848,20 @@ const recursive_remove_local_deleted_files = (dataset_folder) => {
 // Step 6: Generate dataset
 // update JSON object after users finish Generate dataset step
 const updateJSONStructureGenerate = (progress = false) => {
-  let starting_point = sodaJSONObj["starting-point"]["type"];
-  if (sodaJSONObj["starting-point"]["type"] == "bf") {
-    sodaJSONObj["generate-dataset"] = {
+  let starting_point = globals.sodaJSONObj["starting-point"]["type"];
+  if (globals.sodaJSONObj["starting-point"]["type"] == "bf") {
+    globals.sodaJSONObj["generate-dataset"] = {
       destination: "bf",
       "generate-option": "existing-bf",
     };
   }
-  if (sodaJSONObj["starting-point"]["type"] == "local") {
-    var localDestination = require("path").dirname(sodaJSONObj["starting-point"]["local-path"]);
-    var newDatasetName = require("path").basename(sodaJSONObj["starting-point"]["local-path"]);
+  if (globals.sodaJSONObj["starting-point"]["type"] == "local") {
+    var localDestination = require("path").dirname(globals.sodaJSONObj["starting-point"]["local-path"]);
+    var newDatasetName = require("path").basename(globals.sodaJSONObj["starting-point"]["local-path"]);
     // if (progress == false) {
-    //   delete sodaJSONObj["starting-point"]["local-path"];
+    //   delete globals.sodaJSONObj["starting-point"]["local-path"];
     // }
-    sodaJSONObj["generate-dataset"] = {
+    globals.sodaJSONObj["generate-dataset"] = {
       destination: "local",
       path: localDestination,
       "dataset-name": newDatasetName,
@@ -2867,16 +2869,16 @@ const updateJSONStructureGenerate = (progress = false) => {
       "generate-option": "new",
     };
     // delete bf account and dataset keys
-    if ("bf-account-selected" in sodaJSONObj) {
-      delete sodaJSONObj["bf-account-selected"];
+    if ("bf-account-selected" in globals.sodaJSONObj) {
+      delete globals.sodaJSONObj["bf-account-selected"];
     }
-    if ("bf-dataset-selected" in sodaJSONObj) {
-      delete sodaJSONObj["bf-dataset-selected"];
+    if ("bf-dataset-selected" in globals.sodaJSONObj) {
+      delete globals.sodaJSONObj["bf-dataset-selected"];
     }
-    sodaJSONObj["starting-point"]["type"] = "new";
-    recursive_remove_local_deleted_files(sodaJSONObj["dataset-structure"]);
+    globals.sodaJSONObj["starting-point"]["type"] = "new";
+    recursive_remove_local_deleted_files(globals.sodaJSONObj["dataset-structure"]);
   }
-  if (sodaJSONObj["starting-point"]["type"] == "new") {
+  if (globals.sodaJSONObj["starting-point"]["type"] == "new") {
     if ($('input[name="generate-1"]:checked').length > 0) {
       if ($('input[name="generate-1"]:checked')[0].id === "generate-local-desktop") {
         var localDestination = $("#input-destination-generate-dataset-locally")[0].placeholder;
@@ -2884,7 +2886,7 @@ const updateJSONStructureGenerate = (progress = false) => {
           localDestination = "";
         }
         var newDatasetName = $("#inputNewNameDataset").val().trim();
-        sodaJSONObj["generate-dataset"] = {
+        globals.sodaJSONObj["generate-dataset"] = {
           destination: "local",
           path: localDestination,
           "dataset-name": newDatasetName,
@@ -2892,24 +2894,24 @@ const updateJSONStructureGenerate = (progress = false) => {
           "if-existing": "new",
         };
         // delete bf account and dataset keys
-        if ("bf-account-selected" in sodaJSONObj) {
-          delete sodaJSONObj["bf-account-selected"];
+        if ("bf-account-selected" in globals.sodaJSONObj) {
+          delete globals.sodaJSONObj["bf-account-selected"];
         }
-        if ("bf-dataset-selected" in sodaJSONObj) {
-          delete sodaJSONObj["bf-dataset-selected"];
+        if ("bf-dataset-selected" in globals.sodaJSONObj) {
+          delete globals.sodaJSONObj["bf-dataset-selected"];
         }
       } else if ($('input[name="generate-1"]:checked')[0].id === "generate-upload-BF") {
-        sodaJSONObj["generate-dataset"] = {
+        globals.sodaJSONObj["generate-dataset"] = {
           destination: "bf",
           "generate-option": "new",
         };
         if ($("#current-bf-account-generate").text() !== "None") {
-          if ("bf-account-selected" in sodaJSONObj) {
-            sodaJSONObj["bf-account-selected"]["account-name"] = $(
+          if ("bf-account-selected" in globals.sodaJSONObj) {
+            globals.sodaJSONObj["bf-account-selected"]["account-name"] = $(
               "#current-bf-account-generate"
             ).text();
           } else {
-            sodaJSONObj["bf-account-selected"] = {
+            globals.sodaJSONObj["bf-account-selected"] = {
               "account-name": $("#current-bf-account-generate").text(),
             };
           }
@@ -2921,34 +2923,34 @@ const updateJSONStructureGenerate = (progress = false) => {
           ) {
             if ($('input[name="generate-5"]:checked').length > 0) {
               if ($('input[name="generate-5"]:checked')[0].id === "existing-folders-duplicate") {
-                sodaJSONObj["generate-dataset"]["if-existing"] = "create-duplicate";
+                globals.sodaJSONObj["generate-dataset"]["if-existing"] = "create-duplicate";
               } else if (
                 $('input[name="generate-5"]:checked')[0].id === "existing-folders-replace"
               ) {
-                sodaJSONObj["generate-dataset"]["if-existing"] = "replace";
+                globals.sodaJSONObj["generate-dataset"]["if-existing"] = "replace";
               } else if ($('input[name="generate-5"]:checked')[0].id === "existing-folders-merge") {
-                sodaJSONObj["generate-dataset"]["if-existing"] = "merge";
+                globals.sodaJSONObj["generate-dataset"]["if-existing"] = "merge";
               } else if ($('input[name="generate-5"]:checked')[0].id === "existing-folders-skip") {
-                sodaJSONObj["generate-dataset"]["if-existing"] = "skip";
+                globals.sodaJSONObj["generate-dataset"]["if-existing"] = "skip";
               }
             }
             if ($('input[name="generate-6"]:checked').length > 0) {
               if ($('input[name="generate-6"]:checked')[0].id === "existing-files-duplicate") {
-                sodaJSONObj["generate-dataset"]["if-existing-files"] = "create-duplicate";
+                globals.sodaJSONObj["generate-dataset"]["if-existing-files"] = "create-duplicate";
               } else if ($('input[name="generate-6"]:checked')[0].id === "existing-files-replace") {
-                sodaJSONObj["generate-dataset"]["if-existing-files"] = "replace";
+                globals.sodaJSONObj["generate-dataset"]["if-existing-files"] = "replace";
               } else if ($('input[name="generate-6"]:checked')[0].id === "existing-files-skip") {
-                sodaJSONObj["generate-dataset"]["if-existing-files"] = "skip";
+                globals.sodaJSONObj["generate-dataset"]["if-existing-files"] = "skip";
               }
             }
             // populate JSON obj with BF dataset and account
             if ($("#current-bf-dataset-generate").text() !== "None") {
-              if ("bf-dataset-selected" in sodaJSONObj) {
-                sodaJSONObj["bf-dataset-selected"]["dataset-name"] = $(
+              if ("bf-dataset-selected" in globals.sodaJSONObj) {
+                globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"] = $(
                   "#current-bf-dataset-generate"
                 ).text();
               } else {
-                sodaJSONObj["bf-dataset-selected"] = {
+                globals.sodaJSONObj["bf-dataset-selected"] = {
                   "dataset-name": $("#current-bf-dataset-generate").text(),
                 };
               }
@@ -2958,19 +2960,19 @@ const updateJSONStructureGenerate = (progress = false) => {
             $('input[name="generate-4"]:checked')[0].id === "generate-BF-dataset-options-new"
           ) {
             var newDatasetName = $("#inputNewNameDataset").val().trim();
-            sodaJSONObj["generate-dataset"]["dataset-name"] = newDatasetName;
-            sodaJSONObj["generate-dataset"]["if-existing"] = "create-duplicate";
-            sodaJSONObj["generate-dataset"]["if-existing-files"] = "create-duplicate";
+            globals.sodaJSONObj["generate-dataset"]["dataset-name"] = newDatasetName;
+            globals.sodaJSONObj["generate-dataset"]["if-existing"] = "create-duplicate";
+            globals.sodaJSONObj["generate-dataset"]["if-existing-files"] = "create-duplicate";
             // if upload to a new bf dataset, then delete key below from JSON object
-            if ("bf-dataset-selected" in sodaJSONObj) {
-              delete sodaJSONObj["bf-dataset-selected"];
+            if ("bf-dataset-selected" in globals.sodaJSONObj) {
+              delete globals.sodaJSONObj["bf-dataset-selected"];
             }
           }
         }
       }
     }
     if (progress == true) {
-      sodaJSONObj["starting-point"]["type"] = starting_point;
+      globals.sodaJSONObj["starting-point"]["type"] = starting_point;
     }
   }
 };
@@ -2988,18 +2990,18 @@ const updateOverallJSONStructure = (id) => {
       }
     }
     // keys now have all the high-level folders from Step 2
-    // datasetStructureJSONObj["folders"] have all the folders both from the old step 2 and -deleted folders in step 3
+    // globals.datasetStructureJSONObj["folders"] have all the folders both from the old step 2 and -deleted folders in step 3
 
-    // 1st: check if folder in keys, not in datasetStructureJSONObj["folders"], then add an empty object
-    // 2nd: check if folder in datasetStructureJSONObj["folders"], add that to newDatasetStructureJSONObj["folders"]
+    // 1st: check if folder in keys, not in globals.datasetStructureJSONObj["folders"], then add an empty object
+    // 2nd: check if folder in globals.datasetStructureJSONObj["folders"], add that to newDatasetStructureJSONObj["folders"]
     // 3rd: assign old to new
     // 1st
     keys.forEach((folder) => {
-      if ("folders" in datasetStructureJSONObj) {
-        if (Object.keys(datasetStructureJSONObj["folders"]).includes(folder)) {
+      if ("folders" in globals.datasetStructureJSONObj) {
+        if (Object.keys(globals.datasetStructureJSONObj["folders"]).includes(folder)) {
           // clone a new json object
           newDatasetStructureJSONObj["folders"][folder] =
-            datasetStructureJSONObj["folders"][folder];
+            globals.datasetStructureJSONObj["folders"][folder];
         } else {
           newDatasetStructureJSONObj["folders"][folder] = {
             folders: {},
@@ -3011,19 +3013,19 @@ const updateOverallJSONStructure = (id) => {
       }
     });
     // 2nd
-    if ("folders" in datasetStructureJSONObj) {
-      Object.keys(datasetStructureJSONObj["folders"]).forEach((folderKey) => {
+    if ("folders" in globals.datasetStructureJSONObj) {
+      Object.keys(globals.datasetStructureJSONObj["folders"]).forEach((folderKey) => {
         if (!keys.includes(folderKey)) {
           newDatasetStructureJSONObj["folders"][folderKey] =
-            datasetStructureJSONObj["folders"][folderKey];
+            globals.datasetStructureJSONObj["folders"][folderKey];
         }
       });
     }
     // 3rd
-    datasetStructureJSONObj = newDatasetStructureJSONObj;
+    globals.datasetStructureJSONObj = newDatasetStructureJSONObj;
     //dont know here
-    listItems(datasetStructureJSONObj, "#items");
-    getInFolder(".single-item", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+    listItems(globals.datasetStructureJSONObj, "#items");
+    getInFolder(".single-item", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
   } else if (id === allParentStepsJSON["getting-started"]) {
     updateJSONStructureGettingStarted();
   } else if (id === allParentStepsJSON["metadata-files"]) {
@@ -3112,7 +3114,7 @@ const exitCurate = async (resetProgressTabs, start_over = false) => {
 
 const wipeOutCurateProgress = async () => {
   // set SODA json object back
-  sodaJSONObj = {
+  globals.sodaJSONObj = {
     "starting-point": { type: "" },
     "dataset-structure": {},
     "metadata-files": {},
@@ -3157,7 +3159,7 @@ const wipeOutCurateProgress = async () => {
   $(".generate-dataset").removeClass("test2");
 
   // reset dataset structure JSON
-  datasetStructureJSONObj = { folders: {}, files: {} };
+  globals.datasetStructureJSONObj = { folders: {}, files: {} };
 
   // uncheck auto-generated manifest checkbox
   $("#generate-manifest-curate").prop("checked", false);
@@ -3207,22 +3209,22 @@ const saveSODAJSONProgress = (progressFileName) => {
   var filePath = path.join(progressFilePath, progressFileName + ".json");
   // record all information listed in SODA JSON Object before saving
   updateJSONObjectProgress();
-  // delete sodaJSONObj["dataset-structure"] value that was added only for the Preview tree view
-  if ("files" in sodaJSONObj["dataset-structure"]) {
-    sodaJSONObj["dataset-structure"]["files"] = {};
+  // delete globals.sodaJSONObj["dataset-structure"] value that was added only for the Preview tree view
+  if ("files" in globals.sodaJSONObj["dataset-structure"]) {
+    globals.sodaJSONObj["dataset-structure"]["files"] = {};
   }
   // delete manifest files added for treeview
-  for (var highLevelFol in sodaJSONObj["dataset-structure"]["folders"]) {
+  for (var highLevelFol in globals.sodaJSONObj["dataset-structure"]["folders"]) {
     if (
-      "manifest.xlsx" in sodaJSONObj["dataset-structure"]["folders"][highLevelFol]["files"] &&
-      sodaJSONObj["dataset-structure"]["folders"][highLevelFol]["files"]["manifest.xlsx"][
+      "manifest.xlsx" in globals.sodaJSONObj["dataset-structure"]["folders"][highLevelFol]["files"] &&
+      globals.sodaJSONObj["dataset-structure"]["folders"][highLevelFol]["files"]["manifest.xlsx"][
         "forTreeview"
       ] === true
     ) {
-      delete sodaJSONObj["dataset-structure"]["folders"][highLevelFol]["files"]["manifest.xlsx"];
+      delete globals.sodaJSONObj["dataset-structure"]["folders"][highLevelFol]["files"]["manifest.xlsx"];
     }
   }
-  fs.writeFileSync(filePath, JSON.stringify(sodaJSONObj));
+  fs.writeFileSync(filePath, JSON.stringify(globals.sodaJSONObj));
 
   Swal.fire({
     icon: "success",
@@ -3243,9 +3245,9 @@ const saveSODAJSONProgress = (progressFileName) => {
 const saveOrganizeProgressPrompt = () => {
   // check if "save-progress" key is in JSON object
   // if yes, keep saving to that file
-  if ("save-progress" in sodaJSONObj) {
+  if ("save-progress" in globals.sodaJSONObj) {
     // save to file
-    saveSODAJSONProgress(sodaJSONObj["save-progress"]);
+    saveSODAJSONProgress(globals.sodaJSONObj["save-progress"]);
     // if no, ask users what to name it, and create file
   } else {
     Swal.fire({
@@ -3268,7 +3270,7 @@ const saveOrganizeProgressPrompt = () => {
     }).then((result) => {
       if (result.value) {
         if (result.value !== null && result.value !== "") {
-          sodaJSONObj["save-progress"] = result.value.trim();
+          globals.sodaJSONObj["save-progress"] = result.value.trim();
           saveSODAJSONProgress(result.value.trim());
           addOption(progressFileDropdown, result.value.trim(), result.value.trim() + ".json");
         }

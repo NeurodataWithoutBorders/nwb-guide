@@ -4,6 +4,9 @@
 *******************************************************************************************************************
 */
 
+const { electron = {} } = require("../../src/electron/index.js").default;
+const { ipcRenderer } = electron;
+
 // Presentation logic for transitioning from question one to question two
 const transitionToValidateQuestionTwo = async () => {
   // hide both local and pennsieve sections
@@ -168,10 +171,10 @@ document.querySelector("#validate-local-dataset-path").addEventListener("click",
   }
 
   // open folder select dialog
-  ipcRenderer.send("open-folder-dialog-validate-local-dataset");
+  ipcRenderer?.send("open-folder-dialog-validate-local-dataset");
 
   // listen for user's folder path
-  ipcRenderer.on("selected-validate-local-dataset", (evtSender, folderPaths) => {
+  ipcRenderer?.on("selected-validate-local-dataset", (evtSender, folderPaths) => {
     // check if a folder was not selected
     if (!folderPaths.length) return;
 

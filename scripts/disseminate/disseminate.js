@@ -8,6 +8,8 @@ Note: Some frontend elements of the workflow are in the renderer.js file as well
 ******************************************************
 ******************************************************
 */
+const electron = require("../../src/electron/index.js").default.electron ?? {};
+const ipcRenderer = electron.ipcRenderer;
 
 // Main functions
 async function disseminatePublish() {
@@ -537,7 +539,7 @@ async function disseminateShowCurrentPermission(bfAcct, bfDS) {
     permissions = await api.getDatasetPermissions(bfAcct, bfDS);
   } catch (error) {
     clientError(error);
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       "Disseminate Datasets - Show current dataset permission",
@@ -559,7 +561,7 @@ async function disseminateShowCurrentPermission(bfAcct, bfDS) {
 
   currentDatasetPermission.innerHTML = datasetOwner;
 
-  ipcRenderer.send(
+  ipcRenderer?.send(
     "track-event",
     "Success",
     "Disseminate Datasets - Show current dataset permission",
@@ -585,7 +587,7 @@ async function disseminiateShowCurrentDatasetStatus(callback, account, dataset) 
       let res = statusOptionsResponse.data;
       let { current_status } = statusOptionsResponse.data;
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Success",
         "Disseminate Datasets - Show current dataset status",
@@ -612,7 +614,7 @@ async function disseminiateShowCurrentDatasetStatus(callback, account, dataset) 
       clientError(error);
       $(bfCurrentDatasetStatusProgress).css("visbility", "hidden");
       $("#bf-dataset-status-spinner").css("display", "none");
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         "Disseminate Datasets - Show current dataset status",

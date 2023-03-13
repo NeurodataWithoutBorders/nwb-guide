@@ -1,3 +1,8 @@
+const globals = require("../globals.js");
+const { parseJson, protocolConfigPath } = globals;
+const { electron = {} } = require("../../src/electron/index.js").default;
+const { ipcRenderer } = electron;
+
 // event listeners for open dropdown prompt
 document.querySelectorAll(".subjects-change-current-account").forEach((element) => {
   element.addEventListener("click", function () {
@@ -27,9 +32,7 @@ var subjectsFormDiv = document.getElementById("form-add-a-subject");
 var guidedSubjectsFormDiv = document.getElementById("guided-form-add-a-subject");
 var samplesFormDiv = document.getElementById("form-add-a-sample");
 var guidedSamplesFormDiv = document.getElementById("guided-form-add-a-sample");
-var subjectsTableData = [];
 var subjectsFileData = [];
-var samplesTableData = [];
 var samplesFileData = [];
 var headersArrSubjects = [];
 var headersArrSamples = [];
@@ -186,7 +189,7 @@ function displayPreviousSample() {
     prevSubID = $("#previous-subject").val();
     // load previous sample ids accordingly for a particular subject
     var prevSampleArr = [];
-    for (var subject of samplesTableData.slice(1)) {
+    for (var subject of globals.samplesTableData.slice(1)) {
       if (subject[0] === prevSubID) {
         prevSampleArr.push(subject[1]);
       }
@@ -216,10 +219,10 @@ function addSubject(curationMode) {
   if (curationMode === "free-form") {
     subjectID = $("#bootbox-subject-id").val();
     addSubjectIDtoDataBase(subjectID);
-    if (subjectsTableData.length !== 0) {
+    if (globals.subjectsTableData.length !== 0) {
       $("#div-import-primary-folder-subjects").hide();
     }
-    if (subjectsTableData.length === 2) {
+    if (globals.subjectsTableData.length === 2) {
       onboardingMetadata("subject");
     }
   }
@@ -236,10 +239,10 @@ function addSample(curationMode) {
     sampleID = $("#bootbox-sample-id").val();
     subjectID = $("#bootbox-subject-id-samples").val();
     addSampleIDtoDataBase(sampleID, subjectID);
-    if (samplesTableData.length !== 0) {
+    if (globals.samplesTableData.length !== 0) {
       $("#div-import-primary-folder-samples").hide();
     }
-    if (samplesTableData.length === 2) {
+    if (globals.samplesTableData.length === 2) {
       onboardingMetadata("sample");
     }
   }
@@ -711,7 +714,7 @@ function populateRRID(strain, type, curationMode) {
 
 function addSubjectMetadataEntriesIntoJSON(curationMode) {
   let curationModeSelectorPrefix;
-  let dataLength = subjectsTableData.length;
+  let dataLength = globals.subjectsTableData.length;
 
   if (curationMode === "free-form") {
     curationModeSelectorPrefix = "";
@@ -750,22 +753,22 @@ function addSubjectMetadataEntriesIntoJSON(curationMode) {
     }
     valuesArr.push(field.value);
   }
-  subjectsTableData[0] = headersArrSubjects;
+  globals.subjectsTableData[0] = headersArrSubjects;
 
   if (valuesArr !== undefined && valuesArr.length !== 0) {
     if (curationMode === "free-form") {
-      if (subjectsTableData[dataLength] !== undefined) {
-        subjectsTableData[dataLength + 1] = valuesArr;
+      if (globals.subjectsTableData[dataLength] !== undefined) {
+        globals.subjectsTableData[dataLength + 1] = valuesArr;
       } else {
-        subjectsTableData[dataLength] = valuesArr;
+        globals.subjectsTableData[dataLength] = valuesArr;
       }
     }
     if (curationMode === "guided") {
       let subjectID = document.getElementById("guided-bootbox-subject-id").value;
       //Overwrite existing subject data with new subject data
-      for (let i = 1; i < subjectsTableData.length; i++) {
-        if (subjectsTableData[i][0] === subjectID) {
-          subjectsTableData[i] = valuesArr;
+      for (let i = 1; i < globals.subjectsTableData.length; i++) {
+        if (globals.subjectsTableData[i][0] === subjectID) {
+          globals.subjectsTableData[i] = valuesArr;
         }
       }
     }
@@ -780,7 +783,7 @@ function addSubjectMetadataEntriesIntoJSON(curationMode) {
 
 function addSampleMetadataEntriesIntoJSON(curationMode) {
   let curationModeSelectorPrefix = "";
-  var dataLength = samplesTableData.length;
+  var dataLength = globals.samplesTableData.length;
   if (curationMode === "free-form") {
     curationModeSelectorPrefix = "";
   }
@@ -810,22 +813,22 @@ function addSampleMetadataEntriesIntoJSON(curationMode) {
     }
     valuesArr.push(field.value);
   }
-  samplesTableData[0] = headersArrSamples;
+  globals.samplesTableData[0] = headersArrSamples;
   if (valuesArr !== undefined && valuesArr.length !== 0) {
     if (curationMode === "free-form") {
-      if (samplesTableData[dataLength] !== undefined) {
-        samplesTableData[dataLength + 1] = valuesArr;
+      if (globals.samplesTableData[dataLength] !== undefined) {
+        globals.samplesTableData[dataLength + 1] = valuesArr;
       } else {
-        samplesTableData[dataLength] = valuesArr;
+        globals.samplesTableData[dataLength] = valuesArr;
       }
     }
   }
   if (curationMode === "guided") {
     let subjectID = document.getElementById("guided-bootbox-subject-id-samples").value;
     let sampleID = document.getElementById("guided-bootbox-sample-id").value;
-    for (let i = 1; i < samplesTableData.length; i++) {
-      if (samplesTableData[i][0] === subjectID && samplesTableData[i][1] === sampleID) {
-        samplesTableData[i] = valuesArr;
+    for (let i = 1; i < globals.samplesTableData.length; i++) {
+      if (globals.samplesTableData[i][0] === subjectID && globals.samplesTableData[i][1] === sampleID) {
+        globals.samplesTableData[i] = valuesArr;
         break;
       }
     }
@@ -1040,10 +1043,10 @@ function populateForms(subjectID, type, curationMode) {
     fieldArr = $(guidedSubjectsFormDiv).children().find(".subjects-form-entry");
   }
 
-  if (subjectsTableData.length > 1) {
-    for (var i = 1; i < subjectsTableData.length; i++) {
-      if (subjectsTableData[i][0] === subjectID) {
-        infoJson = subjectsTableData[i];
+  if (globals.subjectsTableData.length > 1) {
+    for (var i = 1; i < globals.subjectsTableData.length; i++) {
+      if (globals.subjectsTableData[i][0] === subjectID) {
+        infoJson = globals.subjectsTableData[i];
         break;
       }
     }
@@ -1099,7 +1102,7 @@ function populateForms(subjectID, type, curationMode) {
             //If the selected sample derived from
             const previouslySavedProtocolURL = infoJson[i];
 
-            const protocols = sodaJSONObj["dataset-metadata"]["description-metadata"]["protocols"];
+            const protocols = globals.sodaJSONObj["dataset-metadata"]["description-metadata"]["protocols"];
             for (const protocol of protocols) {
               if (protocol.link === previouslySavedProtocolURL) {
                 protocolTitleDropdown.value = protocol.description;
@@ -1144,10 +1147,10 @@ function populateFormsSamples(subjectID, sampleID, type, curationMode) {
     curationModeSelectorPrefix = "guided-";
     fieldArr = $(guidedSamplesFormDiv).children().find(".samples-form-entry");
   }
-  if (samplesTableData.length > 1) {
-    for (var i = 1; i < samplesTableData.length; i++) {
-      if (samplesTableData[i][0] === subjectID && samplesTableData[i][1] === sampleID) {
-        infoJson = samplesTableData[i];
+  if (globals.samplesTableData.length > 1) {
+    for (var i = 1; i < globals.samplesTableData.length; i++) {
+      if (globals.samplesTableData[i][0] === subjectID && globals.samplesTableData[i][1] === sampleID) {
+        infoJson = globals.samplesTableData[i];
         break;
       }
     }
@@ -1203,7 +1206,7 @@ function populateFormsSamples(subjectID, sampleID, type, curationMode) {
             protocolTitleDropdown.value = "";
             protocolURLDropdown.value = "";
 
-            const protocols = sodaJSONObj["dataset-metadata"]["description-metadata"]["protocols"];
+            const protocols = globals.sodaJSONObj["dataset-metadata"]["description-metadata"]["protocols"];
             for (const protocol of protocols) {
               if (protocol.link === previouslySavedProtocolURL) {
                 protocolTitleDropdown.value = protocol.description;
@@ -1276,9 +1279,9 @@ function editSubject(ev, subjectID) {
   var currentRow = $(ev).parents()[2];
   var newID = $("#bootbox-subject-id").val();
   if (newID === subjectID) {
-    for (var i = 1; i < subjectsTableData.length; i++) {
-      if (subjectsTableData[i][0] === subjectID) {
-        subjectsTableData[i] = subjectsFileData;
+    for (var i = 1; i < globals.subjectsTableData.length; i++) {
+      if (globals.subjectsTableData[i][0] === subjectID) {
+        globals.subjectsTableData[i] = subjectsFileData;
         break;
       }
     }
@@ -1299,9 +1302,9 @@ function editSubject(ev, subjectID) {
         "A similar subject_id already exists. Please either delete the existing subject_id or choose a different subject_id.";
       Swal.fire("Duplicate subject_id", error, "error");
     } else {
-      for (var i = 1; i < subjectsTableData.length; i++) {
-        if (subjectsTableData[i][0] === subjectID) {
-          subjectsTableData[i] = subjectsFileData;
+      for (var i = 1; i < globals.subjectsTableData.length; i++) {
+        if (globals.subjectsTableData[i][0] === subjectID) {
+          globals.subjectsTableData[i] = subjectsFileData;
           break;
         }
       }
@@ -1323,9 +1326,9 @@ function editSample(ev, sampleID) {
   var currentRow = $(ev).parents()[2];
   var newID = $("#bootbox-sample-id").val();
   if (newID === sampleID) {
-    for (var i = 1; i < samplesTableData.length; i++) {
-      if (samplesTableData[i][1] === sampleID) {
-        samplesTableData[i] = samplesFileData;
+    for (var i = 1; i < globals.samplesTableData.length; i++) {
+      if (globals.samplesTableData[i][1] === sampleID) {
+        globals.samplesTableData[i] = samplesFileData;
         break;
       }
     }
@@ -1347,9 +1350,9 @@ function editSample(ev, sampleID) {
         "A similar sample_id already exists. Please either delete the existing sample_id or choose a different sample_id.";
       Swal.fire("Duplicate sample_id", error, "error");
     } else {
-      for (var i = 1; i < samplesTableData.length; i++) {
-        if (samplesTableData[i][1] === sampleID) {
-          samplesTableData[i] = samplesFileData;
+      for (var i = 1; i < globals.samplesTableData.length; i++) {
+        if (globals.samplesTableData[i][1] === sampleID) {
+          globals.samplesTableData[i] = samplesFileData;
           break;
         }
       }
@@ -1380,9 +1383,9 @@ function delete_current_subject_id(ev) {
       updateIndexForTable(document.getElementById("table-subjects"));
       // 2. Delete from JSON
       var subjectID = $(currentRow)[0].cells[1].innerText;
-      for (var i = 1; i < subjectsTableData.length; i++) {
-        if (subjectsTableData[i][0] === subjectID) {
-          subjectsTableData.splice(i, 1);
+      for (var i = 1; i < globals.subjectsTableData.length; i++) {
+        if (globals.subjectsTableData[i][0] === subjectID) {
+          globals.subjectsTableData.splice(i, 1);
           break;
         }
       }
@@ -1410,9 +1413,9 @@ function delete_current_sample_id(ev) {
       updateIndexForTable(document.getElementById("table-samples"));
       // 2. Delete from JSON
       var sampleId = $(currentRow)[0].cells[1].innerText;
-      for (var i = 1; i < samplesTableData.length; i++) {
-        if (samplesTableData[i][1] === sampleId) {
-          samplesTableData.splice(i, 1);
+      for (var i = 1; i < globals.samplesTableData.length; i++) {
+        if (globals.samplesTableData[i][1] === sampleId) {
+          globals.samplesTableData.splice(i, 1);
           break;
         }
       }
@@ -1490,13 +1493,13 @@ async function copy_current_subject_id(ev) {
       var currentRow = $(ev).parents()[2];
       var id = currentRow.cells[1].innerText;
       // 2. append that to the end of matrix
-      for (var subArr of subjectsTableData.slice(1)) {
+      for (var subArr of globals.subjectsTableData.slice(1)) {
         if (subArr[0] === id) {
-          var ind = subjectsTableData.indexOf(subArr);
-          var newArr = [...subjectsTableData[ind]];
-          subjectsTableData.push(newArr);
+          var ind = globals.subjectsTableData.indexOf(subArr);
+          var newArr = [...globals.subjectsTableData[ind]];
+          globals.subjectsTableData.push(newArr);
           // 3. change first entry of that array
-          subjectsTableData[subjectsTableData.length - 1][0] = newSubject;
+          globals.subjectsTableData[globals.subjectsTableData.length - 1][0] = newSubject;
           break;
         }
       }
@@ -1534,14 +1537,14 @@ async function copy_current_sample_id(ev) {
       var id1 = currentRow.cells[1].innerText;
       var id2 = currentRow.cells[2].innerText;
       // 2. append that to the end of matrix
-      for (var samArr of samplesTableData.slice(1)) {
+      for (var samArr of globals.samplesTableData.slice(1)) {
         if (samArr[0] === id1 && samArr[1] === id2) {
-          var ind = samplesTableData.indexOf(samArr);
-          var newArr = [...samplesTableData[ind]];
-          samplesTableData.push(newArr);
+          var ind = globals.samplesTableData.indexOf(samArr);
+          var newArr = [...globals.samplesTableData[ind]];
+          globals.samplesTableData.push(newArr);
           // 3. change first entry of that array
-          samplesTableData[samplesTableData.length - 1][0] = newSubSam[0];
-          samplesTableData[samplesTableData.length - 1][1] = newSubSam[1];
+          globals.samplesTableData[globals.samplesTableData.length - 1][0] = newSubSam[0];
+          globals.samplesTableData[globals.samplesTableData.length - 1][1] = newSubSam[1];
           break;
         }
       }
@@ -1595,7 +1598,7 @@ function updateOrderIDTable(table, json, type) {
   var orderedTableData = [];
   // 2. add headers as the first array
   orderedTableData[0] = json[0];
-  // 3. loop through the UI table by index -> grab subject_id accordingly, find subject_id in json, append that to orderedSubjectsTableData
+  // 3. loop through the UI table by index -> grab subject_id accordingly, find subject_id in json, append that to orderedglobals.subjectsTableData
   i = 1;
   if (type === "subjects") {
     j = 0;
@@ -1613,9 +1616,9 @@ function updateOrderIDTable(table, json, type) {
     }
   }
   if (type === "subjects") {
-    subjectsTableData = orderedTableData;
+    globals.subjectsTableData = orderedTableData;
   } else if (type === "samples") {
-    samplesTableData = orderedTableData;
+    globals.samplesTableData = orderedTableData;
   }
 }
 
@@ -1623,7 +1626,7 @@ function updateOrderContributorTable(table, json) {
   var length = table.rows.length;
   // 1. make a new json object - orderedTableData
   var orderedTableData = [];
-  // 2. loop through the UI table by index -> grab subject_id accordingly, find subject_id in json, append that to orderedSubjectsTableData
+  // 2. loop through the UI table by index -> grab subject_id accordingly, find subject_id in json, append that to orderedglobals.subjectsTableData
   i = 0;
   for (var index = 1; index < length; index++) {
     var name = table.rows[index].cells[1].innerText;
@@ -1639,18 +1642,18 @@ function updateOrderContributorTable(table, json) {
 }
 //
 // function generateSubjects() {
-//   ipcRenderer.send("open-folder-dialog-save-subjects", "subjects.xlsx");
+//   ipcRenderer?.send("open-folder-dialog-save-subjects", "subjects.xlsx");
 // }
 //
 // function generateSamples() {
-//   ipcRenderer.send("open-folder-dialog-save-samples", "samples.xlsx");
+//   ipcRenderer?.send("open-folder-dialog-save-samples", "samples.xlsx");
 // }
 
 function showPrimaryBrowseFolder() {
-  ipcRenderer.send("open-file-dialog-local-primary-folder");
+  ipcRenderer?.send("open-file-dialog-local-primary-folder");
 }
 function showPrimaryBrowseFolderSamples() {
-  ipcRenderer.send("open-file-dialog-local-primary-folder-samples");
+  ipcRenderer?.send("open-file-dialog-local-primary-folder-samples");
 }
 
 function importPrimaryFolderSubjects(folderPath) {
@@ -1681,7 +1684,7 @@ function importPrimaryFolderSubjects(folderPath) {
     } else {
       var folders = fs.readdirSync(folderPath);
       var j = 1;
-      subjectsTableData[0] = headersArrSubjects;
+      globals.subjectsTableData[0] = headersArrSubjects;
       for (var folder of folders) {
         subjectsFileData = [];
         var stats = fs.statSync(path.join(folderPath, folder));
@@ -1690,14 +1693,14 @@ function importPrimaryFolderSubjects(folderPath) {
           for (var i = 1; i < 27; i++) {
             subjectsFileData.push("");
           }
-          subjectsTableData[j] = subjectsFileData;
+          globals.subjectsTableData[j] = subjectsFileData;
           j += 1;
         }
       }
       subjectsFileData = [];
       var subIDArray = [];
       // grab and confirm with users about their sub-ids
-      for (var index of subjectsTableData.slice(1)) {
+      for (var index of globals.subjectsTableData.slice(1)) {
         subIDArray.push(index[0]);
       }
       Swal.fire({
@@ -1715,7 +1718,7 @@ function importPrimaryFolderSubjects(folderPath) {
         backdrop: "rgba(0,0,0, 0.4)",
       }).then((result) => {
         if (result.isConfirmed) {
-          if (subjectsTableData.length > 1) {
+          if (globals.subjectsTableData.length > 1) {
             loadSubjectsDataToTable();
             $("#table-subjects").show();
             $("#div-import-primary-folder-subjects").hide();
@@ -1760,7 +1763,7 @@ function importPrimaryFolderSamples(folderPath) {
     } else {
       var folders = fs.readdirSync(folderPath);
       var j = 1;
-      samplesTableData[0] = headersArrSamples;
+      globals.samplesTableData[0] = headersArrSamples;
       for (var folder of folders) {
         var statsSubjectID = fs.statSync(path.join(folderPath, folder));
         if (statsSubjectID.isDirectory()) {
@@ -1774,7 +1777,7 @@ function importPrimaryFolderSamples(folderPath) {
               for (var i = 2; i < 18; i++) {
                 samplesFileData.push("");
               }
-              samplesTableData[j] = samplesFileData;
+              globals.samplesTableData[j] = samplesFileData;
               j += 1;
             }
           }
@@ -1784,7 +1787,7 @@ function importPrimaryFolderSamples(folderPath) {
       var subIDArray = [];
       var samIDArray = [];
       // grab and confirm with users about their sub-ids
-      for (var index of samplesTableData.slice(1)) {
+      for (var index of globals.samplesTableData.slice(1)) {
         subIDArray.push(index[0]);
         samIDArray.push(index[1]);
       }
@@ -1805,7 +1808,7 @@ function importPrimaryFolderSamples(folderPath) {
         backdrop: "rgba(0,0,0, 0.4)",
       }).then((result) => {
         if (result.isConfirmed) {
-          if (samplesTableData.length > 1) {
+          if (globals.samplesTableData.length > 1) {
             loadSamplesDataToTable();
             $("#table-samples").show();
             $("#div-import-primary-folder-samples").hide();
@@ -1831,8 +1834,8 @@ function loadSubjectsDataToTable() {
   //   "Please add or edit your subject_id(s) in the following subjects table.";
   // delete table rows except headers
   $("#table-subjects tr:gt(0)").remove();
-  for (var i = 1; i < subjectsTableData.length; i++) {
-    var message = addNewIDToTable(subjectsTableData[i][0], null, "subjects");
+  for (var i = 1; i < globals.subjectsTableData.length; i++) {
+    var message = addNewIDToTable(globals.subjectsTableData[i][0], null, "subjects");
   }
   if (message !== "") {
     Swal.fire({
@@ -1869,8 +1872,8 @@ function loadSubjectsDataToTable() {
 function loadSamplesDataToTable() {
   // delete table rows except headers
   $("#table-samples tr:gt(0)").remove();
-  for (var i = 1; i < samplesTableData.length; i++) {
-    var message = addNewIDToTable(samplesTableData[i][1], samplesTableData[i][0], "samples");
+  for (var i = 1; i < globals.samplesTableData.length; i++) {
+    var message = addNewIDToTable(globals.samplesTableData[i][1], globals.samplesTableData[i][0], "samples");
   }
   if (message !== "") {
     Swal.fire({
@@ -1923,7 +1926,7 @@ function resetSubjects() {
         .find("input")
         .prop("placeholder", "Browse here");
       subjectsFileData = [];
-      subjectsTableData = [];
+      globals.subjectsTableData = [];
 
       $("#existing-subjects-file-destination").attr("placeholder", "Browse here");
 
@@ -1988,7 +1991,7 @@ function resetSamples() {
         .find("input")
         .prop("placeholder", "Browse here");
       samplesFileData = [];
-      samplesTableData = [];
+      globals.samplesTableData = [];
 
       $("#existing-samples-file-destination").attr("placeholder", "Browse here");
       $("#div-confirm-existing-samples-import").hide();
@@ -2029,8 +2032,8 @@ async function addCustomField(type, curationMode) {
   }
 
   if (curationMode == "guided") {
-    subjectsHeaderArray = subjectsTableData[0];
-    samplesHeaderArray = samplesTableData[0];
+    subjectsHeaderArray = globals.subjectsTableData[0];
+    samplesHeaderArray = globals.samplesTableData[0];
   }
 
   if (type === "subjects") {
@@ -2057,9 +2060,9 @@ async function addCustomField(type, curationMode) {
     if (customField) {
       addCustomHeader("subjects", customField, curationMode);
       if (curationMode == "guided") {
-        subjectsTableData[0].push(customField);
-        for (let i = 1; i < subjectsTableData.length; i++) {
-          subjectsTableData[i].push("");
+        globals.subjectsTableData[0].push(customField);
+        for (let i = 1; i < globals.subjectsTableData.length; i++) {
+          globals.subjectsTableData[i].push("");
         }
       }
     }
@@ -2087,9 +2090,9 @@ async function addCustomField(type, curationMode) {
     });
     if (customField) {
       if (curationMode == "guided") {
-        samplesTableData[0].push(customField);
-        for (let i = 1; i < samplesTableData.length; i++) {
-          samplesTableData[i].push("");
+        globals.samplesTableData[0].push(customField);
+        for (let i = 1; i < globals.samplesTableData.length; i++) {
+          globals.samplesTableData[i].push("");
         }
       }
       addCustomHeader("samples", customField, curationMode);
@@ -2132,7 +2135,7 @@ function addCustomHeader(type, customHeaderValue, curationMode) {
     if (curationMode == "free-form") {
       headersArrSubjects.push(customName);
       // add empty entries for all of the other sub_ids to normalize the size of matrix
-      for (var subId of subjectsTableData.slice(1, subjectsTableData.length)) {
+      for (var subId of globals.subjectsTableData.slice(1, globals.subjectsTableData.length)) {
         subId.push("");
       }
     }
@@ -2164,7 +2167,7 @@ function addCustomHeader(type, customHeaderValue, curationMode) {
     if (curationMode == "free-form") {
       headersArrSamples.push(customName);
       // add empty entries for all of the other sub_ids to normalize the size of matrix
-      for (var sampleId of samplesTableData.slice(1, samplesTableData.length)) {
+      for (var sampleId of globals.samplesTableData.slice(1, globals.samplesTableData.length)) {
         sampleId.push("");
       }
     }
@@ -2200,20 +2203,20 @@ function deleteCustomField(ev, customField, category, curationMode) {
     if (curationMode == "guided") {
       $(ev).parents()[1].remove();
       if (category === 0) {
-        // get the index of the custom field in the subjectsTableData
-        const indexToRemove = subjectsTableData[0].indexOf(customField);
-        // remove the element at indexToRemove for each element in subjectsTableData
-        for (let i = 0; i < subjectsTableData.length; i++) {
-          subjectsTableData[i].splice(indexToRemove, 1);
+        // get the index of the custom field in the globals.subjectsTableData
+        const indexToRemove = globals.subjectsTableData[0].indexOf(customField);
+        // remove the element at indexToRemove for each element in globals.subjectsTableData
+        for (let i = 0; i < globals.subjectsTableData.length; i++) {
+          globals.subjectsTableData[i].splice(indexToRemove, 1);
         }
       }
     }
     if (category === 1) {
-      // get the index of the custom field in the samplesTableData
-      const indexToRemove = samplesTableData[0].indexOf(customField);
-      // remove the element at indexToRemove for each element in samplesTableData
-      for (let i = 0; i < samplesTableData.length; i++) {
-        samplesTableData[i].splice(indexToRemove, 1);
+      // get the index of the custom field in the globals.samplesTableData
+      const indexToRemove = globals.samplesTableData[0].indexOf(customField);
+      // remove the element at indexToRemove for each element in globals.samplesTableData
+      for (let i = 0; i < globals.samplesTableData.length; i++) {
+        globals.samplesTableData[i].splice(indexToRemove, 1);
       }
     }
   });
@@ -2293,11 +2296,11 @@ $(document).ready(function () {
     headersArrSamples.push(field.name);
   }
 
-  ipcRenderer.on("selected-existing-subjects", (event, filepath) => {
+  ipcRenderer?.on("selected-existing-subjects", (event, filepath) => {
     if (filepath.length > 0) {
       if (filepath != null) {
         document.getElementById("existing-subjects-file-destination").placeholder = filepath[0];
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           "Prepare Metadata - Continue with existing subjects.xlsx",
@@ -2322,7 +2325,7 @@ $(document).ready(function () {
     }
   });
 
-  ipcRenderer.on("selected-existing-samples", (event, filepath) => {
+  ipcRenderer?.on("selected-existing-samples", (event, filepath) => {
     if (filepath.length > 0) {
       if (filepath != null) {
         document.getElementById("existing-samples-file-destination").placeholder = filepath[0];
@@ -2353,11 +2356,11 @@ $(document).ready(function () {
     }
   });
 
-  ipcRenderer.on("selected-existing-DD", (event, filepath) => {
+  ipcRenderer?.on("selected-existing-DD", (event, filepath) => {
     if (filepath.length > 0) {
       if (filepath !== null) {
         document.getElementById("existing-dd-file-destination").placeholder = filepath[0];
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           "Prepare Metadata - Continue with existing dataset_description.xlsx",
@@ -2381,7 +2384,7 @@ $(document).ready(function () {
   });
 
   // generate subjects file
-  ipcRenderer.on("selected-destination-generate-subjects-locally", (event, dirpath) => {
+  ipcRenderer?.on("selected-destination-generate-subjects-locally", (event, dirpath) => {
     if (dirpath.length > 0) {
       document.getElementById("input-destination-generate-subjects-locally").placeholder =
         dirpath[0];
@@ -2392,7 +2395,7 @@ $(document).ready(function () {
   });
 
   // generate samples file
-  ipcRenderer.on("selected-destination-generate-samples-locally", (event, dirpath) => {
+  ipcRenderer?.on("selected-destination-generate-samples-locally", (event, dirpath) => {
     if (dirpath.length > 0) {
       document.getElementById("input-destination-generate-samples-locally").placeholder =
         dirpath[0];
@@ -2464,7 +2467,7 @@ function showExistingSubjectsFile() {
       reverseButtons: reverseSwalButtons,
     }).then((boolean) => {
       if (boolean.isConfirmed) {
-        ipcRenderer.send("open-file-dialog-existing-subjects");
+        ipcRenderer?.send("open-file-dialog-existing-subjects");
         document.getElementById("existing-subjects-file-destination").placeholder = "Browse here";
         $("#div-confirm-existing-subjects-import").hide();
         $($("#div-confirm-existing-subjects-import button")[0]).hide();
@@ -2472,7 +2475,7 @@ function showExistingSubjectsFile() {
       }
     });
   } else {
-    ipcRenderer.send("open-file-dialog-existing-subjects");
+    ipcRenderer?.send("open-file-dialog-existing-subjects");
   }
 }
 
@@ -2492,7 +2495,7 @@ function showExistingSamplesFile() {
       reverseButtons: reverseSwalButtons,
     }).then((boolean) => {
       if (boolean.isConfirmed) {
-        ipcRenderer.send("open-file-dialog-existing-samples");
+        ipcRenderer?.send("open-file-dialog-existing-samples");
         document.getElementById("existing-samples-file-destination").placeholder = "Browse here";
         $("#div-confirm-existing-samples-import").hide();
         $($("#div-confirm-existing-samples-import button")[0]).hide();
@@ -2500,7 +2503,7 @@ function showExistingSamplesFile() {
       }
     });
   } else {
-    ipcRenderer.send("open-file-dialog-existing-samples");
+    ipcRenderer?.send("open-file-dialog-existing-samples");
   }
 }
 
@@ -2644,7 +2647,7 @@ async function checkBFImportSubjects() {
       "Existing",
       Destinations.PENNSIEVE
     );
-    subjectsTableData = res;
+    globals.subjectsTableData = res;
     loadDataFrametoUI("bf");
   } catch (error) {
     clientError(error);
@@ -2709,7 +2712,7 @@ async function checkBFImportSamples() {
       "Existing",
       Destinations.PENNSIEVE
     );
-    samplesTableData = res;
+    globals.samplesTableData = res;
     loadDataFrametoUISamples("bf");
   } catch (error) {
     clientError(error);
@@ -2737,7 +2740,7 @@ function loadDataFrametoUI(type) {
     fieldSubjectEntries.push(field.name.toLowerCase());
   }
   // separate regular headers and custom headers
-  const lowercasedHeaders = subjectsTableData[0].map((header) => header.toLowerCase());
+  const lowercasedHeaders = globals.subjectsTableData[0].map((header) => header.toLowerCase());
   const customHeaders = [];
   for (var field of lowercasedHeaders) {
     if (!fieldSubjectEntries.includes(field)) {
@@ -2765,7 +2768,7 @@ function loadDataFrametoUI(type) {
 
 function loadDataFrametoUISamples(type) {
   // separate regular headers and custom headers
-  const lowercasedHeaders = samplesTableData[0].map((header) => header.toLowerCase());
+  const lowercasedHeaders = globals.samplesTableData[0].map((header) => header.toLowerCase());
   var fieldSampleEntries = [];
   for (var field of $("#form-add-a-sample").children().find(".samples-form-entry")) {
     fieldSampleEntries.push(field.name.toLowerCase());

@@ -1,4 +1,6 @@
 // Purpose: The front end logic for the Validate Dataset section
+const { electron = {} } = require("../../src/electron/index.js").default;
+const { ipcRenderer } = electron;
 
 const { handleAxiosValidationErrors } = require("./scripts/validator/axios-validator-utility.js");
 
@@ -59,7 +61,7 @@ const validateLocalDataset = async () => {
     });
 
     // track that a local validation succeeded
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       "Prepare Datasets - Validate your dataset - Local",
@@ -68,7 +70,7 @@ const validateLocalDataset = async () => {
     );
 
     // track that a validation (local or pennsieve) succeeded
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       "Prepare Datasets - Validate your dataset",
@@ -88,7 +90,7 @@ const validateLocalDataset = async () => {
     datasetLocationInput.value = "";
 
     // track that a local validation failed
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       "Prepare Datasets - Validate your dataset - Local",
@@ -97,7 +99,7 @@ const validateLocalDataset = async () => {
     );
 
     // track that a validation (local or pennsieve) failed to help with aggregating total dataset validation failures
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       "Prepare Datasets - Validate your dataset",
@@ -166,7 +168,7 @@ const validatePennsieveDataset = async () => {
     );
 
     // track that a local validation succeeded
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       "Prepare Datasets - Validate your dataset - Pennsieve",
@@ -175,7 +177,7 @@ const validatePennsieveDataset = async () => {
     );
 
     // track that a validation (local or pennsieve) succeeded
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       "Prepare Datasets - Validate your dataset",
@@ -187,7 +189,7 @@ const validatePennsieveDataset = async () => {
     document.querySelector("#validation-errors-container").style.visiility = "hidden";
 
     // track that a local validation succeeded
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       "Prepare Datasets - Validate your dataset - Pennsieve",
@@ -196,7 +198,7 @@ const validatePennsieveDataset = async () => {
     );
 
     // track that a validation (local or pennsieve) succeeded
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       "Prepare Datasets - Validate your dataset",
@@ -459,10 +461,10 @@ document.querySelector("#validate-local-dataset-path").addEventListener("click",
   }
 
   // open folder select dialog
-  ipcRenderer.send("open-folder-dialog-validate-local-dataset");
+  ipcRenderer?.send("open-folder-dialog-validate-local-dataset");
 
   // listen for user's folder path
-  ipcRenderer.on("selected-validate-local-dataset", async (evtSender, folderPaths) => {
+  ipcRenderer?.on("selected-validate-local-dataset", async (evtSender, folderPaths) => {
     // check if a folder was not selected
     if (!folderPaths.length) {
       return;

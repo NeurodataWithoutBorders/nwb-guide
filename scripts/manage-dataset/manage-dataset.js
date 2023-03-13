@@ -1,3 +1,16 @@
+const { electron = {}, JSONStorage, app } = require('../../src/electron/index.js').default
+
+const {
+  lottie,
+} = require('../globals.js')
+
+const { notyf } = require("../others/renderer.js")
+
+const ipcRenderer = electron.ipcRenderer;
+
+const bfDatasetSubtitle = document.querySelector("#bf-dataset-subtitle");
+const bfDatasetSubtitleCharCount = document.querySelector("#para-char-count-metadata");
+
 // event listeners for opening dataset or account selection dropdown
 document.querySelectorAll(".ds-dd").forEach((dropdownElement) => {
   dropdownElement.addEventListener("click", function () {
@@ -180,7 +193,7 @@ $("#button-create-bf-new-dataset").click(async () => {
       defaultBfDatasetId = res;
       // log a map of datasetId to dataset name to analytics
       // this will be used to help us track private datasets which are not trackable using a datasetId alone
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Dataset ID to Dataset Name Map",
         defaultBfDatasetId,
@@ -192,7 +205,7 @@ $("#button-create-bf-new-dataset").click(async () => {
       $("#button-create-bf-new-dataset").prop("disabled", false);
 
       addNewDatasetToList(bfNewDatasetName);
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Success",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_CREATE_DATASET,
@@ -227,7 +240,7 @@ $("#button-create-bf-new-dataset").click(async () => {
 
       $("#button-create-bf-new-dataset").prop("disabled", false);
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_CREATE_DATASET,
@@ -305,7 +318,7 @@ $("#button-rename-dataset").on("click", async () => {
         });
         $("#button-rename-dataset").prop("disabled", false);
 
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_RENAME_DATASET,
@@ -332,7 +345,7 @@ $("#button-rename-dataset").on("click", async () => {
       });
       $("#button-rename-dataset").prop("disabled", false);
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Success",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_RENAME_DATASET,
@@ -340,7 +353,7 @@ $("#button-rename-dataset").on("click", async () => {
       );
 
       // in case the user does not select a dataset after changing the name add the new datasetID to name mapping
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Dataset ID to Dataset Name Map",
         defaultBfDatasetId,
@@ -426,14 +439,14 @@ $("#button-add-permission-pi").click(async () => {
         let res = bf_change_owner.data.message;
         log.info("Change PI Owner of dataset");
 
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_MAKE_PI_OWNER,
           defaultBfDatasetId
         );
 
-        let nodeStorage = new JSONStorage(app.getPath("userData"));
+        let nodeStorage = new JSONStorage(app?.getPath("userData"));
         nodeStorage.setItem("previously_selected_PI", selectedUser);
 
         showCurrentPermission();
@@ -449,7 +462,7 @@ $("#button-add-permission-pi").click(async () => {
         });
       } catch (error) {
         clientError(error);
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_MAKE_PI_OWNER,
@@ -799,7 +812,7 @@ $("#button-add-subtitle").click(async () => {
           : $("#button-add-subtitle").html("Edit subtitle")
       );
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Success",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_SUBTITLE,
@@ -823,7 +836,7 @@ $("#button-add-subtitle").click(async () => {
 
       $("#ds-description").val("");
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_SUBTITLE,
@@ -1169,7 +1182,7 @@ const addDescription = async (selectedBfDataset, userMarkdownInput) => {
       backdrop: "rgba(0,0,0, 0.4)",
     });
 
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_README,
@@ -1179,7 +1192,7 @@ const addDescription = async (selectedBfDataset, userMarkdownInput) => {
     return;
   }
 
-  ipcRenderer.send(
+  ipcRenderer?.send(
     "track-event",
     "Success",
     ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_README,
@@ -1413,7 +1426,7 @@ const showDatasetDescription = async () => {
 
   try {
     let subtitle = await api.getDatasetSubtitle(selectedBfAccount, selectedBfDataset);
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_SUBTITLE + " - Get Subtitle",
@@ -1429,7 +1442,7 @@ const showDatasetDescription = async () => {
     }, 5);
   } catch (error) {
     clientError(error);
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_SUBTITLE + " - Get Subtitle",
@@ -1688,7 +1701,7 @@ const displayBannerImage = async (path) => {
 // Action when user click on "Import image" button for banner image
 $("#button-import-banner-image").click(async () => {
   $("#para-dataset-banner-image-status").html("");
-  let filePaths = await ipcRenderer.invoke("open-file-dialog-import-banner-image");
+  let filePaths = await ipcRenderer?.invoke("open-file-dialog-import-banner-image");
   displayBannerImage(filePaths);
 });
 
@@ -1740,7 +1753,7 @@ const uploadBannerImage = async () => {
 
         $("#edit_banner_image_modal").modal("hide");
 
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER,
@@ -1748,7 +1761,7 @@ const uploadBannerImage = async () => {
         );
 
         // track the size for all dataset banner uploads
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER + " - Size",
@@ -1757,7 +1770,7 @@ const uploadBannerImage = async () => {
         );
 
         // track the size for the given dataset
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER + " - Size",
@@ -1780,7 +1793,7 @@ const uploadBannerImage = async () => {
           "<span style='color: red;'> " + emessage + "</span>"
         );
 
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER,
@@ -1816,7 +1829,7 @@ const uploadBannerImage = async () => {
           type: "success",
         });
 
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER,
@@ -1824,7 +1837,7 @@ const uploadBannerImage = async () => {
         );
 
         // track the size for all dataset banner uploads
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER + " - Size",
@@ -1833,7 +1846,7 @@ const uploadBannerImage = async () => {
         );
 
         // track the size for the given dataset
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER + " - Size",
@@ -1843,7 +1856,7 @@ const uploadBannerImage = async () => {
       } catch (error) {
         clientError(error);
 
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_BANNER,
@@ -2067,7 +2080,7 @@ $("#button-add-tags").click(async () => {
       backdrop: "rgba(0,0,0, 0.4)",
     });
 
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_TAGS,
@@ -2085,7 +2098,7 @@ $("#button-add-tags").click(async () => {
     heightAuto: false,
     backdrop: "rgba(0,0,0, 0.4)",
   }).then(() => {
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ADD_EDIT_TAGS,
@@ -2223,7 +2236,7 @@ $("#button-add-license").click(async () => {
 
       showCurrentLicense();
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Success",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ASSIGN_LICENSE,
@@ -2245,7 +2258,7 @@ $("#button-add-license").click(async () => {
         backdrop: "rgba(0,0,0, 0.4)",
       });
 
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_ASSIGN_LICENSE,
@@ -2374,7 +2387,7 @@ const handleSelectedSubmitDirectory = async (filepath) => {
 };
 
 $("#selected-local-dataset-submit").click(async () => {
-  let datasetDirectory = await ipcRenderer.invoke("open-file-dialog-submit-dataset");
+  let datasetDirectory = await ipcRenderer?.invoke("open-file-dialog-submit-dataset");
   handleSelectedSubmitDirectory(datasetDirectory);
 });
 
@@ -2508,7 +2521,7 @@ $("#button-submit-dataset").click(async () => {
       log.info("Completed submit function");
 
       // can tell us how many successful upload sessions a dataset ID had (the value is implicitly set to 1 via Total Events query in Analytics) within a given timeframe
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Success",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET,
@@ -2523,7 +2536,7 @@ $("#button-submit-dataset").click(async () => {
         );
       } catch (error) {
         clientError(error);
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET +
@@ -2538,7 +2551,7 @@ $("#button-submit-dataset").click(async () => {
       let num_of_folders = data["totalDir"];
 
       // log amount of folders uploaded in the given session
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Success",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + ` - Number of Folders`,
@@ -2583,7 +2596,7 @@ $("#button-submit-dataset").click(async () => {
 
       // while sessions are used for tracking file count and file size for an upload
       // we still want to know what dataset didn't upload by its pennsieve ID
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         "Manage Datasets - Upload Local Dataset",
@@ -2591,7 +2604,7 @@ $("#button-submit-dataset").click(async () => {
       );
 
       // get total size of the dataset that failed to upload
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + " - size",
@@ -2616,7 +2629,7 @@ $("#button-submit-dataset").click(async () => {
       let num_of_folders = data["totalDir"];
 
       // log amount of folders uploaded in the given session
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + ` - Number of Folders`,
@@ -2626,7 +2639,7 @@ $("#button-submit-dataset").click(async () => {
 
       // track total amount of files being uploaded
       // makes it easy to see aggregate amount of files we failed to upload in Local Dataset
-      ipcRenderer.send(
+      ipcRenderer?.send(
         "track-event",
         "Error",
         ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + ` - Number of Files`,
@@ -2713,7 +2726,7 @@ $("#button-submit-dataset").click(async () => {
       .catch((error) => {
         clientError(error);
         let emessage = userErrorMessage(error);
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Error",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + ` - Progress track`,
@@ -2770,7 +2783,7 @@ $("#button-submit-dataset").click(async () => {
         }
 
         if (statusMessage.includes("Success: COMPLETED")) {
-          ipcRenderer.send(
+          ipcRenderer?.send(
             "track-event",
             "Success",
             ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET +
@@ -2786,7 +2799,7 @@ $("#button-submit-dataset").click(async () => {
         $("#button-submit-dataset").prop("disabled", false);
         $("#selected-local-dataset-submit").prop("disabled", false);
 
-        ipcRenderer.send(
+        ipcRenderer?.send(
           "track-event",
           "Success",
           ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + ` - Progress track`,
@@ -2823,7 +2836,7 @@ $("#button-submit-dataset").click(async () => {
           if (didFail && didUpload) {
             // even when the upload fails we want to know how many files were uploaded and their size
             // for the current upload session
-            ipcRenderer.send(
+            ipcRenderer?.send(
               "track-event",
               "Success",
               ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET +
@@ -2832,7 +2845,7 @@ $("#button-submit-dataset").click(async () => {
               250
             );
 
-            ipcRenderer.send(
+            ipcRenderer?.send(
               "track-event",
               "Success",
               ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + " - size",
@@ -2847,7 +2860,7 @@ $("#button-submit-dataset").click(async () => {
             return;
           } else {
             // track the amount of files uploaded for the current bucket
-            ipcRenderer.send(
+            ipcRenderer?.send(
               "track-event",
               "Success",
               ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET +
@@ -2856,7 +2869,7 @@ $("#button-submit-dataset").click(async () => {
               uploadedFiles
             );
 
-            ipcRenderer.send(
+            ipcRenderer?.send(
               "track-event",
               "Success",
               ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_UPLOAD_LOCAL_DATASET + " - size",
@@ -2925,7 +2938,7 @@ $("#bf_list_dataset_status").on("change", async () => {
     });
     let res = bf_change_dataset_status.data.message;
 
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_CHANGE_STATUS,
@@ -2944,7 +2957,7 @@ $("#bf_list_dataset_status").on("change", async () => {
     });
   } catch (error) {
     clientError(error);
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_CHANGE_STATUS,
@@ -3001,7 +3014,7 @@ async function showCurrentDatasetStatus(callback) {
       },
     });
     let res = bf_dataset_status.data;
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       ManageDatasetsAnalyticsPrefix.MANAGE_DATASETS_CHANGE_STATUS + ` - Get dataset Status`,
@@ -3059,4 +3072,10 @@ async function showCurrentDatasetStatus(callback) {
     $(bfCurrentDatasetStatusProgress).css("visibility", "hidden");
     $("#bf-dataset-status-spinner").css("display", "none");
   }
+}
+
+
+module.exports = {
+  countCharacters,
+  check_forbidden_characters_bf
 }

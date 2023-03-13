@@ -1,3 +1,8 @@
+const globals = require("../globals.js");
+const { parseJson, airtableConfigPath, Tagify, tippy, createDragSort } = globals;
+const electron = require("../../src/electron/index.js").default.electron ?? {};
+const ipcRenderer = electron.ipcRenderer;
+
 // opendropdown event listeners
 document.querySelectorAll(".dd-change-current-account").forEach((element) => {
   element.addEventListener("click", function () {
@@ -45,7 +50,7 @@ $(document).ready(function () {
       $(this).text("Add contributors not listed above");
     }
   });
-  // ipcRenderer.on(
+  // ipcRenderer?.on(
   //   "selected-metadata-ds-description",
   //   (event, dirpath, filename) => {
   //     if (dirpath.length > 0) {
@@ -79,14 +84,14 @@ $(document).ready(function () {
   //   }
   // );
   checkAirtableStatus("");
-  ipcRenderer.on("show-missing-items-ds-description", (event, index) => {
+  ipcRenderer?.on("show-missing-items-ds-description", (event, index) => {
     if (index === 0) {
-      ipcRenderer.send("open-folder-dialog-save-ds-description", "dataset_description.xlsx");
+      ipcRenderer?.send("open-folder-dialog-save-ds-description", "dataset_description.xlsx");
     }
   });
 
   // generate dd file
-  ipcRenderer.on("selected-destination-generate-dd-locally", (event, dirpath) => {
+  ipcRenderer?.on("selected-destination-generate-dd-locally", (event, dirpath) => {
     if (dirpath.length > 0) {
       document.getElementById("input-destination-generate-dd-locally").placeholder = dirpath[0];
       var destinationPath = path.join(dirpath[0], "dataset_description.xlsx");
@@ -164,7 +169,7 @@ function checkAirtableStatus(keyword) {
               log.error(err);
               console.log(err);
               $("#current-airtable-account").html("None");
-              ipcRenderer.send(
+              ipcRenderer?.send(
                 "track-event",
                 "Error",
                 "Prepare Metadata - Add Airtable account - Check Airtable status",
@@ -175,7 +180,7 @@ function checkAirtableStatus(keyword) {
               airtableRes = [false, ""];
               return airtableRes;
             } else {
-              ipcRenderer.send(
+              ipcRenderer?.send(
                 "track-event",
                 "Success",
                 "Prepare Metadata - Add Airtable account - Check Airtable status",
@@ -513,7 +518,7 @@ function showExistingDDFile() {
       reverseButtons: reverseSwalButtons,
     }).then((boolean) => {
       if (boolean.isConfirmed) {
-        ipcRenderer.send("open-file-dialog-existing-DD");
+        ipcRenderer?.send("open-file-dialog-existing-DD");
         document.getElementById("existing-dd-file-destination").placeholder = "Browse here";
         $("#div-confirm-existing-dd-import").hide();
         $($("#div-confirm-existing-dd-import button")[0]).hide();
@@ -521,7 +526,7 @@ function showExistingDDFile() {
       }
     });
   } else {
-    ipcRenderer.send("open-file-dialog-existing-DD");
+    ipcRenderer?.send("open-file-dialog-existing-DD");
   }
 }
 
@@ -1024,7 +1029,7 @@ function addAdditionalLinktoTableDD(link, linkType, linkRelation, description) {
 
 const guidedSetImportedSPARCAward = (awardString) => {
   // save the award string to JSONObj to be shared with other award inputs
-  sodaJSONObj["dataset-metadata"]["shared-metadata"]["imported-sparc-award"] = awardString;
+  globals.sodaJSONObj["dataset-metadata"]["shared-metadata"]["imported-sparc-award"] = awardString;
 
   $("#guided-input-submission-sparc-award-import").val(awardString);
 
@@ -2481,7 +2486,7 @@ function addAirtableAccountInsideSweetalert(keyword, curationMode) {
               }).then((result) => {
                 helpSPARCAward("submission", curationMode);
               });
-              ipcRenderer.send(
+              ipcRenderer?.send(
                 "track-event",
                 "Success",
                 "Prepare Metadata - Add Airtable account",
@@ -2503,7 +2508,7 @@ function addAirtableAccountInsideSweetalert(keyword, curationMode) {
             } else {
               log.error(res);
               console.error(res);
-              ipcRenderer.send(
+              ipcRenderer?.send(
                 "track-event",
                 "Error",
                 "Prepare Metadata - Add Airtable account",
@@ -2524,7 +2529,7 @@ function addAirtableAccountInsideSweetalert(keyword, curationMode) {
             res.on("error", (error) => {
               log.error(error);
               console.error(error);
-              ipcRenderer.send(
+              ipcRenderer?.send(
                 "track-event",
                 "Error",
                 "Prepare Metadata - Add Airtable account",
@@ -2592,7 +2597,7 @@ function addAirtableAccountInsideSweetalert(keyword, curationMode) {
               airTableGettingStartedBtn.children[0].style.display = "flex";
             }
           });
-          ipcRenderer.send(
+          ipcRenderer?.send(
             "track-event",
             "Success",
             "Prepare Metadata - Add Airtable account",
@@ -2614,7 +2619,7 @@ function addAirtableAccountInsideSweetalert(keyword, curationMode) {
         } else {
           log.error(res);
           console.error(res);
-          ipcRenderer.send(
+          ipcRenderer?.send(
             "track-event",
             "Error",
             "Prepare Metadata - Add Airtable account",
@@ -2635,7 +2640,7 @@ function addAirtableAccountInsideSweetalert(keyword, curationMode) {
         res.on("error", (error) => {
           log.error(error);
           console.error(error);
-          ipcRenderer.send(
+          ipcRenderer?.send(
             "track-event",
             "Error",
             "Prepare Metadata - Add Airtable account",

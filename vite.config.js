@@ -4,8 +4,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/index.js',
-      name: 'nwb-guide.js',
-      fileName: () => 'nwb-guide.js',
+      name: 'index.js',
+      fileName: () => 'index.js',
       formats: ['iife'],
     },
   },

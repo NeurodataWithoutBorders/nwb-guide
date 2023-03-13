@@ -1,5 +1,10 @@
 const checkDiskSpace = require("check-disk-space").default;
 
+const globals = require("../globals.js");
+const { parseJson, progressFilePath, lottie } = globals;
+
+const { fs, path } = require("../../src/electron/index.js").default;
+
 var metadataFile = "";
 var jstreePreview = document.getElementById("div-dataset-tree-preview");
 const nonAllowedCharacters = '<>:",;[]{}^`~@/|?*$=!%&+#\\';
@@ -209,7 +214,7 @@ async function dropHandler(ev, paraElement, metadataFile, curationMode, dataDeli
             var informationJson = {};
             informationJson = parseJson(milestonePath);
             informationJson[award] = milestoneObj;
-            fs.writeFileSync(milestonePath, JSON.stringify(informationJson));
+            fs?.writeFileSync(milestonePath, JSON.stringify(informationJson));
             Swal.fire({
               backdrop: "rgba(0,0,0, 0.4)",
               heightAuto: false,
@@ -242,11 +247,11 @@ async function dropHandler(ev, paraElement, metadataFile, curationMode, dataDeli
               },
             ];
 
-            //save the unselected milestones into sodaJSONObj
-            sodaJSONObj["dataset-metadata"]["submission-metadata"]["temp-imported-milestones"] =
+            //save the unselected milestones into globals.sodaJSONObj
+            globals.sodaJSONObj["dataset-metadata"]["submission-metadata"]["temp-imported-milestones"] =
               guidedMilestoneData;
 
-            sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"] = filepath;
+            globals.sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"] = filepath;
 
             renderMilestoneSelectionTable(guidedMilestoneData);
 
@@ -282,7 +287,7 @@ async function dropHandler(ev, paraElement, metadataFile, curationMode, dataDeli
               swal_actions.children[1].style.display = "flex";
               let swal_content = document.getElementsByClassName("swal2-content")[0];
 
-              let ddFilePath = sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"];
+              let ddFilePath = globals.sodaJSONObj["dataset-metadata"]["submission-metadata"]["filepath"];
               if (ddFilePath) {
                 //append file path
                 let firstItem = swal_content.children[0];
@@ -333,7 +338,7 @@ async function dropHandler(ev, paraElement, metadataFile, curationMode, dataDeli
               //get the value of data-code-metadata-file-type from dragDropContainer
               const metadataFileType = dragDropContainer.dataset.codeMetadataFileType;
               //save the path of the metadata file to the json object
-              sodaJSONObj["dataset-metadata"]["code-metadata"][metadataFileType] = file.path;
+              globals.sodaJSONObj["dataset-metadata"]["code-metadata"][metadataFileType] = file.path;
               const lottieContainer = dragDropContainer.querySelector(
                 ".code-metadata-lottie-container"
               );
@@ -383,7 +388,7 @@ const checkAvailableSpace = () => {
       datasetSizeResponse = await client.post(
         "/curate_datasets/dataset_size",
         {
-          soda_json_structure: sodaJSONObj,
+          soda_json_structure: globals.sodaJSONObj,
         },
         { timeout: 0 }
       );
@@ -476,9 +481,9 @@ const progressFileDropdown = document.getElementById("progress-files-dropdown");
 const progressFileParse = (ev) => {
   var fileName = $(ev).val();
   if (fileName !== "Select") {
-    var filePath = path.join(progressFilePath, fileName);
+    var filePath = path?.join(progressFilePath, fileName);
     try {
-      var content = fs.readFileSync(filePath);
+      var content = fs?.readFileSync(filePath);
       contentJson = JSON.parse(content);
       return contentJson;
     } catch (error) {
@@ -518,8 +523,8 @@ const importMetadataFilesProgress = (object) => {
     metadataFileArray.forEach((element) => {
       var fullPath = object["metadata-files"][element]["path"];
 
-      populateMetadataProgress(true, path.parse(element).name, fullPath);
-      if (!fs.existsSync(fullPath)) {
+      populateMetadataProgress(true, path?.parse(element).name, fullPath);
+      if (!fs?.existsSync(fullPath)) {
         missing_metadata_files.push(fullPath);
       }
     });
@@ -532,7 +537,7 @@ const recursive_check_for_missing_files = (dataset_folder) => {
       if ("forTreeview" in dataset_folder["files"][file]) {
         continue;
       }
-      if (!fs.existsSync(dataset_folder["files"][file]["path"])) {
+      if (!fs?.existsSync(dataset_folder["files"][file]["path"])) {
         missing_dataset_files.push(dataset_folder["files"][file]["path"]);
       }
     }
@@ -546,38 +551,38 @@ const recursive_check_for_missing_files = (dataset_folder) => {
 
 const importDatasetStructure = (object) => {
   if ("dataset-structure" in object) {
-    datasetStructureJSONObj = sodaJSONObj["dataset-structure"];
-    recursive_check_for_missing_files(datasetStructureJSONObj);
+    globals.datasetStructureJSONObj = globals.sodaJSONObj["dataset-structure"];
+    recursive_check_for_missing_files(globals.datasetStructureJSONObj);
     highLevelFoldersDisableOptions();
   } else {
-    datasetStructureJSONObj = { folders: {}, files: {}, type: "" };
+    globals.datasetStructureJSONObj = { folders: {}, files: {}, type: "" };
   }
 };
 
 const importGenerateDatasetStep = async (object) => {
-  if ("generate-dataset" in sodaJSONObj) {
+  if ("generate-dataset" in globals.sodaJSONObj) {
     // Step 1: Where to generate the dataset
-    if (sodaJSONObj["generate-dataset"]["destination"] === "local") {
+    if (globals.sodaJSONObj["generate-dataset"]["destination"] === "local") {
       $("#generate-local-desktop").prop("checked", true);
       $($("#generate-local-desktop").parents()[2]).click();
       // Step 2: if generate locally, name and path
       $("#input-destination-generate-dataset-locally").prop(
         "placeholder",
-        sodaJSONObj["generate-dataset"]["path"]
+        globals.sodaJSONObj["generate-dataset"]["path"]
       );
-      $("#input-destination-generate-dataset-locally").val(sodaJSONObj["generate-dataset"]["path"]);
+      $("#input-destination-generate-dataset-locally").val(globals.sodaJSONObj["generate-dataset"]["path"]);
       $("#btn-confirm-local-destination").click();
-      $("#inputNewNameDataset").val(sodaJSONObj["generate-dataset"]["dataset-name"]);
+      $("#inputNewNameDataset").val(globals.sodaJSONObj["generate-dataset"]["dataset-name"]);
       $("#btn-confirm-new-dataset-name").click();
-    } else if (sodaJSONObj["generate-dataset"]["destination"] === "bf") {
+    } else if (globals.sodaJSONObj["generate-dataset"]["destination"] === "bf") {
       $("#generate-upload-BF").prop("checked", true);
       $($("#generate-upload-BF").parents()[2]).click();
       // Step 2: if generate on bf, choose bf account
       if (
-        "bf-account-selected" in sodaJSONObj &&
-        sodaJSONObj["bf-account-selected"]["account-name"] !== ""
+        "bf-account-selected" in globals.sodaJSONObj &&
+        globals.sodaJSONObj["bf-account-selected"]["account-name"] !== ""
       ) {
-        var bfAccountSelected = sodaJSONObj["bf-account-selected"]["account-name"];
+        var bfAccountSelected = globals.sodaJSONObj["bf-account-selected"]["account-name"];
         if (bfAccountSelected != defaultBfAccount) {
           return;
         }
@@ -601,12 +606,12 @@ const importGenerateDatasetStep = async (object) => {
         $("#btn-bf-account").trigger("click");
         // Step 3: choose to generate on an existing or new dataset
         if (
-          "bf-dataset-selected" in sodaJSONObj &&
-          sodaJSONObj["bf-dataset-selected"]["dataset-name"] !== ""
+          "bf-dataset-selected" in globals.sodaJSONObj &&
+          globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"] !== ""
         ) {
           $("#generate-BF-dataset-options-existing").prop("checked", true);
           $($("#generate-BF-dataset-options-existing").parents()[2]).click();
-          var bfDatasetSelected = sodaJSONObj["bf-dataset-selected"]["dataset-name"];
+          var bfDatasetSelected = globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"];
           setTimeout(() => {
             let valid_dataset = false;
             for (index in datasetList) {
@@ -621,13 +626,13 @@ const importGenerateDatasetStep = async (object) => {
             $("#current-bf-dataset-generate").text(bfDatasetSelected);
             $("#button-confirm-bf-dataset").click();
             // Step 4: Handle existing files and folders
-            if ("if-existing" in sodaJSONObj["generate-dataset"]) {
-              var existingFolderOption = sodaJSONObj["generate-dataset"]["if-existing"];
+            if ("if-existing" in globals.sodaJSONObj["generate-dataset"]) {
+              var existingFolderOption = globals.sodaJSONObj["generate-dataset"]["if-existing"];
               $("#existing-folders-" + existingFolderOption).prop("checked", true);
               $($("#existing-folders-" + existingFolderOption).parents()[2]).click();
             }
-            if ("if-existing-files" in sodaJSONObj["generate-dataset"]) {
-              var existingFileOption = sodaJSONObj["generate-dataset"]["if-existing-files"];
+            if ("if-existing-files" in globals.sodaJSONObj["generate-dataset"]) {
+              var existingFileOption = globals.sodaJSONObj["generate-dataset"]["if-existing-files"];
               $("#existing-files-" + existingFileOption).prop("checked", true);
               $($("#existing-files-" + existingFileOption).parents()[2]).click();
             }
@@ -635,13 +640,13 @@ const importGenerateDatasetStep = async (object) => {
         } else {
           $("#generate-BF-dataset-options-new").prop("checked", true);
           $($("#generate-BF-dataset-options-new").parents()[2]).click();
-          $("#inputNewNameDataset").val(sodaJSONObj["generate-dataset"]["dataset-name"]);
+          $("#inputNewNameDataset").val(globals.sodaJSONObj["generate-dataset"]["dataset-name"]);
           $("#inputNewNameDataset").keyup();
         }
       }
     }
   } else {
-    if ("save-progress" in sodaJSONObj) {
+    if ("save-progress" in globals.sodaJSONObj) {
       // the block of code below reverts all the checks to option cards if applicable
       $("#previous-progress").prop("checked", true);
       $($("#previous-progress").parents()[2]).addClass("checked");
@@ -716,13 +721,13 @@ const loadProgressFile = (ev) => {
   $("body").addClass("waiting");
 
   if (JSON.stringify(jsonContent) !== "{}") {
-    sodaJSONObj = jsonContent;
+    globals.sodaJSONObj = jsonContent;
     setTimeout(() => {
-      sodaJSONObj = jsonContent;
-      importManifest(sodaJSONObj);
-      importMetadataFilesProgress(sodaJSONObj);
-      importDatasetStructure(sodaJSONObj);
-      importGenerateDatasetStep(sodaJSONObj);
+      globals.sodaJSONObj = jsonContent;
+      importManifest(globals.sodaJSONObj);
+      importMetadataFilesProgress(globals.sodaJSONObj);
+      importDatasetStructure(globals.sodaJSONObj);
+      importGenerateDatasetStep(globals.sodaJSONObj);
       if (missing_dataset_files.length > 0 || missing_metadata_files > 0) {
         verify_missing_files("pre-existing");
       } else {
@@ -746,12 +751,12 @@ const loadProgressFile = (ev) => {
       }
     }, 1000);
   } else {
-    sodaJSONObj = '{"starting-point":"new","dataset-structure":{},"metadata-files":{}}';
+    globals.sodaJSONObj = '{"starting-point":"new","dataset-structure":{},"metadata-files":{}}';
     setTimeout(() => {
-      importManifest(sodaJSONObj);
-      importMetadataFilesProgress(sodaJSONObj);
-      importDatasetStructure(sodaJSONObj);
-      importGenerateDatasetStep(sodaJSONObj);
+      importManifest(globals.sodaJSONObj);
+      importMetadataFilesProgress(globals.sodaJSONObj);
+      importDatasetStructure(globals.sodaJSONObj);
+      importGenerateDatasetStep(globals.sodaJSONObj);
       if (missing_dataset_files.length > 0 || missing_metadata_files > 0) {
         return_option = verify_missing_files("new");
       } else {
@@ -833,9 +838,9 @@ const verify_missing_files = (mode) => {
 const remove_missing_files = () => {
   if (missing_metadata_files.length > 0) {
     for (let item_path in missing_metadata_files) {
-      for (let item in sodaJSONObj["metadata-files"]) {
-        if (sodaJSONObj["metadata-files"][item]["path"] == missing_metadata_files[item_path]) {
-          delete sodaJSONObj["metadata-files"][item];
+      for (let item in globals.sodaJSONObj["metadata-files"]) {
+        if (globals.sodaJSONObj["metadata-files"][item]["path"] == missing_metadata_files[item_path]) {
+          delete globals.sodaJSONObj["metadata-files"][item];
         }
       }
     }
@@ -844,7 +849,7 @@ const remove_missing_files = () => {
     for (let item_path in missing_dataset_files) {
       recursive_remove_missing_file(
         missing_dataset_files[item_path],
-        sodaJSONObj["dataset-structure"]
+        globals.sodaJSONObj["dataset-structure"]
       );
     }
   }
@@ -888,11 +893,11 @@ const importOrganizeProgressPrompt = () => {
   document.getElementById("para-progress-file-status").innerHTML = "";
   removeOptions(progressFileDropdown);
   addOption(progressFileDropdown, "Select", "Select");
-  if (fs.existsSync(progressFilePath)) {
-    var fileNames = fs.readdirSync(progressFilePath);
+  if (fs?.existsSync(progressFilePath)) {
+    var fileNames = fs?.readdirSync(progressFilePath);
     if (fileNames.length > 0) {
       fileNames.forEach((item, i) => {
-        addOption(progressFileDropdown, path.parse(item).name, item);
+        addOption(progressFileDropdown, path?.parse(item).name, item);
       });
     } else {
       document.getElementById("para-progress-file-status").innerHTML =
@@ -1155,9 +1160,9 @@ function create_child_node(
                 ".DOCX",
                 ".doc",
                 ".docx",
-              ].includes(path.parse(key).ext)
+              ].includes(path?.parse(key).ext)
             ) {
-              nodeType = "file " + path.parse(key).ext.slice(1);
+              nodeType = "file " + path?.parse(key).ext.slice(1);
             } else {
               nodeType = "file other";
             }
@@ -1290,7 +1295,7 @@ $(document).ready(function () {
 
 const moveItems = async (ev, category) => {
   var filtered = getGlobalPath(organizeDSglobalPath);
-  var myPath = getRecursivePath(filtered.slice(1), datasetStructureJSONObj);
+  var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
   var selectedOriginalLocation = filtered[filtered.length - 1];
   var selectedItem = ev.parentElement.innerText;
   let item_name = ev.nextSibling.innerText;
@@ -1301,20 +1306,20 @@ const moveItems = async (ev, category) => {
       1. metadata files added for preview show
       2. added manifest files for show (for preview) before showing the tree here
   */
-  if ("files" in datasetStructureJSONObj) {
-    datasetStructureJSONObj["files"] = {};
+  if ("files" in globals.datasetStructureJSONObj) {
+    globals.datasetStructureJSONObj["files"] = {};
   }
-  for (var highLevelFol in datasetStructureJSONObj["folders"]) {
+  for (var highLevelFol in globals.datasetStructureJSONObj["folders"]) {
     if (
-      "manifest.xlsx" in datasetStructureJSONObj["folders"][highLevelFol]["files"] &&
-      datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"]["forTreeview"] ===
+      "manifest.xlsx" in globals.datasetStructureJSONObj["folders"][highLevelFol]["files"] &&
+      globals.datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"]["forTreeview"] ===
         true
     ) {
-      delete datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"];
+      delete globals.datasetStructureJSONObj["folders"][highLevelFol]["files"]["manifest.xlsx"];
     }
   }
   jsTreeData = create_child_node(
-    datasetStructureJSONObj,
+    globals.datasetStructureJSONObj,
     "My_dataset_folder",
     "folder",
     "",
@@ -1337,7 +1342,7 @@ const moveItems = async (ev, category) => {
   selectedPath = undefined;
   selectedNode = "";
 
-  // first, convert datasetStructureJSONObj to jsTree's json structure
+  // first, convert globals.datasetStructureJSONObj to jsTree's json structure
   // show swal2 with jstree in here
   const { value: folderDestination } = await Swal.fire({
     backdrop: "rgba(0,0,0, 0.4)",
@@ -1419,13 +1424,13 @@ const moveItems = async (ev, category) => {
         }).then(() => {
           // action to move and delete here
           // multiple files/folders
-          let split = selectedPath.split("/");
-          let datasetCopy = datasetStructureJSONObj;
+          let split = selectedpath?.split("/");
+          let datasetCopy = globals.datasetStructureJSONObj;
           if ($("div.single-item.selected-item").toArray().length > 1) {
             $("div.single-item.selected-item")
               .toArray()
               .forEach((element) => {
-                datasetCopy = datasetStructureJSONObj;
+                datasetCopy = globals.datasetStructureJSONObj;
                 let itemToMove = element.textContent;
                 var itemType;
                 if ($(element.firstElementChild).hasClass("myFile")) {
@@ -1520,11 +1525,11 @@ const moveItems = async (ev, category) => {
               });
             }
           }
-          let pathAsArray = selectedPath.split("/");
-          listItems(datasetStructureJSONObj, "#items", 500);
+          let pathAsArray = selectedpath?.split("/");
+          listItems(globals.datasetStructureJSONObj, "#items", 500);
           organizeLandingUIEffect();
           // reconstruct div with new elements
-          getInFolder(".single-item", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+          getInFolder(".single-item", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
 
           // if moved into an empty folder we need to remove the class 'empty'
           // from the folder destination
@@ -1546,9 +1551,9 @@ const moveItems = async (ev, category) => {
 
 function moveItemsHelper(item, destination, category) {
   var filtered = getGlobalPath(organizeDSglobalPath);
-  var myPath = getRecursivePath(filtered.slice(1), datasetStructureJSONObj);
+  var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
   var selectedNodeList = destination.split("/").slice(1);
-  var destinationPath = getRecursivePath(selectedNodeList, datasetStructureJSONObj);
+  var destinationPath = getRecursivePath(selectedNodeList, globals.datasetStructureJSONObj);
 
   // handle duplicates in destination folder
   if (category === "file") {
@@ -1556,29 +1561,29 @@ function moveItemsHelper(item, destination, category) {
     var uiFiles = {};
     if (JSON.stringify(destinationPath["files"]) !== "{}") {
       for (var file in destinationPath["files"]) {
-        uiFiles[path.parse(file).base] = 1;
+        uiFiles[path?.parse(file).base] = 1;
       }
     }
-    var fileBaseName = path.basename(item);
-    var originalFileNameWithoutExt = path.parse(fileBaseName).name;
+    var fileBaseName = path?.basename(item);
+    var originalFileNameWithoutExt = path?.parse(fileBaseName).name;
     var fileNameWithoutExt = originalFileNameWithoutExt;
     var j = 1;
 
     while (fileBaseName in uiFiles) {
       fileNameWithoutExt = `${originalFileNameWithoutExt} (${j})`;
-      fileBaseName = fileNameWithoutExt + path.parse(fileBaseName).ext;
+      fileBaseName = fileNameWithoutExt + path?.parse(fileBaseName).ext;
       j++;
     }
     if ("action" in myPath[category][item]) {
       if (!myPath[category][item]["action"].includes("moved")) {
         myPath[category][item]["action"].push("moved");
       }
-      if (fileBaseName !== path.basename(item)) {
+      if (fileBaseName !== path?.basename(item)) {
         myPath[category][item]["action"].push("renamed");
       }
     } else {
       myPath[category][item]["action"] = ["moved"];
-      if (fileBaseName !== path.basename(item)) {
+      if (fileBaseName !== path?.basename(item)) {
         myPath[category][item]["action"].push("renamed");
       }
     }
@@ -1591,7 +1596,7 @@ function moveItemsHelper(item, destination, category) {
         uiFolders[folder] = 1;
       }
     }
-    var originalFolderName = path.basename(item);
+    var originalFolderName = path?.basename(item);
     var renamedFolderName = originalFolderName;
     var j = 1;
     while (renamedFolderName in uiFolders) {
@@ -1616,7 +1621,7 @@ function moveItemsHelper(item, destination, category) {
   //delete item from the original location
   delete myPath[category][item];
   listItems(myPath, "#items");
-  getInFolder(".single-item", "#items", organizeDSglobalPath, datasetStructureJSONObj);
+  getInFolder(".single-item", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
 
   // log moving multiple files/folders successfully
   logCurationForAnalytics(
@@ -1803,9 +1808,9 @@ function showTreeViewPreview(
 
 // if checked
 function addManifestFilesForTreeView() {
-  for (var key in datasetStructureJSONObj["folders"]) {
+  for (var key in globals.datasetStructureJSONObj["folders"]) {
     if (highLevelFolders.includes(key)) {
-      var fileKey = datasetStructureJSONObj["folders"][key]["files"];
+      var fileKey = globals.datasetStructureJSONObj["folders"][key]["files"];
       if (!("manifest.xlsx" in fileKey)) {
         fileKey["manifest.xlsx"] = {
           forTreeview: true,
@@ -1817,9 +1822,9 @@ function addManifestFilesForTreeView() {
 
 // if unchecked
 function revertManifestForTreeView() {
-  for (var key in datasetStructureJSONObj["folders"]) {
+  for (var key in globals.datasetStructureJSONObj["folders"]) {
     if (highLevelFolders.includes(key)) {
-      var fileKey = datasetStructureJSONObj["folders"][key]["files"];
+      var fileKey = globals.datasetStructureJSONObj["folders"][key]["files"];
       if ("manifest.xlsx" in fileKey && fileKey["manifest.xlsx"]["forTreeview"] === true) {
         delete fileKey["manifest.xlsx"];
       }
@@ -1837,18 +1842,18 @@ $("#generate-manifest-curate").change(function () {
 
 function determineDatasetDestination(dataset_name, dataset_destination) {
   // determine if the dataset is being uploaded to Pennsieve or being generated locally
-  if ("bf-dataset-selected" in sodaJSONObj) {
-    dataset_name = sodaJSONObj["bf-dataset-selected"]["dataset-name"];
+  if ("bf-dataset-selected" in globals.sodaJSONObj) {
+    dataset_name = globals.sodaJSONObj["bf-dataset-selected"]["dataset-name"];
     dataset_destination = "Pennsieve";
-  } else if ("generate-dataset" in sodaJSONObj) {
-    if ("destination" in sodaJSONObj["generate-dataset"]) {
-      let destination = sodaJSONObj["generate-dataset"]["destination"];
+  } else if ("generate-dataset" in globals.sodaJSONObj) {
+    if ("destination" in globals.sodaJSONObj["generate-dataset"]) {
+      let destination = globals.sodaJSONObj["generate-dataset"]["destination"];
       if (destination == "local") {
-        dataset_name = sodaJSONObj["generate-dataset"]["dataset-name"];
+        dataset_name = globals.sodaJSONObj["generate-dataset"]["dataset-name"];
         dataset_destination = "Local";
       }
       if (destination == "bf") {
-        dataset_name = sodaJSONObj["generate-dataset"]["dataset-name"];
+        dataset_name = globals.sodaJSONObj["generate-dataset"]["dataset-name"];
         dataset_destination = "Pennsieve";
       }
     }

@@ -8,17 +8,19 @@ Note: Some frontend elements of the workflow are in the renderer.js file as well
 ******************************************************
 ******************************************************
 */
+const electron = require("../../src/electron/index.js").default.electron ?? {};
+const ipcRenderer = electron.ipcRenderer;
 
 // take the user to the Pennsieve account to sign up for an ORCID Id
 $("#ORCID-btn").on("click", async () => {
   // tell the main process to open a Modal window with the webcontents of the user's Pennsieve profile so they can add an ORCID iD
-  ipcRenderer.send(
+  ipcRenderer?.send(
     "orcid",
     "https://orcid.org/oauth/authorize?client_id=APP-DRQCE0GUWKTRCWY2&response_type=code&scope=/authenticate&redirect_uri=https://app.pennsieve.io/orcid-redirect"
   );
 
   // handle the reply from the asynhronous message to sign the user into Pennsieve
-  ipcRenderer.on("orcid-reply", async (event, accessCode) => {
+  ipcRenderer?.on("orcid-reply", async (event, accessCode) => {
     if (!accessCode || accessCode === "") {
       return;
     }
@@ -86,7 +88,7 @@ $("#ORCID-btn").on("click", async () => {
     });
 
     // track success
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Success",
       DisseminateDatasetsAnalyticsPrefix.DISSEMINATE_REVIEW + " - Integrate ORCID iD",
@@ -362,7 +364,7 @@ $(".pre-publishing-continue").on("click", async function () {
       timerProgressBar: false,
     });
 
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       DisseminateDatasetsAnalyticsPrefix.DISSEMINATE_REVIEW + " - Get Excluded Files",
@@ -374,7 +376,7 @@ $(".pre-publishing-continue").on("click", async function () {
     $(".items-spinner").hide();
   }
 
-  ipcRenderer.send(
+  ipcRenderer?.send(
     "track-event",
     "Success",
     DisseminateDatasetsAnalyticsPrefix.DISSEMINATE_REVIEW + " - Get Excluded Files",
@@ -401,7 +403,7 @@ $(".pre-publishing-continue").on("click", async function () {
     });
 
     // log the error information then continue execution -- this is because they may not want to ignore files when they publish
-    ipcRenderer.send(
+    ipcRenderer?.send(
       "track-event",
       "Error",
       DisseminateDatasetsAnalyticsPrefix.DISSEMINATE_REVIEW + " - Get Metadata Files",
@@ -411,7 +413,7 @@ $(".pre-publishing-continue").on("click", async function () {
     return;
   }
 
-  ipcRenderer.send(
+  ipcRenderer?.send(
     "track-event",
     "Success",
     DisseminateDatasetsAnalyticsPrefix.DISSEMINATE_REVIEW + " - Get Metadata Files",
