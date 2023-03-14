@@ -3,10 +3,12 @@ import { defineConfig } from "vite";
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/index.js',
-      name: 'index.js',
-      fileName: () => 'index.js',
-      formats: ['iife'],
+      entry: {
+        index: 'src/index.js',
+        components: 'src/components.js',
+      },
+      fileName: (_, name) => `${name}.js`,
+      formats: ['es'],
     },
   },
 });

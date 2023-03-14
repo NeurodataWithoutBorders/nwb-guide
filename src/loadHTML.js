@@ -14,12 +14,16 @@ export const addReadyCallback = (callback) => {
     else callbacks.push(callback)
 }
 
+console.log('RUNNING')
 // adds the apps HTML pages to the DOM
 onDocumentReady(async function () {
 
     // NOTE: This is a bottleneck on load times for the Vite dev server
     const links = document.querySelectorAll('link[rel="import"]');
-    let contentIndex = document.querySelector("#content");
+    let main = document.querySelector("nwb-main");
+    console.log('READY')
+
+    console.log('main', main.content)
     let sectionIds = [];
     for (const link of links) {
         let doc = await fetch(link.href, {
@@ -34,7 +38,7 @@ onDocumentReady(async function () {
         sectionIds.push(id);
 
         //Add the HTML Section to the #content container
-        contentIndex.innerHTML += content;
+        main.content.innerHTML += content;
     }
 
     const waitForHtmlSectionsToInsertIntoDOM = () => {

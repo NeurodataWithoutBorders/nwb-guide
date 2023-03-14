@@ -407,22 +407,18 @@ export class Sidebar extends LitElement {
     return this;
   }
 
-  showMainContent() {
-    const nav = (this.shadowRoot ?? this).querySelector(".js-nav");
-    const content = document.querySelector(".js-content");
-    if (nav) nav.classList.add("is-shown");
-
-    if (content) content.classList.add("is-shown"); // NOTE: This remains outside the app
-    else console.warn("Could not find content element");
+  show() {
+    this.nav.classList.add("is-shown");
   }
 
 
   updated(){
+    this.nav = (this.shadowRoot ?? this).querySelector("#main-nav");
+
       // Toggle sidebar
       const toggle = (this.shadowRoot ?? this).querySelector("#sidebarCollapse");
       toggle.addEventListener('click', () => {
-        const mainNav = (this.shadowRoot ?? this).querySelector("#main-nav");
-        mainNav.classList.toggle("active");
+        this.nav.classList.toggle("active");
         toggle.classList.toggle("active");
 
         // TODO: Decide how to grab these elements outside of the component
@@ -444,7 +440,7 @@ export class Sidebar extends LitElement {
       const gettingStarted = (this.shadowRoot ?? this).querySelector("#getting_starting_tab");
       gettingStarted.click()
 
-      this.showMainContent()
+      this.show()
   }
 
   render() {

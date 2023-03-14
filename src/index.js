@@ -1,6 +1,3 @@
-// Web Components
-import "./stories/sidebar.js";
-import "./stories/multiselect/index.js";
 
 import "../assets/nav.js"
 import "../scripts/others/renderer.js"

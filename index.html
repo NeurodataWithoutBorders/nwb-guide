@@ -106,9 +106,7 @@
       <ul id="guided-nav-items" class="guided--container-nav-items"></ul>
     </nav>
 
-    <div class="dash-app" style="background: #fff; border-top: 1px solid #c3c3c3">
-      <main id="content" class="content js-content"></main>
-    </div>
+    <nwb-main class="dash-app" style="background: #fff; border-top: 1px solid #c3c3c3"></nwb-main>
 
     <!-- Required inclusion of jQuery based on legacy SODA DOM manipulation strategy -->
     <script src="node_modules/jquery/dist/jquery.min.js"></script> <!-- Vite -->
@@ -124,15 +122,16 @@
     <script src="https://jsuites.net/v4/jsuites.js"></script>
     <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
 
-    <!-- <script src="./dist/index.js"></script> -->
-    <!-- <script>
-      require('./src/electron/index.js'); // Selectively load Electron-specific assets (still using Electron require syntax)
-    </script> -->
-    <script type="module" defer>
-      import { addReadyCallback } from "./src/loadHTML.js" // Load all HTML
+    <script type="module">
+
+      // Load Components
+      if (isElectron) await import("./dist/components.js") // Load packaged frontend for Electron
+      else await import("./src/components.js") // Load dev frontend (if not in Electron context)
+
+      // Load HTML
+      const { addReadyCallback } = await import("./src/loadHTML.js") // Load all HTML
 
       addReadyCallback(async () => {
-        // await import ("./src/electron/dependents.js") // Selectively load Electron-specific assets (using ES6 import syntax)
         if (isElectron) await import("./dist/index.js") // Load packaged frontend for Electron
         else await import("./src/index.js") // Load dev frontend (if not in Electron context)
       })
