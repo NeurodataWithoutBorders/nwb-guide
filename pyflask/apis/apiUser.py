@@ -8,7 +8,6 @@ api = get_namespace(NamespaceEnum.USER)
 
 @api.route("/orcid")
 class Orcid(Resource):
-
     parser = reqparse.RequestParser(bundle_errors=True)
 
     parser.add_argument("access_code", type=str, required=True, help="ORCID", location="json")

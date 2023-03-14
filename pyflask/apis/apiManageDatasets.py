@@ -64,7 +64,6 @@ pennsieveAPIKeyAndSecret = api.model(
 
 @api.route("/pennsieve_api_key_secret")
 class PennsieveAPIKeyAndSecret(Resource):
-
     # the parser for the pennsieve and api key secret endpoint defines the parameters that are accepted in the request
     api_key_parser = reqparse.RequestParser(bundle_errors=True)
     api_key_parser.add_argument(
@@ -128,7 +127,6 @@ getNumberOfFilesAndFoldersLocally = api.model(
 
 @api.route("/get_number_of_files_and_folders_locally")
 class GetNumberOfFilesAndFoldersLocally(Resource):
-
     files_folders_parser = reqparse.RequestParser(bundle_errors=True)
     files_folders_parser.add_argument(
         "filepath",
@@ -192,7 +190,6 @@ model_get_dataset_status_response = api.model(
 
 @api.route("/bf_dataset_status")
 class BfChangeDatasetStatus(Resource):
-
     # selected_bfaccount, selected_bfdataset, selected_status
     parser_change_dataset_status = reqparse.RequestParser(bundle_errors=True)
     parser_change_dataset_status.add_argument(
@@ -267,7 +264,6 @@ class BfChangeDatasetStatus(Resource):
     )
     @api.expect(parser_dataset_status)
     def get(self):
-
         # get the selected_bfaccount, selected_bfdataset from the request object
         data = self.parser_dataset_status.parse_args()
         selected_bfaccount = data.get("selected_account")
@@ -340,7 +336,6 @@ users_response_model = api.model(
 
 @api.route("/bf_get_users")
 class BfGetUsers(Resource):
-
     parser_get_users = reqparse.RequestParser(bundle_errors=True)
     parser_get_users.add_argument(
         "selected_account",
@@ -384,7 +379,6 @@ model_bf_get_teams_response = api.model(
 
 @api.route("/bf_get_teams")
 class BfGetTeams(Resource):
-
     parser_get_teams = reqparse.RequestParser(bundle_errors=True)
     parser_get_teams.add_argument(
         "selected_account",
@@ -428,7 +422,6 @@ model_account_details_response = api.model(
 
 @api.route("/bf_account_details")
 class BfAccountDetails(Resource):
-
     parser_account_details = reqparse.RequestParser(bundle_errors=True)
     parser_account_details.add_argument(
         "selected_account",
@@ -514,7 +507,6 @@ model_account_datasets_list_response = api.model(
 
 @api.route("/bf_dataset_account")
 class BfDatasetAccount(Resource):
-
     parser_dataset_account = reqparse.RequestParser(bundle_errors=True)
     parser_dataset_account.add_argument(
         "selected_account",
@@ -551,7 +543,6 @@ model_get_dataset_subtitle_response = api.model(
 
 @api.route("/bf_dataset_subtitle")
 class DatasetSubtitle(Resource):
-
     parser_dataset_subtitle = reqparse.RequestParser(bundle_errors=True)
     parser_dataset_subtitle.add_argument(
         "selected_account",
@@ -632,7 +623,6 @@ model_get_dataset_description_response = api.model(
 
 @api.route("/bf_dataset_description")
 class DatasetDescription(Resource):
-
     parser_dataset_description = reqparse.RequestParser(bundle_errors=True)
     parser_dataset_description.add_argument(
         "selected_account",
@@ -1084,7 +1074,6 @@ model_get_username_response = api.model(
 
 @api.route("/account/username")
 class BfGetUsername(Resource):
-
     parser_get_username = reqparse.RequestParser(bundle_errors=True)
     parser_get_username.add_argument(
         "selected_account",
@@ -1101,7 +1090,6 @@ class BfGetUsername(Resource):
     )
     @api.expect(parser_get_username)
     def get(self):
-
         data = self.parser_get_username.parse_args()
 
         selected_account = data.get("selected_account")
@@ -1148,7 +1136,6 @@ class BfGetUsername(Resource):
     )
     @api.marshal_with(successMessage, 200, False)
     def put(self):
-
         data = self.parser_add_username.parse_args()
 
         keyname = data.get("keyname")
@@ -1165,7 +1152,6 @@ class BfGetUsername(Resource):
 
 @api.route("/account/api_key")
 class BfAddAccountApiKey(Resource):
-
     parser_add_api_key = reqparse.RequestParser(bundle_errors=True)
     parser_add_api_key.add_argument(
         "keyname",
@@ -1201,7 +1187,6 @@ class BfAddAccountApiKey(Resource):
     )
     @api.marshal_with(successMessage, 200, False)
     def put(self):
-
         data = self.parser_add_api_key.parse_args()
 
         keyname = data.get("keyname")
@@ -1389,7 +1374,6 @@ model_get_readme_response = api.model(
 
 @api.route("/datasets/<string:dataset_name_or_id>/readme")
 class BfGetDatasetReadme(Resource):
-
     parser_readme = reqparse.RequestParser(bundle_errors=True)
     parser_readme.add_argument(
         "selected_account",
@@ -1467,7 +1451,6 @@ model_get_ds_tags = api.model(
 
 @api.route("/datasets/<string:dataset_name_or_id>/tags")
 class BfGetDatasetTags(Resource):
-
     parser_tags = reqparse.RequestParser(bundle_errors=True)
     parser_tags.add_argument(
         "selected_account",

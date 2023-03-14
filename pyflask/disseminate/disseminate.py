@@ -183,7 +183,6 @@ def bf_submit_review_dataset(selected_bfaccount, selected_bfdataset, publication
 
 
 def get_publication_type(ps, myds):
-
     """
     Function to get the publication type of a dataset
     """
@@ -200,7 +199,6 @@ def get_publication_type(ps, myds):
 
 
 def bf_withdraw_review_dataset(selected_bfaccount, selected_bfdataset):
-
     ps = get_authenticated_ps(selected_bfaccount)
 
     myds = get_dataset(ps, selected_bfdataset)

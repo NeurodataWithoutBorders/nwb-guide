@@ -49,7 +49,6 @@ class DatasetRole(Resource):
 class Dataset(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self, dataset_id):
-
         try:
             return get_dataset_by_id(dataset_id)
         except Exception as e:

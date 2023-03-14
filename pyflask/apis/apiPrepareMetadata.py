@@ -49,7 +49,6 @@ model_get_submission_file_response = api.model(
 
 @api.route("/submission_file")
 class SaveSubmissionFile(Resource):
-
     parser_save_submission_file = reqparse.RequestParser(bundle_errors=True)
     parser_save_submission_file.add_argument(
         "upload_boolean",
@@ -156,7 +155,6 @@ model_get_RC_file_response = api.model(
 
 @api.route("/readme_changes_file")
 class RCFile(Resource):
-
     parser_get_RC_file = reqparse.RequestParser(bundle_errors=True)
     parser_get_RC_file.add_argument(
         "file_type",
@@ -271,7 +269,6 @@ model_save_ds_description_file_response = api.model(
 
 @api.route("/dataset_description_file")
 class DatasetDescriptionFile(Resource):
-
     parser_get_ds_description_file = reqparse.RequestParser(bundle_errors=True)
     parser_get_ds_description_file.add_argument(
         "filepath",
@@ -368,7 +365,6 @@ class DatasetDescriptionFile(Resource):
 
 @api.route("/code_description_file")
 class CodeDescriptionFile(Resource):
-
     parser_upload_code_description_file = reqparse.RequestParser(bundle_errors=True)
     parser_upload_code_description_file.add_argument(
         "filepath",
@@ -414,7 +410,6 @@ class CodeDescriptionFile(Resource):
 
 @api.route("/subjects_file")
 class SubjectsFile(Resource):
-
     parser_save_subjects_file = reqparse.RequestParser(bundle_errors=True)
     parser_save_subjects_file.add_argument(
         "filepath",
@@ -563,7 +558,6 @@ model_get_samples_result = api.model(
 
 @api.route("/samples_file")
 class SamplesFile(Resource):
-
     parser_save_samples_file = reqparse.RequestParser(bundle_errors=True)
     parser_save_samples_file.add_argument(
         "filepath",
@@ -721,7 +715,6 @@ model_ui_fields = api.model(
 
 @api.route("/import_metadata_file")
 class ImportBFMetadataFile(Resource):
-
     parser_import_metadata_file = reqparse.RequestParser(bundle_errors=True)
     parser_import_metadata_file.add_argument(
         "selected_account",
@@ -813,7 +806,6 @@ class ImportBFMetadataFile(Resource):
 
 @api.route("/template_paths")
 class SetTemplatePath(Resource):
-
     parser_set_template_path = reqparse.RequestParser(bundle_errors=True)
     parser_set_template_path.add_argument(
         "basepath",
@@ -881,7 +873,6 @@ class ImportMilestone(Resource):
 
 @api.route("/manifest_dummy_folders")
 class DeleteManifestDummyFolders(Resource):
-
     parser_delete_manifest_dummy_folders = reqparse.RequestParser(bundle_errors=True)
     parser_delete_manifest_dummy_folders.add_argument(
         "paths",

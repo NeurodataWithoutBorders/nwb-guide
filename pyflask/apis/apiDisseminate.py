@@ -242,7 +242,6 @@ class PublishingStatus(Resource):
 
 @api.route("/datasets/<string:dataset_name_or_id>/publication/request")
 class PublicationRequest(Resource):
-
     publication_parser_post = reqparse.RequestParser()
     publication_parser_post.add_argument(
         "selected_account",
@@ -303,7 +302,6 @@ class PublicationRequest(Resource):
 
 @api.route("/datasets/<string:dataset_name_or_id>/publication/cancel")
 class PublicationCancel(Resource):
-
     publication_cancel_parser_post = reqparse.RequestParser()
     publication_cancel_parser_post.add_argument(
         "selected_account",
@@ -315,7 +313,6 @@ class PublicationCancel(Resource):
 
     @api.expect(publication_cancel_parser_post)
     def post(self, dataset_name_or_id):
-
         # get the arguments
         data = self.publication_cancel_parser_post.parse_args()
         selected_account = data.get("selected_account")

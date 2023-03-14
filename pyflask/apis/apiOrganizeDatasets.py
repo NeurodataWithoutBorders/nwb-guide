@@ -55,7 +55,6 @@ class BfGetDatasetFilesFolders(Resource):
 
 @api.route("/datasets")
 class GenerateDatasetLocally(Resource):
-
     parser_change_dataset_status = reqparse.RequestParser(bundle_errors=True)
     parser_change_dataset_status.add_argument(
         "generation_type",
@@ -114,7 +113,6 @@ class GenerateDatasetLocally(Resource):
 
 @api.route("/datasets/import")
 class ImportDataset(Resource):
-
     parser_import_dataset = reqparse.RequestParser(bundle_errors=True)
     parser_import_dataset.add_argument(
         "sodajsonobject",
@@ -151,7 +149,6 @@ class ImportDataset(Resource):
         description="Import files from local machine into the soda json object.",
     )
     def post(self):
-
         data = self.parser_import_dataset.parse_args()
 
         sodajsonobject = data.get("sodajsonobject")

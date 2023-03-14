@@ -165,7 +165,6 @@ class GenerateManifestFiles(Resource):
     )
     @api.expect(parser)
     def post(self):  # sourcery skip: use-named-expression
-
         # get the filepath from the request object
         data = self.parser.parse_args()
 
@@ -241,7 +240,6 @@ class GenerateManifestData(Resource):
     )
     @api.expect(parser)
     def post(self):
-
         data = self.parser.parse_args()
         dataset_structure_obj = data.get("dataset_structure_obj")
         try:
@@ -267,7 +265,6 @@ class DatasetSize(Resource):
     )
     @api.marshal_with(model_dataset_size_response, False, 200)
     def post(self):
-
         # get the soda_json_structure from the request object
         data = request.get_json()
 
