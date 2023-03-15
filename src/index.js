@@ -1,4 +1,4 @@
-
+import "./pages.js"
 import "../assets/nav.js"
 import "../scripts/others/renderer.js"
 // require("./assets/ex-links.js");

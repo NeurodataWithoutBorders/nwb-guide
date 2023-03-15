@@ -1077,9 +1077,9 @@ const guidedUnLockSideBar = () => {
     sidebar.click();
   }
   sidebar.disabled = false;
-  guidedModeSection.style.marginLeft = "-15px";
+  // guidedModeSection.style.marginLeft = "-15px";
   //remove the marginLeft style from guidedDatasetTab
-  guidedDatsetTab.style.marginLeft = "";
+  // guidedDatsetTab.style.marginLeft = "";
   guidedNav.style.display = "none";
 };
 

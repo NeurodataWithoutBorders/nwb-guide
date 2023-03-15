@@ -1,26 +1,25 @@
 /* Section ------------------ */
 
 .section {
-  position: absolute;
+  /* position: absolute; */
   top: 0;
   left: 210px;
   right: 0;
   bottom: 0;
   max-height: 100%;
   margin-right: 0;
-  padding: 0;
-  padding-top: 7px;
-  padding-left: 30px;
+  padding: 25px;
+  /* padding-top: 7px;
+  padding-left: 30px; */
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
   color: var(--color-accent);
   background-color: var(--color-section);
-  /* Hide */
-  pointer-events: none;
+  /* pointer-events: none;
   visibility: hidden;
-  opacity: 0;
-  transform: translateX(-20px);
+  opacity: 0; */
+  /* transform: translateX(-20px); */
   transition: visibility 0s 0.12s linear, opacity 0.12s ease-in, transform 0.12s ease-in-out;
 }
 .section.is-shown {

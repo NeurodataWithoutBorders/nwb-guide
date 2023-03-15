@@ -27,11 +27,6 @@ if (isElectron) {
         log.info("User OS:", os.type(), os.platform(), "version:", os.release());
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
-        // Check current app version //
-        const appVersion = app.getVersion();
-        log.info("Current SODA version:", appVersion);
-        console.log("Current SODA version:", appVersion);
-
         electronExports.app = app;
         electronExports.port = port;
         electronExports.log = log;

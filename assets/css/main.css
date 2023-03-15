@@ -1820,9 +1820,9 @@ details[open] > summary::before {
     margin-top: -7rem;
   }
 
-  .getting-started-overview {
+  /* .getting-started-overview {
     grid-template-rows: 12% 65% 10% 21%;
-  }
+  } */
 
   .front-page_logo {
     width: 80rem;
