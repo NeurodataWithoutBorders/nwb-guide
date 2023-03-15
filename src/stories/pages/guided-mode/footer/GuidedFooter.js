@@ -10,23 +10,23 @@ export class GuidedFooter extends Page {
           exit: { type: Boolean, reflect: true },
         };
       }
-    
+
       constructor (props = {}) {
         super()
       }
-    
+
       // This method turns off shadow DOM to allow for global styles (e.g. bootstrap)
       // NOTE: This component checks whether this is active to determine how to handle styles and internal element references
       createRenderRoot() {
         return this;
       }
-    
+
       attributeChangedCallback(...args) {
         const attrs = ['back', 'next', 'exit']
         super.attributeChangedCallback(...args)
         if (attrs.includes(args[0])) this.requestUpdate()
       }
-    
+
 
   updated(){
 

@@ -15,7 +15,7 @@ export class ContactPage extends Page {
 
   updated(){
     let contact_lottie_container = (this ?? this.shadowRoot).querySelector("#contact-us-lottie");
-    
+
     lottie.loadAnimation({
       container: contact_lottie_container,
       animationData: contact_lottie /*(json js variable, (view src/assets/lotties)*/,
@@ -57,7 +57,7 @@ export class ContactPage extends Page {
   }
 };
 
-{/* 
+{/*
 <br />
 If you are reaching us regarding an issue, we suggest that you attach the SODA
 and Pennsieve log files to the email. Just click on the button below to save those

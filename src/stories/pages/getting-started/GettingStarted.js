@@ -100,11 +100,11 @@ export class GettingStartedPage extends Page {
         Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br />
       </p>
     </div>
-  
+
     <div class="overview-card-layout grid h-auto w-full grid-cols-3 gap-6">
       <div id="overview-column-1" class="overview-column">
         <p class="overview_lottie_header">Curate</p>
-  
+
         <div id="lottie1" class="overview-lottie"></div>
         <p style="margin: 0">
           Rapidly prepare your data and metadata according to the NWB Best Practices and DANDI
@@ -132,10 +132,10 @@ export class GettingStartedPage extends Page {
         @click="${() => openLink("https://docs.sodaforsparc.io/docs/getting-started/user-interface")}"
       >
         <p class="interface-btn-txt">Learn about NWB and DANDI</p>
-  
+
         <i class="fas fa-play"></i>
       </button>
-  
+
       <button
         id="home-button-guided-mode-link"
         class="getting-started-btn secondary-plain-button text-base"

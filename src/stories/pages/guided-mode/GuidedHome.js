@@ -77,7 +77,7 @@ export class GuidedHomePage extends Page {
                 <h2 class="guided--text-sub-step">Begin curating a new dataset</h2>
               </div>
             </div>
-  
+
             <div
               class="guided--panel"
               id="continue-curating-existing"

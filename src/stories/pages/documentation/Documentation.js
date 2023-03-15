@@ -14,7 +14,7 @@ export class DocumentationPage extends Page {
 
   updated(){
     let doc_lottie = (this ?? this.shadowRoot).querySelector("#documentation-lottie");
-  
+
     lottie.loadAnimation({
       container: doc_lottie,
       animationData: docu_lottie /*(json js variable, (view src/assets/lotties)*/,
@@ -22,8 +22,8 @@ export class DocumentationPage extends Page {
       loop: true /*controls looping*/,
       autoplay: true,
     });
-    
-    
+
+
   }
 
   render() {

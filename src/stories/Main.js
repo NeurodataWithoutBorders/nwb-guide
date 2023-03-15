@@ -45,7 +45,7 @@ export class Main extends LitElement {
     this.style.width = "100%";
     this.style.height = "100%";
     this.style.overflow = "hidden";
-    
+
     return html`<main id="content" class="js-content"></main>`;
   }
 };

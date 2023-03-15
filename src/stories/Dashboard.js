@@ -15,7 +15,7 @@ const componentCSS = `
     }
 
     nwb-main {
-        background: #fff; 
+        background: #fff;
         border-top: 1px solid #c3c3c3;
     }
 `
@@ -74,7 +74,7 @@ export class Dashboard extends LitElement {
     this.main = (this.shadowRoot ?? this).querySelector("nwb-main");
     this.sidebar.onClick = (key, value) => this.setMain(value)
     this.main.onTransition = (transition) => {
-      
+
       if (typeof transition === 'number'){
         const sign = Math.sign(transition)
         if (sign === 1) this.setMain(this.#latest.next)
@@ -107,7 +107,7 @@ export class Dashboard extends LitElement {
       return acc
     }
 
-    this.#pagesById = {} 
+    this.#pagesById = {}
     Object.entries(this.pages).forEach((arr) => addPage(this.#pagesById, arr))
 
     // Set sidebar pages

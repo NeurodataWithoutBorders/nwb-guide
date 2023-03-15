@@ -83,7 +83,7 @@ export class GuidedStartPage extends Page {
                 your dataset on Pennsieve with the proper folder structure and metadata files. Note
                 that none of your local data files will ever be modified or moved.
               </p>
-  
+
               <h2>Define your Data Formats</h2>
               <nwb-multiselect-form
                 id="neuroconv-define-formats"
