@@ -139,7 +139,7 @@ export class GettingStartedPage extends Page {
       <button
         id="home-button-guided-mode-link"
         class="getting-started-btn secondary-plain-button text-base"
-        @click="${() => this.onTransition('Guided Mode')}"
+        @click="${() => this.onTransition('guided')}"
       >
         <p class="getting-started-btn-txt">Begin curating a new dataset</p>
         <i class="el-icon icon-animate"

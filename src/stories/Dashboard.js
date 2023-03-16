@@ -31,13 +31,14 @@ export class Dashboard extends LitElement {
   static get properties() {
     return {
       pages: { type: Object, reflect: false },
-      name: { type: String, reflect: true }
+      name: { type: String, reflect: true },
+      subtitle: { type: String, reflect: true },
     };
   }
 
   #pagesById = {}
 
-  #latest
+  #active
 
   constructor (props = {}) {
     super()
@@ -49,8 +50,11 @@ export class Dashboard extends LitElement {
     return this;
   }
 
+  #queue = []
+
   attributeChangedCallback(...args) {
     super.attributeChangedCallback(...args)
+    if (args[0] === 'subtitle' && this.sidebar) this.sidebar.setSubtitle(args[1]) // Update subtitle without rerender
     if (args[0] === 'pages' || args[0] === 'name') this.requestUpdate()
   }
 
@@ -59,31 +63,56 @@ export class Dashboard extends LitElement {
     if (!entry) throw new Error('Page not found...')
     let page = entry.page ?? entry
     if (page instanceof HTMLElement) return page
-    if (Array.isArray(page)) return this.getPage(page[0])
-    else if (typeof page === 'object') return Object.values(page)[0]
+    else if (typeof page === 'object') return this.getPage(Object.values(page)[0])
+  }
+
+  reset() {
+    this.subSidebar.reset() // Reset state of the navigation sidebar
   }
 
   setMain(info){
-    this.#latest = info
+    if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.#pagesById[info.page.id] // Get info from a direct page
+
+    if (this.#active === info) return // Prevent rerendering the same page
+    if (this.#active?.base !== info.base) this.reset() // Reset state if base page changed
+
+    // Update Active Page
+    if (this.#active) this.#active.active = false
+    this.#active = info
+
+    if (info.parent && info.section) {
+
+      this.subSidebar.items = info.parent // Update sidebar items (if changed)
+      this.subSidebar.active = info.id // Update active item (if changed)
+
+      this.sidebar.hide(true)
+      this.subSidebar.show()
+    } else {
+      this.sidebar.show()
+      this.subSidebar.hide()
+    }
     const page = this.getPage(info)
     this.main.set(page)
   }
 
   updated(){
+    const div = (this.shadowRoot ?? this).querySelector("div");
+    div.style.height = '100vh'
     this.sidebar = (this.shadowRoot ?? this).querySelector("nwb-sidebar");
+    this.subSidebar = (this.shadowRoot ?? this).querySelector("nwb-navigation-sidebar");
     this.main = (this.shadowRoot ?? this).querySelector("nwb-main");
-    this.sidebar.onClick = (key, value) => this.setMain(value)
+    this.sidebar.onClick = this.subSidebar.onClick = (_, value) => this.setMain(value)
     this.main.onTransition = (transition) => {
 
       if (typeof transition === 'number'){
         const sign = Math.sign(transition)
-        if (sign === 1) this.setMain(this.#latest.next)
-        else if (sign === -1) this.setMain(this.#latest.previous)
+        if (sign === 1) return this.setMain(this.#active.next)
+        else if (sign === -1) return this.setMain(this.#active.previous)
       }
 
       if (!(transition in this.pages) && transition in this.#pagesById)  {
         const info = this.#pagesById[transition]
-        if (info.base === undefined) transition = this.#pagesById[transition].key // Get key from id
+        if (info.base === undefined) transition = this.#pagesById[transition].id // Get key from id
       }
 
       if (transition in this.pages) this.sidebar.select(transition)
@@ -92,24 +121,55 @@ export class Dashboard extends LitElement {
 
     // Track Pages By Id
     const addPage = (acc, arr, additionalInfo = {}) => {
-      const [key, info] = arr
+      let [ id, info ] = arr
       const page = info.page ?? info
-      let id = info.id || key
-      if (additionalInfo.base) id = `${additionalInfo.base}/${id}`
+      if (additionalInfo.id) id = additionalInfo.id
 
-      if (page instanceof HTMLElement) acc[id] = {page, key, ...additionalInfo}
-      else if (Array.isArray(page)) page.forEach((v, i) => addPage(acc, [0, v], {
-        base: id,
-        previous: page[i-1],
-        next: page[i+1]
-      }))
-      else throw new Error('Unknown page type')
+      if (page instanceof HTMLElement) {
+        page.id = id // track id on the page
+        acc[id] = {
+          id,
+          ...info, 
+          ...additionalInfo
+        }
+      }
+      else if (typeof page === 'object') {
+        const pages = Object.values(page)
+        const pagesInfo = {}
+        
+        Object.entries(page).forEach(([newId, value], i) => {
+          newId = `${id}/${newId}`
+          console.log('newId', newId)
+          const baseInfo = {
+            ...value,
+            previous: pages[i-1],
+            next: pages[i+1],
+            id: newId
+          }
+          pagesInfo[newId] = { ...baseInfo}
+        })
+
+        const pageArr = Object.entries(pagesInfo)
+
+        // Register a base page 
+        const firstPage = pageArr[0]
+        if (pageArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
+
+        // Register all pages
+        pageArr.forEach((arr) => {
+          const info = arr[1]
+          info.parent = pagesInfo
+          addPage(acc, arr, { base: id, ...info})
+        })
+
+      } else throw new Error('Unknown page type')
       return acc
     }
 
     this.#pagesById = {}
     Object.entries(this.pages).forEach((arr) => addPage(this.#pagesById, arr))
 
+    console.log(this.#pagesById)
     // Set sidebar pages
     this.sidebar.pages = this.pages
   }

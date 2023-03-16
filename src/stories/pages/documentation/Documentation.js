@@ -1,6 +1,6 @@
 
 
-import { LitElement, html } from 'lit';
+import { html } from 'lit';
 import { openLink } from '../../../links.js';
 import lottie from 'lottie-web';
 import { docu_lottie } from '../../../../assets/lotties/documentation-lotties.js';

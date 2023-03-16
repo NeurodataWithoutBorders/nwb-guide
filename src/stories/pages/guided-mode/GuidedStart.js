@@ -2,43 +2,51 @@
 
 import { html } from 'lit';
 import { Page } from '../Page.js';
-import { GuidedFooter } from './footer/GuidedFooter';
-import "../../multiselect/MultiSelectForm.js";
-
+import './GuidedFooter';
 
 export class GuidedStartPage extends Page {
 
-  constructor () {
+  constructor() {
     super()
   }
 
-  updated(){
+  updated() {
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
+    // Handle dropdown text
+    const infoDropdowns = (this.shadowRoot ?? this).getElementsByClassName("guided--info-dropdown");
+    for (const infoDropdown of Array.from(infoDropdowns)) {
+      const infoTextElement = infoDropdown.querySelector(".guided--dropdown-text");
+      const dropdownType = infoTextElement.dataset.dropdownType;
+      if (dropdownType === "info") {
+        //insert the info icon before the text
+        infoTextElement.insertAdjacentHTML("beforebegin", ` <i class="fas fa-info-circle"></i>`);
+      }
+      if (dropdownType === "warning") {
+        //insert the warning icon before the text
+        infoTextElement.insertAdjacentHTML(
+          "beforebegin",
+          ` <i class="fas fa-exclamation-triangle"></i>`
+        );
+      }
+
+      infoDropdown.addEventListener("click", () => {
+        const infoContainer = infoDropdown.nextElementSibling;
+        const infoContainerChevron = infoDropdown.querySelector(".fa-chevron-right");
+
+        const infoContainerIsopen = infoContainer.classList.contains("container-open");
+
+        if (infoContainerIsopen) {
+          infoContainerChevron.style.transform = "rotate(0deg)";
+          infoContainer.classList.remove("container-open");
+        } else {
+          infoContainerChevron.style.transform = "rotate(90deg)";
+          infoContainer.classList.add("container-open");
+        }
+      });
+    }
   }
 
   render() {
-
-    const footer = new GuidedFooter();
-
-    // back: () => this.onTransition(-1),
-    // next: () => this.onTransition(1),
-    // exit: true
-
-    const back = document.createElement('button');
-    back.innerText = 'Back';
-    back.addEventListener('click', () => this.onTransition(-1));
-
-    const next = document.createElement('button');
-    next.innerText = 'Next'; // Save and Continue
-    next.addEventListener('click', () => this.onTransition(1));
-
-    const exit = document.createElement('button');
-    exit.innerText = 'Save and Exit';
-    exit.addEventListener('click', () => this.onTransition('/'));
-
-    footer.insertAdjacentElement('beforeend', back)
-    footer.insertAdjacentElement('beforeend', next)
-    footer.insertAdjacentElement('beforeend', exit)
 
     return html`
   <section
@@ -83,18 +91,19 @@ export class GuidedStartPage extends Page {
                 your dataset on Pennsieve with the proper folder structure and metadata files. Note
                 that none of your local data files will ever be modified or moved.
               </p>
-
-              <h2>Define your Data Formats</h2>
-              <nwb-multiselect-form
-                id="neuroconv-define-formats"
-              ></nwb-multiselect-form>
             </div>
           </div>
         </div>
-        ${footer}
     </section>
-    `;
+    <nwb-guided-footer>
+        <div>
+            <nwb-button @click=${() => this.onTransition(-1)}>Back</nwb-button>
+            <nwb-button @click=${() => this.onTransition(1)} primary>Next</nwb-button>
+        </div>
+        <nwb-button @click=${() => this.onTransition('/')}>Save and Exit</nwb-button>
+    </nwb-guided-footer>
+        `;
   }
 };
 
-customElements.get('nwbguide-guided-start-page') || customElements.define('nwbguide-guided-start-page',  GuidedStartPage);
+customElements.get('nwbguide-guided-start-page') || customElements.define('nwbguide-guided-start-page', GuidedStartPage);

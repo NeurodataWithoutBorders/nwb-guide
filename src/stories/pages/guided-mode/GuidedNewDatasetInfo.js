@@ -3,6 +3,8 @@
 import { html } from 'lit';
 import { Page } from '../Page.js';
 import './GuidedHeader.js'
+import './GuidedFooter';
+import { sections } from './globals.js';
 
 export class GuidedNewDatasetPage extends Page {
 
@@ -15,14 +17,18 @@ export class GuidedNewDatasetPage extends Page {
   }
 
   render() {
+
     return html`
+    <nwb-guided-header sections="${JSON.stringify(sections)}"></nwb-guided-header>
+
   <section
     class="section js-section u-category-windows"
   >
-        <nwbguide-guided-header></nwbguide-guided-header>
+
+    <nwb-guided-capsules n=2 selected=0></nwb-guided-capsules>
 
         <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
-        <div class="title-border">
+        <div class="title">
           <h1 class="guided--text-sub-step">Give your dataset a name and subtitle</h1>
         </div>
         <div class="guided--section">
@@ -36,7 +42,6 @@ export class GuidedNewDatasetPage extends Page {
             type="text"
             name="guided-dataset-name"
             placeholder="Enter dataset name here"
-            onkeyup="validateInput($(this))"
           />
           <p class="guided--text-input-instructions mb-0">
             Enter the desired name for your new dataset. This is the field that will be displayed
@@ -63,7 +68,6 @@ export class GuidedNewDatasetPage extends Page {
             name="guided-dataset-subtitle"
             placeholder="Enter datset subtitle here"
             style="height: 7.5em; padding-bottom: 20px"
-            onkeyup="validateInput($(this))"
             maxlength="255"
           ></textarea>
           <p class="guided--text-input-instructions mb-0">
@@ -78,6 +82,8 @@ export class GuidedNewDatasetPage extends Page {
     </div>
 
     </section>
+    <nwb-guided-footer></nwb-guided-footer>
+
     `;
   }
 };

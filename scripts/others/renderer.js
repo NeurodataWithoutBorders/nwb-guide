@@ -67,7 +67,7 @@ const {
 // Set the sidebar subtitle to the current app version
 const dashboard = document.querySelector('nwb-dashboard')
 const appVersion = app?.getVersion();
-dashboard.sidebar.subtitle = appVersion ?? 'Web Version';
+dashboard.subtitle = appVersion ?? 'Web Version';
 
 // const prevent_sleep_id = "";
 // const electron_app = electron.app;
@@ -320,13 +320,6 @@ const startupServerAndApiCheck = async () => {
     console.log("Connected to Python back-end successfully");
     log?.info("Connected to Python back-end successfully");
     ipcRenderer?.send("track-event", "Success", "Establishing Python Connection");
-
-    // Update the options on the multi-select form
-    const multiselectEl = document.getElementById("neuroconv-define-formats");
-    const base = `http://127.0.0.1:${port}`;
-    const multiselectOptions = await fetch(`${base}/neuroconv`).then((res) => res.json());
-    console.log('Setting formats', multiselectOptions )
-    multiselectEl.setAttribute("options", JSON.stringify(multiselectOptions))
   }
 
   // dismiss the Swal

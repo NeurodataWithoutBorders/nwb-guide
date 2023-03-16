@@ -1,6 +1,5 @@
 
 import { LitElement, html } from 'lit';
-import electronExports from '../electron/index.js';
 import useGlobalStyles from './utils/useGlobalStyles.js';
 
 const componentCSS = `
@@ -418,12 +417,11 @@ export class Sidebar extends LitElement {
     if (attrs.includes(args[0])) this.requestUpdate()
   }
 
-
   updated(){
     this.nav = (this.shadowRoot ?? this).querySelector("#main-nav");
 
       // Toggle sidebar
-      const toggle = (this.shadowRoot ?? this).querySelector("#sidebarCollapse");
+      const toggle = this.toggle = (this.shadowRoot ?? this).querySelector("#sidebarCollapse");
       toggle.onclick = () => {
         this.nav.classList.toggle("active");
         toggle.classList.toggle("active");
@@ -433,19 +431,31 @@ export class Sidebar extends LitElement {
       if (firstItem) firstItem.click()
   }
 
-  onClick = () => {} // Set by the user
-  #onClick = (key) => {
-    if (!this.pages[key]) throw new Error(`No page found for key ${key}`)
-    const links = (this.shadowRoot ?? this).querySelectorAll('a')
-    links.forEach((a) => a.classList.remove('is-selected'))
-    const a = (this.shadowRoot ?? this).querySelector(`a[data-key="${key}"]`)
-    a.classList.add('is-selected')
-    this.onClick(key, this.pages[key])
+  show = () => {
+    this.nav.classList.remove("active");
+    this.toggle.classList.remove("active")
+    this.style.display = "block";
   }
 
-  select = (key) => {
-    const info = this.pages[key]
-    if (info) this.#onClick(key, info)
+  hide = (changeDisplay) => {
+    this.nav.classList.add("active");
+    this.toggle.classList.add("active")
+    if (changeDisplay) this.style.display = "none";
+  }
+
+  onClick = () => {} // Set by the user
+  #onClick = (id) => {
+    if (!this.pages[id]) throw new Error(`No page found for key ${id}`)
+    const links = (this.shadowRoot ?? this).querySelectorAll('a')
+    links.forEach((a) => a.classList.remove('is-selected'))
+    const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${id}"]`)
+    a.classList.add('is-selected')
+    this.onClick(id, this.pages[id])
+  }
+
+  select = (id) => {
+    const info = this.pages[id]
+    if (info) this.#onClick(id, info)
   }
 
   render() {
@@ -464,16 +474,17 @@ export class Sidebar extends LitElement {
             </div>
             <!-- Sidebar Links -->
             <ul class="list-unstyled components">
-              ${Object.entries(this.pages).map(([key, value]) => {
+              ${Object.entries(this.pages).map(([id, value]) => {
+                let label = value.label ?? id
                 const icon = value.icon ?? ''
                 const a = document.createElement('a')
+                a.setAttribute('data-id', id)
                 a.href = "#"
-                a.setAttribute('data-key', key)
                 a.innerHTML = `
                   ${icon}
-                  ${key}
+                  ${label}
                 `
-                return html`<li @click="${() => this.#onClick(key)}">${a}</li>`
+                return html`<li @click="${() => this.#onClick(id)}">${a}</li>`
               })}
             </ul>
             <div class="help-section">

@@ -103,18 +103,8 @@
     <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
 
     <script type="module">
-
-      // Load Components
-      if (isElectron) await import("./dist/components.js") // Load packaged frontend for Electron
-      else await import("./src/components.js") // Load dev frontend (if not in Electron context)
-
-      // Load HTML
-      const { addReadyCallback } = await import("./src/loadHTML.js") // Load all HTML
-
-      addReadyCallback(async () => {
-        if (isElectron) await import("./dist/index.js") // Load packaged frontend for Electron
-        else await import("./src/index.js") // Load dev frontend (if not in Electron context)
-      })
+      if (isElectron) await import("./dist/index.js") // Load packaged frontend for Electron
+      else await import("./src/index.js") // Load dev frontend (if not in Electron context)
     </script>
 
     <script src="./assets/lotties.js" type="text/javascript"></script>

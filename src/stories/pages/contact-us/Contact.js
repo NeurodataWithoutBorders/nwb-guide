@@ -57,20 +57,4 @@ export class ContactPage extends Page {
   }
 };
 
-{/*
-<br />
-If you are reaching us regarding an issue, we suggest that you attach the SODA
-and Pennsieve log files to the email. Just click on the button below to save those
-logs file at your desired location.
-<div class="button_container_contact">
-<button
-  id="gather-logs-button"
-  class="view_doc_button sodaVideo-button"
-  onclick="gatherLogs()"
-  style="margin-top: 1rem"
->
-  Gather Logs
-</button>
-</div> */}
-
 customElements.get('nwbguide-contact-page') || customElements.define('nwbguide-contact-page',  ContactPage);

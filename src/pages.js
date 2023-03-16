@@ -4,6 +4,8 @@ import { ContactPage } from "./stories/pages/contact-us/Contact"
 import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome"
 import { GuidedStartPage } from "./stories/pages/guided-mode/GuidedStart"
 import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/GuidedNewDatasetInfo"
+import { GuidedStructurePage } from "./stories/pages/guided-mode/GuidedStructure"
+import { sections } from "./stories/pages/guided-mode/globals"
 
 const dashboard = document.querySelector('nwb-dashboard')
 
@@ -67,34 +69,44 @@ style="margin-right: 30px; margin-bottom: -5px"
 `
 
 dashboard.pages = {
-    'Overview': {
-        id: "/",
+    '/': {
+        label: "Overview",
         page: new GettingStartedPage(),
         icon: overviewIcon
     },
-    'Guided Mode': {
-        id: "guided",
-        page: [
-            {
-                id: 'home',
+    'guided': {
+        label: "Guided Mode",
+        page: {
+            home: {
+                label: "Home",
                 page: new GuidedHomePage()
             },
-            {
-                id: 'start',
-                page: new GuidedStartPage(),
+            start: {
+                label: "Start",
+                page: new GuidedStartPage()
             },
-            {
-                id: 'new-dataset',
+            
+            'new-dataset': {
+                label: "Project Setup",
+                section: sections[0],
                 page: new GuidedNewDatasetPage()
-            }
-        ],
+            },
+            structure: {
+                label: "Data Formats",
+                section: sections[0],
+                page: new GuidedStructurePage()
+            },
+
+        },
         icon: guidedIcon
     },
-    'Documentation': {
+    'docs': {
+        label: "Documentation",
         page: new DocumentationPage(),
         icon: documentationIcon
     },
-    "Contact Us": {
+    "contact": {
+        label: "Contact Us",
         page: new ContactPage(),
         icon: contactIcon
     },

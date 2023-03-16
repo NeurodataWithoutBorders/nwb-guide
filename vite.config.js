@@ -5,7 +5,6 @@ export default defineConfig({
     lib: {
       entry: {
         index: 'src/index.js',
-        components: 'src/components.js',
       },
       fileName: (_, name) => `${name}.js`,
       formats: ['es'],
