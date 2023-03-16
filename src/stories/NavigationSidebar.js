@@ -44,7 +44,7 @@ export class NavigationSidebar extends LitElement {
     this.nav = (this.shadowRoot ?? this).querySelector("#guided-nav");
     for (let section in this.#sectionStates) {
       const state = this.#sectionStates[section]
-      if 
+      if
       ( state.open || state.active ) {
         this.#openDropdown(section, true)
       }
@@ -53,7 +53,7 @@ export class NavigationSidebar extends LitElement {
     if (this.#queue.length) {
       this.#queue.forEach(content => content())
       this.#queue = []
-    }    
+    }
   }
 
   show(){
@@ -74,22 +74,22 @@ export class NavigationSidebar extends LitElement {
       else {
         if (force) el.classList.remove(name);
         else el.classList.add(name);
-      } 
+      }
   }
 
   reset() {
     this.#sectionStates = {}
   }
 
-  #openDropdown = (sectionName, forcedState) => {    
-    
+  #openDropdown = (sectionName, forcedState) => {
+
     const hasForce = forcedState !== undefined
     //remove hidden from child elements with guided--nav-bar-section-page class
     const children = this.querySelectorAll( "[data-section='" + sectionName + "']");
     for (const child of children) this.#updateClass('hidden', child, forcedState)
 
     const dropdown = this.querySelector( "[data-section-name='" + sectionName + "']");
-    
+
     const toggledState = !this.#sectionStates[sectionName].open
 
     //toggle the chevron
@@ -124,7 +124,7 @@ export class NavigationSidebar extends LitElement {
       }
       return acc
     }, {})
-    
+
     return html`
 <nav id="guided-nav" class="guided--nav">
     <img class="nav-center-logo-image" src="assets/img/logo-neuroconv.png" />
@@ -141,7 +141,7 @@ export class NavigationSidebar extends LitElement {
       ${Object.entries(itemsBySection).map(([sectionName, arr]) => {
         return html`
         <div class="guided--nav-bar-section">
-          <div 
+          <div
             class="guided--nav-bar-dropdown"
             data-section-name=${sectionName}
             @click=${() => this.#openDropdown(sectionName)}
@@ -165,7 +165,7 @@ export class NavigationSidebar extends LitElement {
                 hidden
                 ${state.visited ? " completed" : " not-completed"}
                 ${isActive ? "active" : ""}"
-              " 
+              "
               @click=${() => this.onClick(id, value)}
             >
               <div class="guided--nav-bar-section-page-title">

@@ -25,7 +25,7 @@ static get properties() {
   render() {
 
     if (!this.sections.length) return html``;
-    
+
     return html`
     <header id="guided-header-div" class="guided--header">
       <div class="guided--progression-tab-container">

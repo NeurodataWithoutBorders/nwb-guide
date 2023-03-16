@@ -85,7 +85,7 @@ dashboard.pages = {
                 label: "Start",
                 page: new GuidedStartPage()
             },
-            
+
             'new-dataset': {
                 label: "Project Setup",
                 section: sections[0],

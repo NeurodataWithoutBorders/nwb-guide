@@ -26,7 +26,7 @@ export class GuidedCapsules extends LitElement {
     render() {
 
         if (!this.n) return html``;
-        
+
         return html`
             <div class="guided--capsule-container">
             <div class="guided--capsule-container-branch">

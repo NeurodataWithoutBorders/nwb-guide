@@ -43,7 +43,7 @@ export class Button extends LitElement {
       font-size: 16px;
       padding: 12px 24px;
     }
-`;    
+`;
   }
 
   static get properties() {

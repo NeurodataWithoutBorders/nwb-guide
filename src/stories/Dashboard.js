@@ -129,14 +129,14 @@ export class Dashboard extends LitElement {
         page.id = id // track id on the page
         acc[id] = {
           id,
-          ...info, 
+          ...info,
           ...additionalInfo
         }
       }
       else if (typeof page === 'object') {
         const pages = Object.values(page)
         const pagesInfo = {}
-        
+
         Object.entries(page).forEach(([newId, value], i) => {
           newId = `${id}/${newId}`
           console.log('newId', newId)
@@ -151,7 +151,7 @@ export class Dashboard extends LitElement {
 
         const pageArr = Object.entries(pagesInfo)
 
-        // Register a base page 
+        // Register a base page
         const firstPage = pageArr[0]
         if (pageArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
 
