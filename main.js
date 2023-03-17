@@ -187,7 +187,7 @@ const killAllPreviousProcesses = async () => {
   // create a loop of 100
   for (let currentPort = PORT; currentPort <= endRange; currentPort++) {
     promisesArray.push(
-      axios.get(`http://127.0.0.1:${currentPort}/sodaforsparc_server_shutdown`, {})
+      axios.get(`http://127.0.0.1:${currentPort}/server_shutdown`, {})
     );
   }
 
