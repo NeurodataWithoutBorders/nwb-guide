@@ -90,6 +90,13 @@ export class Search extends LitElement {
       <input placeholder="Type here to search" @input=${(ev) => {
 
         const input = ev.target.value
+
+        // Hide all if empty
+        if (!input) {
+          this.#options.forEach(({ option }) => option.classList.add('hidden'))
+          return
+        }
+
         const toShow = []
         // Check if the input value matches the label
         this.#options.forEach(({ option, label }, i) => {
