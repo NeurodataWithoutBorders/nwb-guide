@@ -20,9 +20,19 @@ export class GuidedStructurePage extends Page {
   updated(){
     const list = (this.shadowRoot ?? this).querySelector("ul");
     this.search.onSelect = (key, value) => {
-      console.log("Selected", key, value);
       const li = document.createElement("li");
-      li.innerHTML = `${value.name.slice(0, -9)} - ${value.name}`;
+      const keyEl = document.createElement("span");
+      keyEl.innerText = value.name.slice(0, -9)
+      keyEl.contentEditable = true
+      li.appendChild(keyEl)
+
+      const sepEl = document.createElement("span");
+      sepEl.innerText = " - ";
+      li.appendChild(sepEl)
+
+      const valueEl = document.createElement("span");
+      valueEl.innerText = value.name
+      li.appendChild(valueEl)
       list.appendChild(li);
     }
 
