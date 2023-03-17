@@ -17,6 +17,12 @@ static get properties() {
     };
 }
 
+attributeChangedCallback(...args) {
+  const attrs = ['sections', 'selected']
+  super.attributeChangedCallback(...args)
+  if (attrs.includes(args[0])) this.requestUpdate()
+}
+
   createRenderRoot() {
     return this;
   }

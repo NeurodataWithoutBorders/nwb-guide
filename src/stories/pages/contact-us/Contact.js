@@ -7,8 +7,8 @@ import { Page } from '../Page.js';
 
 export class ContactPage extends Page {
 
-  constructor () {
-    super()
+  constructor(...args) {
+    super(...args)
   }
 
 

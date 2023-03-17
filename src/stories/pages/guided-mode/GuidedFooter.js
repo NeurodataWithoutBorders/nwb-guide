@@ -44,6 +44,12 @@ export class GuidedFooter extends LitElement {
     this.onExit = onExit;
   }
 
+  attributeChangedCallback(...args) {
+    const attrs = ['back', 'next', 'exit', 'onBack', 'onNext', 'onExit']
+    super.attributeChangedCallback(...args)
+    if (attrs.includes(args[0])) this.requestUpdate()
+  }
+
   updated(){
     this.onTransition = this.parentElement.onTransition;
   }

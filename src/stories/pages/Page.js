@@ -16,8 +16,9 @@ export class Page extends LitElement {
     return useGlobalStyles(componentCSS, sheet => sheet.href && sheet.href.includes('bootstrap'), this.shadowRoot)
   }
 
-  constructor () {
+  constructor (info = {}) {
     super()
+    this.info = info
   }
 
   createRenderRoot() {

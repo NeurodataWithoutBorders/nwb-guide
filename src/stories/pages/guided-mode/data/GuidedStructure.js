@@ -1,21 +1,17 @@
 
 
 import { html } from 'lit';
-import { Page } from '../Page.js';
-import './GuidedHeader.js'
-import './GuidedFooter';
-import './GuidedCapsules';
-import { sections } from './globals.js';
+import { Page } from '../../Page.js';
 
 // For Multi-Select Form
-import "../../multiselect/MultiSelectForm.js";
-import globals from '../../../../scripts/globals.js';
+import "../../../multiselect/MultiSelectForm.js";
+import globals from '../../../../../scripts/globals.js';
 const { port } = globals;
 
 export class GuidedStructurePage extends Page {
 
-  constructor () {
-    super()
+  constructor(...args) {
+    super(...args)
   }
 
   updated(){
@@ -26,18 +22,9 @@ export class GuidedStructurePage extends Page {
         multiselectEl.setAttribute("options", JSON.stringify(json))
     });
   }
-
+  
   render() {
     return html`
-    <nwb-guided-header sections="${JSON.stringify(sections)}"></nwb-guided-header>
-
-  <section
-    class="section js-section u-category-windows"
-  >
-  <div
-  class="guided--parent-tab"
->
-  <nwb-guided-capsules n=2 selected=1></nwb-guided-capsules>
   <div
     id="guided-mode-starting-container"
     class="guided--main-tab"
@@ -52,14 +39,7 @@ export class GuidedStructurePage extends Page {
           id="neuroconv-define-formats"
         ></nwb-multiselect-form>
       </div>
-    </div>
   </div>
-
-
-    </section>
-
-    <nwb-guided-footer next="Back to Home Screen" exit="Exit" .onNext=${() => this.onTransition('/')}></nwb-guided-footer>
-
     `;
   }
 };

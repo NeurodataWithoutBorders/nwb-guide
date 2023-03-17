@@ -474,9 +474,10 @@ export class Sidebar extends LitElement {
             </div>
             <!-- Sidebar Links -->
             <ul class="list-unstyled components">
-              ${Object.entries(this.pages).map(([id, value]) => {
-                let label = value.label ?? id
-                const icon = value.icon ?? ''
+              ${Object.entries(this.pages).map(([id, page]) => {
+                const info = page.info ?? {}
+                let label = info.label ?? id
+                const icon = info.icon ?? ''
                 const a = document.createElement('a')
                 a.setAttribute('data-id', id)
                 a.href = "#"

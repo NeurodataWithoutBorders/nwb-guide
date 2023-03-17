@@ -8,8 +8,8 @@ import { Page } from '../Page.js';
 
 export class DocumentationPage extends Page {
 
-  constructor () {
-    super()
+  constructor(...args) {
+    super(...args)
   }
 
   updated(){

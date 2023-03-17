@@ -3,9 +3,16 @@ import { DocumentationPage } from "./stories/pages/documentation/Documentation"
 import { ContactPage } from "./stories/pages/contact-us/Contact"
 import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome"
 import { GuidedStartPage } from "./stories/pages/guided-mode/GuidedStart"
-import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/GuidedNewDatasetInfo"
-import { GuidedStructurePage } from "./stories/pages/guided-mode/GuidedStructure"
-import { sections } from "./stories/pages/guided-mode/globals"
+import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/setup/GuidedNewDatasetInfo"
+import { GuidedStructurePage } from "./stories/pages/guided-mode/data/GuidedStructure"
+import { sections } from "./stories/pages/globals"
+import { GuidedSubjectsPage } from "./stories/pages/guided-mode/setup/GuidedSubjects"
+import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSourceData"
+import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata"
+import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload"
+import { GuidedDeleteFilesPage } from "./stories/pages/guided-mode/options/GuidedDelete"
+import { GuidedConversionTypePage } from "./stories/pages/guided-mode/options/GuidedConversionType"
+import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults"
 
 const dashboard = document.querySelector('nwb-dashboard')
 
@@ -69,45 +76,63 @@ style="margin-right: 30px; margin-bottom: -5px"
 `
 
 dashboard.pages = {
-    '/': {
+    '/': new GettingStartedPage({
         label: "Overview",
-        page: new GettingStartedPage(),
         icon: overviewIcon
-    },
-    'guided': {
+    }),
+    'guided': new GuidedHomePage({
         label: "Guided Mode",
-        page: {
-            home: {
-                label: "Home",
-                page: new GuidedHomePage()
-            },
-            start: {
+        icon: guidedIcon,
+        pages: {
+            start: new GuidedStartPage({
                 label: "Start",
-                page: new GuidedStartPage()
-            },
-
-            'new-dataset': {
-                label: "Project Setup",
+            }),
+            details: new GuidedNewDatasetPage({
+                label: "Project details",
+                section: sections[0]
+            }),
+            subjects: new GuidedSubjectsPage({
+                label: "Subjects",
                 section: sections[0],
-                page: new GuidedNewDatasetPage()
-            },
-            structure: {
-                label: "Data Formats",
-                section: sections[0],
-                page: new GuidedStructurePage()
-            },
+            }),
+            structure: new GuidedStructurePage({
+                label: "Data formats",
+                section: sections[1]
+            }),
+            sourcedata: new GuidedSourceDataPage({
+                label: "Source data",
+                section: sections[1]
+            }),
+            metadata: new GuidedMetadataPage({
+                label: "Metadata",
+                section: sections[1],
+            }),
 
-        },
-        icon: guidedIcon
-    },
-    'docs': {
+            type: new GuidedConversionTypePage({
+                label: "Conversion type",
+                section: sections[2]
+            }),
+            upload: new GuidedUploadPage({
+                label: "Upload dataset",
+                section: sections[2]
+            }),
+            deletefiles: new GuidedDeleteFilesPage({
+                label: "Delete files",
+                section: sections[2]
+            }),
+
+            review: new GuidedResultsPage({
+                label: "Review results",
+                section: sections[3]
+            }),
+        }
+    }),
+    'docs': new DocumentationPage({
         label: "Documentation",
-        page: new DocumentationPage(),
         icon: documentationIcon
-    },
-    "contact": {
+    }),
+    "contact":  new ContactPage({
         label: "Contact Us",
-        page: new ContactPage(),
         icon: contactIcon
-    },
+    })
 }

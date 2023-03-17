@@ -1,15 +1,12 @@
 
 
 import { html } from 'lit';
-import { Page } from '../Page.js';
-import './GuidedHeader.js'
-import './GuidedFooter';
-import { sections } from './globals.js';
+import { Page } from '../../Page.js';
 
 export class GuidedNewDatasetPage extends Page {
 
-  constructor () {
-    super()
+  constructor(...args) {
+    super(...args)
   }
 
   updated(){
@@ -19,20 +16,12 @@ export class GuidedNewDatasetPage extends Page {
   render() {
 
     return html`
-    <nwb-guided-header sections="${JSON.stringify(sections)}"></nwb-guided-header>
-
-  <section
-    class="section js-section u-category-windows"
-  >
-
-    <nwb-guided-capsules n=2 selected=0></nwb-guided-capsules>
-
         <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
         <div class="title">
-          <h1 class="guided--text-sub-step">Give your dataset a name and subtitle</h1>
+          <h1 class="guided--text-sub-step">Project metadata</h1>
         </div>
         <div class="guided--section">
-          <label class="guided--form-label">Dataset name: </label>
+          <label class="guided--form-label">Project Name</label>
           <input
             class="guided--input"
             id="guided-dataset-name-input"
@@ -43,16 +32,10 @@ export class GuidedNewDatasetPage extends Page {
             name="guided-dataset-name"
             placeholder="Enter dataset name here"
           />
-          <p class="guided--text-input-instructions mb-0">
-            Enter the desired name for your new dataset. This is the field that will be displayed
-            in public as the title of the dataset once it is published on the
-            <a href="https://sparc.science/">SPARC Data Portal</a>. Please make sure that your
-            dataset title is different than your other dataset titles and is relatively
-            informative.
-          </p>
+          <p class="guided--text-input-instructions mb-0">Enter the name of your project.</p>
         </div>
         <div class="guided--section">
-          <label class="guided--form-label">Dataset subtitle:</label>
+          <label class="guided--form-label">DOIs of Relevant Publications</label>
           <p style="height: 0px; margin: 0px">
             <span
               id="guided-subtitle-char-count"
@@ -71,19 +54,11 @@ export class GuidedNewDatasetPage extends Page {
             maxlength="255"
           ></textarea>
           <p class="guided--text-input-instructions mb-0">
-            Add two or three sentences (limit of 255 characters) that describe the content of your
-            dataset such that it is possible to differentiate it from other datasets. This field
-            will become the short description visible immediately under the title of your dataset
-            once it is published on the
-            <a href="https://sparc.science/">SPARC Data Portal</a>.
+            Separete multiple DOIs with a comma.
           </p>
         </div>
       </div>
     </div>
-
-    </section>
-    <nwb-guided-footer></nwb-guided-footer>
-
     `;
   }
 };

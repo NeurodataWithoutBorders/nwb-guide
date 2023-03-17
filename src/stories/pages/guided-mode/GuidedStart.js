@@ -6,8 +6,8 @@ import './GuidedFooter';
 
 export class GuidedStartPage extends Page {
 
-  constructor() {
-    super()
+  constructor(...args) {
+    super(...args)
   }
 
   updated() {
@@ -49,10 +49,6 @@ export class GuidedStartPage extends Page {
   render() {
 
     return html`
-  <section
-    class="section js-section u-category-windows"
-  >
-
         <div
           id="guided-mode-starting-container"
           class="guided--main-tab"
@@ -94,14 +90,6 @@ export class GuidedStartPage extends Page {
             </div>
           </div>
         </div>
-    </section>
-    <nwb-guided-footer>
-        <div>
-            <nwb-button @click=${() => this.onTransition(-1)}>Back</nwb-button>
-            <nwb-button @click=${() => this.onTransition(1)} primary>Next</nwb-button>
-        </div>
-        <nwb-button @click=${() => this.onTransition('/')}>Save and Exit</nwb-button>
-    </nwb-guided-footer>
         `;
   }
 };

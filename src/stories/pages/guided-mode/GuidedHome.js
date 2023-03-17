@@ -6,8 +6,8 @@ import lottie from 'lottie-web';
 
 export class GuidedHomePage extends Page {
 
-  constructor () {
-    super()
+  constructor(...args) {
+    super(...args)
   }
 
   updated(){
@@ -26,10 +26,6 @@ export class GuidedHomePage extends Page {
 
   render() {
     return html`
-  <section
-    class="section js-section u-category-windows"
-  >
-
         <div id="guided-home" class="guided--main-tab">
           <div class="guided--panel">
             <h1 class="guided--text-sub-step">Guided Mode</h1>
@@ -111,7 +107,6 @@ export class GuidedHomePage extends Page {
             <div class="guided--section hidden" id="guided-div-update-uploaded-cards"></div>
           </div>
         </div>
-    </section>
     `;
   }
 };
