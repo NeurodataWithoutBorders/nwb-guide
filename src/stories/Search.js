@@ -19,7 +19,7 @@ export class Search extends LitElement {
       display: block;
       background: white;
       border-radius: 5px;
-      font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      width: 100%;
     }
 
     .header {
@@ -115,14 +115,14 @@ export class Search extends LitElement {
     </div>
     <ul>
      <slot>
-      ${this.options.map(option => html`<li 
+      ${this.options ? this.options.map(option => html`<li 
       class="option hidden" 
       data-keywords="${JSON.stringify(option.keywords)}"
-      @click=${() => this.#onSelect(option.label, option)}
+      @click=${() => this.#onSelect(option.label, option.value ?? option)}
       >
         <h4 class="label">${option.label}</h4>
         <small class="keywords">${option.keywords.join(', ')}</small>
-      </li>`)}
+      </li>`) : ''}
      </slot>
     </ul>
     `;

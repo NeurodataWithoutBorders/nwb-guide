@@ -6,6 +6,7 @@ import { Page } from '../../Page.js';
 // For Multi-Select Form
 import "../../../multiselect/MultiSelectForm.js";
 import globals from '../../../../../scripts/globals.js';
+import { Search } from '../../../Search.js';
 const { port } = globals;
 
 export class GuidedStructurePage extends Page {
@@ -14,12 +15,28 @@ export class GuidedStructurePage extends Page {
     super(...args)
   }
 
+  search = new Search()
+
   updated(){
-    // this.content = (this.shadowRoot ?? this).querySelector("#content");
-    const multiselectEl = (this.shadowRoot ?? this).querySelector("#neuroconv-define-formats");
+    const list = (this.shadowRoot ?? this).querySelector("ul");
+    this.search.onSelect = (key, value) => {
+      console.log("Selected", key, value);
+      const li = document.createElement("li");
+      li.innerHTML = `${value.name.slice(0, -9)} - ${value.name}`;
+      list.appendChild(li);
+    }
+
     const base = `http://127.0.0.1:${port}`;
     fetch(`${base}/neuroconv`).then((res) => res.json()).then(json => {
-        multiselectEl.setAttribute("options", JSON.stringify(json))
+      this.search.options = Object.entries(json).map(([key, value]) => {
+        return {
+          label: value.name, 
+          keywords: [value.modality, value.technique],
+          value: value
+          // keywords: value.keywords
+        }
+      })
+      // this.search.options = json;
     });
   }
 
@@ -35,9 +52,9 @@ export class GuidedStructurePage extends Page {
         <h1 class="guided--text-sub-step">Define your Data Formats</h1>
       </div>
       <div class="guided--section">
-        <nwb-multiselect-form
-          id="neuroconv-define-formats"
-        ></nwb-multiselect-form>
+        <ul>
+        </ul>
+        ${this.search}
       </div>
   </div>
     `;

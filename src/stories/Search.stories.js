@@ -17,7 +17,7 @@ Default.args = {
         "extracellular electrophysiology",
         "voltage",
         "recording",
-        "Neuropixels",
+        "neuropixels",
     ]
     },
     {
