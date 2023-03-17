@@ -112,7 +112,7 @@
 
     <!-- Required inclusion of jQuery based on legacy SODA DOM manipulation strategy -->
     <script src="node_modules/jquery/dist/jquery.min.js"></script> <!-- Vite -->
-    <script> isElectron = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1; if (isElectron) window.$ = window.jQuery = require("jquery"); </script> <!-- Electron -->
+    <script>isElectron = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1; if (isElectron) window.$ = window.jQuery = require("jquery"); </script> <!-- Electron -->
 
     <script src="node_modules/cropperjs/dist/cropper.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -124,9 +124,18 @@
     <script src="https://jsuites.net/v4/jsuites.js"></script>
     <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
 
-    <script src="./dist/index.js"></script>
-    <script>
+    <!-- <script src="./dist/index.js"></script> -->
+    <!-- <script>
       require('./src/electron/index.js'); // Selectively load Electron-specific assets (still using Electron require syntax)
+    </script> -->
+    <script type="module" defer>
+      import { addReadyCallback } from "./src/loadHTML.js" // Load all HTML
+
+      addReadyCallback(async () => {
+        // await import ("./src/electron/dependents.js") // Selectively load Electron-specific assets (using ES6 import syntax)
+        if (isElectron) await import("./dist/index.js") // Load packaged frontend for Electron
+        else await import("./src/index.js") // Load dev frontend (if not in Electron context)
+      })
     </script>
 
     <script src="./assets/lotties.js" type="text/javascript"></script>

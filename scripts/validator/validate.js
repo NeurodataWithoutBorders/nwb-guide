@@ -1,5 +1,5 @@
 // Purpose: The front end logic for the Validate Dataset section
-const { electron = {} } = require("../../src/electron/index.js").default;
+const { electron = {} } = require("../../src/electron/index.js");
 const { ipcRenderer } = electron;
 
 const { handleAxiosValidationErrors } = require("./scripts/validator/axios-validator-utility.js");

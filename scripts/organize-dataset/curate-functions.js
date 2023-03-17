@@ -1,9 +1,11 @@
-const checkDiskSpace = require("check-disk-space").default;
 
-const globals = require("../globals.js");
+import checkDiskSpace from "check-disk-space";
+
+import globals from "../globals.js";
 const { parseJson, progressFilePath, lottie } = globals;
 
-const { fs, path } = require("../../src/electron/index.js").default;
+import dependencies from "../../src/electron/index.js";
+const { fs, path } = dependencies;
 
 var metadataFile = "";
 var jstreePreview = document.getElementById("div-dataset-tree-preview");
@@ -1294,6 +1296,7 @@ $(document).ready(function () {
 });
 
 const moveItems = async (ev, category) => {
+  const organizeDSglobalPath =  globals.organizeDSglobalPath;
   var filtered = getGlobalPath(organizeDSglobalPath);
   var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
   var selectedOriginalLocation = filtered[filtered.length - 1];
@@ -1550,6 +1553,7 @@ const moveItems = async (ev, category) => {
 };
 
 function moveItemsHelper(item, destination, category) {
+  const organizeDSglobalPath =  globals.organizeDSglobalPath;
   var filtered = getGlobalPath(organizeDSglobalPath);
   var myPath = getRecursivePath(filtered.slice(1), globals.datasetStructureJSONObj);
   var selectedNodeList = destination.split("/").slice(1);

@@ -1,6 +1,8 @@
-const { JSONStorage, app } = require('../../src/electron/index.js').default
 
-const globals = require('../globals.js');
+import dependencies from "../../src/electron/index.js";
+const { JSONStorage, app } = dependencies;
+
+import globals from '../globals.js'
 const { progressFilePath } = globals;
 
 // JSON object of all the tabs
@@ -478,7 +480,7 @@ const nextPrev = (n) => {
   // and delete ui preview-added manifest files
   if (x[currentTab].id === "high-level-folders-tab") {
     $("#items").empty();
-    $("#items").append(already_created_elem);
+    $("#items").append(globals.already_created_elem);
     getInFolder(".single-item", "#items", dataset_path, globals.datasetStructureJSONObj);
   }
   if (x[currentTab].id === "high-level-folders-tab" || x[currentTab].id === "metadata-files-tab") {
@@ -2712,7 +2714,7 @@ const populateOrganizeDatasetUI = (currentLocation, datasetFolder) => {
 
     //dont know here
     listItems(currentLocation, "#items");
-    getInFolder(".single-item", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
+    getInFolder(".single-item", "#items", globals.organizeDSglobalPath, globals.datasetStructureJSONObj);
     hideMenu("folder", menuFolder, menuHighLevelFolders, menuFile);
     hideMenu("high-level-folder", menuFolder, menuHighLevelFolders, menuFile);
   });
@@ -3025,7 +3027,7 @@ const updateOverallJSONStructure = (id) => {
     globals.datasetStructureJSONObj = newDatasetStructureJSONObj;
     //dont know here
     listItems(globals.datasetStructureJSONObj, "#items");
-    getInFolder(".single-item", "#items", organizeDSglobalPath, globals.datasetStructureJSONObj);
+    getInFolder(".single-item", "#items", globals.organizeDSglobalPath, globals.datasetStructureJSONObj);
   } else if (id === allParentStepsJSON["getting-started"]) {
     updateJSONStructureGettingStarted();
   } else if (id === allParentStepsJSON["metadata-files"]) {

@@ -1,7 +1,13 @@
-const { electron = {}, fs } = require("../../src/electron/index.js").default;
-const globals = require("../globals.js").default;
+
+
+// const { copyFile, readdir } = fs.promises;
+// const { ipcRenderer } = electron;
+
+import dependencies from "../../src/electron/index.js";
+const { fs } = dependencies;
+import globals from "../globals.js";
 const { copyFile, readdir } = fs.promises;
-const { ipcRenderer } = electron;
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 // opendropdown event listeners
 document.querySelectorAll(".manifest-change-current-account").forEach((element) => {

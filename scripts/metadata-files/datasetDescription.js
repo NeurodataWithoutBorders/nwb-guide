@@ -1,7 +1,9 @@
-const globals = require("../globals.js");
+
+import globals from "../globals.js";
 const { parseJson, airtableConfigPath, Tagify, tippy, createDragSort } = globals;
-const electron = require("../../src/electron/index.js").default.electron ?? {};
-const ipcRenderer = electron.ipcRenderer;
+import dependencies from "../../src/electron/index.js";
+
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 // opendropdown event listeners
 document.querySelectorAll(".dd-change-current-account").forEach((element) => {

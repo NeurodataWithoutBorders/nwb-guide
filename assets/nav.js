@@ -1,6 +1,9 @@
-const globals = require("../scripts/globals.js")
 
-const { guidedPrepareHomeScreen } = require("../scripts/guided-mode/guided-curate-dataset.js");
+
+import globals from "../scripts/globals.js";
+import { guidedPrepareHomeScreen } from "../scripts/guided-mode/guided-curate-dataset.js";
+
+
 
 // function to hide the sidebar and disable the sidebar expand button
 function forceActionSidebar(action) {
@@ -42,12 +45,11 @@ async function handleSectionTrigger(event) {
     //reset lazyloading values
     globals.resetLazyLoading();
     //Transition file explorer elements to freeform mode
-    scroll_box = document.querySelector("#organize-dataset-tab");
     $(".shared-folder-structure-element").appendTo($("#free-form-folder-structure-container"));
     freeFormItemsContainer.classList.add("freeform-file-explorer"); //add styling for free form mode
     freeFormButtons.classList.add("freeform-file-explorer-buttons");
-    organizeDSglobalPath = document.getElementById("input-global-path");
-    dataset_path = document.getElementById("input-global-path");
+    globals.organizeDSglobalPath = document.getElementById("input-global-path");
+    globals.dataset_path = document.getElementById("input-global-path");
     document.getElementById("nextBtn").disabled = boolNextButtonDisabled;
   }
 
@@ -135,10 +137,9 @@ async function handleSectionTrigger(event) {
     globals.guidedResetProgressVariables()
 
     //Transition file explorer elements to guided mode
-    organizeDSglobalPath = document.getElementById("guided-input-global-path");
-    organizeDSglobalPath.value = "";
-    dataset_path = document.getElementById("guided-input-global-path");
-    scroll_box = document.querySelector("#guided-body");
+    globals.organizeDSglobalPath = document.getElementById("guided-input-global-path");
+    globals.organizeDSglobalPath.value = "";
+    globals.dataset_path = document.getElementById("guided-input-global-path");
     itemsContainer.innerHTML = "";
     globals.resetLazyLoading();
     freeFormItemsContainer.classList.remove("freeform-file-explorer"); //add styling for free form mode
@@ -177,11 +178,6 @@ async function handleSectionTrigger(event) {
   boolNextButtonDisabled = document.getElementById("nextBtn").disabled;
 }
 
-function showMainContent() {
-  document.querySelector(".js-nav").classList.add("is-shown");
-  document.querySelector(".js-content").classList.add("is-shown");
-}
-
 function handleModalTrigger(event) {
   hideAllModals();
   const modalId = `${event.target.dataset.modal}-modal`;
@@ -193,7 +189,9 @@ function hideAllModals() {
   Array.prototype.forEach.call(modals, (modal) => {
     modal.classList.remove("is-shown");
   });
-  showMainContent();
+
+  const sidebar = document.querySelector("nwb-sidebar");
+  sidebar.showMainContent();
 }
 
 function hideAllSectionsAndDeselectButtons() {
@@ -207,8 +205,6 @@ function hideAllSectionsAndDeselectButtons() {
     button.classList.remove("is-selected");
   });
 }
-
-showMainContent();
 
 // Set of functions for the footer shortcuts between sections
 // only required for when switching between section where the menu needs to change

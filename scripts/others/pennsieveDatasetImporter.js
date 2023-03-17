@@ -1,5 +1,6 @@
-const { electron = {} } = require("../../src/electron/index.js").default;
-const { ipcRenderer } = electron;
+
+import dependencies from "../../src/electron/index.js";
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 // Tracks if bf_request_and_populate_dataset has has an error
 let importError = false;

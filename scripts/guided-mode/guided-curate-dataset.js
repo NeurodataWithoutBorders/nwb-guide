@@ -1,4 +1,6 @@
-const globals = require("../globals.js");
+
+import globals from "../globals.js";
+
 const {
   joinPath,
   parseJson,
@@ -12,13 +14,15 @@ const {
   guidedManifestFilePath
 } = globals;
 
-const { electron = {}, fs } = require("../../src/electron/index.js").default;
+import dependencies  from "../../src/electron/index.js";
+const { electron = {}, fs } = dependencies //require("../../src/electron/index.js");
 const { ipcRenderer, shell } = electron;
 
-const { notyf } = require("../others/renderer.js")
+import { notyf } from "../others/renderer.js";
 
 
-const { countCharacters, check_forbidden_characters_bf } = require("../manage-dataset/manage-dataset.js")
+import { check_forbidden_characters_bf, countCharacters } from "../manage-dataset/manage-dataset.js";
+
 
 const savePageChanges = async (pageBeingLeftID) => {
   const errorArray = [];
@@ -1063,7 +1067,7 @@ const guidedLockSideBar = () => {
   // return data-parent-tab-name for each .guided--parent-tab element
 };
 
-guidedUnLockSideBar = () => {
+const guidedUnLockSideBar = () => {
   const sidebar = document.getElementById("sidebarCollapse");
   const guidedModeSection = document.getElementById("guided_mode-section");
   const guidedDatsetTab = document.getElementById("guided_curate_dataset-tab");
@@ -1337,18 +1341,18 @@ const enableProgressButton = () => {
 };
 
 const disableElementById = (id) => {
-  elementToDisable = document.getElementById(id);
+  const elementToDisable = document.getElementById(id);
   elementToDisable.style.opacity = "0.5";
   elementToDisable.style.pointerEvents = "none";
 };
 const enableElementById = (id) => {
-  elementToEnable = document.getElementById(id);
+  const elementToEnable = document.getElementById(id);
   elementToEnable.style.opacity = "1";
   elementToEnable.style.pointerEvents = "auto";
 };
 const switchElementVisibility = (elementIdToHide, elementIdToShow) => {
-  elementToHide = document.getElementById(elementIdToHide);
-  elementToShow = document.getElementById(elementIdToShow);
+  const elementToHide = document.getElementById(elementIdToHide);
+  const elementToShow = document.getElementById(elementIdToShow);
   elementToHide.classList.add("hidden");
   elementToShow.classList.remove("hidden");
 };
@@ -1521,13 +1525,13 @@ const getAllProgressFileData = async (progressFiles) => {
   return Promise.all(
     progressFiles.map((progressFile) => {
       let progressFilePath = joinPath(guidedProgressFilePath, progressFile);
-      return readFileAsync(progressFilePath);
+      return readFileAsync(progressFilePath) ?? [];
     })
   );
 };
 const getProgressFileData = async (progressFile) => {
   let progressFilePath = joinPath(guidedProgressFilePath, progressFile + ".json");
-  return readFileAsync(progressFilePath);
+  return readFileAsync(progressFilePath) ?? {};
 };
 const deleteProgressCard = async (progressCardDeleteButton) => {
   const progressCard = progressCardDeleteButton.parentElement.parentElement;
@@ -2080,13 +2084,15 @@ const setActiveCapsule = (targetPageID) => {
   }
   targetCapsule.addClass("active");
 };
-setActiveProgressionTab = (targetPageID) => {
+
+const setActiveProgressionTab = (targetPageID) => {
   $(".guided--progression-tab").removeClass("selected-tab");
   let targetPageParentID = $(`#${targetPageID}`).parent().attr("id");
   let targetProgressionTabID = targetPageParentID.replace("parent-tab", "progression-tab");
   let targetProgressionTab = $(`#${targetProgressionTabID}`);
   targetProgressionTab.addClass("selected-tab");
 };
+
 const handlePageBranching = (selectedCardElement) => {
   //hide capsule containers for page branches that are not selected
   const capsuleContainerID = selectedCardElement
@@ -2134,7 +2140,7 @@ const guidedPrepareHomeScreen = async () => {
     "guided-div-dataset-cards-radio-buttons"
   );
 
-  const guidedSavedProgressFiles = await readDirAsync(guidedProgressFilePath);
+  const guidedSavedProgressFiles = await readDirAsync(guidedProgressFilePath).catch(e => []);
   //render progress resumption cards from progress file array on first page of guided mode
   if (guidedSavedProgressFiles.length != 0) {
     // $("#guided-continue-curation-header").text(
@@ -4495,7 +4501,7 @@ const guidedUploadStatusIcon = (elementID, status) => {
 };
 
 //dataset description (first page) functions
-guidedCreateSodaJSONObj = () => {
+const guidedCreateSodaJSONObj = () => {
   globals.sodaJSONObj = {};
 
   globals.sodaJSONObj["guided-options"] = {};
@@ -5182,6 +5188,7 @@ const updateFolderStructureUI = (pageDataObj) => {
     fileExplorer.classList.add("file-explorer-transition");
   }, 200);
 
+  const organizeDSglobalPath =  globals.organizeDSglobalPath;
   $("#guided-input-global-path").val(`My_dataset_folder/${pageDataObj.pathSuffix}`);
   var filtered = getGlobalPath(organizeDSglobalPath);
   organizeDSglobalPath.value = filtered.slice(0, filtered.length).join("/") + "/";
@@ -9206,15 +9213,15 @@ $(document).ready(async () => {
     //Hide all child containers of non-selected buttons
     notSelectedButton.each(function () {
       if ($(this).data("next-element")) {
-        nextQuestionID = $(this).data("next-element");
-        $(`#${nextQuestionID}`).addClass("hidden");
+        const id = $(this).data("next-element");
+        $(`#${id}`).addClass("hidden");
       }
     });
 
     //Display and scroll to selected element container if data-next-element exists
     if (selectedButton.data("next-element")) {
-      nextQuestionID = selectedButton.data("next-element");
-      nextQuestionElement = $(`#${nextQuestionID}`);
+      const nextQuestionID = selectedButton.data("next-element");
+      const nextQuestionElement = $(`#${nextQuestionID}`);
       nextQuestionElement.removeClass("hidden");
       //slow scroll to the next question
       //temp fix to prevent scrolling error
@@ -11440,7 +11447,7 @@ $(document).ready(async () => {
   //next button click handler
   $("#guided-next-button").on("click", async function () {
     //Get the ID of the current page to handle actions on page leave (next button pressed)
-    pageBeingLeftID = CURRENT_PAGE.attr("id");
+    const pageBeingLeftID = CURRENT_PAGE.attr("id");
     //remove blue pulse
     $(this).removeClass("pulse-blue");
     //add a bootstrap loader to the next button
@@ -11509,7 +11516,7 @@ $(document).ready(async () => {
 
   //back button click handler
   $("#guided-back-button").on("click", () => {
-    pageBeingLeftID = CURRENT_PAGE.attr("id");
+    const pageBeingLeftID = CURRENT_PAGE.attr("id");
 
     if (pageBeingLeftID === "guided-prepare-helpers-tab") {
       //Hide dataset name and subtitle parent tab
@@ -12283,6 +12290,7 @@ $(document).ready(async () => {
 
   /// back button Curate
   $("#guided-button-back").on("click", function () {
+    const organizeDSglobalPath =  globals.organizeDSglobalPath;
     var slashCount = organizeDSglobalPath.value.trim().split("/").length - 1;
     if (slashCount !== 1) {
       var filtered = getGlobalPath(organizeDSglobalPath);
@@ -12297,7 +12305,7 @@ $(document).ready(async () => {
       }
       // construct UI with files and folders
       $("#items").empty();
-      already_created_elem = [];
+      globals.already_created_elem = [];
       let items = loadFileFolder(myPath); //array -
       let total_item_count = items[1].length + items[0].length;
       //we have some items to display
@@ -12309,6 +12317,7 @@ $(document).ready(async () => {
   });
   $("#guided-new-folder").on("click", () => {
     event.preventDefault();
+    const organizeDSglobalPath =  globals.organizeDSglobalPath;
     var slashCount = organizeDSglobalPath.value.trim().split("/").length - 1;
     if (slashCount !== 1) {
       var newFolderName = "New Folder";
@@ -12821,11 +12830,9 @@ const guidedSaveParticipantInformation = () => {
 };
 
 
-module.exports = {
+export {
   guidedPrepareHomeScreen
 }
-
-
 
 // GLOBALS TO KEEP THE SAME HTML
 window.validateInput = validateInput
