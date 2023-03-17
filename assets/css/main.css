@@ -1620,7 +1620,7 @@ details[open] > summary::before {
 
 .overview-column {
   display: flex;
-  margin-right: 15px;
+  margin: 15px;
   border: solid;
   border-color: #f2f2f2;
   height: 95% !important;
@@ -1642,9 +1642,12 @@ details[open] > summary::before {
 .getting-started-overview {
   padding-left: 0 !important;
   padding-right: 0 !important;
-  display: grid;
-  grid-template-rows: 14% 68% 15% 3%;
-  align-items: center;
+  height: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  /* display: grid;
+  grid-template-rows: 68% 14% 15%; */
 }
 
 .getting-started-header {
@@ -1678,7 +1681,7 @@ details[open] > summary::before {
 .overview-card-layout {
   display: grid;
   color: black;
-  padding-left: 1rem;
+  padding-left: 2rem;
   padding-right: 2rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   width: 100%;
@@ -1695,7 +1698,7 @@ details[open] > summary::before {
   display: flex;
   justify-content: center;
   height: 50% !important;
-  margin-top: 0rem;
+  margin-top: 25px;
 }
 
 .about-title {
@@ -1813,13 +1816,13 @@ details[open] > summary::before {
 }
 
 @media (min-height: 900px) {
-  .getting-started-header {
+  /* .getting-started-header {
     margin-top: 8rem;
   }
 
   .getting-started-buttons {
     margin-top: -7rem;
-  }
+  } */
 
   /* .getting-started-overview {
     grid-template-rows: 12% 65% 10% 21%;

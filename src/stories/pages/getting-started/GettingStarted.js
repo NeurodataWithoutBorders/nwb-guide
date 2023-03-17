@@ -86,20 +86,9 @@ export class GettingStartedPage extends Page {
     id="getting_started-section"
     class="getting-started-overview section js-section u-category-windows is-shown fullShown"
   >
-    <div class="getting-started-header lg:mt-8">
-      <div class="front-page_logo">
-        <img
-          id="frontpage-logo"
-          src="assets/img/logo-neuroconv.png"
-          width="120px"
-          height="100px"
-          class="neuroconv-welcome"
-        />
-      </div>
-      <p class="header-text">
-        Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br />
-      </p>
-    </div>
+    <p class="header-text">
+      Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br />
+    </p>
 
     <div class="overview-card-layout grid h-auto w-full grid-cols-3 gap-6">
       <div id="overview-column-1" class="overview-column">

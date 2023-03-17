@@ -98,7 +98,6 @@ export class NavigationSidebar extends LitElement {
 
     return html`
 <nav id="guided-nav" class="guided--nav">
-    <img class="nav-center-logo-image" src="assets/img/logo-neuroconv.png" />
     <h1 class="guided--text-sub-step mb-0 mt-0">Guided Mode</h1>
     <p
       class="guided--help-text mb-0 mt-md"
