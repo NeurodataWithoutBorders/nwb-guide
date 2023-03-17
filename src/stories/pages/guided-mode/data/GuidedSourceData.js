@@ -70,6 +70,8 @@ export class GuidedSourceDataPage extends Page {
           <div style="margin-bottom: 25px;">
             <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>
             ${Object.entries(subSchema.properties ?? {}).map(([propertyName, property]) => {
+              const isRequired = subSchema.required.includes(propertyName)
+              if (!isRequired) return ''
               return html`
               <div>
                 <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${subSchema.required.includes(propertyName) ? html`<span style="color: red">*</span>` : ``}</h4>
