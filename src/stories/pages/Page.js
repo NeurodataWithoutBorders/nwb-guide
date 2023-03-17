@@ -29,6 +29,16 @@ export class Page extends LitElement {
     return (this.shadowRoot ?? this).querySelector(input);
   }
 
+  onSet = () => {} // User-defined function
+
+  set = (info) => {
+    if (info){
+      Object.assign(this.info, info)
+      this.onSet()
+      this.requestUpdate()
+    }
+  }
+
   onTransition = () => {} // User-defined function
 
 //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.

@@ -2,6 +2,13 @@
 
 import { html } from 'lit';
 import { Page } from '../../Page.js';
+import electronImports from '../../../../electron/index'
+const { dialog } = electronImports.remote ?? {};
+
+import globals from '../../../../../scripts/globals.js';
+const { port } = globals;
+
+const base = `http://127.0.0.1:${port}`;
 
 export class GuidedSourceDataPage extends Page {
 
@@ -9,8 +16,41 @@ export class GuidedSourceDataPage extends Page {
     super(...args)
   }
 
+  result = {}
+
+  #useElectronDialog = async (type) => {
+    const result = await dialog.showOpenDialog({ properties: [type === 'file' ? 'openFile' : 'openDirectory'] });
+    if (result.canceled) throw new Error('No file selected')
+    return result
+  }
+
+  footer = {
+    onNext: async () => {
+      // TODO: Insert validation here...
+      const valid = true
+      if (!valid) throw new Error('Invalid input')
+
+      // TODO: Create the endpoint to handle this
+      const metadata = this.result 
+      // const metadata = await fetch(`${base}/neuroconv/metadata`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      //   body: JSON.stringify(this.result)
+      // }).then((res) => res.json())
+
+      this.onTransition(1, { metadata })
+    }
+  }
 
   render() {
+
+    const entries = Object.entries(this.info.schema?.properties ?? {})
+
+    this.result = {}
+    entries.forEach(([name]) => this.result[name] = {}) // Register interfaces
+
     return html`
   <div
     id="guided-mode-starting-container"
@@ -21,7 +61,40 @@ export class GuidedSourceDataPage extends Page {
         <h1 class="guided--text-sub-step">Source Data</h1>
       </div>
       <div class="guided--section">
-       Coming soon...
+        <div>
+        <h2>${this.info.schema?.title}</h2>
+        <p>${this.info.schema?.description}</p>
+        ${
+          entries.length === 0 ? html`<p>No interfaces selected</p>` : entries.map(([name, subSchema]) => {
+          return html`
+          <div style="margin-bottom: 25px;">
+            <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>
+            ${Object.entries(subSchema.properties ?? {}).map(([propertyName, property]) => {
+              return html`
+              <div>
+                <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${subSchema.required.includes(propertyName) ? html`<span style="color: red">*</span>` : ``}</h4>
+                ${property.format ? (dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
+
+                    // NOTE: We can get the file, but we can't know the path unless we use Electron
+                    // const [fileHandle] = await window.showOpenFilePicker();
+                    // const file = await fileHandle.getFile();
+                    // console.log(fileHandle, file)
+                    // const contents = await file.text();
+                    // console.log(contents)
+                    const button = ev.target
+                    const file = await this.#useElectronDialog(property.format)
+                    const path = file.filePaths[0]
+                    this.result[name][propertyName] = path
+                    button.nextSibling.innerText = path
+
+                }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small></small>` : html`<p>Cannot get absolute file path on web distribution</p>`) : html`<p>${property.type} type not supported.</p>`}
+              </div>
+              `
+            })}
+          </div>
+          `})
+        }
+        </div>
       </div>
   </div>
     `;

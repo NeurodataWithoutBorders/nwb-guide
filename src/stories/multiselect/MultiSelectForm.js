@@ -74,6 +74,8 @@ export class MultiSelectForm extends LitElement {
     if (changedProperties === 'options') this.requestUpdate()
   }
 
+  selected = {}
+
 
 //   NOTE: We can move these into their own components in the future
   async updated(){
@@ -133,6 +135,9 @@ export class MultiSelectForm extends LitElement {
       input.name = name;
       div.appendChild(input);
       const label = document.createElement("label");
+      input.onchange = (ev) => {
+        this.selected[name] = input.checked
+      }
       label.for = name;
       label.textContent = name;
       div.appendChild(label);
