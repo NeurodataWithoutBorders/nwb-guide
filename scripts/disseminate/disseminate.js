@@ -8,8 +8,11 @@ Note: Some frontend elements of the workflow are in the renderer.js file as well
 ******************************************************
 ******************************************************
 */
-const electron = require("../../src/electron/index.js").default.electron ?? {};
-const ipcRenderer = electron.ipcRenderer;
+
+import dependencies from "../../src/electron/index.js";
+const ipcRenderer = dependencies.electron?.ipcRenderer;
+
+// const ipcRenderer = electron.ipcRenderer;
 
 // Main functions
 async function disseminatePublish() {

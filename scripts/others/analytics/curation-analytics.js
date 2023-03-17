@@ -4,11 +4,11 @@
 
 */
 
-const globals = require("../../globals.js");
-const { electron = {} } = require("../../../src/electron/index.js").default;
-const { ipcRenderer } = electron;
+import globals from "../../globals.js";
+import dependencies from "../../../src/electron/index.js";
+const { ipcRenderer } = dependencies?.electron ?? {};
 
-const { determineDatasetLocation } = require("./analytics-utils");
+import { determineDatasetLocation } from "./analytics-utils.js";
 
 const BUCKET_SIZE = 500;
 
@@ -408,7 +408,7 @@ const logCurationSuccessToAnalytics = async (
   }
 };
 
-module.exports = {
+export {
   logCurationErrorsToAnalytics,
   logCurationSuccessToAnalytics,
 };

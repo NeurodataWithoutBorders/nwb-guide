@@ -1,13 +1,13 @@
 // Purpose: Will become preload.js in the future. For now it is a place to put global variables/functions that are defined in javascript files
 //          needed by the renderer process in order to run.
 
-const electron = require("./src/electron/index.js").default.electron ?? {};
-const ipcRenderer = electron.ipcRenderer;
+import dependencies from "./src/electron/index.js";
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 const SODA_SPARC_API_KEY = "SODA-Pennsieve";
 
 // Contributors table for the dataset description editing page
-const currentConTable = document.getElementById("table-current-contributors");
+export const currentConTable = document.getElementById("table-current-contributors");
 
 // function to show dataset or account Confirm buttons
 const showHideDropdownButtons = (category, action) => {
@@ -816,7 +816,3 @@ const openDropdownPrompt = async (ev, dropdown, show_timer = true) => {
     }, 10);
   }
 };
-
-module.exports = {
-  currentConTable
-}

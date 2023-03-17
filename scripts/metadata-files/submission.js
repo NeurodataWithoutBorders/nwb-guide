@@ -1,10 +1,11 @@
 /*
 This file contains all of the functions related to the submission.xlsx file
 */
-const globals = require("../globals.js");
+import globals from "../globals.js";
+import dependencies from "../../src/electron/index.js";
+
 const { parseJson, lottie } = globals;
-const { electron = {} } = require("../../src/electron/index.js").default;
-const { ipcRenderer } = electron;
+const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 // event listeners for opendropdown prompt
 document.querySelectorAll(".submission-change-current-account").forEach((element) => {

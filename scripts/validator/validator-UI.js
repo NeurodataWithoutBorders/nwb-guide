@@ -4,7 +4,7 @@
 *******************************************************************************************************************
 */
 
-const { electron = {} } = require("../../src/electron/index.js").default;
+const { electron = {} } = require("../../src/electron/index.js");
 const { ipcRenderer } = electron;
 
 // Presentation logic for transitioning from question one to question two

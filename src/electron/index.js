@@ -1,13 +1,13 @@
-const isElectron = require("./check.js").isElectron;
 
-let electronExports = {}
+import isElectron from './check.js'
+
+// NOTE: This file scopes all use of the require import syntax beneath the isElectron conditional statement.
+let electronExports = {
+    isElectron,
+    port: 4242  // Assume port number
+}
 if (isElectron) {
     try {
-        // Import App Scripts
-        // require("./dist/index.js"), // Target the build output
-        require("../../assets/imports"); // Imports html files into app
-        require("../../assets/normalize-shortcuts"); // For normalizing shortcuts across OS
-
         // Import Electron API
         const electron = electronExports.electron = require("electron")  // ipcRenderer, remote, shell, etc.
         electronExports.fs = require("fs-extra")  // File System
@@ -43,9 +43,12 @@ if (isElectron) {
         const { JSONStorage } = require("node-localstorage");
         electronExports.JSONStorage = JSONStorage
 
+        electronExports.Airtable = require('airtable')
+
+
     } catch (e) {
         console.error('Electron API access failed —', e)
     }
 } else console.warn('Electron API is blocked for web builds')
 
-exports.default = electronExports
+export default electronExports

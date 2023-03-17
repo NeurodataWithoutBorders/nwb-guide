@@ -1,7 +1,8 @@
-const globals = require("../../globals.js");
+
+import globals from "../../globals.js";
 
 // determine if we are working with a Local, Saved, or Pennsieve dataset in the current Curation flow
-function determineDatasetLocation() {
+export function determineDatasetLocation() {
   let location = "";
 
   if ("starting-point" in globals.sodaJSONObj) {
@@ -43,5 +44,3 @@ function determineDatasetLocation() {
 
   return location;
 }
-
-module.exports = { determineDatasetLocation };
