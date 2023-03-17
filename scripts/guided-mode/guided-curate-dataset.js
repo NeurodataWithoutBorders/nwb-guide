@@ -8,6 +8,7 @@ const {
   Tagify,
   tippy,
   lottie,
+  notyf,
   createDragSort,
   guidedResetProgressVariables,
   guidedProgressFilePath,
@@ -17,9 +18,6 @@ const {
 import dependencies  from "../../src/electron/index.js";
 const { electron = {}, fs } = dependencies //require("../../src/electron/index.js");
 const { ipcRenderer, shell } = electron;
-
-import { notyf } from "../others/renderer.js";
-
 
 import { check_forbidden_characters_bf, countCharacters } from "../manage-dataset/manage-dataset.js";
 

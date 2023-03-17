@@ -12,7 +12,6 @@ import globals from '../globals.js'
 
 import  { check_forbidden_characters_bf } from '../manage-dataset/manage-dataset.js'
 
-import { Notyf } from 'notyf'
 import Cropper from 'cropperjs'
 import Swal from 'sweetalert2'
 
@@ -52,7 +51,6 @@ import DatePicker from 'tui-date-picker'
 
 
 import { currentConTable } from '../../preload.js'
-import { openLink } from '../../src/links.js';
 
 const {
   parseJson,
@@ -61,7 +59,8 @@ const {
   metadataPath,
   Tagify,
   lottie,
-  createDragSort
+  createDragSort,
+  notyf
 } = globals;
 
 // Set the sidebar subtitle to the current app version
@@ -149,123 +148,6 @@ client = axios.create({
   timeout: 300000,
 });
 
-const notyf = new Notyf({
-  position: { x: "right", y: "bottom" },
-  dismissible: true,
-  ripple: false,
-  types: [
-    {
-      type: "checking_server_is_live",
-      background: "grey",
-      icon: {
-        className: "fas fa-wifi",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 1000,
-    },
-    {
-      type: "checking_server_api_version",
-      background: "grey",
-      icon: {
-        className: "fas fa-wifi",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 1000,
-    },
-    {
-      type: "loading_internet",
-      background: "grey",
-      icon: {
-        className: "fas fa-wifi",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 10000,
-    },
-    {
-      type: "ps_agent",
-      background: "grey",
-      icon: {
-        className: "fas fa-cogs",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 5000,
-    },
-    {
-      type: "app_update",
-      background: "grey",
-      icon: {
-        className: "fas fa-sync-alt",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 0,
-    },
-    {
-      type: "api_key_search",
-      background: "grey",
-      icon: {
-        className: "fas fa-users-cog",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 0,
-    },
-    {
-      type: "success",
-      background: "#13716D",
-      icon: {
-        className: "fas fa-check-circle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 800,
-    },
-    {
-      type: "final",
-      background: "#13716D",
-      icon: {
-        className: "fas fa-check-circle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 3000,
-    },
-    {
-      type: "warning",
-      background: "#fa8c16",
-      icon: {
-        className: "fas fa-exclamation-triangle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 3000,
-    },
-    {
-      type: "app_update_warning",
-      background: "#fa8c16",
-      icon: {
-        className: "fas fa-tools",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 0,
-    },
-    {
-      type: "error",
-      background: "#B80D49",
-      icon: {
-        className: "fas fa-times-circle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 3000,
-    },
-  ],
-});
 
 let connected_to_internet = false;
 let update_available_notification = "";
@@ -8653,12 +8535,5 @@ globals.tippy("#datasetPathDisplay", {
   theme: "soda",
   maxWidth: "100%",
 });
-
-
-// Expose variables to other files
-export {
-  notyf
-}
-
 
 window.gatherLogs = gatherLogs;

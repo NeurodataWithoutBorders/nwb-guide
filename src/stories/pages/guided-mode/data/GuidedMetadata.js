@@ -12,7 +12,8 @@ export class GuidedMetadataPage extends Page {
 
   render() {
     
-    const metadata =  Object.entries(this.info.metadata)
+    const recieved = this.info.metadata
+    const metadata =  recieved ? Object.entries(recieved) : []
     return html`
   <div
     id="guided-mode-starting-container"

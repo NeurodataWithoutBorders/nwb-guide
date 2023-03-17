@@ -6,7 +6,7 @@ import electronImports from '../../../../electron/index'
 const { dialog } = electronImports.remote ?? {};
 
 import globals from '../../../../../scripts/globals.js';
-const { port } = globals;
+const { port, notyf } = globals;
 
 const base = `http://127.0.0.1:${port}`;
 
@@ -31,14 +31,21 @@ export class GuidedSourceDataPage extends Page {
       if (!valid) throw new Error('Invalid input')
 
       // TODO: Create the endpoint to handle this
-      const metadata = this.result 
-      // const metadata = await fetch(`${base}/neuroconv/metadata`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify(this.result)
-      // }).then((res) => res.json())
+      // const metadata = this.result 
+      const metadata = await fetch(`${base}/neuroconv/metadata`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.result)
+      }).then((res) => res.json())
+
+      if (metadata.message) {
+        const message = "Failed to get metadata with current source data. Please try again."
+        notyf.open({
+          type: "error",
+          message,
+        });
+        throw new Error(`Failed to get metadata for source data provided: ${metadata.message}`)
+      }
 
       this.onTransition(1, { metadata })
     }

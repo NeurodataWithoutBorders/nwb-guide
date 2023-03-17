@@ -28,13 +28,28 @@ def get_all_interface_info() -> dict:
     return interface_info
 
 
+# Combine Multiple Interfaces
+def get_custom_converter(interface_class_names: List[str]) -> NWBConverter:
+    class CustomNWBConverter(NWBConverter):
+        data_interface_classes = {interface: getattr(datainterfaces, interface) for interface in interface_class_names}
+
+    return CustomNWBConverter
+
+
 def get_combined_schema(interface_class_names: List[str]) -> dict:
     """
     Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
     """
-
-    # Combine Multiple Interfaces
-    class CustomNWBConverter(NWBConverter):
-        data_interface_classes = {interface: getattr(datainterfaces, interface) for interface in interface_class_names}
-
+    CustomNWBConverter = get_custom_converter(interface_class_names)
     return CustomNWBConverter.get_source_schema()
+
+
+def get_metadata(source_data):
+    """
+    Function used to get metadata from a CustomNWBConverter
+    """
+
+    interface_class_names = list(source_data) # NOTE: We currently assume that the keys of the properties dict are the interface names
+    CustomNWBConverter = get_custom_converter(interface_class_names)
+    converter = CustomNWBConverter(source_data)
+    return converter.get_metadata_schema()

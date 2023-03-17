@@ -3,13 +3,10 @@ import dependencies from '../../src/electron/index.js'
 const { fs, app, path, log } = dependencies
 
 import globals from "../globals.js"
-const { lottie } = globals
+const { lottie, notyf } = globals
 // const {
 //   lottie,
 
-
-
-import { notyf } from "../others/renderer.js"
 
 const ipcRenderer = dependencies.electron?.ipcRenderer;
 
