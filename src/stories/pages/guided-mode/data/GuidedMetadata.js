@@ -11,7 +11,7 @@ export class GuidedMetadataPage extends Page {
 
 
   render() {
-    
+
     const metadata =  Object.entries(this.info.metadata)
     return html`
   <div
