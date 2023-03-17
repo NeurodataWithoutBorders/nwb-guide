@@ -40,7 +40,7 @@ export class GuidedStructurePage extends Page {
     fetch(`${base}/neuroconv`).then((res) => res.json()).then(json => {
       this.search.options = Object.entries(json).map(([key, value]) => {
         return {
-          label: value.name, 
+          label: value.name,
           keywords: [value.modality, value.technique],
           value: value
           // keywords: value.keywords

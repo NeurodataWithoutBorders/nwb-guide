@@ -110,13 +110,13 @@ export class Search extends LitElement {
             option.classList.add('hidden')
           }
         })
-        
+
       }}></input>
     </div>
     <ul>
      <slot>
-      ${this.options ? this.options.map(option => html`<li 
-      class="option hidden" 
+      ${this.options ? this.options.map(option => html`<li
+      class="option hidden"
       data-keywords="${JSON.stringify(option.keywords)}"
       @click=${() => this.#onSelect(option.label, option.value ?? option)}
       >
