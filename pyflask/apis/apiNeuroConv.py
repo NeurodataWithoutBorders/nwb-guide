@@ -14,7 +14,6 @@ parser.add_argument("interfaces", type=str, action="split", help="Interfaces can
 class AllInterfaces(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
-
         try:
             return get_all_interface_info()
         except Exception as e:
@@ -27,7 +26,6 @@ class AllInterfaces(Resource):
 class Schema(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self, interface):
-
         try:
             return get_combined_schema([interface])
         except Exception as e:

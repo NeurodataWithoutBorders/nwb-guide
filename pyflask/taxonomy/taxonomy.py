@@ -1,5 +1,6 @@
 from Bio import Entrez
 
+
 # use Entrez library to load the scientific name for a species
 def load_taxonomy_species(animalList):
     animalDict = {}

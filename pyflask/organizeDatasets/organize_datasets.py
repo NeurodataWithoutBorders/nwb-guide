@@ -71,7 +71,6 @@ def TZLOCAL():
 ## these subsequent CheckLeafValue and traverseForLeafNodes functions check for the validity of file paths,
 ## and folder and file size
 def checkLeafValue(leafName, leafNodeValue):
-
     error, c = "", 0
     total_dataset_size = 1
     curatestatus = ""
@@ -103,12 +102,10 @@ def checkLeafValue(leafName, leafNodeValue):
 
 
 def traverseForLeafNodes(jsonStructure):
-
     total_dataset_size = 1
 
     for key in jsonStructure:
         if isinstance(jsonStructure[key], list):
-
             returnedOutput = checkLeafValue(key, jsonStructure[key])
 
             # returnedOutput = [True, total_dataset_size-1]
@@ -116,7 +113,6 @@ def traverseForLeafNodes(jsonStructure):
                 total_dataset_size += returnedOutput[1]
 
         else:
-
             if len(jsonStructure[key]) == 0:
                 returnedOutput = checkLeafValue(key, jsonStructure[key])
 
@@ -510,9 +506,7 @@ def create_dataset(recursivePath, jsonStructure, listallfiles):
     global curateprogress
 
     for key in jsonStructure:
-
         if isinstance(jsonStructure[key], dict):
-
             if not exists(join(recursivePath, key)):
                 mkdir(join(recursivePath, key))
 
@@ -521,7 +515,6 @@ def create_dataset(recursivePath, jsonStructure, listallfiles):
             create_dataset(outputpath, jsonStructure[key], listallfiles)
 
         elif isinstance(jsonStructure[key], list):
-
             outputpath = join(recursivePath, key)
 
             createFiles(jsonStructure, key, outputpath, listallfiles)
@@ -860,7 +853,6 @@ def import_pennsieve_dataset(soda_json_structure, requested_sparc_only=True):
             if item_id[2:9] == "package":
                 # if it is a file name check if there are additional manifest information to attach to files
                 if item_name[0:8] != "manifest":  # manifest files are not being included json structure
-
                     # verify file name first
                     if "extension" not in children_content:
                         item_name = verify_file_name(item_name, "")
