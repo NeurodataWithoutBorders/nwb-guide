@@ -9,7 +9,7 @@ export class GuidedSubjectsPage extends Page {
     super(...args)
   }
 
-  
+
   render() {
     return html`
   <div

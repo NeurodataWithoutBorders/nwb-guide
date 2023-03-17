@@ -114,12 +114,12 @@ export class Main extends LitElement {
         }
       }
     }
-    
+
     const headerEl = header ? new GuidedHeader(header) : ''
 
     const capsuleEl = new GuidedCapsules(capsules)
     const footerEl = footer ? new GuidedFooter(footer) : ''
-      
+
     return html`
       ${headerEl}
       <main id="content" class="js-content">

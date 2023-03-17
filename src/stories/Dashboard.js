@@ -75,7 +75,7 @@ export class Dashboard extends LitElement {
     // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.#pagesById[info.page.id] // Get info from a direct page
 
     if (this.#active === page) return // Prevent rerendering the same page
-    
+
     if (this.#active?.info?.base !== info.base) this.reset() // Reset state if base page changed
 
     // Update Active Page
@@ -102,7 +102,7 @@ export class Dashboard extends LitElement {
 
 
   #sectionStates = {}
-  
+
   #getSections = (pages = {}) => {
     Object.entries(pages).forEach(([id, page]) => {
 
@@ -146,7 +146,7 @@ export class Dashboard extends LitElement {
         if (sign === 1) return this.setMain(info.next)
         else if (sign === -1) return this.setMain(info.previous ?? info.parent) // Default to back in time
       }
-      
+
       if (transition in this.pages) this.sidebar.select(transition)
       else this.setMain(this.#pagesById[transition])
     }
@@ -164,7 +164,7 @@ export class Dashboard extends LitElement {
 
       // NOTE: This is not true for nested pages with more info...
       if (page instanceof HTMLElement) acc[id] = page
-      
+
       if (pages) {
         const pagesArr = Object.values(pages)
 

@@ -22,7 +22,7 @@ export class GuidedStructurePage extends Page {
         multiselectEl.setAttribute("options", JSON.stringify(json))
     });
   }
-  
+
   render() {
     return html`
   <div

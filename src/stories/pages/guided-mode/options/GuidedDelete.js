@@ -9,7 +9,7 @@ export class GuidedDeleteFilesPage extends Page {
     super(...args)
   }
 
-  
+
   render() {
     return html`
   <div

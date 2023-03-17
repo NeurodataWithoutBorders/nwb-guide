@@ -9,7 +9,7 @@ export class GuidedConversionTypePage extends Page {
     super(...args)
   }
 
-  
+
   render() {
     return html`
   <div

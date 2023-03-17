@@ -18,7 +18,7 @@ export class GuidedCapsules extends LitElement {
             selected: { type: Number, reflect: true },
         };
     }
-    
+
     attributeChangedCallback(...args) {
         const attrs = ['n', 'selected']
         super.attributeChangedCallback(...args)

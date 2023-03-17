@@ -9,7 +9,7 @@ export class GuidedSourceDataPage extends Page {
     super(...args)
   }
 
-  
+
   render() {
     return html`
   <div

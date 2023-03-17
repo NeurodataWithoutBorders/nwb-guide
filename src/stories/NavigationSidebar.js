@@ -123,7 +123,7 @@ export class NavigationSidebar extends LitElement {
             <i class="fas fa-chevron-right"></i>
           </div>
           ${Object.entries(info.pages).map(([id, state]) => {
-            
+
             return html`<div
               data-section="${sectionName}"
               class="
