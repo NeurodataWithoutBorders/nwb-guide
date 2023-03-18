@@ -137,7 +137,7 @@ export class MultiSelectForm extends LitElement {
       const label = document.createElement("label");
 
       if (this.selected[name]) input.checked = true;
-      
+
       input.onchange = (ev) => {
         this.selected[name] = input.checked
       }

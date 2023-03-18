@@ -31,7 +31,7 @@ export const save = (page) => {
     //Destination: HOMEDIR/SODA/Guided-Progress
     globalState["last-modified"] = new Date();
     globalState["page-before-exit"] = page.info.id;
-  
+
     try {
       //create Guided-Progress folder if one does not exist
       fs.mkdirSync(guidedProgressFilePath, { recursive: true });
@@ -41,7 +41,7 @@ export const save = (page) => {
     }
 
     var guidedFilePath = joinPath(guidedProgressFilePath, guidedProgressFileName + ".json");
-  
+
     fs?.writeFileSync(guidedFilePath, JSON.stringify(globalState, null, 2));
   };
 
@@ -90,11 +90,11 @@ export const save = (page) => {
     let progressFilePath = joinPath(guidedProgressFilePath, progressFile + ".json");
     return readFileAsync(progressFilePath);
   };
-  
+
   export const deleteProgressCard = async (progressCardDeleteButton) => {
     const progressCard = progressCardDeleteButton.parentElement.parentElement;
     const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent;
-  
+
     const result = await Swal.fire({
       title: `Are you sure you would like to delete SODA progress made on the dataset: ${progressCardNameToDelete}?`,
       text: "Your progress file will be deleted permanently, and all existing progress will be lost.",
@@ -113,12 +113,12 @@ export const save = (page) => {
         guidedProgressFilePath,
         progressCardNameToDelete + ".json"
       );
-  
-  
+
+
       //delete the progress file
       if (fs) fs.unlinkSync(progressFilePathToDelete, (err) => console.log(err));
       else console.warn(`Cannot delete the progress file`)
-  
+
       //remove the progress card from the DOM
       progressCard.remove();
     }

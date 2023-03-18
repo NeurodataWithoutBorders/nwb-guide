@@ -24,7 +24,7 @@ export class GuidedHomePage extends Page {
         guidedRadioButton.classList.remove("selected");
         guidedRadioButton.classList.remove("not-selected");
         guidedRadioButton.classList.add("basic");
-    
+
         //get the data-next-element attribute
         const elementButtonControls = guidedRadioButton.getAttribute("data-next-element");
         if (elementButtonControls) {
@@ -42,7 +42,7 @@ export class GuidedHomePage extends Page {
     progressFileJSONdata.sort((a, b) => {
       return new Date(b["last-modified"]) - new Date(a["last-modified"]);
     });
-  
+
     //sort progressFileJSONdata into two rows one with property "previous-guided-upload-dataset-name"
     //and one without property "previous-guided-upload-dataset-name"
     const progressDataAlreadyUploadedToPennsieve = progressFileJSONdata.filter(
@@ -77,7 +77,7 @@ export class GuidedHomePage extends Page {
         <b>Click "Datasets in progress" to view local datasets in progress.</b>
       </p>
     `
-  
+
     //Add the progress cards that have not yet been uploaded to Pennsieve
     //to their container (datasets that do not have the globals.sodaJSONObj["previous-guided-upload-dataset-name"] property)
     const resumeList = htmlBase.querySelector("#guided-div-resume-progress-cards")
@@ -106,7 +106,7 @@ export class GuidedHomePage extends Page {
   };
 
   #onRadioClick = (selectedButton, notSelectedButton) => {
-  
+
       notSelectedButton.forEach(button => {
         button.classList.add("selected");
         button.classList.add("not-selected");
@@ -116,17 +116,17 @@ export class GuidedHomePage extends Page {
       //If button has prevent-radio-handler data attribute, other buttons, will be deselected
       //but all other radio button functions will be halted
       if (selectedButton.getAttribute("data-prevent-radio-handler") === true) return;
-  
+
       selectedButton.classList.remove("not-selected");
       selectedButton.classList.remove("basic");
       selectedButton.classList.add("selected");
-  
+
       //Hide all child containers of non-selected buttons
       notSelectedButton.forEach(button => {
         const id = button.getAttribute("data-next-element")
         if (id) (this.shadowRoot ?? this).querySelector(`#${id}`).classList.add("hidden");
       })
-  
+
       //Display and scroll to selected element container if data-next-element exists
       const nextQuestionID = selectedButton.getAttribute("data-next-element")
       if (nextQuestionID) {
@@ -167,7 +167,7 @@ export class GuidedHomePage extends Page {
       }
     }
 
-    this.info.globalState = datasetResumeJsonObj  
+    this.info.globalState = datasetResumeJsonObj
 
     //Return the user to the last page they exited on
     let pageToReturnTo = this.info.globalState["page-before-exit"];

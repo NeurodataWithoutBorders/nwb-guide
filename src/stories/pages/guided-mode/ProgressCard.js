@@ -9,7 +9,7 @@ export class ProgressCard extends LitElement {
             info: {type: Object}
         }
     }
-    
+
     constructor(info){
         super()
         this.info = info
@@ -27,7 +27,7 @@ export class ProgressCard extends LitElement {
 
     render(){
         let progressFileImage = this.info["banner-image-path"] || "";
-  
+
         if (progressFileImage === "") {
           progressFileImage = html`
             <img
@@ -61,11 +61,11 @@ export class ProgressCard extends LitElement {
         const savedUploadDataProgress =
         this.info["previously-uploaded-data"] &&
           Object.keys(this.info["previously-uploaded-data"]).length > 0;
-      
+
         return html`
           <div class="guided--dataset-card">
             ${progressFileImage /* banner image */}
-      
+
             <div class="guided--dataset-card-body">
               <div class="guided--dataset-card-row">
                 <h1

@@ -9,6 +9,7 @@ api = get_namespace(NamespaceEnum.NEUROCONV)
 parser = reqparse.RequestParser()
 parser.add_argument("interfaces", type=str, action="split", help="Interfaces cannot be converted")
 
+
 @api.route("/")
 class AllInterfaces(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -46,6 +47,7 @@ class Schemas(Resource):
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
+
 
 @api.route("/metadata")
 class Schemas(Resource):
