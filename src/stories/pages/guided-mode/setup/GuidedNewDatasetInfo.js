@@ -30,7 +30,10 @@ export class GuidedNewDatasetPage extends Page {
             data-alert-type="danger"
             type="text"
             name="guided-dataset-name"
-            placeholder="Enter dataset name here"
+            placeholder="Enter project name here"
+            value=${this.info.globalState.name ?? ''}
+
+            @input=${(ev) => this.info.globalState.name = ev.target.value}
           />
           <p class="guided--text-input-instructions mb-0">Enter the name of your project.</p>
         </div>
@@ -49,9 +52,11 @@ export class GuidedNewDatasetPage extends Page {
             id="guided-dataset-subtitle-input"
             type="text"
             name="guided-dataset-subtitle"
-            placeholder="Enter datset subtitle here"
+            placeholder="Enter project DOIs here"
             style="height: 7.5em; padding-bottom: 20px"
             maxlength="255"
+            @input=${(ev) => this.info.globalState.doi = ev.target.value}
+            value=${this.info.globalState.doi ?? ''}
           ></textarea>
           <p class="guided--text-input-instructions mb-0">
             Separete multiple DOIs with a comma.

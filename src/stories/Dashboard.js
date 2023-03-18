@@ -69,17 +69,25 @@ export class Dashboard extends LitElement {
 
   setMain(page, infoPassed){
 
-    // Resolve info and page
+    // Update Previous Page
     // if (page.page) page = page.page
     const info = page.info
+    const previous = this.#active
     // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.#pagesById[info.page.id] // Get info from a direct page
 
-    if (this.#active === page) return // Prevent rerendering the same page
+    if (previous === page) return // Prevent rerendering the same page
 
-    if (this.#active?.info?.base !== info.base) this.reset() // Reset state if base page changed
+    if (previous) {
+      if (previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
+
+      if (previous.info.base !== info.base) {
+        previous.globalState = {} // Reset global state if base page changed
+        this.reset() // Reset state if base page changed
+      }
+      previous.active = false
+    }
 
     // Update Active Page
-    if (this.#active) this.#active.active = false
     this.#active = page
 
     if (info.parent && info.section) {
@@ -94,7 +102,10 @@ export class Dashboard extends LitElement {
       this.subSidebar.hide()
     }
 
-    page.set(infoPassed)
+    const toPass = { ...infoPassed}
+    if (previous) toPass.globalState = previous.info.globalState
+
+    page.set(toPass)
 
     // const page = this.getPage(info)
     this.main.set({

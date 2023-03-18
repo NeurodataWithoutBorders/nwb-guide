@@ -9,5 +9,6 @@ export default defineConfig({
       fileName: (_, name) => `${name}.js`,
       formats: ['es'],
     },
+    minify: false
   },
 });

@@ -32,7 +32,7 @@ export class GuidedSourceDataPage extends Page {
 
       // TODO: Create the endpoint to handle this
       // const metadata = this.result 
-      const metadata = await fetch(`${base}/neuroconv/metadata`, {
+      const metadata = this.info.globalState.metadata = await fetch(`${base}/neuroconv/metadata`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.result)
@@ -47,13 +47,14 @@ export class GuidedSourceDataPage extends Page {
         throw new Error(`Failed to get metadata for source data provided: ${metadata.message}`)
       }
 
-      this.onTransition(1, { metadata })
+      this.onTransition(1)
     }
   }
 
   render() {
 
-    const entries = Object.entries(this.info.schema?.properties ?? {})
+    const schema = this.info.globalState.schema
+    const entries = Object.entries(schema?.properties ?? {})
 
     this.result = {}
     entries.forEach(([name]) => this.result[name] = {}) // Register interfaces
@@ -69,8 +70,8 @@ export class GuidedSourceDataPage extends Page {
       </div>
       <div class="guided--section">
         <div>
-        <h2>${this.info.schema?.title}</h2>
-        <p>${this.info.schema?.description}</p>
+        <h2>${schema?.title}</h2>
+        <p>${schema?.description}</p>
         ${
           entries.length === 0 ? html`<p>No interfaces selected</p>` : entries.map(([name, subSchema]) => {
           return html`

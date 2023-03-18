@@ -12,7 +12,7 @@ export class GuidedMetadataPage extends Page {
 
   render() {
     
-    const recieved = this.info.metadata
+    const recieved = this.info.globalState.metadata 
     const metadata =  recieved ? Object.entries(recieved) : []
     return html`
   <div

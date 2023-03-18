@@ -11,25 +11,30 @@ export class GuidedStartPage extends Page {
   }
 
   updated() {
+
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
     // Handle dropdown text
     const infoDropdowns = (this.shadowRoot ?? this).getElementsByClassName("guided--info-dropdown");
     for (const infoDropdown of Array.from(infoDropdowns)) {
       const infoTextElement = infoDropdown.querySelector(".guided--dropdown-text");
+
+      // Auto-add icons if they're not there
       const dropdownType = infoTextElement.dataset.dropdownType;
-      if (dropdownType === "info") {
-        //insert the info icon before the text
-        infoTextElement.insertAdjacentHTML("beforebegin", ` <i class="fas fa-info-circle"></i>`);
-      }
-      if (dropdownType === "warning") {
-        //insert the warning icon before the text
-        infoTextElement.insertAdjacentHTML(
-          "beforebegin",
-          ` <i class="fas fa-exclamation-triangle"></i>`
-        );
+      if (infoTextElement.previousSibling.tagName !== 'I') {
+        if (dropdownType === "info") {
+          //insert the info icon before the text
+          infoTextElement.insertAdjacentHTML("beforebegin", ` <i class="fas fa-info-circle"></i>`);
+        }
+        if (dropdownType === "warning") {
+          //insert the warning icon before the text
+          infoTextElement.insertAdjacentHTML(
+            "beforebegin",
+            ` <i class="fas fa-exclamation-triangle"></i>`
+          );
+        }
       }
 
-      infoDropdown.addEventListener("click", () => {
+      infoDropdown.onclick = () => {
         const infoContainer = infoDropdown.nextElementSibling;
         const infoContainerChevron = infoDropdown.querySelector(".fa-chevron-right");
 
@@ -42,7 +47,7 @@ export class GuidedStartPage extends Page {
           infoContainerChevron.style.transform = "rotate(90deg)";
           infoContainer.classList.add("container-open");
         }
-      });
+      };
     }
   }
 
