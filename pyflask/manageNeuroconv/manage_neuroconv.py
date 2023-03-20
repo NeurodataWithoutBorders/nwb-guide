@@ -38,3 +38,10 @@ def get_combined_schema(interface_class_names: List[str]) -> dict:
         data_interface_classes = {interface: getattr(datainterfaces, interface) for interface in interface_class_names}
 
     return CustomNWBConverter.get_source_schema()
+
+
+def get_metadata(source_data):
+    """
+    Function used to get metadata from a CustomNWBConverter
+    """
+    return source_data # Test function by echoing back the input

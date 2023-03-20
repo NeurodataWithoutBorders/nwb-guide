@@ -31,14 +31,15 @@ export class GuidedSourceDataPage extends Page {
       if (!valid) throw new Error('Invalid input')
 
       // TODO: Create the endpoint to handle this
-      const metadata = this.result
-      // const metadata = await fetch(`${base}/neuroconv/metadata`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify(this.result)
-      // }).then((res) => res.json())
+      const metadata = await fetch(`${base}/neuroconv/metadata`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.result)
+      }).then((res) => res.json())
+
+      console.log('Got Metadata', metadata)
 
       this.onTransition(1, { metadata })
     }
