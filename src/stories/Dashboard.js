@@ -81,7 +81,6 @@ export class Dashboard extends LitElement {
       if (previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
 
       if (previous.info.base !== info.base) {
-        previous.globalState = {} // Reset global state if base page changed
         this.reset() // Reset state if base page changed
       }
       previous.active = false

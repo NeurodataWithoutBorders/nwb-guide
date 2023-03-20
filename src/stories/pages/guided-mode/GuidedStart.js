@@ -8,6 +8,7 @@ export class GuidedStartPage extends Page {
 
   constructor(...args) {
     super(...args)
+    this.info.globalState = {} // Reset global state when navigating back to this page
   }
 
   updated() {
