@@ -18,10 +18,9 @@ from os import getenv
 
 app = Flask(__name__)
 
-# Enable CORS if the environment variable ENABLE_CORS is set
-if getenv("ENABLE_CORS", "False").lower() in ("true", "1", "t"):
-    CORS(app)
-    app.config["CORS_HEADERS"] = "Content-Type"
+# Always enable CORS
+CORS(app)
+app.config["CORS_HEADERS"] = "Content-Type"
 
 configureLogger(app)
 
