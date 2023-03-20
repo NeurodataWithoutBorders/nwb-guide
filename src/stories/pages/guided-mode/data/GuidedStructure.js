@@ -32,7 +32,7 @@ export class GuidedStructurePage extends Page {
     fetch(`${base}/neuroconv`).then((res) => res.json()).then(json => {
       this.select.setAttribute("options", JSON.stringify(json))
       if (selected) this.select.selected = selected
-    });
+    }).catch(e => console.error(e));
   }
 
   render() {

@@ -11,6 +11,34 @@ const {
 
 let saveErrorThrown = false;
 
+
+export const hasEntry = (name) => {
+    const existingProgressNames = getEntries();
+    existingProgressNames.forEach((element, index) => existingProgressNames[index] = element.replace(".json", ""));
+    return existingProgressNames.includes(name);
+}
+
+export const update = (newDatasetName, previousDatasetName) => {
+    return new Promise((resolve, reject) => {
+        //If updataing the dataset, update the old banner image path with a new one
+        if (previousDatasetName) {
+            if (previousDatasetName === newDatasetName)resolve("No changes made to dataset name");
+
+            if (!fs) console.warn("fs is not defined. Will not perform changes on the filesystem.")
+
+            if (hasEntry(newDatasetName))  reject("An existing progress file already exists with that name. Please choose a different name.");
+            
+            // update old progress file with new dataset name
+            const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
+            const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
+            fs?.renameSync(oldProgressFilePath, newProgressFilePath);
+            resolve("Dataset name updated");
+        } 
+        
+        else reject('No previous dataset name provided');
+    });
+}
+
 export const save = (page) => {
 
   const globalState = page.info.globalState
@@ -46,19 +74,6 @@ export const save = (page) => {
     fs?.writeFileSync(guidedFilePath, JSON.stringify(globalState, null, 2));
   };
 
-  const readDirAsync = async (path) => {
-    return new Promise((resolve, reject) => {
-      if (!fs) reject('fs is not defined. Please check if fs is defined in the main process.')
-      fs.readdir(path, (error, result) => {
-        if (error) {
-          throw new Error(error);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-  };
-
   const readFileAsync = async (path) => {
     return new Promise((resolve, reject) => {
       if (!fs) reject('fs is not defined. Please check if fs is defined in the main process.')
@@ -73,9 +88,10 @@ export const save = (page) => {
   };
 
 
-  export const getEntries = async () => {
+  export const getEntries = () => {
     if (fs && !fs.existsSync(guidedProgressFilePath))  fs.mkdirSync(guidedProgressFilePath, { recursive: true });  //Check if Guided-Progress folder exists. If not, create it.
-    return await readDirAsync(guidedProgressFilePath).then(arr => arr.filter(path => path.slice(-5) === '.json')).catch(() => []);
+    const progressFiles = fs ? fs.readdirSync(guidedProgressFilePath) : [];
+    return progressFiles.filter(path => path.slice(-5) === '.json')
   }
 
   export const getAll = async (progressFiles) => {
