@@ -20,14 +20,21 @@ export class GuidedStructurePage extends Page {
     onNext: async () => {
       const selected = this.select.selected
       const interfaces = Object.entries(this.select.selected).filter(([_, v]) => v).map(([k, _]) => k);
-      this.info.globalState.interfaces = selected;
-      this.info.globalState.schema = (interfaces.length === 0) ? {} : await fetch(`${base}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
+      const schema = (interfaces.length === 0) ? {} : await fetch(`${base}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
+      
+      let sourceInfo = this.info.globalThis.source
+      if (!sourceInfo) sourceInfo = this.info.globalThis.source = {results: {}, schema: {}}
+
+      sourceInfo.schema = schema
+      sourceInfo.interfaces = selected
+      
+
       this.onTransition(1)
     }
   }
 
   updated(){
-    const selected = this.info.globalState.interfaces
+    const selected = this.info.globalThis.source?.interfaces
     this.select = (this.shadowRoot ?? this).querySelector("#neuroconv-define-formats");
     fetch(`${base}/neuroconv`).then((res) => res.json()).then(json => {
       this.select.setAttribute("options", JSON.stringify(json))

@@ -13,8 +13,6 @@ const {
   guidedResetProgressVariables,
   guidedProgressFilePath,
   guidedManifestFilePath,
-
-  notyf
 } = globals;
 
 import dependencies  from "../../src/electron/index.js";

@@ -2,6 +2,7 @@
 
 import { html } from 'lit';
 import { Page } from '../../Page.js';
+import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 export class GuidedMetadataPage extends Page {
 
@@ -12,7 +13,8 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
-    const metadata =  Object.entries(this.info.metadata)
+    const form = new JSONSchemaForm(this.info.globalState.metadata)
+
     return html`
   <div
     id="guided-mode-starting-container"
@@ -23,7 +25,7 @@ export class GuidedMetadataPage extends Page {
         <h1 class="guided--text-sub-step">Metadata</h1>
       </div>
       <div class="guided--section">
-       ${metadata.length ? metadata.map(([name, value]) => html`<h3>${name}</h3><pre>${JSON.stringify(value, null, 2)}</pre>`) : html`<p>No metadata</p>`}
+       ${form}
       </div>
   </div>
     `;
