@@ -67,19 +67,26 @@ export class Dashboard extends LitElement {
     this.#sectionStates = {} // Reset state of the navigation sidebar
   }
 
-  setMain(page){
+  setMain(page, infoPassed){
 
-    // Resolve info and page
+    // Update Previous Page
     // if (page.page) page = page.page
     const info = page.info
+    const previous = this.#active
     // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.#pagesById[info.page.id] // Get info from a direct page
 
-    if (this.#active === page) return // Prevent rerendering the same page
+    if (previous === page) return // Prevent rerendering the same page
 
-    if (this.#active?.info?.base !== info.base) this.reset() // Reset state if base page changed
+    if (previous) {
+      if (previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
+
+      if (previous.info.base !== info.base) {
+        this.reset() // Reset state if base page changed
+      }
+      previous.active = false
+    }
 
     // Update Active Page
-    if (this.#active) this.#active.active = false
     this.#active = page
 
     if (info.parent && info.section) {
@@ -93,6 +100,12 @@ export class Dashboard extends LitElement {
       this.sidebar.show()
       this.subSidebar.hide()
     }
+
+    const toPass = { ...infoPassed}
+    if (previous) toPass.globalState = previous.info.globalState
+
+    page.set(toPass)
+
     // const page = this.getPage(info)
     this.main.set({
       page,
@@ -138,17 +151,17 @@ export class Dashboard extends LitElement {
     this.subSidebar = (this.shadowRoot ?? this).querySelector("nwb-navigation-sidebar");
     this.main = (this.shadowRoot ?? this).querySelector("nwb-main");
     this.sidebar.onClick = this.subSidebar.onClick = (_, value) => this.setMain(value)
-    this.main.onTransition = (transition) => {
+    this.main.onTransition = (transition, infoPassed) => {
 
       if (typeof transition === 'number'){
         const info = this.#active.info
         const sign = Math.sign(transition)
-        if (sign === 1) return this.setMain(info.next)
-        else if (sign === -1) return this.setMain(info.previous ?? info.parent) // Default to back in time
+        if (sign === 1) return this.setMain(info.next, infoPassed)
+        else if (sign === -1) return this.setMain(info.previous ?? info.parent, infoPassed) // Default to back in time
       }
 
       if (transition in this.pages) this.sidebar.select(transition)
-      else this.setMain(this.#pagesById[transition])
+      else this.setMain(this.#pagesById[transition], infoPassed)
     }
 
     // Track Pages By Id

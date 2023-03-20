@@ -22,7 +22,9 @@ export class GettingStartedPage extends Page {
     let column1 = this.query("#lottie1");
     let column2 = this.query("#lottie2");
     let column3 = this.query("#lottie3");
-    let heart_lottie = this.query("#heart_lottie");
+    column1.innerHTML = '';
+    column2.innerHTML = '';
+    column3.innerHTML = '';
 
     var column1_lottie = lottie.loadAnimation({
       container: column1,
@@ -41,13 +43,6 @@ export class GettingStartedPage extends Page {
     var column3_lottie = lottie.loadAnimation({
       container: column3,
       animationData: column3Lottie,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-    });
-    var heart_container = lottie.loadAnimation({
-      container: heart_lottie,
-      animationData: heartLottie,
       renderer: "svg",
       loop: true,
       autoplay: true,
@@ -131,8 +126,7 @@ export class GettingStartedPage extends Page {
         @click="${() => this.onTransition('guided')}"
       >
         <p class="getting-started-btn-txt">Begin curating a new dataset</p>
-        <i class="el-icon icon-animate"
-          ><svg
+        <i class="el-icon icon-animate"><svg
             class="icon"
             width="200"
             height="200"
