@@ -5,7 +5,7 @@
   height: 35px;
   border-radius: 50%;
   background: transparent;
-  position: relative;
+  position: absolute;
   top: 8px;
   left: 200px;
   cursor: pointer;
@@ -45,20 +45,18 @@
 }
 
 #main-nav {
-  min-width: 240px;
-  max-width: 240px;
   background: var(--color-sidebar);
   border-top: 1px solid #d5d5d5;
-  color: #f0f0f0;
+  color: black;
   font-family: "Source Sans Pro", sans-serif;
   transition: all 0.25s linear;
   transform-origin: 0 50%; /* Set the transformed position of sidebar to center left side. */
 }
 
 #main-nav.active {
-  width: 0;
-  transform: rotateY(150deg); /* Rotate sidebar vertically by 100 degrees. */
-  transition: all 0.25s linear;
+  width: 0px;
+  overflow: hidden;
+  /* transform: rotateY(150deg);  */
 }
 
 .navbar-btn {
@@ -95,11 +93,8 @@ a[data-toggle="collapse"] {
 }
 
 #main-nav .sidebar-header {
-  margin-top: 10px;
-  margin-bottom: 30px;
-  /* padding: 20px; */
-  padding-bottom: 50px;
-  padding-top: 10px;
+  padding: 20px;
+  padding-bottom: 10px;
 }
 
 #main-nav ul.components {
@@ -107,7 +102,7 @@ a[data-toggle="collapse"] {
   padding-right: 10px;
   padding-left: 3px;
   margin-right: 0;
-  margin-top: 30px;
+  margin-top: 10px;
 }
 
 #main-nav ul p {
@@ -239,7 +234,7 @@ a[data-toggle="collapse"] {
 
 .nav {
   padding: 0px 0px;
-  position: fixed;
+  /* position: fixed; */
   width: 240px;
   min-height: 100vh;
   color: var(--color-subtle);
@@ -247,7 +242,7 @@ a[data-toggle="collapse"] {
   left: 0;
   z-index: 1;
   align-items: stretch;
-  display: flex;
+  /* display: flex; */
   transition: 0.5s;
 }
 

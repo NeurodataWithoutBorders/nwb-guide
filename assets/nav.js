@@ -160,22 +160,22 @@ async function handleSectionTrigger(event) {
 
   document.getElementById(sectionId).classList.add("is-shown");
 
-  let showSidebarSections = [
-    "main_tabs-section",
-    "getting_started-section",
-    "guided_mode-section",
-    "help-section",
-    "documentation-section",
-    "contact-us-section",
-  ];
+  // let showSidebarSections = [
+  //   "main_tabs-section",
+  //   "getting_started-section",
+  //   "guided_mode-section",
+  //   "help-section",
+  //   "documentation-section",
+  //   "contact-us-section",
+  // ];
 
-  if (showSidebarSections.includes(sectionId)) {
-    forceActionSidebar("show");
-  } else {
-    forceActionSidebar("hide");
-  }
+  // if (showSidebarSections.includes(sectionId)) {
+  //   forceActionSidebar("show");
+  // } else {
+  //   forceActionSidebar("hide");
+  // }
 
-  boolNextButtonDisabled = document.getElementById("nextBtn").disabled;
+  // boolNextButtonDisabled = document.getElementById("nextBtn").disabled;
 }
 
 function handleModalTrigger(event) {
