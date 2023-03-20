@@ -27,14 +27,14 @@ export const update = (newDatasetName, previousDatasetName) => {
             if (!fs) console.warn("fs is not defined. Will not perform changes on the filesystem.")
 
             if (hasEntry(newDatasetName))  reject("An existing progress file already exists with that name. Please choose a different name.");
-            
+
             // update old progress file with new dataset name
             const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
             const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
             fs?.renameSync(oldProgressFilePath, newProgressFilePath);
             resolve("Dataset name updated");
-        } 
-        
+        }
+
         else reject('No previous dataset name provided');
     });
 }
