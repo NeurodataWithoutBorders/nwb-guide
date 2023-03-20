@@ -15,6 +15,7 @@ export class ContactPage extends Page {
 
   updated(){
     let contact_lottie_container = (this ?? this.shadowRoot).querySelector("#contact-us-lottie");
+    contact_lottie_container.innerHTML = ''
 
     lottie.loadAnimation({
       container: contact_lottie_container,
