@@ -78,7 +78,7 @@ export class JSONSchemaForm extends LitElement {
 
         const isRequired = subSchema.required?.includes(propertyName)
         if (!isRequired) return
-        
+
           return html`
           <div>
             <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${isRequired ? html`<span style="color: red">*</span>` : ``}</h4>
@@ -96,7 +96,7 @@ export class JSONSchemaForm extends LitElement {
                 this.results[name][propertyName] = path
                 button.nextSibling.innerText = path
 
-            }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`) : html`<p>type not supported (${property.type} | ${property.format ?? 'N/A' } </p>`}
+            }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`) : html`<p>type not supported (${property.type} | ${property.format ?? '–'}) </p>`}
           </div>
           `
         })}
