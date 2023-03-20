@@ -5,11 +5,11 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "npm run build && export ENABLE_CORS=false && npm run start:electron",
+    "start": "npm run build && npm run start:electron",
     "start:electron": "NODE_ENV=development electron .",
     "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
     "dev:app": "vite",
-    "dev:server": "cd pyflask && export ENABLE_CORS=true && python -m flask run --port 4242",
+    "dev:server": "cd pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
     "build:app": "vite build",
     "test": "npm run test:server",
