@@ -36,7 +36,7 @@ def get_custom_converter(interface_class_names: List[str]) -> NWBConverter:
     return CustomNWBConverter
 
 
-def get_combined_schema(interface_class_names: List[str]) -> dict:
+def get_source_schema(interface_class_names: List[str]) -> dict:
     """
     Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
     """
@@ -44,9 +44,9 @@ def get_combined_schema(interface_class_names: List[str]) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def get_metadata(source_data):
+def get_metadata_schema(source_data):
     """
-    Function used to get metadata from a CustomNWBConverter
+    Function used to get metadata schea from a CustomNWBConverter
     """
 
     interface_class_names = list(
