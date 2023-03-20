@@ -1,7 +1,6 @@
-// Web Components
-import "./stories/sidebar.js";
-import "./stories/multiselect/index.js";
+import "./stories/Dashboard.js";
 
+import "./pages.js"
 import "../assets/nav.js"
 import "../scripts/others/renderer.js"
 // require("./assets/ex-links.js");

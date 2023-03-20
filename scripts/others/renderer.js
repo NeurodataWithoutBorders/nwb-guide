@@ -4,7 +4,7 @@
 
 import dependencies from '../../src/electron/index.js'
 const { isElectron, electron = {}, path, os, fs, log, https, JSONStorage, app, Airtable } = dependencies //require("../../src/electron/index.js");
-const { ipcRenderer, shell } = electron;
+const { ipcRenderer } = electron;
 
 import globals from '../globals.js'
 
@@ -12,7 +12,6 @@ import globals from '../globals.js'
 
 import  { check_forbidden_characters_bf } from '../manage-dataset/manage-dataset.js'
 
-import { Notyf } from 'notyf'
 import Cropper from 'cropperjs'
 import Swal from 'sweetalert2'
 
@@ -52,6 +51,7 @@ import DatePicker from 'tui-date-picker'
 
 
 import { currentConTable } from '../../preload.js'
+import { openLink } from '../../src/links.js';
 
 const {
   parseJson,
@@ -60,8 +60,14 @@ const {
   metadataPath,
   Tagify,
   lottie,
-  createDragSort
+  createDragSort,
+  notyf
 } = globals;
+
+// Set the sidebar subtitle to the current app version
+const dashboard = document.querySelector('nwb-dashboard')
+const appVersion = app?.getVersion();
+dashboard.subtitle = appVersion ?? 'Web Version';
 
 // const prevent_sleep_id = "";
 // const electron_app = electron.app;
@@ -129,68 +135,6 @@ if (log) {
   log.transports.file.maxSize = 1024 * 1024 * 10;
 }
 
-// Here is where the splash screen lotties are created and loaded.
-// A mutation observer watches for when the overview tab element has
-// a class change to 'is-shown' to know when to load and unload the lotties
-let over_view_section = document.getElementById("getting_started-section");
-let column1 = document.getElementById("lottie1");
-let column2 = document.getElementById("lottie2");
-let column3 = document.getElementById("lottie3");
-let heart_lottie = document.getElementById("heart_lottie");
-
-var column1_lottie = lottie.loadAnimation({
-  container: column1,
-  animationData: column1Lottie /*(json js variable, (view src/assets/lotties)*/,
-  renderer: "svg",
-  loop: true /*controls looping*/,
-  autoplay: true,
-});
-var column2_lottie = lottie.loadAnimation({
-  container: column2,
-  animationData: column2Lottie /*(json js variable, (view src/assets/lotties)*/,
-  renderer: "svg",
-  loop: true /*controls looping*/,
-  autoplay: true,
-});
-var column3_lottie = lottie.loadAnimation({
-  container: column3,
-  animationData: column3Lottie,
-  renderer: "svg",
-  loop: true,
-  autoplay: true,
-});
-var heart_container = lottie.loadAnimation({
-  container: heart_lottie,
-  animationData: heartLottie,
-  renderer: "svg",
-  loop: true,
-  autoplay: true,
-});
-
-var overview_observer = new MutationObserver(function (mutations) {
-  mutations.forEach(function (mutation) {
-    var attributeValue = $(mutation.target).prop(mutation.attributeName);
-
-    if (attributeValue.includes("is-shown") == true) {
-      //add lotties
-      column1_lottie.play();
-      column2_lottie.play();
-      column3_lottie.play();
-      heart_container.play();
-    } else {
-      column1_lottie.stop();
-      column2_lottie.stop();
-      column3_lottie.stop();
-      heart_container.stop();
-    }
-  });
-});
-
-overview_observer.observe(over_view_section, {
-  attributes: true,
-  attributeFilter: ["class"],
-});
-
 //////////////////////////////////
 // Connect to Python back-end
 //////////////////////////////////
@@ -203,124 +147,6 @@ let client = null;
 client = axios.create({
   baseURL: `http://127.0.0.1:${port}/`,
   timeout: 300000,
-});
-
-const notyf = new Notyf({
-  position: { x: "right", y: "bottom" },
-  dismissible: true,
-  ripple: false,
-  types: [
-    {
-      type: "checking_server_is_live",
-      background: "grey",
-      icon: {
-        className: "fas fa-wifi",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 1000,
-    },
-    {
-      type: "checking_server_api_version",
-      background: "grey",
-      icon: {
-        className: "fas fa-wifi",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 1000,
-    },
-    {
-      type: "loading_internet",
-      background: "grey",
-      icon: {
-        className: "fas fa-wifi",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 10000,
-    },
-    {
-      type: "ps_agent",
-      background: "grey",
-      icon: {
-        className: "fas fa-cogs",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 5000,
-    },
-    {
-      type: "app_update",
-      background: "grey",
-      icon: {
-        className: "fas fa-sync-alt",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 0,
-    },
-    {
-      type: "api_key_search",
-      background: "grey",
-      icon: {
-        className: "fas fa-users-cog",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 0,
-    },
-    {
-      type: "success",
-      background: "#13716D",
-      icon: {
-        className: "fas fa-check-circle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 800,
-    },
-    {
-      type: "final",
-      background: "#13716D",
-      icon: {
-        className: "fas fa-check-circle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 3000,
-    },
-    {
-      type: "warning",
-      background: "#fa8c16",
-      icon: {
-        className: "fas fa-exclamation-triangle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 3000,
-    },
-    {
-      type: "app_update_warning",
-      background: "#fa8c16",
-      icon: {
-        className: "fas fa-tools",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 0,
-    },
-    {
-      type: "error",
-      background: "#B80D49",
-      icon: {
-        className: "fas fa-times-circle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 3000,
-    },
-  ],
 });
 
 let connected_to_internet = false;
@@ -376,13 +202,6 @@ const startupServerAndApiCheck = async () => {
     console.log("Connected to Python back-end successfully");
     log?.info("Connected to Python back-end successfully");
     ipcRenderer?.send("track-event", "Success", "Establishing Python Connection");
-
-    // Update the options on the multi-select form
-    const multiselectEl = document.getElementById("neuroconv-define-formats");
-    const base = `http://127.0.0.1:${port}`;
-    const multiselectOptions = await fetch(`${base}/neuroconv`).then((res) => res.json());
-    console.log('Setting formats', multiselectOptions )
-    multiselectEl.setAttribute("options", JSON.stringify(multiselectOptions))
   }
 
   // dismiss the Swal
@@ -5490,7 +5309,7 @@ $(document).ready(function () {
 // Trigger action when the contexmenu is about to be shown
 $(document).bind("contextmenu", function (event) {
   // Avoid the real one
-  event.preventDefault();
+  // event.preventDefault();
 
   // Right click behaviour for multiple files (Linux os behaviour)
   // ** if right click with ctrl -> include file in selection
@@ -8711,117 +8530,11 @@ function gatherLogs() {
   });
 }
 
-function gettingStarted() {
-  let getting_started = document.getElementById("main_tabs_view");
-  getting_started.click();
-}
-
-function openLink(url) {
-  if (shell) shell.openExternal(url);
-  else window.open(url, "_blank")
-}
-
-function sodaVideo() {
-  document.getElementById("overview-column-1").blur();
-  openLink("https://docs.sodaforsparc.io/docs/getting-started/user-interface")
-}
-
-function directToDocumentation() {
-  openLink(
-    "https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda"
-  );
-  document.getElementById("overview-column-2").blur();
-  // window.open('https://docs.sodaforsparc.io', '_blank');
-}
-const directToGuidedMode = () => {
-  const guidedModeLinkButton = document.getElementById("guided_mode_view");
-  guidedModeLinkButton.click();
-};
-const directToFreeFormMode = () => {
-  const freeFormModeLinkButton = document.getElementById("main_tabs_view");
-  freeFormModeLinkButton.click();
-};
-document.getElementById("doc-btn").addEventListener("click", directToDocumentation);
-document
-  .getElementById("home-button-interface-instructions-link")
-  .addEventListener("click", sodaVideo);
-document
-  .getElementById("home-button-guided-mode-link")
-  .addEventListener("click", directToGuidedMode);
-document
-  .getElementById("home-button-free-form-mode-link")
-  .addEventListener("click", directToFreeFormMode);
-
-let docu_lottie_section = document.getElementById("documentation-section");
-let doc_lottie = document.getElementById("documentation-lottie");
-
-let contact_section = document.getElementById("contact-us-section");
-let contact_lottie_container = document.getElementById("contact-us-lottie");
-
-var contact_lottie_animation = lottie.loadAnimation({
-  container: contact_lottie_container,
-  animationData: contact_lottie /*(json js variable, (view src/assets/lotties)*/,
-  renderer: "svg",
-  loop: true /*controls looping*/,
-  autoplay: true,
-});
-contact_lottie_animation.pause();
-var documentation_lottie = lottie.loadAnimation({
-  container: doc_lottie,
-  animationData: docu_lottie /*(json js variable, (view src/assets/lotties)*/,
-  renderer: "svg",
-  loop: true /*controls looping*/,
-  autoplay: true,
-});
-documentation_lottie.pause();
-
-var documentation_lottie_observer = new MutationObserver(function (mutations) {
-  mutations.forEach(function (mutation) {
-    var attributeValue = $(mutation.target).prop(mutation.attributeName);
-    if (attributeValue.includes("is-shown") == true) {
-      //play lottie
-      documentation_lottie.play();
-    } else {
-      // lottie.stop(documentation_lottie);
-      documentation_lottie.stop();
-    }
-  });
-});
-
-var contact_us_lottie_observer = new MutationObserver(function (mutations) {
-  mutations.forEach(function (mutation) {
-    var attributeValue = $(mutation.target).prop(mutation.attributeName);
-    if (attributeValue.includes("is-shown") == true) {
-      //play lottie
-      contact_lottie_animation.play();
-    } else {
-      contact_lottie_animation.stop();
-      // lottie.stop(contact_lottie_animation);
-    }
-  });
-});
-
-documentation_lottie_observer.observe(docu_lottie_section, {
-  attributes: true,
-  attributeFilter: ["class"],
-});
-
-contact_us_lottie_observer.observe(contact_section, {
-  attributes: true,
-  attributeFilter: ["class"],
-});
-
 globals.tippy("#datasetPathDisplay", {
   placement: "top",
   theme: "soda",
   maxWidth: "100%",
 });
-
-
-// Expose variables to other files
-export {
-  notyf
-}
 
 
 window.gatherLogs = gatherLogs;
