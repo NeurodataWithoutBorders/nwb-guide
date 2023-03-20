@@ -148,7 +148,6 @@ client = axios.create({
   timeout: 300000,
 });
 
-
 let connected_to_internet = false;
 let update_available_notification = "";
 let update_downloaded_notification = "";

@@ -12,7 +12,9 @@ const {
   createDragSort,
   guidedResetProgressVariables,
   guidedProgressFilePath,
-  guidedManifestFilePath
+  guidedManifestFilePath,
+
+  notyf
 } = globals;
 
 import dependencies  from "../../src/electron/index.js";

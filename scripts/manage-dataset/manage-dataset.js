@@ -7,7 +7,6 @@ const { lottie, notyf } = globals
 // const {
 //   lottie,
 
-
 const ipcRenderer = dependencies.electron?.ipcRenderer;
 
 const bfDatasetSubtitle = document.querySelector("#bf-dataset-subtitle");

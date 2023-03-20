@@ -8,7 +8,6 @@ import { Notyf } from 'notyf'
 
 const { fs, app, path, log, port } = dependencies
 
-
 const exportObject = {
   Tagify,
   DragSort,
