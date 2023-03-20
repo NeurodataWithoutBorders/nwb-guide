@@ -60,13 +60,15 @@ export class MultiSelectForm extends LitElement {
 
   static get properties() {
     return {
-      options: { type: Object, reflect: true }
+      options: { type: Object, reflect: true },
+      selected: { type: Object, reflect: false },
     };
   }
 
   constructor (props = {}) {
     super()
     this.options = props.options ?? {}
+    this.selected = props.selected ?? {}
   }
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
@@ -74,11 +76,11 @@ export class MultiSelectForm extends LitElement {
     if (changedProperties === 'options') this.requestUpdate()
   }
 
-
 //   NOTE: We can move these into their own components in the future
   async updated(){
 
     const dataFormatsForm = (this.shadowRoot ?? this).querySelector("#neuroconv-data-formats-form");
+    dataFormatsForm.innerHTML = '' // Clear the form
 
     const formats = this.options
 
@@ -133,6 +135,12 @@ export class MultiSelectForm extends LitElement {
       input.name = name;
       div.appendChild(input);
       const label = document.createElement("label");
+
+      if (this.selected[name]) input.checked = true;
+
+      input.onchange = (ev) => {
+        this.selected[name] = input.checked
+      }
       label.for = name;
       label.textContent = name;
       div.appendChild(label);

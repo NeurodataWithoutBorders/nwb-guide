@@ -8,18 +8,30 @@ import "../../../multiselect/MultiSelectForm.js";
 import globals from '../../../../../scripts/globals.js';
 const { port } = globals;
 
+const base = `http://127.0.0.1:${port}`;
+
 export class GuidedStructurePage extends Page {
 
   constructor(...args) {
     super(...args)
   }
 
+  footer = {
+    onNext: async () => {
+      const selected = this.select.selected
+      const interfaces = Object.entries(this.select.selected).filter(([_, v]) => v).map(([k, _]) => k);
+      this.info.globalState.interfaces = selected;
+      this.info.globalState.schema = (interfaces.length === 0) ? {} : await fetch(`${base}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
+      this.onTransition(1)
+    }
+  }
+
   updated(){
-    // this.content = (this.shadowRoot ?? this).querySelector("#content");
-    const multiselectEl = (this.shadowRoot ?? this).querySelector("#neuroconv-define-formats");
-    const base = `http://127.0.0.1:${port}`;
+    const selected = this.info.globalState.interfaces
+    this.select = (this.shadowRoot ?? this).querySelector("#neuroconv-define-formats");
     fetch(`${base}/neuroconv`).then((res) => res.json()).then(json => {
-        multiselectEl.setAttribute("options", JSON.stringify(json))
+      this.select.setAttribute("options", JSON.stringify(json))
+      if (selected) this.select.selected = selected
     });
   }
 

@@ -6,6 +6,8 @@ import './guided-mode/GuidedHeader.js'
 import '../Footer.js'
 import '../Button'
 
+import { save } from '../../progress.js'
+
 const componentCSS = `
 
 `
@@ -16,9 +18,11 @@ export class Page extends LitElement {
     return useGlobalStyles(componentCSS, sheet => sheet.href && sheet.href.includes('bootstrap'), this.shadowRoot)
   }
 
+  info = { globalState: {} }
+
   constructor (info = {}) {
     super()
-    this.info = info
+    Object.assign(this.info, info)
   }
 
   createRenderRoot() {
@@ -29,7 +33,19 @@ export class Page extends LitElement {
     return (this.shadowRoot ?? this).querySelector(input);
   }
 
+  onSet = () => {} // User-defined function
+
+  set = (info) => {
+    if (info){
+      Object.assign(this.info, info)
+      this.onSet()
+      this.requestUpdate()
+    }
+  }
+
   onTransition = () => {} // User-defined function
+
+  save = () => save(this)
 
 //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.
   render() {
