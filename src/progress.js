@@ -43,7 +43,6 @@ export const save = (page) => {
 
   const globalState = page.info.globalState
   const guidedProgressFileName = globalState.name
-  console.log("Saving progress to " + guidedProgressFileName + ".json", globalState);
 
     if (!fs) {
       if (!saveErrorThrown) console.warn("Cannot save progress in a web build.");

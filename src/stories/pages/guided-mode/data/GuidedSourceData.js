@@ -34,8 +34,8 @@ export class GuidedSourceDataPage extends Page {
         },
       })
 
-      let metadataInfo = this.info.globalThis.metadata
-      if (!metadataInfo) metadataInfo = this.info.globalThis.metadata = {results: {}, schema: {}}
+      let metadataInfo = this.info.globalState.metadata
+      if (!metadataInfo) metadataInfo = this.info.globalState.metadata = {results: {}, schema: {}}
       
       const schema = await fetch(`${base}/neuroconv/metadata`, {
         method: 'POST',
@@ -63,7 +63,7 @@ export class GuidedSourceDataPage extends Page {
 
   render() {
 
-    const form = new JSONSchemaForm(this.info.globalInfo.source)
+    const form = new JSONSchemaForm(this.info.globalState.source)
 
     return html`
   <div

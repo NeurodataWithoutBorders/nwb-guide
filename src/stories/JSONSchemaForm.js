@@ -62,6 +62,7 @@ export class JSONSchemaForm extends LitElement {
     }) // Register interfaces
 
 
+    const filesystemQueries = ['file', 'directory']
     return html`
     <div>
     <h2>${schema.title}</h2>
@@ -74,8 +75,8 @@ export class JSONSchemaForm extends LitElement {
         ${Object.entries(subSchema.properties ?? {}).map(([propertyName, property]) => {
           return html`
           <div>
-            <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${subSchema.required.includes(propertyName) ? html`<span style="color: red">*</span>` : ``}</h4>
-            ${property.format ? (dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
+            <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${subSchema.required?.includes(propertyName) ? html`<span style="color: red">*</span>` : ``}</h4>
+            ${filesystemQueries.includes(property.format) ? (dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
 
                 // NOTE: We can get the file, but we can't know the path unless we use Electron
                 // const [fileHandle] = await window.showOpenFilePicker();
@@ -89,7 +90,7 @@ export class JSONSchemaForm extends LitElement {
                 this.results[name][propertyName] = path
                 button.nextSibling.innerText = path
 
-            }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`) : html`<p>${property.type} type not supported.</p>`}
+            }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`) : html`<p>type not supported (${property.type} | ${property.format ?? 'N/A' } </p>`}
           </div>
           `
         })}
