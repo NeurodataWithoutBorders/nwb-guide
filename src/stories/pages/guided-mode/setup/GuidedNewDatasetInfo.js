@@ -50,8 +50,8 @@ export class GuidedNewDatasetPage extends Page {
 
           return
         }
-    } 
-    
+    }
+
     // Update existing progress file
     else await update(name, this.info.globalState.name)
 
