@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 
