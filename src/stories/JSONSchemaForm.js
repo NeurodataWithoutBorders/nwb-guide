@@ -69,14 +69,16 @@ export class JSONSchemaForm extends LitElement {
     <p>${schema.description}</p>
     ${
       entries.length === 0 ? html`<p>No interfaces selected</p>` : entries.map(([name, subSchema]) => {
-
-        const isRequired = subSchema.required?.includes(propertyName)
-        if (!isRequired) return
         
       return html`
       <div style="margin-bottom: 25px;">
         <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>
         ${Object.entries(subSchema.properties ?? {}).map(([propertyName, property]) => {
+
+
+        const isRequired = subSchema.required?.includes(propertyName)
+        if (!isRequired) return
+        
           return html`
           <div>
             <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${isRequired ? html`<span style="color: red">*</span>` : ``}</h4>
