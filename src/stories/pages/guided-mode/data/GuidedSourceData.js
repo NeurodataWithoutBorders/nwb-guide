@@ -46,7 +46,7 @@ export class GuidedSourceDataPage extends Page {
 
   render() {
 
-    const entries = Object.entries(this.info.schema?.properties ?? {})
+    const entries = Object.entries(this.info.globalState.schema?.properties ?? {})
 
     this.result = {}
     entries.forEach(([name]) => this.result[name] = {}) // Register interfaces
