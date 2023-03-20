@@ -69,7 +69,7 @@ export class JSONSchemaForm extends LitElement {
     <p>${schema.description}</p>
     ${
       entries.length === 0 ? html`<p>No interfaces selected</p>` : entries.map(([name, subSchema]) => {
-        
+
       return html`
       <div style="margin-bottom: 25px;">
         <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>

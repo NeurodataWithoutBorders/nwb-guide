@@ -21,13 +21,13 @@ export class GuidedStructurePage extends Page {
       const selected = this.select.selected
       const interfaces = Object.entries(this.select.selected).filter(([_, v]) => v).map(([k, _]) => k);
       const schema = (interfaces.length === 0) ? {} : await fetch(`${base}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
-      
+
       let sourceInfo = this.info.globalState.source
       if (!sourceInfo) sourceInfo = this.info.globalState.source = {results: {}, schema: {}}
 
       sourceInfo.schema = schema
       sourceInfo.interfaces = selected
-      
+
 
       this.onTransition(1)
     }

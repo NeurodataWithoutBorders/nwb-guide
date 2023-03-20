@@ -49,7 +49,9 @@ def get_metadata(source_data):
     Function used to get metadata from a CustomNWBConverter
     """
 
-    interface_class_names = list(source_data) # NOTE: We currently assume that the keys of the properties dict are the interface names
+    interface_class_names = list(
+        source_data
+    )  # NOTE: We currently assume that the keys of the properties dict are the interface names
     CustomNWBConverter = get_custom_converter(interface_class_names)
     converter = CustomNWBConverter(source_data)
     return converter.get_metadata_schema()

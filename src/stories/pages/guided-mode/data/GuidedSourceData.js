@@ -36,7 +36,7 @@ export class GuidedSourceDataPage extends Page {
 
       let metadataInfo = this.info.globalState.metadata
       if (!metadataInfo) metadataInfo = this.info.globalState.metadata = {results: {}, schema: {}}
-      
+
       const schema = await fetch(`${base}/neuroconv/metadata`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
