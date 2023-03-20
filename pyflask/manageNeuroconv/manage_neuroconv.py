@@ -44,4 +44,4 @@ def get_metadata(source_data):
     """
     Function used to get metadata from a CustomNWBConverter
     """
-    return source_data # Test function by echoing back the input
+    return source_data  # Test function by echoing back the input
