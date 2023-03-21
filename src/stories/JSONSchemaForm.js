@@ -41,7 +41,7 @@ export class JSONSchemaForm extends LitElement {
   }
 
   #useElectronDialog = async (type) => {
-    const result = await dialog.showOpenDialog({ properties: [type === 'file' ? 'openFile' : 'openDirectory'] });
+    const result = await dialog.showOpenDialog({ properties: [type === 'file' ? 'openFile' : 'openDirectory', 'noResolveAliases'] });
     if (result.canceled) throw new Error('No file selected')
     return result
   }
