@@ -67,7 +67,7 @@ export class JSONSchemaForm extends LitElement {
           if (!(key in this.results[name]) && 'default' in value) this.results[name][key] = value.default // Register default properties in results
         })
       }
-    }) 
+    })
 
     // delete extraneous results
     for (let name in this.results) {
@@ -105,7 +105,7 @@ export class JSONSchemaForm extends LitElement {
           <div>
             <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${isRequired ? html`<span style="color: red">*</span>` : ``}</h4>
             ${(() => {
-              
+
               // Handle  string formats
               if (property.type === 'string') {
 
@@ -123,7 +123,7 @@ export class JSONSchemaForm extends LitElement {
                   const path = file.filePaths[0]
                   this.results[name][propertyName] = path
                   button.nextSibling.innerText = path
-  
+
                 }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
 
                 // Handle long string formats
@@ -131,7 +131,7 @@ export class JSONSchemaForm extends LitElement {
 
                 // Handle date formats
                 else if (property.format === 'date-time') return html`<input type="datetime-local" .value="${this.results[name][propertyName] ?? ''}" @input=${(ev) => this.results[name][propertyName] = ev.target.value} />`
-                
+
                 // Handle other string formats
                 else {
                   const type = property.format === 'date-time' ? "datetime-local" : property.format ?? 'text'
