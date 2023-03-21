@@ -1,7 +1,10 @@
 import { Main } from './Main.js';
 
 export default {
-  title: 'Example/Main'
+  title: 'Main',
+  parameters: {
+    chromatic: { disableSnapshot: false },
+  },
 };
 
 const Template = (args) => new Main(args);

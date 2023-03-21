@@ -1,7 +1,7 @@
 import { MultiSelectForm } from './MultiSelectForm.js';
 
 export default {
-  title: 'Example/Multiselect Form'
+  title: 'Multiselect Form'
 };
 
 const Template = (args) => new MultiSelectForm(args);

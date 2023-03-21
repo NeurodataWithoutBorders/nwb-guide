@@ -3,8 +3,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 
 export class Button extends LitElement {
-  constructor({ primary, backgroundColor = null, size, onClick } = {}) {
+  constructor({ primary, label, backgroundColor = null, size, onClick } = {}) {
     super();
+    this.label = label;
     this.primary = primary;
     this.backgroundColor = backgroundColor;
     this.size = size;
@@ -52,6 +53,7 @@ export class Button extends LitElement {
       backgroundColor: { type: String },
       size: { type: String },
       onClick: { type: Function },
+      label: { type: String },
     };
   }
 
@@ -65,7 +67,7 @@ export class Button extends LitElement {
         style=${styleMap({ backgroundColor: this.backgroundColor })}
         @click=${this.onClick}
       >
-        <slot></slot>
+        <slot>${this.label ?? ''}</slot>
       </button>
     `;
   }
