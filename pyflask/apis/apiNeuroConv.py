@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, reqparse
 from namespaces import get_namespace, NamespaceEnum
-from manageNeuroconv import get_all_interface_info, get_combined_schema, get_metadata
+from manageNeuroconv import get_all_interface_info, get_source_schema, get_metadata_schema
 from errorHandlers import notBadRequestException
 
 api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")
@@ -29,7 +29,7 @@ class Schema(Resource):
     def get(self, interface):
 
         try:
-            return get_combined_schema([interface])
+            return get_source_schema([interface])
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -43,7 +43,7 @@ class Schemas(Resource):
         args = parser.parse_args()
         interfaces = args["interfaces"]
         try:
-            return get_combined_schema(interfaces)
+            return get_source_schema(interfaces)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -54,7 +54,7 @@ class Schemas(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return get_metadata(api.payload)
+            return get_metadata_schema(api.payload)
 
         except Exception as e:
             if notBadRequestException(e):
