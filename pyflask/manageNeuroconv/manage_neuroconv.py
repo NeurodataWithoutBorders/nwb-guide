@@ -58,4 +58,5 @@ def get_metadata_schema(source_data):
     CustomNWBConverter = get_custom_converter(interface_class_names)
     converter = CustomNWBConverter(source_data)
     schema = converter.get_metadata_schema()
-    return json.loads(json.dumps(schema, cls=NWBMetaDataEncoder))
+    metadata = converter.get_metadata()
+    return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
