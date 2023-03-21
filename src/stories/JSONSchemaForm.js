@@ -26,6 +26,8 @@ export class JSONSchemaForm extends LitElement {
     return {
       schema: { type: Object, reflect: false },
       results: { type: Object, reflect: false },
+      ignore: { type: Array, reflect: false },
+      onlyRequired: { type: Boolean, reflect: false },
     };
   }
 
@@ -33,6 +35,8 @@ export class JSONSchemaForm extends LitElement {
     super()
     this.schema = props.schema ?? {}
     this.results = props.results ?? {}
+    this.ignore = props.ignore ?? []
+    this.onlyRequired = props.onlyRequired ?? false
   }
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
@@ -56,10 +60,24 @@ export class JSONSchemaForm extends LitElement {
     const schema = this.schema ?? {}
     const entries = Object.entries(schema.properties ?? {})
 
-    this.result = {}
-    entries.forEach(([name]) => {
-      if (!this.results[name]) this.results[name] = {}
-    }) // Register interfaces
+    entries.forEach(([name, property]) => {
+      if (!this.results[name]) this.results[name] = {} // Regisiter new interfaces in results
+      if (property.properties) {
+        Object.entries(property.properties).forEach(([key, value]) => {
+          if (!(key in this.results[name]) && 'default' in value) this.results[name][key] = value.default // Register default properties in results
+        })
+      }
+    })
+
+    // delete extraneous results
+    for (let name in this.results) {
+      if (!(name in schema.properties)) delete this.results[name]
+      else {
+        for (let key in this.results[name]) {
+          if (!(key in schema.properties[name].properties)) delete this.results[name][key]
+        }
+      }
+    }
 
 
     const filesystemQueries = ['file', 'directory']
@@ -70,33 +88,61 @@ export class JSONSchemaForm extends LitElement {
     ${
       entries.length === 0 ? html`<p>No interfaces selected</p>` : entries.map(([name, subSchema]) => {
 
+        // Filter non-required properties
+        const entries = Object.entries(subSchema.properties ?? {})
+        const renderedProperties = entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || subSchema.required?.includes(key)))
+
+        if (renderedProperties.length === 0) return ''
+
       return html`
       <div style="margin-bottom: 25px;">
         <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>
-        ${Object.entries(subSchema.properties ?? {}).map(([propertyName, property]) => {
+        ${renderedProperties.map(([propertyName, property]) => {
 
-
-        const isRequired = subSchema.required?.includes(propertyName)
-        if (!isRequired) return
+          const isRequired = subSchema.required?.includes(propertyName) // Distinguish required properties
 
           return html`
           <div>
             <h4 style="margin-bottom: 0; margin-top: 10px;">${propertyName} ${isRequired ? html`<span style="color: red">*</span>` : ``}</h4>
-            ${filesystemQueries.includes(property.format) ? (dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
+            ${(() => {
 
-                // NOTE: We can get the file, but we can't know the path unless we use Electron
-                // const [fileHandle] = await window.showOpenFilePicker();
-                // const file = await fileHandle.getFile();
-                // console.log(fileHandle, file)
-                // const contents = await file.text();
-                // console.log(contents)
-                const button = ev.target
-                const file = await this.#useElectronDialog(property.format)
-                const path = file.filePaths[0]
-                this.results[name][propertyName] = path
-                button.nextSibling.innerText = path
+              // Handle  string formats
+              if (property.type === 'string') {
 
-            }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`) : html`<p>type not supported (${property.type} | ${property.format ?? '–'}) </p>`}
+                // Handle file and directory formats
+                if (filesystemQueries.includes(property.format)) return dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
+
+                  // NOTE: We can get the file, but we can't know the path unless we use Electron
+                  // const [fileHandle] = await window.showOpenFilePicker();
+                  // const file = await fileHandle.getFile();
+                  // console.log(fileHandle, file)
+                  // const contents = await file.text();
+                  // console.log(contents)
+                  const button = ev.target
+                  const file = await this.#useElectronDialog(property.format)
+                  const path = file.filePaths[0]
+                  this.results[name][propertyName] = path
+                  button.nextSibling.innerText = path
+
+                }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
+
+                // Handle long string formats
+                else if (property.format === 'long') return html`<textarea .value="${this.results[name][propertyName] ?? ''}" @input=${(ev) => this.results[name][propertyName] = ev.target.value}></textarea>`
+
+                // Handle date formats
+                else if (property.format === 'date-time') return html`<input type="datetime-local" .value="${this.results[name][propertyName] ?? ''}" @input=${(ev) => this.results[name][propertyName] = ev.target.value} />`
+
+                // Handle other string formats
+                else {
+                  const type = property.format === 'date-time' ? "datetime-local" : property.format ?? 'text'
+                  return html`<input type="${type}" .value="${this.results[name][propertyName] ?? ''}" @input=${(ev) => this.results[name][propertyName] = ev.target.value} />`
+                }
+              }
+
+
+            // Default case
+            return html`<p>type not supported (${property.type} | ${property.format ?? '–'}) </p>`
+            })()}
           </div>
           `
         })}
