@@ -3,7 +3,7 @@
 > **Note:** This project is under heavy pre-release development and is not recommended for practical use.
 
 ## Installation
-Install the appropriate Python dependencies for your operating system. 
+Install the appropriate Python dependencies for your operating system.
 
 ### Windows
 ```bash
