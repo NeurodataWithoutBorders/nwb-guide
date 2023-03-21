@@ -38,6 +38,10 @@ def get_custom_converter(interface_class_names: List[str]) -> NWBConverter:
 
     return CustomNWBConverter
 
+def instantiate_custom_converter(source_data):
+    interface_class_names = list(source_data)  # NOTE: We currently assume that the keys of the properties dict are the interface names
+    CustomNWBConverter = get_custom_converter(interface_class_names)
+    return  CustomNWBConverter(source_data)
 
 def get_source_schema(interface_class_names: List[str]) -> dict:
     """
@@ -52,11 +56,26 @@ def get_metadata_schema(source_data):
     Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
     """
 
-    interface_class_names = list(
-        source_data
-    )  # NOTE: We currently assume that the keys of the properties dict are the interface names
-    CustomNWBConverter = get_custom_converter(interface_class_names)
-    converter = CustomNWBConverter(source_data)
+    converter = instantiate_custom_converter(source_data)
     schema = converter.get_metadata_schema()
     metadata = converter.get_metadata()
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
+
+
+def convert_to_nwb(info):
+    """
+    Function used to convert the source data to NWB format using the specified metadata.
+    """
+
+    converter = instantiate_custom_converter(info['source_data'])
+
+    converter.run_conversion(
+        metadata=info['metadata'],
+        nwbfile_path=info['nwbfile_path'],
+        # save_to_file=info.save_to_file,
+        # overwrite=info.overwrite,
+        # conversion_options=info.conversion_options,
+        # stub_test=info.stub_test,
+    )
+
+    return True

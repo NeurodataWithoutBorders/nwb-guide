@@ -5,9 +5,7 @@ import { Page } from '../../Page.js';
 
 import globals from '../../../../../scripts/globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-const { port, notyf } = globals;
-
-const base = `http://127.0.0.1:${port}`;
+const { notyf, baseUrl } = globals;
 
 export class GuidedSourceDataPage extends Page {
 
@@ -36,8 +34,10 @@ export class GuidedSourceDataPage extends Page {
 
       // const previousResults = this.info.globalState.metadata.results
 
+      this.save() // Save in case the metadata request fails
+      
       // NOTE: This clears all user-defined results
-      const result = await fetch(`${base}/neuroconv/metadata`, {
+      const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.info.globalState.source.results)

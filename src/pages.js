@@ -112,14 +112,14 @@ dashboard.pages = {
                 label: "Conversion type",
                 section: sections[2]
             }),
-            upload: new GuidedUploadPage({
-                label: "Upload dataset",
-                section: sections[2]
-            }),
-            deletefiles: new GuidedDeleteFilesPage({
-                label: "Delete files",
-                section: sections[2]
-            }),
+            // upload: new GuidedUploadPage({
+            //     label: "Upload dataset",
+            //     section: sections[2]
+            // }),
+            // deletefiles: new GuidedDeleteFilesPage({
+            //     label: "Delete files",
+            //     section: sections[2]
+            // }),
 
             review: new GuidedResultsPage({
                 label: "Review results",
