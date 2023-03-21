@@ -5,6 +5,7 @@ from neuroconv import datainterfaces, NWBConverter
 import json
 from neuroconv.utils import NWBMetaDataEncoder
 
+
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     # Hard coded for now - eventual goal will be to import this from NeuroConv
