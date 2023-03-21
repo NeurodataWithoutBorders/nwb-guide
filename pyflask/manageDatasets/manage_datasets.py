@@ -663,7 +663,6 @@ def bf_rename_dataset(accountname, current_dataset_name, renamed_dataset_name):
 
 
 def clear_queue():
-
     command = [agent_cmd(), "upload-status", "--cancel-all"]
 
     return subprocess.run(command, check=True)  # env=agent_env(?settings?)
@@ -679,7 +678,6 @@ def agent_running():
         create_connection(socket_address(listen_port)).close()
 
     except socket.error as e:
-
         if e.errno == errno.ECONNREFUSED:  # ConnectionRefusedError for Python 3
             return True
         else:
@@ -856,7 +854,6 @@ def bf_submit_dataset(accountname, bfdataset, pathdataset):
 
         def calluploadfolder():
             try:
-
                 global submitdataprogress
                 global submitdatastatus
 
@@ -973,7 +970,6 @@ def bf_submit_dataset(accountname, bfdataset, pathdataset):
                         # update the start_index to end_index + 1
                         start_index = end_index + 1
                 else:
-
                     if len(files) > 0:
                         submitdataprogress = "Uploading folder '%s' to dataset '%s \n' " % (dirpath, bfdataset)
 
@@ -1157,7 +1153,6 @@ def bf_get_teams(selected_bfaccount):
 
 
 def bf_get_permission(selected_bfaccount, selected_bfdataset):
-
     """
     Function to get permission for a selected dataset
 
@@ -1234,7 +1229,6 @@ def bf_get_permission(selected_bfaccount, selected_bfdataset):
 
 
 def bf_get_current_user_permission(bf, myds):
-
     """
     Function to get the permission of currently logged in user for a selected dataset
 
@@ -1254,7 +1248,6 @@ def bf_get_current_user_permission(bf, myds):
 
 
 def bf_add_permission(selected_bfaccount, selected_bfdataset, selected_user, selected_role):
-
     """
     Function to add/remove permission for a suser to a selected dataset
 
@@ -1346,7 +1339,6 @@ def bf_add_permission(selected_bfaccount, selected_bfdataset, selected_user, sel
                 )
 
             if selected_role == "remove current permissions":
-
                 bf._api.datasets._del(
                     "/" + str(selected_dataset_id) + "/collaborators/users".format(dataset_id=selected_dataset_id),
                     json={"id": selected_user_id},
@@ -1372,7 +1364,6 @@ def bf_add_permission(selected_bfaccount, selected_bfdataset, selected_user, sel
 
 
 def bf_add_permission_team(selected_bfaccount, selected_bfdataset, selected_team, selected_role):
-
     """
     Function to add/remove permission fo a team to a selected dataset
 
@@ -1469,7 +1460,6 @@ def bf_add_permission_team(selected_bfaccount, selected_bfdataset, selected_team
             abort(400, "You must be dataset owner or manager to change its permissions")
 
         if selected_role == "remove current permissions":
-
             bf._api.datasets._del(
                 "/" + str(selected_dataset_id) + "/collaborators/teams".format(dataset_id=selected_dataset_id),
                 json={"id": selected_team_id},
@@ -1924,7 +1914,6 @@ def get_number_of_files_and_folders_locally(filepath):
 
 
 def get_pennsieve_api_key_secret(email, password, keyname):
-
     PENNSIEVE_URL = "https://api.pennsieve.io"
 
     try:
