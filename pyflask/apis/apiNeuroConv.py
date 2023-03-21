@@ -60,6 +60,7 @@ class Schemas(Resource):
             if notBadRequestException(e):
                 api.abort(500, str(e))
 
+
 @api.route("/convert")
 class Schemas(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})

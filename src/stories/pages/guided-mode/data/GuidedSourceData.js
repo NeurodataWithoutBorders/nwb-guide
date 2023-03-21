@@ -35,7 +35,7 @@ export class GuidedSourceDataPage extends Page {
       // const previousResults = this.info.globalState.metadata.results
 
       this.save() // Save in case the metadata request fails
-      
+
       // NOTE: This clears all user-defined results
       const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
         method: 'POST',

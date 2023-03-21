@@ -68,7 +68,7 @@ export class JSONSchemaForm extends LitElement {
     <div>
       <h4 style="margin-bottom: 0; margin-top: 10px;">${name} ${isRequired ? html`<span style="color: red">*</span>` : ``}</h4>
       ${(() => {
-        
+
         // Handle  string formats
         if (info.type === 'string') {
 
@@ -95,7 +95,7 @@ export class JSONSchemaForm extends LitElement {
 
           // Handle date formats
           else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} />`
-          
+
           // Handle other string formats
           else {
             const type = info.format === 'date-time' ? "datetime-local" : info.format ?? 'text'
@@ -148,10 +148,10 @@ export class JSONSchemaForm extends LitElement {
 
     // Filter non-required properties (if specified) and render the sub-schema
     const renderable = depth ? this.#getRenderable(schema, depth) : Object.entries(schema.properties ?? {})
-    
-    
-    return renderable.length === 0 ? 
-      html`<p>No properties to render</p>` : 
+
+
+    return renderable.length === 0 ?
+      html`<p>No properties to render</p>` :
       renderable.map(([name, info]) => {
 
       // Directly render the interactive property element

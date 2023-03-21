@@ -32,10 +32,10 @@ export class GuidedConversionTypePage extends Page {
     let conversionGlobalState = this.info.globalState.conversion
     if (!conversionGlobalState) conversionGlobalState = this.info.globalState.conversion = {info: {}, results: null}
 
-    const form = new JSONSchemaForm({ 
-      schema, 
-      results: conversionGlobalState.info, 
-      dialogType: 'showSaveDialog', 
+    const form = new JSONSchemaForm({
+      schema,
+      results: conversionGlobalState.info,
+      dialogType: 'showSaveDialog',
       dialogOptions: {
         properties: [ 'createDirectory' ],
         defaultPath: 'converted.nwb',
@@ -53,7 +53,7 @@ export class GuidedConversionTypePage extends Page {
         // TODO: Insert validation here...
         const valid = true
         if (!valid) throw new Error('Invalid input')
-  
+
         Swal.fire({
           title: "Running conversion",
           html: "Please wait...",
@@ -69,7 +69,7 @@ export class GuidedConversionTypePage extends Page {
 
 
         this.info.globalState.conversion.results = null
-   
+
         this.save() // Save in case the conversion fails
 
         const results = await fetch(`${baseUrl}/neuroconv/convert`, {
@@ -83,10 +83,10 @@ export class GuidedConversionTypePage extends Page {
             metadata: this.info.globalState.metadata.results
           })
         }).then((res) => res.json())
-  
-  
+
+
         Swal.close();
-  
+
         if (results.message) {
           const message = results.message.includes('already exists') ? "File already exists. Please specify another location to store the conversion results" : "Conversion failed with current metadata. Please try again."
           notyf.open({
@@ -95,9 +95,9 @@ export class GuidedConversionTypePage extends Page {
           });
           throw new Error(`Conversion failed with current metadata: ${results.message}`)
         }
-  
+
         this.info.globalState.conversion.results = results
-  
+
         this.onTransition(1)
     })
 
