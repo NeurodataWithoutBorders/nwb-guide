@@ -1,4 +1,4 @@
-import { MultiSelectForm } from './multiselect/index.js';
+import { MultiSelectForm } from './MultiSelectForm.js';
 
 export default {
   title: 'Example/Multiselect Form'
