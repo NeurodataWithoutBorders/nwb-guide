@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 
@@ -47,7 +47,7 @@ def get_source_schema(interface_class_names: List[str]) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def get_metadata_schema(source_data):
+def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
     """
     Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
     """
