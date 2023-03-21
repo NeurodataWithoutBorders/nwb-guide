@@ -45,16 +45,9 @@ export class GuidedHomePage extends Page {
 
     //sort progressFileJSONdata into two rows one with property "previous-guided-upload-dataset-name"
     //and one without property "previous-guided-upload-dataset-name"
-    const progressDataAlreadyUploadedToPennsieve = progressFileJSONdata.filter(
-      (progressFileJSONobj) => {
-        return progressFileJSONobj["previous-guided-upload-dataset-name"];
-      }
-    );
-    const progressDataNotYetUploadedToPennsieve = progressFileJSONdata.filter(
-      (progressFileJSONobj) => {
-        return !progressFileJSONobj["previous-guided-upload-dataset-name"];
-      }
-    );
+    const isInProgress = (progressFileJSONobj) => !progressFileJSONobj.conversion?.results;
+    const progressConversionsSuccessful = progressFileJSONdata.filter((progressFileJSONobj) => !isInProgress(progressFileJSONobj));
+    const progressConversionsInProgress = progressFileJSONdata.filter(isInProgress);
     //Add the progress cards that have already been uploaded to Pennsieve
     //to their container (datasets that have the globals.sodaJSONObj["previous-guided-upload-dataset-name"] property)
 
@@ -67,14 +60,14 @@ export class GuidedHomePage extends Page {
       return card
     }
 
-    if (progressDataAlreadyUploadedToPennsieve.length > 0) {
-      progressDataAlreadyUploadedToPennsieve.forEach((progressFile) => uploadedList.appendChild(createCard(progressFile)))
+    if (progressConversionsSuccessful.length > 0) {
+      progressConversionsSuccessful.forEach((progressFile) => uploadedList.appendChild(createCard(progressFile)))
     } else uploadedList.innerHTML = `
       <h2 class="guided--text-sub-step">
-        No local datasets have been uploaded to Pennsieve yet.
+        No local conversion pipelines have been successful yet.
       </h2>
       <p class="guided--text-input-instructions m-0 text-center">
-        <b>Click "Datasets in progress" to view local datasets in progress.</b>
+        <b>Click "Active Conversions" to view local conversion pipelines in progress.</b>
       </p>
     `
 
@@ -83,14 +76,14 @@ export class GuidedHomePage extends Page {
     const resumeList = htmlBase.querySelector("#guided-div-resume-progress-cards")
     resumeList.innerHTML = ''
 
-    if (progressDataNotYetUploadedToPennsieve.length > 0) {
-      progressDataNotYetUploadedToPennsieve.forEach((progressFile) => resumeList.appendChild(createCard(progressFile)))
+    if (progressConversionsInProgress.length > 0) {
+      progressConversionsInProgress.forEach((progressFile) => resumeList.appendChild(createCard(progressFile)))
     } else resumeList.innerHTML = `
       <h2 class="guided--text-sub-step">
-        All local datasets have been previously uploaded to Pennsieve.
+        All local conversion pipelines have been previously successful.
       </h2>
       <p class="guided--text-input-instructions m-0 text-center">
-        <b>Click "Datasets uploaded to Pennsieve" to view local datasets that have already been uploaded to Pennsieve.</b>
+        <b>Click "Successful Conversions" to view local conversion pipelines that have already been successful.</b>
       </p>
     `;
 
@@ -150,22 +143,22 @@ export class GuidedHomePage extends Page {
     const datasetNameToResume = resumeProgressButton.parentNode.parentNode.querySelector(".progress-file-name").innerText;
     const datasetResumeJsonObj = await progress.get(datasetNameToResume);
 
-    // If the dataset had been previously successfully uploaded, check to make sure it exists on Pennsieve still.
-    if (datasetResumeJsonObj["previous-guided-upload-dataset-name"]) {
-      const previouslyUploadedName = datasetResumeJsonObj["previous-guided-upload-dataset-name"];
-      const datasetToResumeExistsOnPennsieve = await checkIfDatasetExistsOnPennsieve(
-        previouslyUploadedName
-      );
-      if (!datasetToResumeExistsOnPennsieve) {
-        notyf.open({
-          type: "error",
-          message: `The dataset ${previouslyUploadedName} was not found on Pennsieve therefore you can no longer modify this dataset via Guided Mode.`,
-          duration: 7000,
-        });
-        resumeProgressButton.classList.remove("loading");
-        return;
-      }
-    }
+    // // If the dataset had been previously successfully uploaded, check to make sure it exists on Pennsieve still.
+    // if (datasetResumeJsonObj["previous-guided-upload-dataset-name"]) {
+    //   const previouslyUploadedName = datasetResumeJsonObj["previous-guided-upload-dataset-name"];
+    //   const datasetToResumeExistsOnPennsieve = await checkIfDatasetExistsOnPennsieve(
+    //     previouslyUploadedName
+    //   );
+    //   if (!datasetToResumeExistsOnPennsieve) {
+    //     notyf.open({
+    //       type: "error",
+    //       message: `The dataset ${previouslyUploadedName} was not found on Pennsieve therefore you can no longer modify this dataset via Guided Mode.`,
+    //       duration: 7000,
+    //     });
+    //     resumeProgressButton.classList.remove("loading");
+    //     return;
+    //   }
+    // }
 
     this.info.globalState = datasetResumeJsonObj
 
@@ -218,18 +211,6 @@ export class GuidedHomePage extends Page {
     return html`
         <div id="guided-home" class="guided--main-tab">
           <div class="guided--panel">
-            <h1 class="guided--text-sub-step">Guided Mode</h1>
-            <!-- <div class="title-border">
-              </div> -->
-            <p class="guided--help-text" style="margin-bottom: 2rem">
-              The Guided Mode is intended to guide users step-by-step through all the requirements for
-              curating and sharing datasets according to the SPARC data standards. The user interfaces
-              of the Guided Mode are designed to logically guide users through the curation steps and
-              include all necessary information such that no prior knowledge of the SPARC data
-              standards is required. Contrary to the Free Form Mode, the Guided Mode interfaces are
-              interconnected and form a single workflow such that the curation process is streamlined
-              further.
-            </p>
             <div class="justify-center" id="curate-new-home" style="align-items: center">
               <div
                 class="container--dashed"
@@ -260,7 +241,7 @@ export class GuidedHomePage extends Page {
                 }}"
               >
                 <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
-                <h2 class="guided--text-sub-step">Begin curating a new dataset</h2>
+                <h2 class="guided--text-sub-step">Create a new conversion pipeline</h2>
               </div>
             </div>
 
@@ -281,7 +262,7 @@ export class GuidedHomePage extends Page {
                   data-next-element="guided-div-resume-progress-cards"
                   style="width: 250px"
                 >
-                  Datasets in progress
+                  Active Conversions
                 </button>
                 <button
                   class="ui button guided--radio-button guided--tab-button"
@@ -289,7 +270,7 @@ export class GuidedHomePage extends Page {
                   data-next-element="guided-div-update-uploaded-cards"
                   style="width: 250px"
                 >
-                  Datasets uploaded to Pennsieve
+                 Successful Conversions
                 </button>
               </div>
             </div>
