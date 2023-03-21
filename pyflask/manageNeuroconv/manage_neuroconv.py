@@ -49,7 +49,7 @@ def get_source_schema(interface_class_names: List[str]) -> dict:
 
 def get_metadata_schema(source_data):
     """
-    Function used to get metadata schea from a CustomNWBConverter
+    Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
     """
 
     interface_class_names = list(
