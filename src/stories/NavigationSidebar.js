@@ -131,10 +131,10 @@ export class NavigationSidebar extends LitElement {
                 ${state.visited ? " completed" : " not-completed"}
                 ${state.active ? "active" : ""}"f
               "
-              @click=${() => this.onClick(id, state.page)}
+              @click=${() => this.onClick(id)}
             >
               <div class="guided--nav-bar-section-page-title">
-                ${state.page.info.label ?? id}
+                ${state.pageLabel ?? id}
               </div>
             </div>
           </div>

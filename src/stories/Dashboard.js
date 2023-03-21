@@ -63,10 +63,6 @@ export class Dashboard extends LitElement {
     else if (typeof page === 'object') return this.getPage(Object.values(page)[0])
   }
 
-  reset() {
-    this.#sectionStates = {} // Reset state of the navigation sidebar
-  }
-
   setMain(page, infoPassed){
 
     // Update Previous Page
@@ -80,18 +76,17 @@ export class Dashboard extends LitElement {
     if (previous) {
       if (previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
 
-      if (previous.info.base !== info.base) {
-        this.reset() // Reset state if base page changed
-      }
       previous.active = false
     }
 
     // Update Active Page
     this.#active = page
+    const toPass = { ...infoPassed}
+    if (previous) toPass.globalState = previous.info.globalState
+
 
     if (info.parent && info.section) {
-
-      this.subSidebar.sections = this.#getSections(info.parent.info.pages) // Update sidebar items (if changed)
+      this.subSidebar.sections = this.#getSections(info.parent.info.pages, toPass.globalState) // Update sidebar items (if changed)
       this.subSidebar.active = info.id // Update active item (if changed)
 
       this.sidebar.hide(true)
@@ -100,9 +95,6 @@ export class Dashboard extends LitElement {
       this.sidebar.show()
       this.subSidebar.hide()
     }
-
-    const toPass = { ...infoPassed}
-    if (previous) toPass.globalState = previous.info.globalState
 
     page.set(toPass)
 
@@ -114,9 +106,11 @@ export class Dashboard extends LitElement {
   }
 
 
-  #sectionStates = {}
+  // Populate the sections tracked for this page by using the global state as a model
+  #getSections = (pages = {}, globalState = {}) => {
 
-  #getSections = (pages = {}) => {
+    if (!globalState.sections) globalState.sections = {}
+
     Object.entries(pages).forEach(([id, page]) => {
 
       const info = page.info
@@ -126,11 +120,11 @@ export class Dashboard extends LitElement {
 
         const section = info.section
 
-        let state = this.#sectionStates[section]
-        if (!state) state = this.#sectionStates[section] = { open: false, active: false, pages: {} }
+        let state = globalState.sections[section]
+        if (!state) state = globalState.sections[section] = { open: false, active: false, pages: {} }
 
         let pageState = state.pages[id]
-        if (!pageState) pageState = state.pages[id] = { visited: false, active: false, page }
+        if (!pageState) pageState = state.pages[id] = { visited: false, active: false, pageLabel: page.info.label }
 
         state.active = false
         pageState.active = false
@@ -140,7 +134,7 @@ export class Dashboard extends LitElement {
       }
     })
 
-    return this.#sectionStates
+    return globalState.sections
 
   }
 
@@ -150,7 +144,11 @@ export class Dashboard extends LitElement {
     this.sidebar = (this.shadowRoot ?? this).querySelector("nwb-sidebar");
     this.subSidebar = (this.shadowRoot ?? this).querySelector("nwb-navigation-sidebar");
     this.main = (this.shadowRoot ?? this).querySelector("nwb-main");
-    this.sidebar.onClick = this.subSidebar.onClick = (_, value) => this.setMain(value)
+    this.sidebar.onClick = (_, value) => this.setMain(value)
+    this.subSidebar.onClick = (id) => {
+      console.log('Go to page', id, this.#pagesById[id])
+      this.setMain(this.#pagesById[id])
+    }
     this.main.onTransition = (transition, infoPassed) => {
 
       if (typeof transition === 'number'){
