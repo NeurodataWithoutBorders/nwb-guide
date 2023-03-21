@@ -2,9 +2,6 @@ import { Sidebar } from './sidebar.js';
 
 export default {
   title: 'Sidebar',
-  parameters: {
-    chromatic: { disableSnapshot: false },
-  },
 };
 
 const Template = (args) => new Sidebar(args);

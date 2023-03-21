@@ -12,6 +12,7 @@ const preview = {
       },
     },
   },
+  chromatic: { disableSnapshot: true },
 };
 
 export default preview;

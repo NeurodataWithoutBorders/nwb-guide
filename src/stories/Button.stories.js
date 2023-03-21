@@ -4,6 +4,9 @@ import { Button } from './Button';
 export default {
   title: 'Button',
   tags: ['autodocs'],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+  },
   argTypes: {
     backgroundColor: { control: 'color' },
     onClick: { action: 'onClick' },
