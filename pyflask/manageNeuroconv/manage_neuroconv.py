@@ -39,7 +39,7 @@ def get_custom_converter(interface_class_names: List[str]) -> NWBConverter:
     return CustomNWBConverter
 
 
-def instantiate_custom_converter(source_data):
+def instantiate_custom_converter(source_data: Dict[str, str]) -> NWBConverter:
     interface_class_names = list(
         source_data
     )  # NOTE: We currently assume that the keys of the properties dict are the interface names
@@ -66,7 +66,7 @@ def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
-def convert_to_nwb(info):
+def convert_to_nwb(info: dict) -> bool:
     """
     Function used to convert the source data to NWB format using the specified metadata.
     """
