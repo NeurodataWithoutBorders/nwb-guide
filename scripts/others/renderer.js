@@ -51,7 +51,6 @@ import DatePicker from 'tui-date-picker'
 
 
 import { currentConTable } from '../../preload.js'
-import { openLink } from '../../src/links.js';
 
 const {
   parseJson,
@@ -8535,6 +8534,5 @@ globals.tippy("#datasetPathDisplay", {
   theme: "soda",
   maxWidth: "100%",
 });
-
 
 window.gatherLogs = gatherLogs;
