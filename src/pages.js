@@ -91,10 +91,10 @@ dashboard.pages = {
                 label: "Project details",
                 section: sections[0]
             }),
-            subjects: new GuidedSubjectsPage({
-                label: "Subjects",
-                section: sections[0],
-            }),
+            // subjects: new GuidedSubjectsPage({
+            //     label: "Subjects",
+            //     section: sections[0],
+            // }),
             structure: new GuidedStructurePage({
                 label: "Data formats",
                 section: sections[1]
