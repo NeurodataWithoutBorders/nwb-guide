@@ -26,6 +26,8 @@ export class JSONSchemaForm extends LitElement {
     return {
       schema: { type: Object, reflect: false },
       results: { type: Object, reflect: false },
+      ignore: { type: Array, reflect: false },
+      onlyRequired: { type: Boolean, reflect: false },
     };
   }
 
@@ -33,6 +35,8 @@ export class JSONSchemaForm extends LitElement {
     super()
     this.schema = props.schema ?? {}
     this.results = props.results ?? {}
+    this.ignore = props.ignore ?? []
+    this.onlyRequired = props.onlyRequired ?? false
   }
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
@@ -56,8 +60,6 @@ export class JSONSchemaForm extends LitElement {
     const schema = this.schema ?? {}
     const entries = Object.entries(schema.properties ?? {})
 
-    console.log(schema, this.results)
-
     entries.forEach(([name]) => {
       if (!this.results[name]) this.results[name] = {} // Regisiter new interfaces in results
     }) // Register interfaces
@@ -76,14 +78,15 @@ export class JSONSchemaForm extends LitElement {
       entries.length === 0 ? html`<p>No interfaces selected</p>` : entries.map(([name, subSchema]) => {
 
         // Filter non-required properties
-        const requiredProperties = Object.entries(subSchema.properties ?? {}).filter(([_, property]) => subSchema.required?.includes(_))
+        const entries = Object.entries(subSchema.properties ?? {})
+        const renderedProperties = entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || subSchema.required?.includes(key)))
 
-        if (requiredProperties.length === 0) return ''
+        if (renderedProperties.length === 0) return ''
 
       return html`
       <div style="margin-bottom: 25px;">
         <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>
-        ${requiredProperties.map(([propertyName, property]) => {
+        ${renderedProperties.map(([propertyName, property]) => {
 
           const isRequired = subSchema.required?.includes(propertyName) // Distinguish required properties
 
@@ -113,16 +116,15 @@ export class JSONSchemaForm extends LitElement {
                 }}>Get ${property.format[0].toUpperCase() + property.format.slice(1)}</button><small>${this.results[name][propertyName] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
 
                 // Handle long string formats
-                else if (property.format === 'long') return html`<textarea .value="${this.results[name][propertyName]}" @input=${(ev) => this.results[name][propertyName] = ev.target.value}></textarea>`
+                else if (property.format === 'long') return html`<textarea .value="${this.results[name][propertyName] ?? ''}" @input=${(ev) => this.results[name][propertyName] = ev.target.value}></textarea>`
 
                 // Handle date formats
-                else if (property.format === 'date-time') return html`<input type="datetime-local" .value="${this.results[name][propertyName]}" @input=${(ev) => this.results[name][propertyName] = ev.target.value} />`
+                else if (property.format === 'date-time') return html`<input type="datetime-local" .value="${this.results[name][propertyName] ?? ''}" @input=${(ev) => this.results[name][propertyName] = ev.target.value} />`
                 
                 // Handle other string formats
                 else {
                   const type = property.format === 'date-time' ? "datetime-local" : property.format ?? 'text'
-                  console.log('String type', name, propertyName, type)
-                  return html`<input type="${type}" .value="${this.results[name][propertyName]}" @input=${(ev) => this.results[name][propertyName] = ev.target.value} />`
+                  return html`<input type="${type}" .value="${this.results[name][propertyName] ?? ''}" @input=${(ev) => this.results[name][propertyName] = ev.target.value} />`
                 }
               }
 

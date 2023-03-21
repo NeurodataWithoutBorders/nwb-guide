@@ -63,7 +63,11 @@ export class GuidedSourceDataPage extends Page {
 
   render() {
 
-    const form = new JSONSchemaForm(this.info.globalState.source)
+    const form = new JSONSchemaForm({
+      ...this.info.globalState.source,
+      ignore: ['verbose'],
+      onlyRequired: true,
+    })
 
     return html`
   <div

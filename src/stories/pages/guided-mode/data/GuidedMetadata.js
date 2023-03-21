@@ -13,7 +13,11 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
-    const form = new JSONSchemaForm(this.info.globalState.metadata)
+    const form = new JSONSchemaForm({
+      ...this.info.globalState.metadata,
+      ignore: ['Ecephys'],
+      onlyRequired: false,
+    })
 
     return html`
   <div
