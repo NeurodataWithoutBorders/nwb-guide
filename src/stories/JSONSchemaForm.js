@@ -60,12 +60,23 @@ export class JSONSchemaForm extends LitElement {
     const schema = this.schema ?? {}
     const entries = Object.entries(schema.properties ?? {})
 
-    entries.forEach(([name]) => {
+    entries.forEach(([name, property]) => {
       if (!this.results[name]) this.results[name] = {} // Regisiter new interfaces in results
-    }) // Register interfaces
+      if (property.properties) {
+        Object.entries(property.properties).forEach(([key, value]) => {
+          if (!(key in this.results[name]) && 'default' in value) this.results[name][key] = value.default // Register default properties in results
+        })
+      }
+    }) 
 
-    for (let propertyName in this.results) {
-      if (!schema.properties[propertyName]) delete this.results[propertyName] // delete extraneous property names
+    // delete extraneous results
+    for (let name in this.results) {
+      if (!(name in schema.properties)) delete this.results[name]
+      else {
+        for (let key in this.results[name]) {
+          if (!(key in schema.properties[name].properties)) delete this.results[name][key]
+        }
+      }
     }
 
 
