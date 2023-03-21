@@ -10,6 +10,8 @@ import { GuidedHeader } from './pages/guided-mode/GuidedHeader.js';
 const componentCSS = `
     :host {
         position: relative;
+        display: grid;
+        grid-template-rows: fit-content(100%) 1fr fit-content(100%);
     }
 `
 
@@ -115,14 +117,14 @@ export class Main extends LitElement {
       }
     }
 
-    const headerEl = header ? new GuidedHeader(header) : ''
+    const headerEl = header ? new GuidedHeader(header) : html`<div></div>` // Render for grid
 
     const capsuleEl = new GuidedCapsules(capsules)
-    const footerEl = footer ? new GuidedFooter(footer) : ''
+    const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>` // Render for grid
 
     return html`
       ${headerEl}
-      <main id="content" class="js-content">
+      <main id="content" class="js-content" style="overflow: hidden;">
         <section
           class="section js-section u-category-windows"
         >
