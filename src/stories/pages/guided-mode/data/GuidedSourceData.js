@@ -34,10 +34,10 @@ export class GuidedSourceDataPage extends Page {
         },
       })
 
-      let metadataInfo = this.info.globalState.metadata
-      if (!metadataInfo) metadataInfo = this.info.globalState.metadata = {results: {}, schema: {}}
+      // const previousResults = this.info.globalState.metadata.results
 
-      const schema = await fetch(`${base}/neuroconv/metadata`, {
+      // NOTE: This clears all user-defined results
+      const result = await fetch(`${base}/neuroconv/metadata`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.info.globalState.source.results)
@@ -46,16 +46,17 @@ export class GuidedSourceDataPage extends Page {
 
       Swal.close();
 
-      if (schema.message) {
+      if (result.message) {
         const message = "Failed to get metadata with current source data. Please try again."
         notyf.open({
           type: "error",
           message,
         });
-        throw new Error(`Failed to get metadata for source data provided: ${schema.message}`)
+        throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
       }
 
-      metadataInfo.schema = schema
+      console.log('Got the result', result)
+      this.info.globalState.metadata = result
 
       this.onTransition(1)
     }
