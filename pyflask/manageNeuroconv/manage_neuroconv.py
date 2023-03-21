@@ -2,6 +2,8 @@ from typing import List
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 
+import json
+from neuroconv.utils import NWBMetaDataEncoder
 
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
@@ -54,4 +56,5 @@ def get_metadata_schema(source_data):
     )  # NOTE: We currently assume that the keys of the properties dict are the interface names
     CustomNWBConverter = get_custom_converter(interface_class_names)
     converter = CustomNWBConverter(source_data)
-    return converter.get_metadata_schema()
+    schema = converter.get_metadata_schema()
+    return json.loads(json.dumps(schema, cls=NWBMetaDataEncoder))
