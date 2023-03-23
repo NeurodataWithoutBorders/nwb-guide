@@ -3,9 +3,46 @@
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
 
+// Global styles to apply with the dashboard
+import "../../assets/css/variables.css"
+import "../../assets/css/nativize.css"
+import "../../assets/css/global.css"
+import "../../assets/css/nav.css"
+import "../../assets/css/section.css"
+import "../../assets/css/demo.css"
+import "../../assets/css/individualtab.css"
+import "../../assets/css/main_tabs.css"
+import "../../node_modules/cropperjs/dist/cropper.css"
+import "../../node_modules/notyf/notyf.min.css"
+import "../../assets/css/spur.css"
+import "../../assets/css/main.css"
+// import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+import "../../node_modules/@fortawesome/fontawesome-free/css/all.css"
+import "../../node_modules/select2/dist/css/select2.min.css"
+import "../../node_modules/@toast-ui/editor/dist/toastui-editor.css"
+import "../../node_modules/tui-date-picker/dist/tui-date-picker.css"
+import "../../node_modules/codemirror/lib/codemirror.css"
+import "../../node_modules/@yaireo/tagify/dist/tagify.css"
+import "../../node_modules/fomantic-ui/dist/semantic.min.css"
+import "../../node_modules/fomantic-ui/dist/components/accordion.min.css"
+import "../../node_modules/@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css"
+import "../../node_modules/@sweetalert2/theme-bulma/bulma.css"
+import "../../node_modules/bootstrap-select/dist/css/bootstrap-select.min.css"
+import "../../node_modules/jstree/dist/themes/default/style.min.css"
+import "../../node_modules/tippy.js/dist/tippy.css"
+import "../../node_modules/tippy.js/themes/light.css"
+import "../../node_modules/intro.js/minified/introjs.min.css"
+import "../../assets/css/guided.css"
+
+// import "https://jsuites.net/v4/jsuites.js"
+// import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
+
 import "./NavigationSidebar.js"
 import "./Sidebar.js";
 import "./Main.js";
+import { Main } from './Main.js';
+import { Sidebar } from './Sidebar.js';
+import { NavigationSidebar } from './NavigationSidebar.js';
 
 const componentCSS = `
     :host {
@@ -36,13 +73,30 @@ export class Dashboard extends LitElement {
     };
   }
 
+  main;
+  sidebar;
+  subSidebar;
+
   #pagesById = {}
   #active
 
   constructor (props = {}) {
     super()
+
+    this.main =  new Main()
+    this.main.classList.add('dash-app')
+
+    this.sidebar = new Sidebar()
+    this.sidebar.onClick = (_, value) => this.setMain(value)
+
+    this.subSidebar = new NavigationSidebar()
+    this.subSidebar.onClick = (id) => this.setMain(this.#pagesById[id])
+
+
     this.pages = props.pages ?? {}
     this.name = props.name ?? "NWB App"
+
+    this.#updated()
   }
 
   createRenderRoot() {
@@ -52,7 +106,8 @@ export class Dashboard extends LitElement {
   attributeChangedCallback(...args) {
     super.attributeChangedCallback(...args)
     if (args[0] === 'subtitle' && this.sidebar) this.sidebar.setSubtitle(args[1]) // Update subtitle without rerender
-    if (args[0] === 'pages' || args[0] === 'name') this.requestUpdate()
+    if (args[0] === 'name') this.requestUpdate()
+    if (args[0] === 'pages') this.#updated(args[1])
   }
 
 
@@ -64,6 +119,7 @@ export class Dashboard extends LitElement {
   }
 
   setMain(page, infoPassed){
+
 
     // Update Previous Page
     // if (page.page) page = page.page
@@ -138,17 +194,7 @@ export class Dashboard extends LitElement {
 
   }
 
-  updated(){
-    const div = (this.shadowRoot ?? this).querySelector("div");
-    div.style.height = '100vh'
-    this.sidebar = (this.shadowRoot ?? this).querySelector("nwb-sidebar");
-    this.subSidebar = (this.shadowRoot ?? this).querySelector("nwb-navigation-sidebar");
-    this.main = (this.shadowRoot ?? this).querySelector("nwb-main");
-    this.sidebar.onClick = (_, value) => this.setMain(value)
-    this.subSidebar.onClick = (id) => {
-      console.log('Go to page', id, this.#pagesById[id])
-      this.setMain(this.#pagesById[id])
-    }
+  #updated(pages=this.pages) {
     this.main.onTransition = (transition, infoPassed) => {
 
       if (typeof transition === 'number'){
@@ -162,49 +208,56 @@ export class Dashboard extends LitElement {
       else this.setMain(this.#pagesById[transition], infoPassed)
     }
 
-    // Track Pages By Id
-    const addPage = (acc, arr) => {
-      let [ id, page ] = arr
+      this.#pagesById = {}
+      Object.entries(pages).forEach((arr) => this.addPage(this.#pagesById, arr))
+      this.sidebar.pages = pages
+      this.requestUpdate()
+  }
 
-      const info = { ...page.info}
-
-      if (info.id) id = info.id
-
-      const pages = info.pages
-      delete info.pages
-
-      // NOTE: This is not true for nested pages with more info...
-      if (page instanceof HTMLElement) acc[id] = page
-
-      if (pages) {
-        const pagesArr = Object.values(pages)
-
-        // Update info with relative information
-        Object.entries(pages).forEach(([newId, nestedPage], i) => {
-          nestedPage.info.base = id
-          nestedPage.info.previous = pagesArr[i-1]
-          nestedPage.info.next = pagesArr[i+1]
-          nestedPage.info.id = `${id}/${newId}`
-          nestedPage.info.parent = page
-        })
-
-        // // Register a base page
-        // const firstPage = pageArr[0]
-        // if (pagesArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
-
-        // Register all pages
-        Object.entries(pages).forEach((arr) => addPage(acc, arr))
-
+  // Track Pages By Id
+   addPage = (acc, arr) => {
+        let [ id, page ] = arr
+  
+        const info = { ...page.info}
+  
+        if (info.id) id = info.id
+  
+        const pages = info.pages
+        delete info.pages
+  
+        // NOTE: This is not true for nested pages with more info...
+        if (page instanceof HTMLElement) acc[id] = page
+  
+        if (pages) {
+          const pagesArr = Object.values(pages)
+  
+          // Update info with relative information
+          Object.entries(pages).forEach(([newId, nestedPage], i) => {
+            nestedPage.info.base = id
+            nestedPage.info.previous = pagesArr[i-1]
+            nestedPage.info.next = pagesArr[i+1]
+            nestedPage.info.id = `${id}/${newId}`
+            nestedPage.info.parent = page
+          })
+  
+          // // Register a base page
+          // const firstPage = pageArr[0]
+          // if (pagesArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
+  
+          // Register all pages
+          Object.entries(pages).forEach((arr) => this.addPage(acc, arr))
+  
+        }
+  
+        return acc
       }
+  
 
-      return acc
-    }
+  updated(){
 
-    this.#pagesById = {}
-    Object.entries(this.pages).forEach((arr) => addPage(this.#pagesById, arr))
-
-    // Set sidebar pages
-    this.sidebar.pages = this.pages
+    const div = (this.shadowRoot ?? this).querySelector("div");
+    div.style.height = '100vh'    
+    this.#updated()
   }
 
   render() {
@@ -213,12 +266,14 @@ export class Dashboard extends LitElement {
     this.style.display = "grid";
     this.style.gridTemplateColumns = "fit-content(0px) 1fr"
 
+    this.sidebar.name = this.name
+
     return html`
         <div>
-          <nwb-sidebar name=${this.name}></nwb-sidebar>
-          <nwb-navigation-sidebar></nwb-navigation-sidebar>
+          ${this.sidebar}
+          ${this.subSidebar}
         </div>
-        <nwb-main class="dash-app"></nwb-main>
+        ${this.main}
     `;
   }
 };

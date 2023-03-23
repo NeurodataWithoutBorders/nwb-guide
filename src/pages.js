@@ -13,8 +13,8 @@ import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUplo
 import { GuidedDeleteFilesPage } from "./stories/pages/guided-mode/options/GuidedDelete"
 import { GuidedConversionTypePage } from "./stories/pages/guided-mode/options/GuidedConversionType"
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults"
+import { Dashboard } from "./stories/Dashboard"
 
-const dashboard = document.querySelector('nwb-dashboard')
 
 const overviewIcon = `
 <svg
@@ -75,7 +75,7 @@ style="margin-right: 30px; margin-bottom: -5px"
 ></path></svg>
 `
 
-dashboard.pages = {
+const pages = {
     '/': new GettingStartedPage({
         label: "Overview",
         icon: overviewIcon
@@ -135,4 +135,14 @@ dashboard.pages = {
         label: "Contact Us",
         icon: contactIcon
     })
+}
+
+let dashboard = document.querySelector("nwb-dashboard")
+if (dashboard) dashboard.pages = pages
+else dashboard = new Dashboard({ name: "NWB GUIDE", pages })
+
+console.log(dashboard)
+
+export {
+    dashboard
 }

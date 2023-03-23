@@ -52,15 +52,19 @@ export class Sidebar extends LitElement {
   }
 
   show = () => {
-    this.nav.classList.remove("active");
-    this.toggle.classList.remove("active")
-    this.style.display = "block";
+    if (this.nav) {
+      this.nav.classList.remove("active");
+      this.toggle.classList.remove("active")
+      this.style.display = "block";
+    }
   }
 
   hide = (changeDisplay) => {
-    this.nav.classList.add("active");
-    this.toggle.classList.add("active")
-    if (changeDisplay) this.style.display = "none";
+    if (this.nav) {
+      this.nav.classList.add("active");
+      this.toggle.classList.add("active")
+      if (changeDisplay) this.style.display = "none";
+    }
   }
 
   onClick = () => {} // Set by the user
@@ -69,7 +73,7 @@ export class Sidebar extends LitElement {
     const links = (this.shadowRoot ?? this).querySelectorAll('a')
     links.forEach((a) => a.classList.remove('is-selected'))
     const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${id}"]`)
-    a.classList.add('is-selected')
+    if (a) a.classList.add('is-selected')
     this.onClick(id, this.pages[id])
   }
 
