@@ -17,6 +17,7 @@ const exportObject = {
   // Elements filled when needed
   organizeDSglobalPath: '',
   dataset_path: '',
+  baseUrl:`http://127.0.0.1:${port}`
 }
 
 

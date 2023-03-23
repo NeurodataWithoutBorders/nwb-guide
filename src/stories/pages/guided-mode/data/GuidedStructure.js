@@ -20,6 +20,9 @@ export class GuidedStructurePage extends Page {
     onNext: async () => {
       const selected = this.select.selected
       const interfaces = Object.entries(this.select.selected).filter(([_, v]) => v).map(([k, _]) => k);
+
+      this.save() // Save in case the schema request fails
+
       const schema = (interfaces.length === 0) ? {} : await fetch(`${base}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
 
       let sourceInfo = this.info.globalState.source
