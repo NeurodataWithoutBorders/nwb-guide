@@ -1,7 +1,7 @@
 import { MultiSelectForm } from './MultiSelectForm.js';
 
 export default {
-  title: 'Multiselect Form',
+  title: 'Components/Multiselect Form',
   parameters: {
     chromatic: { disableSnapshot: false },
   },

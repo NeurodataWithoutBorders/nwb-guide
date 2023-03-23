@@ -18,6 +18,8 @@ export class Sidebar extends LitElement {
     };
   }
 
+  initialize = true
+
   constructor (props = {}) {
     super()
     this.pages = props.pages
@@ -48,7 +50,7 @@ export class Sidebar extends LitElement {
       }
 
       const firstItem = (this.shadowRoot ?? this).querySelector("ul").children[0];
-      if (firstItem) firstItem.click()
+      if (this.initialize && firstItem) firstItem.click()
   }
 
   show = () => {

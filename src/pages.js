@@ -141,8 +141,6 @@ let dashboard = document.querySelector("nwb-dashboard")
 if (dashboard) dashboard.pages = pages
 else dashboard = new Dashboard({ name: "NWB GUIDE", pages })
 
-console.log(dashboard)
-
 export {
     dashboard
 }

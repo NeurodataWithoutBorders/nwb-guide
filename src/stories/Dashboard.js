@@ -3,40 +3,6 @@
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
 
-// Global styles to apply with the dashboard
-import "../../assets/css/variables.css"
-import "../../assets/css/nativize.css"
-import "../../assets/css/global.css"
-import "../../assets/css/nav.css"
-import "../../assets/css/section.css"
-import "../../assets/css/demo.css"
-import "../../assets/css/individualtab.css"
-import "../../assets/css/main_tabs.css"
-import "../../node_modules/cropperjs/dist/cropper.css"
-import "../../node_modules/notyf/notyf.min.css"
-import "../../assets/css/spur.css"
-import "../../assets/css/main.css"
-// import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-import "../../node_modules/@fortawesome/fontawesome-free/css/all.css"
-import "../../node_modules/select2/dist/css/select2.min.css"
-import "../../node_modules/@toast-ui/editor/dist/toastui-editor.css"
-import "../../node_modules/tui-date-picker/dist/tui-date-picker.css"
-import "../../node_modules/codemirror/lib/codemirror.css"
-import "../../node_modules/@yaireo/tagify/dist/tagify.css"
-import "../../node_modules/fomantic-ui/dist/semantic.min.css"
-import "../../node_modules/fomantic-ui/dist/components/accordion.min.css"
-import "../../node_modules/@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css"
-import "../../node_modules/@sweetalert2/theme-bulma/bulma.css"
-import "../../node_modules/bootstrap-select/dist/css/bootstrap-select.min.css"
-import "../../node_modules/jstree/dist/themes/default/style.min.css"
-import "../../node_modules/tippy.js/dist/tippy.css"
-import "../../node_modules/tippy.js/themes/light.css"
-import "../../node_modules/intro.js/minified/introjs.min.css"
-import "../../assets/css/guided.css"
-
-// import "https://jsuites.net/v4/jsuites.js"
-// import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
-
 import { Main } from './Main.js';
 import { Sidebar } from './sidebar.js';
 import { NavigationSidebar } from './NavigationSidebar.js';
@@ -46,6 +12,7 @@ const componentCSS = `
         display: flex;
         height: 100%;
         width: 100%;
+        position: relative;
     }
 
     nwb-main {
@@ -67,6 +34,7 @@ export class Dashboard extends LitElement {
       pages: { type: Object, reflect: false },
       name: { type: String, reflect: true },
       subtitle: { type: String, reflect: true },
+      activePage: { type: String, reflect: true },
     };
   }
 
@@ -74,24 +42,25 @@ export class Dashboard extends LitElement {
   sidebar;
   subSidebar;
 
-  #pagesById = {}
+  pagesById = {}
   #active
 
   constructor (props = {}) {
     super()
 
-    this.main =  new Main()
+    this.main = new Main()
     this.main.classList.add('dash-app')
 
     this.sidebar = new Sidebar()
-    this.sidebar.onClick = (_, value) => this.setMain(value)
+    this.sidebar.onClick = (_, value) => this.setAttribute('activePage', value.info.id)
 
     this.subSidebar = new NavigationSidebar()
-    this.subSidebar.onClick = (id) => this.setMain(this.#pagesById[id])
+    this.subSidebar.onClick = (id) => this.setAttribute('activePage', id)
 
 
     this.pages = props.pages ?? {}
     this.name = props.name ?? "NWB App"
+    if (props.activePage) this.setAttribute('activePage', props.activePage)
 
     this.#updated()
   }
@@ -100,11 +69,16 @@ export class Dashboard extends LitElement {
     return this;
   }
 
-  attributeChangedCallback(...args) {
-    super.attributeChangedCallback(...args)
-    if (args[0] === 'subtitle' && this.sidebar) this.sidebar.setSubtitle(args[1]) // Update subtitle without rerender
-    if (args[0] === 'name') this.requestUpdate()
-    if (args[0] === 'pages') this.#updated(args[1])
+  attributeChangedCallback(key, previous, latest) {
+    super.attributeChangedCallback(...arguments)
+    if (key === 'subtitle' && this.sidebar) this.sidebar.setSubtitle(latest) // Update subtitle without rerender
+    else if (key === 'name') this.requestUpdate()
+    else if (key === 'pages') this.#updated(latest)
+    else if (key.toLowerCase() === 'activepage'){
+      const page = this.getPage(this.pagesById[latest])
+      this.sidebar.initialize = false
+      this.setMain(page)
+    }
   }
 
 
@@ -115,14 +89,15 @@ export class Dashboard extends LitElement {
     else if (typeof page === 'object') return this.getPage(Object.values(page)[0])
   }
 
-  setMain(page, infoPassed){
+
+  setMain(page, infoPassed = {}){
 
 
     // Update Previous Page
     // if (page.page) page = page.page
     const info = page.info
     const previous = this.#active
-    // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.#pagesById[info.page.id] // Get info from a direct page
+    // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.pagesById[info.page.id] // Get info from a direct page
 
     if (previous === page) return // Prevent rerendering the same page
 
@@ -192,23 +167,28 @@ export class Dashboard extends LitElement {
   }
 
   #updated(pages=this.pages) {
-    this.main.onTransition = (transition, infoPassed) => {
+    this.main.onTransition = (transition) => {
 
       if (typeof transition === 'number'){
         const info = this.#active.info
         const sign = Math.sign(transition)
-        if (sign === 1) return this.setMain(info.next, infoPassed)
-        else if (sign === -1) return this.setMain(info.previous ?? info.parent, infoPassed) // Default to back in time
+        if (sign === 1) return this.setAttribute('activePage', info.next.info.id)
+        else if (sign === -1) return this.setAttribute('activePage', (info.previous ?? info.parent).info.id) // Default to back in time
       }
 
       if (transition in this.pages) this.sidebar.select(transition)
-      else this.setMain(this.#pagesById[transition], infoPassed)
+      else this.setAttribute('activePage', transition)
     }
 
-      this.#pagesById = {}
-      Object.entries(pages).forEach((arr) => this.addPage(this.#pagesById, arr))
+      this.pagesById = {}
+      Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
       this.sidebar.pages = pages
-      this.requestUpdate()
+
+      const page = this.pagesById[this.activePage]
+      if (page) {
+        this.setMain(page)
+        // if (update) this.requestUpdate()
+      }
   }
 
   // Track Pages By Id
@@ -218,6 +198,7 @@ export class Dashboard extends LitElement {
         const info = { ...page.info}
   
         if (info.id) id = info.id
+        else page.info.id = id // update id
   
         const pages = info.pages
         delete info.pages
@@ -262,6 +243,7 @@ export class Dashboard extends LitElement {
     this.style.height = "100%";
     this.style.display = "grid";
     this.style.gridTemplateColumns = "fit-content(0px) 1fr"
+    this.style.position = "relative"
 
     this.sidebar.name = this.name
 
