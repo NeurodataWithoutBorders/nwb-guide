@@ -446,7 +446,7 @@ button.download-metadata:hover {
 
 /* Current interactive UI's main content */
 .dash-app {
-  padding-bottom: 10px !important;
+  /* padding-bottom: 10px !important; */
 }
 
 .dash-title {

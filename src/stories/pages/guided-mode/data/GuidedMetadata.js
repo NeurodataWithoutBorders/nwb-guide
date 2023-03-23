@@ -10,6 +10,16 @@ export class GuidedMetadataPage extends Page {
     super(...args)
   }
 
+  footer = {
+    onNext: async () => {
+      // TODO: Insert validation here...
+      const valid = true
+      if (!valid) throw new Error('Invalid metadata')
+
+      this.onTransition(1)
+    }
+  }
+
 
   render() {
 
