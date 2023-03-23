@@ -9,8 +9,6 @@ export class GuidedFooter extends LitElement {
     return css`
       :host {
         display: flex;
-        position: absolute;
-        bottom: 0;
         width: 100%;
       }
     `
