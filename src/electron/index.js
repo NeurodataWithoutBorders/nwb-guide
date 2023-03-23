@@ -27,6 +27,7 @@ if (isElectron) {
         log.info("User OS:", os.type(), os.platform(), "version:", os.release());
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
+        electronExports.remote = remote;
         electronExports.app = app;
         electronExports.port = port;
         electronExports.log = log;

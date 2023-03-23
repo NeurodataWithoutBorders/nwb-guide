@@ -7,7 +7,6 @@ import re
 
 
 def clear_queue():
-
     command = [agent_cmd(), "upload-status", "--cancel-all"]
 
     return subprocess.run(command, check=True)
@@ -23,7 +22,6 @@ def agent_running():
         create_connection(socket_address(listen_port)).close()
 
     except socket.error as e:
-
         if e.errno == errno.ECONNREFUSED:  # ConnectionRefusedError for Python 3
             return True
         else:

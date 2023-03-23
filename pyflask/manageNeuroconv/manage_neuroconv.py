@@ -1,6 +1,9 @@
-from typing import List, Optional
+from typing import List, Dict
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
+
+import json
+from neuroconv.utils import NWBMetaDataEncoder
 
 
 def get_all_interface_info() -> dict:
@@ -28,13 +31,32 @@ def get_all_interface_info() -> dict:
     return interface_info
 
 
-def get_combined_schema(interface_class_names: List[str]) -> dict:
-    """
-    Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
-    """
-
-    # Combine Multiple Interfaces
+# Combine Multiple Interfaces
+def get_custom_converter(interface_class_names: List[str]) -> NWBConverter:
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {interface: getattr(datainterfaces, interface) for interface in interface_class_names}
 
+    return CustomNWBConverter
+
+
+def get_source_schema(interface_class_names: List[str]) -> dict:
+    """
+    Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
+    """
+    CustomNWBConverter = get_custom_converter(interface_class_names)
     return CustomNWBConverter.get_source_schema()
+
+
+def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
+    """
+    Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
+    """
+
+    interface_class_names = list(
+        source_data
+    )  # NOTE: We currently assume that the keys of the properties dict are the interface names
+    CustomNWBConverter = get_custom_converter(interface_class_names)
+    converter = CustomNWBConverter(source_data)
+    schema = converter.get_metadata_schema()
+    metadata = converter.get_metadata()
+    return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
