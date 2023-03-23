@@ -194,21 +194,21 @@ export class Dashboard extends LitElement {
   // Track Pages By Id
    addPage = (acc, arr) => {
         let [ id, page ] = arr
-  
+
         const info = { ...page.info}
-  
+
         if (info.id) id = info.id
         else page.info.id = id // update id
-  
+
         const pages = info.pages
         delete info.pages
-  
+
         // NOTE: This is not true for nested pages with more info...
         if (page instanceof HTMLElement) acc[id] = page
-  
+
         if (pages) {
           const pagesArr = Object.values(pages)
-  
+
           // Update info with relative information
           Object.entries(pages).forEach(([newId, nestedPage], i) => {
             nestedPage.info.base = id
@@ -217,24 +217,24 @@ export class Dashboard extends LitElement {
             nestedPage.info.id = `${id}/${newId}`
             nestedPage.info.parent = page
           })
-  
+
           // // Register a base page
           // const firstPage = pageArr[0]
           // if (pagesArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
-  
+
           // Register all pages
           Object.entries(pages).forEach((arr) => this.addPage(acc, arr))
-  
+
         }
-  
+
         return acc
       }
-  
+
 
   updated(){
 
     const div = (this.shadowRoot ?? this).querySelector("div");
-    div.style.height = '100vh'    
+    div.style.height = '100vh'
     this.#updated()
   }
 

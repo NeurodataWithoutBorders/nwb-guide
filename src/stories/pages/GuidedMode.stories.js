@@ -8,7 +8,7 @@ export default {
     chromatic: { disableSnapshot: false },
   },
   argTypes: {
-    activePage: { 
+    activePage: {
       options,
       control: { type: 'select' }
      },
@@ -61,5 +61,3 @@ export const Results = Template.bind({});
 Results.args = {
   activePage: 'guided/review'
 }
-
-

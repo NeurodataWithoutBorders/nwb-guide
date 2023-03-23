@@ -8,7 +8,7 @@ export default {
     chromatic: { disableSnapshot: false },
   },
   // argTypes: {
-  //   activePage: { 
+  //   activePage: {
   //     options,
   //     control: { type: 'select' }
   //    },
