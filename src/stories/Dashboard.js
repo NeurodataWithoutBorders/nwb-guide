@@ -37,11 +37,8 @@ import "../../assets/css/guided.css"
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
 
-import "./NavigationSidebar.js"
-import "./Sidebar.js";
-import "./Main.js";
 import { Main } from './Main.js';
-import { Sidebar } from './Sidebar.js';
+import { Sidebar } from './sidebar.js';
 import { NavigationSidebar } from './NavigationSidebar.js';
 
 const componentCSS = `
