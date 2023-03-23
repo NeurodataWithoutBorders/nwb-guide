@@ -91,10 +91,10 @@ dashboard.pages = {
                 label: "Project details",
                 section: sections[0]
             }),
-            subjects: new GuidedSubjectsPage({
-                label: "Subjects",
-                section: sections[0],
-            }),
+            // subjects: new GuidedSubjectsPage({
+            //     label: "Subjects",
+            //     section: sections[0],
+            // }),
             structure: new GuidedStructurePage({
                 label: "Data formats",
                 section: sections[1]
@@ -112,14 +112,14 @@ dashboard.pages = {
                 label: "Conversion type",
                 section: sections[2]
             }),
-            upload: new GuidedUploadPage({
-                label: "Upload dataset",
-                section: sections[2]
-            }),
-            deletefiles: new GuidedDeleteFilesPage({
-                label: "Delete files",
-                section: sections[2]
-            }),
+            // upload: new GuidedUploadPage({
+            //     label: "Upload dataset",
+            //     section: sections[2]
+            // }),
+            // deletefiles: new GuidedDeleteFilesPage({
+            //     label: "Delete files",
+            //     section: sections[2]
+            // }),
 
             review: new GuidedResultsPage({
                 label: "Review results",
