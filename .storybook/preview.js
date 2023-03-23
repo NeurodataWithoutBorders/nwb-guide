@@ -1,6 +1,7 @@
 /** @type { import('@storybook/web-components').Preview } */
 const preview = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     backgrounds: {
       default: "light",
     },

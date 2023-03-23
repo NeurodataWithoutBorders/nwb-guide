@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 
@@ -39,7 +39,7 @@ def get_custom_converter(interface_class_names: List[str]) -> NWBConverter:
     return CustomNWBConverter
 
 
-def instantiate_custom_converter(source_data):
+def instantiate_custom_converter(source_data: Dict[str, str]) -> NWBConverter:
     interface_class_names = list(
         source_data
     )  # NOTE: We currently assume that the keys of the properties dict are the interface names
@@ -55,7 +55,7 @@ def get_source_schema(interface_class_names: List[str]) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def get_metadata_schema(source_data):
+def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
     """
     Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
     """
@@ -66,7 +66,7 @@ def get_metadata_schema(source_data):
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
-def convert_to_nwb(info):
+def convert_to_nwb(info: dict) -> bool:
     """
     Function used to convert the source data to NWB format using the specified metadata.
     """
