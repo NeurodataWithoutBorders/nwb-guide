@@ -21,7 +21,7 @@ export class GuidedResultsPage extends Page {
         <h1 class="guided--text-sub-step">Conversion Results</h1>
       </div>
       <div class="guided--section">
-       Coming soon...
+       ${this.info.globalState.conversion.results ? html`<p>Your conversion was successful!</p>`: html`<p>Your conversion failed. Please try again.</p>`}
       </div>
   </div>
     `;
