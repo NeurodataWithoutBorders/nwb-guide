@@ -6,6 +6,7 @@ const config = {
     name: "@storybook/web-components-vite",
     options: {},
   },
+  staticDirs: ['../assets'],
   docs: {
     autodocs: "tag",
   },
