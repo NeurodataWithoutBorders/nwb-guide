@@ -55,6 +55,7 @@ userpath = expanduser("~")
 METADATA_UPLOAD_BF_PATH = join(userpath, "SODA", "METADATA")
 TEMPLATE_PATH = ""
 
+
 ### Sets the TEMPLATE_PATH using SODA-for-SPARC's basepath so that the prepare_metadata section can find
 ### the templates stored in file_templates direcotory
 def set_template_path(soda_base_path, soda_resources_path):
@@ -127,7 +128,6 @@ def extract_milestone_info(datalist):
 
 ### Create submission file
 def save_submission_file(upload_boolean, bfaccount, bfdataset, filepath, val_arr):
-
     font_submission = Font(name="Calibri", size=14, bold=False)
 
     source = join(TEMPLATE_PATH, "submission.xlsx")
@@ -168,7 +168,6 @@ def save_submission_file(upload_boolean, bfaccount, bfdataset, filepath, val_arr
 # this function saves and uploads the README/CHANGES to Pennsieve, just when users choose to generate onto Pennsieve
 ## (not used for generating locally)
 def upload_RC_file(text_string, file_type, bfaccount, bfdataset):
-
     file_path = join(METADATA_UPLOAD_BF_PATH, file_type)
 
     with open(file_path, "w") as f:
@@ -203,9 +202,7 @@ def upload_metadata_file(file_type, bfaccount, bfdataset, file_path, delete_afte
 
     # handle duplicates on Pennsieve: first, obtain the existing file ID
     for i in range(len(myds.items)):
-
         if myds.items[i].name == file_type:
-
             item_id = myds.items[i].id
 
             # then, delete it using Pennsieve method delete(id)
@@ -233,11 +230,9 @@ def rename_headers(workbook, max_len, start_index):
 
     columns_list = excel_columns(start_index=start_index)
     if max_len >= start_index:
-
         workbook[columns_list[0] + "1"] = "Value"
 
         for i, column in zip(range(2, max_len + 1), columns_list[1:]):
-
             workbook[column + "1"] = f"Value {str(i)}"
             cell = workbook[column + "1"]
 
@@ -248,7 +243,6 @@ def rename_headers(workbook, max_len, start_index):
             cell.font = font
 
     else:
-
         delete_range = len(columns_list) - max_len
         workbook.delete_cols(4 + max_len, delete_range)
 
@@ -489,7 +483,6 @@ def upload_code_description_metadata(filepath, bfAccount, bfDataset):
 
 
 def save_subjects_file(upload_boolean, bfaccount, bfdataset, filepath, datastructure):
-
     source = join(TEMPLATE_PATH, "subjects.xlsx")
 
     if upload_boolean:
@@ -623,7 +616,6 @@ def column_check(x):
 
 # import an existing subjects/samples files from an excel file
 def convert_subjects_samples_file_to_df(type, filepath, ui_fields):
-
     subjects_df = pd.read_excel(filepath, engine="openpyxl", usecols=column_check, header=0)
     subjects_df = subjects_df.dropna(axis=0, how="all")
     subjects_df = subjects_df.replace(np.nan, "", regex=True)
@@ -692,7 +684,6 @@ def convert_subjects_samples_file_to_df(type, filepath, ui_fields):
 
 ### function to read existing Pennsieve manifest files and load info into a dictionary
 def convert_manifest_to_dict(url):
-
     manifest_df = pd.read_excel(url, engine="openpyxl", usecols=column_check, header=0)
     manifest_df = manifest_df.dropna(axis=0, how="all")
     manifest_df = manifest_df.replace(np.nan, "", regex=True)
@@ -744,7 +735,6 @@ def checkEmptyColumn(column):
 
 ## load/import an existing local or Pennsieve submission.xlsx file
 def load_existing_submission_file(filepath):
-
     try:
         DD_df = pd.read_excel(filepath, engine="openpyxl", usecols=column_check, header=0)
 
@@ -820,9 +810,7 @@ def import_bf_metadata_file(file_type, ui_fields, bfaccount, bfdataset):
         abort(400, "Please select a valid Pennsieve dataset.")
 
     for i in range(len(myds.items)):
-
         if myds.items[i].name == file_type:
-
             item_id = myds.items[i].id
             url = returnFileURL(bf, item_id)
 
@@ -843,7 +831,6 @@ def import_bf_metadata_file(file_type, ui_fields, bfaccount, bfdataset):
 
 # import readme or changes file from Pennsieve
 def import_bf_RC(bfaccount, bfdataset, file_type):
-
     file_type = file_type + ".txt"
 
     try:
@@ -857,9 +844,7 @@ def import_bf_RC(bfaccount, bfdataset, file_type):
         abort(400, "Please select a valid Pennsieve dataset.")
 
     for i in range(len(myds.items)):
-
         if myds.items[i].name == file_type:
-
             item_id = myds.items[i].id
             url = returnFileURL(bf, item_id)
 
@@ -876,6 +861,7 @@ manifest_progress = {
     "manifest_files_uploaded": 0,
     "finished": False,
 }
+
 
 # TODO: NOTE: ESSENTIAL: Remove the manifest_file even if the user does not generate before pulling again.
 def import_bf_manifest_file(soda_json_structure, bfaccount, bfdataset):
@@ -930,7 +916,6 @@ def update_existing_pennsieve_manifest_files(myds, bf, dataset_structure, high_l
         ]:
             for j in range(len(myds.items[i])):
                 if myds.items[i][j].name == "manifest.xlsx":
-
                     if not exists(join(manifest_folder_path, myds.items[i].name)):
                         # create the path
                         os.makedirs(join(manifest_folder_path, myds.items[i].name))
@@ -1095,7 +1080,6 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
 # obtain Pennsieve S3 URL for an existing metadata file
 def returnFileURL(bf_object, item_id):
-
     file_details = bf_object._api._get(f"/packages/{str(item_id)}/view")
     file_id = file_details[0]["content"]["id"]
     file_url_info = bf_object._api._get(f"/packages/{str(item_id)}/files/{str(file_id)}")
@@ -1121,7 +1105,6 @@ def recursive_item_path_create(folder, path):
 
 ## import an existing local or Pennsieve dataset_description.xlsx file
 def load_existing_DD_file(import_type, filepath):
-
     ### the following block of code converts .xlsx file into .csv for better performance from Pandas.
     ### Currently pandas' read_excel is super slow - could take minutes.
     # open given workbook
@@ -1129,7 +1112,6 @@ def load_existing_DD_file(import_type, filepath):
 
     if import_type == "bf":
         try:
-
             DD_df = pd.read_excel(filepath, engine="openpyxl", usecols=column_check, header=0)
 
         except:
