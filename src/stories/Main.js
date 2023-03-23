@@ -103,7 +103,7 @@ export class Main extends LitElement {
           let pages = Object.values(section.pages)
           if (pages.length > 1) capsules = {
               n: pages.length,
-              selected: pages.map(o => o.page).indexOf(page),
+              selected: pages.map(o => o.pageLabel).indexOf(page.info.label),
           }
         }
 

@@ -38,7 +38,9 @@ export class GuidedNewDatasetPage extends Page {
 
 
       // Check if name is already used
-      if (Object.keys(this.info.globalState).length === 0) {
+      // Update existing progress file
+      if (this.info.globalState.initialized) await update(name, this.info.globalState.name)
+      else {
         const has = await hasEntry(name)
         if (has) {
           const message = "An existing progress file already exists with that name. Please choose a different name."
@@ -52,8 +54,7 @@ export class GuidedNewDatasetPage extends Page {
         }
     }
 
-    // Update existing progress file
-    else await update(name, this.info.globalState.name)
+    this.info.globalState.initialized = true
 
     Object.assign(this.info.globalState, this.state)
     this.onTransition(1)
@@ -63,7 +64,6 @@ export class GuidedNewDatasetPage extends Page {
 
   render() {
 
-    console.log('rendering GuidedNewDatasetPage', this.state, this.info.globalState)
     // Transfer global state if applicable
     this.state.name = this.info.globalState.name
     this.state.doi = this.info.globalState.doi
