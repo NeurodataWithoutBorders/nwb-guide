@@ -66,12 +66,11 @@ export class GuidedNewDatasetPage extends Page {
 
     // Transfer global state if applicable
     this.state.name = this.info.globalState.name
-    this.state.doi = this.info.globalState.doi
 
     return html`
         <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
         <div class="title">
-          <h1 class="guided--text-sub-step">Project metadata</h1>
+          <h1 class="guided--text-sub-step">Project Setup</h1>
         </div>
         <div class="guided--section">
           <label class="guided--form-label">Project Name</label>
@@ -89,31 +88,6 @@ export class GuidedNewDatasetPage extends Page {
             @input=${(ev) => this.state.name = ev.target.value.trim()}
           />
           <p class="guided--text-input-instructions mb-0">Enter the name of your project.</p>
-        </div>
-        <div class="guided--section">
-          <label class="guided--form-label">DOIs of Relevant Publications</label>
-          <p style="height: 0px; margin: 0px">
-            <span
-              id="guided-subtitle-char-count"
-              style="position: relative; top: 100px; color: rgb(117, 107, 107)"
-            >
-              255 characters left
-            </span>
-          </p>
-          <textarea
-            class="guided--input guided--text-area"
-            id="guided-dataset-subtitle-input"
-            type="text"
-            name="guided-dataset-subtitle"
-            placeholder="Enter project DOIs here"
-            style="height: 7.5em; padding-bottom: 20px"
-            maxlength="255"
-            @input=${(ev) => this.state.doi = ev.target.value}
-            .value=${this.state.doi ?? ''}
-          ></textarea>
-          <p class="guided--text-input-instructions mb-0">
-            Separete multiple DOIs with a comma.
-          </p>
         </div>
       </div>
     </div>

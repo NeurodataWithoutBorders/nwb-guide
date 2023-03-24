@@ -104,12 +104,12 @@ const pages = {
                 section: sections[1]
             }),
             metadata: new GuidedMetadataPage({
-                label: "Metadata",
+                label: "File metadata",
                 section: sections[1],
             }),
 
             type: new GuidedConversionTypePage({
-                label: "Conversion type",
+                label: "Basic options",
                 section: sections[2]
             }),
             // upload: new GuidedUploadPage({

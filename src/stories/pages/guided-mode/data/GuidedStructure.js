@@ -54,7 +54,7 @@ export class GuidedStructurePage extends Page {
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
       <div class="title">
-        <h1 class="guided--text-sub-step">Define your Data Formats</h1>
+        <h1 class="guided--text-sub-step">Data Formats</h1>
       </div>
       <div class="guided--section">
         <nwb-multiselect-form
