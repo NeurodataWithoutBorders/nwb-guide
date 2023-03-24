@@ -64,7 +64,14 @@
     <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
 
     <script type="module">
-      if (isElectron) await import("./dist/index.js") // Load packaged frontend for Electron
+      if (isElectron) {
+        const stylesheet = document.createElement("link") // Import bundled CSS for Electron
+        stylesheet.rel = "stylesheet"
+        stylesheet.href = "./dist/style.css"
+        document.head.appendChild(stylesheet)
+
+        await import("./dist/index.js") // Load packaged frontend for Electron
+      }
       else await import("./src/index.js") // Load dev frontend (if not in Electron context)
     </script>
 
