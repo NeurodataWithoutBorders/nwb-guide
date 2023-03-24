@@ -10,6 +10,7 @@ import tippy from 'tippy.js';
 import globals from '../../../../scripts/globals.js'
 const { notyf } = globals;
 import * as progress from '../../../progress.js'
+import { newDataset } from '../../../../assets/lotties.js';
 
 export class GuidedHomePage extends Page {
 

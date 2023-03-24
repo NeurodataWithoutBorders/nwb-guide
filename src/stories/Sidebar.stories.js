@@ -1,7 +1,7 @@
 import { Sidebar } from './sidebar.js';
 
 export default {
-  title: 'Sidebar',
+  title: 'Components/Sidebar',
 };
 
 const Template = (args) => new Sidebar(args);

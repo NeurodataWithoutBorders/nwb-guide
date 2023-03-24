@@ -2637,7 +2637,7 @@ const errorMark = {
   markers: [],
 };
 
-const newDataset = {
+export const newDataset = {
   v: "5.5.1",
   fr: 60,
   ip: 0,
