@@ -14,6 +14,10 @@ export class Button extends LitElement {
 
   static get styles() {
     return css`
+    :host {
+      display: inline-block;
+    }
+    
     .storybook-button {
       font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-weight: 700;
