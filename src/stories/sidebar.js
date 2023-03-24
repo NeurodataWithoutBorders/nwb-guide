@@ -1,6 +1,7 @@
 
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
+import catalystNeuroLogo from '../../assets/img/logo-catalystneuro.png'
 
 const componentCSS = `` // These are not active until the component is using shadow DOM
 
@@ -142,7 +143,7 @@ export class Sidebar extends LitElement {
                   style="border-bottom:0px;text-decoration:none;"
                 >
                   <img
-                    src="assets/img/logo-catalystneuro.png"
+                    src="${catalystNeuroLogo}"
                     width="140px"
                     height="140px"
                     border="0"
