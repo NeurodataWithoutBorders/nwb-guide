@@ -14,7 +14,6 @@ export class Button extends LitElement {
 
   static get styles() {
     return css`
-
     :host {
       display: inline-block;
     }
