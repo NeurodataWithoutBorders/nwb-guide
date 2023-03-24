@@ -104,7 +104,7 @@ export class GettingStartedPage extends Page {
         <p class="overview_lottie_header">Relax</p>
         <div id="lottie3" class="overview-lottie" style="width: 116"></div>
         <p style="margin: 0">
-          Use our intuitive user interface and automations to streamline your process
+          Use our intuitive interface and automations to streamline your process
         </p>
       </div>
     </div>
