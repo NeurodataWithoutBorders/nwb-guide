@@ -2,7 +2,7 @@ import { Button } from './Button';
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/web-components/writing-stories/introduction
 export default {
-  title: 'Button',
+  title: 'Components/Button',
   tags: ['autodocs'],
   parameters: {
     chromatic: { disableSnapshot: false },

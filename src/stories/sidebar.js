@@ -1,6 +1,7 @@
 
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
+import catalystNeuroLogo from '../../assets/img/logo-catalystneuro.png'
 
 const componentCSS = `` // These are not active until the component is using shadow DOM
 
@@ -17,6 +18,8 @@ export class Sidebar extends LitElement {
       subtitle: { type: String, reflect: true },
     };
   }
+
+  initialize = true
 
   constructor (props = {}) {
     super()
@@ -48,19 +51,23 @@ export class Sidebar extends LitElement {
       }
 
       const firstItem = (this.shadowRoot ?? this).querySelector("ul").children[0];
-      if (firstItem) firstItem.click()
+      if (this.initialize && firstItem) firstItem.click()
   }
 
   show = () => {
-    this.nav.classList.remove("active");
-    this.toggle.classList.remove("active")
-    this.style.display = "block";
+    if (this.nav) {
+      this.nav.classList.remove("active");
+      this.toggle.classList.remove("active")
+      this.style.display = "block";
+    }
   }
 
   hide = (changeDisplay) => {
-    this.nav.classList.add("active");
-    this.toggle.classList.add("active")
-    if (changeDisplay) this.style.display = "none";
+    if (this.nav) {
+      this.nav.classList.add("active");
+      this.toggle.classList.add("active")
+      if (changeDisplay) this.style.display = "none";
+    }
   }
 
   onClick = () => {} // Set by the user
@@ -69,7 +76,7 @@ export class Sidebar extends LitElement {
     const links = (this.shadowRoot ?? this).querySelectorAll('a')
     links.forEach((a) => a.classList.remove('is-selected'))
     const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${id}"]`)
-    a.classList.add('is-selected')
+    if (a) a.classList.add('is-selected')
     this.onClick(id, this.pages[id])
   }
 
@@ -136,7 +143,7 @@ export class Sidebar extends LitElement {
                   style="border-bottom:0px;text-decoration:none;"
                 >
                   <img
-                    src="assets/img/logo-catalystneuro.png"
+                    src="${catalystNeuroLogo}"
                     width="140px"
                     height="140px"
                     border="0"
