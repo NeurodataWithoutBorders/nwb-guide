@@ -281,7 +281,7 @@ function initialize() {
       height: 735,
       center: true,
       show: false,
-      icon: __dirname + "/assets/img/logo-neuroconv.png",
+      icon: __dirname + "/assets/img/logo-guide-draft.png",
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,
@@ -299,7 +299,7 @@ function initialize() {
       width: 340,
       height: 340,
       frame: false,
-      icon: __dirname + "/assets/img/logo-neuroconv.png",
+      icon: __dirname + "/assets/img/logo-guide-draft.png",
       alwaysOnTop: true,
       transparent: true,
     });
