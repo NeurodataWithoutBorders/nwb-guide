@@ -584,28 +584,6 @@ th.table-header {
   text-align: left;
 }
 
-.table-header:before {
-  content: "";
-  background: url("../img/close_folder.png");
-  background-size: cover;
-  position: absolute;
-  width: 20px;
-  height: 15px;
-  margin-left: -30px;
-  margin-top: 3px;
-}
-
-.table-header.openfolder:before {
-  content: "";
-  background: url("../img/open_folder.png");
-  background-size: cover;
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  margin-left: -30px;
-  margin-top: 0px;
-}
-
 table.pathtable {
   margin: auto;
   width: 100%;
