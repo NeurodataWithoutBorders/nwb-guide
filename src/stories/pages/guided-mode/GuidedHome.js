@@ -222,8 +222,8 @@ export class GuidedHomePage extends Page {
           <h1 class="guided--text-sub-step">Guided Mode</h1>
           <p class="guided--help-text" style="margin-bottom: 2rem">
               The NWB GUIDE walks users step-by-step through all the requirements for
-              converting their data to the NWB format and uploading datasets to the DANDI Archive. The user interfaces
-              of the Guided Mode are designed to logically guide users through the conversion process and
+              converting their data to the NWB format and uploading datasets to the DANDI Archive. Each stage
+              of Guided Mode is designed to conveniently guide users through the conversion process and
               include all necessary information such that no prior knowledge of the NWB data
               standard is required.
             </p>
