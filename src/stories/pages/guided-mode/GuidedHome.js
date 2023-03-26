@@ -4,13 +4,13 @@ import { html } from 'lit';
 import { Page } from '../Page.js';
 import { ProgressCard } from './ProgressCard.js';
 
-import lottie from 'lottie-web'
 import tippy from 'tippy.js';
 
 import globals from '../../../../scripts/globals.js'
-const { notyf } = globals;
+const { notyf, startLottie } = globals;
 import * as progress from '../../../progress.js'
 import { newDataset } from '../../../../assets/lotties.js';
+
 
 export class GuidedHomePage extends Page {
 
@@ -184,14 +184,7 @@ export class GuidedHomePage extends Page {
     const htmlBase =  this.shadowRoot ?? this
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
     const lottieContainer = htmlBase.querySelector("#new-dataset-lottie-container")
-    lottieContainer.innerHTML = "";
-    lottie.loadAnimation({
-      container: lottieContainer,
-      animationData: newDataset,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-    });
+    startLottie(lottieContainer, newDataset)
 
     // Render existing conversion pipelines
   // guidedResetProgressVariables();

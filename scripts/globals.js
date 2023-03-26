@@ -8,11 +8,30 @@ import { Notyf } from 'notyf'
 
 const { fs, app, path, log, port } = dependencies
 
+import checkChromatic from 'chromatic/isChromatic';
+const isChromatic = checkChromatic()
+
+const startLottie = (lottieElement, animationData) => {
+  lottieElement.innerHTML = "";
+  const thisLottie = lottie.loadAnimation({
+    container: lottieElement,
+    animationData,
+    renderer: "svg",
+    loop: !isChromatic,
+    autoplay: !isChromatic,
+  });
+
+  if (isChromatic) thisLottie.goToAndStop(thisLottie.getDuration(true) - 1, true) // Go to last frame
+
+  return thisLottie
+}
+
 const exportObject = {
   Tagify,
   DragSort,
   tippy,
   lottie,
+  startLottie,
 
   // Elements filled when needed
   organizeDSglobalPath: '',

@@ -6,6 +6,9 @@ import { column1Lottie, column2Lottie, column3Lottie, heartLottie } from '../../
 import { openLink } from '../../../links.js';
 import { Page } from '../Page.js';
 
+import globals from '../../../../scripts/globals.js'
+const { startLottie } = globals;
+
 export class GettingStartedPage extends Page {
 
   constructor(...args) {
@@ -14,64 +17,12 @@ export class GettingStartedPage extends Page {
 
   updated(){
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
-
-    // Here is where the splash screen lotties are created and loaded.
-    // A mutation observer watches for when the overview tab element has
-    // a class change to 'is-shown' to know when to load and unload the lotties
-    let over_view_section =  this.query("#getting_started-section");
     let column1 = this.query("#lottie1");
     let column2 = this.query("#lottie2");
     let column3 = this.query("#lottie3");
-    column1.innerHTML = '';
-    column2.innerHTML = '';
-    column3.innerHTML = '';
-
-    var column1_lottie = lottie.loadAnimation({
-      container: column1,
-      animationData: column1Lottie /*(json js variable, (view src/assets/lotties)*/,
-      renderer: "svg",
-      loop: true /*controls looping*/,
-      autoplay: true,
-    });
-    var column2_lottie = lottie.loadAnimation({
-      container: column2,
-      animationData: column2Lottie /*(json js variable, (view src/assets/lotties)*/,
-      renderer: "svg",
-      loop: true /*controls looping*/,
-      autoplay: true,
-    });
-    var column3_lottie = lottie.loadAnimation({
-      container: column3,
-      animationData: column3Lottie,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-    });
-
-    var overview_observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (mutation) {
-        var attributeValue = $(mutation.target).prop(mutation.attributeName);
-
-        if (attributeValue.includes("is-shown") == true) {
-          //add lotties
-          column1_lottie.play();
-          column2_lottie.play();
-          column3_lottie.play();
-          heart_container.play();
-        } else {
-          column1_lottie.stop();
-          column2_lottie.stop();
-          column3_lottie.stop();
-          heart_container.stop();
-        }
-      });
-    });
-
-    overview_observer.observe(over_view_section, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
+    startLottie(column1, column1Lottie);
+    startLottie(column2, column2Lottie);
+    startLottie(column3, column3Lottie);
 
   }
 
