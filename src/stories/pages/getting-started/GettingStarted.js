@@ -104,8 +104,7 @@ export class GettingStartedPage extends Page {
         <p class="overview_lottie_header">Relax</p>
         <div id="lottie3" class="overview-lottie" style="width: 116"></div>
         <p style="margin: 0">
-          The NWB Assistant comes with intuitive user interfaces and automation that streamline the
-          process for you
+          Use our intuitive interface and automations to streamline your process
         </p>
       </div>
     </div>
@@ -113,7 +112,7 @@ export class GettingStartedPage extends Page {
       <button
         id="home-button-interface-instructions-link"
         class="getting-started-btn secondary-plain-button text-base"
-        @click="${() => openLink("https://docs.sodaforsparc.io/docs/getting-started/user-interface")}"
+        @click="${() => openLink("https://www.nwb.org/")}"
       >
         <p class="interface-btn-txt">Learn about NWB and DANDI</p>
 
@@ -125,30 +124,8 @@ export class GettingStartedPage extends Page {
         class="getting-started-btn secondary-plain-button text-base"
         @click="${() => this.onTransition('guided')}"
       >
-        <p class="getting-started-btn-txt">Begin curating a new dataset</p>
+        <p class="getting-started-btn-txt">Convert a new dataset</p>
         <i class="el-icon icon-animate"><svg
-            class="icon"
-            width="200"
-            height="200"
-            viewBox="0 0 1024 1024"
-            xmlns="http://www.w3.org/2000/svg"
-            style="height: 2.2rem; width: 2.5rem"
-          >
-            <path
-              fill="currentColor"
-              d="M452.864 149.312a29.12 29.12 0 0141.728.064L826.24 489.664a32 32 0 010 44.672L494.592 874.624a29.12 29.12 0 01-41.728 0 30.592 30.592 0 010-42.752L764.736 512 452.864 192a30.592 30.592 0 010-42.688zm-256 0a29.12 29.12 0 0141.728.064L570.24 489.664a32 32 0 010 44.672L238.592 874.624a29.12 29.12 0 01-41.728 0 30.592 30.592 0 010-42.752L508.736 512 196.864 192a30.592 30.592 0 010-42.688z"
-            ></path>
-          </svg>
-        </i>
-      </button>
-      <button
-        id="home-button-free-form-mode-link"
-        class="getting-started-btn secondary-plain-button text-base"
-        disabled
-      >
-        <p class="getting-started-btn-txt">Continue working on an NWB dataset</p>
-        <i class="el-icon icon-animate"
-          ><svg
             class="icon"
             width="200"
             height="200"
