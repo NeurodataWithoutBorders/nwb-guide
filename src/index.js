@@ -111,7 +111,7 @@ const serverIsLiveStartup = async () => {
   let echoResponse;
 
   try {
-    echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json())    
+    echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json())
   } catch (error) {
     throw error;
   }

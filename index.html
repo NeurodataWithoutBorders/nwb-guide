@@ -20,7 +20,7 @@
     <nwb-dashboard name="NWB GUIDE"></nwb-dashboard>
 
     <script type="module">
-      const isElectron = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1; 
+      const isElectron = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
       if (isElectron) {
         const stylesheet = document.createElement("link") // Import bundled CSS for Electron
         stylesheet.rel = "stylesheet"
@@ -29,7 +29,7 @@
 
         await import("./dist/index.js") // Load packaged frontend for Electron
       }
-      
+
       else await import("./src/index.js") // Load dev frontend (if not in Electron context)
     </script>
   </body>
