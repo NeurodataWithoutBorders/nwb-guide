@@ -5,6 +5,8 @@
 
     <title>NWB GUIDE</title>
 
+    <link rel="preload" href="assets/img/logo-guide-draft-transparent-tight.png" as="image" />
+
     <!-- <link rel="import" href="sections/getting_started/getting_started.html" />
     <link rel="import" href="sections/manage_datasets/manage_datasets.html" />
     <link rel="import" href="sections/post_curation/post_curation.html" />
@@ -47,7 +49,7 @@
   </head>
 
   <body>
-    <nwb-dashboard name="NWB GUIDE"></nwb-dashboard>
+    <nwb-dashboard></nwb-dashboard>
 
     <!-- Required inclusion of jQuery based on legacy SODA DOM manipulation strategy -->
     <script src="node_modules/jquery/dist/jquery.min.js"></script> <!-- Vite -->
@@ -70,7 +72,8 @@
         stylesheet.href = "./dist/style.css"
         document.head.appendChild(stylesheet)
 
-        await import("./dist/index.js") // Load packaged frontend for Electron
+        const url = "./dist/index.js" // avoid erroring when not present
+        await import(url /* @vite-ignore */) // Load packaged frontend for Electron
       }
       else await import("./src/index.js") // Load dev frontend (if not in Electron context)
     </script>

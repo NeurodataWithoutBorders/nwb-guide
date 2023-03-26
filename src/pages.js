@@ -15,6 +15,10 @@ import { GuidedConversionTypePage } from "./stories/pages/guided-mode/options/Gu
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults"
 import { Dashboard } from "./stories/Dashboard"
 
+import logo from '../assets/img/logo-guide-draft-transparent-tight.png'
+let dashboard = document.querySelector("nwb-dashboard")
+if (!dashboard) dashboard = new Dashboard({ logo, pages })
+dashboard.logo = logo
 
 const overviewIcon = `
 <svg
@@ -137,9 +141,7 @@ const pages = {
     })
 }
 
-let dashboard = document.querySelector("nwb-dashboard")
-if (dashboard) dashboard.pages = pages
-else dashboard = new Dashboard({ name: "NWB GUIDE", pages })
+dashboard.pages = pages
 
 export {
     dashboard

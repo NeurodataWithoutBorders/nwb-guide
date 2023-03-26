@@ -8,8 +8,6 @@ const { ipcRenderer } = electron;
 
 import globals from '../globals.js'
 
-
-
 import  { check_forbidden_characters_bf } from '../manage-dataset/manage-dataset.js'
 
 import Cropper from 'cropperjs'
@@ -66,6 +64,7 @@ const {
 // Set the sidebar subtitle to the current app version
 const dashboard = document.querySelector('nwb-dashboard')
 const appVersion = app?.getVersion();
+console.log('appVersion', appVersion)
 dashboard.subtitle = appVersion ?? 'Web Version';
 
 // const prevent_sleep_id = "";

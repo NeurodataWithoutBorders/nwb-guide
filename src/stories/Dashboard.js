@@ -68,6 +68,7 @@ export class Dashboard extends LitElement {
     return {
       pages: { type: Object, reflect: false },
       name: { type: String, reflect: true },
+      logo: { type: String, reflect: true },
       subtitle: { type: String, reflect: true },
       activePage: { type: String, reflect: true },
     };
@@ -94,7 +95,9 @@ export class Dashboard extends LitElement {
 
 
     this.pages = props.pages ?? {}
-    this.name = props.name ?? "NWB App"
+    this.name = props.name
+    this.logo = props.logo
+
     if (props.activePage) this.setAttribute('activePage', props.activePage)
 
     this.#updated()
@@ -106,8 +109,7 @@ export class Dashboard extends LitElement {
 
   attributeChangedCallback(key, previous, latest) {
     super.attributeChangedCallback(...arguments)
-    if (key === 'subtitle' && this.sidebar) this.sidebar.setSubtitle(latest) // Update subtitle without rerender
-    else if (key === 'name') this.requestUpdate()
+    if (this.sidebar && (key === 'name' || key === 'logo' || key === 'subtitle'))  this.sidebar[key] = latest
     else if (key === 'pages') this.#updated(latest)
     else if (key.toLowerCase() === 'activepage'){
       const page = this.getPage(this.pagesById[latest])
@@ -119,7 +121,7 @@ export class Dashboard extends LitElement {
 
   getPage(entry) {
     if (!entry) throw new Error('Page not found...')
-    let page = entry.page ?? entry
+    const page = entry.page ?? entry
     if (page instanceof HTMLElement) return page
     else if (typeof page === 'object') return this.getPage(Object.values(page)[0])
   }
@@ -280,7 +282,8 @@ export class Dashboard extends LitElement {
     this.style.gridTemplateColumns = "fit-content(0px) 1fr"
     this.style.position = "relative"
 
-    this.sidebar.name = this.name
+    if (this.name) this.sidebar.name = this.name
+    if (this.logo) this.sidebar.logo = this.logo
 
     return html`
         <div>
