@@ -36,7 +36,7 @@ export class GuidedStructurePage extends Page {
   updated(){
     const selected = this.info.globalState.source?.interfaces
     this.select = (this.shadowRoot ?? this).querySelector("#neuroconv-define-formats");
-    fetch(`${base}/neuroconv`).then((res) => res.json()).then(json => {
+    fetch(`${baseUrl}/neuroconv`).then((res) => res.json()).then(json => {
       this.select.setAttribute("options", JSON.stringify(json))
       if (selected) this.select.selected = selected
     }).catch(e => console.error(e));

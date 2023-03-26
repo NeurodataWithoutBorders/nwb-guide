@@ -85,7 +85,7 @@ async function run_pre_flight_checks(check_update = true) {
       await Swal.fire({
         title: "No Internet Connection",
         icon: "success",
-        text: "It appears that your computer is not connected to the internet. You may continue, but you will not be able to use features of SODA related to Pennsieve and especially none of the features located under the 'Manage Datasets' section.",
+        text: "It appears that your computer is not connected to the internet. You may continue, but you will not be able to use features of NWB GUIDE related to uploading data to DANDI.",
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
         confirmButtonText: "I understand",
@@ -172,13 +172,13 @@ ipcRenderer?.on("update_downloaded", async () => {
     update_downloaded_notification = notyf.open({
       type: "app_update_warning",
       message:
-        "Update downloaded. It will be installed when you close and relaunch the app. Click here to close SODA now.",
+        "Update downloaded. It will be installed when you close and relaunch the app. Click here to close NWB GUIDE now.",
     });
   } else {
     update_downloaded_notification = notyf.open({
       type: "app_update_warning",
       message:
-        "Update downloaded. It will be installed on the restart of the app. Click here to restart SODA now.",
+        "Update downloaded. It will be installed on the restart of the app. Click here to restart NWB GUIDE now.",
     });
   }
   update_downloaded_notification.on("click", async ({ target, event }) => {
@@ -190,7 +190,7 @@ ipcRenderer?.on("update_downloaded", async () => {
 const restartApp = async () => {
   notyf.open({
     type: "app_update_warning",
-    message: "Closing SODA now...",
+    message: "Closing NWB GUIDE now...",
   });
 
   ipcRenderer?.send("restart_app");

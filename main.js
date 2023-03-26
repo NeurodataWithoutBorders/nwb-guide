@@ -108,7 +108,7 @@ const createPyProc = async () => {
 };
 
 /**
- * Kill the python server process. Needs to be called before SODA closes.
+ * Kill the python server process. Needs to be called before GUIDE closes.
  */
 const exitPyProc = async () => {
 

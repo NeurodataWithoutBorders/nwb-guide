@@ -11,8 +11,8 @@ export const baseUrl = `http://127.0.0.1:${port}`
 
 // Filesystem Management
 export const homeDirectory = app?.getPath("home") ?? '';
-export const progressFilePath = joinPath(homeDirectory, "SODA", "Progress");
-export const guidedProgressFilePath = joinPath(homeDirectory, "SODA", "Guided-Progress");
+export const progressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Progress");
+export const guidedProgressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Guided-Progress");
 
 // ---------- Notification Helper ----------
 export const notyf = new Notyf({

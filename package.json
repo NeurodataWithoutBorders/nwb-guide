@@ -38,7 +38,7 @@
     "url": "git+https://github.com/catalystneuro/neuroconv-app.git"
   },
   "build": {
-    "appId": "com.fairdataihub.sodaforsparc",
+    "appId": "com.catalystneuro.nwbguide",
     "generateUpdatesFilesForAllChannels": true,
     "afterSign": "./notarize.js",
     "files": [

@@ -53,7 +53,7 @@ export const save = (page) => {
       return
     }
 
-    //Destination: HOMEDIR/SODA/Guided-Progress
+    //Destination: HOMEDIR/NWBGUIDE/Guided-Progress
     globalState["last-modified"] = new Date();
     globalState["page-before-exit"] = page.info.id;
 
@@ -108,7 +108,7 @@ export const save = (page) => {
     const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent;
 
     const result = await Swal.fire({
-      title: `Are you sure you would like to delete SODA progress made on the dataset: ${progressCardNameToDelete}?`,
+      title: `Are you sure you would like to delete NWB GUIDE progress made on the dataset: ${progressCardNameToDelete}?`,
       text: "Your progress file will be deleted permanently, and all existing progress will be lost.",
       icon: "warning",
       heightAuto: false,
