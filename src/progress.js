@@ -1,13 +1,10 @@
+import Swal from 'sweetalert2'
 
-import globals from "../scripts/globals.js";
-import electronExports from "./electron/index.js";
-
-const { fs, log } = electronExports;
-
-const {
+import {
   joinPath,
   guidedProgressFilePath,
-} = globals;
+} from "./globals.js";
+import { fs } from "./electron/index.js";
 
 let saveErrorThrown = false;
 
@@ -65,7 +62,6 @@ export const save = (page) => {
       fs.mkdirSync(guidedProgressFilePath, { recursive: true });
     } catch (error) {
       console.error(error);
-      log.error(error);
     }
 
     var guidedFilePath = joinPath(guidedProgressFilePath, guidedProgressFileName + ".json");

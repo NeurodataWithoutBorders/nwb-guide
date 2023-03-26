@@ -5,10 +5,7 @@ import { Page } from '../../Page.js';
 
 // For Multi-Select Form
 import "../../../multiselect/MultiSelectForm.js";
-import globals from '../../../../../scripts/globals.js';
-const { port } = globals;
-
-const base = `http://127.0.0.1:${port}`;
+import { baseUrl } from '../../../../globals.js';
 
 export class GuidedStructurePage extends Page {
 
@@ -23,7 +20,7 @@ export class GuidedStructurePage extends Page {
 
       this.save() // Save in case the schema request fails
 
-      const schema = (interfaces.length === 0) ? {} : await fetch(`${base}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
+      const schema = (interfaces.length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
 
       let sourceInfo = this.info.globalState.source
       if (!sourceInfo) sourceInfo = this.info.globalState.source = {results: {}, schema: {}}

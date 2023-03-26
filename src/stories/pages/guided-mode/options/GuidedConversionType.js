@@ -4,8 +4,8 @@ import { html } from 'lit';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { Page } from '../../Page.js';
 
-import globals from '../../../../../scripts/globals.js';
-const { notyf, baseUrl } = globals;
+import Swal from 'sweetalert2'
+import { notyf, baseUrl } from '../../../../globals.js';
 
 export class GuidedConversionTypePage extends Page {
 
