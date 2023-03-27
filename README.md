@@ -24,12 +24,17 @@ conda env create -f ./tools/anaconda-env/environment-Linux.yml
 Next, install all JavaScript dependencies based on the `package-lock.json` file.
 
 ```bash
-conda activate env-electron-python
 npm ci
 ```
 
 ## Getting Started
-Run the following command to start the Electron application.
+Before starting NWB GUIDE, you'll need to ensure that the Python environment is activated.
+
+```bash
+conda activate env-electron-python
+```
+
+You can now run the following command to start the application using Electron.
 
 ```bash
 npm start
