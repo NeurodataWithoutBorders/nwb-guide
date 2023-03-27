@@ -22,7 +22,9 @@ conda env create -f ./tools/anaconda-env/environment-Linux.yml
 
 
 Next, install all JavaScript dependencies based on the `package-lock.json` file.
+
 ```bash
+conda activate env-electron-python
 npm ci
 ```
 
