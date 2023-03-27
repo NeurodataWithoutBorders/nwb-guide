@@ -17,7 +17,7 @@ import { Dashboard } from "./stories/Dashboard"
 
 import logo from '../assets/img/logo-guide-draft-transparent-tight.png'
 let dashboard = document.querySelector("nwb-dashboard")
-if (!dashboard) dashboard = new Dashboard({ logo, pages })
+if (!dashboard) dashboard = new Dashboard()
 dashboard.logo = logo
 
 const overviewIcon = `
