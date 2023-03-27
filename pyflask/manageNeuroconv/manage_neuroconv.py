@@ -5,6 +5,15 @@ from neuroconv import datainterfaces, NWBConverter
 import json
 from neuroconv.utils import NWBMetaDataEncoder
 
+import os
+
+
+def check_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        # FILE_ATTRIBUTE_HIDDEN = 0x02
+        # ret = ctypes.windll.kernel32.SetFileAttributesW(path, FILE_ATTRIBUTE_HIDDEN)
+
 
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
@@ -71,15 +80,28 @@ def convert_to_nwb(info: dict) -> bool:
     Function used to convert the source data to NWB format using the specified metadata.
     """
 
+    nwbfile_path = info["nwbfile_path"]
+
+    runStubTest = ("stub_test" in info) and info["stub_test"]
+
+    # add a subdirectory to a filepath if stub_test is true
+    if runStubTest:
+        filename = os.path.basename(nwbfile_path)
+        dirname = os.path.join(os.path.dirname(nwbfile_path), '.stubs')
+        nwbfile_path = os.path.join(dirname, filename)
+        check_dir(dirname)
+    
+
     converter = instantiate_custom_converter(info["source_data"])
 
-    converter.run_conversion(
+    # Assume all interfaces have the same conversion options for now
+    options = {interface: {"stub_test": info["stub_test"]} for interface in info["source_data"]} if runStubTest else None 
+
+    file = converter.run_conversion(
         metadata=info["metadata"],
-        nwbfile_path=info["nwbfile_path"],
-        # save_to_file=info.save_to_file,
-        # overwrite=info.overwrite,
-        # conversion_options=info.conversion_options,
-        # stub_test=info.stub_test,
+        nwbfile_path=nwbfile_path,
+        overwrite=info.get("overwrite", False),
+        conversion_options=options
     )
 
-    return True
+    return str(file)
