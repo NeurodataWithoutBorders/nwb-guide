@@ -34,7 +34,7 @@ export const runConversion = async (info, message = "Running conversion") => {
         message,
       });
       throw new Error(`Conversion failed with current metadata: ${results.message}`)
-    }     
-    
+    }
+
     return results
 }

@@ -87,21 +87,22 @@ def convert_to_nwb(info: dict) -> bool:
     # add a subdirectory to a filepath if stub_test is true
     if runStubTest:
         filename = os.path.basename(nwbfile_path)
-        dirname = os.path.join(os.path.dirname(nwbfile_path), '.stubs')
+        dirname = os.path.join(os.path.dirname(nwbfile_path), ".stubs")
         nwbfile_path = os.path.join(dirname, filename)
         check_dir(dirname)
-    
 
     converter = instantiate_custom_converter(info["source_data"])
 
     # Assume all interfaces have the same conversion options for now
-    options = {interface: {"stub_test": info["stub_test"]} for interface in info["source_data"]} if runStubTest else None 
+    options = (
+        {interface: {"stub_test": info["stub_test"]} for interface in info["source_data"]} if runStubTest else None
+    )
 
     file = converter.run_conversion(
         metadata=info["metadata"],
         nwbfile_path=nwbfile_path,
         overwrite=info.get("overwrite", False),
-        conversion_options=options
+        conversion_options=options,
     )
 
     return str(file)
