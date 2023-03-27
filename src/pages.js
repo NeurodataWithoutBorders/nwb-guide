@@ -11,7 +11,7 @@ import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSou
 import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata"
 import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload"
 import { GuidedDeleteFilesPage } from "./stories/pages/guided-mode/options/GuidedDelete"
-import { GuidedConversionOptionsPage, GuidedConversionTypePage } from "./stories/pages/guided-mode/options/GuidedConversionOptions"
+import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions"
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults"
 import { Dashboard } from "./stories/Dashboard"
 import { GuidedStubReviewPage } from "./stories/pages/guided-mode/options/GuidedStubReview"

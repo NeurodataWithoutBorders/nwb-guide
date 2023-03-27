@@ -52,12 +52,17 @@ Metadata.args = {
   activePage: 'guided/metadata'
 }
 
-export const ConversionType = Template.bind({});
-ConversionType.args = {
-  activePage: 'guided/type'
+export const ConversionOptions = Template.bind({});
+ConversionOptions.args = {
+  activePage: 'guided/options'
+}
+
+export const StubReview = Template.bind({});
+StubReview.args = {
+  activePage: 'guided/review'
 }
 
 export const Results = Template.bind({});
 Results.args = {
-  activePage: 'guided/review'
+  activePage: 'guided/approve'
 }
