@@ -68,7 +68,7 @@
         const stylesheet = document.createElement("link") // Import bundled CSS for Electron
         stylesheet.rel = "stylesheet"
         stylesheet.href = "./dist/style.css"
-        document.head.appendChild(stylesheet)
+        document.head.insertAdjacentElement('afterbegin', stylesheet) // ensure css is least priority
 
         await import("./dist/index.js") // Load packaged frontend for Electron
       }
