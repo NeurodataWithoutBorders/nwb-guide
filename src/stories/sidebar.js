@@ -50,7 +50,7 @@ export class Sidebar extends LitElement {
       toggle.onclick = () => {
         this.nav.classList.toggle("active");
         toggle.classList.toggle("active");
-      } 
+      }
 
       // Actually click the item
       let selectedItem = (this.#selected) ? (this.shadowRoot ?? this).querySelector(`ul[data-id='${this.#selected}']`) : (this.shadowRoot ?? this).querySelector("ul").children[0]
@@ -106,7 +106,7 @@ export class Sidebar extends LitElement {
   }
 
   render() {
-    
+
     return html`
     <button type="button" id="sidebarCollapse" class="navbar-btn">
         <span></span>
