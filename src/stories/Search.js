@@ -3,9 +3,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 
 export class Search extends LitElement {
-  constructor({ options } = {}) {
+  constructor({ options, showAllWhenEmpty } = {}) {
     super();
     this.options = options;
+    this.showAllWhenEmpty = showAllWhenEmpty;
   }
 
   static get styles() {
@@ -16,6 +17,7 @@ export class Search extends LitElement {
     }
 
     :host {
+      position: relative;
       display: block;
       background: white;
       border-radius: 5px;
@@ -38,6 +40,11 @@ export class Search extends LitElement {
       list-style: none;
       padding: 0;
       margin: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      background: white;
     }
 
     .hidden {
@@ -62,7 +69,8 @@ export class Search extends LitElement {
 
   static get properties() {
     return {
-      options: { type: Object }
+      options: { type: Object },
+      showAllWhenEmpty: { type: Boolean },
     };
   }
 
@@ -72,6 +80,8 @@ export class Search extends LitElement {
       const keywords = JSON.parse(option.getAttribute('data-keywords'))
       return { option, keywords, label: option.querySelector('.label').innerText }
     })
+
+    this.#initialize()
   }
 
   onSelect = (id, value) => {}
@@ -83,6 +93,8 @@ export class Search extends LitElement {
   }
 
   #options = []
+  #initialize = () => this.#options.forEach(({ option }) => option.classList[this.showAllWhenEmpty ? 'remove' : 'add']('hidden'))
+
   render() {
 
     return html`
@@ -93,7 +105,7 @@ export class Search extends LitElement {
 
         // Hide all if empty
         if (!input) {
-          this.#options.forEach(({ option }) => option.classList.add('hidden'))
+          this.#initialize()
           return
         }
 

@@ -49,7 +49,10 @@ export class GuidedStructurePage extends Page {
       this.#selected[resolvedKey] = name
   }
 
-  search = new Search()
+  search = new Search({
+    showAllWhenEmpty: true,
+  })
+  
   list = document.createElement('ul')
 
   footer = {
