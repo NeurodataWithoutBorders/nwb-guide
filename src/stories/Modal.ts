@@ -21,10 +21,10 @@ export class Modal extends LitElement {
     font-family: var(--visualscript-font-family, sans-serif);
     z-index: 101;
   }
-  
+
   :host * {
     box-sizing: border-box;
-    
+
   }
 
 .modal-header {
@@ -63,7 +63,7 @@ export class Modal extends LitElement {
 
 /* Modal Content */
 .modal-content {
-  
+
   position: absolute;
   bottom: 50%;
   left: 50%;
@@ -77,7 +77,7 @@ export class Modal extends LitElement {
   height: 80vh;
   box-shadow: 0 1px 5px 0 rgb(0 0 0 / 20%);
   transition: opacity 0.5s;
-  display: flex; 
+  display: flex;
   align-items: center;
   justify-content: space-between;
   flex-direction: column;
@@ -93,7 +93,7 @@ export class Modal extends LitElement {
 
     `;
   }
-    
+
     static get properties() {
       return {
         open:  {
@@ -126,7 +126,7 @@ export class Modal extends LitElement {
       this.onClose = props.onClose
 
     }
-    
+
     toggle = (force?:boolean) => {
       this.open = (force !== undefined && typeof force === 'boolean') ? force : !this.open
 
@@ -158,5 +158,5 @@ export class Modal extends LitElement {
     `
     }
   }
-  
+
   customElements.get('nwb-modal') || customElements.define('nwb-modal',  Modal);

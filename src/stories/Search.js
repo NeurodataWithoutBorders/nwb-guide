@@ -117,7 +117,7 @@ export class Search extends LitElement {
         label.classList.add('label')
         label.innerText = option.label
         li.appendChild(label)
-        
+
         const keywords = document.createElement('small')
         keywords.classList.add('keywords')
         keywords.innerText = option.keywords.join(', ')

@@ -32,7 +32,7 @@ export class Overlay extends LitElement {
 
     `;
   }
-    
+
     static get properties() {
       return {
         open: {
@@ -49,11 +49,11 @@ export class Overlay extends LitElement {
 
       this.open = props.open ?? false
     }
-    
+
     render() {
 
       return html`<slot></slot>`
     }
   }
-  
+
   customElements.get('nwb-overlay') || customElements.define('nwb-overlay',  Overlay);
