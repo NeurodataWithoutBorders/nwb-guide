@@ -4,9 +4,10 @@ import { html } from 'lit';
 import { Page } from '../../Page.js';
 
 // For Multi-Select Form
-import "../../../multiselect/MultiSelectForm.js";
+import { Button } from "../../../Button.js"
 import { baseUrl } from '../../../../globals.js';
 import { Search } from '../../../Search.js';
+import { Modal } from '../../../Modal';
 
 export class GuidedStructurePage extends Page {
 
@@ -14,7 +15,18 @@ export class GuidedStructurePage extends Page {
     super(...args)
 
     // Handle Search Bar Interactions
-    this.search.onSelect = this.#addListItem
+    this.search.list.style.position = 'unset'
+    this.search.onSelect = (...args) => {
+      this.#addListItem(...args)
+      this.searchModal.toggle(false)
+    }
+
+    this.addButton.innerText = "Add Interface"
+    this.addButton.onClick = () => {
+      this.searchModal.toggle(true)
+    }
+
+    this.searchModal.appendChild(this.search)
   }
 
   #selected = {}
@@ -54,6 +66,10 @@ export class GuidedStructurePage extends Page {
   })
 
   list = document.createElement('ul')
+
+  addButton = new Button()
+
+  searchModal = new Modal()
 
   footer = {
     onNext: async () => {
@@ -103,7 +119,8 @@ export class GuidedStructurePage extends Page {
       </div>
       <div class="guided--section">
         ${this.list}
-        ${this.search}
+        ${this.addButton}
+        ${this.searchModal}
       </div>
   </div>
     `;

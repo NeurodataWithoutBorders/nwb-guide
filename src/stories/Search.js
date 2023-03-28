@@ -26,6 +26,9 @@ export class Search extends LitElement {
 
     .header {
       padding: 25px;
+      background: white;
+      position: sticky;
+      top: 0;
     }
 
     input {
@@ -88,14 +91,42 @@ export class Search extends LitElement {
 
   #onSelect = (id, value) => {
     this.shadowRoot.querySelector('input').value = ''
-    this.#options.forEach(({option}) => option.classList.add('hidden')) // Hide all
+    this.#initialize()
     this.onSelect(id, value)
   }
 
   #options = []
   #initialize = () => this.#options.forEach(({ option }) => option.classList[this.showAllWhenEmpty ? 'remove' : 'add']('hidden'))
 
+  list = document.createElement('ul')
+
   render() {
+     const slot = document.createElement('slot')
+     this.list.appendChild(slot)
+
+     if (this.options) {
+
+      this.options.forEach(option => {
+        const li = document.createElement('li')
+        li.classList.add('option')
+        li.classList.add('hidden')
+        li.setAttribute('data-keywords', JSON.stringify(option.keywords))
+        li.addEventListener('click', () => this.#onSelect(option.label, option.value ?? option))
+
+        const label = document.createElement('h4')
+        label.classList.add('label')
+        label.innerText = option.label
+        li.appendChild(label)
+        
+        const keywords = document.createElement('small')
+        keywords.classList.add('keywords')
+        keywords.innerText = option.keywords.join(', ')
+        li.appendChild(keywords)
+
+        this.list.appendChild(li)
+      })
+    }
+
 
     return html`
     <div class="header">
@@ -132,18 +163,7 @@ export class Search extends LitElement {
 
       }}></input>
     </div>
-    <ul>
-     <slot>
-      ${this.options ? this.options.map(option => html`<li
-      class="option hidden"
-      data-keywords="${JSON.stringify(option.keywords)}"
-      @click=${() => this.#onSelect(option.label, option.value ?? option)}
-      >
-        <h4 class="label">${option.label}</h4>
-        <small class="keywords">${option.keywords.join(', ')}</small>
-      </li>`) : ''}
-     </slot>
-    </ul>
+    ${this.list}
     `;
   }
 
