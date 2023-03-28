@@ -25,13 +25,13 @@ export class GuidedStructurePage extends Page {
       const keyEl = document.createElement("span");
 
       let resolvedKey = name.slice(0, -9); const originalValue = resolvedKey;
-      
+
       // Ensure no duplicate keys
       let i = 0
       while (resolvedKey in this.#selected) {
         i++
         resolvedKey = `${originalValue}_${i}`
-      } 
+      }
 
       keyEl.innerText = resolvedKey // Cut off "Interface"
       keyEl.contentEditable = true
