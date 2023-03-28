@@ -221,7 +221,7 @@ export class Dashboard extends LitElement {
   #updated(pages=this.pages) {
 
     const url = new URL(window.location.href)
-    const active = url.pathname.split('/').slice(-1)[0]
+    const active = url.pathname.slice(1)
 
     this.main.onTransition = (transition) => {
 
@@ -240,6 +240,7 @@ export class Dashboard extends LitElement {
       Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
       this.sidebar.pages = pages
 
+      console.log('Active', active)
       if (active) this.setAttribute('activePage', active)
   }
 
