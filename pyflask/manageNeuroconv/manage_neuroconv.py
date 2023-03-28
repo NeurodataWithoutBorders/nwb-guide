@@ -117,11 +117,10 @@ def upload_to_dandi(
     api_key: str,
     dandiset_folder_path: Optional[str] = None,
     version: Optional[str] = None,
-    staging: Optional[bool] = None, # Override default staging=True
+    staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
-):    
-    
-    os.environ['DANDI_API_KEY'] = api_key # Update API Key
+):
+    os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,

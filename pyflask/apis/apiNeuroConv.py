@@ -1,6 +1,12 @@
 from flask_restx import Namespace, Resource, reqparse
 from namespaces import get_namespace, NamespaceEnum
-from manageNeuroconv import get_all_interface_info, get_source_schema, get_metadata_schema, convert_to_nwb, upload_to_dandi
+from manageNeuroconv import (
+    get_all_interface_info,
+    get_source_schema,
+    get_metadata_schema,
+    convert_to_nwb,
+    upload_to_dandi,
+)
 from errorHandlers import notBadRequestException
 
 api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")

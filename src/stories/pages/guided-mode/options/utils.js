@@ -16,17 +16,17 @@ export const run = async (url, payload, options={}) => {
           Swal.showLoading();
         },
       })
-  
-  
+
+
       const results = await fetch(`${baseUrl}/neuroconv/${url}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       }).then((res) => res.json())
-  
-  
+
+
       Swal.close();
-  
+
       if (results.message) {
         const message = options.onError ? options.onError(results) : results.message
         notyf.open({
@@ -35,7 +35,7 @@ export const run = async (url, payload, options={}) => {
         });
         throw new Error(`Request to ${url} failed: ${results.message}`)
       }
-  
+
       return results
 }
 
