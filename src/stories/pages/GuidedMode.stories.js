@@ -57,12 +57,12 @@ ConversionOptions.args = {
   activePage: 'guided/options'
 }
 
-export const StubReview = Template.bind({});
-StubReview.args = {
-  activePage: 'guided/review'
+export const StubPreview = Template.bind({});
+StubPreview.args = {
+  activePage: 'guided/preview'
 }
 
 export const Results = Template.bind({});
 Results.args = {
-  activePage: 'guided/approve'
+  activePage: 'guided/review'
 }

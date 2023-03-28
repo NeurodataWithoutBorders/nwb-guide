@@ -14,7 +14,7 @@ import { GuidedDeleteFilesPage } from "./stories/pages/guided-mode/options/Guide
 import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions"
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults"
 import { Dashboard } from "./stories/Dashboard"
-import { GuidedStubReviewPage } from "./stories/pages/guided-mode/options/GuidedStubReview"
+import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview"
 
 
 const overviewIcon = `
@@ -113,16 +113,16 @@ const pages = {
                 label: "Conversion type",
                 section: sections[2]
             }),
-            review: new GuidedStubReviewPage({
-                label: "Upload dataset",
+            preview: new GuidedStubPreviewPage({
+                label: "Preview conversion",
                 section: sections[2]
             }),
-            // deletefiles: new GuidedDeleteFilesPage({
-            //     label: "Delete files",
-            //     section: sections[2]
-            // }),
+            upload: new GuidedUploadPage({
+                label: "Upload to DANDI",
+                section: sections[2]
+            }),
 
-            approve: new GuidedResultsPage({
+            review: new GuidedResultsPage({
                 label: "Review results",
                 section: sections[3]
             }),

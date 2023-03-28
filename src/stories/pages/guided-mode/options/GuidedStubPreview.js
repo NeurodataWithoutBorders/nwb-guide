@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { runConversion } from './utils.js';
 
-export class GuidedStubReviewPage extends Page {
+export class GuidedStubPreviewPage extends Page {
 
   constructor(...args) {
     super(...args)
@@ -61,4 +61,4 @@ export class GuidedStubReviewPage extends Page {
   }
 };
 
-customElements.get('nwbguide-guided-stub-review-page') || customElements.define('nwbguide-guided-stub-review-page',  GuidedStubReviewPage);
+customElements.get('nwbguide-guided-stub-review-page') || customElements.define('nwbguide-guided-stub-review-page',  GuidedStubPreviewPage);
