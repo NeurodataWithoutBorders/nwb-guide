@@ -17,11 +17,23 @@ export class GuidedStructurePage extends Page {
     this.search.onSelect = this.#addListItem
   }
 
+  #selected = {}
+
   #addListItem = (key, value) => {
     const name = value.name ?? value
     const li = document.createElement("li");
       const keyEl = document.createElement("span");
-      keyEl.innerText = name.slice(0, -9) // Cut off "Interface"
+
+      let resolvedKey = name.slice(0, -9); const originalValue = resolvedKey;
+      
+      // Ensure no duplicate keys
+      let i = 0
+      while (resolvedKey in this.#selected) {
+        i++
+        resolvedKey = `${originalValue}_${i}`
+      } 
+
+      keyEl.innerText = resolvedKey // Cut off "Interface"
       keyEl.contentEditable = true
       li.appendChild(keyEl)
 
@@ -33,6 +45,8 @@ export class GuidedStructurePage extends Page {
       valueEl.innerText = name
       li.appendChild(valueEl)
       this.list.appendChild(li);
+
+      this.#selected[resolvedKey] = name
   }
 
   search = new Search()
@@ -41,12 +55,7 @@ export class GuidedStructurePage extends Page {
   footer = {
     onNext: async () => {
 
-      const selected = Array.from(this.list.children).map((li) => {
-        const key = li.children[0].innerText
-        const value = li.children[2].innerText
-        return {key, value}
-      }).reduce((acc, {key, value}) => { acc[key] = value; return acc }, {})
-
+      const selected = this.#selected[resolvedKey]
       const interfaces = Object.keys(selected);
 
       this.save() // Save in case the schema request fails
