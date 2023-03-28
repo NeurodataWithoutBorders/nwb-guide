@@ -1,9 +1,14 @@
 
 
 import { html } from 'lit';
+import { hasEntry, update } from '../../../../progress.js';
 import { Page } from '../../Page.js';
 
+import { notyf } from '../../../../globals.js';
+
 export class GuidedNewDatasetPage extends Page {
+
+  state = {}
 
   constructor(...args) {
     super(...args)
@@ -13,7 +18,54 @@ export class GuidedNewDatasetPage extends Page {
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
   }
 
+  footer = {
+    onNext: async () => {
+
+      // Check validity of project name
+      const name = this.state.name
+      if (!name) {
+
+        const message = "Please enter a project name."
+        notyf.open({
+          type: "error",
+          message: message,
+          duration: 7000,
+        });
+
+        return
+      }
+
+
+      // Check if name is already used
+      // Update existing progress file
+      if (this.info.globalState.initialized) await update(name, this.info.globalState.name)
+      else {
+        const has = await hasEntry(name)
+        if (has) {
+          const message = "An existing progress file already exists with that name. Please choose a different name."
+          notyf.open({
+            type: "error",
+            message: message,
+            duration: 7000,
+          });
+
+          return
+        }
+    }
+
+    this.info.globalState.initialized = true
+
+    Object.assign(this.info.globalState, this.state)
+    this.onTransition(1)
+
+  }
+}
+
   render() {
+
+    // Transfer global state if applicable
+    this.state.name = this.info.globalState.name
+    this.state.doi = this.info.globalState.doi
 
     return html`
         <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
@@ -30,7 +82,10 @@ export class GuidedNewDatasetPage extends Page {
             data-alert-type="danger"
             type="text"
             name="guided-dataset-name"
-            placeholder="Enter dataset name here"
+            placeholder="Enter project name here"
+            .value=${this.state.name ?? ''}
+
+            @input=${(ev) => this.state.name = ev.target.value.trim()}
           />
           <p class="guided--text-input-instructions mb-0">Enter the name of your project.</p>
         </div>
@@ -49,9 +104,11 @@ export class GuidedNewDatasetPage extends Page {
             id="guided-dataset-subtitle-input"
             type="text"
             name="guided-dataset-subtitle"
-            placeholder="Enter datset subtitle here"
+            placeholder="Enter project DOIs here"
             style="height: 7.5em; padding-bottom: 20px"
             maxlength="255"
+            @input=${(ev) => this.state.doi = ev.target.value}
+            .value=${this.state.doi ?? ''}
           ></textarea>
           <p class="guided--text-input-instructions mb-0">
             Separete multiple DOIs with a comma.

@@ -2,9 +2,11 @@ import { Button } from './Button';
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/web-components/writing-stories/introduction
 export default {
-  title: 'Example/Button',
+  title: 'Components/Button',
   tags: ['autodocs'],
-  render: (args) => Button(args),
+  parameters: {
+    chromatic: { disableSnapshot: false },
+  },
   argTypes: {
     backgroundColor: { control: 'color' },
     onClick: { action: 'onClick' },
@@ -15,30 +17,34 @@ export default {
   },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/7.0/web-components/writing-stories/args
-export const Primary = {
-  args: {
+
+const Template = (args) => new Button(args);
+
+export const Primary = Template.bind({});
+
+const base = {
+  label: 'Button',
+}
+
+Primary.args = {
+    ...base,
     primary: true,
-    label: 'Button',
-  },
+}
+
+export const Secondary = Template.bind({});
+
+Secondary.args = {...base}
+
+export const Large = Template.bind({});
+
+Large.args = {
+  ...base,
+  size: 'large'
 };
 
-export const Secondary = {
-  args: {
-    label: 'Button',
-  },
-};
+export const Small = Template.bind({});
 
-export const Large = {
-  args: {
-    size: 'large',
-    label: 'Button',
-  },
-};
-
-export const Small = {
-  args: {
-    size: 'small',
-    label: 'Button',
-  },
+Small.args = {
+  ...base,
+  size: 'small',
 };

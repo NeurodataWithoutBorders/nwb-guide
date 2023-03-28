@@ -240,6 +240,7 @@ DEV_TEMPLATE_PATH = join(dirname(__file__), "..", "file_templates")
 PROD_TEMPLATE_PATH = join(dirname(__file__), "..", "..", "file_templates")
 TEMPLATE_PATH = DEV_TEMPLATE_PATH if exists(DEV_TEMPLATE_PATH) else PROD_TEMPLATE_PATH
 
+
 ### Internal functions
 def TZLOCAL():
     return datetime.now(timezone.utc).astimezone().tzinfo
@@ -566,7 +567,6 @@ def create_dataset(jsonpath, pathdataset):
 
 
 def bf_get_current_user_permission(bf, myds):
-
     """
     Function to get the permission of currently logged in user for a selected dataset
 
@@ -760,7 +760,6 @@ def check_local_dataset_files_validity(soda_json_structure):
         return error
 
     def recursive_empty_local_folder_remove(my_folder, my_folder_key, my_folders_content):
-
         folders_content = my_folder["folders"]
         for folder_key in list(my_folder["folders"].keys()):
             folder = my_folder["folders"][folder_key]
@@ -1006,7 +1005,6 @@ def check_JSON_size(jsonStructure):
 
 
 def generate_dataset_locally(soda_json_structure):
-
     global namespace_logger
 
     namespace_logger.info("starting generate_dataset_locally")
@@ -1308,7 +1306,6 @@ def create_high_level_manifest_files_existing_bf_starting_point(
         makedirs(manifest_folder_path)
 
     for high_level_folder in list(dataset_structure["folders"]):
-
         # do not overwrite an existing manifest file
         if high_level_folder not in high_level_folders:
             continue
@@ -1388,7 +1385,6 @@ def create_high_level_manifest_files_existing_bf(soda_json_structure, bf, ds, my
             return name, ext
 
         def recursive_manifest_info_import_bf(my_item, my_relative_path, dict_folder_manifest, manifest_df):
-
             for item in my_item.items:
                 if item.type == "Collection":
                     folder_name = item.name
@@ -1445,7 +1441,6 @@ def create_high_level_manifest_files_existing_bf(soda_json_structure, bf, ds, my
             my_relative_path,
             dict_folder_manifest,
         ):
-
             if "folders" in my_folder.keys():
                 if my_bf_folder_exists:
                     (
@@ -1518,7 +1513,6 @@ def create_high_level_manifest_files_existing_bf(soda_json_structure, bf, ds, my
                             if desired_name not in my_bf_existing_files_name:
                                 final_name = file_key
                             else:
-
                                 # expected final name
                                 count_done = 0
                                 final_name = desired_name
@@ -1585,7 +1579,6 @@ def create_high_level_manifest_files_existing_bf(soda_json_structure, bf, ds, my
         manifest_dict_save = {}
         for item in ds.items:
             if item.type == "Collection" and item.name in dataset_structure["folders"].keys():
-
                 relative_path = ""
                 item_id = item.id
                 # Initialize dict where manifest info will be stored
@@ -1680,7 +1673,6 @@ def create_high_level_manifest_files_existing_local_starting_point(dataset_path)
 
     if dataset_path != "":
         for high_level_fol in listdir(dataset_path):
-
             if high_level_fol in [
                 "primary",
                 "derivative",
@@ -1696,7 +1688,6 @@ def create_high_level_manifest_files_existing_local_starting_point(dataset_path)
                 ]
 
                 for file in onlyfiles:
-
                     p = pathlib.Path(file)
                     # create high-level folder at the temporary location
                     folderpath = join(soda_manifest_folder_path, high_level_fol)
@@ -1721,7 +1712,6 @@ def bf_get_existing_folders_details(bf_folder):
 
 
 def bf_get_existing_files_details(bf_folder):
-
     double_extensions = [
         ".ome.tiff",
         ".ome.tif",
@@ -1854,7 +1844,6 @@ def get_base_file_name(file_name):
 
 
 def bf_update_existing_dataset(soda_json_structure, bf, ds):
-
     global namespace_logger
 
     namespace_logger.info("Starting bf_update_existing_dataset")
@@ -2093,7 +2082,6 @@ def bf_update_existing_dataset(soda_json_structure, bf, ds):
 
 
 def bf_generate_new_dataset(soda_json_structure, bf, ds):
-
     global namespace_logger
 
     namespace_logger.info("Starting bf_generate_new_dataset")
@@ -2112,7 +2100,6 @@ def bf_generate_new_dataset(soda_json_structure, bf, ds):
     try:
 
         def recursive_create_folder_for_bf(my_folder, my_tracking_folder, existing_folder_option):
-
             # list of existing bf folders at this level
             my_bf_folder = my_tracking_folder["value"]
             (
@@ -2159,7 +2146,6 @@ def bf_generate_new_dataset(soda_json_structure, bf, ds):
             list_upload_files,
             my_relative_path,
         ):
-
             global main_total_generate_dataset_size
 
             my_bf_folder = my_tracking_folder["value"]  # ds (dataset)
@@ -2186,7 +2172,6 @@ def bf_generate_new_dataset(soda_json_structure, bf, ds):
                     )
 
             if "files" in my_folder.keys():
-
                 # delete files to be deleted
                 (
                     my_bf_existing_files,
@@ -2691,7 +2676,6 @@ def bf_check_dataset_files_validity(soda_json_structure, bf):
 
 
 def main_curate_function(soda_json_structure):
-
     global namespace_logger
 
     namespace_logger.info("Starting main_curate_function")
@@ -2797,7 +2781,6 @@ def main_curate_function(soda_json_structure):
     # 1.3. Check that specified dataset files and folders are valid (existing path) if generate dataset is requested
     # Note: Empty folders and 0 kb files will be removed without warning (a warning will be provided on the front end before starting the curate process)
     if "generate-dataset" in main_keys:
-
         # Check at least one file or folder are added to the dataset
         try:
             main_curate_progress_message = "Checking that the dataset is not empty"
@@ -2964,7 +2947,6 @@ def preview_dataset(soda_json_structure):
         raise e
 
     try:
-
         if "dataset-structure" in soda_json_structure.keys():
             # create folder structure
             def recursive_create_mock_folder_structure(my_folder, my_folderpath):
@@ -3061,7 +3043,6 @@ def generate_manifest_file_locally(generate_purpose, soda_json_structure):
 
 
 def guided_generate_manifest_file_data(dataset_structure_obj):
-
     local_timezone = TZLOCAL()
 
     double_extensions = [

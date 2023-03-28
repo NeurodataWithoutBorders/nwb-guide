@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { openLink } from '../../../links.js';
 import lottie from 'lottie-web';
-import { docu_lottie } from '../../../../assets/lotties/documentation-lotties.js';
+import { docu_lottie } from '../../../assets/lotties/documentation-lotties.js';
 import { Page } from '../Page.js';
 
 export class DocumentationPage extends Page {
@@ -14,6 +14,7 @@ export class DocumentationPage extends Page {
 
   updated(){
     let doc_lottie = (this ?? this.shadowRoot).querySelector("#documentation-lottie");
+    doc_lottie.innerHTML = ''
 
     lottie.loadAnimation({
       container: doc_lottie,

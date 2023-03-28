@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import lottie from 'lottie-web';
-import { contact_lottie } from '../../../../assets/lotties/contact-us-lotties.js';
+import { contact_lottie } from '../../../assets/lotties/contact-us-lotties.js';
 import { Page } from '../Page.js';
 
 export class ContactPage extends Page {
@@ -15,6 +15,7 @@ export class ContactPage extends Page {
 
   updated(){
     let contact_lottie_container = (this ?? this.shadowRoot).querySelector("#contact-us-lottie");
+    contact_lottie_container.innerHTML = ''
 
     lottie.loadAnimation({
       container: contact_lottie_container,

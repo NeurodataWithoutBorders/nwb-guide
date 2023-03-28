@@ -1,7 +1,7 @@
 import { Main } from './Main.js';
 
 export default {
-  title: 'Example/Main'
+  title: 'Components/Main',
 };
 
 const Template = (args) => new Main(args);

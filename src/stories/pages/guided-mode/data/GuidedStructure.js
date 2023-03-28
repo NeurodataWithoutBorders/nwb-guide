@@ -5,24 +5,23 @@ import { Page } from '../../Page.js';
 
 // For Multi-Select Form
 import "../../../multiselect/MultiSelectForm.js";
-import globals from '../../../../../scripts/globals.js';
+import { baseUrl } from '../../../../globals.js';
 import { Search } from '../../../Search.js';
-const { port } = globals;
 
 export class GuidedStructurePage extends Page {
 
   constructor(...args) {
     super(...args)
+
+    // Handle Search Bar Interactions
+    this.search.onSelect = this.#addListItem
   }
 
-  search = new Search()
-
-  updated(){
-    const list = (this.shadowRoot ?? this).querySelector("ul");
-    this.search.onSelect = (key, value) => {
-      const li = document.createElement("li");
+  #addListItem = (key, value) => {
+    const name = value.name ?? value
+    const li = document.createElement("li");
       const keyEl = document.createElement("span");
-      keyEl.innerText = value.name.slice(0, -9)
+      keyEl.innerText = name.slice(0, -9) // Cut off "Interface"
       keyEl.contentEditable = true
       li.appendChild(keyEl)
 
@@ -31,23 +30,52 @@ export class GuidedStructurePage extends Page {
       li.appendChild(sepEl)
 
       const valueEl = document.createElement("span");
-      valueEl.innerText = value.name
+      valueEl.innerText = name
       li.appendChild(valueEl)
-      list.appendChild(li);
-    }
+      this.list.appendChild(li);
+  }
 
-    const base = `http://127.0.0.1:${port}`;
-    fetch(`${base}/neuroconv`).then((res) => res.json()).then(json => {
-      this.search.options = Object.entries(json).map(([key, value]) => {
-        return {
-          label: value.name,
-          keywords: [value.modality, value.technique],
-          value: value
-          // keywords: value.keywords
-        }
-      })
-      // this.search.options = json;
-    });
+  search = new Search()
+  list = document.createElement('ul')
+
+  footer = {
+    onNext: async () => {
+
+      const selected = Array.from(this.list.children).map((li) => {
+        const key = li.children[0].innerText
+        const value = li.children[2].innerText
+        return {key, value}
+      }).reduce((acc, {key, value}) => { acc[key] = value; return acc }, {})
+
+      const interfaces = Object.keys(selected);
+
+      this.save() // Save in case the schema request fails
+
+      const schema = (interfaces.length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
+
+      let sourceInfo = this.info.globalState.source
+      if (!sourceInfo) sourceInfo = this.info.globalState.source = {results: {}, schema: {}}
+
+      sourceInfo.schema = schema
+      sourceInfo.interfaces = selected
+
+
+      this.onTransition(1)
+    }
+  }
+
+  async updated(){
+    const selected = this.info.globalState.source?.interfaces
+    this.search.options = await fetch(`${baseUrl}/neuroconv`).then((res) => res.json()).then(json => Object.entries(json).map(([key, value]) => {
+      return {
+        label: value.name,
+        keywords: [value.modality, value.technique],
+        value: value
+        // keywords: value.keywords
+      }
+    })).catch(e => console.error(e));
+
+    for (const [key, value] of Object.entries(selected || {})) this.#addListItem(key, value) // Add previously selected items
   }
 
   render() {
@@ -62,8 +90,7 @@ export class GuidedStructurePage extends Page {
         <h1 class="guided--text-sub-step">Define your Data Formats</h1>
       </div>
       <div class="guided--section">
-        <ul>
-        </ul>
+        ${this.list}
         ${this.search}
       </div>
   </div>

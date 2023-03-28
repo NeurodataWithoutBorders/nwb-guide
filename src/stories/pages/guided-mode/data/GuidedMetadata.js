@@ -2,6 +2,7 @@
 
 import { html } from 'lit';
 import { Page } from '../../Page.js';
+import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 export class GuidedMetadataPage extends Page {
 
@@ -9,8 +10,25 @@ export class GuidedMetadataPage extends Page {
     super(...args)
   }
 
+  footer = {
+    onNext: async () => {
+      // TODO: Insert validation here...
+      const valid = true
+      if (!valid) throw new Error('Invalid metadata')
+
+      this.onTransition(1)
+    }
+  }
+
 
   render() {
+
+    const form = new JSONSchemaForm({
+      ...this.info.globalState.metadata,
+      ignore: ['Ecephys'],
+      onlyRequired: false,
+    })
+
     return html`
   <div
     id="guided-mode-starting-container"
@@ -21,7 +39,7 @@ export class GuidedMetadataPage extends Page {
         <h1 class="guided--text-sub-step">Metadata</h1>
       </div>
       <div class="guided--section">
-       Coming soon...
+       ${form}
       </div>
   </div>
     `;

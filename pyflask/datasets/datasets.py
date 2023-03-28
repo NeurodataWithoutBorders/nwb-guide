@@ -31,7 +31,6 @@ def get_role(pennsieve_account, dataset_name_or_id):
 
 
 def get_dataset_by_id(dataset_id):
-
     token = get_access_token()
 
     headers = {

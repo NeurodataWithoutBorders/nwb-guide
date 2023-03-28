@@ -2,7 +2,6 @@
 
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
-import { sections } from './pages/globals.js';
 import { GuidedFooter } from './pages/guided-mode/GuidedFooter';
 import { GuidedCapsules } from './pages/guided-mode/GuidedCapsules.js';
 import { GuidedHeader } from './pages/guided-mode/GuidedHeader.js';
@@ -10,6 +9,8 @@ import { GuidedHeader } from './pages/guided-mode/GuidedHeader.js';
 const componentCSS = `
     :host {
         position: relative;
+        display: grid;
+        grid-template-rows: fit-content(100%) 1fr fit-content(100%);
     }
 `
 
@@ -72,7 +73,6 @@ export class Main extends LitElement {
     this.style.position = "relative";
     let { page = '', sections = {} } = this.toRender ?? {}
 
-
     let footer = page?.footer // Page-specific footer
     let header = page?.header // Page-specific header
     let capsules = page?.capsules // Page-specific capsules
@@ -101,7 +101,7 @@ export class Main extends LitElement {
           let pages = Object.values(section.pages)
           if (pages.length > 1) capsules = {
               n: pages.length,
-              selected: pages.map(o => o.page).indexOf(page),
+              selected: pages.map(o => o.pageLabel).indexOf(page.info.label),
           }
         }
 
@@ -115,14 +115,14 @@ export class Main extends LitElement {
       }
     }
 
-    const headerEl = header ? new GuidedHeader(header) : ''
+    const headerEl = header ? new GuidedHeader(header) : html`<div></div>` // Render for grid
 
     const capsuleEl = new GuidedCapsules(capsules)
-    const footerEl = footer ? new GuidedFooter(footer) : ''
+    const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>` // Render for grid
 
     return html`
       ${headerEl}
-      <main id="content" class="js-content">
+      <main id="content" class="js-content" style="overflow: hidden;">
         <section
           class="section js-section u-category-windows"
         >

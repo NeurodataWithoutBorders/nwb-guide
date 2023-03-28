@@ -2,29 +2,17 @@ const { app, BrowserWindow, dialog, shell } = require("electron");
 require("@electron/remote/main").initialize();
 app.showExitPrompt = true;
 const path = require("path");
-const glob = require("glob");
 const fp = require("find-free-port");
-const os = require("os");
-const contextMenu = require("electron-context-menu");
-const log = require("electron-log");
 require("v8-compile-cache");
 const { ipcMain } = require("electron");
 const { autoUpdater } = require("electron-updater");
-const { JSONStorage } = require("node-localstorage");
-const { trackEvent } = require("./scripts/others/analytics/analytics");
-const { fstat } = require("fs");
-const { resolve } = require("path");
 const axios = require("axios");
-const { info } = require("console");
-const { node } = require("prop-types");
 
-log.transports.console.level = false;
-log.transports.file.level = "debug";
+require('./application-menu.js')
+require('./shortcuts.js')
+
 autoUpdater.channel = "latest";
-autoUpdater.logger = log;
-global.trackEvent = trackEvent;
 
-const nodeStorage = new JSONStorage(app.getPath("userData"));
 /*************************************************************
  * Python Process
  *************************************************************/
@@ -45,19 +33,14 @@ const portRange = 100;
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
 const guessPackaged = () => {
-  log.info("Guessing if packaged");
 
   const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER);
   const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
 
-  log.info(unixPath);
-
   if (process.platform === "darwin" || process.platform === "linux") {
     if (require("fs").existsSync(unixPath)) {
-      log.info("Unix path exists");
       return true;
     } else {
-      log.info("Unix path does not exist");
       return false;
     }
   }
@@ -79,48 +62,30 @@ const guessPackaged = () => {
  */
 const getScriptPath = () => {
   if (!guessPackaged()) {
-    log.info("App is not packaged returning path: ");
-    log.info(path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py"));
     return path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
   }
 
   if (process.platform === "win32") {
     return path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
   } else {
-    log.info("Since app is packaged returning path: ");
     return path.join(process.resourcesPath, PY_FLASK_MODULE);
   }
 };
 
-const selectPort = () => {
-  return PORT;
-};
-
 const createPyProc = async () => {
   let script = getScriptPath();
-  log.info(script);
-
-  let port = "" + selectPort();
 
   await killAllPreviousProcesses();
-
-  if (require("fs").existsSync(script)) {
-    log.info("server exists at specified location");
-  } else {
-    log.info("server does not exist at specified location");
-  }
 
   fp(PORT, PORT + portRange)
     .then(([freePort]) => {
       let port = freePort;
 
       if (guessPackaged()) {
-        log.info("Application is packaged");
         pyflaskProcess = require("child_process").execFile(script, [port], {
           // stdio: "ignore",
         });
       } else {
-        log.info("Application is not packaged");
         pyflaskProcess = require("child_process").spawn("python", [script, port], {
           // stdio: "ignore",
         });
@@ -128,7 +93,6 @@ const createPyProc = async () => {
 
       if (pyflaskProcess != null) {
         console.log("child process success on port " + port);
-        log.info("child process success on port " + port);
 
         // Listen for errors from Python process
         pyflaskProcess.stderr.on("data", function (data) {
@@ -144,10 +108,9 @@ const createPyProc = async () => {
 };
 
 /**
- * Kill the python server process. Needs to be called before SODA closes.
+ * Kill the python server process. Needs to be called before GUIDE closes.
  */
 const exitPyProc = async () => {
-  log.info("Killing python server process");
 
   // Windows does not properly shut off the python server process. This ensures it is killed.
   const killPythonProcess = () => {
@@ -206,15 +169,11 @@ const killAllPreviousProcesses = async () => {
 let mainWindow = null;
 let user_restart_confirmed = false;
 let updatechecked = false;
-let window_reloaded = false;
 
 function initialize() {
-  const checkForAnnouncements = () => {
-    mainWindow.webContents.send("checkForAnnouncements");
-  };
 
   makeSingleInstance();
-  loadDemos();
+
   function createWindow() {
     // mainWindow.webContents.openDevTools();
 
@@ -244,16 +203,11 @@ function initialize() {
               let { response } = responseObject;
               if (response === 0) {
                 // Runs the following if 'Yes' is clicked
-                var announcementsLaunch = nodeStorage.getItem("announcements");
-                nodeStorage.setItem("announcements", false);
                 quit_app();
               }
             });
         }
       } else {
-        var first_launch = nodeStorage.getItem("firstlaunch");
-        nodeStorage.setItem("firstlaunch", true);
-        nodeStorage.setItem("announcements", true);
         await exitPyProc();
         app.exit();
       }
@@ -281,7 +235,7 @@ function initialize() {
       height: 735,
       center: true,
       show: false,
-      icon: __dirname + "/assets/img/logo-neuroconv.png",
+      icon: __dirname + "/src/assets/img/logo-guide-draft.png",
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,
@@ -299,7 +253,7 @@ function initialize() {
       width: 340,
       height: 340,
       frame: false,
-      icon: __dirname + "/assets/img/logo-neuroconv.png",
+      icon: __dirname + "/src/assets/img/logo-guide-draft.png",
       alwaysOnTop: true,
       transparent: true,
     });
@@ -312,35 +266,11 @@ function initialize() {
         //mainWindow.maximize();
         mainWindow.show();
         createWindow();
-        var first_launch = nodeStorage.getItem("firstlaunch");
-        var announcementsLaunch = nodeStorage.getItem("announcements");
-
-        if (first_launch == true || first_launch == undefined) {
-          mainWindow.reload();
-          mainWindow.focus();
-          nodeStorage.setItem("firstlaunch", false);
-          run_pre_flight_checks();
-        }
-        if (announcementsLaunch == true || announcementsLaunch == undefined) {
-          checkForAnnouncements();
-        }
-        run_pre_flight_checks();
+        // run_pre_flight_checks();
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
       }, 6000);
     });
-
-    mainWindow.on("show", () => {
-      var first_launch = nodeStorage.getItem("firstlaunch");
-      if ((first_launch == true || first_launch == undefined) && window_reloaded == false) {
-      }
-      // run_pre_flight_checks();
-    });
-  });
-
-  app.on("ready", () => {
-    trackEvent("Success", "App Launched - OS", os.platform() + "-" + os.release());
-    trackEvent("Success", "App Launched - SODA", app.getVersion());
   });
 
   app.on("window-all-closed", async () => {
@@ -353,10 +283,10 @@ function initialize() {
   });
 }
 
-function run_pre_flight_checks() {
-  console.log("Running pre-checks");
-  mainWindow.webContents.send("run_pre_flight_checks");
-}
+// function run_pre_flight_checks() {
+//   console.log("Running pre-checks");
+//   mainWindow.webContents.send("run_pre_flight_checks");
+// }
 
 // Make this app a single instance app.
 const gotTheLock = app.requestSingleInstanceLock();
@@ -376,21 +306,6 @@ function makeSingleInstance() {
   }
 }
 
-/*
-the saveImage context Menu-Item works; however, it does not notify users that a download occurs.
-If you check your download folder, you'll see it there.
-See: https://github.com/nteract/nteract/issues/1655
-showSaveImageAs prompts the users where they want to save the image.
-*/
-contextMenu();
-
-// Require each JS file in the main-process dir
-function loadDemos() {
-  const files = glob.sync(path.join(__dirname, "main-process/**/*.js"));
-  files.forEach((file) => {
-    require(file);
-  });
-}
 
 initialize();
 
@@ -407,100 +322,19 @@ ipcMain.on("resize-window", (event, dir) => {
   mainWindow.setSize(x, y);
 });
 
-// Google analytics tracking function
-// To use, category and action is required. Label and value can be left out
-// if not needed. Sample requests from renderer.js is shown below:
-//ipcRenderer.send('track-event', "App Backend", "Python Connection Established");
-//ipcRenderer.send('track-event', "App Backend", "Errors", "server", error);
-ipcMain.on("track-event", (event, category, action, label, value) => {
-  if (label == undefined && value == undefined) {
-    trackEvent(category, action);
-  } else if (label != undefined && value == undefined) {
-    trackEvent(category, action, label);
-  } else {
-    trackEvent(category, action, label, value);
-  }
-});
-
-ipcMain.on("app_version", (event) => {
-  event.sender.send("app_version", { version: app.getVersion() });
-});
-
 autoUpdater.on("update-available", () => {
-  log.info("update_available");
   mainWindow.webContents.send("update_available");
 });
 
 autoUpdater.on("update-downloaded", () => {
-  log.info("update_downloaded");
   mainWindow.webContents.send("update_downloaded");
 });
 
 ipcMain.on("restart_app", async () => {
   user_restart_confirmed = true;
-  nodeStorage.setItem("announcements", true);
-  log.info("quitAndInstall");
   autoUpdater.quitAndInstall();
 });
 
-const wait = async (delay) => {
-  return new Promise((resolve) => setTimeout(resolve, delay));
-};
-
-ipcMain.on("orcid", (event, url) => {
-  const windowOptions = {
-    minWidth: 500,
-    minHeight: 300,
-    width: 900,
-    height: 800,
-    center: true,
-    show: true,
-    icon: __dirname + "/assets/menu-icon/soda_icon.png",
-    webPreferences: {
-      nodeIntegration: true,
-      enableRemoteModule: true,
-    },
-    // modal: true,
-    parent: mainWindow,
-    closable: true,
-  };
-
-  let pennsieveModal = new BrowserWindow(windowOptions);
-
-  // send to client so they can use this for the Pennsieve endpoint for integrating an ORCID
-  let accessCode;
-
-  pennsieveModal.on("close", function () {
-    // send event back to the renderer to re-run the prepublishing checks
-    // this will detect if the user added their ORCID iD
-    event.reply("orcid-reply", accessCode);
-
-    pennsieveModal = null;
-  });
-  pennsieveModal.loadURL(url);
-
-  pennsieveModal.once("ready-to-show", async () => {
-    pennsieveModal.show();
-  });
-
-  // track when the page navigates
-  pennsieveModal.webContents.on("did-navigate", () => {
-    // get the URL
-    url = pennsieveModal.webContents.getURL();
-
-    // check if the url includes the access code
-    if (url.includes("code=")) {
-      // get the access code from the url
-      let params = new URLSearchParams(url.slice(url.search(/\?/)));
-      accessCode = params.get("code");
-
-      // if so close the window
-      pennsieveModal.close();
-    }
-  });
-});
-
 ipcMain.on("get-port", (event) => {
-  log.info("Renderer requested port: " + selectedPort);
   event.returnValue = selectedPort;
 });
