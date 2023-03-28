@@ -45,9 +45,9 @@ export class ProgressCard extends LitElement {
             />
           `;
         }
-        const progressFileName = this.info["name"] || "";
+        const progressFileName = this.info.project["name"] || "";
         const progressFileSubtitle =
-        this.info["subtitle"] || "No designated subtitle";
+        this.info.project["lab_name"] || this.info.project["institution"]
         // const progressFileOwnerName =
         // this.info["pi-owner"]["name"] || "Not designated yet";
         const progressFileLastModified = new Date(this.info["last-modified"]).toLocaleString(
@@ -76,19 +76,15 @@ export class ProgressCard extends LitElement {
                 >${progressFileName}</h1>
               </div>
               <div class="guided--dataset-card-row">
-                <h1
-                  class="guided--text-dataset-card progress-card-popover"
-                  rel="popover"
-                  data-placement="bottom"
-                  data-trigger="hover"
-                  style="font-weight: 400;"
+                ${progressFileSubtitle ? html`<small
+                  style="color: gray;"
                 >
                     ${
                       progressFileSubtitle.length > 70
                         ? `${progressFileSubtitle.substring(0, 70)}...`
                         : progressFileSubtitle
                     }
-                </h1>
+                </small>` :''}
               </div>
               <div class="guided--dataset-card-row">
                 <h2 class="guided--text-dataset-card-sub" style="width: auto;">

@@ -3,16 +3,17 @@
 import { html } from 'lit';
 import { hasEntry, update } from '../../../../progress.js';
 import { Page } from '../../Page.js';
+import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 import { notyf } from '../../../../globals.js';
 
 export class GuidedNewDatasetPage extends Page {
 
-  state = {}
-
   constructor(...args) {
     super(...args)
   }
+
+  state = {}
 
   updated(){
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
@@ -20,6 +21,8 @@ export class GuidedNewDatasetPage extends Page {
 
   footer = {
     onNext: async () => {
+
+      const globalState = this.info.globalState.project
 
       // Check validity of project name
       const name = this.state.name
@@ -38,7 +41,7 @@ export class GuidedNewDatasetPage extends Page {
 
       // Check if name is already used
       // Update existing progress file
-      if (this.info.globalState.initialized) await update(name, this.info.globalState.name)
+      if (globalState.initialized) await update(name, globalState.name)
       else {
         const has = await hasEntry(name)
         if (has) {
@@ -53,9 +56,9 @@ export class GuidedNewDatasetPage extends Page {
         }
     }
 
-    this.info.globalState.initialized = true
+    globalState.initialized = true
+    Object.assign(globalState, this.state)
 
-    Object.assign(this.info.globalState, this.state)
     this.onTransition(1)
 
   }
@@ -63,9 +66,121 @@ export class GuidedNewDatasetPage extends Page {
 
   render() {
 
-    // Transfer global state if applicable
-    this.state.name = this.info.globalState.name
-    this.state.doi = this.info.globalState.doi
+    let projectGlobalState = this.info.globalState.project
+    if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {}
+
+    const schema = {
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Enter the name of your project.',
+          placeholder: "Enter project name here"
+        },
+
+        // Transposed from Metadata (manual entry)
+        institution: {
+          type: 'string',
+          description: 'Enter the name of your institution.',
+          placeholder: "Enter institution name here"
+        },
+        lab_name: {
+          type: 'string',
+          description: 'Enter the name of your lab.',
+          placeholder: "Enter lab name here"
+        },
+        experimenters: {
+          type: 'array',
+          description: 'Enter the names of the experimenters.',
+          placeholder: "Enter experimenter name heres",
+          items: {
+            type: 'string',
+          }
+        },
+
+        related_publications: {
+          type: 'array',
+          description: 'Enter DOIs of relevant publications.',
+          placeholder: "Enter publication DOIs here",
+          items: {
+            type: 'string',
+          }
+        },
+
+        experiment_details: {
+          type: 'object',
+          properties: {
+            experiment_description: {
+              type: 'string',
+              format: 'long',
+              description: 'Enter a description of the experiment.',
+              placeholder: "Enter experiment description here"
+            },
+            protocol: {
+              type: 'string',
+              description: 'Enter a description of the protocol.',
+              placeholder: "Enter protocol description here"
+            },
+            surgery: {
+              type: 'string',
+              description: 'Enter a description of the surgery.',
+              placeholder: "Enter surgery description here"
+            },
+            virus: {
+              type: 'string',
+              description: 'Enter a description of the virus.',
+              placeholder: "Enter virus description here" 
+            }, 
+            stimulus_notes: {
+              type: 'string',
+              description: 'Enter a description of the stimulus.',
+              placeholder: "Enter stimulus description here"
+            }
+          }
+        },
+
+        common_subject_information: {
+          type: 'object',
+          properties: {
+            species: {
+              type: 'string',
+              description: 'Enter a common species for your subjects.',
+              placeholder: "Enter species here"
+            },
+            description: {
+              type: 'string',
+              description: 'Enter a common description for your subjects.',
+              placeholder: "Enter subject description here"
+            },
+            genotype: {
+              type: 'string',
+              description: 'Enter a common genotype for your subjects.',
+              placeholder: "Enter genotype here"
+            },
+            strain: {
+              type: 'string',
+              description: 'Enter a common strain for your subjects.',
+              placeholder: "Enter strain here" 
+            }, 
+            sex: {
+              type: 'string',
+              description: 'Enter a common sex for your subjects.',
+              placeholder: "Enter sex here"
+            }
+          }
+        }
+
+
+      },
+      required: ['name']
+    }
+
+    const form = new JSONSchemaForm({
+      schema,
+      results: this.state
+    })
+
+    form.style.width = '100%'
+
 
     return html`
         <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
@@ -73,46 +188,7 @@ export class GuidedNewDatasetPage extends Page {
           <h1 class="guided--text-sub-step">Project metadata</h1>
         </div>
         <div class="guided--section">
-          <label class="guided--form-label">Project Name</label>
-          <input
-            class="guided--input"
-            id="guided-dataset-name-input"
-            data-input-set="guided-dataset-starting-point-tab"
-            data-alert-message="A Pennsieve dataset name cannot contain any of the following characters: /:*?'."
-            data-alert-type="danger"
-            type="text"
-            name="guided-dataset-name"
-            placeholder="Enter project name here"
-            .value=${this.state.name ?? ''}
-
-            @input=${(ev) => this.state.name = ev.target.value.trim()}
-          />
-          <p class="guided--text-input-instructions mb-0">Enter the name of your project.</p>
-        </div>
-        <div class="guided--section">
-          <label class="guided--form-label">DOIs of Relevant Publications</label>
-          <p style="height: 0px; margin: 0px">
-            <span
-              id="guided-subtitle-char-count"
-              style="position: relative; top: 100px; color: rgb(117, 107, 107)"
-            >
-              255 characters left
-            </span>
-          </p>
-          <textarea
-            class="guided--input guided--text-area"
-            id="guided-dataset-subtitle-input"
-            type="text"
-            name="guided-dataset-subtitle"
-            placeholder="Enter project DOIs here"
-            style="height: 7.5em; padding-bottom: 20px"
-            maxlength="255"
-            @input=${(ev) => this.state.doi = ev.target.value}
-            .value=${this.state.doi ?? ''}
-          ></textarea>
-          <p class="guided--text-input-instructions mb-0">
-            Separete multiple DOIs with a comma.
-          </p>
+        ${form}
         </div>
       </div>
     </div>

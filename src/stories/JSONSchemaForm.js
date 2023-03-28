@@ -13,6 +13,83 @@ const componentCSS = `
       display: inline-block;
     }
 
+    p {
+      margin: 0 0 1em;
+      line-height: 1.4285em;
+    }
+
+    .guided--form-label {
+      display: block;
+      width: 100%;
+      margin: 0 0 0.45rem 0;
+      color: black;
+      font-weight: 600;
+    }
+  
+    .guided--form-label {
+      font-size: 1.2em !important;
+    }
+    .guided--form-label.centered {
+      text-align: center;
+    }
+
+    .guided--form-label.header {
+      font-size: 1.5em !important;
+    }
+
+.guided--input {
+  width: 100%;
+  height: 38px;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 100%;
+  font-weight: normal;
+  border: 1px solid var(--color-border);
+  transition: border-color 150ms ease-in-out 0s;
+  outline: none;
+  color: rgb(33, 49, 60);
+  background-color: rgb(255, 255, 255);
+}
+
+.guided--input:read-only,
+.guided--input:disabled {
+  color: dimgray;
+  pointer-events: none;
+}
+.guided--input::placeholder {
+  opacity: 0.5;
+}
+
+.guided--text-area {
+  height: 5em;
+  resize: none;
+  font-family: unset;
+}
+.guided--text-area-tall {
+  height: 15em;
+}
+.guided--input:hover {
+  box-shadow: rgb(231 238 236) 0px 0px 0px 2px;
+}
+.guided--input:focus {
+  outline: 0;
+  box-shadow: var(--color-light-green) 0px 0px 0px 1px;
+}
+
+.guided--text-input-instructions {
+  font-size: 13px;
+  width: 100%;
+  padding-top: 4px;
+  padding-bottom: 5px;
+  color: dimgray !important;
+}
+
+hr {
+  margin: 1em 0 1.5em 0;
+}
+
+
+
 `
 
 export class JSONSchemaForm extends LitElement {
@@ -62,15 +139,20 @@ export class JSONSchemaForm extends LitElement {
 
   }
 
+  #parseStringToHeader = (headerStr) => headerStr.split('_').map(str => str[0].toUpperCase() + str.slice(1)).join(' ')
+
   #renderInteractiveElement = (name, info, parent, isRequired) => {
+
+    // Handle  string formats
+    const isArray = info.type === 'array'
+    const isStringArray = isArray && info.items.type === 'string'
 
     return html`
     <div>
-      <h4 style="margin-bottom: 0; margin-top: 10px;">${name} ${isRequired ? html`<span style="color: red">*</span>` : ``}</h4>
+      <label class="guided--form-label">${this.#parseStringToHeader(name)} ${isRequired ? html`<span style="color: red">*</span>` : ``}</label>
       ${(() => {
 
-        // Handle  string formats
-        if (info.type === 'string') {
+        if (info.type === 'string' || isStringArray) {
 
           // Handle file and directory formats
           if (this.#filesystemQueries.includes(info.format)) return dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
@@ -91,7 +173,21 @@ export class JSONSchemaForm extends LitElement {
           }}>Get ${info.format[0].toUpperCase() + info.format.slice(1)}</button><small>${parent[name] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
 
           // Handle long string formats
-          else if (info.format === 'long') return html`<textarea .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value}></textarea>`
+          else if (info.format === 'long' || isArray) return html`<textarea 
+          class="guided--input guided--text-area"
+            type="text"
+            placeholder="${info.placeholder ?? ''}"
+            style="height: 7.5em; padding-bottom: 20px"
+            maxlength="255"
+          .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}" 
+          @input=${(ev) => {
+
+            // Split by comma if array
+            if (isStringArray) parent[name] = ev.target.value.split('\n').map(str => str.trim())
+            
+            // Otherwise, just set the value
+            else parent[name] = ev.target.value
+          }}></textarea>`
 
           // Handle date formats
           else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} />`
@@ -99,7 +195,16 @@ export class JSONSchemaForm extends LitElement {
           // Handle other string formats
           else {
             const type = info.format === 'date-time' ? "datetime-local" : info.format ?? 'text'
-            return html`<input type="${type}" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} />`
+            return html`
+            <input
+              class="guided--input"
+              type="${type}"
+              placeholder="${info.placeholder ?? ''}"
+              .value="${parent[name] ?? ''}"
+
+              @input=${(ev) => parent[name] = ev.target.value}
+            />
+            `
           }
         }
 
@@ -107,6 +212,7 @@ export class JSONSchemaForm extends LitElement {
       // Default case
       return html`<p>type not supported (${info.type} | ${info.format ?? '–'}) </p>`
       })()}
+      ${info.description ? html`<p class="guided--text-input-instructions mb-0">${info.description}${isStringArray ? ' Separate on new lines.' : ''}</p>` : ''}
     </div>
     `
   }
@@ -115,11 +221,14 @@ export class JSONSchemaForm extends LitElement {
 
   #registerDefaultProperties = (properties = {}, results) => {
     for (let name in properties) {
-      if (!results[name]) results[name] = {} // Regisiter new interfaces in results
       const info = properties[name]
-      if (info.properties) {
+      const props = info.properties
+      if (!results[name]) {
+        if (props) results[name] = {} // Regisiter new interfaces in results
+        else if ('default' in info) results[name] = info.default
+      }
+      if (props) {
         Object.entries(info.properties).forEach(([key, value]) => {
-          console.log('Registering', key, value)
           if (!(key in results[name])) {
             if ('default' in value) results[name][key] = value.default
             else if (value.properties) {
@@ -159,8 +268,9 @@ export class JSONSchemaForm extends LitElement {
 
       // Render properties in the sub-schema
       return html`
-    <div style="margin-bottom: 25px;">
-      <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>
+    <div style="margin-top: 25px;">
+      <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
+      <hr/>
       ${this.#render(info, results[name], depth + 1)}
     </div>
     `})
