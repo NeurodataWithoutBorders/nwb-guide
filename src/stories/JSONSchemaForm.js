@@ -1,7 +1,7 @@
 import { LitElement, css, html } from 'lit';
 
-import electronImports from '../electron/index'
-const { dialog } = electronImports.remote ?? {};
+import { remote } from '../electron/index'
+const { dialog } = remote
 
 const componentCSS = `
 

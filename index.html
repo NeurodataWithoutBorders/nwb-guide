@@ -5,37 +5,7 @@
 
     <title>NWB GUIDE</title>
 
-    <!-- <link rel="import" href="sections/getting_started/getting_started.html" />
-    <link rel="import" href="sections/manage_datasets/manage_datasets.html" />
-    <link rel="import" href="sections/post_curation/post_curation.html" />
-    <link rel="import" href="sections/prepare_metadata/metadata_templates.html" />
-    <link rel="import" href="sections/prepare_metadata/create_submission.html" />
-    <link rel="import" href="sections/prepare_metadata/create_subjects.html" />
-    <link rel="import" href="sections/prepare_metadata/dataset_description.html" />
-    <link rel="import" href="sections/prepare_metadata/create_samples.html" />
-    <link rel="import" href="sections/prepare_metadata/create_changes.html" />
-    <link rel="import" href="sections/prepare_metadata/create_readme.html" />
-    <link rel="import" href="sections/prepare_metadata/create_manifest.html" />
-    <link rel="import" href="sections/curate/curate.html" />
-    <link rel="import" href="sections/main_tabs/main_tabs.html" />
-    <link rel="import" href="sections/documentation/documentation.html" />
-    <link rel="import" href="sections/validate/validate_dataset.html" />
-    <link rel="import" href="sections/contact-us/contact_us.html" />
-    <link rel="import" href="sections/guided_mode/guided_curate_dataset.html" /> -->
-
     <style>
-      #notification {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 288px;
-        padding: 20px;
-        z-index: 10000000;
-        border-radius: 5px;
-        background-color: white;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-      }
-
       #version {
         white-space: nowrap;
       }
@@ -49,32 +19,18 @@
   <body>
     <nwb-dashboard name="NWB GUIDE"></nwb-dashboard>
 
-    <!-- Required inclusion of jQuery based on legacy SODA DOM manipulation strategy -->
-    <script src="node_modules/jquery/dist/jquery.min.js"></script> <!-- Vite -->
-    <script>isElectron = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1; if (isElectron) window.$ = window.jQuery = require("jquery"); </script> <!-- Electron -->
-
-    <script src="node_modules/cropperjs/dist/cropper.js"></script>
-    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="node_modules/fomantic-ui/dist/components/accordion.js"></script>
-    <script src="node_modules/jstree/dist/jstree.min.js"></script>
-    <script src="node_modules/@tarekraafat/autocomplete.js/dist/autoComplete.js"></script>
-    <script src="node_modules/sweetalert2/dist/sweetalert2.min.js"></script>
-    <script src="node_modules/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
-    <script src="https://jsuites.net/v4/jsuites.js"></script>
-    <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
-
     <script type="module">
+      const isElectron = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
       if (isElectron) {
         const stylesheet = document.createElement("link") // Import bundled CSS for Electron
         stylesheet.rel = "stylesheet"
         stylesheet.href = "./dist/style.css"
-        document.head.appendChild(stylesheet)
+        document.head.insertAdjacentElement('afterbegin', stylesheet) // ensure css is least priority
 
         await import("./dist/index.js") // Load packaged frontend for Electron
       }
+
       else await import("./src/index.js") // Load dev frontend (if not in Electron context)
     </script>
-
-    <!-- <script src="./assets/lotties.js" type="text/javascript"></script> -->
   </body>
 </html>

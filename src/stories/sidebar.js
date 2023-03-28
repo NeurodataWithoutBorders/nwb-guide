@@ -1,7 +1,7 @@
 
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
-import catalystNeuroLogo from '../../assets/img/logo-catalystneuro.png'
+import catalystNeuroLogo from '../assets/img/logo-catalystneuro.png'
 
 const componentCSS = `` // These are not active until the component is using shadow DOM
 
@@ -42,6 +42,8 @@ export class Sidebar extends LitElement {
 
   updated(){
     this.nav = (this.shadowRoot ?? this).querySelector("#main-nav");
+
+    this.subtitleElement = (this.shadowRoot ?? this).querySelector("#subtitle");
 
       // Toggle sidebar
       const toggle = this.toggle = (this.shadowRoot ?? this).querySelector("#sidebarCollapse");

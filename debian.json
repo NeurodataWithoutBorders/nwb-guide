@@ -1,5 +1,5 @@
 {
   "dest": "release-builds/",
-  "icon": "assets/app-icon/png/soda_icon.png",
+  "icon": "src/assets/app-icon/png/icon.png",
   "categories": ["Utility"]
 }

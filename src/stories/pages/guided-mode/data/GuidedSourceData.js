@@ -3,9 +3,9 @@
 import { html } from 'lit';
 import { Page } from '../../Page.js';
 
-import globals from '../../../../../scripts/globals.js';
+import Swal from 'sweetalert2'
+import { notyf, baseUrl } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-const { notyf, baseUrl } = globals;
 
 export class GuidedSourceDataPage extends Page {
 

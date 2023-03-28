@@ -8,35 +8,29 @@ import { Sidebar } from './sidebar.js';
 import { NavigationSidebar } from './NavigationSidebar.js';
 
 // Global styles to apply with the dashboard
-import "../../assets/css/variables.css"
-import "../../assets/css/nativize.css"
-import "../../assets/css/global.css"
-import "../../assets/css/nav.css"
-import "../../assets/css/section.css"
-import "../../assets/css/demo.css"
-import "../../assets/css/individualtab.css"
-import "../../assets/css/main_tabs.css"
-import "../../node_modules/cropperjs/dist/cropper.css"
+import "../assets/css/variables.css"
+import "../assets/css/nativize.css"
+import "../assets/css/global.css"
+import "../assets/css/nav.css"
+import "../assets/css/section.css"
+import "../assets/css/demo.css"
+import "../assets/css/individualtab.css"
+import "../assets/css/main_tabs.css"
+// import "../../node_modules/cropperjs/dist/cropper.css"
 import "../../node_modules/notyf/notyf.min.css"
-import "../../assets/css/spur.css"
-import "../../assets/css/main.css"
+import "../assets/css/spur.css"
+import "../assets/css/main.css"
 // import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
 import "../../node_modules/@fortawesome/fontawesome-free/css/all.css"
-import "../../node_modules/select2/dist/css/select2.min.css"
-import "../../node_modules/@toast-ui/editor/dist/toastui-editor.css"
-import "../../node_modules/tui-date-picker/dist/tui-date-picker.css"
-import "../../node_modules/codemirror/lib/codemirror.css"
-import "../../node_modules/@yaireo/tagify/dist/tagify.css"
+// import "../../node_modules/select2/dist/css/select2.min.css"
+// import "../../node_modules/@toast-ui/editor/dist/toastui-editor.css"
+// import "../../node_modules/codemirror/lib/codemirror.css"
+// import "../../node_modules/@yaireo/tagify/dist/tagify.css"
 import "../../node_modules/fomantic-ui/dist/semantic.min.css"
 import "../../node_modules/fomantic-ui/dist/components/accordion.min.css"
-import "../../node_modules/@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css"
 import "../../node_modules/@sweetalert2/theme-bulma/bulma.css"
-import "../../node_modules/bootstrap-select/dist/css/bootstrap-select.min.css"
-import "../../node_modules/jstree/dist/themes/default/style.min.css"
-import "../../node_modules/tippy.js/dist/tippy.css"
-import "../../node_modules/tippy.js/themes/light.css"
-import "../../node_modules/intro.js/minified/introjs.min.css"
-import "../../assets/css/guided.css"
+// import "../../node_modules/intro.js/minified/introjs.min.css"
+import "../assets/css/guided.css"
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
@@ -106,7 +100,7 @@ export class Dashboard extends LitElement {
 
   attributeChangedCallback(key, previous, latest) {
     super.attributeChangedCallback(...arguments)
-    if (key === 'subtitle' && this.sidebar) this.sidebar.setSubtitle(latest) // Update subtitle without rerender
+    if (key === 'subtitle' && this.sidebar) this.sidebar.subtitle = latest // Update subtitle without rerender
     else if (key === 'name') this.requestUpdate()
     else if (key === 'pages') this.#updated(latest)
     else if (key.toLowerCase() === 'activepage'){
