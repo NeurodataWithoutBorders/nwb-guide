@@ -52,7 +52,7 @@ export class GuidedStructurePage extends Page {
   search = new Search({
     showAllWhenEmpty: true,
   })
-  
+
   list = document.createElement('ul')
 
   footer = {
