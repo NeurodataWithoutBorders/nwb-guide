@@ -31,6 +31,7 @@ import "../../node_modules/fomantic-ui/dist/components/accordion.min.css"
 import "../../node_modules/@sweetalert2/theme-bulma/bulma.css"
 // import "../../node_modules/intro.js/minified/introjs.min.css"
 import "../assets/css/guided.css"
+import isElectron from '../electron/check.js';
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
@@ -105,15 +106,7 @@ export class Dashboard extends LitElement {
         this.setMain(this.pagesById[e.state.page], undefined, false)
       }
     }
-
-  // window.onpushstate = (e) => {
-  //   console.log('Ev', e)
-  //   if(e.state){
-  //     const page = e.state.page
-  //     this.setMain(this.pagesById[page], { globalState: this.#active.info.globalState })
-  //   }
-  // }
-
+    
     this.#updated()
   }
 
@@ -221,7 +214,9 @@ export class Dashboard extends LitElement {
   #updated(pages=this.pages) {
 
     const url = new URL(window.location.href)
-    const active = url.pathname.slice(1)
+    let active = url.pathname.slice(1)
+    if (isElectron) active = new URLSearchParams(url.search).get('page')
+
 
     this.main.onTransition = (transition) => {
 
@@ -247,7 +242,7 @@ export class Dashboard extends LitElement {
     const page = this.getPage(this.pagesById[id])
     if (page) {
       const { id, label } = page.info
-      history.pushState({ page: id, label }, label, `${window.location.origin}/${id === '/' ? '' : id}`);
+      history.pushState({ page: id, label }, label, (isElectron) ? `?page=${id}` : `${window.location.origin}/${id === '/' ? '' : id}`);
     }
   }
 

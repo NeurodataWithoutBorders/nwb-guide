@@ -85,7 +85,7 @@ export class Sidebar extends LitElement {
   onClick = () => {} // Set by the user
 
   selectItem = (id) => {
-    this.#selected = id.split('/')[0]
+    this.#selected = id.split('/')[0] || '/'
     const links = (this.shadowRoot ?? this).querySelectorAll('a')
     links.forEach((a) => a.classList.remove('is-selected'))
     const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${this.#selected}"]`)
