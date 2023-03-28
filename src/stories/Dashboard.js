@@ -240,7 +240,6 @@ export class Dashboard extends LitElement {
       Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
       this.sidebar.pages = pages
 
-      console.log('Active', active)
       if (active) this.setAttribute('activePage', active)
   }
 
@@ -248,7 +247,7 @@ export class Dashboard extends LitElement {
     const page = this.getPage(this.pagesById[id])
     if (page) {
       const { id, label } = page.info
-      history.pushState({ page: id, label }, label, `${id}`);
+      history.pushState({ page: id, label }, label, `${window.location.origin}/${id === '/' ? '' : id}`);
     }
   }
 
