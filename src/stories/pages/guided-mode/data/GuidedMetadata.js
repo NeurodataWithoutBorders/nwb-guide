@@ -23,7 +23,7 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
-    const metadataResults = this.info.globalState.metadata.results 
+    const metadataResults = this.info.globalState.metadata.results
 
     // Merge project-wide data into metadata
     const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')

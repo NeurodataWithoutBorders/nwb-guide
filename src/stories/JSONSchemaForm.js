@@ -25,7 +25,7 @@ const componentCSS = `
       color: black;
       font-weight: 600;
     }
-  
+
     .guided--form-label {
       font-size: 1.2em !important;
     }
@@ -189,18 +189,18 @@ export class JSONSchemaForm extends LitElement {
           }}>Get ${info.format[0].toUpperCase() + info.format.slice(1)}</button><small>${parent[name] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
 
           // Handle long string formats
-          else if (info.format === 'long' || isArray) return html`<textarea 
+          else if (info.format === 'long' || isArray) return html`<textarea
           class="guided--input guided--text-area"
             type="text"
             placeholder="${info.placeholder ?? ''}"
             style="height: 7.5em; padding-bottom: 20px"
             maxlength="255"
-          .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}" 
+          .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}"
           @input=${(ev) => {
 
             // Split by comma if array
             if (isStringArray) parent[name] = ev.target.value.split('\n').map(str => str.trim())
-            
+
             // Otherwise, just set the value
             else parent[name] = ev.target.value
           }}></textarea>`

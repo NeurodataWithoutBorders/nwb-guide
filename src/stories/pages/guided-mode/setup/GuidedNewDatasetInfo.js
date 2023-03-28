@@ -130,8 +130,8 @@ export class GuidedNewDatasetPage extends Page {
             virus: {
               type: 'string',
               description: 'Enter a description of the virus.',
-              placeholder: "Enter virus description here" 
-            }, 
+              placeholder: "Enter virus description here"
+            },
             stimulus_notes: {
               type: 'string',
               description: 'Enter a description of the stimulus.',
@@ -162,8 +162,8 @@ export class GuidedNewDatasetPage extends Page {
             strain: {
               type: 'string',
               description: 'Enter a common strain for your subjects.',
-              placeholder: "Enter strain here" 
-            }, 
+              placeholder: "Enter strain here"
+            },
             sex: {
               type: 'string',
               description: 'Enter a common sex for your subjects.',
