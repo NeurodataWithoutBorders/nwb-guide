@@ -1,9 +1,12 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 
 import json
 from neuroconv.utils import NWBMetaDataEncoder
+from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+from pathlib import Path
 
 import os
 
@@ -106,3 +109,25 @@ def convert_to_nwb(info: dict) -> bool:
     )
 
     return str(file)
+
+
+def upload_to_dandi(
+    dandiset_id: str,
+    nwb_folder_path: str,
+    api_key: str,
+    dandiset_folder_path: Optional[str] = None,
+    version: Optional[str] = None,
+    staging: Optional[bool] = None, # Override default staging=True
+    cleanup: Optional[bool] = None,
+):    
+    
+    os.environ['DANDI_API_KEY'] = api_key # Update API Key
+
+    return automatic_dandi_upload(
+        dandiset_id=dandiset_id,
+        nwb_folder_path=Path(nwb_folder_path),
+        dandiset_folder_path=Path(dandiset_folder_path) if dandiset_folder_path is not None else None,
+        version=version,
+        staging=staging,
+        cleanup=cleanup,
+    )

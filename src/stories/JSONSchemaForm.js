@@ -118,6 +118,8 @@ export class JSONSchemaForm extends LitElement {
       const info = properties[name]
       const props = info.properties
       if (props && !results[name]) results[name] = {} // Regisiter new interfaces in results
+      else if (info.default) results[name] = info.default
+      
       if (props) {
         Object.entries(props).forEach(([key, value]) => {
           if (!(key in results[name])) {
