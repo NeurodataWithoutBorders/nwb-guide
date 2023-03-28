@@ -18,7 +18,7 @@ export class DocumentationPage extends Page {
 
     lottie.loadAnimation({
       container: doc_lottie,
-      animationData: docu_lottie /*(json js variable, (view src/assets/lotties)*/,
+      animationData: docu_lottie /*(json js variable, (view frontend/assets/lotties)*/,
       renderer: "svg",
       loop: true /*controls looping*/,
       autoplay: true,

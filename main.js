@@ -9,7 +9,6 @@ const { autoUpdater } = require("electron-updater");
 const axios = require("axios");
 
 require('./application-menu.js')
-require('./shortcuts.js')
 
 autoUpdater.channel = "latest";
 
@@ -27,7 +26,7 @@ let PORT = 4242;
 let selectedPort = null;
 const portRange = 100;
 
-const icon = path.join(__dirname, "src/assets/img/logo-guide-draft.png");
+const icon = path.join(__dirname, "frontend/assets/img/logo-guide-draft.png");
 
 /**
  * Determine if the application is running from a packaged version or from a dev version.
@@ -228,6 +227,7 @@ function initialize() {
   };
 
   app.on("ready", () => {
+    require('./shortcuts.js')
     createPyProc();
 
     const windowOptions = {

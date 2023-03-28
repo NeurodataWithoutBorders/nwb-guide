@@ -40,7 +40,6 @@
   "build": {
     "appId": "com.catalystneuro.nwbguide",
     "generateUpdatesFilesForAllChannels": true,
-    "afterSign": "./notarize.js",
     "files": [
       "**/*",
       "!pysoda/",
@@ -53,7 +52,7 @@
     "win": {
       "asar": false,
       "target": "nsis",
-      "icon": "src/assets/app-icon/logo-guide-draft.ico"
+      "icon": "frontend/assets/app-icon/logo-guide-draft.ico"
     },
     "mac": {
       "asar": true,
@@ -61,7 +60,7 @@
         "dmg",
         "zip"
       ],
-      "icon": "src/assets/img/logo-guide-draft.png",
+      "icon": "frontend/assets/img/logo-guide-draft.png",
       "darkModeSupport": false,
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -76,7 +75,7 @@
     "linux": {
       "asar": true,
       "target": "AppImage",
-      "icon": "src/assets/img/logo-guide-draft.png",
+      "icon": "frontend/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
           "from": "./pyflaskdist/app"
@@ -88,7 +87,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/assets/app-icon/logo-guide-draft.ico"
+      "installerIcon": "frontend/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
       "provider": "github",

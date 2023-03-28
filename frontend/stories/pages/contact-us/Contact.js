@@ -19,7 +19,7 @@ export class ContactPage extends Page {
 
     lottie.loadAnimation({
       container: contact_lottie_container,
-      animationData: contact_lottie /*(json js variable, (view src/assets/lotties)*/,
+      animationData: contact_lottie /*(json js variable, (view frontend/assets/lotties)*/,
       renderer: "svg",
       loop: true /*controls looping*/,
       autoplay: true,

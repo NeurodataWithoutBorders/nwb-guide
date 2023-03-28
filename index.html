@@ -24,13 +24,13 @@
       if (isElectron) {
         const stylesheet = document.createElement("link") // Import bundled CSS for Electron
         stylesheet.rel = "stylesheet"
-        stylesheet.href = "./dist/style.css"
+        stylesheet.href = "./frontend/dist/style.css"
         document.head.insertAdjacentElement('afterbegin', stylesheet) // ensure css is least priority
 
-        await import("./dist/index.js") // Load packaged frontend for Electron
+        await import("./frontend/dist/index.js") // Load packaged frontend for Electron
       }
 
-      else await import("./src/index.js") // Load dev frontend (if not in Electron context)
+      else await import("./frontend/index.js") // Load dev frontend (if not in Electron context)
     </script>
   </body>
 </html>

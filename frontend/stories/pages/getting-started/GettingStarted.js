@@ -28,14 +28,14 @@ export class GettingStartedPage extends Page {
 
     var column1_lottie = lottie.loadAnimation({
       container: column1,
-      animationData: column1Lottie /*(json js variable, (view src/assets/lotties)*/,
+      animationData: column1Lottie /*(json js variable, (view frontend/assets/lotties)*/,
       renderer: "svg",
       loop: true /*controls looping*/,
       autoplay: true,
     });
     var column2_lottie = lottie.loadAnimation({
       container: column2,
-      animationData: column2Lottie /*(json js variable, (view src/assets/lotties)*/,
+      animationData: column2Lottie /*(json js variable, (view frontend/assets/lotties)*/,
       renderer: "svg",
       loop: true /*controls looping*/,
       autoplay: true,
