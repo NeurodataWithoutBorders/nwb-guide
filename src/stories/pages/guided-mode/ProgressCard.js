@@ -47,7 +47,7 @@ export class ProgressCard extends LitElement {
         }
         const progressFileName = this.info.project["name"] || "";
         const progressFileSubtitle =
-        this.info.project["lab_name"] || this.info.project["institution"]
+        this.info.project.NWBFile?.["lab"] || this.info.project.NWBFile?.["institution"]
         // const progressFileOwnerName =
         // this.info["pi-owner"]["name"] || "Not designated yet";
         const progressFileLastModified = new Date(this.info["last-modified"]).toLocaleString(

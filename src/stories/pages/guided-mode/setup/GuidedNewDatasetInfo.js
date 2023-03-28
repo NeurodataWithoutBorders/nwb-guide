@@ -69,6 +69,8 @@ export class GuidedNewDatasetPage extends Page {
     let projectGlobalState = this.info.globalState.project
     if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {}
 
+    Object.assign(this.state, projectGlobalState) // Initialize state with global state
+
     const schema = {
       properties: {
         name: {
@@ -78,37 +80,37 @@ export class GuidedNewDatasetPage extends Page {
         },
 
         // Transposed from Metadata (manual entry)
-        institution: {
-          type: 'string',
-          description: 'Enter the name of your institution.',
-          placeholder: "Enter institution name here"
-        },
-        lab_name: {
-          type: 'string',
-          description: 'Enter the name of your lab.',
-          placeholder: "Enter lab name here"
-        },
-        experimenters: {
-          type: 'array',
-          description: 'Enter the names of the experimenters.',
-          placeholder: "Enter experimenter name heres",
-          items: {
-            type: 'string',
-          }
-        },
-
-        related_publications: {
-          type: 'array',
-          description: 'Enter DOIs of relevant publications.',
-          placeholder: "Enter publication DOIs here",
-          items: {
-            type: 'string',
-          }
-        },
-
-        experiment_details: {
-          type: 'object',
+        NWBFile: {
+          type: "object",
           properties: {
+
+              institution: {
+                type: 'string',
+                description: 'Enter the name of your institution.',
+                placeholder: "Enter institution name here"
+              },
+              lab: {
+                type: 'string',
+                description: 'Enter the name of your lab.',
+                placeholder: "Enter lab name here"
+              },
+              experimenter: {
+                type: 'array',
+                description: 'Enter the names of the experimenters.',
+                placeholder: "Enter experimenter name heres",
+                items: {
+                  type: 'string',
+                },
+
+            related_publications: {
+              type: 'array',
+              description: 'Enter DOIs of relevant publications.',
+              placeholder: "Enter publication DOIs here",
+              items: {
+                type: 'string',
+              }
+            },
+
             experiment_description: {
               type: 'string',
               format: 'long',
@@ -134,11 +136,12 @@ export class GuidedNewDatasetPage extends Page {
               type: 'string',
               description: 'Enter a description of the stimulus.',
               placeholder: "Enter stimulus description here"
-            }
-          }
+            },
+          },
         },
+      },
 
-        common_subject_information: {
+        Subject: {
           type: 'object',
           properties: {
             species: {

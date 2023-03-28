@@ -88,6 +88,16 @@ hr {
   margin: 1em 0 1.5em 0;
 }
 
+pre {
+  white-space: pre-wrap;       /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  font-family: unset;
+  color: DimGray;
+}
+
 
 
 `
@@ -139,20 +149,26 @@ export class JSONSchemaForm extends LitElement {
 
   }
 
-  #parseStringToHeader = (headerStr) => headerStr.split('_').map(str => str[0].toUpperCase() + str.slice(1)).join(' ')
+  #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
+
+  #parseStringToHeader = (headerStr) => {
+    return headerStr.split('_').filter(str => !!str).map(this.#capitalize).join(' ')
+  }
 
   #renderInteractiveElement = (name, info, parent, isRequired) => {
 
-    // Handle  string formats
+    // Handle string (and related) formats / types
     const isArray = info.type === 'array'
-    const isStringArray = isArray && info.items.type === 'string'
+
+    const hasItemsRef = 'items' in info && '$ref' in info.items
+    const isStringArray = isArray && (info.items?.type === 'string' || (!('items' in info) || (!('type' in info.items) && !hasItemsRef))) // Default to a string type
 
     return html`
     <div>
       <label class="guided--form-label">${this.#parseStringToHeader(name)} ${isRequired ? html`<span style="color: red">*</span>` : ``}</label>
       ${(() => {
 
-        if (info.type === 'string' || isStringArray) {
+        if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
 
           // Handle file and directory formats
           if (this.#filesystemQueries.includes(info.format)) return dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
@@ -194,7 +210,7 @@ export class JSONSchemaForm extends LitElement {
 
           // Handle other string formats
           else {
-            const type = info.format === 'date-time' ? "datetime-local" : info.format ?? 'text'
+            const type = info.format === 'date-time' ? "datetime-local" : info.format ?? (info.type ==='string' ? 'text' : info.type)
             return html`
             <input
               class="guided--input"
@@ -209,10 +225,11 @@ export class JSONSchemaForm extends LitElement {
         }
 
 
-      // Default case
-      return html`<p>type not supported (${info.type} | ${info.format ?? '–'}) </p>`
+      // Print out the immutable default value
+      console.log('type not supported', info.type, info.format, info.items?.type, info)
+      return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
-      ${info.description ? html`<p class="guided--text-input-instructions mb-0">${info.description}${isStringArray ? ' Separate on new lines.' : ''}</p>` : ''}
+      ${info.description ? html`<p class="guided--text-input-instructions mb-0">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
     </div>
     `
   }
@@ -248,16 +265,15 @@ export class JSONSchemaForm extends LitElement {
     }
   }
 
-  #getRenderable = (schema = {}) => {
+  #getRenderable = (schema = {}, depth) => {
     const entries = Object.entries(schema.properties ?? {})
-    return entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || schema.required?.includes(key)))
+    return entries.filter(([key]) => !this.ignore.includes(key) && (!this.onlyRequired || depth === 0 || schema.required?.includes(key)))
   }
 
   #render = (schema, results, depth = 0) => {
 
     // Filter non-required properties (if specified) and render the sub-schema
-    const renderable = depth ? this.#getRenderable(schema, depth) : Object.entries(schema.properties ?? {})
-
+    const renderable = this.#getRenderable(schema, depth)
 
     return renderable.length === 0 ?
       html`<p>No properties to render</p>` :
@@ -288,8 +304,8 @@ export class JSONSchemaForm extends LitElement {
 
     return html`
     <div>
-    ${schema.title ? html`<h2>${schema.title}</h2>` : ''}
-    ${schema.description ? html`<p>${schema.description}</p>` : ''}
+    ${false ? html`<h2>${schema.title}</h2>` : ''}
+    ${false ? html`<p>${schema.description}</p>` : ''}
     ${this.#render(schema, this.results)}
     </div>
     `;
