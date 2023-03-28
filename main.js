@@ -27,7 +27,7 @@ let PORT = 4242;
 let selectedPort = null;
 const portRange = 100;
 
-const icon = path.join(__dirname, "src/assets/img/logo-nwbguide-draft.png");
+const icon = path.join(__dirname, "src/assets/img/logo-guide-draft.png");
 
 /**
  * Determine if the application is running from a packaged version or from a dev version.
