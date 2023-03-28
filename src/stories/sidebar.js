@@ -44,6 +44,8 @@ export class Sidebar extends LitElement {
   updated(){
     this.nav = (this.shadowRoot ?? this).querySelector("#main-nav");
 
+    this.subtitleElement = (this.shadowRoot ?? this).querySelector("#subtitle");
+
       // Toggle sidebar
       const toggle = this.toggle = (this.shadowRoot ?? this).querySelector("#sidebarCollapse");
       toggle.onclick = () => {

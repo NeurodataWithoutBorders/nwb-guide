@@ -1,5 +1,4 @@
-import dependencies from './electron/index.js'
-const { electron = {} } = dependencies
+import { electron } from './electron/index.js'
 const { shell } = electron;
 
 export const openLink = (url) => {
