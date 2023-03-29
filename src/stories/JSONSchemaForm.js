@@ -1,6 +1,7 @@
 import { LitElement, css, html } from 'lit';
 
 import { remote } from '../electron/index'
+import { FilesystemSelector } from './FileSystemSelector';
 const { dialog } = remote
 
 const componentCSS = `
@@ -14,6 +15,11 @@ const componentCSS = `
     }
 
 `
+
+document.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+});
 
 export class JSONSchemaForm extends LitElement {
 
@@ -48,18 +54,13 @@ export class JSONSchemaForm extends LitElement {
     if (changedProperties === 'options') this.requestUpdate()
   }
 
-  #useElectronDialog = async (type) => {
-
-    const options = { ...this.dialogOptions }
-    options.properties = [type === 'file' ? 'openFile' : 'openDirectory', 'noResolveAliases', ...options.properties ?? []]
-    const result = await dialog[this.dialogType](options);
-    if (result.canceled) throw new Error('No file selected')
-    return result
-  }
-
 //   NOTE: We can move these into their own components in the future
   async updated(){
 
+  }
+
+  #handleFile = async (path, parent, name) => {
+    parent[name] = path
   }
 
   #renderInteractiveElement = (name, info, parent, isRequired) => {
@@ -73,22 +74,13 @@ export class JSONSchemaForm extends LitElement {
         if (info.type === 'string') {
 
           // Handle file and directory formats
-          if (this.#filesystemQueries.includes(info.format)) return dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
-
-            // NOTE: We can get the file, but we can't know the path unless we use Electron
-            // const [fileHandle] = await window.showOpenFilePicker();
-            // const file = await fileHandle.getFile();
-            // console.log(fileHandle, file)
-            // const contents = await file.text();
-            // console.log(contents)
-            const button = ev.target
-            const file = await this.#useElectronDialog(info.format)
-            const path = file.filePath ?? file.filePaths?.[0]
-            if (!path) throw new Error('Unable to parse file path')
-            parent[name] = path
-            button.nextSibling.innerText = path
-
-          }}>Get ${info.format[0].toUpperCase() + info.format.slice(1)}</button><small>${parent[name] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
+          if (this.#filesystemQueries.includes(info.format)) return new FilesystemSelector({
+            type: info.format,
+            value: parent[name],
+            onSelect: (path) => this.#handleFile(path, parent, name),
+            dialogOptions: this.dialogOptions,
+            dialogType: this.dialogType
+          })
 
           // Handle long string formats
           else if (info.format === 'long') return html`<textarea .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value}></textarea>`
