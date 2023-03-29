@@ -106,7 +106,7 @@ export class Dashboard extends LitElement {
         this.setMain(this.pagesById[e.state.page], undefined, false)
       }
     }
-    
+
     this.#updated()
   }
 
