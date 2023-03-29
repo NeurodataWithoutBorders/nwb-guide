@@ -29,8 +29,8 @@
         stylesheet.href = "./dist/style.css"
         document.head.insertAdjacentElement('afterbegin', stylesheet) // ensure css is least priority
 
-        const url = "./dist/index.js" // avoid erroring when not present
-        await import(url /* @vite-ignore */) // Load packaged frontend for Electron
+        const dist = "./dist/index.js"
+        await import(dist /* @vite-ignore */) // Load packaged frontend for Electron
       }
 
       else await import("./src/index.js") // Load dev frontend (if not in Electron context)
