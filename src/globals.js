@@ -134,7 +134,7 @@ export const notyf = new Notyf({
 });
 
 
-export const notify = (type="success", message, duration=5000) => notyf.open({
+export const notify = (type="success", message, duration) => notyf.open({
   type,
   message,
   duration,

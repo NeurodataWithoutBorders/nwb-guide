@@ -73,7 +73,7 @@ export class JSONSchemaForm extends LitElement {
 
     return html`
     <div>
-      <h4 style="margin-bottom: 0; margin-top: 10px;">${name} ${isRequired ? html`<span style="color: red">*</span>` : ``}</h4>
+      <h4 style="margin-bottom: 0; margin-top: 10px;">${name} ${isRequired ? html`<span style="color: ${typeof isRequired === 'function' ? '#fa8c16' : 'red'};">*</span>` : ``}</h4>
       ${(() => {
 
         // Handle  string formats
@@ -122,17 +122,25 @@ export class JSONSchemaForm extends LitElement {
 
   #validate = (results, requirements, parent) => {
 
-    let invalid = []
+    let invalid = {
+      required: [],
+      conditional: []
+    }
+
     for (let name in requirements) {
-      const isRequired = requirements[name]
+      let isRequired = requirements[name]
+      const isFunction = typeof isRequired === 'function'
+      if (isFunction) isRequired = isRequired.call(results)
       if (isRequired) {
         let path = parent ? `${parent} > ${name}` : name
         if (typeof isRequired === 'object' && !Array.isArray(isRequired)) {
           const subInvalid = this.#validate(results[name], isRequired, path)
-          if (subInvalid.length) invalid = [...invalid, ...subInvalid]
+          for (let type in subInvalid) {
+            if (subInvalid[type].length) invalid[type].push(...subInvalid[type])
+          }
         } 
         
-        else if (!results[name]) invalid.push(path)
+        else if (!results[name]) invalid[isFunction ? 'conditional' : 'required'].push(path)
       }
     }
 
@@ -145,18 +153,19 @@ export class JSONSchemaForm extends LitElement {
     return this.#validate(results, requirements)
   }
 
+  // Checks missing required properties and throws an error if any are found
   onInvalid = (invalidInputs) => {
-    const message = `<h5>Invalid inputs detected</h5> <ul>${invalidInputs.map((id) => `<li>${id}</li>`).join('')}</ul>`
-    notify('error', message)
-    throw new Error(message)
+    if (invalidInputs.required.length) notify('error', `<h5>Required Properties Missing</h5> <ul>${invalidInputs.required.map((id) => `<li>${id}</li>`).join('')}</ul>`)
+    if (invalidInputs.conditional.length) notify('warning', `<h5>Conditional Properties Missing</h5> <ul>${invalidInputs.conditional.map((id) => `<li>${id}</li>`).join('')}</ul>`)
+    throw new Error(`Invalid inputs detected: JSON.stringify(${invalidInputs})`)
   }
 
   validate = () => {
     const invalidInputs = this.getInvalidInputs()
-    const isValid = !invalidInputs.length
+    const isValid = !invalidInputs.required.length && !invalidInputs.conditional.length
     if (!isValid) this.onInvalid(invalidInputs)
 
-    else isValid
+    return isValid
   }
 
   #registerDefaultProperties = (properties = {}, results) => {
@@ -215,7 +224,6 @@ export class JSONSchemaForm extends LitElement {
   }
 
   #registerRequirements = (schema, requirements = {}, acc=this.#requirements) => {
-    console.log('Registering requirements', schema, requirements, acc)
     if (!schema) return
     if (schema.required) schema.required.forEach(key => acc[key] = true)
     for (let key in requirements) acc[key] = requirements[key] // Overwrite standard requirements with custom requirements
@@ -242,7 +250,6 @@ export class JSONSchemaForm extends LitElement {
 
     this.#registerRequirements(this.schema, this.required)
 
-    console.log(this.#requirements)
     return html`
     <div>
     ${schema.title ? html`<h2>${schema.title}</h2>` : ''}

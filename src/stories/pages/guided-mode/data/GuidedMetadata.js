@@ -3,7 +3,6 @@
 import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-import { notify } from '../../../../globals.js';
 
 export class GuidedMetadataPage extends Page {
 
@@ -29,10 +28,14 @@ export class GuidedMetadataPage extends Page {
       ignore: ['Ecephys'],
       required: {
         Subject: {
-          age: true,
-          date_of_birth: true
+          age: function () {
+            return !this['date_of_birth']
+          },
+          date_of_birth: function () {
+            return !this['age']
+          }
         },
-      },
+      }
     })
 
     return html`
