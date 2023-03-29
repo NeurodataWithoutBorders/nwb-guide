@@ -11,17 +11,15 @@ export class GuidedUploadPage extends Page {
     super(...args)
   }
 
+  form;
+
   footer = {
     onNext: async () => {
-
-
-       // TODO: Insert validation here...
-       const valid = true
-       if (!valid) throw new Error('Invalid input')
 
        delete this.info.globalState.upload.results // Clear the preview results
 
        this.save() // Save in case the conversion fails
+       this.form.validate() // Will throw an error in the callback
 
        const results = await run('upload', this.info.globalState.upload.info, {
         title: 'Uploading to DANDI',
@@ -71,7 +69,7 @@ export class GuidedUploadPage extends Page {
     let uploadGlobalState = this.info.globalState.upload
     if (!uploadGlobalState) uploadGlobalState = this.info.globalState.upload = {info: {}, results: null}
 
-    const form = new JSONSchemaForm({
+    this.form = new JSONSchemaForm({
       schema,
       results: uploadGlobalState.info,
       // dialogType: 'showSaveDialog',
@@ -94,7 +92,7 @@ export class GuidedUploadPage extends Page {
       </div>
       <div class="guided--section">
       <h3>NWB File Path</h3>
-      ${form}
+      ${this.form}
       </div>
   </div>
     `;

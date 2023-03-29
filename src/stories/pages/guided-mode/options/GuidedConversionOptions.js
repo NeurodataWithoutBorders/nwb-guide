@@ -13,7 +13,27 @@ export class GuidedConversionOptionsPage extends Page {
   }
 
   footer = {
-    next: false
+    next: 'Run Conversion Preview',
+    onNext: async () => {
+      this.save() // Save in case the conversion fails
+      this.form.validate() // Will throw an error in the callback
+      
+      delete this.info.globalState.preview // Clear the preview results
+
+      const results = await runConversion({
+        ...this.info.globalState.conversion.info,
+        stub_test: true,
+        overwrite: true,
+
+        // Override with the lastest source data and metadata information
+        source_data: this.info.globalState.source.results,
+        metadata: this.info.globalState.metadata.results
+      })
+
+      this.info.globalState.preview = results // Save the preview results
+
+      this.onTransition(1)
+    }
   }
 
   render() {
@@ -33,10 +53,9 @@ export class GuidedConversionOptionsPage extends Page {
       conversionGlobalState = this.info.globalState.conversion = {info: {
         override: true // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
       }, results: null}
-      console.error('CRAETING FROM SCRATCH')
     }
 
-    const form = new JSONSchemaForm({
+    this.form = new JSONSchemaForm({
       schema,
       results: conversionGlobalState.info,
       dialogType: 'showSaveDialog',
@@ -52,30 +71,7 @@ export class GuidedConversionOptionsPage extends Page {
 
     const convertButton = document.createElement('nwb-button')
     convertButton.textContent = 'Run Conversion Preview'
-    convertButton.addEventListener('click', async () => {
-
-        // TODO: Insert validation here...
-        const valid = true
-        if (!valid) throw new Error('Invalid input')
-
-        delete this.info.globalState.preview // Clear the preview results
-
-        this.save() // Save in case the conversion fails
-
-        const results = await runConversion({
-          ...this.info.globalState.conversion.info,
-          stub_test: true,
-          overwrite: true,
-
-          // Override with the lastest source data and metadata information
-          source_data: this.info.globalState.source.results,
-          metadata: this.info.globalState.metadata.results
-        })
-
-        this.info.globalState.preview = results // Save the preview results
-
-        this.onTransition(1)
-    })
+    convertButton.addEventListener('click', this.footer.onNext)
 
     return html`
   <div
@@ -88,7 +84,7 @@ export class GuidedConversionOptionsPage extends Page {
       </div>
       <div class="guided--section">
       <h3>NWB File Path</h3>
-      ${form}
+      ${this.form}
       <br>
       ${convertButton}
       </div>

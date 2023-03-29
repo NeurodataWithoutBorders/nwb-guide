@@ -3,6 +3,7 @@
 import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
+import { notify } from '../../../../globals.js';
 
 export class GuidedMetadataPage extends Page {
 
@@ -10,12 +11,12 @@ export class GuidedMetadataPage extends Page {
     super(...args)
   }
 
+  form;
+
   footer = {
     onNext: async () => {
-      // TODO: Insert validation here...
-      const valid = true
-      if (!valid) throw new Error('Invalid metadata')
-
+      this.save()
+      this.form.validate() // Will throw an error in the callback
       this.onTransition(1)
     }
   }
@@ -23,10 +24,15 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
-    const form = new JSONSchemaForm({
+    this.form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
       ignore: ['Ecephys'],
-      onlyRequired: false,
+      required: {
+        Subject: {
+          age: true,
+          date_of_birth: true
+        },
+      },
     })
 
     return html`
@@ -39,7 +45,7 @@ export class GuidedMetadataPage extends Page {
         <h1 class="guided--text-sub-step">Metadata</h1>
       </div>
       <div class="guided--section">
-       ${form}
+       ${this.form}
       </div>
   </div>
     `;

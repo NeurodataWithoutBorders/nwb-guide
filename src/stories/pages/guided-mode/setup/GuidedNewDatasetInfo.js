@@ -21,34 +21,12 @@ export class GuidedNewDatasetPage extends Page {
   footer = {
     onNext: async () => {
 
-      // Check validity of project name
-      const name = this.state.name
-      if (!name) {
-
-        const message = "Please enter a project name."
-        notyf.open({
-          type: "error",
-          message: message,
-          duration: 7000,
-        });
-
-        return
-      }
-
-
-      // Check if name is already used
-      // Update existing progress file
+      // Check if name is already used = update existing progress file
       if (this.info.globalState.initialized) await update(name, this.info.globalState.name)
       else {
         const has = await hasEntry(name)
         if (has) {
-          const message = "An existing progress file already exists with that name. Please choose a different name."
-          notyf.open({
-            type: "error",
-            message: message,
-            duration: 7000,
-          });
-
+          notify('error', "An existing progress file already exists with that name. Please choose a different name.")
           return
         }
     }

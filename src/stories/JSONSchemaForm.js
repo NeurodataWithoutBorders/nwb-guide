@@ -1,6 +1,7 @@
 import { LitElement, css, html } from 'lit';
 
 import { remote } from '../electron/index'
+import { notify } from '../globals';
 const { dialog } = remote
 
 const componentCSS = `
@@ -27,6 +28,7 @@ export class JSONSchemaForm extends LitElement {
       schema: { type: Object, reflect: false },
       results: { type: Object, reflect: false },
       ignore: { type: Array, reflect: false },
+      required: { type: Object, reflect: false},
       onlyRequired: { type: Boolean, reflect: false },
       dialogType: { type: String, reflect: false },
       dialogOptions: { type: Object, reflect: false }
@@ -38,10 +40,14 @@ export class JSONSchemaForm extends LitElement {
     this.schema = props.schema ?? {}
     this.results = props.results ?? {}
     this.ignore = props.ignore ?? []
+    this.required = props.required ?? {}
     this.onlyRequired = props.onlyRequired ?? false
     this.dialogOptions = props.dialogOptions ?? {}
     this.dialogType = props.dialogType ?? 'showOpenDialog'
+    if (props.onInvalid) this.onInvalid = props.onInvalid
   }
+
+  #requirements = {}
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
     super.attributeChangedCallback(changedProperties, oldValue, newValue)
@@ -57,10 +63,6 @@ export class JSONSchemaForm extends LitElement {
     return result
   }
 
-//   NOTE: We can move these into their own components in the future
-  async updated(){
-
-  }
 
   #updateParent(name, value, parent) {
     if (!value) delete parent[name]
@@ -118,6 +120,45 @@ export class JSONSchemaForm extends LitElement {
 
   #filesystemQueries = ['file', 'directory']
 
+  #validate = (results, requirements, parent) => {
+
+    let invalid = []
+    for (let name in requirements) {
+      const isRequired = requirements[name]
+      if (isRequired) {
+        let path = parent ? `${parent} > ${name}` : name
+        if (typeof isRequired === 'object' && !Array.isArray(isRequired)) {
+          const subInvalid = this.#validate(results[name], isRequired, path)
+          if (subInvalid.length) invalid = [...invalid, ...subInvalid]
+        } 
+        
+        else if (!results[name]) invalid.push(path)
+      }
+    }
+
+    return invalid
+  }
+
+  getInvalidInputs = () => {
+    let requirements = this.#requirements
+    let results = this.results
+    return this.#validate(results, requirements)
+  }
+
+  onInvalid = (invalidInputs) => {
+    const message = `<h5>Invalid inputs detected</h5> <ul>${invalidInputs.map((id) => `<li>${id}</li>`).join('')}</ul>`
+    notify('error', message)
+    throw new Error(message)
+  }
+
+  validate = () => {
+    const invalidInputs = this.getInvalidInputs()
+    const isValid = !invalidInputs.length
+    if (!isValid) this.onInvalid(invalidInputs)
+
+    else isValid
+  }
+
   #registerDefaultProperties = (properties = {}, results) => {
     for (let name in properties) {
       const info = properties[name]
@@ -146,15 +187,15 @@ export class JSONSchemaForm extends LitElement {
     }
   }
 
-  #getRenderable = (schema = {}) => {
+  #getRenderable = (schema = {}, required) => {
     const entries = Object.entries(schema.properties ?? {})
-    return entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || schema.required?.includes(key)))
+    return entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || required[key]))
   }
 
-  #render = (schema, results, depth = 0) => {
+  #render = (schema, results, required = {}, depth = 0) => {    
 
     // Filter non-required properties (if specified) and render the sub-schema
-    const renderable = depth ? this.#getRenderable(schema, depth) : Object.entries(schema.properties ?? {})
+    const renderable = depth ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
 
     return renderable.length === 0 ?
@@ -162,15 +203,31 @@ export class JSONSchemaForm extends LitElement {
       renderable.map(([name, info]) => {
 
       // Directly render the interactive property element
-      if (!info.properties) return this.#renderInteractiveElement(name, info, results, schema.required?.includes(name))
+      if (!info.properties) return this.#renderInteractiveElement(name, info, results, required[name])
 
       // Render properties in the sub-schema
       return html`
     <div style="margin-bottom: 25px;">
       <h3 style="padding-bottom: 0px; margin: 0;">${name}</h3>
-      ${this.#render(info, results[name], depth + 1)}
+      ${this.#render(info, results[name], required[name], depth + 1)}
     </div>
     `})
+  }
+
+  #registerRequirements = (schema, requirements = {}, acc=this.#requirements) => {
+    console.log('Registering requirements', schema, requirements, acc)
+    if (!schema) return
+    if (schema.required) schema.required.forEach(key => acc[key] = true)
+    for (let key in requirements) acc[key] = requirements[key] // Overwrite standard requirements with custom requirements
+    if (schema.properties){
+        Object.entries(schema.properties).forEach(([key, value]) => {
+        if (value.properties) {
+          let nextAccumulator = acc[key]
+          if (!nextAccumulator || typeof nextAccumulator !== 'object') nextAccumulator = acc[key] = {}
+          this.#registerRequirements(value, requirements[key], nextAccumulator)
+        }
+      })
+    }
   }
 
   render() {
@@ -183,11 +240,14 @@ export class JSONSchemaForm extends LitElement {
     // Delete extraneous results
     this.#deleteExtraneousResults(this.results, this.schema)
 
+    this.#registerRequirements(this.schema, this.required)
+
+    console.log(this.#requirements)
     return html`
     <div>
     ${schema.title ? html`<h2>${schema.title}</h2>` : ''}
     ${schema.description ? html`<p>${schema.description}</p>` : ''}
-    ${this.#render(schema, this.results)}
+    ${this.#render(schema, this.results, this.#requirements)}
     </div>
     `;
   }
