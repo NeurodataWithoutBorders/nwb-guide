@@ -23,7 +23,6 @@ export class GuidedUploadPage extends Page {
 
        this.save() // Save in case the conversion fails
 
-       console.log('Info', this.info.globalState.upload.info)
        const results = await run('upload', this.info.globalState.upload.info, {
         title: 'Uploading to DANDI',
       })

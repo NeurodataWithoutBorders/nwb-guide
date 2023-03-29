@@ -27,7 +27,7 @@ export const run = async (url, payload, options={}) => {
 
       Swal.close();
 
-      if (results.message) {
+      if (results?.message) {
         const message = options.onError ? options.onError(results) : results.message
         notyf.open({
           type: "error",
@@ -36,7 +36,7 @@ export const run = async (url, payload, options={}) => {
         throw new Error(`Request to ${url} failed: ${results.message}`)
       }
 
-      return results
+      return results || true
 }
 
 export const runConversion = async (info) => run(`convert`, info, {
