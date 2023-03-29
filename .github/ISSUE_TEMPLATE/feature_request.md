@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a feature you would like us to integrate in SODA
+about: Suggest a feature you would like us to integrate in NWB GUIDE
 title: ""
 labels: ""
 assignees: ""

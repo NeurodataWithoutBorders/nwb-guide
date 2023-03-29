@@ -4,8 +4,8 @@ import { html } from 'lit';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { Page } from '../../Page.js';
 
-import globals from '../../../../../scripts/globals.js';
-const { notyf, baseUrl } = globals;
+import Swal from 'sweetalert2'
+import { notyf, baseUrl } from '../../../../globals.js';
 
 export class GuidedConversionTypePage extends Page {
 
@@ -108,10 +108,9 @@ export class GuidedConversionTypePage extends Page {
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
       <div class="title">
-        <h1 class="guided--text-sub-step">Conversion Details</h1>
+        <h1 class="guided--text-sub-step">Conversion Options</h1>
       </div>
       <div class="guided--section">
-      <h3>NWB File Path</h3>
       ${form}
       <br>
       ${convertButton}

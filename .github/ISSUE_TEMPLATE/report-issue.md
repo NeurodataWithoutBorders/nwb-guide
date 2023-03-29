@@ -1,6 +1,6 @@
 ---
 name: Report issue
-about: Let us know of any issue you encounter while using SODA
+about: Let us know of any issue you encounter while using NWB GUIDE
 title: ""
 labels: ""
 assignees: ""

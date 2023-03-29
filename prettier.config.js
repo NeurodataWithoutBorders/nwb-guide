@@ -1,5 +1,16 @@
-const { prettierConfig } = require("@fairdataihub/config");
-
-const config = prettierConfig();
-
-module.exports = config;
+module.exports = {
+    arrowParens: "always",
+    bracketSameLine: false,
+    bracketSpacing: true,
+    embeddedLanguageFormatting: "auto",
+    endOfLine: "auto",
+    htmlWhitespaceSensitivity: "css",
+    printWidth: 100,
+    quoteProps: "as-needed",
+    semi: true,
+    singleQuote: false,
+    tabWidth: 2,
+    trailingComma: "es5",
+    useTabs: false,
+    vueIndentScriptAndStyle: false,
+  };;
