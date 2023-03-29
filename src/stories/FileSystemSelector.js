@@ -11,6 +11,7 @@ const componentCSS = css`
 
     :host {
       display: inline-block;
+      width: 100%;
     }
 
     button { 

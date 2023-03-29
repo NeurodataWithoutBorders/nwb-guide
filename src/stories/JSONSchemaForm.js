@@ -12,6 +12,7 @@ const componentCSS = `
 
     :host {
       display: inline-block;
+      width:100%;
     }
 
 `
