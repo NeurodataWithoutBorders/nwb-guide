@@ -66,33 +66,26 @@ export class GuidedStartPage extends Page {
             </div>
             <div class="guided--section">
               <p class="guided--help-text">
-                Guided Mode is designed to be the simplest and most efficient method of curating and
-                sharing a SPARC dataset if you are starting from scratch. Guided Mode guides you
-                through the entire SPARC curation and sharing process via intuitive user interfaces
-                that typically only require you to provide basic inputs or answer simple questions.
+              Guided Mode is divided into four high-level sections. During the first three sections,
+              you will be directed to specify the data formats and files to include in your dataset and provide
+              information about your dataset. In the final section, NWB GUIDE will automatically generate
+              a valid NWB file and ask for your review before uploading to DANDI. Note
+              that none of your local data files will ever be modified or moved.
               </p>
               <div class="guided--info-dropdown">
                 <p class="guided--dropdown-text" data-dropdown-type="info">
-                  Learn more about curating and submitting SPARC datasets
+                  Learn more about the conversion process
                 </p>
                 <i class="fas fa-chevron-right"></i>
               </div>
               <div class="guided--info-container">
                 <p class="guided--help-text">
-                  Although not required to use Guided Mode, you can learn more about the SPARC data
-                  curation and sharing process in the
-                  <a href="https://docs.sparc.science/docs/data-submission-overview" target="_blank"
-                    >SPARC Data Submission Overview document page</a
+                  Although not required to use Guided Mode, you can learn more about the NWB conversion process in the
+                  <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
+                    >neuroconv documentation page</a
                   >.
                 </p>
               </div>
-              <p class="guided--help-text" style="margin-top: 1em">
-                Guided Moded is divived in four high-level sections. During the first three sections,
-                you will be directed to specify the files to include in your dataset and provide
-                information about your dataset. On the final section, SODA will automatically generate
-                your dataset on Pennsieve with the proper folder structure and metadata files. Note
-                that none of your local data files will ever be modified or moved.
-              </p>
             </div>
           </div>
         </div>

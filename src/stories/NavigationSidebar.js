@@ -99,13 +99,6 @@ export class NavigationSidebar extends LitElement {
     return html`
 <nav id="guided-nav" class="guided--nav">
     <h1 class="guided--text-sub-step mb-0 mt-0">Guided Mode</h1>
-    <p
-      class="guided--help-text mb-0 mt-md"
-      style="border-bottom: 1px solid var(--color-light-green)"
-      id="guided-page-navigation-header"
-    >
-      <b>Page navigation</b>
-    </p>
 
     <ul id="guided-nav-items" class="guided--container-nav-items">
       ${Object.entries(this.sections).map(([sectionName, info]) => {
