@@ -130,8 +130,8 @@ export class JSONSchemaForm extends LitElement {
         if (typeof isRequired === 'object' && !Array.isArray(isRequired)) {
           const subInvalid = this.#validate(results[name], isRequired, path)
           if (subInvalid.length) invalid = [...invalid, ...subInvalid]
-        } 
-        
+        }
+
         else if (!results[name]) invalid.push(path)
       }
     }
@@ -192,7 +192,7 @@ export class JSONSchemaForm extends LitElement {
     return entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || required[key]))
   }
 
-  #render = (schema, results, required = {}, depth = 0) => {    
+  #render = (schema, results, required = {}, depth = 0) => {
 
     // Filter non-required properties (if specified) and render the sub-schema
     const renderable = depth ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
