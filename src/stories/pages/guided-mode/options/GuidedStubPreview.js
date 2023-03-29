@@ -14,7 +14,7 @@ export class GuidedStubPreviewPage extends Page {
     next: 'Run Conversion',
     onNext: async () => {
       this.save() // Save in case the conversion fails
-      
+
       this.info.globalState.conversion.results = null
 
       const results = await runConversion({
