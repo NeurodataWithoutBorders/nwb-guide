@@ -62,6 +62,11 @@ export class JSONSchemaForm extends LitElement {
 
   }
 
+  #updateParent(name, value, parent) {
+    if (!value) delete parent[name]
+    else parent[name] = value
+  }
+
   #renderInteractiveElement = (name, info, parent, isRequired) => {
 
     return html`
@@ -91,15 +96,15 @@ export class JSONSchemaForm extends LitElement {
           }}>Get ${info.format[0].toUpperCase() + info.format.slice(1)}</button><small>${parent[name] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
 
           // Handle long string formats
-          else if (info.format === 'long') return html`<textarea .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value}></textarea>`
+          else if (info.format === 'long') return html`<textarea .value="${parent[name] ?? ''}" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}></textarea>`
 
           // Handle date formats
-          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} />`
+          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)} />`
 
           // Handle other string formats
           else {
             const type = info.format === 'date-time' ? "datetime-local" : info.format ?? 'text'
-            return html`<input type="${type}" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} />`
+            return html`<input type="${type}" .value="${parent[name] ?? ''}" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)} />`
           }
         }
 
