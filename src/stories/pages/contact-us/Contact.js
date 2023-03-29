@@ -1,12 +1,10 @@
 
 
 import { html } from 'lit';
-import lottie from 'lottie-web';
 import { contact_lottie } from '../../../assets/lotties/contact-us-lotties.js';
 import { Page } from '../Page.js';
 
-import globals from '../../../../scripts/globals.js'
-const { startLottie } = globals;
+import { startLottie } from '../../../globals.js'
 
 
 export class ContactPage extends Page {

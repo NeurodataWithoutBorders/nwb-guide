@@ -6,8 +6,7 @@ import { column1Lottie, column2Lottie, column3Lottie } from '../../../assets/lot
 import { openLink } from '../../../links.js';
 import { Page } from '../Page.js';
 
-import globals from '../../../../scripts/globals.js'
-const { startLottie } = globals;
+import { startLottie } from '../../../globals.js'
 
 export class GettingStartedPage extends Page {
 
