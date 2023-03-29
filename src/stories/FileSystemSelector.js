@@ -13,7 +13,7 @@ const componentCSS = css`
       display: inline-block;
     }
 
-    button { 
+    button {
       background: WhiteSmoke;
       border: 1px solid #c3c3c3;
       border-radius: 4px;
@@ -29,7 +29,7 @@ const componentCSS = css`
     small {
       color: silver;
     }
-    
+
     :host(.active) button {
       background: Gainsboro;
     }
@@ -106,7 +106,7 @@ export class FilesystemSelector extends LitElement {
       @dragleave=${() => {
         this.classList.remove('active')
       }}
-      
+
       @drop=${async (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -117,8 +117,8 @@ export class FilesystemSelector extends LitElement {
         if (pathArr.length > 1) console.error('Only one file can be registered at a time')
         this.#handleFile(pathArr[0])
       }}
-      
-      
+
+
       >${this.value || `Drop a ${this.type} here, or click to choose a ${this.type}`}
       ${dialog ? '' : html`<br><small>Cannot get full ${this.type} path on web distribution</small>`}
       </button>
