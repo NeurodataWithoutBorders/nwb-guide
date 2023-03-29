@@ -48,7 +48,7 @@ export class Main extends LitElement {
   #queue = []
 
   set(toRender) {
-    const page = toRender.page ?? toRender
+    let page = toRender.page ?? toRender
 
     if (typeof page === 'function') page = new page()
     page.onTransition = this.onTransition;

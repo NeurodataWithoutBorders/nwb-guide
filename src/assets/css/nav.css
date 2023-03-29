@@ -94,7 +94,7 @@ a[data-toggle="collapse"] {
 
 #main-nav .sidebar-header {
   padding: 20px;
-  padding-bottom: 10px;
+  padding-bottom: 0px;
 }
 
 #main-nav ul.components {
@@ -430,10 +430,6 @@ a[data-toggle="collapse"] {
 
 .nav-center-logo-image {
   display: block;
-  margin-left: auto;
-  margin-bottom: 10px;
-  margin-top: 10px;
-  margin-right: auto;
-  width: 80px;
-  padding-left: 0;
+  width: 100%;
+  padding: 0px 25px;
 }
