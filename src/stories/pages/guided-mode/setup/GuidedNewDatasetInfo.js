@@ -4,8 +4,7 @@ import { html } from 'lit';
 import { hasEntry, update } from '../../../../progress.js';
 import { Page } from '../../Page.js';
 
-import globals from '../../../../../scripts/globals.js';
-const { notyf } = globals;
+import { notyf } from '../../../../globals.js';
 
 export class GuidedNewDatasetPage extends Page {
 

@@ -2,11 +2,11 @@
 
 import { html } from 'lit';
 import { openLink } from '../../../links.js';
-import { docu_lottie } from '../../../../assets/lotties/documentation-lotties.js';
+import { docu_lottie } from '../../../assets/lotties/documentation-lotties.js';
 import { Page } from '../Page.js';
 
-import globals from '../../../../scripts/globals.js'
-const { startLottie } = globals;
+import { startLottie } from '../../../globals.js'
+
 
 export class DocumentationPage extends Page {
 

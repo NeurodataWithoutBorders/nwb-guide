@@ -44,6 +44,8 @@ export class Sidebar extends LitElement {
   updated(){
     this.nav = (this.shadowRoot ?? this).querySelector("#main-nav");
 
+    this.subtitleElement = (this.shadowRoot ?? this).querySelector("#subtitle");
+
       // Toggle sidebar
       const toggle = this.toggle = (this.shadowRoot ?? this).querySelector("#sidebarCollapse");
       toggle.onclick = () => {
@@ -51,11 +53,18 @@ export class Sidebar extends LitElement {
         toggle.classList.toggle("active");
       }
 
-      const firstItem = (this.shadowRoot ?? this).querySelector("ul").children[0];
-      if (this.initialize && firstItem) firstItem.click()
+      // Actually click the item
+      let selectedItem = (this.#selected) ? (this.shadowRoot ?? this).querySelector(`ul[data-id='${this.#selected}']`) : (this.shadowRoot ?? this).querySelector("ul").children[0]
+      if (this.initialize && selectedItem) selectedItem.click()
+      else if (this.#selected) this.selectItem(this.#selected) // Visually select the item
+
+      if (this.#hidden) this.hide(true)
+
   }
 
   show = () => {
+    this.#hidden = false
+
     if (this.nav) {
       this.nav.classList.remove("active");
       this.toggle.classList.remove("active")
@@ -63,7 +72,10 @@ export class Sidebar extends LitElement {
     }
   }
 
+  #hidden = false
+
   hide = (changeDisplay) => {
+    this.#hidden = true
     if (this.nav) {
       this.nav.classList.add("active");
       this.toggle.classList.add("active")
@@ -72,17 +84,25 @@ export class Sidebar extends LitElement {
   }
 
   onClick = () => {} // Set by the user
-  #onClick = (id) => {
-    if (!this.pages[id]) throw new Error(`No page found for key ${id}`)
+
+  selectItem = (id) => {
+    this.#selected = id.split('/')[0] || '/'
     const links = (this.shadowRoot ?? this).querySelectorAll('a')
     links.forEach((a) => a.classList.remove('is-selected'))
-    const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${id}"]`)
+    const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${this.#selected}"]`)
     if (a) a.classList.add('is-selected')
+  }
+
+  #onClick = (id) => {
+    if (!this.pages[id]) throw new Error(`No page found for key ${id}`)
+    this.selectItem(id)
     this.onClick(id, this.pages[id])
   }
 
+  #selected = ''
+
   select = (id) => {
-    const info = this.pages[id]
+    const info = this.pages?.[id]
     if (info) this.#onClick(id, info)
   }
 

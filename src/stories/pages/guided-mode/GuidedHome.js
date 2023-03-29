@@ -4,12 +4,9 @@ import { html } from 'lit';
 import { Page } from '../Page.js';
 import { ProgressCard } from './ProgressCard.js';
 
-import tippy from 'tippy.js';
-
-import globals from '../../../../scripts/globals.js'
-const { notyf, startLottie } = globals;
+const { notyf, startLottie } = '../../../globals.js';
 import * as progress from '../../../progress.js'
-import { newDataset } from '../../../../assets/lotties.js';
+import { newDataset } from '../../../assets/lotties/index.js';
 
 
 export class GuidedHomePage extends Page {
@@ -95,10 +92,6 @@ export class GuidedHomePage extends Page {
       </p>
     `;
 
-    tippy(".progress-card-popover", {
-      allowHTML: true,
-      interactive: true,
-    });
 
     const radioButtons = Array.from(htmlBase.querySelectorAll(".guided--radio-button"));
     radioButtons.forEach((radioButton) => {

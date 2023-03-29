@@ -15,7 +15,7 @@ import { GuidedConversionTypePage } from "./stories/pages/guided-mode/options/Gu
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults"
 import { Dashboard } from "./stories/Dashboard"
 
-import logo from '../assets/img/logo-guide-draft-transparent-tight.png'
+import logo from './assets/img/logo-guide-draft-transparent-tight.png'
 let dashboard = document.querySelector("nwb-dashboard")
 if (!dashboard) dashboard = new Dashboard()
 dashboard.logo = logo
