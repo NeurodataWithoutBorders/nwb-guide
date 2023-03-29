@@ -138,8 +138,8 @@ export class JSONSchemaForm extends LitElement {
           for (let type in subInvalid) {
             if (subInvalid[type].length) invalid[type].push(...subInvalid[type])
           }
-        } 
-        
+        }
+
         else if (!results[name]) invalid[isFunction ? 'conditional' : 'required'].push(path)
       }
     }
