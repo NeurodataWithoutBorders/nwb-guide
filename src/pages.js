@@ -16,6 +16,12 @@ import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedRes
 import { Dashboard } from "./stories/Dashboard"
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview"
 
+import logo from './assets/img/logo-guide-draft-transparent-tight.png'
+let dashboard = document.querySelector("nwb-dashboard")
+if (!dashboard) dashboard = new Dashboard()
+dashboard.logo = logo
+dashboard.name = 'NWB GUIDE'
+dashboard.renderNameInSidebar = false
 
 const overviewIcon = `
 <svg
@@ -105,12 +111,12 @@ const pages = {
                 section: sections[1]
             }),
             metadata: new GuidedMetadataPage({
-                label: "Metadata",
+                label: "File metadata",
                 section: sections[1],
             }),
 
             options: new GuidedConversionOptionsPage({
-                label: "Conversion type",
+                label: "Basic options",
                 section: sections[2]
             }),
             preview: new GuidedStubPreviewPage({
@@ -138,9 +144,7 @@ const pages = {
     })
 }
 
-let dashboard = document.querySelector("nwb-dashboard")
-if (dashboard) dashboard.pages = pages
-else dashboard = new Dashboard({ name: "NWB GUIDE", pages })
+dashboard.pages = pages
 
 export {
     dashboard
