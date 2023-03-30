@@ -37,7 +37,7 @@ export class GuidedMetadataPage extends Page {
 
     const form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
-      ignore: ['Ecephys'],
+      ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       onlyRequired: false,
     })
 
