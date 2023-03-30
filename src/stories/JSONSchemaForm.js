@@ -21,7 +21,7 @@ const componentCSS = `
     .guided--form-label {
       display: block;
       width: 100%;
-      margin: 0 0 0.45rem 0;
+      margin: 1.45rem 0 0.45rem 0;
       color: black;
       font-weight: 600;
     }
@@ -80,7 +80,6 @@ const componentCSS = `
   font-size: 13px;
   width: 100%;
   padding-top: 4px;
-  padding-bottom: 5px;
   color: dimgray !important;
 }
 
@@ -229,7 +228,7 @@ export class JSONSchemaForm extends LitElement {
       console.log('type not supported', info.type, info.format, info.items?.type, info)
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
-      ${info.description ? html`<p class="guided--text-input-instructions mb-0">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
+      ${info.description ? html`<p class="guided--text-input-instructions">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
     </div>
     `
   }
@@ -240,12 +239,9 @@ export class JSONSchemaForm extends LitElement {
     for (let name in properties) {
       const info = properties[name]
       const props = info.properties
-      if (!results[name]) {
-        if (props) results[name] = {} // Regisiter new interfaces in results
-        else if ('default' in info) results[name] = info.default
-      }
+      if (props && !results[name]) results[name] = {} // Regisiter new interfaces in results
       if (props) {
-        Object.entries(info.properties).forEach(([key, value]) => {
+        Object.entries(props).forEach(([key, value]) => {
           if (!(key in results[name])) {
             if ('default' in value) results[name][key] = value.default
             else if (value.properties) {
