@@ -115,11 +115,11 @@ export class JSONSchemaForm extends LitElement {
 
   #registerDefaultProperties = (properties = {}, results) => {
     for (let name in properties) {
-      if (!results[name]) results[name] = {} // Regisiter new interfaces in results
       const info = properties[name]
-      if (info.properties) {
-        Object.entries(info.properties).forEach(([key, value]) => {
-          console.log('Registering', key, value)
+      const props = info.properties
+      if (props && !results[name]) results[name] = {} // Regisiter new interfaces in results
+      if (props) {
+        Object.entries(props).forEach(([key, value]) => {
           if (!(key in results[name])) {
             if ('default' in value) results[name][key] = value.default
             else if (value.properties) {
