@@ -17,6 +17,8 @@ export const homeDirectory = app?.getPath("home") ?? '';
 export const progressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Progress");
 export const guidedProgressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Guided-Progress");
 
+export const isStorybook = window.location.href.includes('iframe.html')
+
 // ---------- Lottie Helper ----------
 const isChromatic = checkChromatic()
 

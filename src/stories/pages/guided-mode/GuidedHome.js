@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { Page } from '../Page.js';
 import { ProgressCard } from './ProgressCard.js';
 
-const { notyf, startLottie } = '../../../globals.js';
+import { notyf, startLottie } from '../../../globals.js';
 import * as progress from '../../../progress.js'
 import { newDataset } from '../../../assets/lotties/index.js';
 
