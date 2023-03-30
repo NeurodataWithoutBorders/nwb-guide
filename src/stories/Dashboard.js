@@ -283,10 +283,6 @@ export class Dashboard extends LitElement {
             nestedPage.info.parent = page
           })
 
-          // // Register a base page
-          // const firstPage = pageArr[0]
-          // if (pagesArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
-
           // Register all pages
           Object.entries(pages).forEach((arr) => this.addPage(acc, arr))
 
