@@ -41,7 +41,7 @@ def test_get_all_interfaces(client):
                         "label": {"type": "string"},
                         "keywords": {"type": "array", "items": {"type": "string"}},
                     },
-                    "required": ["label", "keywords"]
+                    "required": ["label", "keywords"],
                 }
             },
         },

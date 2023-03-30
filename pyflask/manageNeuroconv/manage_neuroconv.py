@@ -10,10 +10,7 @@ def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
 
     # Hard coded for now - eventual goal will be to import this from NeuroConv
-    hardcoded_interfaces = dict(
-        SpikeGLX=SpikeGLXRecordingInterface,
-        Phy=PhySortingInterface
-    )
+    hardcoded_interfaces = dict(SpikeGLX=SpikeGLXRecordingInterface, Phy=PhySortingInterface)
 
     interface_info = {
         interface.__name__: {
@@ -21,7 +18,8 @@ def get_all_interface_info() -> dict:
             # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves have a label property
             "label": format_name
             # Can also add a description here if we want to provide more information about the interface
-        } for format_name, interface in hardcoded_interfaces.items()
+        }
+        for format_name, interface in hardcoded_interfaces.items()
     }
 
     print(interface_info)
