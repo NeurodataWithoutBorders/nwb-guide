@@ -152,7 +152,7 @@ export class JSONSchemaForm extends LitElement {
     if (!value) delete parent[name]
     else parent[name] = value
   }
-  
+
   #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
 
   #parseStringToHeader = (headerStr) => {
