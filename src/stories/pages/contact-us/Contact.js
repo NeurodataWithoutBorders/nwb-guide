@@ -1,9 +1,11 @@
 
 
 import { html } from 'lit';
-import lottie from 'lottie-web';
 import { contact_lottie } from '../../../assets/lotties/contact-us-lotties.js';
 import { Page } from '../Page.js';
+
+import { startLottie } from '../../../globals.js'
+
 
 export class ContactPage extends Page {
 
@@ -15,15 +17,7 @@ export class ContactPage extends Page {
 
   updated(){
     let contact_lottie_container = (this ?? this.shadowRoot).querySelector("#contact-us-lottie");
-    contact_lottie_container.innerHTML = ''
-
-    lottie.loadAnimation({
-      container: contact_lottie_container,
-      animationData: contact_lottie /*(json js variable, (view src/assets/lotties)*/,
-      renderer: "svg",
-      loop: true /*controls looping*/,
-      autoplay: true,
-    });
+    startLottie(contact_lottie_container, contact_lottie);
   }
 
   render() {

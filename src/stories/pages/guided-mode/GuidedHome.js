@@ -4,11 +4,10 @@ import { html } from 'lit';
 import { Page } from '../Page.js';
 import { ProgressCard } from './ProgressCard.js';
 
-import lottie from 'lottie-web'
-
-import { notyf } from '../../../globals.js'
+import { notyf, startLottie } from '../../../globals.js';
 import * as progress from '../../../progress.js'
 import { newDataset } from '../../../assets/lotties/index.js';
+
 
 export class GuidedHomePage extends Page {
 
@@ -178,14 +177,7 @@ export class GuidedHomePage extends Page {
     const htmlBase =  this.shadowRoot ?? this
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
     const lottieContainer = htmlBase.querySelector("#new-dataset-lottie-container")
-    lottieContainer.innerHTML = "";
-    lottie.loadAnimation({
-      container: lottieContainer,
-      animationData: newDataset,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-    });
+    startLottie(lottieContainer, newDataset)
 
     // Render existing conversion pipelines
   // guidedResetProgressVariables();
@@ -213,18 +205,15 @@ export class GuidedHomePage extends Page {
     return html`
         <div id="guided-home" class="guided--main-tab">
           <div class="guided--panel">
-            <h1 class="guided--text-sub-step">Guided Mode</h1>
-            <!-- <div class="title-border">
-              </div> -->
-            <p class="guided--help-text" style="margin-bottom: 2rem">
-              The Guided Mode is intended to guide users step-by-step through all the requirements for
-              curating and sharing datasets according to the SPARC data standards. The user interfaces
-              of the Guided Mode are designed to logically guide users through the curation steps and
-              include all necessary information such that no prior knowledge of the SPARC data
-              standards is required. Contrary to the Free Form Mode, the Guided Mode interfaces are
-              interconnected and form a single workflow such that the curation process is streamlined
-              further.
+          <h1 class="guided--text-sub-step">Guided Mode</h1>
+          <p class="guided--help-text" style="margin-bottom: 2rem">
+              The NWB GUIDE walks users step-by-step through all the requirements for
+              converting their data to the NWB format and uploading datasets to the DANDI Archive. Each stage
+              of Guided Mode is designed to conveniently guide users through the conversion process and
+              include all necessary information such that no prior knowledge of the NWB data
+              standard is required.
             </p>
+
             <div class="justify-center" id="curate-new-home" style="align-items: center">
               <div
                 class="container--dashed"
@@ -255,7 +244,7 @@ export class GuidedHomePage extends Page {
                 }}"
               >
                 <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
-                <h2 class="guided--text-sub-step">Begin curating a new dataset</h2>
+                <h2 class="guided--text-sub-step" style="width: 100%;">Convert a new dataset</h2>
               </div>
             </div>
 
@@ -276,15 +265,7 @@ export class GuidedHomePage extends Page {
                   data-next-element="guided-div-resume-progress-cards"
                   style="width: 250px"
                 >
-                  Datasets in progress
-                </button>
-                <button
-                  class="ui button guided--radio-button guided--tab-button"
-                  id="guided-button-view-datasets-uploaded"
-                  data-next-element="guided-div-update-uploaded-cards"
-                  style="width: 250px"
-                >
-                  Datasets uploaded to Pennsieve
+                  Conversions in Progress
                 </button>
               </div>
             </div>
