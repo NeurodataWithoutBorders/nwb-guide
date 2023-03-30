@@ -101,6 +101,7 @@ export class GuidedNewDatasetPage extends Page {
                 items: {
                   type: 'string',
                 },
+              },
 
             related_publications: {
               type: 'array',
@@ -117,6 +118,16 @@ export class GuidedNewDatasetPage extends Page {
               description: 'Enter a description of the experiment.',
               placeholder: "Enter experiment description here"
             },
+
+            keywords: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+              description: 'Enter keywords for the experiment.',
+              placeholder: "Enter experiment keywords here"
+            },
+
             protocol: {
               type: 'string',
               description: 'Enter a description of the protocol.',
@@ -137,8 +148,7 @@ export class GuidedNewDatasetPage extends Page {
               description: 'Enter a description of the stimulus.',
               placeholder: "Enter stimulus description here"
             },
-          },
-        },
+          }
       },
 
         Subject: {
