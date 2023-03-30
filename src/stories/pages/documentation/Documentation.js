@@ -2,9 +2,11 @@
 
 import { html } from 'lit';
 import { openLink } from '../../../links.js';
-import lottie from 'lottie-web';
 import { docu_lottie } from '../../../assets/lotties/documentation-lotties.js';
 import { Page } from '../Page.js';
+
+import { startLottie } from '../../../globals.js'
+
 
 export class DocumentationPage extends Page {
 
@@ -14,15 +16,8 @@ export class DocumentationPage extends Page {
 
   updated(){
     let doc_lottie = (this ?? this.shadowRoot).querySelector("#documentation-lottie");
-    doc_lottie.innerHTML = ''
 
-    lottie.loadAnimation({
-      container: doc_lottie,
-      animationData: docu_lottie /*(json js variable, (view src/assets/lotties)*/,
-      renderer: "svg",
-      loop: true /*controls looping*/,
-      autoplay: true,
-    });
+    startLottie(doc_lottie, docu_lottie);
 
 
   }

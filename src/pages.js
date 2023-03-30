@@ -19,6 +19,8 @@ import logo from './assets/img/logo-guide-draft-transparent-tight.png'
 let dashboard = document.querySelector("nwb-dashboard")
 if (!dashboard) dashboard = new Dashboard()
 dashboard.logo = logo
+dashboard.name = 'NWB GUIDE'
+dashboard.renderNameInSidebar = false
 
 const overviewIcon = `
 <svg
