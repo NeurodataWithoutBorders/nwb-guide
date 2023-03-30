@@ -28,7 +28,7 @@ export const runConversion = async (info, message = "Running conversion") => {
     Swal.close();
 
     if (results.message) {
-      const message = results.message.includes('already exists') ? "File already exists. Please specify another location to store the conversion results" : "Conversion failed with current metadata. Please try again."
+      const message = results.message.includes('already exists') ? "File already exists. Please specify another location to store the conversion results" : results.message
       notyf.open({
         type: "error",
         message,

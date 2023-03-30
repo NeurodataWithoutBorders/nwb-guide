@@ -5,14 +5,13 @@ from neuroconv import datainterfaces, NWBConverter
 import json
 from neuroconv.utils import NWBMetaDataEncoder
 
+from pathlib import Path
 import os
 
 
 def check_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
-        # FILE_ATTRIBUTE_HIDDEN = 0x02
-        # ret = ctypes.windll.kernel32.SetFileAttributesW(path, FILE_ATTRIBUTE_HIDDEN)
 
 
 def get_all_interface_info() -> dict:
@@ -75,32 +74,32 @@ def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
-def convert_to_nwb(info: dict) -> bool:
+def convert_to_nwb(info: dict) -> str:
     """
     Function used to convert the source data to NWB format using the specified metadata.
     """
 
-    nwbfile_path = info["nwbfile_path"]
+    nwbfile_path = Path(info["nwbfile_path"])
 
-    runStubTest = ("stub_test" in info) and info["stub_test"]
+    run_stub_test = info.get("stub_test")
 
     # add a subdirectory to a filepath if stub_test is true
-    if runStubTest:
-        filename = os.path.basename(nwbfile_path)
-        dirname = os.path.join(os.path.dirname(nwbfile_path), ".stubs")
-        nwbfile_path = os.path.join(dirname, filename)
-        check_dir(dirname)
+    if run_stub_test:
+        stub_subfolder = nwbfile_path.parent / ".stubs"
+        stub_subfolder.mkdir(exist_ok=True)
+        preview_path = stub_subfolder / nwbfile_path.name
 
     converter = instantiate_custom_converter(info["source_data"])
 
     # Assume all interfaces have the same conversion options for now
+    available_options = converter.get_conversion_options_schema()
     options = (
-        {interface: {"stub_test": info["stub_test"]} for interface in info["source_data"]} if runStubTest else None
+        { interface: {"stub_test": info["stub_test"]} if available_options.get('properties').get(interface).get("stub_test") else {} for interface in info["source_data"]} if run_stub_test else None
     )
 
     file = converter.run_conversion(
         metadata=info["metadata"],
-        nwbfile_path=nwbfile_path,
+        nwbfile_path=preview_path if run_stub_test else nwbfile_path,
         overwrite=info.get("overwrite", False),
         conversion_options=options,
     )
