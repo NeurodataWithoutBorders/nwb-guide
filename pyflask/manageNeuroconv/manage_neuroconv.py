@@ -94,7 +94,14 @@ def convert_to_nwb(info: dict) -> str:
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
-        { interface: {"stub_test": info["stub_test"]} if available_options.get('properties').get(interface).get("properties").get("stub_test") else {} for interface in info["source_data"]} if run_stub_test else None
+        {
+            interface: {"stub_test": info["stub_test"]}
+            if available_options.get("properties").get(interface).get("properties").get("stub_test")
+            else {}
+            for interface in info["source_data"]
+        }
+        if run_stub_test
+        else None
     )
 
     file = converter.run_conversion(
