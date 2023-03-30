@@ -31,12 +31,12 @@ export class GuidedStructurePage extends Page {
 
   #selected = {}
 
-  #addListItem = (key, value) => {
-    const name = value.name ?? value
+  #addListItem = (value) => {
+    const { key, label } = value
     const li = document.createElement("li");
       const keyEl = document.createElement("span");
 
-      let resolvedKey = name.slice(0, -9); const originalValue = resolvedKey;
+      let resolvedKey = key; const originalValue = resolvedKey;
 
       // Ensure no duplicate keys
       let i = 0
@@ -45,7 +45,7 @@ export class GuidedStructurePage extends Page {
         resolvedKey = `${originalValue}_${i}`
       }
 
-      keyEl.innerText = resolvedKey // Cut off "Interface"
+      keyEl.innerText = resolvedKey
       keyEl.contentEditable = true
       li.appendChild(keyEl)
 
@@ -54,11 +54,11 @@ export class GuidedStructurePage extends Page {
       li.appendChild(sepEl)
 
       const valueEl = document.createElement("span");
-      valueEl.innerText = name
+      valueEl.innerText = label
       li.appendChild(valueEl)
       this.list.appendChild(li);
 
-      this.#selected[resolvedKey] = name
+      this.#selected[resolvedKey] = label
   }
 
   search = new Search({
@@ -96,11 +96,9 @@ export class GuidedStructurePage extends Page {
     const selected = this.info.globalState.source?.interfaces
     this.search.options = await fetch(`${baseUrl}/neuroconv`).then((res) => res.json()).then(json => Object.entries(json).map(([key, value]) => {
       return {
-        label: value.name,
-        keywords: [value.modality, value.technique],
-        value: value
-        // keywords: value.keywords
-      }
+        ...value,
+        key: key.replace('Interface', '')
+      } // Has label and keywords property already
     })).catch(e => console.error(e));
 
     for (const [key, value] of Object.entries(selected || {})) this.#addListItem(key, value) // Add previously selected items

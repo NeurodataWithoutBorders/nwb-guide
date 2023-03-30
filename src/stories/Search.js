@@ -111,7 +111,7 @@ export class Search extends LitElement {
         li.classList.add('option')
         li.classList.add('hidden')
         li.setAttribute('data-keywords', JSON.stringify(option.keywords))
-        li.addEventListener('click', () => this.#onSelect(option.label, option.value ?? option))
+        li.addEventListener('click', () => this.#onSelect(option))
 
         const label = document.createElement('h4')
         label.classList.add('label')

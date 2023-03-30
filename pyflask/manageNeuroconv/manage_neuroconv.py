@@ -8,26 +8,23 @@ from neuroconv.utils import NWBMetaDataEncoder
 
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
+
     # Hard coded for now - eventual goal will be to import this from NeuroConv
-    interfaces_by_modality_and_technique = dict(
-        ecephys=dict(
-            recording=dict(SpikeGLX=SpikeGLXRecordingInterface),
-            sorting=dict(Phy=PhySortingInterface),
-        )
+    hardcoded_interfaces = dict(
+        SpikeGLX=SpikeGLXRecordingInterface,
+        Phy=PhySortingInterface
     )
 
-    interface_info = dict()
+    interface_info = {
+        interface.__name__: {
+            "keywords": interface.keywords,
+            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves have a label property
+            "label": format_name
+            # Can also add a description here if we want to provide more information about the interface
+        } for format_name, interface in hardcoded_interfaces.items()
+    }
 
-    for modality, techniques in interfaces_by_modality_and_technique.items():
-        for technique, format_name_to_interface in techniques.items():
-            for format_name, interface in format_name_to_interface.items():
-                # interface = format_name_to_interface
-                interface_info[format_name] = {  # Note in the full scope, format_name won't be unique
-                    "modality": modality,
-                    "name": interface.__name__,  # Where is this value used in the display?
-                    "technique": technique,  # Is this actually necessary anymore?
-                }
-
+    print(interface_info)
     return interface_info
 
 

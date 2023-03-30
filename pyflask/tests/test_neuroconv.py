@@ -38,10 +38,10 @@ def test_get_all_interfaces(client):
                 "^.*Interface$": {
                     "type": "object",
                     "properties": {
-                        "modality": {"type": "string"},
-                        "name": {"type": "string"},
-                        "technique": {"type": "string"},
+                        "label": {"type": "string"},
+                        "keywords": {"type": "array", "items": {"type": "string"}},
                     },
+                    "required": ["label", "keywords"]
                 }
             },
         },
