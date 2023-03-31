@@ -73,10 +73,10 @@ def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
-
 class objectview(object):
     def __init__(self, d):
         self.__dict__ = d
+
 
 def validate_metadata(parent: dict, function: str) -> dict:
     """
@@ -85,7 +85,7 @@ def validate_metadata(parent: dict, function: str) -> dict:
     fn = nwbinspector.__dict__.get(function)
     if fn is None:
         raise ValueError(f"Function {function} not found in nwbinspector")
-    
+
     if "subject" in function and "subject_exists" not in function:
         cls = Subject
         default_parent = {}
@@ -97,13 +97,9 @@ def validate_metadata(parent: dict, function: str) -> dict:
             session_start_time=datetime.now(),
         )
 
-    result = fn(cls(
-        **default_parent,
-        **parent
-    ))
+    result = fn(cls(**default_parent, **parent))
 
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
-
 
 
 def convert_to_nwb(info: dict) -> str:

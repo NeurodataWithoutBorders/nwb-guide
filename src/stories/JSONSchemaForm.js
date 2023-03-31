@@ -19,7 +19,7 @@ const componentCSS = `
       line-height: 1.4285em;
     }
 
-    .invalid { 
+    .invalid {
       background: rgb(255, 229, 228) !important;
     }
 
@@ -291,7 +291,7 @@ export class JSONSchemaForm extends LitElement {
   validateOnChange = () => {}
   #validateOnChange = async (name, parent, element, path) => {
     const valid = parent[name] === '' ? true : await this.validateOnChange(name, parent, path)
-    
+
     const errors = element.parentElement.querySelector('ol.errors')
     errors.innerHTML = ''
 

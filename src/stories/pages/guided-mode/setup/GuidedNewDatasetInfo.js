@@ -22,7 +22,7 @@ export class GuidedNewDatasetPage extends Page {
     onNext: async () => {
 
       const globalState = this.info.globalState.project
-      
+
       // Check validity of project name
       const name = this.state.name
       if (!name) {
