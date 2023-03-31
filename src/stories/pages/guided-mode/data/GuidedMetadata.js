@@ -41,6 +41,9 @@ export class GuidedMetadataPage extends Page {
       ...this.info.globalState.metadata,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       required: {
+        NWBFile: {
+          session_start_time: true
+        },
         Subject: {
           age: true,
           date_of_birth: true
