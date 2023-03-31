@@ -51,10 +51,6 @@ export class GuidedUploadPage extends Page {
           type: 'string',
           format: 'directory'
         },
-        version: {
-          type: 'string',
-          default: 'draft'
-        },
         staging: {
           type: 'boolean',
           default: true // Defualt to staging for now
