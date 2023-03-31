@@ -1,11 +1,10 @@
 
 
 import { html } from 'lit';
+import { baseUrl, notyf } from '../../../../globals.js';
 import { hasEntry, update } from '../../../../progress.js';
-import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-
-import { notyf } from '../../../../globals.js';
+import { Page } from '../../Page.js';
 
 export class GuidedNewDatasetPage extends Page {
 
@@ -23,21 +22,21 @@ export class GuidedNewDatasetPage extends Page {
     onNext: async () => {
 
       const globalState = this.info.globalState.project
-
+      
       // Check validity of project name
       const name = this.state.name
       if (!name) {
-
         const message = "Please enter a project name."
         notyf.open({
           type: "error",
           message: message,
           duration: 7000,
         });
-
-        return
       }
 
+      this.form.validate()
+
+      if (!name) return
 
       // Check if name is already used
       // Update existing progress file
@@ -51,7 +50,6 @@ export class GuidedNewDatasetPage extends Page {
             message: message,
             duration: 7000,
           });
-
           return
         }
     }
@@ -60,7 +58,6 @@ export class GuidedNewDatasetPage extends Page {
     Object.assign(globalState, this.state)
 
     this.onTransition(1)
-
   }
 }
 
@@ -187,9 +184,37 @@ export class GuidedNewDatasetPage extends Page {
       required: ['name']
     }
 
-    const form = new JSONSchemaForm({
+    const noCheck = [
+      'name',
+      'description', 'genotype', 'strain',
+      'lab', 'protocol', 'surgery', 'virus', 'stimulus_notes'
+    ]
+
+    const form = this.form = new JSONSchemaForm({
       schema,
-      results: this.state
+      results: this.state,
+      validateOnChange: async (name, parent, path) => {
+
+        const message = { parent }
+
+        if (noCheck.includes(name)) return
+        else if (name === 'related_publications') message.function = 'check_doi_publications'
+        else if (name === 'experimenter') message.function = 'check_experimenter_form'
+        else if (path.slice(-1)[0] === 'Subject') {
+          message.function = 'check_subject_' + name
+          if (name === 'species') message.function += '_form'
+        }
+        else message.function = 'check_' + name
+
+        const res = await fetch(`${baseUrl}/neuroconv/validate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(message)
+        }).then(res => res.json())
+
+        if (res?.message) return [  { message: res.message } ] // Some of the requests end in errors
+        return res
+      }
     })
 
     form.style.width = '100%'
@@ -201,7 +226,7 @@ export class GuidedNewDatasetPage extends Page {
           <h1 class="guided--text-sub-step">Project Setup</h1>
         </div>
         <div class="guided--section">
-        ${form}
+         ${form}
         </div>
       </div>
     </div>

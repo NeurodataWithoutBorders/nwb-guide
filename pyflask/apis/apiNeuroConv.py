@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, reqparse
 from namespaces import get_namespace, NamespaceEnum
-from manageNeuroconv import get_all_interface_info, get_source_schema, get_metadata_schema, convert_to_nwb
+from manageNeuroconv import get_all_interface_info, get_source_schema, get_metadata_schema, convert_to_nwb, validate_metadata
 from errorHandlers import notBadRequestException
 
 api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")
@@ -65,6 +65,28 @@ class Schemas(Resource):
     def post(self):
         try:
             return convert_to_nwb(api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
+
+
+validate_parser = api.parser()
+validate_parser.add_argument('parent',  type=dict, required=True)
+validate_parser.add_argument('function', type=str, required=True)
+
+
+# await fetch('neuroconv/validate', {method:"POST", body: JSON.stringify({nwb_file_object: {related_publications: ['name']}, function: 'check_doi_publications'}), headers: {
+#     "Content-Type": "application/json",
+#   }}).then(res => res.text())
+@api.route("/validate")
+@api.expect(validate_parser)
+class Schemas(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            args = validate_parser.parse_args()
+            return validate_metadata(args.get('parent'), args.get('function'))
 
         except Exception as e:
             if notBadRequestException(e):
