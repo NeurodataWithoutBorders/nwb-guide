@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { hasEntry, update } from '../../../../progress.js';
 import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
+import { notify } from '../../../../globals.js';
 
 export class GuidedNewDatasetPage extends Page {
 
@@ -32,7 +33,13 @@ export class GuidedNewDatasetPage extends Page {
 
       // Check if name is already used
       // Update existing progress file
-      if (globalState.initialized) await update(name, globalState.name)
+      if (globalState.initialized) {
+        const res = await update(name, globalState.name).then(res => {
+          notify('success', res)
+          return res
+        }).catch(e => notify('error', e))
+        if (!res) return
+      }
       else {
         const has = await hasEntry(name)
         if (has) {
