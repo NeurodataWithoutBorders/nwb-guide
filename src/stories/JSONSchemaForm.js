@@ -98,7 +98,6 @@ pre {
 }
 
 
-
 `
 
 export class JSONSchemaForm extends LitElement {
@@ -172,7 +171,11 @@ export class JSONSchemaForm extends LitElement {
       <label class="guided--form-label">${this.#parseStringToHeader(name)} ${isRequired ? html`<span style="color: red">*</span>` : ``}</label>
       ${(() => {
 
-        if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
+        if (info.type === 'boolean') {
+          return html`<input type="checkbox" @change=${(ev) => this.#updateParent(name, ev.target.checked, parent)} ?checked=${parent[name] ?? false} />`
+        }
+
+        else if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
 
           // Handle file and directory formats
           if (this.#filesystemQueries.includes(info.format)) return dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
