@@ -39,6 +39,9 @@ export class GuidedMetadataPage extends Page {
     this.form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
+      linked: [
+        [['Subject', 'age'], ['Subject', 'date_of_birth']]
+      ],
       required: {
         NWBFile: {
           session_start_time: true

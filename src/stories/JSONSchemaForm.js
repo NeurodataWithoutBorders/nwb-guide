@@ -98,8 +98,14 @@ pre {
   color: DimGray;
 }
 
+  .required:after {
+    content: " *";
+    color: red;
+  }
 
-
+  .required.conditional:after {
+    color: #fa8c16;
+  }
 `
 
 export class JSONSchemaForm extends LitElement {
@@ -130,6 +136,7 @@ export class JSONSchemaForm extends LitElement {
     this.onlyRequired = props.onlyRequired ?? false
     this.dialogOptions = props.dialogOptions ?? {}
     this.dialogType = props.dialogType ?? 'showOpenDialog'
+    this.linked = props.linked ?? []
     if (props.onInvalid) this.onInvalid = props.onInvalid
   }
 
@@ -171,7 +178,7 @@ export class JSONSchemaForm extends LitElement {
 
     return html`
     <div>
-      <label class="guided--form-label">${this.#parseStringToHeader(name)} ${isRequired ? html`<span style="color: red">*</span>` : ``}</label>
+      <label class="guided--form-label ${isRequired ? 'required' : ''} ${typeof isRequired === 'function' ? 'conditional' : ''}">${this.#parseStringToHeader(name)}</label>
       ${(() => {
 
         if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
