@@ -47,10 +47,6 @@ export class GuidedUploadPage extends Page {
           type: 'string',
           format: 'directory'
         },
-        dandiset_folder_path: {
-          type: 'string',
-          format: 'directory'
-        },
         staging: {
           type: 'boolean',
           default: true // Defualt to staging for now

@@ -116,8 +116,6 @@ def upload_to_dandi(
     dandiset_id: str,
     nwb_folder_path: str,
     api_key: str,
-    dandiset_folder_path: Optional[str] = None,
-    version: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
 ):
@@ -126,8 +124,6 @@ def upload_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=Path(nwb_folder_path),
-        dandiset_folder_path=Path(dandiset_folder_path) if dandiset_folder_path is not None else None,
-        version=version,
         staging=staging,
         cleanup=cleanup,
     )
