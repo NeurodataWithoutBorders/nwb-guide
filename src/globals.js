@@ -1,7 +1,9 @@
 
 import { app, path, port } from './electron/index.js'
 import { Notyf } from 'notyf'
+import checkChromatic from 'chromatic/isChromatic';
 
+import lottie from 'lottie-web'
 
 export const joinPath = (...args) => path?.join(...args);
 
@@ -9,10 +11,31 @@ export const joinPath = (...args) => path?.join(...args);
 export const baseUrl = `http://127.0.0.1:${port}`
 
 
+
 // Filesystem Management
 export const homeDirectory = app?.getPath("home") ?? '';
 export const progressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Progress");
 export const guidedProgressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Guided-Progress");
+
+export const isStorybook = window.location.href.includes('iframe.html')
+
+// ---------- Lottie Helper ----------
+const isChromatic = checkChromatic()
+
+export const startLottie = (lottieElement, animationData) => {
+  lottieElement.innerHTML = "";
+  const thisLottie = lottie.loadAnimation({
+    container: lottieElement,
+    animationData,
+    renderer: "svg",
+    loop: !isChromatic,
+    autoplay: !isChromatic,
+  });
+
+  if (isChromatic) thisLottie.goToAndStop(thisLottie.getDuration(true) - 1, true) // Go to last frame
+
+  return thisLottie
+}
 
 // ---------- Notification Helper ----------
 export const notyf = new Notyf({

@@ -19,7 +19,7 @@ export const update = (newDatasetName, previousDatasetName) => {
     return new Promise((resolve, reject) => {
         //If updataing the dataset, update the old banner image path with a new one
         if (previousDatasetName) {
-            if (previousDatasetName === newDatasetName)resolve("No changes made to dataset name");
+            if (previousDatasetName === newDatasetName) resolve("No changes made to dataset name");
 
             if (!fs) console.warn("fs is not defined. Will not perform changes on the filesystem.")
 
@@ -29,7 +29,7 @@ export const update = (newDatasetName, previousDatasetName) => {
             const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
             const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
             fs?.renameSync(oldProgressFilePath, newProgressFilePath);
-            resolve("Dataset name updated");
+            resolve(`Dataset name (${previousDatasetName}) updated to ${newDatasetName}`);
         }
 
         else reject('No previous dataset name provided');
@@ -39,7 +39,7 @@ export const update = (newDatasetName, previousDatasetName) => {
 export const save = (page) => {
 
   const globalState = page.info.globalState
-  const guidedProgressFileName = globalState.name
+  const guidedProgressFileName = globalState.project.name
 
     if (!fs) {
       if (!saveErrorThrown) console.warn("Cannot save progress in a web build.");

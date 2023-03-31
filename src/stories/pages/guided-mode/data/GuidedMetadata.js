@@ -23,10 +23,26 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
+
+    const metadataResults = this.info.globalState.metadata.results
+
+    // Merge project-wide data into metadata
+    const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
+    toMerge.forEach(([key, value]) => {
+      let internalMetadata = metadataResults[key]
+      if (!metadataResults[key]) internalMetadata = metadataResults[key] = {}
+      for (let key in value) {
+        if (!(key in internalMetadata)) internalMetadata[key] = value[key] // Prioritize existing results (cannot override with new information...)
+      }
+    })
+
     this.form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
-      ignore: ['Ecephys'],
+      ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       required: {
+        NWBFile: {
+          session_start_time: true
+        },
         Subject: {
           age: function () {
             return !this['date_of_birth']
@@ -45,7 +61,7 @@ export class GuidedMetadataPage extends Page {
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
       <div class="title">
-        <h1 class="guided--text-sub-step">Metadata</h1>
+        <h1 class="guided--text-sub-step">NWB File Metadata</h1>
       </div>
       <div class="guided--section">
        ${this.form}
