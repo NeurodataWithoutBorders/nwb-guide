@@ -148,6 +148,11 @@ export class JSONSchemaForm extends LitElement {
 
   }
 
+  #updateParent(name, value, parent) {
+    if (!value) delete parent[name]
+    else parent[name] = value
+  }
+
   #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
 
   #parseStringToHeader = (headerStr) => {
@@ -182,7 +187,7 @@ export class JSONSchemaForm extends LitElement {
             const file = await this.#useElectronDialog(info.format)
             const path = file.filePath ?? file.filePaths?.[0]
             if (!path) throw new Error('Unable to parse file path')
-            parent[name] = path
+            this.#updateParent(name, path, parent)
             button.nextSibling.innerText = path
 
           }}>Get ${info.format[0].toUpperCase() + info.format.slice(1)}</button><small>${parent[name] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
@@ -196,16 +201,11 @@ export class JSONSchemaForm extends LitElement {
             maxlength="255"
           .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}"
           @input=${(ev) => {
-
-            // Split by comma if array
-            if (isStringArray) parent[name] = ev.target.value.split('\n').map(str => str.trim())
-
-            // Otherwise, just set the value
-            else parent[name] = ev.target.value
+            this.#updateParent(name, (isStringArray) ? ev.target.value.split('\n').map(str => str.trim()) : ev.target.value, parent)
           }}></textarea>`
 
           // Handle date formats
-          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} />`
+          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)} />`
 
           // Handle other string formats
           else {
@@ -217,7 +217,7 @@ export class JSONSchemaForm extends LitElement {
               placeholder="${info.placeholder ?? ''}"
               .value="${parent[name] ?? ''}"
 
-              @input=${(ev) => parent[name] = ev.target.value}
+              @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}
             />
             `
           }
@@ -225,7 +225,6 @@ export class JSONSchemaForm extends LitElement {
 
 
       // Print out the immutable default value
-      console.log('type not supported', info.type, info.format, info.items?.type, info)
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
       ${info.description ? html`<p class="guided--text-input-instructions">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
@@ -240,6 +239,8 @@ export class JSONSchemaForm extends LitElement {
       const info = properties[name]
       const props = info.properties
       if (props && !results[name]) results[name] = {} // Regisiter new interfaces in results
+      else if (info.default) results[name] = info.default
+
       if (props) {
         Object.entries(props).forEach(([key, value]) => {
           if (!(key in results[name])) {
