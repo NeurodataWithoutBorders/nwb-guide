@@ -3,7 +3,6 @@
 import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-import { notify } from '../../../../globals.js';
 
 export class GuidedMetadataPage extends Page {
 
@@ -40,15 +39,22 @@ export class GuidedMetadataPage extends Page {
     this.form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
+      linked: [
+        [['Subject', 'age'], ['Subject', 'date_of_birth']]
+      ],
       required: {
         NWBFile: {
           session_start_time: true
         },
         Subject: {
-          age: true,
-          date_of_birth: true
+          age: function () {
+            return !this['date_of_birth']
+          },
+          date_of_birth: function () {
+            return !this['age']
+          }
         },
-      },
+      }
     })
 
     return html`
