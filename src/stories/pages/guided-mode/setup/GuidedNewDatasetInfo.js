@@ -6,6 +6,8 @@ import { hasEntry, update } from '../../../../progress.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { Page } from '../../Page.js';
 
+import validationJSON from './validation.json' assert { type: "json" };
+
 export class GuidedNewDatasetPage extends Page {
 
   constructor(...args) {
@@ -197,14 +199,18 @@ export class GuidedNewDatasetPage extends Page {
 
         const message = { parent }
 
-        if (noCheck.includes(name)) return
-        else if (name === 'related_publications') message.function = 'check_doi_publications'
-        else if (name === 'experimenter') message.function = 'check_experimenter_form'
-        else if (path.slice(-1)[0] === 'Subject') {
-          message.function = 'check_subject_' + name
-          if (name === 'species') message.function += '_form'
+        if (validationJSON.ignore.includes(name)) return
+        else if (Object.keys(validationJSON.properties).includes(name)) message.function = validationJSON.properties[name]
+        else {
+          const child_match = Object.keys(validationJSON.children).find(key => path.slice(-1)[0] === key)
+          if (child_match) {
+            const childrenObject =  validationJSON.children[child_match]
+            if (Object.keys(childrenObject).includes(name)) message.function = childrenObject[name]
+            else if (childrenObject['*']) message.function = childrenObject['*'].replace(`{*}`, `${name}`)
+          } else if (validationJSON.properties['*']) message.function = validationJSON.properties['*'].replace(`{*}`, `${name}`)
         }
-        else message.function = 'check_' + name
+        
+        if (!message.function) return // No validation for this field
 
         const res = await fetch(`${baseUrl}/neuroconv/validate`, {
           method: 'POST',
