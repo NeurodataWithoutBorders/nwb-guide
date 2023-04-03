@@ -253,11 +253,11 @@
   background-color: rgb(255, 255, 255);
 }
 
-.guided--input:read-only,
 .guided--input:disabled {
   color: dimgray;
   pointer-events: none;
 }
+
 .guided--input::placeholder {
   opacity: 0.5;
 }

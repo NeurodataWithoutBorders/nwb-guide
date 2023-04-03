@@ -51,11 +51,11 @@ const componentCSS = `
   background-color: rgb(255, 255, 255);
 }
 
-.guided--input:read-only,
 .guided--input:disabled {
   color: dimgray;
   pointer-events: none;
 }
+
 .guided--input::placeholder {
   opacity: 0.5;
 }
@@ -171,8 +171,17 @@ export class JSONSchemaForm extends LitElement {
       <label class="guided--form-label">${this.#parseStringToHeader(name)} ${isRequired ? html`<span style="color: red">*</span>` : ``}</label>
       ${(() => {
 
-        if (info.type === 'boolean') {
-          return html`<input type="checkbox" @change=${(ev) => this.#updateParent(name, ev.target.checked, parent)} ?checked=${parent[name] ?? false} />`
+        // Basic enumeration of properties on a select element
+        if (info.enum) {
+          return html`
+          <select class="guided--input" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}>
+            ${info.enum.map(item => html`<option value=${item} ?selected=${parent[name] === item}>${item}</option>`)}
+          </select>
+          `
+        }
+
+        else if (info.type === 'boolean') {
+          return html`<input type="checkbox" @input=${(ev) => this.#updateParent(name, ev.target.checked, parent)} ?checked=${parent[name] ?? false} />`
         }
 
         else if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
