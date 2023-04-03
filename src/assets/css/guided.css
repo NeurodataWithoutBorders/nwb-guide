@@ -651,12 +651,14 @@ h1.guided--text-sub-step {
   padding-right: 7px;
 }
 
+
 .guided--text-dataset-card {
   margin: 0px;
   color: black;
   font-weight: 600;
   font-size: 14px !important;
 }
+
 .guided--dataset-card-row {
   display: flex;
   flex-grow: 1;
@@ -664,11 +666,18 @@ h1.guided--text-sub-step {
   justify-content: center;
 }
 
+/* Margin beneath project name */
+.guided--dataset-card-row:first-of-type h1 {
+  font-size: 16px !important;
+}
+
+
 .guided--text-dataset-card-sub {
   margin: 0px;
   color: #999;
   font-weight: 600;
   font-size: 12px !important;
+  margin-bottom: 10px;
 }
 
 .guided--dataset-card {
@@ -698,7 +707,7 @@ h1.guided--text-sub-step {
 }
 .guided--dataset-card-body {
   display: flex;
-  height: 80px;
+  /* height: 80px; */
   flex-grow: 1;
   margin: 5px;
   margin-left: 12px;

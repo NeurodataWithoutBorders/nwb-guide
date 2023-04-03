@@ -1,6 +1,12 @@
 from flask_restx import Namespace, Resource, reqparse
 from namespaces import get_namespace, NamespaceEnum
-from manageNeuroconv import get_all_interface_info, get_source_schema, get_metadata_schema, convert_to_nwb
+from manageNeuroconv import (
+    get_all_interface_info,
+    get_source_schema,
+    get_metadata_schema,
+    convert_to_nwb,
+    upload_to_dandi,
+)
 from errorHandlers import notBadRequestException
 
 api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")
@@ -51,6 +57,18 @@ class Schemas(Resource):
     def post(self):
         try:
             return convert_to_nwb(api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
+
+
+@api.route("/upload")
+class Schemas(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return upload_to_dandi(**api.payload)
 
         except Exception as e:
             if notBadRequestException(e):
