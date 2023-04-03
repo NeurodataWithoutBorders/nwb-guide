@@ -209,7 +209,7 @@ export class GuidedNewDatasetPage extends Page {
             else if (childrenObject['*']) message.function = childrenObject['*'].replace(`{*}`, `${name}`)
           } else if (validationJSON.properties['*']) message.function = validationJSON.properties['*'].replace(`{*}`, `${name}`)
         }
-        
+
         if (!message.function) return // No validation for this field
 
         const res = await fetch(`${baseUrl}/neuroconv/validate`, {
