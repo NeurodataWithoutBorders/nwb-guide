@@ -88,7 +88,7 @@ export class GuidedStructurePage extends Page {
 
       keyEl.addEventListener('blur', () => {
         const newKey = keyEl.innerText
-        if (newKey === '') deleteListItem()
+        if (newKey === '') keyEl.innerText = resolvedKey // Reset to original value
         else {
           delete this.#selected[resolvedKey]
           resolvedKey = newKey

@@ -58,7 +58,6 @@ export class GuidedSourceDataPage extends Page {
         throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
       }
 
-      console.log('Got the result', result)
       this.info.globalState.metadata = result
 
       this.onTransition(1)
