@@ -7,6 +7,7 @@ from neuroconv.utils import NWBMetaDataEncoder
 import nwbinspector
 from pynwb.file import NWBFile, Subject
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
 
 from pathlib import Path
 import os
@@ -73,31 +74,58 @@ def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
-class objectview(object):
-    def __init__(self, d):
-        self.__dict__ = d
+
+def get_check_function(check_function_name: str) -> callable:
+    """
+    Function used to fetch an arbitrary NWB Inspector function
+    """
+    check_function: callable = nwbinspector.__dict__.get(check_function_name)
+    if check_function is None:
+        raise ValueError(f"Function {function} not found in nwbinspector")
+
+    return check_function
+
+def validate_subject_metadata(subject_metadata: dict, check_function_info: str or callable):
+    """
+    Function used to validate subject metadata
+    """
+
+    if check_function_info == str:
+        check_function = get_check_function(check_function_info)
+    else:
+        check_function = check_function_info
+
+    subject = Subject(**subject_metadata)
+    return check_function(subject)
+
+def validate_nwbfile_metadata(nwbfile_metadata: dict, check_function_info: str or callable):
+    """
+    Function used to validate NWBFile metadata
+    """
+
+    if check_function_info == str:
+        check_function = get_check_function(check_function_info)
+    else:
+        check_function = check_function_info
+
+    testing_nwbfile = mock_NWBFile(**nwbfile_metadata)
+
+    return check_function(testing_nwbfile)
 
 
-def validate_metadata(nwbfile_metadata: dict, check_function_name: str) -> dict:
+def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     """
     Function used to validate data using an arbitrary NWB Inspector function
     """
-    check_function: callable = nwbinspector.__dict__.get(check_function_name)
-    if fn is None:
-        raise ValueError(f"Function {function} not found in nwbinspector")
 
-    if "subject" in function and "subject_exists" not in function:
-        nwb_class = Subject
-        default_parent = {}
+    check_function = get_check_function(check_function_name)
+
+    if check_function.neurodata_type is Subject:
+        result = validate_subject_metadata(metadata, check_function)
+    elif check_function.neurodata_type is NWBFile:
+        result = validate_nwbfile_metadata(metadata, check_function)
     else:
-        cls = NWBFile
-        default_parent = dict(
-            session_description="This is a description",
-            identifier="00001",
-            session_start_time=datetime.now(),
-        )
-
-    result = fn(cls(**default_parent, **parent))
+        raise ValueError(f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} is not supported by this function")
 
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
