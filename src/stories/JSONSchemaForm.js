@@ -174,8 +174,8 @@ export class JSONSchemaForm extends LitElement {
         // Basic enumeration of properties on a select element
         if (info.enum) {
           return html`
-          <select class="guided--input" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}>
-            ${info.enum.map(item => html`<option value=${item} ?selected=${parent[name] === item}>${item}</option>`)}
+          <select class="guided--input" @input=${(ev) => this.#updateParent(name, info.enum[ev.target.value], parent)}>
+            ${info.enum.map((item, i) => html`<option value=${i} ?selected=${parent[name] === item}>${item}</option>`)}
           </select>
           `
         }
