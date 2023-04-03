@@ -80,7 +80,7 @@ export class GuidedStructurePage extends Page {
               return false;
           }
       });
-    
+
       const deleteListItem = () => {
         li.remove()
         delete this.#selected[resolvedKey]
@@ -95,7 +95,7 @@ export class GuidedStructurePage extends Page {
           this.#selected[resolvedKey] = value
         }
       })
-        
+
       button.onClick = deleteListItem
   }
 
@@ -152,7 +152,7 @@ export class GuidedStructurePage extends Page {
     this.#selected = {}
     this.list.remove()
     this.list = document.createElement('ul')
-    
+
 
     return html`
   <div
