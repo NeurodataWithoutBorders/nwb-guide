@@ -77,7 +77,6 @@ def get_metadata_schema(source_data: Dict[str, dict]) -> Dict[str, dict]:
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
-
 def get_check_function(check_function_name: str) -> callable:
     """
     Function used to fetch an arbitrary NWB Inspector function
@@ -87,6 +86,7 @@ def get_check_function(check_function_name: str) -> callable:
         raise ValueError(f"Function {function} not found in nwbinspector")
 
     return check_function
+
 
 def validate_subject_metadata(subject_metadata: dict, check_function_info: str or callable):
     """
@@ -100,6 +100,7 @@ def validate_subject_metadata(subject_metadata: dict, check_function_info: str o
 
     subject = Subject(**subject_metadata)
     return check_function(subject)
+
 
 def validate_nwbfile_metadata(nwbfile_metadata: dict, check_function_info: str or callable):
     """
@@ -128,7 +129,9 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     elif check_function.neurodata_type is NWBFile:
         result = validate_nwbfile_metadata(metadata, check_function)
     else:
-        raise ValueError(f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} is not supported by this function")
+        raise ValueError(
+            f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} is not supported by this function"
+        )
 
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 

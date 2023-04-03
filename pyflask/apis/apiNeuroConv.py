@@ -100,7 +100,6 @@ class Schemas(Resource):
                 api.abort(500, str(e))
 
 
-
 @api.route("/upload")
 class Schemas(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
