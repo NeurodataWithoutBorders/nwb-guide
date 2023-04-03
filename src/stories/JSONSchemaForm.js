@@ -107,7 +107,6 @@ pre {
 }
 
 
-
 `
 
 export class JSONSchemaForm extends LitElement {
@@ -153,6 +152,11 @@ export class JSONSchemaForm extends LitElement {
     return result
   }
 
+  #updateParent(name, value, parent) {
+    if (!value) delete parent[name]
+    else parent[name] = value
+  }
+
   #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
 
   validate = () => {
@@ -185,7 +189,11 @@ export class JSONSchemaForm extends LitElement {
       <label class="guided--form-label">${this.#parseStringToHeader(name)} ${isRequired ? html`<span style="color: red">*</span>` : ``}</label>
       ${(() => {
 
-        if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
+        if (info.type === 'boolean') {
+          return html`<input type="checkbox" @change=${(ev) => this.#updateParent(name, ev.target.checked, parent)} ?checked=${parent[name] ?? false} />`
+        }
+
+        else if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
 
           // Handle file and directory formats
           if (this.#filesystemQueries.includes(info.format)) return dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
@@ -200,8 +208,8 @@ export class JSONSchemaForm extends LitElement {
             const file = await this.#useElectronDialog(info.format)
             const path = file.filePath ?? file.filePaths?.[0]
             if (!path) throw new Error('Unable to parse file path')
-            parent[name] = path
             this.#validateOnChange(name, parent, button, path)
+            this.#updateParent(name, path, parent)
             button.nextSibling.innerText = path
 
           }}>Get ${info.format[0].toUpperCase() + info.format.slice(1)}</button><small>${parent[name] ?? ''}</small>` : html`<p>Cannot get absolute file path on web distribution</p>`
@@ -215,12 +223,7 @@ export class JSONSchemaForm extends LitElement {
             maxlength="255"
             .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}"
             @input=${(ev) => {
-
-              // Split by comma if array
-              if (isStringArray && ev.target.value) parent[name] = ev.target.value.split('\n').map(str => str.trim()).filter(str => !!str)
-
-              // Otherwise, just set the value
-              else parent[name] = ev.target.value
+              this.#updateParent(name, (isStringArray) ? ev.target.value.split('\n').map(str => str.trim()) : ev.target.value, parent)
             }}
             @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
           ></textarea>`
@@ -238,7 +241,7 @@ export class JSONSchemaForm extends LitElement {
               placeholder="${info.placeholder ?? ''}"
               .value="${parent[name] ?? ''}"
 
-              @input=${(ev) => parent[name] = ev.target.value}
+              @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}
               @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
             />
             `
@@ -262,6 +265,8 @@ export class JSONSchemaForm extends LitElement {
       const info = properties[name]
       const props = info.properties
       if (props && !results[name]) results[name] = {} // Regisiter new interfaces in results
+      else if (info.default) results[name] = info.default
+
       if (props) {
         Object.entries(props).forEach(([key, value]) => {
           if (!(key in results[name])) {

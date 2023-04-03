@@ -6,6 +6,7 @@ from manageNeuroconv import (
     get_metadata_schema,
     convert_to_nwb,
     validate_metadata,
+    upload_to_dandi,
 )
 from errorHandlers import notBadRequestException
 
@@ -93,6 +94,19 @@ class Schemas(Resource):
         try:
             args = validate_parser.parse_args()
             return validate_metadata(args.get("parent"), args.get("function"))
+
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
+
+
+
+@api.route("/upload")
+class Schemas(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return upload_to_dandi(**api.payload)
 
         except Exception as e:
             if notBadRequestException(e):

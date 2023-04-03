@@ -4,4 +4,5 @@ from .manage_neuroconv import (
     get_metadata_schema,
     convert_to_nwb,
     validate_metadata,
+    upload_to_dandi,
 )
