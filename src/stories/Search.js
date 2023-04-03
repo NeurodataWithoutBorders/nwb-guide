@@ -103,8 +103,8 @@ export class Search extends LitElement {
   render() {
 
     // Update list
-    this.list.remove() 
-    this.list = document.createElement('ul') 
+    this.list.remove()
+    this.list = document.createElement('ul')
 
      const slot = document.createElement('slot')
      this.list.appendChild(slot)
