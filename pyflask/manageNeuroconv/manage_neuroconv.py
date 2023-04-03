@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 
@@ -9,6 +9,7 @@ from pynwb.file import NWBFile, Subject
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
 from neuroconv.tools.data_transfers import automatic_dandi_upload
+from nwbinspector.register_checks import InspectorMessage
 
 from pathlib import Path
 
@@ -88,29 +89,23 @@ def get_check_function(check_function_name: str) -> callable:
     return check_function
 
 
-def validate_subject_metadata(subject_metadata: dict, check_function_info: str or callable):
+def validate_subject_metadata(subject_metadata: dict, check_function_name: str) -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """
     Function used to validate subject metadata
     """
 
-    if check_function_info == str:
-        check_function = get_check_function(check_function_info)
-    else:
-        check_function = check_function_info
+    check_function = get_check_function(check_function_name)
 
     subject = Subject(**subject_metadata)
     return check_function(subject)
 
 
-def validate_nwbfile_metadata(nwbfile_metadata: dict, check_function_info: str or callable):
+def validate_nwbfile_metadata(nwbfile_metadata: dict, check_function_name: str) -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """
     Function used to validate NWBFile metadata
     """
 
-    if check_function_info == str:
-        check_function = get_check_function(check_function_info)
-    else:
-        check_function = check_function_info
+    check_function = get_check_function(check_function_name)
 
     testing_nwbfile = mock_NWBFile(**nwbfile_metadata)
 
@@ -124,10 +119,10 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
 
     check_function = get_check_function(check_function_name)
 
-    if check_function.neurodata_type is Subject:
-        result = validate_subject_metadata(metadata, check_function)
-    elif check_function.neurodata_type is NWBFile:
-        result = validate_nwbfile_metadata(metadata, check_function)
+    if issubclass(check_function.neurodata_type, Subject):
+        result = validate_subject_metadata(metadata, check_function_name)
+    elif issubclass(check_function.neurodata_type, NWBFile):
+        result = validate_nwbfile_metadata(metadata, check_function_name)
     else:
         raise ValueError(
             f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} is not supported by this function"
