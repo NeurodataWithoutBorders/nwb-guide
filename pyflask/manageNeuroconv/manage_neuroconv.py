@@ -78,16 +78,16 @@ class objectview(object):
         self.__dict__ = d
 
 
-def validate_metadata(parent: dict, function: str) -> dict:
+def validate_metadata(nwbfile_metadata: dict, check_function_name: str) -> dict:
     """
     Function used to validate data using an arbitrary NWB Inspector function
     """
-    fn = nwbinspector.__dict__.get(function)
+    check_function: callable = nwbinspector.__dict__.get(check_function_name)
     if fn is None:
         raise ValueError(f"Function {function} not found in nwbinspector")
 
     if "subject" in function and "subject_exists" not in function:
-        cls = Subject
+        nwb_class = Subject
         default_parent = {}
     else:
         cls = NWBFile
