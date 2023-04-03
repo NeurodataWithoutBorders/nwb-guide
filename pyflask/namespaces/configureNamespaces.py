@@ -28,5 +28,6 @@ def configure_namespaces():
     )
     namespaces[NamespaceEnum.STARTUP] = organize_datasets_namespace
 
+
 def get_namespace(namespace_name):
     return namespaces[namespace_name]
