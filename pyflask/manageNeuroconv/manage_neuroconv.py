@@ -89,7 +89,9 @@ def get_check_function(check_function_name: str) -> callable:
     return check_function
 
 
-def validate_subject_metadata(subject_metadata: dict, check_function_name: str) -> Union[None, InspectorMessage, List[InspectorMessage]]:
+def validate_subject_metadata(
+    subject_metadata: dict, check_function_name: str
+) -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """
     Function used to validate subject metadata
     """
@@ -100,7 +102,9 @@ def validate_subject_metadata(subject_metadata: dict, check_function_name: str) 
     return check_function(subject)
 
 
-def validate_nwbfile_metadata(nwbfile_metadata: dict, check_function_name: str) -> Union[None, InspectorMessage, List[InspectorMessage]]:
+def validate_nwbfile_metadata(
+    nwbfile_metadata: dict, check_function_name: str
+) -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """
     Function used to validate NWBFile metadata
     """
