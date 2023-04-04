@@ -3,5 +3,6 @@ from .manage_neuroconv import (
     get_source_schema,
     get_metadata_schema,
     convert_to_nwb,
+    validate_metadata,
     upload_to_dandi,
 )
