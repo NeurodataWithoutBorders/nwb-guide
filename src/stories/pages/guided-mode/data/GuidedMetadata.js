@@ -23,9 +23,21 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
+    const metadataResults = this.info.globalState.metadata.results
+
+    // Merge project-wide data into metadata
+    const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
+    toMerge.forEach(([key, value]) => {
+      let internalMetadata = metadataResults[key]
+      if (!metadataResults[key]) internalMetadata = metadataResults[key] = {}
+      for (let key in value) {
+        if (!(key in internalMetadata)) internalMetadata[key] = value[key] // Prioritize existing results (cannot override with new information...)
+      }
+    })
+
     const form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
-      ignore: ['Ecephys'],
+      ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       onlyRequired: false,
     })
 

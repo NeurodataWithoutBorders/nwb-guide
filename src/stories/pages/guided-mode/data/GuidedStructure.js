@@ -31,12 +31,12 @@ export class GuidedStructurePage extends Page {
 
   #selected = {}
 
-  #addListItem = (key, value) => {
-    const name = value.name ?? value
+  #addListItem = (listValue) => {
+    const { key, label, value } = listValue
     const li = document.createElement("li");
       const keyEl = document.createElement("span");
 
-      let resolvedKey = name.slice(0, -9); const originalValue = resolvedKey;
+      let resolvedKey = key; const originalValue = resolvedKey;
 
       // Ensure no duplicate keys
       let i = 0
@@ -45,20 +45,58 @@ export class GuidedStructurePage extends Page {
         resolvedKey = `${originalValue}_${i}`
       }
 
-      keyEl.innerText = resolvedKey // Cut off "Interface"
+      keyEl.innerText = resolvedKey
       keyEl.contentEditable = true
+
+      li.style.display = 'flex'
+      li.style.alignItems = 'center'
+
       li.appendChild(keyEl)
 
       const sepEl = document.createElement("span");
-      sepEl.innerText = " - ";
+      sepEl.innerHTML = "&nbsp;-&nbsp;";
       li.appendChild(sepEl)
 
       const valueEl = document.createElement("span");
-      valueEl.innerText = name
+      valueEl.innerText = label
       li.appendChild(valueEl)
       this.list.appendChild(li);
 
-      this.#selected[resolvedKey] = name
+      const button = new Button({
+        label: 'Delete',
+        size: 'small',
+      })
+
+      button.style.marginLeft = '1rem'
+
+      li.appendChild(button)
+
+      this.#selected[resolvedKey] = value
+
+        // Stop enter key from creating new line
+        keyEl.addEventListener('keydown', function(e) {
+          if (e.keyCode === 13) {
+              keyEl.blur()
+              return false;
+          }
+      });
+
+      const deleteListItem = () => {
+        li.remove()
+        delete this.#selected[resolvedKey]
+      }
+
+      keyEl.addEventListener('blur', () => {
+        const newKey = keyEl.innerText
+        if (newKey === '') keyEl.innerText = resolvedKey // Reset to original value
+        else {
+          delete this.#selected[resolvedKey]
+          resolvedKey = newKey
+          this.#selected[resolvedKey] = value
+        }
+      })
+
+      button.onClick = deleteListItem
   }
 
   search = new Search({
@@ -74,18 +112,19 @@ export class GuidedStructurePage extends Page {
   footer = {
     onNext: async () => {
 
-      const selected = this.#selected[resolvedKey]
-      const interfaces = Object.keys(selected);
-
       this.save() // Save in case the schema request fails
 
-      const schema = (interfaces.length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema?interfaces=${interfaces.join(',')}`).then((res) => res.json())
+      const schema = (Object.keys(this.#selected).length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.#selected)
+      }).then((res) => res.json())
 
       let sourceInfo = this.info.globalState.source
       if (!sourceInfo) sourceInfo = this.info.globalState.source = {results: {}, schema: {}}
 
       sourceInfo.schema = schema
-      sourceInfo.interfaces = selected
+      sourceInfo.interfaces = this.#selected
 
 
       this.onTransition(1)
@@ -93,20 +132,28 @@ export class GuidedStructurePage extends Page {
   }
 
   async updated(){
+
+
     const selected = this.info.globalState.source?.interfaces
     this.search.options = await fetch(`${baseUrl}/neuroconv`).then((res) => res.json()).then(json => Object.entries(json).map(([key, value]) => {
       return {
-        label: value.name,
-        keywords: [value.modality, value.technique],
-        value: value
-        // keywords: value.keywords
-      }
+        ...value,
+        key: key.replace('Interface', ''),
+        value: key,
+      } // Has label and keywords property already
     })).catch(e => console.error(e));
 
-    for (const [key, value] of Object.entries(selected || {})) this.#addListItem(key, value) // Add previously selected items
+    for (const [key, name] of Object.entries(selected || {})) this.#addListItem({...this.search.options.find(o => o.value === name), key}) // Add previously selected items
   }
 
   render() {
+
+    // Reset list
+    this.#selected = {}
+    this.list.remove()
+    this.list = document.createElement('ul')
+
+
     return html`
   <div
     id="guided-mode-starting-container"

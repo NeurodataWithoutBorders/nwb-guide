@@ -1,6 +1,12 @@
 from flask_restx import Namespace, Resource, reqparse
 from namespaces import get_namespace, NamespaceEnum
-from manageNeuroconv import get_all_interface_info, get_source_schema, get_metadata_schema, convert_to_nwb
+from manageNeuroconv import (
+    get_all_interface_info,
+    get_source_schema,
+    get_metadata_schema,
+    convert_to_nwb,
+    upload_to_dandi,
+)
 from errorHandlers import notBadRequestException
 
 api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")
@@ -22,26 +28,12 @@ class AllInterfaces(Resource):
             raise e
 
 
-@api.route("/schema/<string:interface>")
-class Schema(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def get(self, interface):
-        try:
-            return get_source_schema([interface])
-        except Exception as e:
-            if notBadRequestException(e):
-                api.abort(500, str(e))
-            raise e
-
-
 @api.route("/schema")
 class Schemas(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def get(self):
-        args = parser.parse_args()
-        interfaces = args["interfaces"]
+    def post(self):
         try:
-            return get_source_schema(interfaces)
+            return get_source_schema(api.payload)
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
@@ -52,7 +44,7 @@ class Schemas(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return get_metadata_schema(api.payload)
+            return get_metadata_schema(api.payload.get("source_data"), api.payload.get("interfaces"))
 
         except Exception as e:
             if notBadRequestException(e):
@@ -65,6 +57,18 @@ class Schemas(Resource):
     def post(self):
         try:
             return convert_to_nwb(api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
+
+
+@api.route("/upload")
+class Schemas(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return upload_to_dandi(**api.payload)
 
         except Exception as e:
             if notBadRequestException(e):

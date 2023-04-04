@@ -39,7 +39,7 @@ export const update = (newDatasetName, previousDatasetName) => {
 export const save = (page) => {
 
   const globalState = page.info.globalState
-  const guidedProgressFileName = globalState.name
+  const guidedProgressFileName = globalState.project.name
 
     if (!fs) {
       if (!saveErrorThrown) console.warn("Cannot save progress in a web build.");
