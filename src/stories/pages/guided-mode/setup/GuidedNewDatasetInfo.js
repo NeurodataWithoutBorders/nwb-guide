@@ -175,6 +175,7 @@ export class GuidedNewDatasetPage extends Page {
             },
             sex: {
               type: 'string',
+              enum: ["M", "F", "U", "O"],
               description: 'Enter a common sex for your subjects.',
               placeholder: "Enter sex here"
             }
