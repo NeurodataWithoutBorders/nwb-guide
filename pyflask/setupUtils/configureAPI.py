@@ -1,6 +1,5 @@
 from os import getenv
 
-# import API from flask_restx
 from flask_restx import Api
 
 
