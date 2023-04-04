@@ -7,6 +7,7 @@ dependencies:
   - PyInstaller = 4.7
   - nodejs = 16.14.2
   - git = 2.34.1
+  - numcodecs = 0.11.0
   - pip
   - pip:
       - chardet == 4.0.0
