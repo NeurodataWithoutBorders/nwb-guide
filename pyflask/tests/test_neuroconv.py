@@ -50,13 +50,13 @@ def test_get_all_interfaces(client):
 
 # Test single interface schema request
 def test_single_schema_request(client):
-    interfaces = {'myname': 'SpikeGLXRecordingInterface'}
-    data = client.post("/neuroconv/schema",json=interfaces, follow_redirects=True).json
+    interfaces = {"myname": "SpikeGLXRecordingInterface"}
+    data = client.post("/neuroconv/schema", json=interfaces, follow_redirects=True).json
     validate(data, schema=get_converter_output_schema(interfaces))
 
 
 # Uses the NWBConverter Class to combine multiple interfaces
 def test_multiple_schema_request(client):
-    interfaces = {'myname': 'SpikeGLXRecordingInterface', 'myphyinterface': "PhySortingInterface"}
+    interfaces = {"myname": "SpikeGLXRecordingInterface", "myphyinterface": "PhySortingInterface"}
     data = client.post("/neuroconv/schema", json=interfaces, follow_redirects=True).json
     validate(data, schema=get_converter_output_schema(interfaces))
