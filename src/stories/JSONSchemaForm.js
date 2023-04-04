@@ -1,6 +1,7 @@
 import { LitElement, css, html } from 'lit';
 
 import { remote } from '../electron/index'
+import { notyf } from '../globals';
 const { dialog } = remote
 
 const componentCSS = `
@@ -16,6 +17,14 @@ const componentCSS = `
     p {
       margin: 0 0 1em;
       line-height: 1.4285em;
+    }
+
+    .invalid {
+      background: rgb(255, 229, 228) !important;
+    }
+
+    .errors {
+      color: #9d0b0b;
     }
 
     .guided--form-label {
@@ -126,6 +135,7 @@ export class JSONSchemaForm extends LitElement {
     this.onlyRequired = props.onlyRequired ?? false
     this.dialogOptions = props.dialogOptions ?? {}
     this.dialogType = props.dialogType ?? 'showOpenDialog'
+    if (props.validateOnChange) this.validateOnChange = props.validateOnChange
   }
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
@@ -142,11 +152,6 @@ export class JSONSchemaForm extends LitElement {
     return result
   }
 
-//   NOTE: We can move these into their own components in the future
-  async updated(){
-
-  }
-
   #updateParent(name, value, parent) {
     if (!value) delete parent[name]
     else parent[name] = value
@@ -154,11 +159,24 @@ export class JSONSchemaForm extends LitElement {
 
   #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
 
+  validate = () => {
+    const invalidInputs = this.shadowRoot.querySelectorAll('.invalid')
+    if (invalidInputs.length) {
+      invalidInputs[0].focus()
+      notyf.open({
+        type: "error",
+        message: `${invalidInputs.length} invalid form values. Please check the highlighted fields.`,
+        duration: 5000,
+      });
+      throw new Error('Invalid form values')
+    } else return true
+  }
+
   #parseStringToHeader = (headerStr) => {
     return headerStr.split('_').filter(str => !!str).map(this.#capitalize).join(' ')
   }
 
-  #renderInteractiveElement = (name, info, parent, isRequired) => {
+  #renderInteractiveElement = (name, info, parent, isRequired, path = []) => {
 
     // Handle string (and related) formats / types
     const isArray = info.type === 'array'
@@ -199,6 +217,7 @@ export class JSONSchemaForm extends LitElement {
             const file = await this.#useElectronDialog(info.format)
             const path = file.filePath ?? file.filePaths?.[0]
             if (!path) throw new Error('Unable to parse file path')
+            this.#validateOnChange(name, parent, button, path)
             this.#updateParent(name, path, parent)
             button.nextSibling.innerText = path
 
@@ -211,13 +230,15 @@ export class JSONSchemaForm extends LitElement {
             placeholder="${info.placeholder ?? ''}"
             style="height: 7.5em; padding-bottom: 20px"
             maxlength="255"
-          .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}"
-          @input=${(ev) => {
-            this.#updateParent(name, (isStringArray) ? ev.target.value.split('\n').map(str => str.trim()) : ev.target.value, parent)
-          }}></textarea>`
+            .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}"
+            @input=${(ev) => {
+              this.#updateParent(name, (isStringArray) ? ev.target.value.split('\n').map(str => str.trim()) : ev.target.value, parent)
+            }}
+            @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
+          ></textarea>`
 
           // Handle date formats
-          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)} />`
+          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)} />`
 
           // Handle other string formats
           else {
@@ -230,6 +251,7 @@ export class JSONSchemaForm extends LitElement {
               .value="${parent[name] ?? ''}"
 
               @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}
+              @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
             />
             `
           }
@@ -240,6 +262,7 @@ export class JSONSchemaForm extends LitElement {
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
       ${info.description ? html`<p class="guided--text-input-instructions">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
+      <ol class="errors"></ol>
     </div>
     `
   }
@@ -279,24 +302,44 @@ export class JSONSchemaForm extends LitElement {
     return entries.filter(([key]) => !this.ignore.includes(key) && (!this.onlyRequired || depth === 0 || schema.required?.includes(key)))
   }
 
-  #render = (schema, results, depth = 0) => {
+  validateOnChange = () => {}
+  #validateOnChange = async (name, parent, element, path) => {
+    const valid = parent[name] === '' ? true : await this.validateOnChange(name, parent, path)
+
+    const errors = element.parentElement.querySelector('ol.errors')
+    errors.innerHTML = ''
+
+    if (valid === true || valid == undefined) {
+      element.classList.remove('invalid')
+    } else {
+      element.classList.add('invalid')
+      valid.forEach(error => {
+        const li = document.createElement('li')
+        li.innerText = error.message
+        errors.appendChild(li)
+      })
+    }
+  }
+
+  #render = (schema, results, path = []) => {
 
     // Filter non-required properties (if specified) and render the sub-schema
-    const renderable = this.#getRenderable(schema, depth)
+    const renderable = this.#getRenderable(schema, path.length)
 
     return renderable.length === 0 ?
       html`<p>No properties to render</p>` :
       renderable.map(([name, info]) => {
 
+
       // Directly render the interactive property element
-      if (!info.properties) return this.#renderInteractiveElement(name, info, results, schema.required?.includes(name))
+      if (!info.properties) return this.#renderInteractiveElement(name, info, results, schema.required?.includes(name), path)
 
       // Render properties in the sub-schema
       return html`
     <div style="margin-top: 25px;">
       <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
       <hr/>
-      ${this.#render(info, results[name], depth + 1)}
+      ${this.#render(info, results[name], [...path, name])}
     </div>
     `})
   }
