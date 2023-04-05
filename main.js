@@ -27,6 +27,8 @@ let PORT = 4242;
 let selectedPort = null;
 const portRange = 100;
 
+const icon = path.join(__dirname, "src/assets/img/logo-guide-draft.png");
+
 /**
  * Determine if the application is running from a packaged version or from a dev version.
  * The resources path is used for Linux and Mac builds and the app.getAppPath() is used for Windows builds.
@@ -235,7 +237,7 @@ function initialize() {
       height: 735,
       center: true,
       show: false,
-      icon: __dirname + "/src/assets/img/logo-guide-draft.png",
+      icon,
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,
@@ -253,7 +255,7 @@ function initialize() {
       width: 340,
       height: 340,
       frame: false,
-      icon: __dirname + "/src/assets/img/logo-guide-draft.png",
+      icon,
       alwaysOnTop: true,
       transparent: true,
     });

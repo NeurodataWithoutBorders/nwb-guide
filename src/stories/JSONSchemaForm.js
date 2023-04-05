@@ -19,6 +19,14 @@ const componentCSS = `
       line-height: 1.4285em;
     }
 
+    .invalid {
+      background: rgb(255, 229, 228) !important;
+    }
+
+    .errors {
+      color: #9d0b0b;
+    }
+
     .guided--form-label {
       display: block;
       width: 100%;
@@ -52,11 +60,11 @@ const componentCSS = `
   background-color: rgb(255, 255, 255);
 }
 
-.guided--input:read-only,
 .guided--input:disabled {
   color: dimgray;
   pointer-events: none;
 }
+
 .guided--input::placeholder {
   opacity: 0.5;
 }
@@ -138,6 +146,7 @@ export class JSONSchemaForm extends LitElement {
     this.dialogType = props.dialogType ?? 'showOpenDialog'
     this.linked = props.linked ?? []
     if (props.onInvalid) this.onInvalid = props.onInvalid
+    if (props.validateOnChange) this.validateOnChange = props.validateOnChange
   }
 
   #requirements = {}
@@ -156,7 +165,6 @@ export class JSONSchemaForm extends LitElement {
     return result
   }
 
-
   #updateParent(name, value, parent) {
     if (!value) delete parent[name]
     else parent[name] = value
@@ -164,11 +172,20 @@ export class JSONSchemaForm extends LitElement {
 
   #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
 
+  validate = () => {
+    const invalidInputs = this.shadowRoot.querySelectorAll('.invalid')
+    if (invalidInputs.length) {
+      invalidInputs[0].focus()
+      notify('error', `${invalidInputs.length} invalid form values. Please check the highlighted fields.`)
+      throw new Error('Invalid form values')
+    } else return true
+  }
+
   #parseStringToHeader = (headerStr) => {
     return headerStr.split('_').filter(str => !!str).map(this.#capitalize).join(' ')
   }
 
-  #renderInteractiveElement = (name, info, parent, isRequired) => {
+  #renderInteractiveElement = (name, info, parent, isRequired, path = []) => {
 
     // Handle string (and related) formats / types
     const isArray = info.type === 'array'
@@ -181,7 +198,20 @@ export class JSONSchemaForm extends LitElement {
       <label class="guided--form-label ${isRequired ? 'required' : ''} ${typeof isRequired === 'function' ? 'conditional' : ''}">${this.#parseStringToHeader(name)}</label>
       ${(() => {
 
-        if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
+        // Basic enumeration of properties on a select element
+        if (info.enum) {
+          return html`
+          <select class="guided--input" @input=${(ev) => this.#updateParent(name, info.enum[ev.target.value], parent)}>
+            ${info.enum.map((item, i) => html`<option value=${i} ?selected=${parent[name] === item}>${item}</option>`)}
+          </select>
+          `
+        }
+
+        else if (info.type === 'boolean') {
+          return html`<input type="checkbox" @input=${(ev) => this.#updateParent(name, ev.target.checked, parent)} ?checked=${parent[name] ?? false} />`
+        }
+
+        else if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
 
           // Handle file and directory formats
           if (this.#filesystemQueries.includes(info.format)) return dialog ? html`<button style="margin-right: 15px;" @click=${async (ev) => {
@@ -196,6 +226,7 @@ export class JSONSchemaForm extends LitElement {
             const file = await this.#useElectronDialog(info.format)
             const path = file.filePath ?? file.filePaths?.[0]
             if (!path) throw new Error('Unable to parse file path')
+            this.#validateOnChange(name, parent, button, path)
             this.#updateParent(name, path, parent)
             button.nextSibling.innerText = path
 
@@ -208,14 +239,15 @@ export class JSONSchemaForm extends LitElement {
             placeholder="${info.placeholder ?? ''}"
             style="height: 7.5em; padding-bottom: 20px"
             maxlength="255"
-          .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}"
-          @input=${(ev) => {
-            const value = (isStringArray ? ev.target.value.split('\n').map(str => str.trim()) : ev.target.value)
-            this.#updateParent(name, value, parent)
-          }}></textarea>`
+            .value="${isStringArray ? (parent[name] ? parent[name].join('\n') : '') : (parent[name] ?? '')}"
+            @input=${(ev) => {
+              this.#updateParent(name, (isStringArray) ? ev.target.value.split('\n').map(str => str.trim()) : ev.target.value, parent)
+            }}
+            @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
+          ></textarea>`
 
           // Handle date formats
-          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => this.#updateParent(name, ev.target.value, parent)} />`
+          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)} />`
 
           // Handle other string formats
           else {
@@ -228,6 +260,7 @@ export class JSONSchemaForm extends LitElement {
               .value="${parent[name] ?? ''}"
 
               @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}
+              @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
             />
             `
           }
@@ -238,6 +271,7 @@ export class JSONSchemaForm extends LitElement {
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
       ${info.description ? html`<p class="guided--text-input-instructions">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
+      <ol class="errors"></ol>
     </div>
     `
   }
@@ -325,24 +359,47 @@ export class JSONSchemaForm extends LitElement {
     return entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || required[key]))
   }
 
-  #render = (schema, results, required = {}, depth = 0) => {
+  validateOnChange = () => {}
+  #validateOnChange = async (name, parent, element, path) => {
+    const valid = parent[name] === '' ? true : await this.validateOnChange(name, parent, path)
+
+    const errors = element.parentElement.querySelector('ol.errors')
+    errors.innerHTML = ''
+
+    if (valid === true || valid == undefined) {
+      element.classList.remove('invalid')
+    } else {
+      element.classList.add('invalid')
+      valid.forEach(error => {
+        const li = document.createElement('li')
+        li.innerText = error.message
+        errors.appendChild(li)
+      })
+    }
+  }
+
+  #render =(schema, results, required = {}, path = []) => {
 
     // Filter non-required properties (if specified) and render the sub-schema
-    const renderable = depth ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
+    const renderable = this.#getRenderable(schema, path.length)
 
+    // // Filter non-required properties (if specified) and render the sub-schema
+    // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
     return renderable.length === 0 ?
       html`<p>No properties to render</p>` :
       renderable.map(([name, info]) => {
 
+
       // Directly render the interactive property element
-      if (!info.properties) return this.#renderInteractiveElement(name, info, results, required[name])
+      if (!info.properties) return this.#renderInteractiveElement(name, info, results, required[name], path)
 
       // Render properties in the sub-schema
       return html`
-    <div style="margin-bottom: 25px;">
-      <h3 style="padding-bottom: 0px; margin: 0;">${this.#parseStringToHeader(name)}</h3>
-      ${this.#render(info, results[name], required[name], depth + 1)}
+    <div style="margin-top: 40px;">
+      <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
+      <hr/>
+      ${this.#render(info, results[name],  required[name], [...path, name])}
     </div>
     `})
   }

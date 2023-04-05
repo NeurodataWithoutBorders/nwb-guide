@@ -13,9 +13,6 @@ configure_namespaces()
 
 from setupUtils import configureLogger, configureRouteHandlers, configureAPI
 
-# import getenv
-from os import getenv
-
 app = Flask(__name__)
 
 # Always enable CORS

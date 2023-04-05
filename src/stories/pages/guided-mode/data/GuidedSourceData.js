@@ -36,7 +36,10 @@ export class GuidedSourceDataPage extends Page {
       const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.info.globalState.source.results)
+        body: JSON.stringify({
+          source_data: this.info.globalState.source.results,
+          interfaces: this.info.globalState.source.interfaces,
+        })
       }).then((res) => res.json())
 
 
