@@ -66,7 +66,7 @@ class Schemas(Resource):
 
 validate_parser = api.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
-validate_parser.add_argument("function", type=str, required=True)
+validate_parser.add_argument("function_name", type=str, required=True)
 
 
 # await fetch('neuroconv/validate', {method:"POST", body: JSON.stringify({nwb_file_object: {related_publications: ['name']}, function: 'check_doi_publications'}), headers: {
@@ -79,7 +79,7 @@ class Schemas(Resource):
     def post(self):
         try:
             args = validate_parser.parse_args()
-            return validate_metadata(args.get("parent"), args.get("function"))
+            return validate_metadata(args.get("parent"), args.get("function_name"))
 
         except Exception as e:
             if notBadRequestException(e):

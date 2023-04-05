@@ -4,6 +4,9 @@ import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
+import { validateOnChange } from '../../../../validation/index.js';
+
+
 export class GuidedMetadataPage extends Page {
 
   constructor(...args) {
@@ -40,21 +43,25 @@ export class GuidedMetadataPage extends Page {
     this.form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
-      linked: [
+      conditionalRequirements: [
         [['Subject', 'age'], ['Subject', 'date_of_birth']]
       ],
+      validateOnChange,
       required: {
+
         NWBFile: {
           session_start_time: true
         },
-        Subject: {
-          age: function () {
-            return !this['date_of_birth']
-          },
-          date_of_birth: function () {
-            return !this['age']
-          }
-        },
+
+        // // Custom final validation
+        // Subject: {
+        //   age: function () {
+        //     return !this['date_of_birth']
+        //   },
+        //   date_of_birth: function () {
+        //     return !this['age']
+        //   }
+        // },
       }
     })
 

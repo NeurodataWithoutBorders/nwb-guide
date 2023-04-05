@@ -27,6 +27,14 @@ const componentCSS = `
       color: #9d0b0b;
     }
 
+    .errors > * {
+      padding: 25px;
+      background: #f8d7da;
+      border: 1px solid #f5c2c7;
+      border-radius: 4px;
+      margin: 0 0 1em;
+    }
+
     .guided--form-label {
       display: block;
       width: 100%;
@@ -106,12 +114,12 @@ pre {
   color: DimGray;
 }
 
-  .required:after {
+  .required label:after {
     content: " *";
     color: red;
   }
 
-  .required.conditional:after {
+  .required.conditional label:after {
     color: #fa8c16;
   }
 `
@@ -144,7 +152,7 @@ export class JSONSchemaForm extends LitElement {
     this.onlyRequired = props.onlyRequired ?? false
     this.dialogOptions = props.dialogOptions ?? {}
     this.dialogType = props.dialogType ?? 'showOpenDialog'
-    this.linked = props.linked ?? []
+    this.conditionalRequirements = props.conditionalRequirements ?? []
     if (props.onInvalid) this.onInvalid = props.onInvalid
     if (props.validateOnChange) this.validateOnChange = props.validateOnChange
   }
@@ -173,12 +181,19 @@ export class JSONSchemaForm extends LitElement {
   #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
 
   validate = () => {
-    const invalidInputs = this.shadowRoot.querySelectorAll('.invalid')
-    if (invalidInputs.length) {
-      invalidInputs[0].focus()
-      notify('error', `${invalidInputs.length} invalid form values. Please check the highlighted fields.`)
+    const invalidInputs = this.getInvalidInputs()
+    const isValid = !invalidInputs.required.length && !invalidInputs.conditional.length
+    if (!isValid) this.onInvalid(invalidInputs)
+  
+    const flaggedInputs = this.shadowRoot.querySelectorAll('.invalid')
+    if (flaggedInputs.length) {
+      flaggedInputs[0].focus()
+      notify('error', `${flaggedInputs.length} invalid form values. Please check the highlighted fields.`)
       throw new Error('Invalid form values')
-    } else return true
+    }
+
+    return isValid && flaggedInputs.length === 0
+
   }
 
   #parseStringToHeader = (headerStr) => {
@@ -187,28 +202,30 @@ export class JSONSchemaForm extends LitElement {
 
   #renderInteractiveElement = (name, info, parent, isRequired, path = []) => {
 
-    // Handle string (and related) formats / types
-    const isArray = info.type === 'array'
+    const isArray = info.type === 'array' // Handle string (and related) formats / types
 
     const hasItemsRef = 'items' in info && '$ref' in info.items
     const isStringArray = isArray && (info.items?.type === 'string' || (!('items' in info) || (!('type' in info.items) && !hasItemsRef))) // Default to a string type
 
+    const fullPath = [...path, name]
+    const isConditional = this.#getLinks(fullPath).length || typeof isRequired === 'function' // Check the two possible ways of determining if a field is conditional
+
     return html`
-    <div>
-      <label class="guided--form-label ${isRequired ? 'required' : ''} ${typeof isRequired === 'function' ? 'conditional' : ''}">${this.#parseStringToHeader(name)}</label>
+    <div id=${fullPath.join('.')} class="${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
+      <label class="guided--form-label">${this.#parseStringToHeader(name)}</label>
       ${(() => {
 
         // Basic enumeration of properties on a select element
         if (info.enum) {
           return html`
-          <select class="guided--input" @input=${(ev) => this.#updateParent(name, info.enum[ev.target.value], parent)}>
+          <select class="guided--input schema-input" @input=${(ev) => this.#updateParent(name, info.enum[ev.target.value], parent)}>
             ${info.enum.map((item, i) => html`<option value=${i} ?selected=${parent[name] === item}>${item}</option>`)}
           </select>
           `
         }
 
         else if (info.type === 'boolean') {
-          return html`<input type="checkbox" @input=${(ev) => this.#updateParent(name, ev.target.checked, parent)} ?checked=${parent[name] ?? false} />`
+          return html`<input type="checkbox" class="schema-input" @input=${(ev) => this.#updateParent(name, ev.target.checked, parent)} ?checked=${parent[name] ?? false} />`
         }
 
         else if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
@@ -234,7 +251,7 @@ export class JSONSchemaForm extends LitElement {
 
           // Handle long string formats
           else if (info.format === 'long' || isArray) return html`<textarea
-          class="guided--input guided--text-area"
+            class="guided--input guided--text-area schema-input"
             type="text"
             placeholder="${info.placeholder ?? ''}"
             style="height: 7.5em; padding-bottom: 20px"
@@ -246,15 +263,12 @@ export class JSONSchemaForm extends LitElement {
             @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
           ></textarea>`
 
-          // Handle date formats
-          else if (info.format === 'date-time') return html`<input type="datetime-local" .value="${parent[name] ?? ''}" @input=${(ev) => parent[name] = ev.target.value} @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)} />`
-
           // Handle other string formats
           else {
             const type = info.format === 'date-time' ? "datetime-local" : info.format ?? (info.type ==='string' ? 'text' : info.type)
             return html`
             <input
-              class="guided--input"
+              class="guided--input schema-input"
               type="${type}"
               placeholder="${info.placeholder ?? ''}"
               .value="${parent[name] ?? ''}"
@@ -271,7 +285,7 @@ export class JSONSchemaForm extends LitElement {
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
       ${info.description ? html`<p class="guided--text-input-instructions">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
-      <ol class="errors"></ol>
+      <div class="errors"></div>
     </div>
     `
   }
@@ -318,14 +332,6 @@ export class JSONSchemaForm extends LitElement {
     throw new Error(`Invalid inputs detected: JSON.stringify(${invalidInputs})`)
   }
 
-  validate = () => {
-    const invalidInputs = this.getInvalidInputs()
-    const isValid = !invalidInputs.required.length && !invalidInputs.conditional.length
-    if (!isValid) this.onInvalid(invalidInputs)
-
-    return isValid
-  }
-
   #registerDefaultProperties = (properties = {}, results) => {
     for (let name in properties) {
       const info = properties[name]
@@ -360,20 +366,42 @@ export class JSONSchemaForm extends LitElement {
   }
 
   validateOnChange = () => {}
-  #validateOnChange = async (name, parent, element, path) => {
+
+  #getLinks = (args) => this.conditionalRequirements.filter((linked) =>linked.find((link) => link.join('.') === args.join('.')))
+  #applyToLinks = (fn, args) => this.#getLinks(args).forEach((linked) => linked.forEach((link) => fn(link, this.shadowRoot.getElementById(`${link.join('.')}`))))
+
+  #validateOnChange = async (name, parent, element, path = []) => {
+
+
     const valid = parent[name] === '' ? true : await this.validateOnChange(name, parent, path)
 
-    const errors = element.parentElement.querySelector('ol.errors')
+    const errors = element.parentElement.querySelector('.errors')
     errors.innerHTML = ''
+    
 
     if (valid === true || valid == undefined) {
+
       element.classList.remove('invalid')
+
+      this.#applyToLinks((name, element) => {
+        element.classList.remove('required', 'conditional')
+        const errors = element.querySelector('.errors')
+        if (errors) errors.innerHTML = ''
+        const invalid = element.querySelectorAll('.invalid')
+        invalid.forEach(input => input.classList.remove('invalid'))
+      }, [...path, name])
     } else {
+
+      // Add new invalid classes and errors
       element.classList.add('invalid')
+      
+      // Only add the conditional class for linked elements
+      this.#applyToLinks((name, element) => element.classList.add('required', 'conditional'), [...path, name])
+
       valid.forEach(error => {
-        const li = document.createElement('li')
-        li.innerText = error.message
-        errors.appendChild(li)
+        const p = document.createElement('p')
+        p.innerText = error.message
+        errors.appendChild(p)
       })
     }
   }
@@ -417,6 +445,15 @@ export class JSONSchemaForm extends LitElement {
         }
       })
     }
+  }
+
+  updated() {
+    // NOTE: This ignores the file selector button
+    const inputsWithVaulues = Array.from(this.shadowRoot.querySelectorAll('.schema-input')).filter(input => input.value)
+    inputsWithVaulues.forEach(input => {
+      const event = new Event('change'); // Create a new change event
+      input.dispatchEvent(event); // Manually trigger the change event
+    })
   }
 
   render() {

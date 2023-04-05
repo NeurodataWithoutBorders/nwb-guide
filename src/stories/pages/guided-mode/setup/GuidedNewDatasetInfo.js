@@ -1,12 +1,11 @@
 
 
 import { html } from 'lit';
-import { baseUrl } from '../../../../globals.js';
 import { hasEntry, update } from '../../../../progress.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { notify } from '../../../../globals.js';
 import { Page } from '../../Page.js';
-import validationJSON from './validation.json' assert { type: "json" };
+import { validateOnChange } from '../../../../validation/index.js';
 
 export class GuidedNewDatasetPage extends Page {
 
@@ -184,41 +183,10 @@ export class GuidedNewDatasetPage extends Page {
       required: ['name']
     }
 
-    const noCheck = [
-      'name',
-      'description', 'genotype', 'strain',
-      'lab', 'protocol', 'surgery', 'virus', 'stimulus_notes'
-    ]
-
     const form = this.form = new JSONSchemaForm({
       schema,
       results: this.state,
-      validateOnChange: async (name, parent, path) => {
-
-        const message = { parent }
-
-        if (validationJSON.ignore.includes(name)) return
-        else if (Object.keys(validationJSON.properties).includes(name)) message.function = validationJSON.properties[name]
-        else {
-          const child_match = Object.keys(validationJSON.children).find(key => path.slice(-1)[0] === key)
-          if (child_match) {
-            const childrenObject =  validationJSON.children[child_match]
-            if (Object.keys(childrenObject).includes(name)) message.function = childrenObject[name]
-            else if (childrenObject['*']) message.function = childrenObject['*'].replace(`{*}`, `${name}`)
-          } else if (validationJSON.properties['*']) message.function = validationJSON.properties['*'].replace(`{*}`, `${name}`)
-        }
-
-        if (!message.function) return // No validation for this field
-
-        const res = await fetch(`${baseUrl}/neuroconv/validate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(message)
-        }).then(res => res.json())
-
-        if (res?.message) return [  { message: res.message } ] // Some of the requests end in errors
-        return res
-      }
+      validateOnChange
     })
 
     form.style.width = '100%'
