@@ -69,7 +69,8 @@ export class GuidedConversionOptionsPage extends Page {
 
           // Override with the lastest source data and metadata information
           source_data: this.info.globalState.source.results,
-          metadata: this.info.globalState.metadata.results
+          metadata: this.info.globalState.metadata.results,
+          interfaces: this.info.globalState.source.interfaces
         })
 
         this.info.globalState.preview = results // Save the preview results
