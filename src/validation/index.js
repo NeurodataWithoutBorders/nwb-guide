@@ -10,7 +10,7 @@ export const validateOnChange = async (name, parent, path) => {
 
     const fullPath = [...path, name]
     functions = fullPath.reduce((acc, key) => acc[key], json)
-    
+
     if (functions === undefined) {
       let lastWildcard;
       fullPath.reduce((acc,key) => {
@@ -32,14 +32,14 @@ export const validateOnChange = async (name, parent, path) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          parent, 
+          parent,
           function_name: func
         })
       }).then(res => res.json())
     }))).flat()
 
     if (res.find(res => res)) return res.filter(res => res) // Some of the requests end in errors
-    
+
     return true
 
   }

@@ -184,7 +184,7 @@ export class JSONSchemaForm extends LitElement {
     const invalidInputs = this.getInvalidInputs()
     const isValid = !invalidInputs.required.length && !invalidInputs.conditional.length
     if (!isValid) this.onInvalid(invalidInputs)
-  
+
     const flaggedInputs = this.shadowRoot.querySelectorAll('.invalid')
     if (flaggedInputs.length) {
       flaggedInputs[0].focus()
@@ -377,7 +377,7 @@ export class JSONSchemaForm extends LitElement {
 
     const errors = element.parentElement.querySelector('.errors')
     errors.innerHTML = ''
-    
+
 
     if (valid === true || valid == undefined) {
 
@@ -394,7 +394,7 @@ export class JSONSchemaForm extends LitElement {
 
       // Add new invalid classes and errors
       element.classList.add('invalid')
-      
+
       // Only add the conditional class for linked elements
       this.#applyToLinks((name, element) => element.classList.add('required', 'conditional'), [...path, name])
 

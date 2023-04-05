@@ -90,9 +90,8 @@ def validate_subject_metadata(
 
     check_function = get_check_function(check_function_name)
 
-    if (isinstance(subject_metadata.get('date_of_birth'), str)):
-       subject_metadata["date_of_birth"] =  datetime.fromisoformat(subject_metadata["date_of_birth"])
-
+    if isinstance(subject_metadata.get("date_of_birth"), str):
+        subject_metadata["date_of_birth"] = datetime.fromisoformat(subject_metadata["date_of_birth"])
 
     subject = Subject(**subject_metadata)
     return check_function(subject)
@@ -107,8 +106,8 @@ def validate_nwbfile_metadata(
 
     check_function = get_check_function(check_function_name)
 
-    if (isinstance(nwbfile_metadata.get("session_start_time"), str)):
-       nwbfile_metadata["session_start_time"] =  datetime.fromisoformat(nwbfile_metadata["session_start_time"])
+    if isinstance(nwbfile_metadata.get("session_start_time"), str):
+        nwbfile_metadata["session_start_time"] = datetime.fromisoformat(nwbfile_metadata["session_start_time"])
 
     testing_nwbfile = mock_NWBFile(**nwbfile_metadata)
 
