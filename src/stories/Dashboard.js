@@ -31,6 +31,8 @@ import "../../node_modules/fomantic-ui/dist/components/accordion.min.css"
 import "../../node_modules/@sweetalert2/theme-bulma/bulma.css"
 // import "../../node_modules/intro.js/minified/introjs.min.css"
 import "../assets/css/guided.css"
+import isElectron from '../electron/check.js';
+import { isStorybook } from '../globals.js';
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
@@ -60,7 +62,7 @@ export class Dashboard extends LitElement {
 
   static get properties() {
     return {
-      pages: { type: Object, reflect: false },
+      renderNameInSidebar: { type: Boolean, reflect: true },
       name: { type: String, reflect: true },
       logo: { type: String, reflect: true },
       subtitle: { type: String, reflect: true },
@@ -73,7 +75,8 @@ export class Dashboard extends LitElement {
   subSidebar;
 
   pagesById = {}
-  #active
+  #active;
+  #activeId;
 
   constructor (props = {}) {
     super()
@@ -91,8 +94,24 @@ export class Dashboard extends LitElement {
     this.pages = props.pages ?? {}
     this.name = props.name
     this.logo = props.logo
+    this.renderNameInSidebar = props.renderNameInSidebar ?? true
 
     if (props.activePage) this.setAttribute('activePage', props.activePage)
+
+
+    // Handle all pop and push state updates
+    const pushState = window.history.pushState;
+    window.history.pushState = function(state) {
+        if (typeof window.onpushstate == "function") window.onpushstate({state: state});
+        return pushState.apply(window.history, arguments);
+    };
+
+    window.onpushstate = window.onpopstate = (e) => {
+      if(e.state){
+        document.title = `${e.state.label} - ${this.name}`
+        this.setMain(this.pagesById[e.state.page], undefined, false)
+      }
+    }
 
     this.#updated()
   }
@@ -104,11 +123,13 @@ export class Dashboard extends LitElement {
   attributeChangedCallback(key, previous, latest) {
     super.attributeChangedCallback(...arguments)
     if (this.sidebar && (key === 'name' || key === 'logo' || key === 'subtitle'))  this.sidebar[key] = latest
+    else if (key === 'renderNameInSidebar') this.sidebar.renderName = latest === 'true' || latest === true
     else if (key === 'pages') this.#updated(latest)
     else if (key.toLowerCase() === 'activepage'){
-      const page = this.getPage(this.pagesById[latest])
+      this.sidebar.selectItem(latest) // Just highlight the item
       this.sidebar.initialize = false
-      this.setMain(page)
+      this.#activatePage(latest)
+      return
     }
   }
 
@@ -143,11 +164,9 @@ export class Dashboard extends LitElement {
     const toPass = { ...infoPassed}
     if (previous) toPass.globalState = previous.info.globalState
 
-
     if (info.parent && info.section) {
       this.subSidebar.sections = this.#getSections(info.parent.info.pages, toPass.globalState) // Update sidebar items (if changed)
       this.subSidebar.active = info.id // Update active item (if changed)
-
       this.sidebar.hide(true)
       this.subSidebar.show()
     } else {
@@ -198,8 +217,16 @@ export class Dashboard extends LitElement {
   }
 
   #updated(pages=this.pages) {
+
+    const url = new URL(window.location.href)
+    let active = url.pathname.slice(1)
+    if (isElectron || isStorybook) active = new URLSearchParams(url.search).get('page')
+    if (!active) active = this.activePage // default to active page
+
+
     this.main.onTransition = (transition) => {
 
+      console.log('transition', transition)
       if (typeof transition === 'number'){
         const info = this.#active.info
         const sign = Math.sign(transition)
@@ -215,11 +242,18 @@ export class Dashboard extends LitElement {
       Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
       this.sidebar.pages = pages
 
-      const page = this.pagesById[this.activePage]
-      if (page) {
-        this.setMain(page)
-        // if (update) this.requestUpdate()
-      }
+      console.log('active', active)
+      if (active) this.setAttribute('activePage', active)
+  }
+
+  #activatePage = (id) => {
+    const page = this.getPage(this.pagesById[id])
+    this.#activeId = id
+
+    if (page) {
+      const { id, label } = page.info
+      history.pushState({ page: id, label }, label, (isElectron || isStorybook) ? `?page=${id}` : `${window.location.origin}/${id === '/' ? '' : id}`);
+  }
   }
 
   // Track Pages By Id
@@ -249,10 +283,6 @@ export class Dashboard extends LitElement {
             nestedPage.info.parent = page
           })
 
-          // // Register a base page
-          // const firstPage = pageArr[0]
-          // if (pagesArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
-
           // Register all pages
           Object.entries(pages).forEach((arr) => this.addPage(acc, arr))
 
@@ -261,15 +291,20 @@ export class Dashboard extends LitElement {
         return acc
       }
 
-
+  #first = true
   updated(){
 
     const div = (this.shadowRoot ?? this).querySelector("div");
     div.style.height = '100vh'
-    this.#updated()
+
+    if (this.#first) {
+      this.#first = false
+      this.#updated()
+    }
   }
 
   render() {
+
     this.style.width = "100%";
     this.style.height = "100%";
     this.style.display = "grid";
@@ -278,6 +313,7 @@ export class Dashboard extends LitElement {
 
     if (this.name) this.sidebar.name = this.name
     if (this.logo) this.sidebar.logo = this.logo
+    if ('renderNameInSidebar' in this) this.sidebar.renderName = this.renderNameInSidebar
 
     return html`
         <div>
