@@ -19,7 +19,7 @@ export class GuidedUploadPage extends Page {
        delete this.info.globalState.upload.results // Clear the preview results
 
        this.save() // Save in case the conversion fails
-       this.form.validate() // Will throw an error in the callback
+       await this.form.validate() // Will throw an error in the callback
 
        const results = await run('upload', this.info.globalState.upload.info, {
         title: 'Uploading to DANDI',

@@ -17,7 +17,7 @@ export class GuidedSourceDataPage extends Page {
     onNext: async () => {
 
       this.save() // Save in case the conversion fails
-      this.form.validate() // Will throw an error in the callback
+      await this.form.validate() // Will throw an error in the callback
 
       Swal.fire({
         title: "Getting metadata for source data",
@@ -66,6 +66,7 @@ export class GuidedSourceDataPage extends Page {
       ...this.info.globalState.source,
       ignore: ['verbose'],
       onlyRequired: true,
+      showLevelOverride: 0
     })
 
     return html`

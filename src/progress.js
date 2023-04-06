@@ -19,7 +19,7 @@ export const update = (newDatasetName, previousDatasetName) => {
     return new Promise((resolve, reject) => {
         //If updataing the dataset, update the old banner image path with a new one
         if (previousDatasetName) {
-            if (previousDatasetName === newDatasetName) resolve("No changes made to dataset name");
+            if (previousDatasetName === newDatasetName) resolve();
 
             if (!fs) console.warn("fs is not defined. Will not perform changes on the filesystem.")
 

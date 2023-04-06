@@ -27,27 +27,27 @@ export class GuidedNewDatasetPage extends Page {
       // Check validity of project name
       const name = this.state.name
       if (!name) {
-        notify('error', "Please enter a project name.")
+        notify("Please enter a project name.", 'error')
         return
       }
 
-      this.form.validate()
+      await this.form.validate()
 
       if (!name) return
 
       // Check if name is already used
       // Update existing progress file
       if (globalState.initialized) {
-        const res = await update(name, globalState.name).then(res => {
-          notify('success', res)
-          return res
-        }).catch(e => notify('error', e))
+          const res = await update(name, globalState.name).then(res => {
+          if (typeof res === 'string') notify(res)
+          return (res !== false)
+        }).catch(e => notify(e, 'error'))
         if (!res) return
       }
       else {
         const has = await hasEntry(name)
         if (has) {
-          notify('error', "An existing progress file already exists with that name. Please choose a different name.")
+          notify("An existing progress file already exists with that name. Please choose a different name.", 'error')
           return
         }
     }
@@ -186,6 +186,7 @@ export class GuidedNewDatasetPage extends Page {
     const form = this.form = new JSONSchemaForm({
       schema,
       results: this.state,
+      validateEmptyValues: false,
       validateOnChange
     })
 

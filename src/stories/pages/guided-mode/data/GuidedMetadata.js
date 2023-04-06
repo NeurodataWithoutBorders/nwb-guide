@@ -18,7 +18,7 @@ export class GuidedMetadataPage extends Page {
   footer = {
     onNext: async () => {
       this.save()
-      this.form.validate() // Will throw an error in the callback
+      await this.form.validate() // Will throw an error in the callback
       this.onTransition(1)
     }
   }

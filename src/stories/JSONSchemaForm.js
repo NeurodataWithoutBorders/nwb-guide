@@ -2,6 +2,7 @@ import { LitElement, css, html } from 'lit';
 
 import { remote } from '../electron/index'
 import { notify } from '../globals';
+import Swal from 'sweetalert2';
 const { dialog } = remote
 
 const componentCSS = `
@@ -31,6 +32,18 @@ const componentCSS = `
       padding: 25px;
       background: #f8d7da;
       border: 1px solid #f5c2c7;
+      border-radius: 4px;
+      margin: 0 0 1em;
+    }
+
+    .warnings {
+      color: #856404;
+    }
+
+    .warnings > * {
+      padding: 25px;
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
       border-radius: 4px;
       margin: 0 0 1em;
     }
@@ -137,7 +150,6 @@ export class JSONSchemaForm extends LitElement {
       results: { type: Object, reflect: false },
       ignore: { type: Array, reflect: false },
       required: { type: Object, reflect: false},
-      onlyRequired: { type: Boolean, reflect: false },
       dialogType: { type: String, reflect: false },
       dialogOptions: { type: Object, reflect: false }
     };
@@ -149,10 +161,15 @@ export class JSONSchemaForm extends LitElement {
     this.results = props.results ?? {}
     this.ignore = props.ignore ?? []
     this.required = props.required ?? {}
-    this.onlyRequired = props.onlyRequired ?? false
     this.dialogOptions = props.dialogOptions ?? {}
     this.dialogType = props.dialogType ?? 'showOpenDialog'
+
+    this.onlyRequired = props.onlyRequired ?? false
+    this.showLevelOverride = props.showLevelOverride ?? false
+
     this.conditionalRequirements = props.conditionalRequirements ?? []
+
+    this.validateEmptyValues = props.validateEmptyValues ?? true
     if (props.onInvalid) this.onInvalid = props.onInvalid
     if (props.validateOnChange) this.validateOnChange = props.validateOnChange
   }
@@ -180,27 +197,105 @@ export class JSONSchemaForm extends LitElement {
 
   #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
 
-  validate = () => {
-    const invalidInputs = this.getInvalidInputs()
-    const isValid = !invalidInputs.required.length && !invalidInputs.conditional.length
-    if (!isValid) this.onInvalid(invalidInputs)
 
+  #addMessage = (name, message, type) => {
+    if (Array.isArray(name)) name = name.join('-') // Convert array to string
+    const container = this.shadowRoot.querySelector(`#${name} .${type}`)
+    const p = document.createElement('p')
+    p.innerText = message
+    container.appendChild(p)
+  }
+
+  #clearMessages = (fullPath, type) => {
+    if (Array.isArray(fullPath)) fullPath = fullPath.join('-') // Convert array to string
+    const container = this.shadowRoot.querySelector(`#${fullPath} .${type}`)
+    container.innerHTML = ''
+  }
+
+  validate = async () => {
+
+    // Check if any required inputs are missing
+    const invalidInputs = await this.getMissingRequiredPaths()
+    const isValid = !invalidInputs.required.length && !invalidInputs.conditional.length
+
+    // Clear any existing messages
+    const allRequirements = [...invalidInputs.required, ...invalidInputs.conditional]
+    allRequirements.forEach(name => {
+      this.#clearMessages(name, 'errors')
+      this.#addMessage(name, `${name} is ${invalidInputs.conditional.includes(name) ? 'conditionally required' : 'missing'}`, 'errors')
+    })
+
+    // Print out a detailed error message if any inputs are missing
+    let message = '';
+    console.log('What is valid', isValid, invalidInputs)
+    if (!isValid) {
+      message += `<b>${invalidInputs.required.length} required inputs`
+      if (!invalidInputs.required.length) message = `${invalidInputs.conditional.length} conditionally required inputs`
+      else if (invalidInputs.conditional.length) message += ` and ${invalidInputs.conditional.length} conditionally required inputs`
+      message += ' are not specified properly.</b>'
+    }
+
+    // Check if all inputs are valid
     const flaggedInputs = this.shadowRoot.querySelectorAll('.invalid')
     if (flaggedInputs.length) {
       flaggedInputs[0].focus()
-      notify('error', `${flaggedInputs.length} invalid form values. Please check the highlighted fields.`)
+      if (!message) message = `${flaggedInputs.length} invalid form values.`
+      message += ` Please check the highlighted fields.`
+    }
+
+
+    if (message) {
+      notify(message, 'error', 7000)
       throw new Error('Invalid form values')
     }
 
-    return isValid && flaggedInputs.length === 0
+    // Ensure user is aware of any warnings before moving on
+    const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
+    const nWarnings = activeWarnings.reduce((acc, curr) => acc = acc + curr.length, 0)   
+  
+    if (nWarnings) {
+      const warningText = activeWarnings.reduce((acc, children) => [...acc, ...children.map(el => el.innerText)], [])
+      const result = await Swal.fire({
+        title: `Are you sure you would like to submit your metadata with ${nWarnings} warnings?`,
+        html: `<small><ol style="text-align: left;">${warningText.map(v => `<li>${v}</li>`).join('')}</ol></small>`,
+        icon: "warning",
+        heightAuto: false,
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Complete Metadata Entry",
+        cancelButtonText: "Cancel",
+        focusCancel: true,
+      });
+
+      if (!result.isConfirmed) throw new Error('User cancelled metadata submission')
+    }
+
+    return true
 
   }
 
   #parseStringToHeader = (headerStr) => {
-    return headerStr.split('_').filter(str => !!str).map(this.#capitalize).join(' ')
+    return headerStr.split('-').filter(str => !!str).map(this.#capitalize).join(' ')
   }
 
-  #renderInteractiveElement = (name, info, parent, isRequired, path = []) => {
+  #get = (path) => {
+    return path.reduce((acc, curr) => acc = acc[curr], this.results)
+  }
+
+
+  #checkRequiredAfterChange = async (fullPath) => {
+     const path = [...fullPath]
+      const name = path.pop()
+      const parent = this.#get(path)
+      const element = this.shadowRoot.querySelector(`#${fullPath.join('-')} .guided--input`)
+      const isValid = await this.#validateOnChange(name, parent, element, path, false)
+      if (!isValid) return true
+  }
+
+  #renderInteractiveElement = (name, info, parent, required, path = []) => {
+
+    let isRequired = required[name]
 
     const isArray = info.type === 'array' // Handle string (and related) formats / types
 
@@ -209,9 +304,19 @@ export class JSONSchemaForm extends LitElement {
 
     const fullPath = [...path, name]
     const isConditional = this.#getLinks(fullPath).length || typeof isRequired === 'function' // Check the two possible ways of determining if a field is conditional
+    
+    if (isConditional && !isRequired) isRequired = required[name] = async () => { 
+
+      if (this.#checkRequiredAfterChange(fullPath)) return true // Check self
+      else {
+        const linkResults = await this.#applyToLinks(this.#checkRequiredAfterChange, fullPath) // Check links
+        if (linkResults.includes(true)) return true
+        else return false
+      }
+     }
 
     return html`
-    <div id=${fullPath.join('.')} class="${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
+    <div id=${fullPath.join('-')} class="${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
       <label class="guided--form-label">${this.#parseStringToHeader(name)}</label>
       ${(() => {
 
@@ -286,13 +391,14 @@ export class JSONSchemaForm extends LitElement {
       })()}
       ${info.description ? html`<p class="guided--text-input-instructions">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
       <div class="errors"></div>
+      <div class="warnings"></div>
     </div>
     `
   }
 
   #filesystemQueries = ['file', 'directory']
 
-  #validate = (results, requirements, parent) => {
+  #validateRequirements = async (results, requirements, parent) => {
 
     let invalid = {
       required: [],
@@ -302,11 +408,11 @@ export class JSONSchemaForm extends LitElement {
     for (let name in requirements) {
       let isRequired = requirements[name]
       const isFunction = typeof isRequired === 'function'
-      if (isFunction) isRequired = isRequired.call(results)
+      if (isFunction) isRequired = await isRequired.call(this.results)
       if (isRequired) {
-        let path = parent ? `${parent} > ${name}` : name
+        let path = parent ? `${parent}-${name}` : name
         if (typeof isRequired === 'object' && !Array.isArray(isRequired)) {
-          const subInvalid = this.#validate(results[name], isRequired, path)
+          const subInvalid = await this.#validateRequirements(results[name], isRequired, path)
           for (let type in subInvalid) {
             if (subInvalid[type].length) invalid[type].push(...subInvalid[type])
           }
@@ -315,22 +421,17 @@ export class JSONSchemaForm extends LitElement {
         else if (!results[name]) invalid[isFunction ? 'conditional' : 'required'].push(path)
       }
     }
-
     return invalid
   }
 
-  getInvalidInputs = () => {
+  getMissingRequiredPaths = async () => {
     let requirements = this.#requirements
     let results = this.results
-    return this.#validate(results, requirements)
+    return await this.#validateRequirements(results, requirements)
   }
 
   // Checks missing required properties and throws an error if any are found
-  onInvalid = (invalidInputs) => {
-    if (invalidInputs.required.length) notify('error', `<h5>Required Properties Missing</h5> <ul>${invalidInputs.required.map((id) => `<li>${id}</li>`).join('')}</ul>`)
-    if (invalidInputs.conditional.length) notify('warning', `<h5>Conditional Properties Missing</h5> <ul>${invalidInputs.conditional.map((id) => `<li>${id}</li>`).join('')}</ul>`)
-    throw new Error(`Invalid inputs detected: JSON.stringify(${invalidInputs})`)
-  }
+  onInvalid = () => {}
 
   #registerDefaultProperties = (properties = {}, results) => {
     for (let name in properties) {
@@ -360,56 +461,94 @@ export class JSONSchemaForm extends LitElement {
     }
   }
 
-  #getRenderable = (schema = {}, required) => {
+  #getRenderable = (schema = {}, required, path) => {
     const entries = Object.entries(schema.properties ?? {})
-    return entries.filter(([key]) => (!this.ignore.includes(name) && !this.ignore.includes(key)) && (!this.onlyRequired || required[key]))
+
+    return entries.filter(([key]) => {
+
+      if (this.ignore.includes(key)) return false
+      if (this.showLevelOverride >= path.length) return true
+      if (required[key]) return true
+      if (this.#getLinks([...path, key]).length) return true
+      if (!this.onlyRequired) return true
+      return false
+
+    })
   }
 
   validateOnChange = () => {}
 
-  #getLinks = (args) => this.conditionalRequirements.filter((linked) =>linked.find((link) => link.join('.') === args.join('.')))
-  #applyToLinks = (fn, args) => this.#getLinks(args).forEach((linked) => linked.forEach((link) => fn(link, this.shadowRoot.getElementById(`${link.join('.')}`))))
+  #getLinks = (args) => {
+    if (typeof args === 'string') args = args.split('-')
+    return this.conditionalRequirements.filter((linked) =>linked.find((link) => link.join('-') === args.join('-')))
+  }
 
-  #validateOnChange = async (name, parent, element, path = []) => {
+  #applyToLinks = (fn, args) => Promise.all(this.#getLinks(args).map((linked) => linked.map((link) => fn(link, this.shadowRoot.getElementById(`${link.join('-')}`))).flat()))
+  
+  // Check if all links are not required anymore
+  #isLinkResolved = async (pathArr) => {
+    return (await this.#applyToLinks((link) => {
+      const isRequired = this.#isRequired(link)
+      if (typeof isRequired === 'function') return !isRequired.call(this.results)
+      else return !isRequired
+    }, pathArr)).reduce((a, b) => a && b, true)
+  }
+
+  #isRequired = (path) => {
+    if (typeof path === 'string') path = path.split('-')
+    return path.reduce((obj, key) => obj && obj[key], this.#requirements)
+  }
+
+  #validateOnChange = async (name, parent, element, path = [], checkLinks = true) => {
+
+    const valid = (!this.validateEmptyValues && !(name in parent)) ? true : await this.validateOnChange(name, parent, path)
+
+    const fullPath = [...path, name]
+    this.#clearMessages([...path, name], 'errors')
+    this.#clearMessages([...path, name], 'warnings')
+    
+    const isRequired = this.#isRequired(fullPath)
+    let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === 'warning' && (!isRequired || !info.missing)) : []
+    const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === 'error' || (isRequired && info.missing)) : []
+
+    if (checkLinks) {
+      const isLinkResolved = await this.#isLinkResolved(fullPath)
+      if (!isLinkResolved) {
+        errors.push(...warnings) // Move warnings to errors if the element is linked
+        warnings = []
+      }
+    }
+
+    warnings.forEach((info) => this.#addMessage(fullPath, info.message, 'warnings'))
 
 
-    const valid = parent[name] === '' ? true : await this.validateOnChange(name, parent, path)
-
-    const errors = element.parentElement.querySelector('.errors')
-    errors.innerHTML = ''
-
-
-    if (valid === true || valid == undefined) {
+    if (valid === true || valid == undefined || errors.length === 0) {
 
       element.classList.remove('invalid')
 
-      this.#applyToLinks((name, element) => {
-        element.classList.remove('required', 'conditional')
-        const errors = element.querySelector('.errors')
-        if (errors) errors.innerHTML = ''
-        const invalid = element.querySelectorAll('.invalid')
-        invalid.forEach(input => input.classList.remove('invalid'))
-      }, [...path, name])
+      await this.#applyToLinks((name, element) => {
+        element.classList.remove('required', 'conditional') // Links manage their own error and validity states, but only one needs to be valid
+      }, fullPath)
+
+      return true
+      
     } else {
 
       // Add new invalid classes and errors
       element.classList.add('invalid')
 
       // Only add the conditional class for linked elements
-      this.#applyToLinks((name, element) => element.classList.add('required', 'conditional'), [...path, name])
+      await this.#applyToLinks((name, element) => element.classList.add('required', 'conditional'), [...path, name])
+      errors.forEach((info) => this.#addMessage(fullPath, info.message, 'errors'))
 
-      valid.forEach(error => {
-        const p = document.createElement('p')
-        p.innerText = error.message
-        errors.appendChild(p)
-      })
+      return false
     }
   }
 
   #render =(schema, results, required = {}, path = []) => {
 
     // Filter non-required properties (if specified) and render the sub-schema
-    const renderable = this.#getRenderable(schema, path.length)
+    const renderable = this.#getRenderable(schema, required, path)
 
     // // Filter non-required properties (if specified) and render the sub-schema
     // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
@@ -420,7 +559,7 @@ export class JSONSchemaForm extends LitElement {
 
 
       // Directly render the interactive property element
-      if (!info.properties) return this.#renderInteractiveElement(name, info, results, required[name], path)
+      if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
 
       // Render properties in the sub-schema
       return html`
@@ -447,13 +586,18 @@ export class JSONSchemaForm extends LitElement {
     }
   }
 
-  updated() {
-    // NOTE: This ignores the file selector button
-    const inputsWithVaulues = Array.from(this.shadowRoot.querySelectorAll('.schema-input')).filter(input => input.value)
-    inputsWithVaulues.forEach(input => {
+  // NOTE: This ignores the file selector button
+  #checkAllInputs = (filter) => {
+    const inputs = Array.from(this.shadowRoot.querySelectorAll('.schema-input'))
+    const filtered = filter ? inputs.filter(filter) : inputs
+    filtered.forEach(input => {
       const event = new Event('change'); // Create a new change event
       input.dispatchEvent(event); // Manually trigger the change event
     })
+  }
+
+  async updated() {
+    this.#checkAllInputs((this.validateEmptyValues) ? undefined : (el) => el.value !== '') // Check all inputs with non-empty values on render
   }
 
   render() {

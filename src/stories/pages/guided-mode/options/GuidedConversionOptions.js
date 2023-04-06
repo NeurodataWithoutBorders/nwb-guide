@@ -16,7 +16,7 @@ export class GuidedConversionOptionsPage extends Page {
     next: 'Run Conversion Preview',
     onNext: async () => {
       this.save() // Save in case the conversion fails
-      this.form.validate() // Will throw an error in the callback
+      await this.form.validate() // Will throw an error in the callback
 
       delete this.info.globalState.preview // Clear the preview results
 

@@ -25,7 +25,7 @@ export const validateOnChange = async (name, parent, path) => {
 
     if (!functions || functions.length === 0) return // No validation for this field
     if (!Array.isArray(functions)) functions = [functions]
-
+    
     // Client-side validation of multiple conditions. May be able to offload this to a single server-side call
     const res = (await Promise.all(functions.map(async func => {
       return await fetch(`${baseUrl}/neuroconv/validate`, {
@@ -38,7 +38,14 @@ export const validateOnChange = async (name, parent, path) => {
       }).then(res => res.json())
     }))).flat()
 
-    if (res.find(res => res)) return res.filter(res => res) // Some of the requests end in errors
+
+    if (res.find(res => res)) return res.filter(res => res).map(o => {
+      return {
+        message: o.message,
+        type: o.importance === 'CRITICAL' ? 'error' : 'warning',
+        missing: o.message.includes('is missing') // Indicates that the field is missing
+      }
+    }) // Some of the requests end in errors
 
     return true
 
