@@ -222,12 +222,11 @@ export class JSONSchemaForm extends LitElement {
     const allRequirements = [...invalidInputs.required, ...invalidInputs.conditional]
     allRequirements.forEach(name => {
       this.#clearMessages(name, 'errors')
-      this.#addMessage(name, `${name} is ${invalidInputs.conditional.includes(name) ? 'conditionally required' : 'missing'}`, 'errors')
+      this.#addMessage(name, `${name.split('-').slice(-1)[0]} is ${invalidInputs.conditional.includes(name) ? 'conditionally required' : 'missing'}`, 'errors')
     })
 
     // Print out a detailed error message if any inputs are missing
     let message = '';
-    console.log('What is valid', isValid, invalidInputs)
     if (!isValid) {
       message += `<b>${invalidInputs.required.length} required inputs`
       if (!invalidInputs.required.length) message = `${invalidInputs.conditional.length} conditionally required inputs`
@@ -307,7 +306,8 @@ export class JSONSchemaForm extends LitElement {
 
     if (isConditional && !isRequired) isRequired = required[name] = async () => {
 
-      if (this.#checkRequiredAfterChange(fullPath)) return true // Check self
+      const isRequiredAfterChange = await this.#checkRequiredAfterChange(fullPath)
+      if (isRequiredAfterChange) return true // Check self
       else {
         const linkResults = await this.#applyToLinks(this.#checkRequiredAfterChange, fullPath) // Check links
         if (linkResults.includes(true)) return true
@@ -324,6 +324,7 @@ export class JSONSchemaForm extends LitElement {
         if (info.enum) {
           return html`
           <select class="guided--input schema-input" @input=${(ev) => this.#updateParent(name, info.enum[ev.target.value], parent)}>
+          <option disabled selected value>Select an option</option>
             ${info.enum.map((item, i) => html`<option value=${i} ?selected=${parent[name] === item}>${item}</option>`)}
           </select>
           `
