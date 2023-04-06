@@ -251,8 +251,8 @@ export class JSONSchemaForm extends LitElement {
 
     // Ensure user is aware of any warnings before moving on
     const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
-    const nWarnings = activeWarnings.reduce((acc, curr) => acc = acc + curr.length, 0)   
-  
+    const nWarnings = activeWarnings.reduce((acc, curr) => acc = acc + curr.length, 0)
+
     if (nWarnings) {
       const warningText = activeWarnings.reduce((acc, children) => [...acc, ...children.map(el => el.innerText)], [])
       const result = await Swal.fire({
@@ -304,8 +304,8 @@ export class JSONSchemaForm extends LitElement {
 
     const fullPath = [...path, name]
     const isConditional = this.#getLinks(fullPath).length || typeof isRequired === 'function' // Check the two possible ways of determining if a field is conditional
-    
-    if (isConditional && !isRequired) isRequired = required[name] = async () => { 
+
+    if (isConditional && !isRequired) isRequired = required[name] = async () => {
 
       if (this.#checkRequiredAfterChange(fullPath)) return true // Check self
       else {
@@ -484,7 +484,7 @@ export class JSONSchemaForm extends LitElement {
   }
 
   #applyToLinks = (fn, args) => Promise.all(this.#getLinks(args).map((linked) => linked.map((link) => fn(link, this.shadowRoot.getElementById(`${link.join('-')}`))).flat()))
-  
+
   // Check if all links are not required anymore
   #isLinkResolved = async (pathArr) => {
     return (await this.#applyToLinks((link) => {
@@ -506,7 +506,7 @@ export class JSONSchemaForm extends LitElement {
     const fullPath = [...path, name]
     this.#clearMessages([...path, name], 'errors')
     this.#clearMessages([...path, name], 'warnings')
-    
+
     const isRequired = this.#isRequired(fullPath)
     let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === 'warning' && (!isRequired || !info.missing)) : []
     const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === 'error' || (isRequired && info.missing)) : []
@@ -531,7 +531,7 @@ export class JSONSchemaForm extends LitElement {
       }, fullPath)
 
       return true
-      
+
     } else {
 
       // Add new invalid classes and errors

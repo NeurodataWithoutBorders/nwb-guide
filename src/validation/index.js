@@ -25,7 +25,7 @@ export const validateOnChange = async (name, parent, path) => {
 
     if (!functions || functions.length === 0) return // No validation for this field
     if (!Array.isArray(functions)) functions = [functions]
-    
+
     // Client-side validation of multiple conditions. May be able to offload this to a single server-side call
     const res = (await Promise.all(functions.map(async func => {
       return await fetch(`${baseUrl}/neuroconv/validate`, {
