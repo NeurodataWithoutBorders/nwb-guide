@@ -2,7 +2,6 @@
 
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
-import { sections } from './pages/globals.js';
 import { GuidedFooter } from './pages/guided-mode/GuidedFooter';
 import { GuidedCapsules } from './pages/guided-mode/GuidedCapsules.js';
 import { GuidedHeader } from './pages/guided-mode/GuidedHeader.js';
@@ -49,7 +48,7 @@ export class Main extends LitElement {
   #queue = []
 
   set(toRender) {
-    const page = toRender.page ?? toRender
+    let page = toRender.page ?? toRender
 
     if (typeof page === 'function') page = new page()
     page.onTransition = this.onTransition;
@@ -73,7 +72,6 @@ export class Main extends LitElement {
   render() {
     this.style.position = "relative";
     let { page = '', sections = {} } = this.toRender ?? {}
-
 
     let footer = page?.footer // Page-specific footer
     let header = page?.header // Page-specific header

@@ -1,13 +1,10 @@
+import Swal from 'sweetalert2'
 
-import globals from "../scripts/globals.js";
-import electronExports from "./electron/index.js";
-
-const { fs, log } = electronExports;
-
-const {
+import {
   joinPath,
   guidedProgressFilePath,
-} = globals;
+} from "./globals.js";
+import { fs } from "./electron/index.js";
 
 let saveErrorThrown = false;
 
@@ -42,7 +39,7 @@ export const update = (newDatasetName, previousDatasetName) => {
 export const save = (page) => {
 
   const globalState = page.info.globalState
-  const guidedProgressFileName = globalState.name
+  const guidedProgressFileName = globalState.project.name
 
     if (!fs) {
       if (!saveErrorThrown) console.warn("Cannot save progress in a web build.");
@@ -56,7 +53,7 @@ export const save = (page) => {
       return
     }
 
-    //Destination: HOMEDIR/SODA/Guided-Progress
+    //Destination: HOMEDIR/NWBGUIDE/Guided-Progress
     globalState["last-modified"] = new Date();
     globalState["page-before-exit"] = page.info.id;
 
@@ -65,7 +62,6 @@ export const save = (page) => {
       fs.mkdirSync(guidedProgressFilePath, { recursive: true });
     } catch (error) {
       console.error(error);
-      log.error(error);
     }
 
     var guidedFilePath = joinPath(guidedProgressFilePath, guidedProgressFileName + ".json");
@@ -112,7 +108,7 @@ export const save = (page) => {
     const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent;
 
     const result = await Swal.fire({
-      title: `Are you sure you would like to delete SODA progress made on the dataset: ${progressCardNameToDelete}?`,
+      title: `Are you sure you would like to delete NWB GUIDE progress made on the dataset: ${progressCardNameToDelete}?`,
       text: "Your progress file will be deleted permanently, and all existing progress will be lost.",
       icon: "warning",
       heightAuto: false,

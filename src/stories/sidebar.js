@@ -14,15 +14,22 @@ export class Sidebar extends LitElement {
     return {
       pages: { type: Object, reflect: false },
       name: { type: String, reflect: true },
+      logo: { type: String, reflect: true },
       subtitle: { type: String, reflect: true },
+
+      renderName: { type: Boolean, reflect: true },
     };
   }
+
+  initialize = true
 
   constructor (props = {}) {
     super()
     this.pages = props.pages
     this.name = props.name ?? ''
-    this.subtitle = props.subtitle ?? ''
+    this.logo = props.logo
+    this.subtitle = props.subtitle ?? '0.0.1'
+    this.renderName = props.renderName ?? true
   }
 
   // This method turns off shadow DOM to allow for global styles (e.g. bootstrap)
@@ -32,13 +39,15 @@ export class Sidebar extends LitElement {
   }
 
   attributeChangedCallback(...args) {
-    const attrs = ['pages', 'name', 'subtitle']
+    const attrs = ['pages', 'name', 'subtitle', 'renderName']
     super.attributeChangedCallback(...args)
     if (attrs.includes(args[0])) this.requestUpdate()
   }
 
   updated(){
     this.nav = (this.shadowRoot ?? this).querySelector("#main-nav");
+
+    this.subtitleElement = (this.shadowRoot ?? this).querySelector("#subtitle");
 
       // Toggle sidebar
       const toggle = this.toggle = (this.shadowRoot ?? this).querySelector("#sidebarCollapse");
@@ -47,38 +56,65 @@ export class Sidebar extends LitElement {
         toggle.classList.toggle("active");
       }
 
-      const firstItem = (this.shadowRoot ?? this).querySelector("ul").children[0];
-      if (firstItem) firstItem.click()
+      // Actually click the item
+      let selectedItem = (this.#selected) ? (this.shadowRoot ?? this).querySelector(`ul[data-id='${this.#selected}']`) : (this.shadowRoot ?? this).querySelector("ul").children[0]
+      if (this.initialize && selectedItem) selectedItem.click()
+      else if (this.#selected) this.selectItem(this.#selected) // Visually select the item
+
+      if (this.#hidden) this.hide(true)
+
   }
 
   show = () => {
-    this.nav.classList.remove("active");
-    this.toggle.classList.remove("active")
-    this.style.display = "block";
+    this.#hidden = false
+
+    if (this.nav) {
+      this.nav.classList.remove("active");
+      this.toggle.classList.remove("active")
+      this.style.display = "block";
+    }
   }
 
+  #hidden = false
+
   hide = (changeDisplay) => {
-    this.nav.classList.add("active");
-    this.toggle.classList.add("active")
-    if (changeDisplay) this.style.display = "none";
+    this.#hidden = true
+    if (this.nav) {
+      this.nav.classList.add("active");
+      this.toggle.classList.add("active")
+      if (changeDisplay) this.style.display = "none";
+    }
   }
 
   onClick = () => {} // Set by the user
-  #onClick = (id) => {
-    if (!this.pages[id]) throw new Error(`No page found for key ${id}`)
+
+  selectItem = (id) => {
+    this.#selected = id.split('/')[0] || '/'
     const links = (this.shadowRoot ?? this).querySelectorAll('a')
     links.forEach((a) => a.classList.remove('is-selected'))
-    const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${id}"]`)
-    a.classList.add('is-selected')
+    const a = (this.shadowRoot ?? this).querySelector(`a[data-id="${this.#selected}"]`)
+    if (a) a.classList.add('is-selected')
+  }
+
+  #onClick = (id) => {
+    if (!this.pages[id]) throw new Error(`No page found for key ${id}`)
+    this.selectItem(id)
     this.onClick(id, this.pages[id])
   }
 
+  #selected = ''
+
   select = (id) => {
-    const info = this.pages[id]
+    const info = this.pages?.[id]
     if (info) this.#onClick(id, info)
   }
 
   render() {
+
+    const hasName = this.name && this.renderName
+    const logoNoName = (this.logo && !hasName)
+    console.log('hasName', hasName, this.renderName)
+
     return html`
     <button type="button" id="sidebarCollapse" class="navbar-btn">
         <span></span>
@@ -89,8 +125,15 @@ export class Sidebar extends LitElement {
         <div id="nav-items" class="nav-item u-category-windows">
           <!-- Sidebar Header -->
           <div class="sidebar-header">
-                ${this.name ? html`<h1 style="margin-bottom: 0;">${this.name}</h1>` : ''}
-                ${this.subtitle ? html`<span id="subtitle" style="font-size: 14px">${this.subtitle}</span>` : ''}
+              ${logoNoName ? html`
+                <img
+                  id="button-soda-big-icon"
+                  class="nav-center-logo-image"
+                  src="${this.logo}"
+                />
+              ` : ''}
+                ${hasName ? html`<h1 style="margin-bottom: 0;">${this.name}</h1>` : ''}
+                ${this.subtitle ? html`<span id="subtitle" style="font-size: 14px; ${logoNoName ? `padding-top: 15px; text-align: center; width: 100%; display: block;` : ''}">${this.subtitle}</span>` : ''}
             </div>
             <!-- Sidebar Links -->
             <ul class="list-unstyled components">
@@ -108,42 +151,17 @@ export class Sidebar extends LitElement {
                 return html`<li @click="${() => this.#onClick(id)}">${a}</li>`
               })}
             </ul>
-            <div class="help-section">
-              <ul
-                class="list-unstyled components"
-                style="
-                  height: 50px;
-                  margin-bottom: 0;
-                  margin-left: 35px;
-                  display: flex;
-                  flex-direction: row;
-                  justify-content: center;
-                "
-              ></ul>
+            <div>
+            ${!logoNoName && this.logo ? html`
+            <img
+              id="button-soda-big-icon"
+              class="nav-center-logo-image"
+              style="padding:0px 40px;"
+              src="${this.logo}"
+            />
+          ` : ''}
             </div>
           </div>
-          <!-- Sidebar Footer -->
-          <div class="boxhead">
-            <div style="display: block" id="catalystneuro-logo">
-              <h3
-                style="
-                  width: auto;
-                  text-align: center;
-                "
-              >
-                <a
-                  href="https://catalystneuro.com/"
-                  style="border-bottom:0px;text-decoration:none;"
-                >
-                  <img
-                    src="assets/img/logo-catalystneuro.png"
-                    width="140px"
-                    height="140px"
-                    border="0"
-                  />
-                </a>
-              </h3>
-            </div>
         </div>
       </nav>
     `;

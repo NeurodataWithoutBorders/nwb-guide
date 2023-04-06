@@ -11,10 +11,17 @@ import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSou
 import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata"
 import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload"
 import { GuidedDeleteFilesPage } from "./stories/pages/guided-mode/options/GuidedDelete"
-import { GuidedConversionTypePage } from "./stories/pages/guided-mode/options/GuidedConversionType"
+import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions"
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults"
+import { Dashboard } from "./stories/Dashboard"
+import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview"
 
-const dashboard = document.querySelector('nwb-dashboard')
+import logo from './assets/img/logo-guide-draft-transparent-tight.png'
+let dashboard = document.querySelector("nwb-dashboard")
+if (!dashboard) dashboard = new Dashboard()
+dashboard.logo = logo
+dashboard.name = 'NWB GUIDE'
+dashboard.renderNameInSidebar = false
 
 const overviewIcon = `
 <svg
@@ -75,7 +82,7 @@ style="margin-right: 30px; margin-bottom: -5px"
 ></path></svg>
 `
 
-dashboard.pages = {
+const pages = {
     '/': new GettingStartedPage({
         label: "Overview",
         icon: overviewIcon
@@ -104,22 +111,22 @@ dashboard.pages = {
                 section: sections[1]
             }),
             metadata: new GuidedMetadataPage({
-                label: "Metadata",
+                label: "File metadata",
                 section: sections[1],
             }),
 
-            type: new GuidedConversionTypePage({
-                label: "Conversion type",
+            options: new GuidedConversionOptionsPage({
+                label: "Basic options",
                 section: sections[2]
             }),
-            // upload: new GuidedUploadPage({
-            //     label: "Upload dataset",
-            //     section: sections[2]
-            // }),
-            // deletefiles: new GuidedDeleteFilesPage({
-            //     label: "Delete files",
-            //     section: sections[2]
-            // }),
+            preview: new GuidedStubPreviewPage({
+                label: "Preview conversion",
+                section: sections[2]
+            }),
+            upload: new GuidedUploadPage({
+                label: "Upload to DANDI",
+                section: sections[2]
+            }),
 
             review: new GuidedResultsPage({
                 label: "Review results",
@@ -135,4 +142,10 @@ dashboard.pages = {
         label: "Contact Us",
         icon: contactIcon
     })
+}
+
+dashboard.pages = pages
+
+export {
+    dashboard
 }

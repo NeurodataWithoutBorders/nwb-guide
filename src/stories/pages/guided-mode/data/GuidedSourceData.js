@@ -3,9 +3,9 @@
 import { html } from 'lit';
 import { Page } from '../../Page.js';
 
-import globals from '../../../../../scripts/globals.js';
+import Swal from 'sweetalert2'
+import { notyf, baseUrl } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-const { notyf, baseUrl } = globals;
 
 export class GuidedSourceDataPage extends Page {
 
@@ -40,7 +40,10 @@ export class GuidedSourceDataPage extends Page {
       const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.info.globalState.source.results)
+        body: JSON.stringify({
+          source_data: this.info.globalState.source.results,
+          interfaces: this.info.globalState.source.interfaces,
+        })
       }).then((res) => res.json())
 
 
@@ -55,7 +58,6 @@ export class GuidedSourceDataPage extends Page {
         throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
       }
 
-      console.log('Got the result', result)
       this.info.globalState.metadata = result
 
       this.onTransition(1)

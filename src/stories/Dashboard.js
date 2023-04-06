@@ -3,15 +3,47 @@
 import { LitElement, html } from 'lit';
 import useGlobalStyles from './utils/useGlobalStyles.js';
 
-import "./NavigationSidebar.js"
-import "./Sidebar.js";
-import "./Main.js";
+import { Main } from './Main.js';
+import { Sidebar } from './sidebar.js';
+import { NavigationSidebar } from './NavigationSidebar.js';
+
+// Global styles to apply with the dashboard
+import "../assets/css/variables.css"
+import "../assets/css/nativize.css"
+import "../assets/css/global.css"
+import "../assets/css/nav.css"
+import "../assets/css/section.css"
+import "../assets/css/demo.css"
+import "../assets/css/individualtab.css"
+import "../assets/css/main_tabs.css"
+// import "../../node_modules/cropperjs/dist/cropper.css"
+import "../../node_modules/notyf/notyf.min.css"
+import "../assets/css/spur.css"
+import "../assets/css/main.css"
+// import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+import "../../node_modules/@fortawesome/fontawesome-free/css/all.css"
+// import "../../node_modules/select2/dist/css/select2.min.css"
+// import "../../node_modules/@toast-ui/editor/dist/toastui-editor.css"
+// import "../../node_modules/codemirror/lib/codemirror.css"
+// import "../../node_modules/@yaireo/tagify/dist/tagify.css"
+import "../../node_modules/fomantic-ui/dist/semantic.min.css"
+import "../../node_modules/fomantic-ui/dist/components/accordion.min.css"
+import "../../node_modules/@sweetalert2/theme-bulma/bulma.css"
+// import "../../node_modules/intro.js/minified/introjs.min.css"
+import "../assets/css/guided.css"
+import isElectron from '../electron/check.js';
+import { isStorybook } from '../globals.js';
+
+// import "https://jsuites.net/v4/jsuites.js"
+// import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
+
 
 const componentCSS = `
     :host {
         display: flex;
         height: 100%;
         width: 100%;
+        position: relative;
     }
 
     nwb-main {
@@ -30,46 +62,94 @@ export class Dashboard extends LitElement {
 
   static get properties() {
     return {
-      pages: { type: Object, reflect: false },
+      renderNameInSidebar: { type: Boolean, reflect: true },
       name: { type: String, reflect: true },
+      logo: { type: String, reflect: true },
       subtitle: { type: String, reflect: true },
+      activePage: { type: String, reflect: true },
     };
   }
 
-  #pagesById = {}
-  #active
+  main;
+  sidebar;
+  subSidebar;
+
+  pagesById = {}
+  #active;
+  #activeId;
 
   constructor (props = {}) {
     super()
+
+    this.main = new Main()
+    this.main.classList.add('dash-app')
+
+    this.sidebar = new Sidebar()
+    this.sidebar.onClick = (_, value) => this.setAttribute('activePage', value.info.id)
+
+    this.subSidebar = new NavigationSidebar()
+    this.subSidebar.onClick = (id) => this.setAttribute('activePage', id)
+
+
     this.pages = props.pages ?? {}
-    this.name = props.name ?? "NWB App"
+    this.name = props.name
+    this.logo = props.logo
+    this.renderNameInSidebar = props.renderNameInSidebar ?? true
+
+    if (props.activePage) this.setAttribute('activePage', props.activePage)
+
+
+    // Handle all pop and push state updates
+    const pushState = window.history.pushState;
+    window.history.pushState = function(state) {
+        if (typeof window.onpushstate == "function") window.onpushstate({state: state});
+        return pushState.apply(window.history, arguments);
+    };
+
+    window.onpushstate = window.onpopstate = (e) => {
+      if(e.state){
+        document.title = `${e.state.label} - ${this.name}`
+        this.setMain(this.pagesById[e.state.page], undefined, false)
+      }
+    }
+
+    this.#updated()
   }
 
   createRenderRoot() {
     return this;
   }
 
-  attributeChangedCallback(...args) {
-    super.attributeChangedCallback(...args)
-    if (args[0] === 'subtitle' && this.sidebar) this.sidebar.setSubtitle(args[1]) // Update subtitle without rerender
-    if (args[0] === 'pages' || args[0] === 'name') this.requestUpdate()
+  attributeChangedCallback(key, previous, latest) {
+    super.attributeChangedCallback(...arguments)
+    if (this.sidebar && (key === 'name' || key === 'logo' || key === 'subtitle'))  this.sidebar[key] = latest
+    else if (key === 'renderNameInSidebar') this.sidebar.renderName = latest === 'true' || latest === true
+    else if (key === 'pages') this.#updated(latest)
+    else if (key.toLowerCase() === 'activepage'){
+      this.sidebar.selectItem(latest) // Just highlight the item
+      this.sidebar.initialize = false
+      this.#activatePage(latest)
+      return
+    }
   }
 
 
   getPage(entry) {
     if (!entry) throw new Error('Page not found...')
-    let page = entry.page ?? entry
+    const page = entry.page ?? entry
     if (page instanceof HTMLElement) return page
     else if (typeof page === 'object') return this.getPage(Object.values(page)[0])
   }
 
-  setMain(page, infoPassed){
+
+  setMain(page, infoPassed = {}){
+
 
     // Update Previous Page
     // if (page.page) page = page.page
     const info = page.info
     const previous = this.#active
-    // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.#pagesById[info.page.id] // Get info from a direct page
+    // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.pagesById[info.page.id] // Get info from a direct page
 
     if (previous === page) return // Prevent rerendering the same page
 
@@ -84,11 +164,9 @@ export class Dashboard extends LitElement {
     const toPass = { ...infoPassed}
     if (previous) toPass.globalState = previous.info.globalState
 
-
     if (info.parent && info.section) {
       this.subSidebar.sections = this.#getSections(info.parent.info.pages, toPass.globalState) // Update sidebar items (if changed)
       this.subSidebar.active = info.id // Update active item (if changed)
-
       this.sidebar.hide(true)
       this.subSidebar.show()
     } else {
@@ -138,87 +216,111 @@ export class Dashboard extends LitElement {
 
   }
 
-  updated(){
-    const div = (this.shadowRoot ?? this).querySelector("div");
-    div.style.height = '100vh'
-    this.sidebar = (this.shadowRoot ?? this).querySelector("nwb-sidebar");
-    this.subSidebar = (this.shadowRoot ?? this).querySelector("nwb-navigation-sidebar");
-    this.main = (this.shadowRoot ?? this).querySelector("nwb-main");
-    this.sidebar.onClick = (_, value) => this.setMain(value)
-    this.subSidebar.onClick = (id) => {
-      console.log('Go to page', id, this.#pagesById[id])
-      this.setMain(this.#pagesById[id])
-    }
-    this.main.onTransition = (transition, infoPassed) => {
+  #updated(pages=this.pages) {
 
+    const url = new URL(window.location.href)
+    let active = url.pathname.slice(1)
+    if (isElectron || isStorybook) active = new URLSearchParams(url.search).get('page')
+    if (!active) active = this.activePage // default to active page
+
+
+    this.main.onTransition = (transition) => {
+
+      console.log('transition', transition)
       if (typeof transition === 'number'){
         const info = this.#active.info
         const sign = Math.sign(transition)
-        if (sign === 1) return this.setMain(info.next, infoPassed)
-        else if (sign === -1) return this.setMain(info.previous ?? info.parent, infoPassed) // Default to back in time
+        if (sign === 1) return this.setAttribute('activePage', info.next.info.id)
+        else if (sign === -1) return this.setAttribute('activePage', (info.previous ?? info.parent).info.id) // Default to back in time
       }
 
       if (transition in this.pages) this.sidebar.select(transition)
-      else this.setMain(this.#pagesById[transition], infoPassed)
+      else this.setAttribute('activePage', transition)
     }
 
-    // Track Pages By Id
-    const addPage = (acc, arr) => {
-      let [ id, page ] = arr
+      this.pagesById = {}
+      Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
+      this.sidebar.pages = pages
 
-      const info = { ...page.info}
+      console.log('active', active)
+      if (active) this.setAttribute('activePage', active)
+  }
 
-      if (info.id) id = info.id
+  #activatePage = (id) => {
+    const page = this.getPage(this.pagesById[id])
+    this.#activeId = id
 
-      const pages = info.pages
-      delete info.pages
+    if (page) {
+      const { id, label } = page.info
+      history.pushState({ page: id, label }, label, (isElectron || isStorybook) ? `?page=${id}` : `${window.location.origin}/${id === '/' ? '' : id}`);
+  }
+  }
 
-      // NOTE: This is not true for nested pages with more info...
-      if (page instanceof HTMLElement) acc[id] = page
+  // Track Pages By Id
+   addPage = (acc, arr) => {
+        let [ id, page ] = arr
 
-      if (pages) {
-        const pagesArr = Object.values(pages)
+        const info = { ...page.info}
 
-        // Update info with relative information
-        Object.entries(pages).forEach(([newId, nestedPage], i) => {
-          nestedPage.info.base = id
-          nestedPage.info.previous = pagesArr[i-1]
-          nestedPage.info.next = pagesArr[i+1]
-          nestedPage.info.id = `${id}/${newId}`
-          nestedPage.info.parent = page
-        })
+        if (info.id) id = info.id
+        else page.info.id = id // update id
 
-        // // Register a base page
-        // const firstPage = pageArr[0]
-        // if (pagesArr.find(([id]) => id === '/')) addPage(acc, [id, ...firstPage.slice(1)], firstPage[1])
+        const pages = info.pages
+        delete info.pages
 
-        // Register all pages
-        Object.entries(pages).forEach((arr) => addPage(acc, arr))
+        // NOTE: This is not true for nested pages with more info...
+        if (page instanceof HTMLElement) acc[id] = page
 
+        if (pages) {
+          const pagesArr = Object.values(pages)
+
+          // Update info with relative information
+          Object.entries(pages).forEach(([newId, nestedPage], i) => {
+            nestedPage.info.base = id
+            nestedPage.info.previous = pagesArr[i-1]
+            nestedPage.info.next = pagesArr[i+1]
+            nestedPage.info.id = `${id}/${newId}`
+            nestedPage.info.parent = page
+          })
+
+          // Register all pages
+          Object.entries(pages).forEach((arr) => this.addPage(acc, arr))
+
+        }
+
+        return acc
       }
 
-      return acc
+  #first = true
+  updated(){
+
+    const div = (this.shadowRoot ?? this).querySelector("div");
+    div.style.height = '100vh'
+
+    if (this.#first) {
+      this.#first = false
+      this.#updated()
     }
-
-    this.#pagesById = {}
-    Object.entries(this.pages).forEach((arr) => addPage(this.#pagesById, arr))
-
-    // Set sidebar pages
-    this.sidebar.pages = this.pages
   }
 
   render() {
+
     this.style.width = "100%";
     this.style.height = "100%";
     this.style.display = "grid";
     this.style.gridTemplateColumns = "fit-content(0px) 1fr"
+    this.style.position = "relative"
+
+    if (this.name) this.sidebar.name = this.name
+    if (this.logo) this.sidebar.logo = this.logo
+    if ('renderNameInSidebar' in this) this.sidebar.renderName = this.renderNameInSidebar
 
     return html`
         <div>
-          <nwb-sidebar name=${this.name}></nwb-sidebar>
-          <nwb-navigation-sidebar></nwb-navigation-sidebar>
+          ${this.sidebar}
+          ${this.subSidebar}
         </div>
-        <nwb-main class="dash-app"></nwb-main>
+        ${this.main}
     `;
   }
 };

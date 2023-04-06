@@ -1,7 +1,7 @@
 import { JSONSchemaForm } from './JSONSchemaForm';
 
 export default {
-  title: 'Example/JSON Schema Form'
+  title: 'Components/JSON Schema Form'
 };
 
 const Template = (args) => new JSONSchemaForm(args);
