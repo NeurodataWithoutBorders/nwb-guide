@@ -10,6 +10,7 @@ from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
 from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage
+from nwbinspector.nwbinspector import configure_checks, load_config
 
 from pathlib import Path
 
@@ -74,7 +75,10 @@ def get_check_function(check_function_name: str) -> callable:
     """
     Function used to fetch an arbitrary NWB Inspector function
     """
-    check_function: callable = nwbinspector.__dict__.get(check_function_name)
+    dandi_check_list = configure_checks(config=load_config(filepath_or_keyword="dandi"))
+    dandi_check_registry = {check.__name__: check for check in dandi_check_list}
+
+    check_function: callable = dandi_check_registry.get(check_function_name)
     if check_function is None:
         raise ValueError(f"Function {check_function_name} not found in nwbinspector")
 
