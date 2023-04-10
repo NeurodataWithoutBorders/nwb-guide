@@ -41,7 +41,7 @@ export class GuidedPathExpansionPage extends Page {
 
       // Funnel down to one subject + session until we have a mechanism for representing all of them
       this.info.globalState.source.results = interfaces_info.source_data
-      this.info.globalState.metadata.results = interfaces_info.metadata 
+      this.info.globalState.metadata.results = interfaces_info.metadata
 
       this.onTransition(1)
     }
