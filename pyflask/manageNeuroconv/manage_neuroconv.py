@@ -3,7 +3,7 @@ from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInter
 from neuroconv import datainterfaces, NWBConverter
 
 import json
-from neuroconv.utils import NWBMetaDataEncoder
+from neuroconv.utils import NWBMetaDataEncoder, LocalPathExpander
 import nwbinspector
 from pynwb.file import NWBFile, Subject
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
@@ -15,7 +15,31 @@ from pathlib import Path
 
 from pathlib import Path
 import os
-from datetime import datetime
+
+
+def autodetect_source_data(info: dict) -> dict:
+    """Autodetect source data from the specifies directories using fstrings."""
+
+    expander = LocalPathExpander()
+    out = expander.expand_paths(info)
+
+
+    # Organize results by subject, session, and data type
+    organized_output = {}
+    for item in out:
+        subject_id = item['metadata']['Subject']['subject_id']
+        session_id = item['metadata']['NWBFile']['session_id']
+        if subject_id not in organized_output:
+            organized_output[subject_id] = {}
+        
+        if session_id not in organized_output[subject_id]:
+            organized_output[subject_id][session_id] = {}
+
+        for key, value in item['source_data'].items():
+            organized_output[subject_id][session_id][key] = value
+
+    print('Output', json.dumps(organized_output, indent=4))
+    return organized_output
 
 
 def get_all_interface_info() -> dict:
