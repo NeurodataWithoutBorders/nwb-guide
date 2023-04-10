@@ -323,7 +323,7 @@ export class JSONSchemaForm extends LitElement {
         // Basic enumeration of properties on a select element
         if (info.enum) {
           return html`
-          <select class="guided--input schema-input" 
+          <select class="guided--input schema-input"
             @input=${(ev) => this.#updateParent(name, info.enum[ev.target.value], parent)}
             @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
           >
@@ -334,11 +334,11 @@ export class JSONSchemaForm extends LitElement {
         }
 
         else if (info.type === 'boolean') {
-          return html`<input 
-          type="checkbox" 
-          class="schema-input" 
-          @input=${(ev) => this.#updateParent(name, ev.target.checked, parent)} 
-          ?checked=${parent[name] ?? false} 
+          return html`<input
+          type="checkbox"
+          class="schema-input"
+          @input=${(ev) => this.#updateParent(name, ev.target.checked, parent)}
+          ?checked=${parent[name] ?? false}
           @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
           />`
         }
