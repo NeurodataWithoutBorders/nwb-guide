@@ -38,7 +38,6 @@ export class GuidedSourceDataPage extends Page {
 
       await Promise.all(this.mapSessions(async ({ subject, session, info }) => {
 
-        console.log('info', info, this.info.globalState.interfaces)
         // NOTE: This clears all user-defined results
         const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
           method: 'POST',
