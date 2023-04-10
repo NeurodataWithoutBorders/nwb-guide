@@ -62,7 +62,7 @@ export class GuidedSourceDataPage extends Page {
 
         // Merge metadata results with the generated info
         this.merge('metadata', result.results, info)
-        
+
         // Mirror structure with metadata schema
         const schema = this.info.globalState.schema
         if (!schema.metadata) schema.metadata = {}
@@ -83,7 +83,7 @@ export class GuidedSourceDataPage extends Page {
         ignore: ['verbose'],
         onlyRequired: true,
       })
-      
+
       return html`
         <h2 class="guided--text-sub-step">Subject: ${subject} - Session: ${session}</h2>
         ${form}

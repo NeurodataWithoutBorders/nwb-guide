@@ -160,8 +160,7 @@ def convert_to_nwb(info: dict) -> str:
 
     run_stub_test = info.get("stub_test")
 
-    parent_folder.mkdir(exist_ok=True, parents=True) # Ensure all parent directories exist
-
+    parent_folder.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:

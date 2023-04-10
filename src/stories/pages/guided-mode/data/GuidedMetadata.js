@@ -30,7 +30,7 @@ export class GuidedMetadataPage extends Page {
         if (!(key in internalMetadata)) internalMetadata[key] = value[key] // Prioritize existing results (cannot override with new information...)
       }
     })
-    
+
     return info
   }
 
