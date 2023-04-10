@@ -51,8 +51,8 @@ export class GuidedPathExpansionPage extends Page {
             }
           }
         }
-      } 
-      
+      }
+
       // Otherwise use path expansion
       else if (!hidden && hidden !== undefined) {
 
@@ -95,7 +95,7 @@ export class GuidedPathExpansionPage extends Page {
         subject_id: {
           type: 'string',
           description: 'Enter a subject ID.',
-        },  
+        },
         session_id: {
           type: 'string',
           description: 'Enter a session ID.',
@@ -110,7 +110,7 @@ export class GuidedPathExpansionPage extends Page {
     description: 'Locate data using a format string. This will be used to automatically detect source data for multiple subjects and sessions.',
     altContent: this.altForm,
   })
-  
+
 
   render() {
 
@@ -146,8 +146,8 @@ export class GuidedPathExpansionPage extends Page {
     const form = this.form = new JSONSchemaForm({
       ...structureGlobalState
     })
-    
-    
+
+
 
     this.optional.innerHTML = ''
     this.optional.insertAdjacentElement('afterbegin', form)

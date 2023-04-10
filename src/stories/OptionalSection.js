@@ -35,7 +35,7 @@ export class OptionalSection extends LitElement {
         const altContent = this.shadowRoot.querySelector('#altContent')
 
         if (state === undefined) state = !content.classList.contains('hidden')
-       
+
         if (state) {
             content.removeAttribute('hidden')
             altContent.setAttribute('hidden', true)
