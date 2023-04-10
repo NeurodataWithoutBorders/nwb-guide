@@ -20,26 +20,37 @@ export class GuidedMetadataPage extends Page {
     }
   }
 
-
-  render() {
-
-    const metadataResults = this.info.globalState.metadata.results
-    console.log('this.info.globalState.metadata', this.info.globalState.metadata)
-
-    // Merge project-wide data into metadata
+  // Merge project-wide data into metadata
+  populateWithProjectMetadata(info){
     const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
     toMerge.forEach(([key, value]) => {
-      let internalMetadata = metadataResults[key]
-      if (!metadataResults[key]) internalMetadata = metadataResults[key] = {}
+      let internalMetadata = info[key]
+      if (!info[key]) internalMetadata = info[key] = {}
       for (let key in value) {
         if (!(key in internalMetadata)) internalMetadata[key] = value[key] // Prioritize existing results (cannot override with new information...)
       }
     })
+    
+    return info
+  }
 
-    const form = new JSONSchemaForm({
-      ...this.info.globalState.metadata,
-      ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
-      onlyRequired: false,
+  render() {
+
+    const forms = this.mapSessions(({subject, session, info }) => {
+
+      const results = this.populateWithProjectMetadata(info.metadata)
+
+      const form = new JSONSchemaForm({
+        schema: this.info.globalState.schema.metadata[subject][session],
+        results,
+        ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
+        onlyRequired: false,
+      })
+
+      return html`
+        <h2 class="guided--text-sub-step">Subject: ${subject} - Session: ${session}</h2>
+        ${form}
+      `
     })
 
     return html`
@@ -52,7 +63,7 @@ export class GuidedMetadataPage extends Page {
         <h1 class="guided--text-sub-step">NWB File Metadata</h1>
       </div>
       <div class="guided--section">
-       ${form}
+       ${forms}
       </div>
   </div>
     `;

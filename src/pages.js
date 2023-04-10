@@ -108,10 +108,11 @@ const pages = {
                 section: sections[0]
             }),
 
-            autodetect: new GuidedPathExpansionPage({
-                label: "Autodetect source data",
+            locate: new GuidedPathExpansionPage({
+                label: "Locate data",
                 section: sections[0]
             }),
+            
             sourcedata: new GuidedSourceDataPage({
                 label: "Source data",
                 section: sections[1]

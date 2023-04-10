@@ -36,29 +36,40 @@ export class GuidedSourceDataPage extends Page {
 
       this.save() // Save in case the metadata request fails
 
-      // NOTE: This clears all user-defined results
-      const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source_data: this.info.globalState.source.results,
-          interfaces: this.info.globalState.source.interfaces,
-        })
-      }).then((res) => res.json())
+      await Promise.all(this.mapSessions(async ({ subject, session, info }) => {
+
+        console.log('info', info, this.info.globalState.interfaces)
+        // NOTE: This clears all user-defined results
+        const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source_data: info.source_data,
+            interfaces: this.info.globalState.interfaces,
+          })
+        }).then((res) => res.json())
 
 
-      Swal.close();
+        Swal.close();
 
-      if (result.message) {
-        const message = "Failed to get metadata with current source data. Please try again."
-        notyf.open({
-          type: "error",
-          message,
-        });
-        throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
-      }
+        if (result.message) {
+          const message = "Failed to get metadata with current source data. Please try again."
+          notyf.open({
+            type: "error",
+            message,
+          });
+          throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
+        }
 
-      this.merge('metadata', result)
+        // Merge metadata results with the generated info
+        this.merge('metadata', result.results, info)
+        
+        // Mirror structure with metadata schema
+        const schema = this.info.globalState.schema
+        if (!schema.metadata) schema.metadata = {}
+        if (!schema.metadata[subject]) schema.metadata[subject] = {}
+        schema.metadata[subject][session] = result.schema
+      }))
 
       this.onTransition(1)
     }
@@ -66,11 +77,25 @@ export class GuidedSourceDataPage extends Page {
 
   render() {
 
-    const form = new JSONSchemaForm({
-      ...this.info.globalState.source,
-      ignore: ['verbose'],
-      onlyRequired: true,
+    const forms = this.mapSessions(({ subject, session, info }) => {
+      const form = new JSONSchemaForm({
+        schema: this.info.globalState.schema.source_data,
+        results: info.source_data,
+        ignore: ['verbose'],
+        onlyRequired: true,
+      })
+      
+      return html`
+        <h2 class="guided--text-sub-step">Subject: ${subject} - Session: ${session}</h2>
+        ${form}
+      `
     })
+
+    // const form = new JSONSchemaForm({
+    //   ...this.info.globalState.source,
+    //   ignore: ['verbose'],
+    //   onlyRequired: true,
+    // })
 
     return html`
   <div
@@ -82,7 +107,7 @@ export class GuidedSourceDataPage extends Page {
         <h1 class="guided--text-sub-step">Source Data</h1>
       </div>
       <div class="guided--section">
-        ${form}
+        ${forms}
       </div>
   </div>
     `;

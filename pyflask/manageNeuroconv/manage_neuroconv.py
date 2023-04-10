@@ -17,8 +17,8 @@ from pathlib import Path
 import os
 
 
-def autodetect_source_data(info: dict) -> dict:
-    """Autodetect source data from the specifies directories using fstrings."""
+def locate_data(info: dict) -> dict:
+    """Locate data from the specifies directories using fstrings."""
 
     expander = LocalPathExpander()
     out = expander.expand_paths(info)
@@ -154,12 +154,18 @@ def convert_to_nwb(info: dict) -> str:
     """
 
     nwbfile_path = Path(info["nwbfile_path"])
+    parent_folder = nwbfile_path.parent
+
+    folder = Path(info["folder"]) if "folder" in info else parent_folder
 
     run_stub_test = info.get("stub_test")
 
+    parent_folder.mkdir(exist_ok=True, parents=True) # Ensure all parent directories exist
+
+
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        stub_subfolder = nwbfile_path.parent / ".stubs"
+        stub_subfolder = folder / ".stubs"
         stub_subfolder.mkdir(exist_ok=True)
         preview_path = stub_subfolder / nwbfile_path.name
 

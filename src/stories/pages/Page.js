@@ -7,6 +7,7 @@ import '../Footer.js'
 import '../Button'
 
 import { save } from '../../progress.js'
+import { runConversion } from './guided-mode/options/utils.js';
 
 const componentCSS = `
 
@@ -62,6 +63,40 @@ export class Page extends LitElement {
       }
       else target[key][k] = v
     }
+  }
+
+  mapSessions(callback) {
+    const overallResults = this.info.globalState.results
+    return Object.entries(overallResults).map(([subject, sessions]) => {
+      return Object.entries(sessions).map(([session, info]) => {
+        return callback({ subject, session, info })
+      })
+    }).flat(2)
+  }
+
+  runConversions = async (conversionOptions = {}) => {
+    const folder = this.info.globalState.conversion.info.output_folder
+    let results = []
+
+    const overallResults = this.info.globalState.results
+    for (let subject in overallResults) {
+      for (let session in overallResults[subject]) {
+        const file = `${folder}/sub-${subject}/sub-${subject}_ses-${session}.nwb`
+        const result = await runConversion({
+          folder,
+          nwbfile_path: file,
+          overwrite: true,
+          ...overallResults[subject][session], // source_data and metadata are passed in here
+          ...conversionOptions, // Any additional conversion options override the defaults
+
+          interfaces: this.info.globalState.interfaces
+        })
+        results.push({ file, result })
+      }
+    }
+
+    return results
+
   }
 
 //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.

@@ -120,11 +120,11 @@ export class GuidedStructurePage extends Page {
         body: JSON.stringify(this.#selected)
       }).then((res) => res.json())
 
-      let sourceInfo = this.info.globalState.source
-      if (!sourceInfo) sourceInfo = this.info.globalState.source = {results: {}, schema: {}}
+      let schemas = this.info.globalState.schema
+      if (!schemas) schemas = this.info.globalState.schema = {}
 
-      sourceInfo.schema = schema
-      sourceInfo.interfaces = this.#selected
+      schemas.source_data = schema
+      this.info.globalState.interfaces = this.#selected
 
 
       this.onTransition(1)
@@ -134,7 +134,7 @@ export class GuidedStructurePage extends Page {
   async updated(){
 
 
-    const selected = this.info.globalState.source?.interfaces
+    const selected = this.info.globalState.interfaces
     this.search.options = await fetch(`${baseUrl}/neuroconv`).then((res) => res.json()).then(json => Object.entries(json).map(([key, value]) => {
       return {
         ...value,

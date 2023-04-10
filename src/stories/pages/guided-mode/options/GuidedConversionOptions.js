@@ -4,8 +4,6 @@ import { html } from 'lit';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { Page } from '../../Page.js';
 
-import { runConversion } from './utils.js';
-
 export class GuidedConversionOptionsPage extends Page {
 
   constructor(...args) {
@@ -20,12 +18,12 @@ export class GuidedConversionOptionsPage extends Page {
 
     const schema = {
       properties: {
-        nwbfile_path: {
+        output_folder: {
           type: 'string',
-          format: 'file'
+          format: 'directory'
         }
       },
-      required: ['nwbfile_path']
+      required: ['output_folder']
     }
 
     let conversionGlobalState = this.info.globalState.conversion
@@ -33,19 +31,14 @@ export class GuidedConversionOptionsPage extends Page {
       conversionGlobalState = this.info.globalState.conversion = {info: {
         override: true // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
       }, results: null}
-      console.error('CRAETING FROM SCRATCH')
     }
 
     const form = new JSONSchemaForm({
       schema,
       results: conversionGlobalState.info,
-      dialogType: 'showSaveDialog',
+      dialogType: 'showOpenDialog',
       dialogOptions: {
-        properties: [ 'createDirectory' ],
-        defaultPath: 'converted.nwb',
-        filters: [
-          { name: 'NWB File', extensions: ['nwb'] }
-        ]
+        properties: [ 'openDirectory', 'createDirectory' ],
       }
     })
 
@@ -62,16 +55,8 @@ export class GuidedConversionOptionsPage extends Page {
 
         this.save() // Save in case the conversion fails
 
-        const results = await runConversion({
-          ...this.info.globalState.conversion.info,
-          stub_test: true,
-          overwrite: true,
+        const results = await this.runConversions({ stub_test: true })
 
-          // Override with the lastest source data and metadata information
-          source_data: this.info.globalState.source.results,
-          metadata: this.info.globalState.metadata.results,
-          interfaces: this.info.globalState.source.interfaces
-        })
 
         this.info.globalState.preview = results // Save the preview results
 

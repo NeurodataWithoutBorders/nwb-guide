@@ -2,7 +2,6 @@
 
 import { html } from 'lit';
 import { Page } from '../../Page.js';
-import { runConversion } from './utils.js';
 
 export class GuidedStubPreviewPage extends Page {
 
@@ -28,16 +27,7 @@ export class GuidedStubPreviewPage extends Page {
 
         this.save()
 
-        const results = await runConversion({
-          ...this.info.globalState.conversion.info,
-          overwrite: true,
-
-          // Override with the lastest source data and metadata information
-          source_data: this.info.globalState.source.results,
-          metadata: this.info.globalState.metadata.results
-        })
-
-        this.info.globalState.conversion.results = results
+        this.info.globalState.conversion.results = await this.runConversions()
 
         this.onTransition(1)
     })
@@ -52,7 +42,7 @@ export class GuidedStubPreviewPage extends Page {
         <h1 class="guided--text-sub-step">Conversion Preview</h1>
       </div>
       <div class="guided--section">
-      ${this.info.globalState.preview ? html`<pre>${this.info.globalState.preview}</pre>`: html`<p>Your conversion preview failed. Please try again.</p>`}
+      ${this.info.globalState.preview ? this.info.globalState.preview.map(preview => html`<h2 class="guided--text-sub-step">${preview.file}</h2><pre>${preview.result}</pre>`) : html`<p>Your conversion preview failed. Please try again.</p>`}
       <br>
       ${convertButton}
       </div>
