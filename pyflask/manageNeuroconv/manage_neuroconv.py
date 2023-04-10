@@ -23,21 +23,19 @@ def autodetect_source_data(info: dict) -> dict:
     expander = LocalPathExpander()
     out = expander.expand_paths(info)
 
-
     # Organize results by subject, session, and data type
     organized_output = {}
     for item in out:
-        subject_id = item['metadata']['Subject']['subject_id']
-        session_id = item['metadata']['NWBFile']['session_id']
+        subject_id = item["metadata"]["Subject"]["subject_id"]
+        session_id = item["metadata"]["NWBFile"]["session_id"]
         if subject_id not in organized_output:
             organized_output[subject_id] = {}
-        
+
         if session_id not in organized_output[subject_id]:
             organized_output[subject_id][session_id] = {}
 
         organized_output[subject_id][session_id] = item
 
-    print('Output', json.dumps(organized_output, indent=4))
     return organized_output
 
 
