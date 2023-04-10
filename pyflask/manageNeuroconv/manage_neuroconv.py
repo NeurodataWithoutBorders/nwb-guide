@@ -35,8 +35,7 @@ def autodetect_source_data(info: dict) -> dict:
         if session_id not in organized_output[subject_id]:
             organized_output[subject_id][session_id] = {}
 
-        for key, value in item['source_data'].items():
-            organized_output[subject_id][session_id][key] = value
+        organized_output[subject_id][session_id] = item
 
     print('Output', json.dumps(organized_output, indent=4))
     return organized_output

@@ -47,6 +47,23 @@ export class Page extends LitElement {
 
   save = () => save(this)
 
+  merge = (path, toMerge = {}, target =  this.info.globalState) => {
+
+    if (!Array.isArray(path)) path = path.split('.')
+
+    const key = path.pop() // Focus on the last key in the path
+    path.forEach(key => target = target[key])
+
+    // Deep merge objects
+    for (const [k, v] of Object.entries(toMerge)) {
+      if (typeof v === 'object' && !Array.isArray(v)) {
+        if (!target[key][k]) target[key][k] = v
+        else this.merge(`${k}`, v, target[key])
+      }
+      else target[key][k] = v
+    }
+  }
+
 //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.
   render() {
     return html`

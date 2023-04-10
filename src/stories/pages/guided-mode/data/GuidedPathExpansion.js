@@ -39,7 +39,9 @@ export class GuidedPathExpansionPage extends Page {
       const first_session = Object.keys(results[first_subject])[0]
       const interfaces_info = results[first_subject][first_session]
 
-      this.info.globalState.source.results = interfaces_info // Funnel down to one subject + session until we have a mechanism for representing all of them
+      // Funnel down to one subject + session until we have a mechanism for representing all of them
+      this.info.globalState.source.results = interfaces_info.source_data
+      this.info.globalState.metadata.results = interfaces_info.metadata 
 
       this.onTransition(1)
     }
