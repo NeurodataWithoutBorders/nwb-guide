@@ -157,8 +157,8 @@ export class Dashboard extends LitElement {
       if (previous.info.globalState) toPass.globalState = previous.info.globalState // Pass global state over if appropriate
       if (toSave && previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
       previous.active = false
-    } 
-    
+    }
+
     // On initial reload, load global state if you can
     if (isNested && !('globalState' in toPass)) toPass.globalState = page.load()
 

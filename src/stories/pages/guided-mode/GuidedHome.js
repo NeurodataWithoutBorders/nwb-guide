@@ -143,7 +143,7 @@ export class GuidedHomePage extends Page {
     resumeProgressButton.classList.add("loading");
     const datasetNameToResume = resumeProgressButton.parentNode.parentNode.querySelector(".progress-file-name").innerText;
     const global = this.load(datasetNameToResume)
-   
+
     //Return the user to the last page they exited on
     let pageToReturnTo = global["page-before-exit"];
     if (pageToReturnTo) this.onTransition(pageToReturnTo)
