@@ -6,7 +6,7 @@ import './guided-mode/GuidedHeader.js'
 import '../Footer.js'
 import '../Button'
 
-import { save } from '../../progress.js'
+import { get, save } from '../../progress.js'
 
 const componentCSS = `
 
@@ -46,6 +46,8 @@ export class Page extends LitElement {
   onTransition = () => {} // User-defined function
 
   save = () => save(this)
+
+  load = (datasetNameToResume = new URLSearchParams(window.location.search).get('project')) => this.info.globalState = get(datasetNameToResume)
 
 //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.
   render() {
