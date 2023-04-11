@@ -9,7 +9,7 @@ from pynwb.file import NWBFile, Subject
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
 from neuroconv.tools.data_transfers import automatic_dandi_upload
-from nwbinspector.register_checks import InspectorMessage
+from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
 from pathlib import Path
@@ -84,6 +84,20 @@ def get_check_function(check_function_name: str) -> callable:
 
     return check_function
 
+def run_check_function(check_function: callable, arg: dict) -> dict:
+    """
+    Function used to run an arbitrary NWB Inspector function
+    """
+
+    output = check_function(arg)
+    if isinstance(output, InspectorMessage):
+        if output.importance != Importance.ERROR:
+            output.importance = check_function.importance
+    elif output is not None:
+        for x in output:
+            x.importance = check_function.importance
+            
+    return output
 
 def validate_subject_metadata(
     subject_metadata: dict, check_function_name: str
@@ -97,8 +111,7 @@ def validate_subject_metadata(
     if isinstance(subject_metadata.get("date_of_birth"), str):
         subject_metadata["date_of_birth"] = datetime.fromisoformat(subject_metadata["date_of_birth"])
 
-    subject = Subject(**subject_metadata)
-    return check_function(subject)
+    return run_check_function(check_function, Subject(**subject_metadata))
 
 
 def validate_nwbfile_metadata(
@@ -113,9 +126,7 @@ def validate_nwbfile_metadata(
     if isinstance(nwbfile_metadata.get("session_start_time"), str):
         nwbfile_metadata["session_start_time"] = datetime.fromisoformat(nwbfile_metadata["session_start_time"])
 
-    testing_nwbfile = mock_NWBFile(**nwbfile_metadata)
-
-    return check_function(testing_nwbfile)
+    return run_check_function(check_function, mock_NWBFile(**nwbfile_metadata))
 
 
 def validate_metadata(metadata: dict, check_function_name: str) -> dict:
