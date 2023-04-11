@@ -84,6 +84,7 @@ def get_check_function(check_function_name: str) -> callable:
 
     return check_function
 
+
 def run_check_function(check_function: callable, arg: dict) -> dict:
     """
     Function used to run an arbitrary NWB Inspector function
@@ -96,8 +97,9 @@ def run_check_function(check_function: callable, arg: dict) -> dict:
     elif output is not None:
         for x in output:
             x.importance = check_function.importance
-            
+
     return output
+
 
 def validate_subject_metadata(
     subject_metadata: dict, check_function_name: str
