@@ -142,7 +142,7 @@ export class Dashboard extends LitElement {
   }
 
 
-  setMain(page, infoPassed = {}){
+  setMain(page, infoPassed = {}, toSave = true) {
 
 
     // Update Previous Page
@@ -154,14 +154,14 @@ export class Dashboard extends LitElement {
     if (previous === page) return // Prevent rerendering the same page
 
     if (previous) {
-      if (previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
+      if (toSave && previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
 
       previous.active = false
     }
 
     // Update Active Page
     this.#active = page
-    const toPass = { ...infoPassed}
+    const toPass = { ...infoPassed }
     if (previous) toPass.globalState = previous.info.globalState
 
     if (info.parent && info.section) {
@@ -252,7 +252,12 @@ export class Dashboard extends LitElement {
 
     if (page) {
       const { id, label } = page.info
-      history.pushState({ page: id, label }, label, (isElectron || isStorybook) ? `?page=${id}` : `${window.location.origin}/${id === '/' ? '' : id}`);
+      const queries = new URLSearchParams(window.location.search)
+      queries.set('page', id)
+      const projectName = queries.get('projectName')
+      const value = (isElectron || isStorybook) ? `?${queries}` : `${window.location.origin}/${id === '/' ? '' : id}?${queries}`
+      console.warn('Setting all queries', value, projectName)
+      history.pushState({ page: id, label, projectName }, label, value);
   }
   }
 
