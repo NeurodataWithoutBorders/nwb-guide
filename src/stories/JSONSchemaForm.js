@@ -275,7 +275,7 @@ export class JSONSchemaForm extends LitElement {
   }
 
   #parseStringToHeader = (headerStr) => {
-    return headerStr.split('-').filter(str => !!str).map(this.#capitalize).join(' ')
+    return headerStr.split('_').filter(str => !!str).map(this.#capitalize).join(' ')
   }
 
   #get = (path) => {
