@@ -609,7 +609,7 @@ export class JSONSchemaForm extends LitElement {
     let categorized = renderable.reduce((obj, [name, info]) => {
       const link = this.#getLink([...path, name])
       if (link) {
-        if (!obj.linked.includes(link)) obj.linked.push(this.#getLink([...path, name])) 
+        if (!obj.linked.includes(link)) obj.linked.push(this.#getLink([...path, name]))
       } else obj.general.push([name, info])
 
       return obj
@@ -650,7 +650,7 @@ export class JSONSchemaForm extends LitElement {
       `
     })
 
-  
+
     return [...rendered, ...renderedLinks]
   }
 
