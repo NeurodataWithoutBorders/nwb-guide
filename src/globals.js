@@ -5,7 +5,13 @@ import checkChromatic from 'chromatic/isChromatic';
 
 import lottie from 'lottie-web'
 
-export const joinPath = (...args) => path?.join(...args);
+export const joinPath = (...args) => path ? path.join(...args) : args.filter(str => str).join('/');
+
+
+export let runOnLoad = (fn) => {
+  if (document.readyState === 'complete') fn();
+  else window.addEventListener('load', fn);
+}
 
 // Base Request URL for Python Server
 export const baseUrl = `http://127.0.0.1:${port}`
@@ -14,8 +20,8 @@ export const baseUrl = `http://127.0.0.1:${port}`
 
 // Filesystem Management
 export const homeDirectory = app?.getPath("home") ?? '';
-export const progressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Progress");
-export const guidedProgressFilePath = joinPath(homeDirectory, "NWB GUIDE", "Guided-Progress");
+export const progressFilePath = homeDirectory ? joinPath(homeDirectory, "NWB GUIDE", "Progress") : '';
+export const guidedProgressFilePath = homeDirectory ? joinPath(homeDirectory, "NWB GUIDE", "Guided-Progress") : '';
 
 export const isStorybook = window.location.href.includes('iframe.html')
 

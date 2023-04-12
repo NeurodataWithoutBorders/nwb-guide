@@ -76,7 +76,6 @@ export class Dashboard extends LitElement {
 
   pagesById = {}
   #active;
-  #activeId;
 
   constructor (props = {}) {
     super()
@@ -109,7 +108,7 @@ export class Dashboard extends LitElement {
     window.onpushstate = window.onpopstate = (e) => {
       if(e.state){
         document.title = `${e.state.label} - ${this.name}`
-        this.setMain(this.pagesById[e.state.page], undefined, false)
+        this.setMain(this.pagesById[e.state.page], false)
       }
     }
 
@@ -142,29 +141,31 @@ export class Dashboard extends LitElement {
   }
 
 
-  setMain(page, infoPassed = {}){
+  setMain(page, toSave = true) {
 
 
     // Update Previous Page
-    // if (page.page) page = page.page
     const info = page.info
     const previous = this.#active
-    // if (!info.next && !info.previous && info.page instanceof HTMLElement) info = this.pagesById[info.page.id] // Get info from a direct page
 
     if (previous === page) return // Prevent rerendering the same page
 
-    if (previous) {
-      if (previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
+    const isNested = info.parent && info.section
 
+    const toPass = {}
+    if (previous) {
+      if (previous.info.globalState) toPass.globalState = previous.info.globalState // Pass global state over if appropriate
+      if (toSave && previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
       previous.active = false
     }
 
+    // On initial reload, load global state if you can
+    if (isNested && !('globalState' in toPass)) toPass.globalState = page.load()
+
     // Update Active Page
     this.#active = page
-    const toPass = { ...infoPassed}
-    if (previous) toPass.globalState = previous.info.globalState
 
-    if (info.parent && info.section) {
+    if (isNested) {
       this.subSidebar.sections = this.#getSections(info.parent.info.pages, toPass.globalState) // Update sidebar items (if changed)
       this.subSidebar.active = info.id // Update active item (if changed)
       this.sidebar.hide(true)
@@ -226,7 +227,6 @@ export class Dashboard extends LitElement {
 
     this.main.onTransition = (transition) => {
 
-      console.log('transition', transition)
       if (typeof transition === 'number'){
         const info = this.#active.info
         const sign = Math.sign(transition)
@@ -242,17 +242,19 @@ export class Dashboard extends LitElement {
       Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
       this.sidebar.pages = pages
 
-      console.log('active', active)
       if (active) this.setAttribute('activePage', active)
   }
 
   #activatePage = (id) => {
     const page = this.getPage(this.pagesById[id])
-    this.#activeId = id
 
     if (page) {
       const { id, label } = page.info
-      history.pushState({ page: id, label }, label, (isElectron || isStorybook) ? `?page=${id}` : `${window.location.origin}/${id === '/' ? '' : id}`);
+      const queries = new URLSearchParams(window.location.search)
+      queries.set('page', id)
+      const project = queries.get('project')
+      const value = (isElectron || isStorybook) ? `?${queries}` : `${window.location.origin}/${id === '/' ? '' : id}?${queries}`
+      history.pushState({ page: id, label, project }, label, value);
   }
   }
 
