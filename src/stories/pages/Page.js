@@ -7,6 +7,7 @@ import '../Footer.js'
 import '../Button'
 
 import { get, save } from '../../progress.js'
+import { dismissNotification, notify } from '../../globals.js';
 
 const componentCSS = `
 
@@ -41,6 +42,21 @@ export class Page extends LitElement {
       this.onSet()
       this.requestUpdate()
     }
+  }
+
+  #notifications = []
+
+  dismiss = (notification) => {
+    if (notification) dismissNotification(notification)
+    else {
+      this.#notifications.forEach(notification => dismissNotification(notification))
+      this.#notifications = []
+    }
+  }
+  
+  notify = (...args) => {
+    const note = notify(...args)
+    this.#notifications.push(note)
   }
 
   onTransition = () => {} // User-defined function

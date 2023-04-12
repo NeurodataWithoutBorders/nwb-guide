@@ -30,6 +30,8 @@ export class GuidedConversionOptionsPage extends Page {
         metadata: this.info.globalState.metadata.results,
         interfaces: this.info.globalState.source.interfaces
       })
+      
+      .catch(e => this.notify(e.message, 'error'))
 
       this.info.globalState.preview = results // Save the preview results
 

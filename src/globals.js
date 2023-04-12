@@ -103,7 +103,7 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 10000,
+      duration: 20000,
     },
     {
       type: "app_update_warning",
@@ -122,7 +122,7 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 10000,
+      duration: 20000,
     },
   ],
 });

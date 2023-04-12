@@ -154,6 +154,7 @@ export class Dashboard extends LitElement {
 
     const toPass = {}
     if (previous) {
+      previous.dismiss() // Dismiss all notifications for this page
       if (previous.info.globalState) toPass.globalState = previous.info.globalState // Pass global state over if appropriate
       if (toSave && previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
       previous.active = false

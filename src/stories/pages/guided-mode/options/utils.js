@@ -1,6 +1,6 @@
 
 import Swal from 'sweetalert2'
-import { notyf, baseUrl, notify } from '../../../../globals.js';
+import { baseUrl } from '../../../../globals.js';
 
 export const run = async (url, payload, options={}) => {
 
@@ -29,7 +29,6 @@ export const run = async (url, payload, options={}) => {
 
       if (results?.message) {
         const message = options.onError ? options.onError(results) : results.message
-        notify(message, 'error')
         throw new Error(`Request to ${url} failed: ${results.message}`)
       }
 

@@ -47,7 +47,7 @@ export class GuidedSourceDataPage extends Page {
 
       if (result.message) {
         const message = "Failed to get metadata with current source data. Please try again."
-        notify(message, 'error')
+        this.notify(message, 'error')
         throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
       }
 
