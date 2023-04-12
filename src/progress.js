@@ -37,10 +37,10 @@ export const update = (newDatasetName, previousDatasetName) => {
   });
 }
 
-export const save = (page) => {
+export const save = (page, overrides = {}) => {
 
   const globalState = page.info.globalState
-  let guidedProgressFileName = globalState.project.name
+  let guidedProgressFileName = overrides.globalState?.project?.name ?? globalState.project.name
 
   const params = new URLSearchParams(location.search);
   params.set('project', guidedProgressFileName);
@@ -58,7 +58,8 @@ export const save = (page) => {
 
   //Destination: HOMEDIR/NWBGUIDE/Guided-Progress
   globalState["last-modified"] = new Date();
-  globalState["page-before-exit"] = page.info.id;
+  globalState["page-before-exit"] = overrides.id ?? page.info.id;
+  console.log('BEFORE EXIT', globalState["page-before-exit"])
 
 
   var guidedFilePath = joinPath(guidedProgressFilePath, guidedProgressFileName + ".json");

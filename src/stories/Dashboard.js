@@ -108,7 +108,7 @@ export class Dashboard extends LitElement {
     window.onpushstate = window.onpopstate = (e) => {
       if(e.state){
         document.title = `${e.state.label} - ${this.name}`
-        this.setMain(this.pagesById[e.state.page], false)
+        this.setMain(this.pagesById[e.state.page])
       }
     }
 
@@ -141,7 +141,7 @@ export class Dashboard extends LitElement {
   }
 
 
-  setMain(page, toSave = true) {
+  setMain(page) {
 
 
     // Update Previous Page
@@ -155,7 +155,7 @@ export class Dashboard extends LitElement {
     const toPass = {}
     if (previous) {
       if (previous.info.globalState) toPass.globalState = previous.info.globalState // Pass global state over if appropriate
-      if (toSave && previous.info.parent && previous.info.section) previous.save() // Save only on nested pages
+      if (previous.info.parent && previous.info.section) previous.save(isNested ? page.info : undefined) // Auto-save on nested pages (with info overrides for appropriate redirect)
       previous.active = false
     }
 
