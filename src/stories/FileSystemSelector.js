@@ -57,7 +57,7 @@ export class FilesystemSelector extends LitElement {
 
   constructor (props = {}) {
     super()
-    if (props.onChange) this.onChange = props.onChange
+    if (props.onSelect) this.onSelect = props.onSelect
     this.type = props.type ?? 'file'
     this.value = props.value ?? ''
     this.dialogOptions = props.dialogOptions ?? {}
