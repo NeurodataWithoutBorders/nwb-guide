@@ -15,9 +15,9 @@ export class GuidedSourceDataPage extends Page {
 
   footer = {
     onNext: async () => {
-      // TODO: Insert validation here...
-      const valid = true
-      if (!valid) throw new Error('Invalid input')
+
+      this.save() // Save in case the conversion fails
+      await this.form.validate() // Will throw an error in the callback
 
       Swal.fire({
         title: "Getting metadata for source data",
@@ -31,10 +31,6 @@ export class GuidedSourceDataPage extends Page {
           Swal.showLoading();
         },
       })
-
-      // const previousResults = this.info.globalState.metadata.results
-
-      this.save() // Save in case the metadata request fails
 
       // NOTE: This clears all user-defined results
       const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
@@ -66,10 +62,11 @@ export class GuidedSourceDataPage extends Page {
 
   render() {
 
-    const form = new JSONSchemaForm({
+    this.form = new JSONSchemaForm({
       ...this.info.globalState.source,
       ignore: ['verbose'],
       onlyRequired: true,
+      showLevelOverride: 0
     })
 
     return html`
@@ -82,7 +79,7 @@ export class GuidedSourceDataPage extends Page {
         <h1 class="guided--text-sub-step">Source Data</h1>
       </div>
       <div class="guided--section">
-        ${form}
+        ${this.form}
       </div>
   </div>
     `;

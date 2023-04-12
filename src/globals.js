@@ -161,3 +161,10 @@ export const notyf = new Notyf({
     },
   ],
 });
+
+
+export const notify = (message, type="success", duration) => notyf.open({
+  type,
+  message,
+  duration,
+})

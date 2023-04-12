@@ -1,0 +1,36 @@
+{
+    "*": "check_{*}",
+
+    "name": false,
+
+    "NWBFile": {
+        "identifier": false,
+        "session_description": false,
+        "lab": false,
+        "protocol": false,
+        "surgery": false,
+        "virus": false,
+        "stimulus_notes": false,
+        "notes": false,
+        "data_collection": false,
+        "slices": false,
+        "pharmacology": false,
+        "session_id": false,
+        "related_publications": "check_doi_publications",
+        "experimenter": ["check_experimenter_form", "check_experimenter_exists"],
+        "session_start_time": ["check_session_start_time_future_date", "check_session_start_time_old_date"]
+    },
+
+    "Subject": {
+        "description": false,
+        "genotype": false,
+        "strain": false,
+        "weight": false,
+        "age__reference": false,
+        "subject_id": "check_subject_id_exists",
+        "species": ["check_subject_species_form", "check_subject_species_exists"],
+        "date_of_birth": false,
+        "age": ["check_subject_age", "check_subject_proper_age_range"],
+        "*": "check_subject_{*}"
+    }
+}

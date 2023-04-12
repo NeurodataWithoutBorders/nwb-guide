@@ -4,24 +4,28 @@ import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
+import { validateOnChange } from '../../../../validation/index.js';
+
+
 export class GuidedMetadataPage extends Page {
 
   constructor(...args) {
     super(...args)
   }
 
+  form;
+
   footer = {
     onNext: async () => {
-      // TODO: Insert validation here...
-      const valid = true
-      if (!valid) throw new Error('Invalid metadata')
-
+      this.save()
+      await this.form.validate() // Will throw an error in the callback
       this.onTransition(1)
     }
   }
 
 
   render() {
+
 
     const metadataResults = this.info.globalState.metadata.results
     console.log('this.info.globalState.metadata', this.info.globalState.metadata)
@@ -36,10 +40,29 @@ export class GuidedMetadataPage extends Page {
       }
     })
 
-    const form = new JSONSchemaForm({
+    this.form = new JSONSchemaForm({
       ...this.info.globalState.metadata,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
-      onlyRequired: false,
+      conditionalRequirements: [
+        [['Subject', 'age'], ['Subject', 'date_of_birth']]
+      ],
+      validateOnChange,
+      required: {
+
+        NWBFile: {
+          session_start_time: true
+        },
+
+        // // Custom final validation
+        // Subject: {
+        //   age: function () {
+        //     return !this['date_of_birth']
+        //   },
+        //   date_of_birth: function () {
+        //     return !this['age']
+        //   }
+        // },
+      }
     })
 
     return html`
@@ -52,7 +75,7 @@ export class GuidedMetadataPage extends Page {
         <h1 class="guided--text-sub-step">NWB File Metadata</h1>
       </div>
       <div class="guided--section">
-       ${form}
+       ${this.form}
       </div>
   </div>
     `;
