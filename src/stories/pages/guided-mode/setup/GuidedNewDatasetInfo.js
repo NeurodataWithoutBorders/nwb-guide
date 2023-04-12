@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { hasEntry, update } from '../../../../progress.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-import { notify } from '../../../../globals.js';
+import { dismissNotification, notify } from '../../../../globals.js';
 import { Page } from '../../Page.js';
 import { validateOnChange } from '../../../../validation/index.js';
 
@@ -19,6 +19,8 @@ export class GuidedNewDatasetPage extends Page {
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
   }
 
+  notification
+
   footer = {
     onNext: async () => {
 
@@ -27,7 +29,8 @@ export class GuidedNewDatasetPage extends Page {
       // Check validity of project name
       const name = this.state.name
       if (!name) {
-        notify("Please enter a project name.", 'error')
+        if (this.notification) dismissNotification(this.notification)
+        this.notification = notify("Please enter a project name.", 'error')
         return
       }
 

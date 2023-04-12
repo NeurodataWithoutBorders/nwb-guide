@@ -48,6 +48,7 @@ export const notyf = new Notyf({
   position: { x: "right", y: "bottom" },
   dismissible: true,
   ripple: false,
+  duration: 3000,
   types: [
     {
       type: "checking_server_is_live",
@@ -57,7 +58,6 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 1000,
     },
     {
       type: "checking_server_api_version",
@@ -67,7 +67,6 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 1000,
     },
     {
       type: "loading_internet",
@@ -77,17 +76,6 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 10000,
-    },
-    {
-      type: "ps_agent",
-      background: "grey",
-      icon: {
-        className: "fas fa-cogs",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 5000,
     },
     {
       type: "app_update",
@@ -97,17 +85,6 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 0,
-    },
-    {
-      type: "api_key_search",
-      background: "grey",
-      icon: {
-        className: "fas fa-users-cog",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 0,
     },
     {
       type: "success",
@@ -117,17 +94,6 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 800,
-    },
-    {
-      type: "final",
-      background: "#13716D",
-      icon: {
-        className: "fas fa-check-circle",
-        tagName: "i",
-        color: "white",
-      },
-      duration: 3000,
     },
     {
       type: "warning",
@@ -137,7 +103,7 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 3000,
+      duration: 10000,
     },
     {
       type: "app_update_warning",
@@ -147,7 +113,6 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 0,
     },
     {
       type: "error",
@@ -157,14 +122,16 @@ export const notyf = new Notyf({
         tagName: "i",
         color: "white",
       },
-      duration: 3000,
+      duration: 10000,
     },
   ],
 });
 
 
-export const notify = (message, type="success", duration) => notyf.open({
-  type,
-  message,
-  duration,
-})
+export const notify = (message, type="success", duration) => {
+  const info = { type, message }
+  if (duration) info.duration = duration
+  return notyf.open(info)
+}
+
+export const dismissNotification = (notification) => notyf.dismiss(notification)
