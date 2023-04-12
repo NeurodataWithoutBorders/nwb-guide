@@ -81,7 +81,7 @@ export const getEntries = () => {
 export const getAll = (progressFiles) => {
   return progressFiles.map((progressFile) => {
     let progressFilePath = joinPath(guidedProgressFilePath, progressFile);
-    return JSON.parse(fs ? fs.readdirSync(progressFilePath) : localStorage.getItem(progressFilePath));
+    return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
   })
 };
 
