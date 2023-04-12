@@ -53,7 +53,7 @@ export class Page extends LitElement {
       this.#notifications = []
     }
   }
-  
+
   notify = (...args) => {
     const note = notify(...args)
     this.#notifications.push(note)
