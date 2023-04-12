@@ -16,6 +16,8 @@ export class Sidebar extends LitElement {
       name: { type: String, reflect: true },
       logo: { type: String, reflect: true },
       subtitle: { type: String, reflect: true },
+
+      renderName: { type: Boolean, reflect: true },
     };
   }
 
@@ -27,6 +29,7 @@ export class Sidebar extends LitElement {
     this.name = props.name ?? ''
     this.logo = props.logo
     this.subtitle = props.subtitle ?? '0.0.1'
+    this.renderName = props.renderName ?? true
   }
 
   // This method turns off shadow DOM to allow for global styles (e.g. bootstrap)
@@ -36,7 +39,7 @@ export class Sidebar extends LitElement {
   }
 
   attributeChangedCallback(...args) {
-    const attrs = ['pages', 'name', 'subtitle']
+    const attrs = ['pages', 'name', 'subtitle', 'renderName']
     super.attributeChangedCallback(...args)
     if (attrs.includes(args[0])) this.requestUpdate()
   }
@@ -108,7 +111,8 @@ export class Sidebar extends LitElement {
 
   render() {
 
-    const logoNoName = (this.logo && !this.name)
+    const hasName = this.name && this.renderName
+    const logoNoName = (this.logo && !hasName)
 
     return html`
     <button type="button" id="sidebarCollapse" class="navbar-btn">
@@ -127,7 +131,7 @@ export class Sidebar extends LitElement {
                   src="${this.logo}"
                 />
               ` : ''}
-                ${this.name ? html`<h1 style="margin-bottom: 0;">${this.name}</h1>` : ''}
+                ${hasName ? html`<h1 style="margin-bottom: 0;">${this.name}</h1>` : ''}
                 ${this.subtitle ? html`<span id="subtitle" style="font-size: 14px; ${logoNoName ? `padding-top: 15px; text-align: center; width: 100%; display: block;` : ''}">${this.subtitle}</span>` : ''}
             </div>
             <!-- Sidebar Links -->

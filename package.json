@@ -1,6 +1,6 @@
 {
-  "name": "neuroconv-app",
-  "productName": "NeuroConv",
+  "name": "nwb-guide",
+  "productName": "NWB GUIDE",
   "version": "0.0.1",
   "description": "",
   "main": "main.js",
@@ -35,7 +35,7 @@
   "config": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/catalystneuro/neuroconv-app.git"
+    "url": "git+https://github.com/catalystneuro/nwb-guide.git"
   },
   "build": {
     "appId": "com.catalystneuro.nwbguide",
@@ -53,7 +53,7 @@
     "win": {
       "asar": false,
       "target": "nsis",
-      "icon": "src/assets/app-icon/win/icon.ico"
+      "icon": "src/assets/app-icon/logo-guide-draft.ico"
     },
     "mac": {
       "asar": true,
@@ -61,7 +61,7 @@
         "dmg",
         "zip"
       ],
-      "icon": "src/assets/app-icon/png/icon.png",
+      "icon": "src/assets/img/logo-guide-draft.png",
       "darkModeSupport": false,
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -76,7 +76,7 @@
     "linux": {
       "asar": true,
       "target": "AppImage",
-      "icon": "src/assets/app-icon/png/icon.png",
+      "icon": "src/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
           "from": "./pyflaskdist/app"
@@ -88,11 +88,11 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/assets/app-icon/win/icon.ico"
+      "installerIcon": "src/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
       "provider": "github",
-      "repository": "https://github.com/catalystneuro/neuroconv-app.git"
+      "repository": "https://github.com/catalystneuro/nwb-guide.git"
     }
   },
   "keywords": [],
@@ -131,15 +131,17 @@
     "electron-packager": "^14.0.6",
     "electron-rebuild": "^1.11.0",
     "prettier": "^2.3.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "storybook": "^7.0.0-beta.62"
   },
   "optionalDependencies": {
     "win-node-env": "^0.4.0"
   },
   "bugs": {
-    "url": "https://github.com/catalystneuro/neuroconv-app/issues"
+    "url": "https://github.com/catalystneuro/nwb-guide/issues"
   },
   "readme": "ERROR: No README data found!",
-  "homepage": "https://github.com/catalystneuro/neuroconv-app#readme",
-  "_id": "neuroconv-app@0.0.1"
+  "homepage": "https://github.com/catalystneuro/nwb-guide#readme",
+  "_id": "nwb-guide@0.0.1"
 }

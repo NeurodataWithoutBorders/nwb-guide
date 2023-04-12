@@ -4,11 +4,10 @@ import { html } from 'lit';
 import { Page } from '../Page.js';
 import { ProgressCard } from './ProgressCard.js';
 
-import lottie from 'lottie-web'
-
-import { notyf } from '../../../globals.js'
+import { startLottie } from '../../../globals.js';
 import * as progress from '../../../progress.js'
 import { newDataset } from '../../../assets/lotties/index.js';
+
 
 export class GuidedHomePage extends Page {
 
@@ -143,29 +142,10 @@ export class GuidedHomePage extends Page {
   resume = async (resumeProgressButton) => {
     resumeProgressButton.classList.add("loading");
     const datasetNameToResume = resumeProgressButton.parentNode.parentNode.querySelector(".progress-file-name").innerText;
-    const datasetResumeJsonObj = await progress.get(datasetNameToResume);
-
-    // If the dataset had been previously successfully uploaded, check to make sure it exists on Pennsieve still.
-    if (datasetResumeJsonObj["previous-guided-upload-dataset-name"]) {
-      const previouslyUploadedName = datasetResumeJsonObj["previous-guided-upload-dataset-name"];
-      const datasetToResumeExistsOnPennsieve = await checkIfDatasetExistsOnPennsieve(
-        previouslyUploadedName
-      );
-      if (!datasetToResumeExistsOnPennsieve) {
-        notyf.open({
-          type: "error",
-          message: `The dataset ${previouslyUploadedName} was not found on Pennsieve therefore you can no longer modify this dataset via Guided Mode.`,
-          duration: 7000,
-        });
-        resumeProgressButton.classList.remove("loading");
-        return;
-      }
-    }
-
-    this.info.globalState = datasetResumeJsonObj
+    const global = this.load(datasetNameToResume)
 
     //Return the user to the last page they exited on
-    let pageToReturnTo = this.info.globalState["page-before-exit"];
+    let pageToReturnTo = global["page-before-exit"];
     if (pageToReturnTo) this.onTransition(pageToReturnTo)
     else throw new Error("No page to return to")
   }
@@ -173,19 +153,12 @@ export class GuidedHomePage extends Page {
 
   async updated(){
 
-    this.info.globalState = {} // Reset the global information
+    this.info.globalState = {} // Reset global state when navigating back to this page
 
     const htmlBase =  this.shadowRoot ?? this
     // this.content = (this.shadowRoot ?? this).querySelector("#content");
     const lottieContainer = htmlBase.querySelector("#new-dataset-lottie-container")
-    lottieContainer.innerHTML = "";
-    lottie.loadAnimation({
-      container: lottieContainer,
-      animationData: newDataset,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-    });
+    startLottie(lottieContainer, newDataset)
 
     // Render existing conversion pipelines
   // guidedResetProgressVariables();
@@ -194,12 +167,12 @@ export class GuidedHomePage extends Page {
 
   const datasetCardsRadioButtonsContainer = htmlBase.querySelector("#guided-div-dataset-cards-radio-buttons");
 
-  const guidedSavedProgressFiles = await progress.getEntries()
+  const guidedSavedProgressFiles = progress.getEntries()
 
   //render progress resumption cards from progress file array on first page of guided mode
   if (guidedSavedProgressFiles.length != 0) {
     datasetCardsRadioButtonsContainer.classList.remove("hidden");
-    const progressFileData = await progress.getAll(guidedSavedProgressFiles);
+    const progressFileData = progress.getAll(guidedSavedProgressFiles);
     this.renderProgressCards(progressFileData);
     htmlBase.querySelector("#guided-button-view-datasets-in-progress").click();
   } else {

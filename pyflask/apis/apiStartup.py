@@ -1,7 +1,6 @@
-from startup import echo, get_api_version
+from startup import get_api_version
 from flask_restx import Resource
 from namespaces import get_namespace, NamespaceEnum
-from flask import request
 
 api = get_namespace(NamespaceEnum.STARTUP)
 
