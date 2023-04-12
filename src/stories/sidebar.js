@@ -113,7 +113,6 @@ export class Sidebar extends LitElement {
 
     const hasName = this.name && this.renderName
     const logoNoName = (this.logo && !hasName)
-    console.log('hasName', hasName, this.renderName)
 
     return html`
     <button type="button" id="sidebarCollapse" class="navbar-btn">
