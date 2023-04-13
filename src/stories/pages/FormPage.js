@@ -61,7 +61,19 @@ export class GuidedFormPage extends Page {
 
     form.style.width = '100%'
 
-    return html`<div class="guided--section">${form}</div>`;
+    return html`
+    <div
+    id="guided-mode-starting-container"
+    class="guided--main-tab"
+    data-parent-tab-name="Dataset Structure"
+  >
+    <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
+      <div class="title">
+        <h1 class="guided--text-sub-step">Data Formats</h1>
+      </div>
+      <div class="guided--section">${form}</div>
+  </div>
+    `;
   }
 };
 
