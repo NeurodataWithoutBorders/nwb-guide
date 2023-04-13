@@ -37,10 +37,14 @@ export const update = (newDatasetName, previousDatasetName) => {
   });
 }
 
-export const save = (page) => {
+export const save = (page, overrides = {}) => {
 
   const globalState = page.info.globalState
-  let guidedProgressFileName = globalState.project.name
+  let guidedProgressFileName = overrides.globalState?.project?.name ?? globalState.project.name
+
+  //return if guidedProgressFileName is not a string greater than 0
+  if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return
+
 
   const params = new URLSearchParams(location.search);
   params.set('project', guidedProgressFileName);
@@ -50,16 +54,9 @@ export const save = (page) => {
 
   window.history.pushState(history.state, null, value);
 
-  //return if guidedProgressFileName is not a strnig greater than 0
-  if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) {
-    console.warn("Failed to save because guidedProgressFileName is not a string or is empty.");
-    return
-  }
-
   //Destination: HOMEDIR/NWBGUIDE/Guided-Progress
   globalState["last-modified"] = new Date();
-  globalState["page-before-exit"] = page.info.id;
-
+  globalState["page-before-exit"] = overrides.id ?? page.info.id;
 
   var guidedFilePath = joinPath(guidedProgressFilePath, guidedProgressFileName + ".json");
 

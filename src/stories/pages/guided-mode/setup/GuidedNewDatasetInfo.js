@@ -61,6 +61,8 @@ export class GuidedNewDatasetPage extends Page {
 
   render() {
 
+    this.state = {} // Clear local state on each render
+
     let projectGlobalState = this.info.globalState.project
     if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {}
 
