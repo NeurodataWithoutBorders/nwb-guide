@@ -1,14 +1,14 @@
 
 
 import { html } from 'lit';
-import { Page } from '../../Page.js';
 
 import Swal from 'sweetalert2'
 import { notyf, baseUrl } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { InstanceManager } from '../../../InstanceManager.js';
+import { ManagedPage } from './ManagedPage.js';
 
-export class GuidedSourceDataPage extends Page {
+export class GuidedSourceDataPage extends ManagedPage {
 
   constructor(...args) {
     super(...args)
@@ -91,20 +91,6 @@ export class GuidedSourceDataPage extends Page {
     }
   }
 
-  #getDetails = (path) => {
-    let details = {}
-      if (path.length !== 2) throw new Error("Path must have {subject}/{session} form.")
-      try {
-        const subSplit = path[0].split('-')
-        const sesSplit = path[1].split('-')
-        details.subject = subSplit.length === 2 ? subSplit[1] : subSplit[0]
-        details.session = sesSplit.length === 2 ? sesSplit[1] : sesSplit[0]
-      } catch (e) {
-        throw new Error("Path must have {subject}/{session} form.")
-      }
-      return details
-    }
-
   render() {
 
     this.forms = this.mapSessions(this.createForm)
@@ -122,7 +108,7 @@ export class GuidedSourceDataPage extends Page {
       instances,
       onAdded: (path) => {
 
-        let details = this.#getDetails(path)
+        let details = this.getDetails(path)
 
         const info = this.addSession(details)
 
@@ -139,8 +125,7 @@ export class GuidedSourceDataPage extends Page {
         }
       },
       onRemoved: (_, path) => {
-        console.log(path)
-        let details = this.#getDetails(path)
+        let details = this.getDetails(path)
         this.removeSession(details)
       }
     })

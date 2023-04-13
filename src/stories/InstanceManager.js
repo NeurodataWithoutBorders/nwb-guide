@@ -132,6 +132,7 @@ export class InstanceManager extends LitElement {
     if (props.renderInstance) this.renderInstance = props.renderInstance
     if (props.onAdded) this.onAdded = props.onAdded
     if (props.onRemoved) this.onRemoved = props.onRemoved
+    this.add = props.add ?? true
   }
 
   renderInstance = (_, value) => value
@@ -270,7 +271,7 @@ export class InstanceManager extends LitElement {
           </li>
         `)}
       </ul>
-      <div id="new-manager">
+      ${this.add ? html`<div id="new-manager">
         <div id="new-info" class="item" hidden>
           <input></input>
           <nwb-button size="small" primary @click=${() => {
@@ -312,7 +313,7 @@ export class InstanceManager extends LitElement {
               width: '100%'
             }}>Add ${this.instanceType}</nwb-button>
         </div>
-      </div>
+      </div>` : ''}
       
       </div>
       <div id="instance-display">

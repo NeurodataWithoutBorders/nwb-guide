@@ -1,19 +1,18 @@
 
 
 import { html } from 'lit';
-import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 import { validateOnChange } from '../../../../validation/index.js';
+import { InstanceManager } from '../../../InstanceManager.js';
+import { ManagedPage } from './ManagedPage.js';
 
 
-export class GuidedMetadataPage extends Page {
+export class GuidedMetadataPage extends ManagedPage {
 
   constructor(...args) {
     super(...args)
   }
-
-  form;
 
   footer = {
     onNext: async () => {
@@ -37,32 +36,41 @@ export class GuidedMetadataPage extends Page {
     return info
   }
 
-  render() {
 
-    this.forms = this.mapSessions(({subject, session, info }) => {
+  createForm = ({subject, session, info}) => {
+    const results = this.populateWithProjectMetadata(info.metadata)
 
-      const results = this.populateWithProjectMetadata(info.metadata)
-
-      const form = new JSONSchemaForm({
-        schema: this.info.globalState.schema.metadata[subject][session],
-        results,
-        ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
-        validateOnChange,
-        onlyRequired: false,
-      })
-
-      return {
-        subject,
-        session,
-        form
-      }
+    const form = new JSONSchemaForm({
+      schema: this.info.globalState.schema.metadata[subject][session],
+      results,
+      ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
+      validateOnChange,
+      onlyRequired: false,
     })
 
-    const formsToRender = this.forms.map(info => {
-      return html`
-        <h2 class="guided--text-sub-step">Subject: ${info.subject} - Session: ${info.session}</h2>
-        ${info.form}
-      `
+    return {
+      subject,
+      session,
+      form
+    }
+  }
+
+  render() {
+
+
+    this.forms = this.mapSessions(this.createForm)
+
+    let instances = {}
+    this.forms.forEach(({ subject, session, form }) => {
+      if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {}
+      instances[`sub-${subject}`][`ses-${session}`] = form
+    })
+
+    const manager = new InstanceManager({
+      header: 'File Metadata',
+      instanceType: 'Session',
+      instances,
+      add: false,
     })
 
     return html`
@@ -75,7 +83,7 @@ export class GuidedMetadataPage extends Page {
         <h1 class="guided--text-sub-step">NWB File Metadata</h1>
       </div>
       <div class="guided--section">
-       ${formsToRender}
+       ${manager}
       </div>
   </div>
     `;
