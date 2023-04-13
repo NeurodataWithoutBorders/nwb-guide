@@ -564,7 +564,7 @@ export class JSONSchemaForm extends LitElement {
 
       // Render properties in the sub-schema
       return html`
-    <div style="margin-top: 40px;">
+    <div data-section-name="${name}" data-depth="${path.length}" style="margin-top: 40px;">
       <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
       <hr/>
       ${this.#render(info, results[name],  required[name], [...path, name])}
@@ -597,7 +597,8 @@ export class JSONSchemaForm extends LitElement {
     })
   }
 
-  async updated() {
+  updated() {
+
     this.#checkAllInputs((this.validateEmptyValues) ? undefined : (el) => el.value !== '') // Check all inputs with non-empty values on render
   }
 

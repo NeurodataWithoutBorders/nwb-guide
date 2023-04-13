@@ -44,6 +44,7 @@ export class Main extends LitElement {
   }
 
   onTransition = () => {} // user-defined function
+  updatePages = () => {} // user-defined function
 
   #queue = []
 
@@ -52,6 +53,7 @@ export class Main extends LitElement {
 
     if (typeof page === 'function') page = new page()
     page.onTransition = this.onTransition;
+    page.updatePages = this.updatePages;
 
     if (this.content) this.toRender = toRender.page ? toRender : { page }
     else this.#queue.push(page)

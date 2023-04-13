@@ -28,7 +28,7 @@ export class GuidedMetadataPage extends Page {
 
 
     const metadataResults = this.info.globalState.metadata.results
-    console.log('this.info.globalState.metadata', this.info.globalState.metadata)
+    console.log('this.info.globalState.metadata', this.info.globalState.metadata, this.info.globalState, this.info.globalState.project)
 
     // Merge project-wide data into metadata
     const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
@@ -48,20 +48,9 @@ export class GuidedMetadataPage extends Page {
       ],
       validateOnChange,
       required: {
-
         NWBFile: {
           session_start_time: true
         },
-
-        // // Custom final validation
-        // Subject: {
-        //   age: function () {
-        //     return !this['date_of_birth']
-        //   },
-        //   date_of_birth: function () {
-        //     return !this['age']
-        //   }
-        // },
       }
     })
 
@@ -71,9 +60,6 @@ export class GuidedMetadataPage extends Page {
     class="guided--main-tab"
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-      <div class="title">
-        <h1 class="guided--text-sub-step">NWB File Metadata</h1>
-      </div>
       <div class="guided--section">
        ${this.form}
       </div>

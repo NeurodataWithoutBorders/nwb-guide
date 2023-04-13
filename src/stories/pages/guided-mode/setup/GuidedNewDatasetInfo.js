@@ -7,6 +7,9 @@ import { notify } from '../../../../globals.js';
 import { Page } from '../../Page.js';
 import { validateOnChange } from '../../../../validation/index.js';
 
+import projectMetadataSchema from './project-metadata.schema.json' assert { type: 'json' };
+import { schemaToPages } from '../../FormPage.js';
+
 export class GuidedNewDatasetPage extends Page {
 
   constructor(...args) {
@@ -68,122 +71,16 @@ export class GuidedNewDatasetPage extends Page {
 
     Object.assign(this.state, projectGlobalState) // Initialize state with global state
 
-    const schema = {
-      properties: {
-        name: {
-          type: 'string',
-          description: 'Enter the name of your project.',
-          placeholder: "Enter project name here"
-        },
+    // Properly clone the schema to produce multiple pages from the project metadata schema
+    const schema = { ...projectMetadataSchema }
+    schema.properties = {...schema.properties}
 
-        // Transposed from Metadata (manual entry)
-        NWBFile: {
-          type: "object",
-          properties: {
+    const pages = schemaToPages.call(this, schema, projectGlobalState, {
+      validateEmptyValues: false,
+    })
 
-              institution: {
-                type: 'string',
-                description: 'Enter the name of your institution.',
-                placeholder: "Enter institution name here"
-              },
-              lab: {
-                type: 'string',
-                description: 'Enter the name of your lab.',
-                placeholder: "Enter lab name here"
-              },
-              experimenter: {
-                type: 'array',
-                description: 'Enter the names of the experimenters.',
-                placeholder: "Enter experimenter name heres",
-                items: {
-                  type: 'string',
-                },
-              },
+    pages.forEach(page => this.addPage(page.info.label, page))
 
-            related_publications: {
-              type: 'array',
-              description: 'Enter DOIs of relevant publications.',
-              placeholder: "Enter publication DOIs here",
-              items: {
-                type: 'string',
-              }
-            },
-
-            experiment_description: {
-              type: 'string',
-              format: 'long',
-              description: 'Enter a description of the experiment.',
-              placeholder: "Enter experiment description here"
-            },
-
-            keywords: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-              description: 'Enter keywords for the experiment.',
-              placeholder: "Enter experiment keywords here"
-            },
-
-            protocol: {
-              type: 'string',
-              description: 'Enter a description of the protocol.',
-              placeholder: "Enter protocol description here"
-            },
-            surgery: {
-              type: 'string',
-              description: 'Enter a description of the surgery.',
-              placeholder: "Enter surgery description here"
-            },
-            virus: {
-              type: 'string',
-              description: 'Enter a description of the virus.',
-              placeholder: "Enter virus description here"
-            },
-            stimulus_notes: {
-              type: 'string',
-              description: 'Enter a description of the stimulus.',
-              placeholder: "Enter stimulus description here"
-            },
-          }
-      },
-
-        Subject: {
-          type: 'object',
-          properties: {
-            species: {
-              type: 'string',
-              description: 'Enter a common species for your subjects.',
-              placeholder: "Enter species here"
-            },
-            description: {
-              type: 'string',
-              description: 'Enter a common description for your subjects.',
-              placeholder: "Enter subject description here"
-            },
-            genotype: {
-              type: 'string',
-              description: 'Enter a common genotype for your subjects.',
-              placeholder: "Enter genotype here"
-            },
-            strain: {
-              type: 'string',
-              description: 'Enter a common strain for your subjects.',
-              placeholder: "Enter strain here"
-            },
-            sex: {
-              type: 'string',
-              enum: ["M", "F", "U", "O"],
-              description: 'Enter a common sex for your subjects.',
-              placeholder: "Enter sex here"
-            }
-          }
-        }
-
-
-      },
-      required: ['name']
-    }
 
     const form = this.form = new JSONSchemaForm({
       schema,
@@ -193,7 +90,6 @@ export class GuidedNewDatasetPage extends Page {
     })
 
     form.style.width = '100%'
-
 
     return html`
         <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
