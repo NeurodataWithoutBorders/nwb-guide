@@ -3,11 +3,10 @@ import Swal from 'sweetalert2'
 import {
   joinPath,
   guidedProgressFilePath,
-  isStorybook,
   runOnLoad,
   reloadPageToHome,
 } from "./globals.js";
-import { fs, isElectron } from "./electron/index.js";
+import { fs } from "./electron/index.js";
 
 export const hasEntry = (name) => {
   const existingProgressNames = getEntries();

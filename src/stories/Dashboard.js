@@ -119,7 +119,7 @@ export class Dashboard extends LitElement {
     return this;
   }
 
-  attributeChangedCallback(key, previous, latest) {
+  attributeChangedCallback(key, _, latest) {
     super.attributeChangedCallback(...arguments)
     if (this.sidebar && (key === 'name' || key === 'logo' || key === 'subtitle')) this.sidebar[key] = latest
     else if (key === 'renderNameInSidebar') this.sidebar.renderName = latest === 'true' || latest === true
@@ -127,6 +127,8 @@ export class Dashboard extends LitElement {
     else if (key.toLowerCase() === 'activepage') {
 
       if (this.#active && this.#active.info.parent && this.#active.info.section) this.#active.save() // Always properly saves the page
+
+      while (latest && !this.pagesById[latest]) latest = latest.split('/').slice(0, -1).join('/') // Trim off last character until you find a page
 
       this.sidebar.selectItem(latest) // Just highlight the item
       this.sidebar.initialize = false
@@ -253,11 +255,7 @@ export class Dashboard extends LitElement {
     Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
     this.sidebar.pages = pages
 
-    if (active) {
-      let ogActive = active
-      while (active && !this.pagesById[active]) active = active.split('/').slice(0, -1).join('/') // Trim off last character until you find a page
-      this.setAttribute('activePage', active ?? ogActive)
-    }
+    if (active) this.setAttribute('activePage', active)
   }
 
   #activatePage = (id) => {
