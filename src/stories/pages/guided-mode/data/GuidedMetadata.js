@@ -4,18 +4,21 @@ import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
+import { validateOnChange } from '../../../../validation/index.js';
+
+
 export class GuidedMetadataPage extends Page {
 
   constructor(...args) {
     super(...args)
   }
 
+  form;
+
   footer = {
     onNext: async () => {
-      // TODO: Insert validation here...
-      const valid = true
-      if (!valid) throw new Error('Invalid metadata')
-
+      this.save()
+      await Promise.all(this.forms.map(({ form }) => form.validate())) // Will throw an error in the callback
       this.onTransition(1)
     }
   }
@@ -36,7 +39,7 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
-    const forms = this.mapSessions(({subject, session, info }) => {
+    this.forms = this.mapSessions(({subject, session, info }) => {
 
       const results = this.populateWithProjectMetadata(info.metadata)
 
@@ -44,12 +47,21 @@ export class GuidedMetadataPage extends Page {
         schema: this.info.globalState.schema.metadata[subject][session],
         results,
         ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
+        validateOnChange,
         onlyRequired: false,
       })
 
+      return {
+        subject,
+        session,
+        form
+      }
+    })
+
+    const formsToRender = this.forms.map(info => {
       return html`
-        <h2 class="guided--text-sub-step">Subject: ${subject} - Session: ${session}</h2>
-        ${form}
+        <h2 class="guided--text-sub-step">Subject: ${info.subject} - Session: ${info.session}</h2>
+        ${info.form}
       `
     })
 
@@ -63,7 +75,7 @@ export class GuidedMetadataPage extends Page {
         <h1 class="guided--text-sub-step">NWB File Metadata</h1>
       </div>
       <div class="guided--section">
-       ${forms}
+       ${formsToRender}
       </div>
   </div>
     `;

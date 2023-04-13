@@ -11,7 +11,19 @@ export class GuidedConversionOptionsPage extends Page {
   }
 
   footer = {
-    next: false
+    next: 'Run Conversion Preview',
+    onNext: async () => {
+      this.save() // Save in case the conversion fails
+      await this.form.validate() // Will throw an error in the callback
+
+      delete this.info.globalState.preview // Clear the preview results
+
+      const results = await this.runConversions({ stub_test: true })
+
+      this.info.globalState.preview = results // Save the preview results
+
+      this.onTransition(1)
+    }
   }
 
   render() {
@@ -33,7 +45,7 @@ export class GuidedConversionOptionsPage extends Page {
       }, results: null}
     }
 
-    const form = new JSONSchemaForm({
+    this.form = new JSONSchemaForm({
       schema,
       results: conversionGlobalState.info,
       dialogType: 'showOpenDialog',
@@ -45,23 +57,7 @@ export class GuidedConversionOptionsPage extends Page {
 
     const convertButton = document.createElement('nwb-button')
     convertButton.textContent = 'Run Conversion Preview'
-    convertButton.addEventListener('click', async () => {
-
-        // TODO: Insert validation here...
-        const valid = true
-        if (!valid) throw new Error('Invalid input')
-
-        delete this.info.globalState.preview // Clear the preview results
-
-        this.save() // Save in case the conversion fails
-
-        const results = await this.runConversions({ stub_test: true })
-
-
-        this.info.globalState.preview = results // Save the preview results
-
-        this.onTransition(1)
-    })
+    convertButton.addEventListener('click', this.footer.onNext)
 
     return html`
   <div
@@ -74,7 +70,7 @@ export class GuidedConversionOptionsPage extends Page {
       </div>
       <div class="guided--section">
       <h3>NWB File Path</h3>
-      ${form}
+      ${this.form}
       <br>
       ${convertButton}
       </div>

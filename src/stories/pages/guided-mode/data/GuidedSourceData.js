@@ -15,9 +15,9 @@ export class GuidedSourceDataPage extends Page {
 
   footer = {
     onNext: async () => {
-      // TODO: Insert validation here...
-      const valid = true
-      if (!valid) throw new Error('Invalid input')
+
+      this.save() // Save in case the conversion fails
+      await Promise.all(this.forms.map(({ form }) => form.validate())) // Will throw an error in the callback
 
       Swal.fire({
         title: "Getting metadata for source data",
@@ -76,19 +76,26 @@ export class GuidedSourceDataPage extends Page {
 
   render() {
 
-    const forms = this.mapSessions(({ subject, session, info }) => {
+    this.forms = this.mapSessions(({ subject, session, info }) => {
       const form = new JSONSchemaForm({
         schema: this.info.globalState.schema.source_data,
         results: info.source_data,
         ignore: ['verbose'],
         onlyRequired: true,
+        // showLevelOverride: 0
       })
 
-      return html`
-        <h2 class="guided--text-sub-step">Subject: ${subject} - Session: ${session}</h2>
-        ${form}
-      `
+      return {
+        subject,
+        session,
+        form
+      }
     })
+
+    const formsToRender = this.forms.map(info => html`
+      <h2 class="guided--text-sub-step">Subject: ${info.subject} - Session: ${info.session}</h2>
+      ${info.form}
+    `)
 
     // const form = new JSONSchemaForm({
     //   ...this.info.globalState.source,
@@ -106,7 +113,7 @@ export class GuidedSourceDataPage extends Page {
         <h1 class="guided--text-sub-step">Source Data</h1>
       </div>
       <div class="guided--section">
-        ${forms}
+        ${formsToRender}
       </div>
   </div>
     `;

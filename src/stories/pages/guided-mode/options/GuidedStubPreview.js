@@ -10,27 +10,19 @@ export class GuidedStubPreviewPage extends Page {
   }
 
   footer = {
-    next: false
+    next: 'Run Conversion',
+    onNext: async () => {
+      this.save() // Save in case the conversion fails
+      this.info.globalState.conversion.results = await this.runConversions()
+      this.onTransition(1)
+    }
   }
 
   render() {
 
     const convertButton = document.createElement('nwb-button')
     convertButton.textContent = 'Run Full Conversion'
-    convertButton.addEventListener('click', async () => {
-
-        // TODO: Insert validation here...
-        const valid = true
-        if (!valid) throw new Error('Invalid input')
-
-        this.info.globalState.conversion.results = null
-
-        this.save()
-
-        this.info.globalState.conversion.results = await this.runConversions()
-
-        this.onTransition(1)
-    })
+    convertButton.addEventListener('click', this.footer.onNext)
 
     return html`
   <div
