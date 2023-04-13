@@ -59,8 +59,6 @@ export const save = (page, overrides = {}) => {
   //Destination: HOMEDIR/NWBGUIDE/Guided-Progress
   globalState["last-modified"] = new Date();
   globalState["page-before-exit"] = overrides.id ?? page.info.id;
-  console.log('BEFORE EXIT', globalState["page-before-exit"])
-
 
   var guidedFilePath = joinPath(guidedProgressFilePath, guidedProgressFileName + ".json");
 
