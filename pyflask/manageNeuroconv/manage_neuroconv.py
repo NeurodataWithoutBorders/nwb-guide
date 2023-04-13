@@ -14,8 +14,6 @@ from nwbinspector.nwbinspector import configure_checks, load_config
 from datetime import datetime
 
 from pathlib import Path
-
-from pathlib import Path
 import os
 
 
