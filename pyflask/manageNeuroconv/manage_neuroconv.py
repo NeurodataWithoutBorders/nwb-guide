@@ -4,13 +4,14 @@ from neuroconv import datainterfaces, NWBConverter
 
 import json
 from neuroconv.utils import NWBMetaDataEncoder, LocalPathExpander
-import nwbinspector
 from pynwb.file import NWBFile, Subject
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
 from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
+
+from datetime import datetime
 
 from pathlib import Path
 
