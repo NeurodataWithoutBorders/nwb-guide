@@ -14,13 +14,10 @@ export class GuidedNewDatasetPage extends Page {
 
   constructor(...args) {
     super(...args)
+    this.updateForm() // Register nested pages on creation—not just with data
   }
 
   state = {}
-
-  updated(){
-    // this.content = (this.shadowRoot ?? this).querySelector("#content");
-  }
 
   footer = {
     onNext: async () => {
@@ -62,33 +59,34 @@ export class GuidedNewDatasetPage extends Page {
   }
 }
 
+updateForm = () => {
+
+  let projectGlobalState = this.info.globalState.project
+  if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {}
+
+   // Properly clone the schema to produce multiple pages from the project metadata schema
+   const schema = { ...projectMetadataSchema }
+   schema.properties = {...schema.properties}
+
+   const pages = schemaToPages.call(this, schema, projectGlobalState, { validateEmptyValues: false })
+
+   pages.forEach(page => this.addPage(page.info.label, page))
+
+   this.form = new JSONSchemaForm({
+     schema,
+     results: this.state,
+     validateEmptyValues: false,
+     validateOnChange
+   })
+
+   return this.form
+}
+
   render() {
 
     this.state = {} // Clear local state on each render
 
-    let projectGlobalState = this.info.globalState.project
-    if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {}
-
-    Object.assign(this.state, projectGlobalState) // Initialize state with global state
-
-    // Properly clone the schema to produce multiple pages from the project metadata schema
-    const schema = { ...projectMetadataSchema }
-    schema.properties = {...schema.properties}
-
-    const pages = schemaToPages.call(this, schema, projectGlobalState, {
-      validateEmptyValues: false,
-    })
-
-    pages.forEach(page => this.addPage(page.info.label, page))
-
-
-    const form = this.form = new JSONSchemaForm({
-      schema,
-      results: this.state,
-      validateEmptyValues: false,
-      validateOnChange
-    })
-
+    const form = this.updateForm()
     form.style.width = '100%'
 
     return html`

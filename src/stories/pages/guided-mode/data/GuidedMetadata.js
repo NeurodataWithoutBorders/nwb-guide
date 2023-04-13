@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { Page } from '../../Page.js';
-import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 import { validateOnChange } from '../../../../validation/index.js';
+import { schemaToPages } from '../../FormPage.js';
 
 
 export class GuidedMetadataPage extends Page {
@@ -13,35 +13,25 @@ export class GuidedMetadataPage extends Page {
     super(...args)
   }
 
-  form;
-
-  footer = {
-    onNext: async () => {
-      this.save()
-      await this.form.validate() // Will throw an error in the callback
-      this.onTransition(1)
-    }
-  }
-
-
   render() {
 
-
-    const metadataResults = this.info.globalState.metadata.results
-    console.log('this.info.globalState.metadata', this.info.globalState.metadata, this.info.globalState, this.info.globalState.project)
+    const results = this.info.globalState.metadata.results
 
     // Merge project-wide data into metadata
     const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
     toMerge.forEach(([key, value]) => {
-      let internalMetadata = metadataResults[key]
-      if (!metadataResults[key]) internalMetadata = metadataResults[key] = {}
+      let internalMetadata = results[key]
+      if (!results[key]) internalMetadata = results[key] = {}
       for (let key in value) {
         if (!(key in internalMetadata)) internalMetadata[key] = value[key] // Prioritize existing results (cannot override with new information...)
       }
     })
 
-    this.form = new JSONSchemaForm({
-      ...this.info.globalState.metadata,
+    // Properly clone the schema to produce multiple pages from the project metadata schema
+    const schema = { ...this.info.globalState.metadata.schema }
+    schema.properties = {...schema.properties}
+
+    const pages = schemaToPages.call(this, schema, results, {
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       conditionalRequirements: [
         [['Subject', 'age'], ['Subject', 'date_of_birth']]
@@ -54,17 +44,9 @@ export class GuidedMetadataPage extends Page {
       }
     })
 
-    return html`
-  <div
-    id="guided-mode-starting-container"
-    class="guided--main-tab"
-  >
-    <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-      <div class="guided--section">
-       ${this.form}
-      </div>
-  </div>
-    `;
+    pages.forEach(page => this.addPage(page.info.label, page))
+
+    this.onTransition(1) // Immediately transition to next page
   }
 };
 
