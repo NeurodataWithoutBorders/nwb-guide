@@ -556,7 +556,35 @@ export class JSONSchemaForm extends LitElement {
 
     return renderable.length === 0 ?
       html`<p>No properties to render</p>` :
-      renderable.map(([name, info]) => {
+      renderable
+
+      // Sort alphabetically
+      .sort(([name], [name2])=> {
+        if (name < name2) {
+          return -1;
+        }
+        if (name > name2) {
+          return 1;
+        }
+        return 0;
+      })
+
+      // Sort required properties to the top
+      .sort(([name], [name2]) => {
+        if (required[name] && !required[name2]) return -1 // first required
+        if (!required[name] && required[name2]) return 1 // second required
+        return 0 // Both required
+      })
+
+       // Prioritise properties without other properties
+      .sort(([_, info], [__, info2]) => {
+        if (!info.properties && !info2.properties) return 0
+        else if (!info.properties) return -1
+        else if (!info2.properties) return 1
+      })
+
+      // Render each property
+      .map(([name, info]) => {
 
 
       // Directly render the interactive property element
