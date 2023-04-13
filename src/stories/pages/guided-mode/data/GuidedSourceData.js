@@ -6,6 +6,7 @@ import { Page } from '../../Page.js';
 import Swal from 'sweetalert2'
 import { notyf, baseUrl } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
+import { InstanceManager } from '../../../InstanceManager.js';
 
 export class GuidedSourceDataPage extends Page {
 
@@ -74,35 +75,76 @@ export class GuidedSourceDataPage extends Page {
     }
   }
 
-  render() {
-
-    this.forms = this.mapSessions(({ subject, session, info }) => {
-      const form = new JSONSchemaForm({
-        schema: this.info.globalState.schema.source_data,
-        results: info.source_data,
-        ignore: ['verbose'],
-        onlyRequired: true,
-        // showLevelOverride: 0
-      })
-
-      return {
-        subject,
-        session,
-        form
-      }
+  createForm = ({ subject, session, info }) => {
+    const form = new JSONSchemaForm({
+      schema: this.info.globalState.schema.source_data,
+      results: info.source_data,
+      ignore: ['verbose'],
+      onlyRequired: true,
+      // showLevelOverride: 0
     })
 
-    const formsToRender = this.forms.map(info => html`
-      <h2 class="guided--text-sub-step">Subject: ${info.subject} - Session: ${info.session}</h2>
-      ${info.form}
-    `)
+    return {
+      subject,
+      session,
+      form
+    }
+  }
 
-    // const form = new JSONSchemaForm({
-    //   ...this.info.globalState.source,
-    //   ignore: ['verbose'],
-    //   onlyRequired: true,
-    // })
+  #getDetails = (path) => {
+    let details = {}
+      if (path.length !== 2) throw new Error("Path must have {subject}/{session} form.")
+      try {
+        const subSplit = path[0].split('-')
+        const sesSplit = path[1].split('-')
+        details.subject = subSplit.length === 2 ? subSplit[1] : subSplit[0]
+        details.session = sesSplit.length === 2 ? sesSplit[1] : sesSplit[0]
+      } catch (e) {
+        throw new Error("Path must have {subject}/{session} form.")
+      }
+      return details
+    }
 
+  render() {
+
+    this.forms = this.mapSessions(this.createForm)
+
+
+    let instances = {}
+    this.forms.forEach(({ subject, session, form }) => {
+      if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {}
+      instances[`sub-${subject}`][`ses-${session}`] = form
+    })
+
+    const manager = new InstanceManager({
+      header: 'Source Data',
+      instanceType: 'Session',
+      instances,
+      onAdded: (path) => {
+
+        let details = this.#getDetails(path)
+
+        const info = this.addSession(details)
+
+        const form = this.createForm({
+          ...details,
+          info
+        })
+
+        this.forms.push(form)
+
+        return {
+          key: `sub-${details.subject}/ses-${details.session}`,
+          value: form.form
+        }
+      },
+      onRemoved: (_, path) => {
+        console.log(path)
+        let details = this.#getDetails(path)
+        this.removeSession(details)
+      }
+    })
+    
     return html`
   <div
     id="guided-mode-starting-container"
@@ -113,7 +155,7 @@ export class GuidedSourceDataPage extends Page {
         <h1 class="guided--text-sub-step">Source Data</h1>
       </div>
       <div class="guided--section">
-        ${formsToRender}
+        ${manager}
       </div>
   </div>
     `;

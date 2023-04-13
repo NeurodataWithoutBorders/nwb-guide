@@ -66,6 +66,18 @@ export class Page extends LitElement {
     }
   }
 
+  addSession ({ subject, session, info }) {
+    if (!this.info.globalState.results[subject]) this.info.globalState.results[subject] = {}
+    info = this.info.globalState.results[subject][session] = info ?? {}
+    if (!info.metadata) info.metadata = {}
+    if (!info.source_data) info.source_data = {}
+    return info
+  }
+
+  removeSession ({ subject, session }) {
+    delete this.info.globalState.results[subject][session]
+  }
+
   mapSessions(callback) {
     const overallResults = this.info.globalState.results
     return Object.entries(overallResults).map(([subject, sessions]) => {

@@ -3,19 +3,24 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 
 export class Button extends LitElement {
-  constructor({ primary, label, color = null, size, onClick } = {}) {
+  constructor({ primary, label, color = null, size, onClick, buttonStyles } = {}) {
     super();
     this.label = label;
     this.primary = primary;
     this.color = color;
     this.size = size;
     this.onClick = onClick;
+    this.buttonStyles = buttonStyles || {};
   }
 
   static get styles() {
     return css`
     :host {
       display: inline-block;
+    }
+
+    .button-icon {
+      margin-right: 10px;
     }
 
     .storybook-button {
@@ -59,6 +64,7 @@ export class Button extends LitElement {
       size: { type: String },
       onClick: { type: Function },
       label: { type: String },
+      icon: { type: String },
     };
   }
 
@@ -69,9 +75,10 @@ export class Button extends LitElement {
       <button
         type="button"
         class=${['storybook-button', `storybook-button--${this.size || 'medium'}`, mode].join(' ')}
-        style=${styleMap(this.primary ? { backgroundColor: this.color } : { color: this.color })}
+        style=${styleMap(this.primary ? { ...this.buttonStyles, backgroundColor: this.color } : { ...this.buttonStyles, color: this.color })}
         @click=${this.onClick}
       >
+        ${this.icon ? html`<span class="button-icon">${this.icon}</span>` : ''}
         <slot>${this.label ?? ''}</slot>
       </button>
     `;
