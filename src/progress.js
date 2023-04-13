@@ -45,7 +45,6 @@ export const save = (page, overrides = {}) => {
 
   //return if guidedProgressFileName is not a string greater than 0
   if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return
-
   const params = new URLSearchParams(location.search);
 
   params.set('project', guidedProgressFileName);
