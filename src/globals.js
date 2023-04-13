@@ -1,5 +1,5 @@
 
-import { app, path, port } from './electron/index.js'
+import { app, isElectron, path, port } from './electron/index.js'
 import { Notyf } from 'notyf'
 import checkChromatic from 'chromatic/isChromatic';
 
@@ -12,6 +12,8 @@ export let runOnLoad = (fn) => {
   if (document.readyState === 'complete') fn();
   else window.addEventListener('load', fn);
 }
+
+export const reloadPageToHome = () => window.location = (isElectron || isStorybook) ? window.location.pathname : window.location.origin // Clear all query params
 
 // Base Request URL for Python Server
 export const baseUrl = `http://127.0.0.1:${port}`
