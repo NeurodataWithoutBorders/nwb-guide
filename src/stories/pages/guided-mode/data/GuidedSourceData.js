@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { Page } from '../../Page.js';
 
 import Swal from 'sweetalert2'
-import { notyf, baseUrl } from '../../../../globals.js';
+import { notyf, baseUrl, notify } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 export class GuidedSourceDataPage extends Page {
@@ -47,10 +47,7 @@ export class GuidedSourceDataPage extends Page {
 
       if (result.message) {
         const message = "Failed to get metadata with current source data. Please try again."
-        notyf.open({
-          type: "error",
-          message,
-        });
+        this.notify(message, 'error')
         throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
       }
 
