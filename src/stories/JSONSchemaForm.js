@@ -619,7 +619,7 @@ export class JSONSchemaForm extends LitElement {
       return acc
     }, [])
 
-    
+
     const sorted = renderableWithLinks
 
       // Sort alphabetically
@@ -640,7 +640,7 @@ export class JSONSchemaForm extends LitElement {
 
         if (required[name] && !required[name2]) return -1 // first required
         if (!required[name] && required[name2]) return 1 // second required
-        
+
         if (e1[isLink] && !e2[isLink]) return -1 // first link
         if (!e1[isLink] && e2[isLink]) return 1 // second link
 
@@ -652,8 +652,8 @@ export class JSONSchemaForm extends LitElement {
         const [ info ] = e1
         const [ info2 ] = e2
 
-        if (e1[isLink] || e2[isLink]) return 0 
-        
+        if (e1[isLink] || e2[isLink]) return 0
+
         if (!info.properties && !info2.properties) return 0
         else if (!info.properties) return -1
         else if (!info2.properties) return 1
