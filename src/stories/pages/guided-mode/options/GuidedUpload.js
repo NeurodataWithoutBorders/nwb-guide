@@ -24,6 +24,7 @@ export class GuidedUploadPage extends Page {
        const results = await run('upload', this.info.globalState.upload.info, {
         title: 'Uploading to DANDI',
       })
+      .catch(e => this.notify(e.message, 'error'))
 
        this.info.globalState.upload.results = results // Save the preview results
 

@@ -159,6 +159,7 @@ export class Dashboard extends LitElement {
 
     const toPass = {}
     if (previous) {
+      previous.dismiss() // Dismiss all notifications for this page
       if (previous.info.globalState) toPass.globalState = previous.info.globalState // Pass global state over if appropriate
       previous.active = false
     }

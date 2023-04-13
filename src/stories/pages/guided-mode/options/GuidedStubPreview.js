@@ -26,6 +26,8 @@ export class GuidedStubPreviewPage extends Page {
         metadata: this.info.globalState.metadata.results
       })
 
+      .catch(e => this.notify(e.message, 'error'))
+
       this.info.globalState.conversion.results = results
 
       this.onTransition(1)
