@@ -12,7 +12,7 @@ export class InstanceManager extends LitElement {
       * {
         box-sizing: border-box;
       }
-    
+
       :host {
         width: 100%;
         display: flex;
@@ -180,7 +180,7 @@ export class InstanceManager extends LitElement {
     return instances
   }
 
-  #selected; 
+  #selected;
 
   // Correct bug where multiple instances are selected
   updated = () => {
@@ -190,7 +190,7 @@ export class InstanceManager extends LitElement {
       el.removeAttribute('selected')
       this.shadowRoot.querySelector(`div[data-instance="${instance}"]`).setAttribute('hidden', '')
     })
-    
+
   }
 
   render() {
@@ -201,7 +201,7 @@ export class InstanceManager extends LitElement {
       if (isCategory) instances = {...instances, ...this.#mapCategoryToInstances(key, value)}
       else instances[key] = value
     })
-    
+
     const isSelected = Object.keys(instances).map((key, i) => this.#selected ? key === this.#selected : i === 0)
 
     return html`
@@ -226,15 +226,15 @@ export class InstanceManager extends LitElement {
                 instances.forEach(el => {
                   if (el !== element) el.hidden = true
                 })
-    
+
                 sidebarInstances.forEach(el => {
                   if (el !== sidebarElement) el.removeAttribute('selected')
                 })
               }
             }}">${key}</span>
-            <nwb-button 
-              size="small" 
-              primary 
+            <nwb-button
+              size="small"
+              primary
               color="gray"
               @click=${(ev) => {
                 const parent = ev.target.parentNode
@@ -290,7 +290,7 @@ export class InstanceManager extends LitElement {
                 let target = this.instances
                 resolvedPath.forEach(key => target = target[key] = target[key] ?? {})
                 target[key] = resolvedValue
-                
+
                 this.#onKeyDone()
                 this.requestUpdate()
               } catch (e) {
@@ -301,12 +301,12 @@ export class InstanceManager extends LitElement {
           }}>Add</nwb-button>
         </div>
         <div class="item">
-          <nwb-button 
-            id="add-new-button" 
+          <nwb-button
+            id="add-new-button"
             @click=${(ev) => {
               ev.target.parentNode.hidden = true
               this.toggleInput(true)
-            }} 
+            }}
 
             icon="+"
             .buttonStyles=${{
@@ -314,7 +314,7 @@ export class InstanceManager extends LitElement {
             }}>Add ${this.instanceType}</nwb-button>
         </div>
       </div>` : ''}
-      
+
       </div>
       <div id="instance-display">
       ${Object.entries(instances).map(([key, o], i) => html`

@@ -126,7 +126,7 @@ export class GuidedSourceDataPage extends ManagedPage {
         this.removeSession(details)
       }
     })
-    
+
     return html`
   <div
     id="guided-mode-starting-container"
