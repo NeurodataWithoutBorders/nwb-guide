@@ -45,7 +45,7 @@ export class Page extends LitElement {
 
   onTransition = () => {} // User-defined function
 
-  save = () => save(this)
+  save = (overrides) => save(this, overrides)
 
   load = (datasetNameToResume = new URLSearchParams(window.location.search).get('project')) => this.info.globalState = get(datasetNameToResume)
 
