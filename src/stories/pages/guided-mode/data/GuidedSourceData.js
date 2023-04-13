@@ -3,7 +3,7 @@
 import { html } from 'lit';
 
 import Swal from 'sweetalert2'
-import { notyf, baseUrl } from '../../../../globals.js';
+import { notyf, baseUrl, notify } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { InstanceManager } from '../../../InstanceManager.js';
 import { ManagedPage } from './ManagedPage.js';
@@ -52,14 +52,11 @@ export class GuidedSourceDataPage extends ManagedPage {
 
         Swal.close();
 
-        if (result.message) {
-          const message = "Failed to get metadata with current source data. Please try again."
-          notyf.open({
-            type: "error",
-            message,
-          });
-          throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
-        }
+      if (result.message) {
+        const message = "Failed to get metadata with current source data. Please try again."
+        this.notify(message, 'error')
+        throw new Error(`Failed to get metadata for source data provided: ${result.message}`)
+      }
 
         // Merge metadata results with the generated info
         this.merge('metadata', result.results, info)
