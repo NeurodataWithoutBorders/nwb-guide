@@ -10,15 +10,15 @@ export function schemaToPages (schema, sharedGlobalState, options) {
    return Object.entries(schema.properties)
     .filter(([_, value]) => value.properties)
     .map(([key, value]) => {
-            
+
             sharedGlobalState[key] = sharedGlobalState[key] ?? {} // Create global state object if it doesn't exist
 
             const optionsCopy = { ...options }
             if (optionsCopy.required && optionsCopy.required[key]) optionsCopy.required = { [key] : optionsCopy.required[key] } // Only bring requirements from the current page
             else delete optionsCopy.required
 
-            const page = new GuidedFormPage({ 
-                label: key, 
+            const page = new GuidedFormPage({
+                label: key,
                 section: this.info.section,
                 formOptions: {
                     ...optionsCopy,
@@ -26,7 +26,7 @@ export function schemaToPages (schema, sharedGlobalState, options) {
                     results: { [key]: sharedGlobalState[key] },
                 }
             })
-    
+
             delete schema.properties[key]
 
             if (optionsCopy.ignore && optionsCopy.ignore.includes(key)) return null
