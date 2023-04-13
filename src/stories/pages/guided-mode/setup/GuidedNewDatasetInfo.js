@@ -1,12 +1,11 @@
 
 
 import { html } from 'lit';
-import { baseUrl, notyf } from '../../../../globals.js';
 import { hasEntry, update } from '../../../../progress.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
+import { notify } from '../../../../globals.js';
 import { Page } from '../../Page.js';
-
-import validationJSON from './validation.json' assert { type: "json" };
+import { validateOnChange } from '../../../../validation/index.js';
 
 export class GuidedNewDatasetPage extends Page {
 
@@ -28,30 +27,27 @@ export class GuidedNewDatasetPage extends Page {
       // Check validity of project name
       const name = this.state.name
       if (!name) {
-        const message = "Please enter a project name."
-        notyf.open({
-          type: "error",
-          message: message,
-          duration: 7000,
-        });
+        notify("Please enter a project name.", 'error')
+        return
       }
 
-      this.form.validate()
+      await this.form.validate()
 
       if (!name) return
 
       // Check if name is already used
       // Update existing progress file
-      if (globalState.initialized) await update(name, globalState.name)
+      if (globalState.initialized) {
+          const res = await update(name, globalState.name).then(res => {
+          if (typeof res === 'string') notify(res)
+          return (res !== false)
+        }).catch(e => notify(e, 'error'))
+        if (!res) return
+      }
       else {
         const has = await hasEntry(name)
         if (has) {
-          const message = "An existing progress file already exists with that name. Please choose a different name."
-          notyf.open({
-            type: "error",
-            message: message,
-            duration: 7000,
-          });
+          notify("An existing progress file already exists with that name. Please choose a different name.", 'error')
           return
         }
     }
@@ -187,41 +183,11 @@ export class GuidedNewDatasetPage extends Page {
       required: ['name']
     }
 
-    const noCheck = [
-      'name',
-      'description', 'genotype', 'strain',
-      'lab', 'protocol', 'surgery', 'virus', 'stimulus_notes'
-    ]
-
     const form = this.form = new JSONSchemaForm({
       schema,
       results: this.state,
-      validateOnChange: async (name, parent, path) => {
-
-        const message = { parent }
-
-        if (validationJSON.ignore.includes(name)) return
-        else if (Object.keys(validationJSON.properties).includes(name)) message.function = validationJSON.properties[name]
-        else {
-          const child_match = Object.keys(validationJSON.children).find(key => path.slice(-1)[0] === key)
-          if (child_match) {
-            const childrenObject =  validationJSON.children[child_match]
-            if (Object.keys(childrenObject).includes(name)) message.function = childrenObject[name]
-            else if (childrenObject['*']) message.function = childrenObject['*'].replace(`{*}`, `${name}`)
-          } else if (validationJSON.properties['*']) message.function = validationJSON.properties['*'].replace(`{*}`, `${name}`)
-        }
-
-        if (!message.function) return // No validation for this field
-
-        const res = await fetch(`${baseUrl}/neuroconv/validate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(message)
-        }).then(res => res.json())
-
-        if (res?.message) return [  { message: res.message } ] // Some of the requests end in errors
-        return res
-      }
+      validateEmptyValues: false,
+      validateOnChange
     })
 
     form.style.width = '100%'
