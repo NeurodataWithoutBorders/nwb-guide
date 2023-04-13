@@ -4,7 +4,8 @@ const { ipcRenderer } = electron;
 
 import {
   notyf,
-  baseUrl
+  baseUrl,
+  notify
 } from './globals.js'
 
 import Swal from 'sweetalert2'
@@ -188,11 +189,7 @@ ipcRenderer?.on("update_downloaded", async () => {
 
 // Restart the app for update. Does not restart on macos
 const restartApp = async () => {
-  notyf.open({
-    type: "app_update_warning",
-    message: "Closing NWB GUIDE now...",
-  });
-
+  notify("Closing NWB GUIDE now...", "app_update_warning")
   ipcRenderer?.send("restart_app");
 };
 

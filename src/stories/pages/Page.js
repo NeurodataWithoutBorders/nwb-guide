@@ -7,6 +7,7 @@ import '../Footer.js'
 import '../Button'
 
 import { get, save } from '../../progress.js'
+import { dismissNotification, notify } from '../../globals.js';
 
 const componentCSS = `
 
@@ -43,9 +44,24 @@ export class Page extends LitElement {
     }
   }
 
+  #notifications = []
+
+  dismiss = (notification) => {
+    if (notification) dismissNotification(notification)
+    else {
+      this.#notifications.forEach(notification => dismissNotification(notification))
+      this.#notifications = []
+    }
+  }
+
+  notify = (...args) => {
+    const note = notify(...args)
+    this.#notifications.push(note)
+  }
+
   onTransition = () => {} // User-defined function
 
-  save = () => save(this)
+  save = (overrides) => save(this, overrides)
 
   load = (datasetNameToResume = new URLSearchParams(window.location.search).get('project')) => this.info.globalState = get(datasetNameToResume)
 

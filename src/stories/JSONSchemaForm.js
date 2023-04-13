@@ -597,6 +597,7 @@ export class JSONSchemaForm extends LitElement {
 
   #render =(schema, results, required = {}, path = []) => {
 
+    let isLink = Symbol('isLink')
     // Filter non-required properties (if specified) and render the sub-schema
     const renderable = this.#getRenderable(schema, required, path)
 
@@ -605,21 +606,78 @@ export class JSONSchemaForm extends LitElement {
 
     if (renderable.length === 0) return html`<p>No properties to render</p>`
 
-    // Separete linked from non-linked properties
-    let categorized = renderable.reduce((obj, [name, info]) => {
+    let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
       const link = this.#getLink([...path, name])
       if (link) {
-        if (!obj.linked.includes(link)) obj.linked.push(this.#getLink([...path, name]))
-      } else obj.general.push([name, info])
+        if (!acc.find(([_, info]) => info === link)) {
+          const entry = [link.name, link]
+          entry[isLink] = true
+          acc.push(entry)
+        }
+      } else acc.push([name, info])
 
-      return obj
-    }, {
-      linked: [],
-      general: []
-    })
+      return acc
+    }, [])
 
-    // Render non-linked properties
-    let rendered = categorized.general.map(([name, info]) => {
+    
+    const sorted = renderableWithLinks
+
+      // Sort alphabetically
+      .sort(([name], [name2])=> {
+        if (name.toLowerCase() < name2.toLowerCase()) {
+          return -1;
+        }
+        if (name.toLowerCase() > name2.toLowerCase()) {
+          return 1;
+        }
+        return 0;
+      })
+
+      // Sort required properties to the top
+      .sort((e1, e2) => {
+        const [ name ] = e1
+        const [ name2 ] = e2
+
+        if (required[name] && !required[name2]) return -1 // first required
+        if (!required[name] && required[name2]) return 1 // second required
+        
+        if (e1[isLink] && !e2[isLink]) return -1 // first link
+        if (!e1[isLink] && e2[isLink]) return 1 // second link
+
+        return 0 // Both required
+      })
+
+       // Prioritise properties without other properties (e.g. name over NWBFile)
+      .sort((e1, e2) => {
+        const [ info ] = e1
+        const [ info2 ] = e2
+
+        if (e1[isLink] || e2[isLink]) return 0 
+        
+        if (!info.properties && !info2.properties) return 0
+        else if (!info.properties) return -1
+        else if (!info2.properties) return 1
+      })
+
+    let rendered = sorted.map((entry) => {
+
+      const [name, info] = entry
+
+      // Render linked properties
+      if (entry[isLink]) {
+        const linkedProperties = info.properties.map(path => {
+          const pathCopy = [...path]
+          const name = pathCopy.pop()
+          return this.#renderInteractiveElement(name, schema.properties[name], results, required, pathCopy)
+        })
+        return html`
+        <div class="link" data-name="${info.name}">
+          <div>
+            ${linkedProperties}
+          </div>
+        </div>
+        `
+      }
 
         // Directly render the interactive property element
         if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
@@ -634,24 +692,7 @@ export class JSONSchemaForm extends LitElement {
       `
     })
 
-    // Render linked properties
-    const renderedLinks = categorized.linked.map(link => {
-      const linkedProperties = link.properties.map(path => {
-        const pathCopy = [...path]
-        const name = pathCopy.pop()
-        return this.#renderInteractiveElement(name, schema.properties[name], results, required, pathCopy)
-      })
-      return html`
-      <div class="link" data-name="${link.name}">
-        <div>
-          ${linkedProperties}
-        </div>
-      </div>
-      `
-    })
-
-
-    return [...rendered, ...renderedLinks]
+    return rendered
   }
 
   #registerRequirements = (schema, requirements = {}, acc=this.#requirements) => {

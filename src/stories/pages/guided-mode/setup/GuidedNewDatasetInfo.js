@@ -3,7 +3,6 @@
 import { html } from 'lit';
 import { hasEntry, update } from '../../../../progress.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
-import { notify } from '../../../../globals.js';
 import { Page } from '../../Page.js';
 import { validateOnChange } from '../../../../validation/index.js';
 
@@ -15,9 +14,7 @@ export class GuidedNewDatasetPage extends Page {
 
   state = {}
 
-  updated(){
-    // this.content = (this.shadowRoot ?? this).querySelector("#content");
-  }
+  #nameNotification
 
   footer = {
     onNext: async () => {
@@ -27,9 +24,12 @@ export class GuidedNewDatasetPage extends Page {
       // Check validity of project name
       const name = this.state.name
       if (!name) {
-        notify("Please enter a project name.", 'error')
+        if (this.#nameNotification) this.dismiss(this.#nameNotification) // Dismiss previous custom notification
+        this.#nameNotification = this.notify("Please enter a project name.", 'error')
         return
       }
+
+      this.dismiss() // Dismiss all notifications
 
       await this.form.validate()
 
@@ -39,15 +39,15 @@ export class GuidedNewDatasetPage extends Page {
       // Update existing progress file
       if (globalState.initialized) {
           const res = await update(name, globalState.name).then(res => {
-          if (typeof res === 'string') notify(res)
+          if (typeof res === 'string') this.notify(res)
           return (res !== false)
-        }).catch(e => notify(e, 'error'))
+        }).catch(e => this.notify(e, 'error'))
         if (!res) return
       }
       else {
         const has = await hasEntry(name)
         if (has) {
-          notify("An existing progress file already exists with that name. Please choose a different name.", 'error')
+          this.notify("An existing progress file already exists with that name. Please choose a different name.", 'error')
           return
         }
     }
@@ -60,6 +60,8 @@ export class GuidedNewDatasetPage extends Page {
 }
 
   render() {
+
+    this.state = {} // Clear local state on each render
 
     let projectGlobalState = this.info.globalState.project
     if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {}
