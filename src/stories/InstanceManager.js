@@ -288,11 +288,8 @@ export class InstanceManager extends LitElement {
 
                 let target = this.instances
                 resolvedPath.forEach(key => target = target[key] = target[key] ?? {})
-                if (key in target) {
-                  this.onRemoved(target[key], resolvedPath)
-                  throw new Error(`Key ${key} already exists in ${resolvedPath.join('/')}`)
-                }
-                else target[key] = resolvedValue
+                target[key] = resolvedValue
+                
                 this.#onKeyDone()
                 this.requestUpdate()
               } catch (e) {

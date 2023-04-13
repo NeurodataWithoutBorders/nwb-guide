@@ -68,6 +68,7 @@ export class Page extends LitElement {
 
   addSession ({ subject, session, info }) {
     if (!this.info.globalState.results[subject]) this.info.globalState.results[subject] = {}
+    if (this.info.globalState.results[subject][session]) throw new Error(`Session ${subject}/${session} already exists.`)
     info = this.info.globalState.results[subject][session] = info ?? {}
     if (!info.metadata) info.metadata = {}
     if (!info.source_data) info.source_data = {}
