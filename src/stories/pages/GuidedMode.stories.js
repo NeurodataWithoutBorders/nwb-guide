@@ -29,7 +29,7 @@ const globalState = {
             },
             species: {
               type: 'string',
-              description: 'Enter a common species for your subjects.', 
+              description: 'Enter a common species for your subjects.',
             },
             age: {
               type: 'number',
