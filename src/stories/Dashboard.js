@@ -67,6 +67,7 @@ export class Dashboard extends LitElement {
       logo: { type: String, reflect: true },
       subtitle: { type: String, reflect: true },
       activePage: { type: String, reflect: true },
+      globalState: { type: Object }
     };
   }
 
@@ -95,6 +96,8 @@ export class Dashboard extends LitElement {
     this.logo = props.logo
     this.renderNameInSidebar = props.renderNameInSidebar ?? true
 
+    this.globalState = props.globalState // Impose a static global state on pages that have none
+
     if (props.activePage) this.setAttribute('activePage', props.activePage)
 
 
@@ -121,6 +124,7 @@ export class Dashboard extends LitElement {
 
   attributeChangedCallback(key, previous, latest) {
     super.attributeChangedCallback(...arguments)
+    console.log('Dashboard', key, previous, latest)
     if (this.sidebar && (key === 'name' || key === 'logo' || key === 'subtitle')) this.sidebar[key] = latest
     else if (key === 'renderNameInSidebar') this.sidebar.renderName = latest === 'true' || latest === true
     else if (key === 'pages') this.#updated(latest)
@@ -163,7 +167,8 @@ export class Dashboard extends LitElement {
     }
 
     // On initial reload, load global state if you can
-    if (isNested && !('globalState' in toPass)) toPass.globalState = page.load()
+    console.log('Global STate', this.globalState, page.load)
+    if (isNested && !('globalState' in toPass)) toPass.globalState = this.globalState ?? page.load()
 
     // Update Active Page
     this.#active = page
@@ -177,6 +182,9 @@ export class Dashboard extends LitElement {
       this.sidebar.show()
       this.subSidebar.hide()
     }
+
+    console.log(toPass.globalState)
+
 
     page.set(toPass)
 

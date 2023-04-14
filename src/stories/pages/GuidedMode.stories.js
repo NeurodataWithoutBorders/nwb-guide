@@ -15,9 +15,41 @@ export default {
   },
 };
 
+const globalState = {
+  project: {},
+  metadata: {
+    schema: {
+      properties: {
+        Subject: {
+          type: 'object',
+          properties: {
+            subject_id: {
+              type: 'string',
+              description: 'Enter a subject ID.',
+            },
+            species: {
+              type: 'string',
+              description: 'Enter a common species for your subjects.', 
+            },
+            age: {
+              type: 'number',
+              description: 'The age of the subject'
+            },
+            date_of_birth: {
+              type: 'string',
+              description: 'The date of birth of the subject'
+            }
+          },
+          required: ['subject_id']
+        }
+      }
+    }
+  }
+}
+
 
 const Template = (args = {}) => {
-  for (let k in args) dashboard.setAttribute(k, args[k])
+  for (let k in args) dashboard[k] = args[k]
   return dashboard
 };
 
@@ -49,8 +81,10 @@ SourceData.args = {
 
 export const Metadata = Template.bind({});
 Metadata.args = {
-  activePage: 'guided/metadata'
+  activePage: 'guided/metadata',
+  // globalState
 }
+Metadata.args.globalState = globalState
 
 export const ConversionOptions = Template.bind({});
 ConversionOptions.args = {
