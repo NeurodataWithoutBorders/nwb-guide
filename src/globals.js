@@ -15,7 +15,7 @@ export let runOnLoad = (fn) => {
 
 export const reloadPageToHome = () => {
   if (isStorybook) return
-  window.location = (isElectron) ? window.location.pathname : window.location.origin 
+  window.location = (isElectron) ? window.location.pathname : window.location.origin
 }// Clear all query params
 
 // Base Request URL for Python Server
