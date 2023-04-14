@@ -18,6 +18,7 @@ export default {
 const globalState = {
   project: {},
   metadata: {
+    results: {},
     schema: {
       properties: {
         Subject: {

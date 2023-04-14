@@ -5,6 +5,7 @@ import {
   guidedProgressFilePath,
   runOnLoad,
   reloadPageToHome,
+  isStorybook,
 } from "./globals.js";
 import { fs } from "./electron/index.js";
 
