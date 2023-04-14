@@ -88,6 +88,8 @@ export const get = (name) => {
     const projectName = params.get('project')
     if (!projectName) {
 
+      if (isStorybook) return {}
+
       runOnLoad(() => {
         Swal.fire({
           title: 'No project specified.',

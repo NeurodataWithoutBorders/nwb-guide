@@ -15,6 +15,7 @@ export class GuidedMetadataPage extends Page {
 
   render() {
 
+
     const results = this.info.globalState.metadata.results
 
     // Merge project-wide data into metadata
@@ -34,7 +35,10 @@ export class GuidedMetadataPage extends Page {
     const pages = schemaToPages.call(this, schema, results, {
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       conditionalRequirements: [
-        [['Subject', 'age'], ['Subject', 'date_of_birth']]
+        {
+          name: 'Subject Age',
+          properties: [['Subject', 'age'], ['Subject', 'date_of_birth']]
+        }
       ],
       validateOnChange,
       required: {
