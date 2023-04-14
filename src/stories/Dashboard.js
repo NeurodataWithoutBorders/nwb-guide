@@ -137,7 +137,7 @@ export class Dashboard extends LitElement {
 
 
   getPage(entry) {
-    if (!entry) throw reloadPageToHome()
+    if (!entry) return reloadPageToHome()
     const page = entry.page ?? entry
     if (page instanceof HTMLElement) return page
     else if (typeof page === 'object') return this.getPage(Object.values(page)[0])

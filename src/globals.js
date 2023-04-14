@@ -13,7 +13,10 @@ export let runOnLoad = (fn) => {
   else window.addEventListener('load', fn);
 }
 
-export const reloadPageToHome = () => window.location = (isElectron || isStorybook) ? window.location.pathname : window.location.origin // Clear all query params
+export const reloadPageToHome = () => {
+  if (isStorybook) return
+  window.location = (isElectron) ? window.location.pathname : window.location.origin 
+}// Clear all query params
 
 // Base Request URL for Python Server
 export const baseUrl = `http://127.0.0.1:${port}`
