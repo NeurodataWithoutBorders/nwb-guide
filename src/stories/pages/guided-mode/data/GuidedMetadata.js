@@ -28,7 +28,6 @@ export class GuidedMetadataPage extends Page {
 
 
     const metadataResults = this.info.globalState.metadata.results
-    console.log('this.info.globalState.metadata', this.info.globalState.metadata)
 
     // Merge project-wide data into metadata
     const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
@@ -44,7 +43,10 @@ export class GuidedMetadataPage extends Page {
       ...this.info.globalState.metadata,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       conditionalRequirements: [
-        [['Subject', 'age'], ['Subject', 'date_of_birth']]
+        {
+          name: 'Subject Age',
+          properties: [['Subject', 'age'], ['Subject', 'date_of_birth']]
+        }
       ],
       validateOnChange,
       required: {
