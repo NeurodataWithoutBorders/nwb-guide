@@ -27,7 +27,10 @@ export class GuidedStubPreviewPage extends Page {
         interfaces: this.info.globalState.source.interfaces
       })
 
-      .catch(e => this.notify(e.message, 'error'))
+      .catch(e => {
+        this.notify(e.message, 'error')
+        throw e.message
+      })
 
       this.info.globalState.conversion.results = results
 
