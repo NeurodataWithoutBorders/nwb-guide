@@ -23,7 +23,8 @@ export class GuidedStubPreviewPage extends Page {
 
         // Override with the lastest source data and metadata information
         source_data: this.info.globalState.source.results,
-        metadata: this.info.globalState.metadata.results
+        metadata: this.info.globalState.metadata.results,
+        interfaces: this.info.globalState.source.interfaces
       })
 
       .catch(e => this.notify(e.message, 'error'))
