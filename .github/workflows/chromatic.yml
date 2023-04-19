@@ -1,6 +1,6 @@
 name: "Chromatic Publish"
 
-on: workflow_dispatch
+on: pull_request
 
 jobs:
   test:
