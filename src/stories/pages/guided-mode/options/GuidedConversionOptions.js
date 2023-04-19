@@ -71,11 +71,6 @@ export class GuidedConversionOptionsPage extends Page {
       }
     })
 
-
-    const convertButton = document.createElement('nwb-button')
-    convertButton.textContent = 'Run Conversion Preview'
-    convertButton.addEventListener('click', this.footer.onNext)
-
     return html`
   <div
     id="guided-mode-starting-container"
@@ -87,8 +82,6 @@ export class GuidedConversionOptionsPage extends Page {
       </div>
       <div class="guided--section">
       ${this.form}
-      <br>
-      ${convertButton}
       </div>
   </div>
     `;
