@@ -35,7 +35,7 @@ export class GuidedConversionOptionsPage extends Page {
         this.notify(e.message, 'error')
         throw e.message
       })
-      
+
       this.info.globalState.preview = results // Save the preview results
 
       this.onTransition(1)
