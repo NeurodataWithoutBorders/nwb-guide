@@ -124,7 +124,6 @@ export class Dashboard extends LitElement {
 
   attributeChangedCallback(key, previous, latest) {
     super.attributeChangedCallback(...arguments)
-    console.log('Dashboard', key, previous, latest)
     if (this.sidebar && (key === 'name' || key === 'logo' || key === 'subtitle')) this.sidebar[key] = latest
     else if (key === 'renderNameInSidebar') this.sidebar.renderName = latest === 'true' || latest === true
     else if (key === 'pages') this.#updated(latest)
@@ -167,7 +166,6 @@ export class Dashboard extends LitElement {
     }
 
     // On initial reload, load global state if you can
-    console.log('Global STate', this.globalState, page.load)
     if (isNested && !('globalState' in toPass)) toPass.globalState = this.globalState ?? page.load()
 
     // Update Active Page
@@ -182,9 +180,6 @@ export class Dashboard extends LitElement {
       this.sidebar.show()
       this.subSidebar.hide()
     }
-
-    console.log(toPass.globalState)
-
 
     page.set(toPass)
 
