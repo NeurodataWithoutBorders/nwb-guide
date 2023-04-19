@@ -36,14 +36,14 @@ export class Accordion extends LitElement {
       vertical-align: top;
       width: 0.45em;
     }
-    
+
     .chevron.right:before {
       left: 0;
       position: relative;
       top: 0.15em;
       transform: rotate(45deg);
     }
-    
+
     .chevron.bottom:before {
       top: 0;
       transform: rotate(135deg);
@@ -87,7 +87,7 @@ export class Accordion extends LitElement {
       width: 100%;
       padding: 25px;
     }
-        
+
 
     .guided--nav-bar-dropdown {
       min-height: 40px;
@@ -108,7 +108,7 @@ export class Accordion extends LitElement {
     .guided--nav-bar-section:last-child > .guided--nav-bar-dropdown {
       border-bottom: none;
     }
-    
+
     .guided--nav-bar-dropdown:hover {
       cursor: pointer;
       background-color: lightgray;
@@ -122,7 +122,7 @@ export class Accordion extends LitElement {
       margin-top: 3px;
       padding-left: 5px;
     }
-    
+
     .guided--container-nav-items {
       width: 100%;
       list-style: none;
