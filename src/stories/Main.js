@@ -94,6 +94,9 @@ export class Main extends LitElement {
         else footer = true
       }
 
+      if (footer === true) footer = {}
+      if (footer && 'onNext' in footer && !('next' in footer)) footer.next = "Save and Continue"
+
       // Default Capsules Behavior
       const section = sections[info.section]
       if (section) {

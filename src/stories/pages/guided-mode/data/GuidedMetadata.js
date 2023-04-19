@@ -44,6 +44,12 @@ export class GuidedMetadataPage extends ManagedPage {
       schema: this.info.globalState.schema.metadata[subject][session],
       results,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
+      conditionalRequirements: [
+        {
+          name: 'Subject Age',
+          properties: [['Subject', 'age'], ['Subject', 'date_of_birth']]
+        }
+      ],
       validateOnChange,
       onlyRequired: false,
     })

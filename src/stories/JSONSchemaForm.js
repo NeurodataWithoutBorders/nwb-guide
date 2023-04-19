@@ -1,9 +1,7 @@
 import { LitElement, css, html } from 'lit';
-import { remote } from '../electron/index'
 import { notify } from '../globals';
 import { FilesystemSelector } from './FileSystemSelector';
 import Swal from 'sweetalert2';
-const { dialog } = remote
 
 const componentCSS = `
 
@@ -60,6 +58,7 @@ const componentCSS = `
     .guided--form-label {
       font-size: 1.2em !important;
     }
+
     .guided--form-label.centered {
       text-align: center;
     }
@@ -67,6 +66,43 @@ const componentCSS = `
     .guided--form-label.header {
       font-size: 1.5em !important;
     }
+
+    .link {
+      margin-top: 20px;
+      border: 1px solid black;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .link > div {
+      padding: 0px 10px;
+    }
+
+    .link::before {
+      box-sizing: border-box;
+      display: block;
+      width: 100%;
+      color: white;
+      background: black;
+      padding: 10px;
+      content: ''attr(data-name)'';
+      font-weight: bold;
+    }
+
+    .link.required::after {
+      box-sizing: border-box;
+      display: block;
+      width: 10px;
+      height: 10px;
+      background: #ff3d64;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      right: 0;
+      content: '';
+      margin: 15px;
+    }
+
 
 .guided--input {
   width: 100%;
@@ -130,11 +166,11 @@ pre {
 
   .required label:after {
     content: " *";
-    color: red;
+    color: #ff0033;
   }
 
   .required.conditional label:after {
-    color: #fa8c16;
+    color: transparent;
   }
 `
 
@@ -173,7 +209,7 @@ export class JSONSchemaForm extends LitElement {
     this.onlyRequired = props.onlyRequired ?? false
     this.showLevelOverride = props.showLevelOverride ?? false
 
-    this.conditionalRequirements = props.conditionalRequirements ?? []
+    this.conditionalRequirements = props.conditionalRequirements ?? [] // NOTE: We assume properties only belong to one conditional requirement group
 
     this.validateEmptyValues = props.validateEmptyValues ?? true
     if (props.onInvalid) this.onInvalid = props.onInvalid
@@ -221,10 +257,7 @@ export class JSONSchemaForm extends LitElement {
 
     // Clear any existing messages
     const allRequirements = [...invalidInputs.required, ...invalidInputs.conditional]
-    allRequirements.forEach(name => {
-      this.#clearMessages(name, 'errors')
-      this.#addMessage(name, `${name.split('-').slice(-1)[0]} is ${invalidInputs.conditional.includes(name) ? 'conditionally required' : 'missing'}`, 'errors')
-    })
+    allRequirements.forEach(name => this.#clearMessages(name, 'errors'))
 
     // Print out a detailed error message if any inputs are missing
     let message = '';
@@ -303,14 +336,14 @@ export class JSONSchemaForm extends LitElement {
     const isStringArray = isArray && (info.items?.type === 'string' || (!('items' in info) || (!('type' in info.items) && !hasItemsRef))) // Default to a string type
 
     const fullPath = [...path, name]
-    const isConditional = this.#getLinks(fullPath).length || typeof isRequired === 'function' // Check the two possible ways of determining if a field is conditional
+    const isConditional = this.#getLink(fullPath) || typeof isRequired === 'function' // Check the two possible ways of determining if a field is conditional
 
     if (isConditional && !isRequired) isRequired = required[name] = async () => {
 
       const isRequiredAfterChange = await this.#checkRequiredAfterChange(fullPath)
       if (isRequiredAfterChange) return true // Check self
       else {
-        const linkResults = await this.#applyToLinks(this.#checkRequiredAfterChange, fullPath) // Check links
+        const linkResults = await this.#applyToLinkedProperties(this.#checkRequiredAfterChange, fullPath) // Check links
         if (linkResults.includes(true)) return true
         else return false
       }
@@ -470,7 +503,7 @@ export class JSONSchemaForm extends LitElement {
       if (this.ignore.includes(key)) return false
       if (this.showLevelOverride >= path.length) return true
       if (required[key]) return true
-      if (this.#getLinks([...path, key]).length) return true
+      if (this.#getLink([...path, key])) return true
       if (!this.onlyRequired) return true
       return false
 
@@ -479,16 +512,20 @@ export class JSONSchemaForm extends LitElement {
 
   validateOnChange = () => {}
 
-  #getLinks = (args) => {
+  #getLink = (args) => {
     if (typeof args === 'string') args = args.split('-')
-    return this.conditionalRequirements.filter((linked) =>linked.find((link) => link.join('-') === args.join('-')))
+    return this.conditionalRequirements.find((linked) =>linked.properties.find((link) => link.join('-') === args.join('-')))
   }
 
-  #applyToLinks = (fn, args) => Promise.all(this.#getLinks(args).map((linked) => linked.map((link) => fn(link, this.shadowRoot.getElementById(`${link.join('-')}`))).flat()))
+  #applyToLinkedProperties = (fn, args) => {
+    const links = this.#getLink(args)?.properties
+    if (!links) return []
+    return Promise.all(links.map((link) => fn(link, this.shadowRoot.getElementById(`${link.join('-')}`))).flat())
+  }
 
   // Check if all links are not required anymore
   #isLinkResolved = async (pathArr) => {
-    return (await this.#applyToLinks((link) => {
+    return (await this.#applyToLinkedProperties((link) => {
       const isRequired = this.#isRequired(link)
       if (typeof isRequired === 'function') return !isRequired.call(this.results)
       else return !isRequired
@@ -498,6 +535,12 @@ export class JSONSchemaForm extends LitElement {
   #isRequired = (path) => {
     if (typeof path === 'string') path = path.split('-')
     return path.reduce((obj, key) => obj && obj[key], this.#requirements)
+  }
+
+  #getLinkElement = (path) => {
+    const link = this.#getLink(path)
+    if (!link) return
+    return this.shadowRoot.querySelector(`[data-name="${link.name}"]`)
   }
 
   #validateOnChange = async (name, parent, element, path = [], checkLinks = true) => {
@@ -527,7 +570,10 @@ export class JSONSchemaForm extends LitElement {
 
       element.classList.remove('invalid')
 
-      await this.#applyToLinks((name, element) => {
+      const linkEl = this.#getLinkElement(fullPath)
+      if (linkEl) linkEl.classList.remove('required', 'conditional')
+
+      await this.#applyToLinkedProperties((name, element) => {
         element.classList.remove('required', 'conditional') // Links manage their own error and validity states, but only one needs to be valid
       }, fullPath)
 
@@ -538,8 +584,11 @@ export class JSONSchemaForm extends LitElement {
       // Add new invalid classes and errors
       element.classList.add('invalid')
 
+      const linkEl = this.#getLinkElement(fullPath)
+      if (linkEl) linkEl.classList.add('required', 'conditional')
+
       // Only add the conditional class for linked elements
-      await this.#applyToLinks((name, element) => element.classList.add('required', 'conditional'), [...path, name])
+      await this.#applyToLinkedProperties((name, element) => element.classList.add('required', 'conditional'), [...path, name])
       errors.forEach((info) => this.#addMessage(fullPath, info.message, 'errors'))
 
       return false
@@ -548,56 +597,102 @@ export class JSONSchemaForm extends LitElement {
 
   #render =(schema, results, required = {}, path = []) => {
 
+    let isLink = Symbol('isLink')
     // Filter non-required properties (if specified) and render the sub-schema
     const renderable = this.#getRenderable(schema, required, path)
 
     // // Filter non-required properties (if specified) and render the sub-schema
     // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
-    return renderable.length === 0 ?
-      html`<p>No properties to render</p>` :
-      renderable
+    if (renderable.length === 0) return html`<p>No properties to render</p>`
+
+    let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
+      const link = this.#getLink([...path, name])
+      if (link) {
+        if (!acc.find(([_, info]) => info === link)) {
+          const entry = [link.name, link]
+          entry[isLink] = true
+          acc.push(entry)
+        }
+      } else acc.push([name, info])
+
+      return acc
+    }, [])
+
+
+    const sorted = renderableWithLinks
 
       // Sort alphabetically
       .sort(([name], [name2])=> {
-        if (name < name2) {
+        if (name.toLowerCase() < name2.toLowerCase()) {
           return -1;
         }
-        if (name > name2) {
+        if (name.toLowerCase() > name2.toLowerCase()) {
           return 1;
         }
         return 0;
       })
 
       // Sort required properties to the top
-      .sort(([name], [name2]) => {
+      .sort((e1, e2) => {
+        const [ name ] = e1
+        const [ name2 ] = e2
+
         if (required[name] && !required[name2]) return -1 // first required
         if (!required[name] && required[name2]) return 1 // second required
+
+        if (e1[isLink] && !e2[isLink]) return -1 // first link
+        if (!e1[isLink] && e2[isLink]) return 1 // second link
+
         return 0 // Both required
       })
 
-       // Prioritise properties without other properties
-      .sort(([_, info], [__, info2]) => {
+       // Prioritise properties without other properties (e.g. name over NWBFile)
+      .sort((e1, e2) => {
+        const [ info ] = e1
+        const [ info2 ] = e2
+
+        if (e1[isLink] || e2[isLink]) return 0
+
         if (!info.properties && !info2.properties) return 0
         else if (!info.properties) return -1
         else if (!info2.properties) return 1
       })
 
-      // Render each property
-      .map(([name, info]) => {
+    let rendered = sorted.map((entry) => {
 
+      const [name, info] = entry
 
-      // Directly render the interactive property element
-      if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
+      // Render linked properties
+      if (entry[isLink]) {
+        const linkedProperties = info.properties.map(path => {
+          const pathCopy = [...path]
+          const name = pathCopy.pop()
+          return this.#renderInteractiveElement(name, schema.properties[name], results, required, pathCopy)
+        })
+        return html`
+        <div class="link" data-name="${info.name}">
+          <div>
+            ${linkedProperties}
+          </div>
+        </div>
+        `
+      }
 
-      // Render properties in the sub-schema
-      return html`
-    <div style="margin-top: 40px;">
-      <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
-      <hr/>
-      ${this.#render(info, results[name],  required[name], [...path, name])}
-    </div>
-    `})
+        // Directly render the interactive property element
+        if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
+
+        // Render properties in the sub-schema
+        return html`
+      <div style="margin-top: 40px;">
+        <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
+        <hr/>
+        ${this.#render(info, results[name],  required[name], [...path, name])}
+      </div>
+      `
+    })
+
+    return rendered
   }
 
   #registerRequirements = (schema, requirements = {}, acc=this.#requirements) => {

@@ -20,10 +20,6 @@ export class GuidedStubPreviewPage extends Page {
 
   render() {
 
-    const convertButton = document.createElement('nwb-button')
-    convertButton.textContent = 'Run Full Conversion'
-    convertButton.addEventListener('click', this.footer.onNext)
-
     return html`
   <div
     id="guided-mode-starting-container"
@@ -35,8 +31,6 @@ export class GuidedStubPreviewPage extends Page {
       </div>
       <div class="guided--section">
       ${this.info.globalState.preview ? this.info.globalState.preview.map(preview => html`<h2 class="guided--text-sub-step">${preview.file}</h2><pre>${preview.result}</pre>`) : html`<p>Your conversion preview failed. Please try again.</p>`}
-      <br>
-      ${convertButton}
       </div>
   </div>
     `;
