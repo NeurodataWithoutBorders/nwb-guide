@@ -4,13 +4,22 @@ import { html } from 'lit';
 import { Page } from '../../Page.js';
 
 import { validateOnChange } from '../../../../validation/index.js';
-import { schemaToPages } from '../../FormPage.js';
+import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 
 export class GuidedMetadataPage extends Page {
 
   constructor(...args) {
     super(...args)
+  }
+
+  form;
+  footer = {
+    onNext: async () => {
+      this.save()
+      await this.form.validate() // Will throw an error in the callback
+      this.onTransition(1)
+    }
   }
 
   render() {
@@ -32,7 +41,9 @@ export class GuidedMetadataPage extends Page {
     const schema = { ...this.info.globalState.metadata.schema }
     schema.properties = {...schema.properties}
 
-    const pages = schemaToPages.call(this, schema, results, {
+    this.form = new JSONSchemaForm({
+      schema,
+      results,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       conditionalRequirements: [
         {
@@ -48,9 +59,18 @@ export class GuidedMetadataPage extends Page {
       }
     })
 
-    pages.forEach(page => this.addPage(page.info.label, page))
+    return html`
+  <div
+    id="guided-mode-starting-container"
+    class="guided--main-tab"
+  >
+    <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
+      <div class="guided--section">
+       ${this.form}
+      </div>
+  </div>
+    `;
 
-    this.onTransition(1) // Immediately transition to next page
   }
 };
 
