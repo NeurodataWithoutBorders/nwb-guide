@@ -565,7 +565,7 @@ export class JSONSchemaForm extends LitElement {
         }, fullPath)
       }
     }
-   
+
     // Clear old errors and warnings
     this.#clearMessages(fullPath, 'errors')
     this.#clearMessages(fullPath, 'warnings')
@@ -596,7 +596,7 @@ export class JSONSchemaForm extends LitElement {
 
       // Only add the conditional class for linked elements
       await this.#applyToLinkedProperties((name, element) => element.classList.add('required', 'conditional'), [...path, name])
-      
+
       errors.forEach((info) => this.#addMessage(fullPath, info.message, 'errors'))
 
       return false
@@ -735,7 +735,7 @@ export class JSONSchemaForm extends LitElement {
 
   render() {
 
-    
+
     const schema = this.schema ?? {}
 
     // Register default properties
