@@ -2,6 +2,7 @@ import { LitElement, css, html } from 'lit';
 import { notify } from '../globals';
 import { FilesystemSelector } from './FileSystemSelector';
 import Swal from 'sweetalert2';
+import { Accordion } from './Accordion';
 
 const componentCSS = `
 
@@ -55,6 +56,10 @@ const componentCSS = `
       font-weight: 600;
     }
 
+    .form-section:first-child .guided--form-label {
+      margin-top: 0;
+    }
+
     .guided--form-label {
       font-size: 1.2em !important;
     }
@@ -75,7 +80,7 @@ const componentCSS = `
     }
 
     .link > div {
-      padding: 0px 10px;
+      padding: 20px;
     }
 
     .link::before {
@@ -188,6 +193,7 @@ export class JSONSchemaForm extends LitElement {
 
   static get properties() {
     return {
+      mode: { type: String, reflect: true },
       schema: { type: Object, reflect: false },
       results: { type: Object, reflect: false },
       ignore: { type: Array, reflect: false },
@@ -197,8 +203,11 @@ export class JSONSchemaForm extends LitElement {
     };
   }
 
+  #base
+
   constructor (props = {}) {
     super()
+    this.mode = props.mode ?? 'default'
     this.schema = props.schema ?? {}
     this.results = props.results ?? {}
     this.ignore = props.ignore ?? []
@@ -214,6 +223,8 @@ export class JSONSchemaForm extends LitElement {
     this.validateEmptyValues = props.validateEmptyValues ?? true
     if (props.onInvalid) this.onInvalid = props.onInvalid
     if (props.validateOnChange) this.validateOnChange = props.validateOnChange
+
+    this.#base = props.base
   }
 
   #requirements = {}
@@ -350,7 +361,7 @@ export class JSONSchemaForm extends LitElement {
      }
 
     return html`
-    <div id=${fullPath.join('-')} class="${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
+    <div id=${fullPath.join('-')} class="form-section ${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
       <label class="guided--form-label">${this.#parseStringToHeader(name)}</label>
       ${(() => {
 
@@ -682,6 +693,35 @@ export class JSONSchemaForm extends LitElement {
         // Directly render the interactive property element
         if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
 
+
+        if (this.mode === 'accordion') {
+          const accordion = new Accordion({
+            sections: {
+              [this.#parseStringToHeader(name)]: {
+                subtitle: `${Object.keys(info.properties).length} fields`,
+                content: new JSONSchemaForm({
+                  schema: info,
+                  results: results[name],
+                  required: required[name],
+                  ignore: this.ignore,
+                  dialogOptions: this.dialogOptions,
+                  dialogType: this.dialogType,
+                  onlyRequired: this.onlyRequired,
+                  showLevelOverride: this.showLevelOverride,
+                  conditionalRequirements: this.conditionalRequirements,
+                  validateOnChange: this.validateOnChange,
+                  validateEmptyValues: this.validateEmptyValues,
+                  onInvalid: this.onInvalid,
+                  base: [...path, name]
+                }),
+              }
+            }
+          })
+
+          return accordion
+
+        }
+
         // Render properties in the sub-schema
         return html`
       <div style="margin-top: 40px;">
@@ -740,7 +780,7 @@ export class JSONSchemaForm extends LitElement {
     <div>
     ${false ? html`<h2>${schema.title}</h2>` : ''}
     ${false ? html`<p>${schema.description}</p>` : ''}
-    ${this.#render(schema, this.results, this.#requirements)}
+    ${this.#render(schema, this.results, this.#requirements, this.#base)}
     </div>
     `;
   }

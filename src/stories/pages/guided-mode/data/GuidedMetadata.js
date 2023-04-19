@@ -41,6 +41,7 @@ export class GuidedMetadataPage extends ManagedPage {
     const results = this.populateWithProjectMetadata(info.metadata)
 
     const form = new JSONSchemaForm({
+      mode: 'accordion',
       schema: this.info.globalState.schema.metadata[subject][session],
       results,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],

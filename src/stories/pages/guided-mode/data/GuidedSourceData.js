@@ -74,6 +74,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
   createForm = ({ subject, session, info }) => {
     const form = new JSONSchemaForm({
+      mode: 'accordion',
       schema: this.info.globalState.schema.source_data,
       results: info.source_data,
       ignore: ['verbose'],
