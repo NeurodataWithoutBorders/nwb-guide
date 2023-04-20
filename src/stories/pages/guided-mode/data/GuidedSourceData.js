@@ -74,6 +74,8 @@ export class GuidedSourceDataPage extends ManagedPage {
 
   createForm = ({ subject, session, info }) => {
 
+    const instanceId = `sub-${subject}/ses-${session}`
+
     const form = new JSONSchemaForm({
       identifier: instanceId,
       mode: 'accordion',
@@ -82,7 +84,7 @@ export class GuidedSourceDataPage extends ManagedPage {
       ignore: ['verbose'],
       onlyRequired: true,
       onStatusChange: (state) => {
-        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='sub-${subject}/ses-${session}'] .indicator`)
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${this.instanceId}'] .indicator`)
         const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
         if (currentState) indicator.classList.remove(currentState)
         indicator.classList.add(state)
