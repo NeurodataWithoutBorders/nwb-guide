@@ -97,8 +97,15 @@ export class InstanceManager extends LitElement {
       #instance-display {
         padding: 25px;
         border-left: 0;
-        overflow-y: auto;
+        overflow-y: scroll;
         overflow-x: hidden;
+        height: 100%;
+      }
+
+      #content {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
 
       input {
@@ -324,7 +331,7 @@ export class InstanceManager extends LitElement {
         </div>
       </div>` : ''}
       </div>
-      <div>
+      <div id="content">
       ${this.controls.length ? html`<div class="controls">${this.controls.map((o) => {
         return html`<nwb-button
           size="small"
