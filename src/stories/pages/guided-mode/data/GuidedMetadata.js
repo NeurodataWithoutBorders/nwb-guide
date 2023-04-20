@@ -97,7 +97,7 @@ export class GuidedMetadataPage extends ManagedPage {
           })
 
           modal.insertAdjacentHTML('beforeend', `<pre>${result}</pre>`)
-          document.body.appendChild(modal)  
+          document.body.appendChild(modal)
         }}
       ],
     })
