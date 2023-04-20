@@ -6,7 +6,7 @@ import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { validateOnChange } from '../../../../validation/index.js';
 import { InstanceManager } from '../../../InstanceManager.js';
 import { ManagedPage } from './ManagedPage.js';
-
+import { Modal } from '../../../Modal';
 
 export class GuidedMetadataPage extends ManagedPage {
 
@@ -78,6 +78,28 @@ export class GuidedMetadataPage extends ManagedPage {
       instanceType: 'Session',
       instances,
       add: false,
+
+      controls: [
+        {name: 'Preview', onClick: async (key, el) => {
+
+            let [ subject, session ] = key.split('/')
+          if (subject.startsWith('sub-')) subject = subject.slice(4)
+          if (session.startsWith('ses-')) session = session.slice(4)
+
+          const [ { file, result } ] = await this.runConversions({ stub_test: true }, [ { subject, session } ])
+
+          .catch(e => this.notify(e.message, 'error'))
+
+          const modal = new Modal({
+            header: file,
+            open: true,
+            onClose: () => modal.remove()
+          })
+
+          modal.insertAdjacentHTML('beforeend', `<pre>${result}</pre>`)
+          document.body.appendChild(modal)  
+        }}
+      ],
     })
 
     return html`

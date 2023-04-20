@@ -65,7 +65,7 @@ export class GuidedNewDatasetPage extends Page {
 
     let projectGlobalState = this.info.globalState.project
     if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {}
-
+    
     Object.assign(this.state, projectGlobalState) // Initialize state with global state
 
     const schema = {
@@ -189,7 +189,7 @@ export class GuidedNewDatasetPage extends Page {
       schema,
       results: this.state,
       validateEmptyValues: false,
-      validateOnChange
+      validateOnChange,
     })
 
     form.style.width = '100%'

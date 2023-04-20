@@ -10,6 +10,22 @@ import { runConversion } from './guided-mode/options/utils.js';
 import { get, save } from '../../progress.js'
 import { dismissNotification, notify } from '../../globals.js';
 
+const randomizeIndex = (count) => Math.floor(count * Math.random())
+
+const randomizeElements = (array, count) => {
+  if (count > array.length) throw new Error('Array size cannot be smaller than expected random numbers count.');
+  const result = [];
+  const guardian = new Set();
+  while (result.length < count) {
+      const index = randomizeIndex(array.length);
+      if (guardian.has(index)) continue;
+      const element = array[index];
+      guardian.add(index);
+      result.push(element);
+  }
+  return result;
+};
+
 const componentCSS = `
 
 `
@@ -96,34 +112,36 @@ export class Page extends LitElement {
     delete this.info.globalState.results[subject][session]
   }
 
-  mapSessions(callback) {
-    const overallResults = this.info.globalState.results
-    return Object.entries(overallResults).map(([subject, sessions]) => {
-      return Object.entries(sessions).map(([session, info]) => {
-        return callback({ subject, session, info })
-      })
+  mapSessions(callback = (v) => v) {
+    return Object.entries(this.info.globalState.results).map(([subject, sessions]) => {
+      return Object.entries(sessions).map(([session, info]) => callback({ subject, session, info }))
     }).flat(2)
   }
 
-  runConversions = async (conversionOptions = {}) => {
+  async runConversions (conversionOptions = {}, toRun) {
+    let original = toRun
+    if (!Array.isArray(toRun)) toRun = this.mapSessions()
+
+    // Filter the sessions to run
+    if (typeof original === 'number') toRun = randomizeElements(toRun, original) // Grab a random set of sessions
+    else if (typeof original === 'string') toRun = toRun.filter(({ subject }) => subject === original)
+    else if (typeof original === 'function') toRun = toRun.filter(original)
+
     const folder = this.info.globalState.conversion.info.output_folder
     let results = []
 
-    const overallResults = this.info.globalState.results
-    for (let subject in overallResults) {
-      for (let session in overallResults[subject]) {
-        const file = `${folder}/sub-${subject}/sub-${subject}_ses-${session}.nwb`
-        const result = await runConversion({
-          folder,
-          nwbfile_path: file,
-          overwrite: true,
-          ...overallResults[subject][session], // source_data and metadata are passed in here
-          ...conversionOptions, // Any additional conversion options override the defaults
+    for (let { subject, session } of toRun) {
+      const file = `${folder}/sub-${subject}/sub-${subject}_ses-${session}.nwb`
+      const result = await runConversion({
+        folder,
+        nwbfile_path: file,
+        overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
+        ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
+        ...conversionOptions, // Any additional conversion options override the defaults
 
-          interfaces: this.info.globalState.interfaces
-        })
-        results.push({ file, result })
-      }
+        interfaces: this.info.globalState.interfaces
+      })
+      results.push({ file, result })
     }
 
     return results

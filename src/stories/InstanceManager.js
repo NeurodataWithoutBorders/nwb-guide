@@ -121,6 +121,14 @@ export class InstanceManager extends LitElement {
         align-items: center;
         z-index: 1;
       }
+
+      .controls {
+        padding: 10px;
+        border-bottom: 1px solid gainsboro;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
     `
   }
 
@@ -133,6 +141,7 @@ export class InstanceManager extends LitElement {
     if (props.onAdded) this.onAdded = props.onAdded
     if (props.onRemoved) this.onRemoved = props.onRemoved
     this.add = props.add ?? true
+    this.controls = props.controls ?? []
   }
 
   renderInstance = (_, value) => value
@@ -314,14 +323,26 @@ export class InstanceManager extends LitElement {
             }}>Add ${this.instanceType}</nwb-button>
         </div>
       </div>` : ''}
-
       </div>
-      <div id="instance-display">
-      ${Object.entries(instances).map(([key, o], i) => html`
-        <div data-instance="${key}" ?hidden=${isSelected[i] === false}>
-            ${this.renderInstance(key, o)}
+      <div>
+      ${this.controls.length ? html`<div class="controls">${this.controls.map((o) => {
+        return html`<nwb-button
+          size="small"
+          icon=${o.icon}
+          @click=${function() {
+            const el = this.shadowRoot.querySelector('#instance-display > div:not([hidden])')
+            o.onClick.call(this, el.getAttribute('data-instance'), el)
+          }}
+        >${o.name}</nwb-button>`
+      })}</div>` : ``}
+
+        <div id="instance-display">
+        ${Object.entries(instances).map(([key, o], i) => html`
+          <div data-instance="${key}" ?hidden=${isSelected[i] === false}>
+              ${this.renderInstance(key, o)}
+          </div>
+        `)}
         </div>
-      `)}
       </div>
     </div>
     `;

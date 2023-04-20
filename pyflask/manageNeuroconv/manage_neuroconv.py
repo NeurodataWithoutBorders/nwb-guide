@@ -15,6 +15,14 @@ from datetime import datetime
 
 from pathlib import Path
 import os
+  
+# Get stub save path
+project_base_path = Path(__file__).parent.parent.parent
+path_config = Path(project_base_path, 'paths.config.json')
+f = path_config.open()
+data = json.load(f)
+stub_save_path = Path(Path.home(), *data['stubs'])
+f.close()
 
 
 def locate_data(info: dict) -> dict:
@@ -186,9 +194,8 @@ def convert_to_nwb(info: dict) -> str:
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        stub_subfolder = folder / ".stubs"
-        stub_subfolder.mkdir(exist_ok=True)
-        preview_path = stub_subfolder / nwbfile_path.name
+        stub_save_path.mkdir(exist_ok=True)
+        preview_path = stub_save_path / nwbfile_path.name
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
