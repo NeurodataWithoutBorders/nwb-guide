@@ -15,13 +15,13 @@ from datetime import datetime
 
 from pathlib import Path
 import os
-  
+
 # Get stub save path
 project_base_path = Path(__file__).parent.parent.parent
-path_config = Path(project_base_path, 'paths.config.json')
+path_config = Path(project_base_path, "paths.config.json")
 f = path_config.open()
 data = json.load(f)
-stub_save_path = Path(Path.home(), *data['stubs'])
+stub_save_path = Path(Path.home(), *data["stubs"])
 f.close()
 
 
