@@ -84,7 +84,7 @@ export class GuidedSourceDataPage extends ManagedPage {
       ignore: ['verbose'],
       onlyRequired: true,
       onStatusChange: (state) => {
-        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${this.instanceId}'] .indicator`)
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${instanceId}'] .indicator`)
         const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
         if (currentState) indicator.classList.remove(currentState)
         indicator.classList.add(state)
