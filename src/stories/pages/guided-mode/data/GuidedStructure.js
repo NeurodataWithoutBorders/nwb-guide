@@ -123,7 +123,7 @@ export class GuidedStructurePage extends Page {
       let schemas = this.info.globalState.schema
       if (!schemas) schemas = this.info.globalState.schema = {}
 
-      schemas.source_data = schema      
+      schemas.source_data = schema
       this.info.globalState.interfaces = this.#selected
 
 
