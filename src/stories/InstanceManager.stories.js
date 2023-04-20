@@ -15,7 +15,22 @@ const Template = (args) => new InstanceManager(args);
 export const Primary = Template.bind({});
 
 const instances = {
-  '001': 'This is some text 1',
+  '000': {
+    content: 'This is not started',
+  },
+  '001': {  
+      content: 'This is very wrong',
+      status: 'error'
+  },
+  '002': {  
+    content: 'This is kinda right',
+    status: 'warning'
+  },
+  '003': {
+    content: 'This is done',
+    status: 'valid'
+  }
+
 }
 
 const convertToElement = (_, o) => {

@@ -17,7 +17,7 @@ export class GuidedMetadataPage extends ManagedPage {
   footer = {
     onNext: async () => {
       this.save()
-      await Promise.all(this.forms.map(({ form }) => form.validate())) // Will throw an error in the callback
+      for (let { form } of this.forms) await form.validate() // Will throw an error in the callback
       this.onTransition(1)
     }
   }
@@ -40,6 +40,8 @@ export class GuidedMetadataPage extends ManagedPage {
   createForm = ({subject, session, info}) => {
     const results = this.populateWithProjectMetadata(info.metadata)
 
+    const instanceId = `sub-${subject}/ses-${session}`
+
     const form = new JSONSchemaForm({
       mode: 'accordion',
       schema: this.info.globalState.schema.metadata[subject][session],
@@ -53,6 +55,12 @@ export class GuidedMetadataPage extends ManagedPage {
       ],
       validateOnChange,
       onlyRequired: false,
+      onStatusChange: (state) => {
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${instanceId}'] .indicator`)
+        const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
+        if (currentState) indicator.classList.remove(currentState)
+        indicator.classList.add(state)
+      }
     })
 
     return {
@@ -73,7 +81,7 @@ export class GuidedMetadataPage extends ManagedPage {
       instances[`sub-${subject}`][`ses-${session}`] = form
     })
 
-    const manager = new InstanceManager({
+    this.manager = new InstanceManager({
       header: 'File Metadata',
       instanceType: 'Session',
       instances,
@@ -112,7 +120,7 @@ export class GuidedMetadataPage extends ManagedPage {
         <h1 class="guided--text-sub-step">NWB File Metadata</h1>
       </div>
       <div class="guided--section">
-       ${manager}
+       ${this.manager}
       </div>
   </div>
     `;

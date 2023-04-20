@@ -18,7 +18,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     onNext: async () => {
 
       this.save() // Save in case the conversion fails
-      await Promise.all(this.forms.map(({ form }) => form.validate())) // Will throw an error in the callback
+      for (let { form } of this.forms) await form.validate() // Will throw an error in the callback
 
       Swal.fire({
         title: "Getting metadata for source data",

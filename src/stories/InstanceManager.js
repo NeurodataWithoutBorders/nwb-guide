@@ -45,13 +45,10 @@ export class InstanceManager extends LitElement {
         justify-content: space-between;
       }
 
-      #instance-sidebar > * {
-        padding: 15px;
-      }
-
       #instance-header {
         background: #e5e5e5;
         border-bottom: 1px solid #c3c3c3;
+        padding: 15px;
       }
 
       #instance-list {
@@ -82,8 +79,9 @@ export class InstanceManager extends LitElement {
         padding: 10px;
         cursor: pointer;
         width: 100%;
-        display: block;
-        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-weight: bold;
         border-radius: 8px;
         border: 1px solid transparent;
@@ -136,6 +134,28 @@ export class InstanceManager extends LitElement {
         justify-content: flex-end;
         align-items: center;
       }
+
+      .indicator {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        border: 1px solid gray;
+        background: lightgray;
+        margin-left: 5px;
+        transition: background 0.5s;
+      }
+
+      .indicator.warning {
+        background: rgb(255, 228, 143);
+      }
+
+      .indicator.valid {
+        background: rgb(162, 255, 143);
+      }
+
+      .indicator.error {
+        background: rgb(255, 143, 143);
+      }
     `
   }
 
@@ -151,7 +171,7 @@ export class InstanceManager extends LitElement {
     this.controls = props.controls ?? []
   }
 
-  renderInstance = (_, value) => value
+  renderInstance = (_, value) => value.content ?? value
   onAdded = () => {}
   onRemoved = () => {}
 
@@ -213,7 +233,7 @@ export class InstanceManager extends LitElement {
     let instances = {}
 
     Object.entries(this.instances).forEach(([key, value]) =>{
-      const isCategory =  typeof value === 'object' && !(value instanceof HTMLElement)
+      const isCategory =  typeof value === 'object' && !(value instanceof HTMLElement) && !('content' in value)
       if (isCategory) instances = {...instances, ...this.#mapCategoryToInstances(key, value)}
       else instances[key] = value
     })
@@ -227,7 +247,7 @@ export class InstanceManager extends LitElement {
           <h2>${this.header}</h2>
         </div>
         <ul id="instance-list">
-        ${Object.keys(instances).map((key, i) => html`
+        ${Object.entries(instances).map(([key, info], i) => html`
           <li class="item" ?selected=${isSelected[i] === true} data-instance="${key}">
             <span @click="${() => {
 
@@ -247,7 +267,7 @@ export class InstanceManager extends LitElement {
                   if (el !== sidebarElement) el.removeAttribute('selected')
                 })
               }
-            }}">${key}</span>
+            }}">${key} <div class="indicator ${info.status}"></div> </span>
             <nwb-button
               size="small"
               primary

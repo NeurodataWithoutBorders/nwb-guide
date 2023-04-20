@@ -85,8 +85,6 @@ export class GuidedPathExpansionPage extends Page {
         // Save an overall results object organized by subject and session
         this.merge('results', results)
 
-        console.error('Global results', { ...this.info.globalState.results })
-
         // Remove previous results that are no longer present
         const globalResults = this.info.globalState.results
         for (let sub in globalResults) {
