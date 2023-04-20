@@ -58,13 +58,18 @@ export class FilesystemSelector extends LitElement {
   constructor (props = {}) {
     super()
     if (props.onSelect) this.onSelect = props.onSelect
+    if (props.onChange) this.onChange = props.onChange
     this.type = props.type ?? 'file'
     this.value = props.value ?? ''
     this.dialogOptions = props.dialogOptions ?? {}
+    this.onChange = props.onChange ?? (() => {})
     this.dialogType = props.dialogType ?? 'showOpenDialog'
+
+    this.addEventListener('change', () => this.onChange(this.value))
   }
 
   onSelect = () => {}
+  onChange = () => {}
 
   display = document.createElement('small')
 
@@ -82,6 +87,8 @@ export class FilesystemSelector extends LitElement {
   #handleFile = async (path) => {
     if (!path) throw new Error('Unable to parse file path')
     this.value = path
+    const event = new Event('change'); // Create a new change event
+    this.dispatchEvent(event)
     this.onSelect(path)
   }
 

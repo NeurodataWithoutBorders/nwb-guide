@@ -43,6 +43,7 @@ export class GuidedMetadataPage extends ManagedPage {
     const instanceId = `sub-${subject}/ses-${session}`
 
     const form = new JSONSchemaForm({
+      identifier: instanceId,
       mode: 'accordion',
       schema: this.info.globalState.schema.metadata[subject][session],
       results,
@@ -56,7 +57,7 @@ export class GuidedMetadataPage extends ManagedPage {
       validateOnChange,
       onlyRequired: false,
       onStatusChange: (state) => {
-        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${instanceId}'] .indicator`)
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='sub-${subject}/ses-${session}'] .indicator`)
         const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
         if (currentState) indicator.classList.remove(currentState)
         indicator.classList.add(state)

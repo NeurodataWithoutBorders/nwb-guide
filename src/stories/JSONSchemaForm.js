@@ -209,6 +209,8 @@ export class JSONSchemaForm extends LitElement {
 
   constructor (props = {}) {
     super()
+
+    this.identifier = props.identifier
     this.mode = props.mode ?? 'default'
     this.schema = props.schema ?? {}
     this.results = props.results ?? {}
@@ -236,10 +238,6 @@ export class JSONSchemaForm extends LitElement {
   attributeChangedCallback(changedProperties, oldValue, newValue) {
     super.attributeChangedCallback(changedProperties, oldValue, newValue)
     if (changedProperties === 'options') this.requestUpdate()
-  }
-
-  #handleFile = async (filePath, parent, name) => {
-    parent[name] = filePath
   }
 
   #updateParent(name, value, parent) {
@@ -291,6 +289,7 @@ export class JSONSchemaForm extends LitElement {
     // Print out a detailed error message if any inputs are missing
     let message = isValid ? '' : `<b>${invalidInputs.length} required inputs are not specified properly.</b>`
 
+
     // Check if all inputs are valid
     const flaggedInputs = this.shadowRoot.querySelectorAll('.invalid')
     if (flaggedInputs.length) {
@@ -301,6 +300,7 @@ export class JSONSchemaForm extends LitElement {
 
 
     if (message) {
+      if (this.identifier) message = `[${this.identifier}]: ${message}`
       notify(message, 'error', 7000)
       throw new Error(message)
     }
@@ -408,7 +408,11 @@ export class JSONSchemaForm extends LitElement {
           if (this.#filesystemQueries.includes(info.format)) return new FilesystemSelector({
             type: info.format,
             value: parent[name],
-            onSelect: (filePath) => this.#handleFile(filePath, parent, name),
+            onSelect: (filePath) => this.#updateParent(name, filePath, parent),
+            onChange: (filePath) => {
+              console.error('TRIGGERED ON CHANGE')
+              this.#validateOnChange(name, parent, filePath, path)
+            },
             dialogOptions: this.dialogOptions,
             dialogType: this.dialogType
           })
@@ -706,6 +710,7 @@ export class JSONSchemaForm extends LitElement {
         if (this.mode === 'accordion' && hasMany) {
 
         this.#nestedForms[name] = new JSONSchemaForm({
+          identifier: this.identifier,
           schema: info,
           results: results[name],
           required: required[name], // Scoped to the sub-schema
@@ -764,15 +769,14 @@ export class JSONSchemaForm extends LitElement {
   // NOTE: This ignores the file selector button
   #checkAllInputs = (filter) => {
     const inputs = Array.from(this.shadowRoot.querySelectorAll('.schema-input'))
-    const filtered = filter ? inputs.filter(filter) : inputs
-    filtered.forEach(input => {
-      const event = new Event('change'); // Create a new change event
-      input.dispatchEvent(event); // Manually trigger the change event
-    })
+    const fileInputs = Array.from(this.shadowRoot.querySelectorAll('nwb-filesystem-selector') ?? [])
+    const allInputs = [...inputs, ...fileInputs]
+    const filtered = filter ? allInputs.filter(filter) : allInputs
+    filtered.forEach(input => input.dispatchEvent(new Event('change')))
   }
 
   async updated() {
-    this.#checkAllInputs((this.validateEmptyValues) ? undefined : (el) => el.value !== '') // Check all inputs with non-empty values on render
+    this.#checkAllInputs((this.validateEmptyValues) ? undefined : (el) => (el.value ?? el.checked) !== '') // Check all inputs with non-empty values on render
   }
 
   render() {

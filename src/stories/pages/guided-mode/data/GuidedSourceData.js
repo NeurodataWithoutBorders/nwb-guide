@@ -74,14 +74,19 @@ export class GuidedSourceDataPage extends ManagedPage {
 
   createForm = ({ subject, session, info }) => {
 
-    const topLevelProperties = Object.keys(this.info.globalState.schema.source_data.properties)
     const form = new JSONSchemaForm({
+      identifier: instanceId,
       mode: 'accordion',
       schema: this.info.globalState.schema.source_data,
       results: info.source_data,
       ignore: ['verbose'],
       onlyRequired: true,
-      // showLevelOverride: 0
+      onStatusChange: (state) => {
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='sub-${subject}/ses-${session}'] .indicator`)
+        const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
+        if (currentState) indicator.classList.remove(currentState)
+        indicator.classList.add(state)
+      }
     })
 
     return {
@@ -102,7 +107,7 @@ export class GuidedSourceDataPage extends ManagedPage {
       instances[`sub-${subject}`][`ses-${session}`] = form
     })
 
-    const manager = new InstanceManager({
+    this.manager = new InstanceManager({
       header: 'Source Data',
       instanceType: 'Session',
       instances,
@@ -140,7 +145,7 @@ export class GuidedSourceDataPage extends ManagedPage {
         <h1 class="guided--text-sub-step">Source Data</h1>
       </div>
       <div class="guided--section">
-        ${manager}
+        ${this.manager}
       </div>
   </div>
     `;
