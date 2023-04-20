@@ -73,6 +73,8 @@ export class GuidedSourceDataPage extends ManagedPage {
   }
 
   createForm = ({ subject, session, info }) => {
+
+    const topLevelProperties = Object.keys(this.info.globalState.schema.source_data.properties)
     const form = new JSONSchemaForm({
       mode: 'accordion',
       schema: this.info.globalState.schema.source_data,

@@ -21,6 +21,7 @@ export class GuidedPathExpansionPage extends Page {
       this.save() // Save in case the request fails
 
       const hidden = this.optional.hidden
+      this.info.globalState.structure.state = !hidden
 
       if (!this.optional.toggled) {
         const message = "Please select a path expansion option."
@@ -36,6 +37,8 @@ export class GuidedPathExpansionPage extends Page {
         const source_data = {}
         for (let key in this.info.globalState.interfaces) source_data[key] =  {}
 
+        const existingMetadata = this.info.globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata
+
         this.info.globalState.results = {
           [this.altInfo.subject_id]: {
             [this.altInfo.session_id]: {
@@ -43,14 +46,19 @@ export class GuidedPathExpansionPage extends Page {
                metadata: {
                 NWBFile: {
                   session_id: this.altInfo.session_id,
+                  ...existingMetadata?.NWBFile ?? {}
                 },
                 Subject: {
                   subject_id: this.altInfo.subject_id,
+                  ...existingMetadata?.Subject ?? {}
                 }
               },
             }
           }
         }
+
+        console.error(this.info.globalState.results)
+
       }
 
       // Otherwise use path expansion
@@ -75,7 +83,17 @@ export class GuidedPathExpansionPage extends Page {
         }
 
         // Save an overall results object organized by subject and session
-        this.info.globalState.results = results
+        this.merge('results', results)
+
+        console.error('Global results', { ...this.info.globalState.results })
+
+        // Remove previous results that are no longer present
+        const globalResults = this.info.globalState.results
+        for (let sub in globalResults) {
+          for (let ses in globalResults[sub]) {
+            if (!results[sub]?.[ses]) delete globalResults[sub]?.[ses]
+          }
+        }
       }
 
       this.onTransition(1)
@@ -116,6 +134,9 @@ export class GuidedPathExpansionPage extends Page {
 
     let structureGlobalState = this.info.globalState.structure
     if (!structureGlobalState) structureGlobalState = this.info.globalState.structure = { results: {} }
+
+    const state = this.info.globalState.structure.state
+    if (state !== undefined) this.optional.state = state
 
    const baseSchema = {
       properties: {

@@ -694,7 +694,9 @@ export class JSONSchemaForm extends LitElement {
         if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
 
 
-        if (this.mode === 'accordion') {
+        const hasMany = renderable.length > 1 // How many siblings?
+
+        if (this.mode === 'accordion' && hasMany) {
           const accordion = new Accordion({
             sections: {
               [this.#parseStringToHeader(name)]: {
@@ -723,13 +725,14 @@ export class JSONSchemaForm extends LitElement {
         }
 
         // Render properties in the sub-schema
-        return html`
-      <div style="margin-top: 40px;">
-        <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
-        <hr/>
-        ${this.#render(info, results[name],  required[name], [...path, name])}
-      </div>
-      `
+        const rendered = this.#render(info, results[name], required[name], [...path, name])
+        return (hasMany || path.length > 1) ? html`
+          <div style="margin-top: 40px;">
+            <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
+            <hr/>
+            ${rendered}
+          </div>
+        ` : rendered
     })
 
     return rendered

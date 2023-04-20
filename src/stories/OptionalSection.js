@@ -17,6 +17,12 @@ export class OptionalSection extends LitElement {
         `
     }
 
+    static get properties() {
+        return {
+            state: { type: Boolean, reflect: true },
+        }
+    }
+
     get hidden() {
         return this.shadowRoot.querySelector('.optional-section__content').hidden
     }
@@ -27,6 +33,7 @@ export class OptionalSection extends LitElement {
         this.description = props.description ?? 'This is the description of the optional section.'
         this.content = props.content ?? ''
         this.altContent = props.altContent ?? ''
+        this.state = props.state
     }
 
     show(state){
@@ -64,6 +71,13 @@ export class OptionalSection extends LitElement {
             this.no.primary = true
         }
     })
+
+    updated(){
+        if (this.state === undefined) return
+
+        if (this.state) this.yes.click()
+        else this.no.click()
+    }
 
     render(){
 
