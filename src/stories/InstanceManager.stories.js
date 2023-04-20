@@ -18,11 +18,11 @@ const instances = {
   '000': {
     content: 'This is not started',
   },
-  '001': {  
+  '001': {
       content: 'This is very wrong',
       status: 'error'
   },
-  '002': {  
+  '002': {
     content: 'This is kinda right',
     status: 'warning'
   },
