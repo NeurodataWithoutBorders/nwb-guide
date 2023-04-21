@@ -287,7 +287,7 @@ export class JSONSchemaForm extends LitElement {
     const isValid = !invalidInputs.length
 
     // Print out a detailed error message if any inputs are missing
-    let message = isValid ? '' : `<b>${invalidInputs.length} required inputs are not specified properly.</b>`
+    let message = isValid ? '' : `${invalidInputs.length} required inputs are not specified properly.`
 
 
     // Check if all inputs are valid
@@ -300,8 +300,7 @@ export class JSONSchemaForm extends LitElement {
 
 
     if (message) {
-      if (this.identifier) message = `[${this.identifier}]: ${message}`
-      notify(message, 'error', 7000)
+      notify(this.identifier ?  `<b>[${this.identifier}]</b>: ${message}` : message, 'error', 7000)
       throw new Error(message)
     }
 
@@ -409,10 +408,7 @@ export class JSONSchemaForm extends LitElement {
             type: info.format,
             value: parent[name],
             onSelect: (filePath) => this.#updateParent(name, filePath, parent),
-            onChange: (filePath) => {
-              console.error('TRIGGERED ON CHANGE')
-              this.#validateOnChange(name, parent, filePath, path)
-            },
+            onChange: (filePath) => this.#validateOnChange(name, parent, filePath, path),
             dialogOptions: this.dialogOptions,
             dialogType: this.dialogType
           })

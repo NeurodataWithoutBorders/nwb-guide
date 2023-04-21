@@ -86,7 +86,6 @@ export class GuidedMetadataPage extends ManagedPage {
       header: 'File Metadata',
       instanceType: 'Session',
       instances,
-      add: false,
 
       controls: [
         {name: 'Preview', onClick: async (key, el) => {

@@ -113,6 +113,7 @@ export class Page extends LitElement {
   }
 
   mapSessions(callback = (v) => v) {
+    console.warn('this.info.globalState.results', this.info.globalState.results)
     return Object.entries(this.info.globalState.results).map(([subject, sessions]) => {
       return Object.entries(sessions).map(([session, info]) => callback({ subject, session, info }))
     }).flat(2)
