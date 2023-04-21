@@ -27,6 +27,11 @@ export class OptionalSection extends LitElement {
         return this.shadowRoot.querySelector('.optional-section__content').hidden
     }
 
+    attributeChangedCallback(...args) {
+        super.attributeChangedCallback(...args)
+        if (args[0] === 'state') this.requestUpdate()
+    }
+
     constructor(props){
         super()
         this.title = props.title ?? ''
@@ -74,9 +79,8 @@ export class OptionalSection extends LitElement {
 
     updated(){
         if (this.state === undefined) return
-
-        if (this.state) this.yes.click()
-        else this.no.click()
+        if (this.state) this.yes.onClick()
+        else this.no.onClick()
     }
 
     render(){

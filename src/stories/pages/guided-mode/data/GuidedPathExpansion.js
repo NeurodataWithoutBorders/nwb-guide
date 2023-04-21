@@ -57,8 +57,6 @@ export class GuidedPathExpansionPage extends Page {
           }
         }
 
-        console.error(this.info.globalState.results)
-
       }
 
       // Otherwise use path expansion
@@ -91,6 +89,7 @@ export class GuidedPathExpansionPage extends Page {
           for (let ses in globalResults[sub]) {
             if (!results[sub]?.[ses]) delete globalResults[sub]?.[ses]
           }
+          if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]
         }
       }
 
@@ -134,6 +133,7 @@ export class GuidedPathExpansionPage extends Page {
     if (!structureGlobalState) structureGlobalState = this.info.globalState.structure = { results: {} }
 
     const state = this.info.globalState.structure.state
+    console.error('Setting state', state)
     if (state !== undefined) this.optional.state = state
 
    const baseSchema = {
