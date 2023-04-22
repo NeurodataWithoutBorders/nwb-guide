@@ -2,6 +2,7 @@ import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.min.css';
 
 import { LitElement, html } from 'lit';
+import './Button';
 
 
 function arrayRenderer(instance, td, row, col, prop, value, cellProperties) {
@@ -51,6 +52,13 @@ export class Table extends LitElement {
     this.data = data ?? [];
     this.keyColumn = keyColumn ?? 'id'
     if (validateOnChange) this.validateOnChange = validateOnChange
+
+    this.style.width = '100%';
+    this.style.display = 'flex';
+    this.style.flexWrap = 'wrap';
+    this.style.alignItems = 'center';
+    this.style.justifyContent = 'center';
+
   }
 
   static get properties() {
@@ -70,7 +78,7 @@ export class Table extends LitElement {
       let value;
       if (col === this.keyColumn) {
         if (hasRow) value = row
-        else return
+        else return ''
       } else value = (hasRow ? this.data[row][col] : undefined) ?? this.schema.properties[col].default ?? ''
       return value
     })
@@ -159,7 +167,7 @@ export class Table extends LitElement {
       colHeaders,
       columns,
       height: 'auto',
-      width: 'auto',
+      width: '100%',
       contextMenu: ['row_below', 'remove_row'],//, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
       licenseKey: 'non-commercial-and-evaluation' // for non-commercial use only
     });
@@ -203,7 +211,6 @@ export class Table extends LitElement {
 
     table.addHook('afterCreateRow', (index, amount) => {
       const physicalRows = Array.from({length: amount}, (e, i) => index + i)
-      console.log('afterCreateRow', physicalRows)
       physicalRows.forEach(row => this.#setRow(row, this.#getRowData(row)))
     })
 
@@ -220,7 +227,10 @@ export class Table extends LitElement {
 
 
   render() {
-    return html`<div></div>`;
+    return html`
+      <div></div>
+      <nwb-button style="margin-top: 25px;" @click=${() => this.table.alter("insert_row")}>Add New Row</nwb-button>
+    `;
   }
 
 }

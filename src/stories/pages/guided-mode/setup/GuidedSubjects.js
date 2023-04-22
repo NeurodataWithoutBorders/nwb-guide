@@ -60,7 +60,7 @@ export class GuidedSubjectsPage extends Page {
     const toRemove = Object.keys(subjects).filter(sub => !toHave.includes(sub))
     toRemove.forEach(sub => delete subjects[sub])
     toHave.forEach(sub => subjects[sub] = subjects[sub] ?? {})
-    
+
     for (let subject in subjects) {
       const sessions = Object.keys(this.info.globalState.results[subject])
       subjects[subject].sessions = sessions
@@ -78,7 +78,7 @@ export class GuidedSubjectsPage extends Page {
       }
     }
 
-    const table = new Table({
+    const subjectTable = new Table({
       schema, 
       data: subjects,
       keyColumn: 'subject_id',
@@ -97,7 +97,7 @@ export class GuidedSubjectsPage extends Page {
           <div style="
             width: 100%;
           ">
-            ${table}
+            ${subjectTable}
           </div>
       </div>
     `;

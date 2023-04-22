@@ -34,6 +34,7 @@ export class GuidedPathExpansionPage extends Page {
 
       // Force single subject/session
       if (hidden) {
+        
         const source_data = {}
         for (let key in this.info.globalState.interfaces) source_data[key] =  {}
 
@@ -59,7 +60,7 @@ export class GuidedPathExpansionPage extends Page {
 
       }
 
-      // Otherwise use path expansion
+      // Otherwise use path expansion to merge into existing subjects
       else if (!hidden && hidden !== undefined) {
 
         const structure = this.info.globalState.structure.results
@@ -83,14 +84,17 @@ export class GuidedPathExpansionPage extends Page {
         // Save an overall results object organized by subject and session
         this.merge('results', results)
 
-        // Remove previous results that are no longer present
-        const globalResults = this.info.globalState.results
-        for (let sub in globalResults) {
-          for (let ses in globalResults[sub]) {
-            if (!results[sub]?.[ses]) delete globalResults[sub]?.[ses]
-          }
-          if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]
-        }
+        // // NOTE: Current behavior is to ONLY add new results, not remove old ones
+        // // If we'd like, we could label sessions as user-defined so they never clear
+        
+        // // Remove previous results that are no longer present
+        // const globalResults = this.info.globalState.results
+        // for (let sub in globalResults) {
+        //   for (let ses in globalResults[sub]) {
+        //     if (!results[sub]?.[ses]) delete globalResults[sub]?.[ses]
+        //   }
+        //   if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]
+        // }
       }
 
       this.onTransition(1)
@@ -102,28 +106,28 @@ export class GuidedPathExpansionPage extends Page {
     session_id: '1',
   }
 
-  altForm = new JSONSchemaForm({
-    results: this.altInfo,
-    schema: {
-      type: 'object',
-      properties: {
-        subject_id: {
-          type: 'string',
-          description: 'Enter a subject ID.',
-        },
-        session_id: {
-          type: 'string',
-          description: 'Enter a session ID.',
-        },
-      },
-      required: ['subject_id', 'session_id']
-    }
-  })
+  // altForm = new JSONSchemaForm({
+  //   results: this.altInfo,
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       subject_id: {
+  //         type: 'string',
+  //         description: 'Enter a subject ID.',
+  //       },
+  //       session_id: {
+  //         type: 'string',
+  //         description: 'Enter a session ID.',
+  //       },
+  //     },
+  //     required: ['subject_id', 'session_id']
+  //   }
+  // })
 
   optional = new OptionalSection({
     title: 'Would you like to locate data programmatically?',
     description: 'Locate data using a format string. This will be used to automatically detect source data for multiple subjects and sessions.',
-    altContent: this.altForm,
+    // altContent: this.altForm,
   })
 
 
@@ -133,7 +137,6 @@ export class GuidedPathExpansionPage extends Page {
     if (!structureGlobalState) structureGlobalState = this.info.globalState.structure = { results: {} }
 
     const state = this.info.globalState.structure.state
-    console.error('Setting state', state)
     if (state !== undefined) this.optional.state = state
 
    const baseSchema = {
@@ -162,9 +165,7 @@ export class GuidedPathExpansionPage extends Page {
 
     this.optional.requestUpdate()
 
-    const form = this.form = new JSONSchemaForm({
-      ...structureGlobalState
-    })
+    const form = this.form = new JSONSchemaForm({ ...structureGlobalState })
 
 
 
