@@ -185,7 +185,6 @@ export class Dashboard extends LitElement {
       this.subSidebar.hide()
     }
 
-
     page.set(toPass)
 
     // const page = this.getPage(info)
