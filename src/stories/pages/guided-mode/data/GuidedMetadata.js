@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { Page } from '../../Page.js';
-import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 import { validateOnChange } from '../../../../validation/index.js';
+import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
 
 export class GuidedMetadataPage extends Page {
@@ -14,7 +14,6 @@ export class GuidedMetadataPage extends Page {
   }
 
   form;
-
   footer = {
     onNext: async () => {
       this.save()
@@ -23,24 +22,28 @@ export class GuidedMetadataPage extends Page {
     }
   }
 
-
   render() {
 
 
-    const metadataResults = this.info.globalState.metadata.results
+    const results = this.info.globalState.metadata.results
 
     // Merge project-wide data into metadata
     const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
     toMerge.forEach(([key, value]) => {
-      let internalMetadata = metadataResults[key]
-      if (!metadataResults[key]) internalMetadata = metadataResults[key] = {}
+      let internalMetadata = results[key]
+      if (!results[key]) internalMetadata = results[key] = {}
       for (let key in value) {
         if (!(key in internalMetadata)) internalMetadata[key] = value[key] // Prioritize existing results (cannot override with new information...)
       }
     })
 
+    // Properly clone the schema to produce multiple pages from the project metadata schema
+    const schema = { ...this.info.globalState.metadata.schema }
+    schema.properties = {...schema.properties}
+
     this.form = new JSONSchemaForm({
-      ...this.info.globalState.metadata,
+      schema,
+      results,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       conditionalRequirements: [
         {
@@ -50,20 +53,9 @@ export class GuidedMetadataPage extends Page {
       ],
       validateOnChange,
       required: {
-
         NWBFile: {
           session_start_time: true
         },
-
-        // // Custom final validation
-        // Subject: {
-        //   age: function () {
-        //     return !this['date_of_birth']
-        //   },
-        //   date_of_birth: function () {
-        //     return !this['age']
-        //   }
-        // },
       }
     })
 
@@ -73,14 +65,12 @@ export class GuidedMetadataPage extends Page {
     class="guided--main-tab"
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-      <div class="title">
-        <h1 class="guided--text-sub-step">NWB File Metadata</h1>
-      </div>
       <div class="guided--section">
        ${this.form}
       </div>
   </div>
     `;
+
   }
 };
 

@@ -18,8 +18,27 @@ export default {
 const globalState = {
   project: {},
   metadata: {
+    results: {},
     schema: {
       properties: {
+        NWBFile: {
+          type: 'object',
+          properties: {
+            session_description: {
+              type: 'string',
+              description: 'Enter a description of the session.',
+            },
+            identifier: {
+              type: 'string',
+              description: 'Enter a unique identifier for the session.',
+            },
+            session_start_time: {
+              type: 'string',
+              description: 'Enter the start time of the session.',
+              format: 'date-time'
+            }
+          }
+        },
         Subject: {
           type: 'object',
           properties: {
