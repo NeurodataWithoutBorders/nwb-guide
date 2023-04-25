@@ -87,13 +87,15 @@ export class Page extends LitElement {
     path.forEach(key => target = target[key])
 
     // Deep merge objects
-    for (const [k, v] of Object.entries(toMerge)) {
-      if (typeof v === 'object' && !Array.isArray(v)) {
-        if (!target[key][k]) target[key][k] = v
-        else this.merge(`${k}`, v, target[key])
+    if (key in target) {
+      for (const [k, v] of Object.entries(toMerge)) {
+        if (typeof v === 'object' && !Array.isArray(v)) {
+          if (!target[key][k]) target[key][k] = v
+          else this.merge(`${k}`, v, target[key])
+        }
+        else target[key][k] = v
       }
-      else target[key][k] = v
-    }
+    } else target[key] = toMerge
   }
 
   addSession ({ subject, session, info }) {
