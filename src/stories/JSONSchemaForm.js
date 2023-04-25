@@ -593,7 +593,7 @@ export class JSONSchemaForm extends LitElement {
     this.#nErrors += errors.length
     this.#nWarnings += warnings.length
     this.#checkStatus()
-    
+
     // Show aggregated errors and warnings (if any)
     warnings.forEach((info) => this.#addMessage(fullPath, info.message, 'warnings'))
 

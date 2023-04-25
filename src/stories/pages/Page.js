@@ -141,7 +141,7 @@ export class Page extends LitElement {
         this.notify(e.message, 'error')
         throw e.message
       })
-      
+
       results.push({ file, result })
     }
 
