@@ -409,10 +409,7 @@ export class JSONSchemaForm extends LitElement {
             type: info.format,
             value: parent[name],
             onSelect: (filePath) => this.#updateParent(name, filePath, parent),
-            onChange: (filePath) => {
-              console.error('TRIGGERED ON CHANGE')
-              this.#validateOnChange(name, parent, filePath, path)
-            },
+            onChange: (filePath) => this.#validateOnChange(name, parent, filePath, path),
             dialogOptions: this.dialogOptions,
             dialogType: this.dialogType
           })

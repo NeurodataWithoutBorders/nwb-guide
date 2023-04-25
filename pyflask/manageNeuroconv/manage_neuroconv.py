@@ -3,7 +3,8 @@ from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInter
 from neuroconv import datainterfaces, NWBConverter
 
 import json
-from neuroconv.utils import NWBMetaDataEncoder, LocalPathExpander
+from neuroconv.utils import NWBMetaDataEncoder
+from neuroconv.tools import LocalPathExpander
 from pynwb.file import NWBFile, Subject
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
@@ -29,6 +30,12 @@ def locate_data(info: dict) -> dict:
     """Locate data from the specifies directories using fstrings."""
 
     expander = LocalPathExpander()
+
+    # Transform the input into a list of dictionaries
+    for value in info.values():
+        if (value.get('base_directory') is not None) and (value.get('base_directory') != ''):
+            value['base_directory'] = Path(value['base_directory'])
+
     out = expander.expand_paths(info)
 
     # Organize results by subject, session, and data type

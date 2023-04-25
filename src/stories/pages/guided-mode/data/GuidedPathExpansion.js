@@ -7,6 +7,7 @@ import { Page } from '../../Page.js';
 import { baseUrl, notyf } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { OptionalSection } from '../../../OptionalSection.js';
+import { run } from '../options/utils.js';
 
 export class GuidedPathExpansionPage extends Page {
 
@@ -64,11 +65,8 @@ export class GuidedPathExpansionPage extends Page {
 
         const structure = this.info.globalState.structure.results
 
-        const results = await fetch(`${baseUrl}/neuroconv/locate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(structure)
-        }).then((res) => res.json())
+        const results = await run(`locate`, structure, { title: 'Locating Data'})
+                        .catch(e => this.notify(e.message, 'error'))
 
         const subjects = Object.keys(results)
         if (subjects.length === 0) {
@@ -86,8 +84,9 @@ export class GuidedPathExpansionPage extends Page {
         // Remove previous results that are no longer present
         const globalResults = this.info.globalState.results
         for (let sub in globalResults) {
-          for (let ses in globalResults[sub]) {
-            if (!results[sub]?.[ses]) delete globalResults[sub]?.[ses]
+          const subInfo = globalResults[sub]
+          for (let ses in subInfo) {
+            if (!results[sub]?.[ses] && delete globalResults[sub]?.[ses]) delete globalResults[sub][ses]
           }
           if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]
         }
@@ -133,12 +132,11 @@ export class GuidedPathExpansionPage extends Page {
     if (!structureGlobalState) structureGlobalState = this.info.globalState.structure = { results: {} }
 
     const state = this.info.globalState.structure.state
-    console.error('Setting state', state)
     if (state !== undefined) this.optional.state = state
 
    const baseSchema = {
       properties: {
-        folder: {
+        base_directory: {
           type: 'string',
           format: 'directory',
           description: 'Enter the base directory of your data.',
@@ -152,7 +150,7 @@ export class GuidedPathExpansionPage extends Page {
           // {subject_id}_{session_id}_{task_name}/{subject_id}_{session_id}_{task_name}_imec0/{subject_id}_{session_id}_{task_name}_t0.imec0.ap.bin
 
       },
-      required: ['base_directory', 'format_string']
+      required: ['base_directory', 'file_path']
     }
 
     // Require properties for all sources
@@ -161,6 +159,7 @@ export class GuidedPathExpansionPage extends Page {
     structureGlobalState.schema = generatedSchema
 
     this.optional.requestUpdate()
+
 
     const form = this.form = new JSONSchemaForm({
       ...structureGlobalState

@@ -72,8 +72,6 @@ export class GuidedStructurePage extends Page {
       li.appendChild(button)
 
       this.#selected[resolvedKey] = value
-      console.log('SELECTED', this.#selected)
-
 
         // Stop enter key from creating new line
         keyEl.addEventListener('keydown', function(e) {
@@ -116,9 +114,7 @@ export class GuidedStructurePage extends Page {
 
       this.save() // Save in case the schema request fails
 
-      console.log(this.#selected)
-
-      const interfaces = this.#selected
+      const interfaces = { ...this.#selected }
 
       const schema = (Object.keys(interfaces).length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema`, {
         method: 'POST',
@@ -130,7 +126,7 @@ export class GuidedStructurePage extends Page {
       if (!schemas) schemas = this.info.globalState.schema = {}
 
       schemas.source_data = schema
-      this.info.globalState.interfaces = this.#selected
+      this.info.globalState.interfaces = interfaces
 
       this.onTransition(1)
     }
@@ -138,8 +134,8 @@ export class GuidedStructurePage extends Page {
 
   async updated(){
 
-
     const selected = this.info.globalState.interfaces
+
     this.search.options = await fetch(`${baseUrl}/neuroconv`).then((res) => res.json()).then(json => Object.entries(json).map(([key, value]) => {
       return {
         ...value,
