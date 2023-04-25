@@ -2,10 +2,6 @@
 
 import { LitElement, html } from 'lit';
 import useGlobalStyles from '../utils/useGlobalStyles.js';
-import './guided-mode/GuidedHeader.js'
-import '../Footer.js'
-import '../Button'
-
 import { runConversion } from './guided-mode/options/utils.js';
 import { get, save } from '../../progress.js'
 import { dismissNotification, notify } from '../../globals.js';
@@ -77,6 +73,7 @@ export class Page extends LitElement {
   }
 
   onTransition = () => {} // User-defined function
+  updatePages = () => {} // User-defined function
 
   save = (overrides) => save(this, overrides)
 
@@ -140,7 +137,11 @@ export class Page extends LitElement {
         ...conversionOptions, // Any additional conversion options override the defaults
 
         interfaces: this.info.globalState.interfaces
+      }) .catch(e => {
+        this.notify(e.message, 'error')
+        throw e.message
       })
+      
       results.push({ file, result })
     }
 
@@ -149,18 +150,14 @@ export class Page extends LitElement {
   }
 
 //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.
+  addPage = (id, subpage) => {
+    if (!this.info.pages) this.info.pages = {}
+    this.info.pages[id] = subpage
+    this.updatePages()
+  }
+
   render() {
-    return html`
-    <nwbguide-guided-header></nwbguide-guided-header>
-    <section><slot></slot></section>
-    <nwb-footer style="display: flex; align-items: center; justify-content: space-between;">
-        <div>
-            <nwb-button @click=${() => this.onTransition(-1)}>Back</nwb-button>
-            <nwb-button @click=${() => this.onTransition(1)} primary>Next</nwb-button>
-        </div>
-        <nwb-button @click=${() => this.onTransition('/')}>Save and Exit</nwb-button>
-    </nwb-footer>
-    `;
+    return html`<slot></slot>`;
   }
 };
 

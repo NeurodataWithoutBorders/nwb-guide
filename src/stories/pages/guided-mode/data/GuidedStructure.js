@@ -72,6 +72,8 @@ export class GuidedStructurePage extends Page {
       li.appendChild(button)
 
       this.#selected[resolvedKey] = value
+      console.log('SELECTED', this.#selected)
+
 
         // Stop enter key from creating new line
         keyEl.addEventListener('keydown', function(e) {
@@ -114,10 +116,14 @@ export class GuidedStructurePage extends Page {
 
       this.save() // Save in case the schema request fails
 
-      const schema = (Object.keys(this.#selected).length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema`, {
+      console.log(this.#selected)
+
+      const interfaces = this.#selected
+
+      const schema = (Object.keys(interfaces).length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.#selected)
+        body: JSON.stringify(interfaces)
       }).then((res) => res.json())
 
       let schemas = this.info.globalState.schema
@@ -125,7 +131,6 @@ export class GuidedStructurePage extends Page {
 
       schemas.source_data = schema
       this.info.globalState.interfaces = this.#selected
-
 
       this.onTransition(1)
     }

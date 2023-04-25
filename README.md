@@ -1,6 +1,21 @@
-# NWB GUIDE
+<p align="center">
+  <img src="src/assets/img/logo-guide-draft-transparent-tight.png" width="250" alt="NeuroConv logo"/>
+  <h3 align="center">NWB Graphical User Interface for Data Entry</h3>
+</p>
 
 > **Note:** This project is under heavy pre-release development and is not recommended for practical use.
+
+<!-- TABLE OF CONTENTS -->
+
+## Table of Contents
+
+- [About](#about)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Contributing](#contributing)
+
+## About
+NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.
 
 ## Installation
 Install the appropriate Python dependencies for your operating system.
