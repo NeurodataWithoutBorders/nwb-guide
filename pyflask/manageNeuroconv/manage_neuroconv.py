@@ -33,8 +33,8 @@ def locate_data(info: dict) -> dict:
 
     # Transform the input into a list of dictionaries
     for value in info.values():
-        if (value.get('base_directory') is not None) and (value.get('base_directory') != ''):
-            value['base_directory'] = Path(value['base_directory'])
+        if (value.get("base_directory") is not None) and (value.get("base_directory") != ""):
+            value["base_directory"] = Path(value["base_directory"])
 
     out = expander.expand_paths(info)
 
