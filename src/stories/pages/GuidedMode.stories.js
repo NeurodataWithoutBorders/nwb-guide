@@ -28,7 +28,7 @@ const globalState = {
         metadata: { },
         source_data: { }
       }
-    }   
+    }
   },
   interfaces: {
     neuropixel: 'SpikeGLXRecordingInterface'
