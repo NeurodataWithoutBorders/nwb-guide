@@ -1,7 +1,7 @@
 import { LitElement, css, html } from 'lit';
 import { notify } from '../globals';
 import { FilesystemSelector } from './FileSystemSelector';
-import Swal from 'sweetalert2';
+import { Accordion } from './Accordion';
 
 const componentCSS = `
 
@@ -55,6 +55,10 @@ const componentCSS = `
       font-weight: 600;
     }
 
+    .form-section:first-child .guided--form-label {
+      margin-top: 0;
+    }
+
     .guided--form-label {
       font-size: 1.2em !important;
     }
@@ -75,7 +79,7 @@ const componentCSS = `
     }
 
     .link > div {
-      padding: 0px 10px;
+      padding: 20px;
     }
 
     .link::before {
@@ -188,6 +192,7 @@ export class JSONSchemaForm extends LitElement {
 
   static get properties() {
     return {
+      mode: { type: String, reflect: true },
       schema: { type: Object, reflect: false },
       results: { type: Object, reflect: false },
       ignore: { type: Array, reflect: false },
@@ -197,8 +202,16 @@ export class JSONSchemaForm extends LitElement {
     };
   }
 
+  #base = []
+  #nestedForms = {}
+  #nErrors = 0
+  #nWarnings = 0
+
   constructor (props = {}) {
     super()
+
+    this.identifier = props.identifier
+    this.mode = props.mode ?? 'default'
     this.schema = props.schema ?? {}
     this.results = props.results ?? {}
     this.ignore = props.ignore ?? []
@@ -214,6 +227,10 @@ export class JSONSchemaForm extends LitElement {
     this.validateEmptyValues = props.validateEmptyValues ?? true
     if (props.onInvalid) this.onInvalid = props.onInvalid
     if (props.validateOnChange) this.validateOnChange = props.validateOnChange
+
+    if (props.onStatusChange) this.onStatusChange = props.onStatusChange
+
+    if (props.base) this.#base = props.base
   }
 
   #requirements = {}
@@ -221,10 +238,6 @@ export class JSONSchemaForm extends LitElement {
   attributeChangedCallback(changedProperties, oldValue, newValue) {
     super.attributeChangedCallback(changedProperties, oldValue, newValue)
     if (changedProperties === 'options') this.requestUpdate()
-  }
-
-  #handleFile = async (filePath, parent, name) => {
-    parent[name] = filePath
   }
 
   #updateParent(name, value, parent) {
@@ -246,27 +259,36 @@ export class JSONSchemaForm extends LitElement {
   #clearMessages = (fullPath, type) => {
     if (Array.isArray(fullPath)) fullPath = fullPath.join('-') // Convert array to string
     const container = this.shadowRoot.querySelector(`#${fullPath} .${type}`)
+    const nChildren = container.children.length
     container.innerHTML = ''
+
+    // Track errors and warnings
+    if (type === 'errors') this.#nErrors -= nChildren
+    if (type === 'warnings') this.#nWarnings -= nChildren
   }
+
+  status;
+  #checkStatus = () => {
+    let newStatus = 'valid'
+    const nestedStatus = Object.values(this.#nestedForms).map(f => f.status)
+    if (nestedStatus.includes('error')) newStatus = 'error'
+    else if (this.#nErrors) newStatus = 'error'
+    else if (nestedStatus.includes('warning')) newStatus = 'warning'
+    else if (this.#nWarnings) newStatus = 'warning'
+
+    if (newStatus !== this.status) this.onStatusChange(this.status = newStatus)
+  }
+
 
   validate = async () => {
 
     // Check if any required inputs are missing
-    const invalidInputs = await this.getMissingRequiredPaths()
-    const isValid = !invalidInputs.required.length && !invalidInputs.conditional.length
-
-    // Clear any existing messages
-    const allRequirements = [...invalidInputs.required, ...invalidInputs.conditional]
-    allRequirements.forEach(name => this.#clearMessages(name, 'errors'))
+    const invalidInputs = await this.#validateRequirements(this.results, this.#requirements) // get missing required paths
+    const isValid = !invalidInputs.length
 
     // Print out a detailed error message if any inputs are missing
-    let message = '';
-    if (!isValid) {
-      message += `<b>${invalidInputs.required.length} required inputs`
-      if (!invalidInputs.required.length) message = `${invalidInputs.conditional.length} conditionally required inputs`
-      else if (invalidInputs.conditional.length) message += ` and ${invalidInputs.conditional.length} conditionally required inputs`
-      message += ' are not specified properly.</b>'
-    }
+    let message = isValid ? '' : `<b>${invalidInputs.length} required inputs are not specified properly.</b>`
+
 
     // Check if all inputs are valid
     const flaggedInputs = this.shadowRoot.querySelectorAll('.invalid')
@@ -278,31 +300,33 @@ export class JSONSchemaForm extends LitElement {
 
 
     if (message) {
+      if (this.identifier) message = `[${this.identifier}]: ${message}`
       notify(message, 'error', 7000)
-      throw new Error('Invalid form values')
+      throw new Error(message)
     }
 
-    // Ensure user is aware of any warnings before moving on
-    const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
-    const nWarnings = activeWarnings.reduce((acc, curr) => acc = acc + curr.length, 0)
+    for (let key in this.#nestedForms) await this.#nestedForms[key].validate() // Validate nested forms too
 
-    if (nWarnings) {
-      const warningText = activeWarnings.reduce((acc, children) => [...acc, ...children.map(el => el.innerText)], [])
-      const result = await Swal.fire({
-        title: `Are you sure you would like to submit your metadata with ${nWarnings} warnings?`,
-        html: `<small><ol style="text-align: left;">${warningText.map(v => `<li>${v}</li>`).join('')}</ol></small>`,
-        icon: "warning",
-        heightAuto: false,
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Complete Metadata Entry",
-        cancelButtonText: "Cancel",
-        focusCancel: true,
-      });
+    // NOTE: Ensure user is aware of any warnings before moving on
+    // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
 
-      if (!result.isConfirmed) throw new Error('User cancelled metadata submission')
-    }
+    // if (this.#nWarnings) {
+    //   const warningText = activeWarnings.reduce((acc, children) => [...acc, ...children.map(el => el.innerText)], [])
+    //   const result = await Swal.fire({
+    //     title: `Are you sure you would like to submit your metadata with ${this.#nWarnings} warnings?`,
+    //     html: `<small><ol style="text-align: left;">${warningText.map(v => `<li>${v}</li>`).join('')}</ol></small>`,
+    //     icon: "warning",
+    //     heightAuto: false,
+    //     showCancelButton: true,
+    //     confirmButtonColor: "#3085d6",
+    //     cancelButtonColor: "#d33",
+    //     confirmButtonText: "Complete Metadata Entry",
+    //     cancelButtonText: "Cancel",
+    //     focusCancel: true,
+    //   });
+
+    //   if (!result.isConfirmed) throw new Error('User cancelled metadata submission')
+    // }
 
     return true
 
@@ -313,6 +337,7 @@ export class JSONSchemaForm extends LitElement {
   }
 
   #get = (path) => {
+    path = path.slice(this.#base.length) // Correct for base path
     return path.reduce((acc, curr) => acc = acc[curr], this.results)
   }
 
@@ -350,7 +375,7 @@ export class JSONSchemaForm extends LitElement {
      }
 
     return html`
-    <div id=${fullPath.join('-')} class="${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
+    <div id=${fullPath.join('-')} class="form-section ${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
       <label class="guided--form-label">${this.#parseStringToHeader(name)}</label>
       ${(() => {
 
@@ -383,7 +408,8 @@ export class JSONSchemaForm extends LitElement {
           if (this.#filesystemQueries.includes(info.format)) return new FilesystemSelector({
             type: info.format,
             value: parent[name],
-            onSelect: (filePath) => this.#handleFile(filePath, parent, name),
+            onSelect: (filePath) => this.#updateParent(name, filePath, parent),
+            onChange: (filePath) => this.#validateOnChange(name, parent, filePath, path),
             dialogOptions: this.dialogOptions,
             dialogType: this.dialogType
           })
@@ -434,34 +460,19 @@ export class JSONSchemaForm extends LitElement {
 
   #validateRequirements = async (results, requirements, parent) => {
 
-    let invalid = {
-      required: [],
-      conditional: []
-    }
+    let invalid = []
 
     for (let name in requirements) {
       let isRequired = requirements[name]
-      const isFunction = typeof isRequired === 'function'
-      if (isFunction) isRequired = await isRequired.call(this.results)
+      if (typeof isRequired === 'function') isRequired = await isRequired.call(this.results)
       if (isRequired) {
         let path = parent ? `${parent}-${name}` : name
-        if (typeof isRequired === 'object' && !Array.isArray(isRequired)) {
-          const subInvalid = await this.#validateRequirements(results[name], isRequired, path)
-          for (let type in subInvalid) {
-            if (subInvalid[type].length) invalid[type].push(...subInvalid[type])
-          }
-        }
-
-        else if (!results[name]) invalid[isFunction ? 'conditional' : 'required'].push(path)
+        if (typeof isRequired === 'object' && !Array.isArray(isRequired)) invalid.push(...await this.#validateRequirements(results[name], isRequired, path))
+        else if (!results[name]) invalid.push(path)
       }
     }
-    return invalid
-  }
 
-  getMissingRequiredPaths = async () => {
-    let requirements = this.#requirements
-    let results = this.results
-    return await this.#validateRequirements(results, requirements)
+    return invalid
   }
 
   // Checks missing required properties and throws an error if any are found
@@ -511,6 +522,7 @@ export class JSONSchemaForm extends LitElement {
   }
 
   validateOnChange = () => {}
+  onStatusChange = () => {}
 
   #getLink = (args) => {
     if (typeof args === 'string') args = args.split('-')
@@ -520,7 +532,10 @@ export class JSONSchemaForm extends LitElement {
   #applyToLinkedProperties = (fn, args) => {
     const links = this.#getLink(args)?.properties
     if (!links) return []
-    return Promise.all(links.map((link) => fn(link, this.shadowRoot.getElementById(`${link.join('-')}`))).flat())
+    return Promise.all(links.map((link) => {
+      const linkEl =this.shadowRoot.getElementById(`${link.join('-')}`)
+      return fn(link, linkEl)
+    }).flat())
   }
 
   // Check if all links are not required anymore
@@ -534,6 +549,7 @@ export class JSONSchemaForm extends LitElement {
 
   #isRequired = (path) => {
     if (typeof path === 'string') path = path.split('-')
+    path = path.slice(this.#base.length) // Remove base path
     return path.reduce((obj, key) => obj && obj[key], this.#requirements)
   }
 
@@ -570,11 +586,15 @@ export class JSONSchemaForm extends LitElement {
     this.#clearMessages(fullPath, 'errors')
     this.#clearMessages(fullPath, 'warnings')
 
+    // Track errors and warnings
+    this.#nErrors += errors.length
+    this.#nWarnings += warnings.length
+    this.#checkStatus()
+
     // Show aggregated errors and warnings (if any)
     warnings.forEach((info) => this.#addMessage(fullPath, info.message, 'warnings'))
 
     if (valid === true || valid == undefined || errors.length === 0) {
-
       element.classList.remove('invalid')
 
       const linkEl = this.#getLinkElement(fullPath)
@@ -691,14 +711,48 @@ export class JSONSchemaForm extends LitElement {
         // Directly render the interactive property element
         if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
 
+
+        const hasMany = renderable.length > 1 // How many siblings?
+
+        if (this.mode === 'accordion' && hasMany) {
+
+        this.#nestedForms[name] = new JSONSchemaForm({
+          identifier: this.identifier,
+          schema: info,
+          results: results[name],
+          required: required[name], // Scoped to the sub-schema
+          ignore: this.ignore,
+          dialogOptions: this.dialogOptions,
+          dialogType: this.dialogType,
+          onlyRequired: this.onlyRequired,
+          showLevelOverride: this.showLevelOverride,
+          conditionalRequirements: this.conditionalRequirements,
+          validateOnChange: (...args) => this.validateOnChange(...args),
+          validateEmptyValues: this.validateEmptyValues,
+          onStatusChange: () => this.#checkStatus(), // Forward status changes to the parent form
+          onInvalid: (...args) => this.onInvalid(...args),
+          base: [...path, name]
+        })
+
+          return new Accordion({
+            sections: {
+              [this.#parseStringToHeader(name)]: {
+                subtitle: `${Object.keys(info.properties).length} fields`,
+                content: this.#nestedForms[name]
+              }
+            }
+          })
+        }
+
         // Render properties in the sub-schema
-        return html`
-      <div data-section-name="${name}" data-depth="${path.length}" style="margin-top: 40px;">
-        <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
-        <hr/>
-        ${this.#render(info, results[name],  required[name], [...path, name])}
-      </div>
-      `
+        const rendered = this.#render(info, results[name], required[name], [...path, name])
+        return (hasMany || path.length > 1) ? html`
+          <div style="margin-top: 40px;">
+            <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
+            <hr/>
+            ${rendered}
+          </div>
+        ` : rendered
     })
 
     return rendered
@@ -722,16 +776,14 @@ export class JSONSchemaForm extends LitElement {
   // NOTE: This ignores the file selector button
   #checkAllInputs = (filter) => {
     const inputs = Array.from(this.shadowRoot.querySelectorAll('.schema-input'))
-    const filtered = filter ? inputs.filter(filter) : inputs
-    filtered.forEach(input => {
-      const event = new Event('change'); // Create a new change event
-      input.dispatchEvent(event); // Manually trigger the change event
-    })
+    const fileInputs = Array.from(this.shadowRoot.querySelectorAll('nwb-filesystem-selector') ?? [])
+    const allInputs = [...inputs, ...fileInputs]
+    const filtered = filter ? allInputs.filter(filter) : allInputs
+    filtered.forEach(input => input.dispatchEvent(new Event('change')))
   }
 
-  updated() {
-
-    this.#checkAllInputs((this.validateEmptyValues) ? undefined : (el) => el.value !== '') // Check all inputs with non-empty values on render
+  async updated() {
+    this.#checkAllInputs((this.validateEmptyValues) ? undefined : (el) => (el.value ?? el.checked) !== '') // Check all inputs with non-empty values on render
   }
 
   render() {
@@ -751,7 +803,7 @@ export class JSONSchemaForm extends LitElement {
     <div>
     ${false ? html`<h2>${schema.title}</h2>` : ''}
     ${false ? html`<p>${schema.description}</p>` : ''}
-    ${this.#render(schema, this.results, this.#requirements)}
+    ${this.#render(schema, this.results, this.#requirements, this.#base)}
     </div>
     `;
   }

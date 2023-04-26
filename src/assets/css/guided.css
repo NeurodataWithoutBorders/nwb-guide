@@ -79,7 +79,7 @@
   width: 100%;
   list-style: none;
   padding-left: 0px;
-  max-height: 400px;
+  /* max-height: 400px; */
   overflow-y: auto;
 }
 

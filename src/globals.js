@@ -3,6 +3,8 @@ import { app, isElectron, path, port } from './electron/index.js'
 import { Notyf } from 'notyf'
 import checkChromatic from 'chromatic/isChromatic';
 
+import paths from '../paths.config.json' assert { type: "json" }
+
 import lottie from 'lottie-web'
 
 export const joinPath = (...args) => path ? path.join(...args) : args.filter(str => str).join('/');
@@ -25,8 +27,7 @@ export const baseUrl = `http://127.0.0.1:${port}`
 
 // Filesystem Management
 export const homeDirectory = app?.getPath("home") ?? '';
-export const progressFilePath = homeDirectory ? joinPath(homeDirectory, "NWB GUIDE", "Progress") : '';
-export const guidedProgressFilePath = homeDirectory ? joinPath(homeDirectory, "NWB GUIDE", "Guided-Progress") : '';
+export const guidedProgressFilePath = homeDirectory ? joinPath(homeDirectory, ...paths.progress) : '';
 
 export const isStorybook = window.location.href.includes('iframe.html')
 

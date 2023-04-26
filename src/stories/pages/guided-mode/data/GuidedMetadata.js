@@ -1,13 +1,15 @@
 
 
 import { html } from 'lit';
-import { Page } from '../../Page.js';
-
-import { validateOnChange } from '../../../../validation/index.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
+import { InstanceManager } from '../../../InstanceManager.js';
+import { ManagedPage } from './ManagedPage.js';
+import { Modal } from '../../../Modal';
 
-export class GuidedMetadataPage extends Page {
+import { validateOnChange } from '../../../../validation/index.js';
+
+export class GuidedMetadataPage extends ManagedPage {
 
   constructor(...args) {
     super(...args)
@@ -17,32 +19,35 @@ export class GuidedMetadataPage extends Page {
   footer = {
     onNext: async () => {
       this.save()
-      await this.form.validate() // Will throw an error in the callback
+      for (let { form } of this.forms) await form.validate() // Will throw an error in the callback
       this.onTransition(1)
     }
   }
 
-  render() {
-
-
-    const results = this.info.globalState.metadata.results
-
-    // Merge project-wide data into metadata
+  // Merge project-wide data into metadata
+  populateWithProjectMetadata(info){
     const toMerge = Object.entries(this.info.globalState.project).filter(([_, value]) => value && typeof value === 'object')
     toMerge.forEach(([key, value]) => {
-      let internalMetadata = results[key]
-      if (!results[key]) internalMetadata = results[key] = {}
+      let internalMetadata = info[key]
+      if (!info[key]) internalMetadata = info[key] = {}
       for (let key in value) {
         if (!(key in internalMetadata)) internalMetadata[key] = value[key] // Prioritize existing results (cannot override with new information...)
       }
     })
 
-    // Properly clone the schema to produce multiple pages from the project metadata schema
-    const schema = { ...this.info.globalState.metadata.schema }
-    schema.properties = {...schema.properties}
+    return info
+  }
 
-    this.form = new JSONSchemaForm({
-      schema,
+
+  createForm = ({subject, session, info}) => {
+    const results = this.populateWithProjectMetadata(info.metadata)
+
+    const instanceId = `sub-${subject}/ses-${session}`
+
+    const form = new JSONSchemaForm({
+      identifier: instanceId,
+      mode: 'accordion',
+      schema: this.info.globalState.schema.metadata[subject][session],
       results,
       ignore: ['Ecephys', 'source_script', 'source_script_file_name'],
       conditionalRequirements: [
@@ -52,11 +57,60 @@ export class GuidedMetadataPage extends Page {
         }
       ],
       validateOnChange,
-      required: {
-        NWBFile: {
-          session_start_time: true
-        },
+      onlyRequired: false,
+      onStatusChange: (state) => {
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='sub-${subject}/ses-${session}'] .indicator`)
+        const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
+        if (currentState) indicator.classList.remove(currentState)
+        indicator.classList.add(state)
       }
+    })
+
+    return {
+      subject,
+      session,
+      form
+    }
+  }
+
+  render() {
+
+
+    this.forms = this.mapSessions(this.createForm)
+
+    let instances = {}
+    this.forms.forEach(({ subject, session, form }) => {
+      if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {}
+      instances[`sub-${subject}`][`ses-${session}`] = form
+    })
+
+    this.manager = new InstanceManager({
+      header: 'File Metadata',
+      instanceType: 'Session',
+      instances,
+      add: false,
+
+      controls: [
+        {name: 'Preview', onClick: async (key, el) => {
+
+            let [ subject, session ] = key.split('/')
+          if (subject.startsWith('sub-')) subject = subject.slice(4)
+          if (session.startsWith('ses-')) session = session.slice(4)
+
+          const [ { file, result } ] = await this.runConversions({ stub_test: true }, [ { subject, session } ])
+
+          .catch(e => this.notify(e.message, 'error'))
+
+          const modal = new Modal({
+            header: file,
+            open: true,
+            onClose: () => modal.remove()
+          })
+
+          modal.insertAdjacentHTML('beforeend', `<pre>${result}</pre>`)
+          document.body.appendChild(modal)
+        }}
+      ],
     })
 
     return html`
@@ -66,7 +120,7 @@ export class GuidedMetadataPage extends Page {
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
       <div class="guided--section">
-       ${this.form}
+       ${this.manager}
       </div>
   </div>
     `;

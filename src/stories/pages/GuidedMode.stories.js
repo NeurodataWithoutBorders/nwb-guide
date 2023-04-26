@@ -93,6 +93,11 @@ Structure.args = {
   activePage: 'guided/structure'
 }
 
+export const Locate = Template.bind({});
+Locate.args = {
+  activePage: 'guided/locate'
+}
+
 export const SourceData = Template.bind({});
 SourceData.args = {
   activePage: 'guided/sourcedata'
@@ -114,6 +119,12 @@ export const StubPreview = Template.bind({});
 StubPreview.args = {
   activePage: 'guided/preview'
 }
+
+export const Upload = Template.bind({});
+Upload.args = {
+  activePage: 'guided/upload'
+}
+
 
 export const Results = Template.bind({});
 Results.args = {
