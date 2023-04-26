@@ -176,7 +176,7 @@ export class GuidedPathExpansionPage extends Page {
     return html`
         <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
         <div class="title">
-          <h1 class="guided--text-sub-step">Locate Data</h1>
+          <h1 class="guided--text-sub-step">Locate Test</h1>
         </div>
         <div class="guided--section">
          ${this.optional}

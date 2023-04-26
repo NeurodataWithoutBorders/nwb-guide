@@ -2,6 +2,8 @@ import "./pages.js"
 import { isElectron, electron, app } from './electron/index.js'
 const { ipcRenderer } = electron;
 
+import { Dashboard } from './stories/Dashboard.js'
+
 import {
   notyf,
   baseUrl,
@@ -11,7 +13,7 @@ import {
 import Swal from 'sweetalert2'
 
 // Set the sidebar subtitle to the current app version
-const dashboard = document.querySelector('nwb-dashboard')
+const dashboard = document.querySelector('nwb-dashboard') as Dashboard
 const appVersion = app?.getVersion();
 dashboard.subtitle = appVersion ?? 'Web Version';
 
@@ -23,7 +25,7 @@ let update_available_notification = "";
 let update_downloaded_notification = "";
 
 // utility function for async style set timeout
-const wait = async (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+const wait = async (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 // check that the client connected to the server using exponential backoff
 // verify the api versions match
@@ -77,7 +79,7 @@ const startupServerAndApiCheck = async () => {
 async function run_pre_flight_checks(check_update = true) {
   // log.info("Running pre flight checks");
   return new Promise(async (resolve) => {
-    let connection_response = "";
+    let connection_response: any = "";
 
     // Check the internet connection and if available check the rest.
     connection_response = await check_internet_connection();

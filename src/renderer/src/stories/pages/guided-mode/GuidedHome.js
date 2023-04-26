@@ -6,7 +6,7 @@ import { ProgressCard } from './ProgressCard.js';
 
 import { startLottie } from '../../../globals.js';
 import * as progress from '../../../progress.js'
-import { newDataset } from '../../../assets/lotties/index.js';
+import { newDataset } from '../../../../assets/lotties/index.js';
 
 
 export class GuidedHomePage extends Page {

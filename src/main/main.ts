@@ -1,38 +1,41 @@
-const { app, BrowserWindow, dialog, shell } = require("electron");
-require("@electron/remote/main").initialize();
-app.showExitPrompt = true;
-const path = require("path");
-const fp = require("find-free-port");
-require("v8-compile-cache");
-const { ipcMain } = require("electron");
-const { autoUpdater } = require("electron-updater");
-const axios = require("axios");
+import { app, BrowserWindow, dialog, shell } from 'electron';
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
-require('./application-menu.js')
-require('./shortcuts.js')
+import main from '@electron/remote/main';
+main.initialize()
+
+let showExitPrompt = true;
+import path from 'path';
+import { autoUpdater } from 'electron-updater';
+import { ipcMain } from 'electron';
+import fp from 'find-free-port';
+import 'v8-compile-cache'
+
+import child_process from 'child_process';
+import fs from 'fs';
+import axios from 'axios';
+
+import './application-menu.js';
+import './shortcuts.js';
+
+import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
+import splashHTML from './splash-screen.html?asset'
 
 autoUpdater.channel = "latest";
-
-// Enable hot reload for Electron
-try {
-  require('electron-reloader')(module)
-} catch (_) {}
 
 /*************************************************************
  * Python Process
  *************************************************************/
 
 // flask setup environment variables
-const PY_FLASK_DIST_FOLDER = "pyflaskdist";
-const PY_FLASK_FOLDER = "pyflask";
+const PY_FLASK_DIST_FOLDER = path.join('..', '..', "pyflaskdist");
+const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
 const PY_FLASK_MODULE = "app";
-let pyflaskProcess = null;
+let pyflaskProcess: any = null;
 
-let PORT = 4242;
-let selectedPort = null;
+let PORT: number | string | null = 4242;
+let selectedPort: number | string | null = null;
 const portRange = 100;
-
-const icon = path.join(__dirname, "src/assets/img/logo-guide-draft.png");
 
 /**
  * Determine if the application is running from a packaged version or from a dev version.
@@ -45,7 +48,7 @@ const guessPackaged = () => {
   const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
 
   if (process.platform === "darwin" || process.platform === "linux") {
-    if (require("fs").existsSync(unixPath)) {
+    if (fs.existsSync(unixPath)) {
       return true;
     } else {
       return false;
@@ -53,7 +56,7 @@ const guessPackaged = () => {
   }
 
   if (process.platform === "win32") {
-    if (require("fs").existsSync(windowsPath)) {
+    if (fs.existsSync(windowsPath)) {
       return true;
     } else {
       return false;
@@ -75,7 +78,7 @@ const getScriptPath = () => {
   if (process.platform === "win32") {
     return path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
   } else {
-    return path.join(process.resourcesPath, PY_FLASK_MODULE);
+    return path.join(process.resourcesPath, PY_FLASK_MODULE); // NOTE: Not sure if this will recognize packaged assets for Mac...
   }
 };
 
@@ -84,16 +87,18 @@ const createPyProc = async () => {
 
   await killAllPreviousProcesses();
 
-  fp(PORT, PORT + portRange)
-    .then(([freePort]) => {
+  const defaultPort = PORT as number
+
+  fp(defaultPort, defaultPort + portRange)
+    .then(([freePort]: string[]) => {
       let port = freePort;
 
       if (guessPackaged()) {
-        pyflaskProcess = require("child_process").execFile(script, [port], {
+        pyflaskProcess = child_process.execFile(script, [port], {
           // stdio: "ignore",
         });
       } else {
-        pyflaskProcess = require("child_process").spawn("python", [script, port], {
+        pyflaskProcess = child_process.spawn("python", [script, port], {
           // stdio: "ignore",
         });
       }
@@ -102,14 +107,14 @@ const createPyProc = async () => {
         console.log("child process success on port " + port);
 
         // Listen for errors from Python process
-        pyflaskProcess.stderr.on("data", function (data) {
+        pyflaskProcess.stderr.on("data", function (data: any) {
           console.log("[python]:", data.toString());
         });
       } else console.error("child process failed to start on port" + port);
 
       selectedPort = port;
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       console.log(err);
     });
 };
@@ -122,7 +127,7 @@ const exitPyProc = async () => {
   // Windows does not properly shut off the python server process. This ensures it is killed.
   const killPythonProcess = () => {
     // kill pyproc with command line
-    const cmd = require("child_process").spawnSync("taskkill", [
+    const cmd = child_process.spawnSync("taskkill", [
       "/pid",
       pyflaskProcess.pid,
       "/f",
@@ -151,11 +156,13 @@ const killAllPreviousProcesses = async () => {
 
   // kill all previous python processes that could be running.
   let promisesArray = [];
+  
+  const defaultPort = PORT as number 
 
-  let endRange = PORT + portRange;
+  let endRange = defaultPort + portRange;
 
   // create a loop of 100
-  for (let currentPort = PORT; currentPort <= endRange; currentPort++) {
+  for (let currentPort = defaultPort; currentPort <= endRange; currentPort++) {
     promisesArray.push(
       axios.get(`http://127.0.0.1:${currentPort}/server_shutdown`, {})
     );
@@ -173,7 +180,7 @@ const killAllPreviousProcesses = async () => {
  * Main app window
  *************************************************************/
 
-let mainWindow = null;
+let mainWindow: BrowserWindow;
 let user_restart_confirmed = false;
 let updatechecked = false;
 
@@ -197,10 +204,10 @@ function initialize() {
 
     mainWindow.on("close", async (e) => {
       if (!user_restart_confirmed) {
-        if (app.showExitPrompt) {
+        if (showExitPrompt) {
           e.preventDefault(); // Prevents the window from closing
           dialog
-            .showMessageBox(BrowserWindow.getFocusedWindow(), {
+            .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
               type: "question",
               buttons: ["Yes", "No"],
               title: "Confirm",
@@ -223,7 +230,7 @@ function initialize() {
 
   const quit_app = () => {
     console.log("Quit app called");
-    app.showExitPrompt = false;
+    showExitPrompt = false;
     mainWindow.close();
     /// feedback form iframe prevents closing gracefully
     /// so force close
@@ -253,8 +260,14 @@ function initialize() {
     };
 
     mainWindow = new BrowserWindow(windowOptions);
-    require("@electron/remote/main").enable(mainWindow.webContents);
-    mainWindow.loadURL(path.join("file://", __dirname, "/index.html"));
+    main.enable(mainWindow.webContents);
+
+  // HMR for renderer base on electron-vite cli.
+  // Load the remote URL for development or the local html file for production.
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  else mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+
+
 
     const splash = new BrowserWindow({
       width: 340,
@@ -264,7 +277,9 @@ function initialize() {
       alwaysOnTop: true,
       transparent: true,
     });
-    splash.loadURL(path.join("file://", __dirname, "/splash-screen.html"));
+
+    splash.loadFile(splashHTML)
+    
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
     mainWindow.once("ready-to-show", () => {
@@ -276,7 +291,7 @@ function initialize() {
         // run_pre_flight_checks();
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
-      }, 6000);
+      }, 1000);
     });
   });
 
