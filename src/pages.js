@@ -17,6 +17,7 @@ import { Dashboard } from "./stories/Dashboard"
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview"
 
 import logo from './assets/img/logo-guide-draft-transparent-tight.png'
+import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion"
 let dashboard = document.querySelector("nwb-dashboard")
 if (!dashboard) dashboard = new Dashboard()
 dashboard.logo = logo
@@ -104,8 +105,14 @@ const pages = {
             // }),
             structure: new GuidedStructurePage({
                 label: "Data formats",
-                section: sections[1]
+                section: sections[0]
             }),
+
+            locate: new GuidedPathExpansionPage({
+                label: "Locate data",
+                section: sections[0]
+            }),
+
             sourcedata: new GuidedSourceDataPage({
                 label: "Source data",
                 section: sections[1]

@@ -21,9 +21,10 @@ export class GuidedUploadPage extends Page {
        this.save() // Save in case the conversion fails
        await this.form.validate() // Will throw an error in the callback
 
-       const results = await run('upload', this.info.globalState.upload.info, {
-        title: 'Uploading to DANDI',
-      })
+       const info = { ...this.info.globalState.upload.info }
+       info.nwb_folder_path = this.info.globalState.conversion.info.output_folder
+
+       const results = await run('upload', info, { title: 'Uploading to DANDI' })
       .catch(e => this.notify(e.message, 'error'))
 
        this.info.globalState.upload.results = results // Save the preview results
@@ -42,10 +43,6 @@ export class GuidedUploadPage extends Page {
         dandiset_id: {
           type: 'string',
         },
-        nwb_folder_path: {
-          type: 'string',
-          format: 'directory'
-        },
         staging: {
           type: 'boolean',
           default: true // Defualt to staging for now
@@ -56,7 +53,7 @@ export class GuidedUploadPage extends Page {
         }
 
       },
-      required: ['api_key', 'dandiset_id', 'nwb_folder_path']
+      required: ['api_key', 'dandiset_id']
     }
 
     let uploadGlobalState = this.info.globalState.upload

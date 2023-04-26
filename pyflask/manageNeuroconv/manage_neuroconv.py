@@ -4,7 +4,7 @@ from neuroconv import datainterfaces, NWBConverter
 
 import json
 from neuroconv.utils import NWBMetaDataEncoder
-import nwbinspector
+from neuroconv.tools import LocalPathExpander
 from pynwb.file import NWBFile, Subject
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
@@ -12,11 +12,46 @@ from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
-from pathlib import Path
+from datetime import datetime
 
 from pathlib import Path
 import os
-from datetime import datetime
+
+# Get stub save path
+project_base_path = Path(__file__).parent.parent.parent
+path_config = Path(project_base_path, "paths.config.json")
+f = path_config.open()
+data = json.load(f)
+stub_save_path = Path(Path.home(), *data["stubs"])
+f.close()
+
+
+def locate_data(info: dict) -> dict:
+    """Locate data from the specifies directories using fstrings."""
+
+    expander = LocalPathExpander()
+
+    # Transform the input into a list of dictionaries
+    for value in info.values():
+        if (value.get("base_directory") is not None) and (value.get("base_directory") != ""):
+            value["base_directory"] = Path(value["base_directory"])
+
+    out = expander.expand_paths(info)
+
+    # Organize results by subject, session, and data type
+    organized_output = {}
+    for item in out:
+        subject_id = item["metadata"]["Subject"]["subject_id"]
+        session_id = item["metadata"]["NWBFile"]["session_id"]
+        if subject_id not in organized_output:
+            organized_output[subject_id] = {}
+
+        if session_id not in organized_output[subject_id]:
+            organized_output[subject_id][session_id] = {}
+
+        organized_output[subject_id][session_id] = item
+
+    return organized_output
 
 
 def get_all_interface_info() -> dict:
@@ -156,14 +191,18 @@ def convert_to_nwb(info: dict) -> str:
     """
 
     nwbfile_path = Path(info["nwbfile_path"])
+    parent_folder = nwbfile_path.parent
+
+    folder = Path(info["folder"]) if "folder" in info else parent_folder
 
     run_stub_test = info.get("stub_test")
 
+    parent_folder.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
+
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        stub_subfolder = nwbfile_path.parent / ".stubs"
-        stub_subfolder.mkdir(exist_ok=True)
-        preview_path = stub_subfolder / nwbfile_path.name
+        stub_save_path.mkdir(exist_ok=True)
+        preview_path = stub_save_path / nwbfile_path.name
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
