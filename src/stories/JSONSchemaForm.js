@@ -563,9 +563,6 @@ export class JSONSchemaForm extends LitElement {
     const valid = (!this.validateEmptyValues && !(name in parent)) ? true : await this.validateOnChange(name, parent, path)
 
     const fullPath = [...path, name]
-    this.#clearMessages([...path, name], 'errors')
-    this.#clearMessages([...path, name], 'warnings')
-
     const isRequired = this.#isRequired(fullPath)
     let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === 'warning' && (!isRequired || !info.missing)) : []
     const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === 'error' || (isRequired && info.missing)) : []
@@ -575,15 +572,26 @@ export class JSONSchemaForm extends LitElement {
       if (!isLinkResolved) {
         errors.push(...warnings) // Move warnings to errors if the element is linked
         warnings = []
+
+        // Clear old errors and warnings on linked properties
+        this.#applyToLinkedProperties((path) => {
+          this.#clearMessages(path, 'errors')
+          this.#clearMessages(path, 'warnings')
+        }, fullPath)
       }
     }
 
-    warnings.forEach((info) => this.#addMessage(fullPath, info.message, 'warnings'))
+    // Clear old errors and warnings
+    this.#clearMessages(fullPath, 'errors')
+    this.#clearMessages(fullPath, 'warnings')
 
     // Track errors and warnings
     this.#nErrors += errors.length
     this.#nWarnings += warnings.length
     this.#checkStatus()
+    
+    // Show aggregated errors and warnings (if any)
+    warnings.forEach((info) => this.#addMessage(fullPath, info.message, 'warnings'))
 
     if (valid === true || valid == undefined || errors.length === 0) {
       element.classList.remove('invalid')
@@ -607,6 +615,7 @@ export class JSONSchemaForm extends LitElement {
 
       // Only add the conditional class for linked elements
       await this.#applyToLinkedProperties((name, element) => element.classList.add('required', 'conditional'), [...path, name])
+
       errors.forEach((info) => this.#addMessage(fullPath, info.message, 'errors'))
 
       return false
@@ -667,15 +676,16 @@ export class JSONSchemaForm extends LitElement {
 
        // Prioritise properties without other properties (e.g. name over NWBFile)
       .sort((e1, e2) => {
-        const [ info ] = e1
-        const [ info2 ] = e2
+        const [ _, info ] = e1
+        const [ __, info2 ] = e2
 
         if (e1[isLink] || e2[isLink]) return 0
 
-        if (!info.properties && !info2.properties) return 0
-        else if (!info.properties) return -1
-        else if (!info2.properties) return 1
+        if (info2.properties) return -1
+        else if (info.properties) return 1
+        else return 0
       })
+
 
     let rendered = sorted.map((entry) => {
 
@@ -776,6 +786,7 @@ export class JSONSchemaForm extends LitElement {
   }
 
   render() {
+
 
     const schema = this.schema ?? {}
 

@@ -3,10 +3,11 @@ import Swal from 'sweetalert2'
 import {
   joinPath,
   guidedProgressFilePath,
-  isStorybook,
   runOnLoad,
+  reloadPageToHome,
+  isStorybook,
 } from "./globals.js";
-import { fs, isElectron } from "./electron/index.js";
+import { fs } from "./electron/index.js";
 
 export const hasEntry = (name) => {
   const existingProgressNames = getEntries();
@@ -44,9 +45,8 @@ export const save = (page, overrides = {}) => {
 
   //return if guidedProgressFileName is not a string greater than 0
   if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return
-
-
   const params = new URLSearchParams(location.search);
+
   params.set('project', guidedProgressFileName);
 
   const value = `${location.pathname}?${params}`
@@ -97,9 +97,7 @@ export const get = (name) => {
           text: 'Reload the application and load a project to view.',
           icon: 'error',
           confirmButtonText: 'Restart'
-        }).then(() => {
-          window.location = (isElectron || isStorybook) ? window.location.pathname : window.location.origin // Clear all query params
-        })
+        }).then(reloadPageToHome)
       })
 
       return

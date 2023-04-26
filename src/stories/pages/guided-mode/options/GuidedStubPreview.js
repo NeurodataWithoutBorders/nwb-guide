@@ -14,7 +14,7 @@ export class GuidedStubPreviewPage extends Page {
     onNext: async () => {
       this.save() // Save in case the conversion fails
       delete this.info.globalState.conversion.results
-      this.info.globalState.conversion.results = await this.runConversions()
+      this.info.globalState.conversion.results = await this.runConversions().catch(e => this.notify(e.message, 'error'))
       this.onTransition(1)
     }
   }

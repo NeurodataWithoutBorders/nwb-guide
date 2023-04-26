@@ -61,7 +61,6 @@ export class GuidedConversionOptionsPage extends Page {
         <h1 class="guided--text-sub-step">Conversion Details</h1>
       </div>
       <div class="guided--section">
-      <h3>NWB File Path</h3>
       ${this.form}
       </div>
   </div>

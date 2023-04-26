@@ -61,6 +61,11 @@ export class GuidedMetadataPage extends ManagedPage {
         const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
         if (currentState) indicator.classList.remove(currentState)
         indicator.classList.add(state)
+      },
+      required: {
+        NWBFile: {
+          session_start_time: true
+        },
       }
     })
 
@@ -116,14 +121,12 @@ export class GuidedMetadataPage extends ManagedPage {
     class="guided--main-tab"
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-      <div class="title">
-        <h1 class="guided--text-sub-step">NWB File Metadata</h1>
-      </div>
       <div class="guided--section">
        ${this.manager}
       </div>
   </div>
     `;
+
   }
 };
 
