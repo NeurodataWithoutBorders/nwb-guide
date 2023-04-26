@@ -23,12 +23,11 @@ templates_path = ["_templates"]
 master_doc = "index"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'img/favicon.ico'
+#html_favicon = 'img/favicon.ico'  # TODO
 
 # These paths are either relative to html_static_path or fully qualified paths (eg. https://...)
 html_css_files = [
