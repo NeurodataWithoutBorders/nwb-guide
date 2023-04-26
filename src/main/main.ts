@@ -156,8 +156,8 @@ const killAllPreviousProcesses = async () => {
 
   // kill all previous python processes that could be running.
   let promisesArray = [];
-  
-  const defaultPort = PORT as number 
+
+  const defaultPort = PORT as number
 
   let endRange = defaultPort + portRange;
 
@@ -297,7 +297,7 @@ function initialize() {
     });
 
     splash.loadFile(splashHTML)
-    
+
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
     mainWindow.once("ready-to-show", () => {
