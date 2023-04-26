@@ -86,12 +86,11 @@ export class InstanceManager extends LitElement {
         align-items: center;
         font-weight: bold;
         border-radius: 8px;
-        border: 1px solid transparent;
+        border: 1px solid #c3c3c3;
       }
 
       .item[selected] > span, span:hover {
         background: #ececec;
-        border: 1px solid #c3c3c3;
       }
 
       #instance-display {
@@ -143,21 +142,20 @@ export class InstanceManager extends LitElement {
         position: absolute;
         right: 0px;
         top: 0px;
-        opacity: 0.5;
-        background: transparent;
+        background: rgb(250, 250, 250);
         border-left: 1px solid rgb(195, 195, 195);
       }
 
       .item.warning .indicator {
-        background: rgb(255, 228, 143);
+        background: rgb(255, 252, 191);
       }
 
       .item.valid .indicator {
-        background: rgb(162, 255, 143);
+        background: rgb(202, 255, 191);
       }
 
       .item.error .indicator {
-        background: rgb(255, 143, 143);
+        background: rgb(255, 191, 191);
       }
     `
   }
