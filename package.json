@@ -105,6 +105,7 @@
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@sweetalert2/theme-bulma": "^4.0.3",
     "axios": "^0.19.2",
+    "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
     "electron-log": "^4.3.5",
     "electron-notarize": "^1.2.1",

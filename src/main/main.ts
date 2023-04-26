@@ -141,14 +141,14 @@ const exitPyProc = async () => {
   if (process.platform === "win32") {
     killPythonProcess();
     pyflaskProcess = null;
-    PORT = null;
+    // PORT = null;
     return;
   }
 
   // kill signal to pyProc
   pyflaskProcess.kill();
   pyflaskProcess = null;
-  PORT = null;
+  // PORT = null;
 };
 
 const killAllPreviousProcesses = async () => {
@@ -240,7 +240,25 @@ function initialize() {
   };
 
   app.on("ready", () => {
-    createPyProc();
+    const promise = createPyProc();
+
+    // Listen after first load
+    promise.then(() => {
+      const chokidar = require('chokidar');
+      let done = true
+      chokidar.watch(path.join(__dirname, "../../pyflask"), {
+        ignored:  ['**/__pycache__/**']
+      }).on('all', async (event: string) => {
+        if (event === 'change' && done) {
+          done = false
+          await exitPyProc();
+          setTimeout(async () => {
+            await createPyProc();
+            done = true
+          }, 1000)
+        }
+      });
+    })
 
     const windowOptions = {
       minWidth: 1121,
