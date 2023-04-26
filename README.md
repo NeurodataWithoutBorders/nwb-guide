@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/img/logo-guide-draft-transparent-tight.png" width="250" alt="NeuroConv logo"/>
+  <img src="src/renderer/assets/img/logo-guide-draft-transparent-tight.png" width="250" alt="NeuroConv logo"/>
   <h3 align="center">NWB Graphical User Interface for Data Entry</h3>
 </p>
 
