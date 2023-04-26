@@ -171,7 +171,7 @@ export class InstanceManager extends LitElement {
   }
 
   renderInstance = (_, value) => value.content ?? value
-  
+
   // onAdded = () => {}
   // onRemoved = () => {}
 

@@ -35,7 +35,7 @@ export class GuidedPathExpansionPage extends Page {
 
       // Force single subject/session
       if (hidden) {
-        
+
         const source_data = {}
         for (let key in this.info.globalState.interfaces) source_data[key] =  {}
 
@@ -84,7 +84,7 @@ export class GuidedPathExpansionPage extends Page {
 
         // // NOTE: Current behavior is to ONLY add new results, not remove old ones
         // // If we'd like, we could label sessions as user-defined so they never clear
-        
+
         // // Remove previous results that are no longer present
         // const globalResults = this.info.globalState.results
         // for (let sub in globalResults) {

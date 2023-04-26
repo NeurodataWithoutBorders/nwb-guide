@@ -104,7 +104,7 @@ export class Table extends LitElement {
     })
 
     const rowHeaders = this.rowHeaders = Object.keys(this.data)
-    
+
 
     const columns = colHeaders.map(k => {
 
@@ -150,9 +150,9 @@ export class Table extends LitElement {
           og(value, callback)
         }
       } else {
-        info.validator = async function (value, callback) { 
+        info.validator = async function (value, callback) {
           if (!value) return callback(true) // Allow empty values
-          callback(await runThisValidator(value, this.row)) 
+          callback(await runThisValidator(value, this.row))
         }
       }
 
@@ -196,14 +196,14 @@ export class Table extends LitElement {
             delete target[rowName]
             rowHeaders[row] = value
           }
-        } 
-        
+        }
+
         // Update data on passed object
         else {
           if (value == undefined && value === '') delete target[rowName][header]
           else target[rowName][header] = value
         }
-      } 
+      }
     })
 
     table.addHook('afterRemoveRow', (_, __, physicalRows) => physicalRows.forEach(row => delete this.data[rowHeaders[row]]))

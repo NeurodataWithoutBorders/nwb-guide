@@ -34,7 +34,7 @@ const schema = {
 
 export const Default = Template.bind({});
 Default.args = {
-  schema, 
+  schema,
   data,
   keyColumn: 'subject_id',
   validateOnChange: () => true // Always validate as true

@@ -29,7 +29,7 @@ export class GuidedSubjectsPage extends Page {
         if (!subObj) subObj = results[subject] = {}
         else {
           const toRemove = Object.keys(subObj).filter(s => !sessions.includes(s))
-          for (let s of toRemove) delete subObj[s] // Delete extra sessions from results  
+          for (let s of toRemove) delete subObj[s] // Delete extra sessions from results
           if (!Object.keys(subObj).length) delete results[subject] // Delete subjects without sessions
         }
 
@@ -54,7 +54,7 @@ export class GuidedSubjectsPage extends Page {
 
     let subjects = this.info.globalState.subjects
     if (!subjects) subjects = this.info.globalState.subjects = {} // Ensure global subjects tracking
-    
+
     // Ensure all the proper subjects are in the global state
     const toHave = Object.keys(this.info.globalState.results)
     const toRemove = Object.keys(subjects).filter(sub => !toHave.includes(sub))
@@ -65,7 +65,7 @@ export class GuidedSubjectsPage extends Page {
       const sessions = Object.keys(this.info.globalState.results[subject])
       subjects[subject].sessions = sessions
     }
-    
+
     const schema = {
       ...nwbBaseSchema.properties.Subject,
       properties: {
@@ -79,7 +79,7 @@ export class GuidedSubjectsPage extends Page {
     }
 
     const subjectTable = new Table({
-      schema, 
+      schema,
       data: subjects,
       keyColumn: 'subject_id',
       validateOnChange: (key, v, parent) => validateOnChange(key, parent, ['Subject'], v)
@@ -89,7 +89,7 @@ export class GuidedSubjectsPage extends Page {
       <div
         id="guided-mode-starting-container"
         class="guided--main-tab"
-      > 
+      >
         <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
           <div class="title">
             <h1 class="guided--text-sub-step">Subjects</h1>
