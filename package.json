@@ -129,8 +129,6 @@
     "electron": "19.0.0",
     "electron-builder": "22.10.5",
     "electron-packager": "^14.0.6",
-    "electron-rebuild": "^1.11.0",
-    "electron-reloader": "^1.2.3",
     "electron-vite": "^1.0.22",
     "prettier": "^2.3.2",
     "react": "^18.2.0",
