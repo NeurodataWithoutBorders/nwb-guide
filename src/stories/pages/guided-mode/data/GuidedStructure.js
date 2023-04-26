@@ -114,18 +114,19 @@ export class GuidedStructurePage extends Page {
 
       this.save() // Save in case the schema request fails
 
-      const schema = (Object.keys(this.#selected).length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema`, {
+      const interfaces = { ...this.#selected }
+
+      const schema = (Object.keys(interfaces).length === 0) ? {} : await fetch(`${baseUrl}/neuroconv/schema`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.#selected)
+        body: JSON.stringify(interfaces)
       }).then((res) => res.json())
 
       let schemas = this.info.globalState.schema
       if (!schemas) schemas = this.info.globalState.schema = {}
 
       schemas.source_data = schema
-      this.info.globalState.interfaces = this.#selected
-
+      this.info.globalState.interfaces = interfaces
 
       this.onTransition(1)
     }
@@ -133,8 +134,8 @@ export class GuidedStructurePage extends Page {
 
   async updated(){
 
-
     const selected = this.info.globalState.interfaces
+
     this.search.options = await fetch(`${baseUrl}/neuroconv`).then((res) => res.json()).then(json => Object.entries(json).map(([key, value]) => {
       return {
         ...value,

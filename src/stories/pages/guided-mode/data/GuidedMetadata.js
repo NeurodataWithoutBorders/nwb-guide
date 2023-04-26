@@ -3,10 +3,11 @@
 import { html } from 'lit';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 
-import { validateOnChange } from '../../../../validation/index.js';
 import { InstanceManager } from '../../../InstanceManager.js';
 import { ManagedPage } from './ManagedPage.js';
 import { Modal } from '../../../Modal';
+
+import { validateOnChange } from '../../../../validation/index.js';
 
 export class GuidedMetadataPage extends ManagedPage {
 
@@ -14,6 +15,7 @@ export class GuidedMetadataPage extends ManagedPage {
     super(...args)
   }
 
+  form;
   footer = {
     onNext: async () => {
       this.save()
@@ -116,14 +118,12 @@ export class GuidedMetadataPage extends ManagedPage {
     class="guided--main-tab"
   >
     <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-      <div class="title">
-        <h1 class="guided--text-sub-step">NWB File Metadata</h1>
-      </div>
       <div class="guided--section">
        ${this.manager}
       </div>
   </div>
     `;
+
   }
 };
 

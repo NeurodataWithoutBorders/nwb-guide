@@ -13,6 +13,11 @@ require('./shortcuts.js')
 
 autoUpdater.channel = "latest";
 
+// Enable hot reload for Electron
+try {
+  require('electron-reloader')(module)
+} catch (_) {}
+
 /*************************************************************
  * Python Process
  *************************************************************/

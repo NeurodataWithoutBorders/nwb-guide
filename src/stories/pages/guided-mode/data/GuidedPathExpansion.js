@@ -7,6 +7,7 @@ import { Page } from '../../Page.js';
 import { baseUrl, notyf } from '../../../../globals.js';
 import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { OptionalSection } from '../../../OptionalSection.js';
+import { run } from '../options/utils.js';
 
 export class GuidedPathExpansionPage extends Page {
 
@@ -65,11 +66,8 @@ export class GuidedPathExpansionPage extends Page {
 
         const structure = this.info.globalState.structure.results
 
-        const results = await fetch(`${baseUrl}/neuroconv/locate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(structure)
-        }).then((res) => res.json())
+        const results = await run(`locate`, structure, { title: 'Locating Data'})
+                        .catch(e => this.notify(e.message, 'error'))
 
         const subjects = Object.keys(results)
         if (subjects.length === 0) {
@@ -141,7 +139,7 @@ export class GuidedPathExpansionPage extends Page {
 
    const baseSchema = {
       properties: {
-        folder: {
+        base_directory: {
           type: 'string',
           format: 'directory',
           description: 'Enter the base directory of your data.',
@@ -155,7 +153,7 @@ export class GuidedPathExpansionPage extends Page {
           // {subject_id}_{session_id}_{task_name}/{subject_id}_{session_id}_{task_name}_imec0/{subject_id}_{session_id}_{task_name}_t0.imec0.ap.bin
 
       },
-      required: ['base_directory', 'format_string']
+      required: ['base_directory', 'file_path']
     }
 
     // Require properties for all sources

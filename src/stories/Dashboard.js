@@ -122,7 +122,7 @@ export class Dashboard extends LitElement {
     return this;
   }
 
-  attributeChangedCallback(key, previous, latest) {
+  attributeChangedCallback(key, _, latest) {
     super.attributeChangedCallback(...arguments)
     if (this.sidebar && (key === 'name' || key === 'logo' || key === 'subtitle')) this.sidebar[key] = latest
     else if (key === 'renderNameInSidebar') this.sidebar.renderName = latest === 'true' || latest === true
@@ -130,6 +130,8 @@ export class Dashboard extends LitElement {
     else if (key.toLowerCase() === 'activepage') {
 
       if (this.#active && this.#active.info.parent && this.#active.info.section) this.#active.save() // Always properly saves the page
+
+      while (latest && !this.pagesById[latest]) latest = latest.split('/').slice(0, -1).join('/') // Trim off last character until you find a page
 
       this.sidebar.selectItem(latest) // Just highlight the item
       this.sidebar.initialize = false
@@ -154,7 +156,7 @@ export class Dashboard extends LitElement {
     const info = page.info
     const previous = this.#active
 
-    if (previous === page) return // Prevent rerendering the same page
+    // if (previous === page) return // Prevent rerendering the same page
 
     const isNested = info.parent && info.section
 
@@ -172,7 +174,9 @@ export class Dashboard extends LitElement {
     this.#active = page
 
     if (isNested) {
-      this.subSidebar.sections = this.#getSections(info.parent.info.pages, toPass.globalState) // Update sidebar items (if changed)
+      let parent = info.parent
+      while (parent.info.parent) parent = parent.info.parent // Lock sections to the top-level parent
+      this.subSidebar.sections = this.#getSections(parent.info.pages, toPass.globalState) // Update sidebar items (if changed)
       this.subSidebar.active = info.id // Update active item (if changed)
       this.sidebar.hide(true)
       this.subSidebar.show()
@@ -214,6 +218,8 @@ export class Dashboard extends LitElement {
         state.active = false
         pageState.active = false
 
+        if (page.info.pages) this.#getSections(page.info.pages, globalState) // Show all states
+
         if (!('visited' in pageState)) pageState.visited = false
         if (id === this.#active.info.id) state.active = pageState.visited = pageState.active = true // Set active page as visited
       }
@@ -244,17 +250,16 @@ export class Dashboard extends LitElement {
       else this.setAttribute('activePage', transition)
     }
 
-    this.main.updatePages = () => this.#updated() // Rerender with new pages
+    this.main.updatePages = () => {
+      this.#updated() // Rerender with new pages
+      this.setAttribute('activePage', this.#active.info.id) // Re-render the current page
+    }
 
     this.pagesById = {}
     Object.entries(pages).forEach((arr) => this.addPage(this.pagesById, arr))
     this.sidebar.pages = pages
 
-    if (active) {
-      let ogActive = active
-      while (active && !this.pagesById[active]) active = active.split('/').slice(0, -1).join('/') // Trim off last character until you find a page
-      this.setAttribute('activePage', active ?? ogActive)
-    }
+    if (active) this.setAttribute('activePage', active)
   }
 
   #activatePage = (id) => {
@@ -280,7 +285,6 @@ export class Dashboard extends LitElement {
     else page.info.id = id // update id
 
     const pages = info.pages
-    // delete info.pages
 
     // NOTE: This is not true for nested pages with more info...
     if (page instanceof HTMLElement) acc[id] = page

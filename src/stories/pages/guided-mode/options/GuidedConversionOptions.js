@@ -18,7 +18,7 @@ export class GuidedConversionOptionsPage extends Page {
 
       // Preview a random conversion
       delete this.info.globalState.preview // Clear the preview results
-      const results = await this.runConversions({ stub_test: true }, 1).catch(e => this.notify(e.message, 'error'))
+      const results = await this.runConversions({ stub_test: true }, 1)
       this.info.globalState.preview = results // Save the preview results
 
       this.onTransition(1)
@@ -61,7 +61,6 @@ export class GuidedConversionOptionsPage extends Page {
         <h1 class="guided--text-sub-step">Conversion Details</h1>
       </div>
       <div class="guided--section">
-      <h3>NWB File Path</h3>
       ${this.form}
       </div>
   </div>

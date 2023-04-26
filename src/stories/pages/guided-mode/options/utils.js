@@ -27,10 +27,7 @@ export const run = async (url, payload, options={}) => {
 
       Swal.close();
 
-      if (results?.message) {
-        const message = options.onError ? options.onError(results) : results.message
-        throw new Error(`Request to ${url} failed: ${results.message}`)
-      }
+      if (results?.message) throw new Error(`Request to ${url} failed: ${results.message}`)
 
       return results || true
 }
