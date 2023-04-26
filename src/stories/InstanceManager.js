@@ -76,6 +76,8 @@ export class InstanceManager extends LitElement {
       }
 
       .item > span {
+        position: relative;
+        overflow: hidden;
         padding: 10px;
         cursor: pointer;
         width: 100%;
@@ -136,24 +138,25 @@ export class InstanceManager extends LitElement {
       }
 
       .indicator {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        border: 1px solid gray;
-        background: lightgray;
-        margin-left: 5px;
-        transition: background 0.5s;
+        height: 100%;
+        width: 10px;
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        opacity: 0.5;
+        background: transparent;
+        border-left: 1px solid rgb(195, 195, 195);
       }
 
-      .indicator.warning {
+      .item.warning .indicator {
         background: rgb(255, 228, 143);
       }
 
-      .indicator.valid {
+      .item.valid .indicator {
         background: rgb(162, 255, 143);
       }
 
-      .indicator.error {
+      .item.error .indicator {
         background: rgb(255, 143, 143);
       }
     `
@@ -248,7 +251,7 @@ export class InstanceManager extends LitElement {
         </div>
         <ul id="instance-list">
         ${Object.entries(instances).map(([key, info], i) => html`
-          <li class="item" ?selected=${isSelected[i] === true} data-instance="${key}">
+          <li class="item ${info.status}" ?selected=${isSelected[i] === true} data-instance="${key}">
             <span @click="${() => {
 
               this.#selected = key
@@ -267,7 +270,7 @@ export class InstanceManager extends LitElement {
                   if (el !== sidebarElement) el.removeAttribute('selected')
                 })
               }
-            }}">${key} <div class="indicator ${info.status}"></div> </span>
+            }}">${key} <div class="indicator"></div> </span>
             <nwb-button
               size="small"
               primary
