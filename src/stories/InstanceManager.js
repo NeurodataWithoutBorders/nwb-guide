@@ -134,7 +134,7 @@ export class InstanceManager extends LitElement {
         justify-content: flex-end;
         align-items: center;
       }
-      
+
       .indicator {
         height: 100%;
         width: 40px;
