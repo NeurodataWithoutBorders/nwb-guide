@@ -1,7 +1,7 @@
 
 
 import { LitElement, css, html } from 'lit';
-import { errorColor, successColor, warningColor } from './globals';
+import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol } from './globals';
 
 // import 'fa-icons';
 
@@ -113,16 +113,35 @@ export class Accordion extends LitElement {
     }
 
     .guided--nav-bar-dropdown.error {
-      border-bottom: 5px solid ${errorColor} !important;
+      border-bottom: 5px solid hsl(${errorHue}, 100%, 70%) !important;
     }
 
     .guided--nav-bar-dropdown.warning {
-      border-bottom: 5px solid ${warningColor} !important;
+      border-bottom: 5px solid hsl(${warningHue}, 100%, 70%) !important;
     }
 
     .guided--nav-bar-dropdown.valid {
-      border-bottom: 5px solid ${successColor} !important;
+      border-bottom: 5px solid hsl(${successHue}, 100%, 70%) !important;
     }
+
+    .guided--nav-bar-dropdown::after {
+      font-size: 0.8em;
+      position: absolute;
+      right: 50px;
+    }
+
+    .guided--nav-bar-dropdown.error::after {
+      content: '${errorSymbol}';
+    }
+
+    .guided--nav-bar-dropdown.warning::after {
+      content: '${warningSymbol}';
+    }
+
+    .guided--nav-bar-dropdown.valid::after {
+      content: '${successSymbol}';
+    }
+
 
     .guided--nav-bar-dropdown:hover {
       cursor: pointer;

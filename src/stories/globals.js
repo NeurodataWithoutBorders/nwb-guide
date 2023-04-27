@@ -1,5 +1,9 @@
 import { css } from "lit"
 
-export const errorColor = css`rgb(255, 191, 191)`
-export const warningColor = css`rgb(255, 252, 191)`
-export const successColor = css`rgb(202, 255, 191)`
+export const errorHue = 0
+export const warningHue = 57
+export const successHue = 110
+
+export const errorSymbol = css`❌`
+export const warningSymbol = css`⚠️`
+export const successSymbol = css`✅`
