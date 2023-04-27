@@ -1,6 +1,7 @@
 .. image:: ../src/assets/img/logo-guide-draft-transparent-tight.png
+
 Welcome to the documentation for the NeurodataWithoutBorders (NWB) Graphical User Interface for Data Entry (GUIDE)!
-=====================================================================================
+===================================================================================================================
 
 ..
   :scale: 100 %
