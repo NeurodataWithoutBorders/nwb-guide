@@ -405,14 +405,17 @@ export class JSONSchemaForm extends LitElement {
         else if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
 
           // Handle file and directory formats
-          if (this.#filesystemQueries.includes(info.format)) return new FilesystemSelector({
-            type: info.format,
-            value: parent[name],
-            onSelect: (filePath) => this.#updateParent(name, filePath, parent),
-            onChange: (filePath) => this.#validateOnChange(name, parent, filePath, path),
-            dialogOptions: this.dialogOptions,
-            dialogType: this.dialogType
-          })
+          if (this.#filesystemQueries.includes(info.format)) {
+            const el = new FilesystemSelector({
+              type: info.format,
+              value: parent[name],
+              onSelect: (filePath) => this.#updateParent(name, filePath, parent),
+              onChange: (filePath) => this.#validateOnChange(name, parent, el, path),
+              dialogOptions: this.dialogOptions,
+              dialogType: this.dialogType
+            })
+            return el
+          }
 
           // Handle long string formats
           else if (info.format === 'long' || isArray) return html`<textarea
