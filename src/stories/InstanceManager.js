@@ -3,6 +3,7 @@
 import { LitElement, css, html } from 'lit';
 import './Button';
 import { notify } from '../globals';
+import { errorColor, successColor, warningColor } from './globals';
 
 export class InstanceManager extends LitElement {
 
@@ -147,15 +148,15 @@ export class InstanceManager extends LitElement {
       }
 
       .item.warning .indicator {
-        background: rgb(255, 252, 191);
+        background: ${warningColor};
       }
 
       .item.valid .indicator {
-        background: rgb(202, 255, 191);
+        background: ${successColor};
       }
 
       .item.error .indicator {
-        background: rgb(255, 191, 191);
+        background: ${errorColor};
       }
     `
   }

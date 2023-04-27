@@ -1,6 +1,7 @@
 
 
 import { LitElement, css, html } from 'lit';
+import { errorColor, successColor, warningColor } from './globals';
 
 // import 'fa-icons';
 
@@ -65,6 +66,7 @@ export class Accordion extends LitElement {
       padding-bottom: 2px;
     }
 
+
     .hidden {
       display: none !important;
     }
@@ -90,6 +92,7 @@ export class Accordion extends LitElement {
 
 
     .guided--nav-bar-dropdown {
+      position: relative;
       min-height: 40px;
       width: 100%;
       display: flex;
@@ -97,7 +100,7 @@ export class Accordion extends LitElement {
       justify-content: space-between;
       flex-wrap: nowrap;
       user-select: none;
-      background-color: gainsboro;
+      background-color: 	rgb(240,240,240);
       border-bottom: 1px solid gray;
     }
 
@@ -107,6 +110,18 @@ export class Accordion extends LitElement {
 
     .guided--nav-bar-section:last-child > .guided--nav-bar-dropdown {
       border-bottom: none;
+    }
+
+    .guided--nav-bar-dropdown.error {
+      border-bottom: 5px solid ${errorColor} !important;
+    }
+
+    .guided--nav-bar-dropdown.warning {
+      border-bottom: 5px solid ${warningColor} !important;
+    }
+
+    .guided--nav-bar-dropdown.valid {
+      border-bottom: 5px solid ${successColor} !important;
     }
 
     .guided--nav-bar-dropdown:hover {
@@ -155,6 +170,13 @@ export class Accordion extends LitElement {
     })
   }
 
+  setSectionStatus = (sectionName, status) => {
+    const el = this.shadowRoot.querySelector( "[data-section-name='" + sectionName + "']");
+    el.classList.remove("error", "warning", "valid")
+    el.classList.add(status)
+    this.sections[sectionName].status = status
+  }
+
   onClick = () => {} // Set by the user
 
 
@@ -198,7 +220,7 @@ export class Accordion extends LitElement {
         return html`
         <div class="guided--nav-bar-section">
           <div
-            class="guided--nav-bar-dropdown"
+            class="guided--nav-bar-dropdown ${info.status}"
             data-section-name=${sectionName}
             @click=${() => this.#toggleDropdown(sectionName)}
           >
