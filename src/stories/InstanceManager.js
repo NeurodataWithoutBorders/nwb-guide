@@ -3,6 +3,7 @@
 import { LitElement, css, html } from 'lit';
 import './Button';
 import { notify } from '../globals';
+import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol } from './globals';
 
 export class InstanceManager extends LitElement {
 
@@ -152,27 +153,32 @@ export class InstanceManager extends LitElement {
         border-left: 1px solid rgb(195, 195, 195);
       }
 
+      .item.warning .indicator {
+        background: hsl(${warningHue}, 100%, 90%);
+      }
+
+      .item.valid .indicator {
+        background: hsl(${successHue}, 100%, 90%);
+      }
+
+      .item.error .indicator {
+        background: hsl(${errorHue}, 100%, 95%);
+      }
+
       .item.valid span, .item.error span, .item.warning span {
         padding-right: 60px;
-
       }
 
       .item.valid .indicator::before {
-        content: '✅';
-        display: inline-block;
-        color: green;
+        content: '${successSymbol}';
       }
 
       .item.error .indicator::before {
-        content: '❌';
-        display: inline-block;
-        color: red;
+        content: '${errorSymbol}';
       }
 
       .item.warning .indicator::before {
-        content: '⚠️';
-        display: inline-block;
-        color: darkyellow;
+        content: '${warningSymbol}';
       }
     `
   }

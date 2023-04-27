@@ -23,6 +23,9 @@ const defaultSchema = {
       type: 'string',
       default: true
     },
+    warn: {
+      type: 'string',
+    },
     optional: {
       type: 'string',
       format: 'file',
@@ -33,7 +36,7 @@ const defaultSchema = {
 
 export const Nested = Template.bind({});
 Nested.args = {
-  mode: 'default',
+  mode: 'accordion',
   results: {
     name: 'name',
   },

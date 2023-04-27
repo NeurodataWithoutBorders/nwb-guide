@@ -566,6 +566,7 @@ export class JSONSchemaForm extends LitElement {
 
     const valid = (!this.validateEmptyValues && !(name in parent)) ? true : await this.validateOnChange(name, parent, path)
 
+
     const fullPath = [...path, name]
     const isRequired = this.#isRequired(fullPath)
     let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === 'warning' && (!isRequired || !info.missing)) : []
@@ -585,6 +586,10 @@ export class JSONSchemaForm extends LitElement {
       }
     }
 
+    if (!errors.length && isRequired && !parent[name]) {
+      errors.push({ message: `${name} is a required property.`, type: 'error', missing: true}) // Throw at least a basic error if the property is required
+    }
+
     // Clear old errors and warnings
     this.#clearMessages(fullPath, 'errors')
     this.#clearMessages(fullPath, 'warnings')
@@ -597,7 +602,7 @@ export class JSONSchemaForm extends LitElement {
     // Show aggregated errors and warnings (if any)
     warnings.forEach((info) => this.#addMessage(fullPath, info.message, 'warnings'))
 
-    if (valid === true || valid == undefined || errors.length === 0) {
+    if ((valid === true || valid == undefined || !valid.find(o => o.type === 'error')) && errors.length === 0) {
       element.classList.remove('invalid')
 
       const linkEl = this.#getLinkElement(fullPath)
@@ -719,6 +724,8 @@ export class JSONSchemaForm extends LitElement {
 
         if (this.mode === 'accordion' && hasMany) {
 
+          const headerName = this.#parseStringToHeader(name)
+
         this.#nestedForms[name] = new JSONSchemaForm({
           identifier: this.identifier,
           schema: info,
@@ -732,19 +739,24 @@ export class JSONSchemaForm extends LitElement {
           conditionalRequirements: this.conditionalRequirements,
           validateOnChange: (...args) => this.validateOnChange(...args),
           validateEmptyValues: this.validateEmptyValues,
-          onStatusChange: () => this.#checkStatus(), // Forward status changes to the parent form
+          onStatusChange: (status) => {
+            accordion.setSectionStatus(headerName, status)
+            this.#checkStatus()
+          }, // Forward status changes to the parent form
           onInvalid: (...args) => this.onInvalid(...args),
           base: [...path, name]
         })
 
-          return new Accordion({
+        const accordion = new Accordion({
             sections: {
-              [this.#parseStringToHeader(name)]: {
+              [headerName]: {
                 subtitle: `${Object.keys(info.properties).length} fields`,
                 content: this.#nestedForms[name]
               }
             }
           })
+
+          return accordion
         }
 
         // Render properties in the sub-schema
