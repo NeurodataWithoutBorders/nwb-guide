@@ -562,7 +562,7 @@ export class JSONSchemaForm extends LitElement {
   #validateOnChange = async (name, parent, element, path = [], checkLinks = true) => {
 
     const valid = (!this.validateEmptyValues && !(name in parent)) ? true : await this.validateOnChange(name, parent, path)
-    
+
 
     const fullPath = [...path, name]
     const isRequired = this.#isRequired(fullPath)
