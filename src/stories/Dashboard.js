@@ -111,7 +111,9 @@ export class Dashboard extends LitElement {
     window.onpushstate = window.onpopstate = (e) => {
       if (e.state) {
         document.title = `${e.state.label} - ${this.name}`
-        this.setMain(this.pagesById[e.state.page])
+        const page = this.pagesById[e.state.page]// ?? this.pagesById[this.#activatePage]
+        if (!page) return
+        this.setMain(page)
       }
     }
 
