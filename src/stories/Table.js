@@ -1,56 +1,18 @@
-import Handsontable from 'handsontable';
-import 'handsontable/dist/handsontable.full.min.css';
-
 import { LitElement, html } from 'lit';
 import './Button';
-
-
-function arrayRenderer(instance, td, row, col, prop, value, cellProperties) {
-  if (!value) value = []
-  const ol = document.createElement('ol');
-  if (typeof value === 'string') value = value.split(',')
-  else if (!Array.isArray(value)) value = [value]
-  value.forEach(v => {
-    const li = document.createElement('li');
-    li.innerText = v;
-    ol.appendChild(li);
-  });
-
-  td.innerText = '';
-  td.appendChild(ol);
-
-  return td;
-}
-
-class ArrayEditor extends Handsontable.editors.TextEditor {
-  constructor(hotInstance) {
-    super(hotInstance);
-  }
-
-  getValue(){
-    const value = super.getValue()
-    if (!value) return []
-    else {
-      const split = value.split(',').map(str => str.trim()).filter(str => str)
-      return (this.cellProperties.uniqueItems) ? Array.from((new Set(split))) : split; // Only unique values
-    }
-  }
-
-  setValue(newValue) {
-    if (Array.isArray(newValue)) return newValue.join(',')
-    super.setValue(newValue)
-  }
-}
+import { notify } from '../globals';
+import { Handsontable } from './hot';
 
 export class Table extends LitElement {
 
   validateOnChange
 
-  constructor({ schema, data, keyColumn, validateOnChange } = {}) {
+  constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
     super();
     this.schema = schema ?? {}
     this.data = data ?? [];
     this.keyColumn = keyColumn ?? 'id'
+    this.template = template ?? {}
     if (validateOnChange) this.validateOnChange = validateOnChange
 
     this.style.width = '100%';
@@ -58,6 +20,24 @@ export class Table extends LitElement {
     this.style.flexWrap = 'wrap';
     this.style.alignItems = 'center';
     this.style.justifyContent = 'center';
+
+    // Inject scoped stylesheet
+    const style = `
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      
+      ul li:before {
+        content: '-';
+        position: absolute;
+        margin-left: -20px;
+      }
+    `
+
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = style;
+    this.appendChild(styleEl);
 
   }
 
@@ -79,7 +59,7 @@ export class Table extends LitElement {
       if (col === this.keyColumn) {
         if (hasRow) value = row
         else return ''
-      } else value = (hasRow ? this.data[row][col] : undefined) ?? this.schema.properties[col].default ?? ''
+      } else value = (hasRow ? this.data[row][col] : undefined) ?? this.template[col] ?? this.schema.properties[col].default ?? ''
       return value
     })
   }
@@ -105,10 +85,13 @@ export class Table extends LitElement {
 
     const rowHeaders = this.rowHeaders = Object.keys(this.data)
 
+    const displayHeaders = [...colHeaders]
 
-    const columns = colHeaders.map(k => {
+    const columns = colHeaders.map((k, i) => {
 
       const info = { type: 'text' }
+
+      if (entries[k].unit) displayHeaders[i] = `${k} (${entries[k].unit})`
 
       // Enumerate Possible Values
       if (entries[k].enum) {
@@ -118,14 +101,13 @@ export class Table extends LitElement {
 
       // Constrain to Date Format
       if (entries[k].format === 'date-time') {
-        info.type = 'date'
+        info.type = 'date-time'
         info.correctFormat = false
       }
 
       if (entries[k].type === 'array') {
         info.data = k
-        info.renderer = arrayRenderer
-        info.editor = ArrayEditor
+        info.type = 'array'
         info.uniqueItems = entries[k].uniqueItems
       }
 
@@ -161,10 +143,12 @@ export class Table extends LitElement {
 
     const data = this.#getData()
 
+    let nRows = rowHeaders.length
+
     const table = new Handsontable(div, {
       data,
       // rowHeaders: rowHeaders.map(v => `sub-${v}`),
-      colHeaders,
+      colHeaders: displayHeaders,
       columns,
       height: 'auto',
       width: '100%',
@@ -206,10 +190,22 @@ export class Table extends LitElement {
       }
     })
 
-    table.addHook('afterRemoveRow', (_, __, physicalRows) => physicalRows.forEach(row => delete this.data[rowHeaders[row]]))
+    // If only one row, do not allow deletion
+    table.addHook('beforeRemoveRow', (index, amount) => {
+      if (nRows - amount < 1) {
+        notify('You must have at least one row', 'error')
+        return false
+      }
+    })
+
+    table.addHook('afterRemoveRow', (_, amount, physicalRows) => {
+      nRows -= amount
+      physicalRows.forEach(row => delete this.data[rowHeaders[row]])
+    })
 
 
     table.addHook('afterCreateRow', (index, amount) => {
+      nRows += amount
       const physicalRows = Array.from({length: amount}, (e, i) => index + i)
       physicalRows.forEach(row => this.#setRow(row, this.#getRowData(row)))
     })
@@ -229,7 +225,7 @@ export class Table extends LitElement {
   render() {
     return html`
       <div></div>
-      <nwb-button style="margin-top: 25px;" @click=${() => this.table.alter("insert_row")}>Add New Row</nwb-button>
+      <nwb-button style="margin-top: 25px;" @click=${() => this.table.alter("insert_row_below")}>Add New Row</nwb-button>
     `;
   }
 
