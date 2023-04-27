@@ -8,19 +8,19 @@ export class DateTimeSelector extends LitElement {
         display: inline-block;
         position: relative;
       }
-  
+
       `
     }
-  
+
     get value () {
       return this.input.value
     }
-  
+
     set value (newValue) {
       this.input.value = newValue
     }
-    
-  
+
+
       constructor(){
         super()
         this.input = document.createElement('input')
@@ -31,10 +31,10 @@ export class DateTimeSelector extends LitElement {
             this.input.showPicker()
         })
       }
-  
+
       render () {
         return this.input
       }
   }
-  
+
   customElements.get('date-time-selector') || customElements.define('date-time-selector',  DateTimeSelector);

@@ -27,7 +27,7 @@ export class Table extends LitElement {
         list-style-type: none;
         padding: 0;
       }
-      
+
       ul li:before {
         content: '-';
         position: absolute;

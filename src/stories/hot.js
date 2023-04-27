@@ -58,9 +58,9 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor{
       height,
     } = this.getEditedCellRect();
     const style = this.DATETIME.style;
-  
+
     this._opened = true;
-  
+
     style.height = `${height}px`;
     style.minWidth = `${width}px`;
     style.top = `${top}px`;
@@ -68,11 +68,11 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor{
     style.margin = '0px';
     style.display = '';
   }
-  
+
   focus() {
     this.DATETIME.click()
   }
-  
+
   close() {
     this._opened = false;
     this.DATETIME.style.display = 'none';
@@ -107,4 +107,4 @@ Handsontable.cellTypes.registerCellType('array', {
 Handsontable.cellTypes.registerCellType('date-time', {
     editor: DateTimeEditor,
   });
-  
+
