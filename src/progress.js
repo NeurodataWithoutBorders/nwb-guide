@@ -41,7 +41,7 @@ export const update = (newDatasetName, previousDatasetName) => {
 export const save = (page, overrides = {}) => {
 
   const globalState = page.info.globalState
-  let guidedProgressFileName = overrides.globalState?.project?.name ?? globalState.project.name
+  let guidedProgressFileName = overrides.globalState?.project?.name ?? globalState.project?.name
 
   //return if guidedProgressFileName is not a string greater than 0
   if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return

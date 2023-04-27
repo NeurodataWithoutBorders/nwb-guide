@@ -144,7 +144,20 @@ export class GuidedStructurePage extends Page {
       } // Has label and keywords property already
     })).catch(e => console.error(e));
 
-    for (const [key, name] of Object.entries(selected || {})) this.#addListItem({...this.search.options.find(o => o.value === name), key}) // Add previously selected items
+    for (const [key, name] of Object.entries(selected || {})) {
+      let found = this.search.options?.find(o => o.value === name)
+
+      // If not found, spoof based on the key and names provided previously
+      if (!found) {
+        found = {
+            key,
+            label: name.replace('Interface', ''),
+            value: name,
+          }
+      }
+
+      this.#addListItem({...found, key}) // Add previously selected items
+    }
   }
 
   render() {
