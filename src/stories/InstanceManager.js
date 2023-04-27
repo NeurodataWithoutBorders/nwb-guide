@@ -39,7 +39,6 @@ export class InstanceManager extends LitElement {
       }
 
       #instance-sidebar {
-        width: 200px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -78,7 +77,7 @@ export class InstanceManager extends LitElement {
       .item > span {
         position: relative;
         overflow: hidden;
-        padding: 10px;
+        padding: 10px 20px;
         cursor: pointer;
         width: 100%;
         display: flex;
@@ -135,27 +134,45 @@ export class InstanceManager extends LitElement {
         justify-content: flex-end;
         align-items: center;
       }
-
+      
       .indicator {
         height: 100%;
-        width: 10px;
+        width: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         position: absolute;
         right: 0px;
         top: 0px;
+        font-size: 0.8em;
+      }
+
+      .item.valid .indicator, .item.error .indicator, .item.warning .indicator {
         background: rgb(250, 250, 250);
         border-left: 1px solid rgb(195, 195, 195);
       }
 
-      .item.warning .indicator {
-        background: rgb(255, 252, 191);
+      .item.valid span, .item.error span, .item.warning span {
+        padding-right: 60px;
+
       }
 
-      .item.valid .indicator {
-        background: rgb(202, 255, 191);
+      .item.valid .indicator::before {
+        content: '✅';
+        display: inline-block;
+        color: green;
       }
 
-      .item.error .indicator {
-        background: rgb(255, 191, 191);
+      .item.error .indicator::before {
+        content: '❌';
+        display: inline-block;
+        color: red;
+      }
+
+      .item.warning .indicator::before {
+        content: '⚠️';
+        display: inline-block;
+        color: darkyellow;
       }
     `
   }

@@ -410,7 +410,7 @@ export class JSONSchemaForm extends LitElement {
               type: info.format,
               value: parent[name],
               onSelect: (filePath) => this.#updateParent(name, filePath, parent),
-              onChange: (filePath) => this.#validateOnChange(name, parent, el, filePath, path),
+              onChange: (filePath) => this.#validateOnChange(name, parent, el, path),
               dialogOptions: this.dialogOptions,
               dialogType: this.dialogType
             })
