@@ -81,6 +81,13 @@ export class Page extends LitElement {
 
   merge = (path, toMerge = {}, target =  this.info.globalState) => {
 
+    // Provide a temporary data structure to merge into
+    const isTemp = !path || path.length === 0
+    if (isTemp) {
+      path = ['temp']
+      target = { temp: target }
+    }
+
     if (!Array.isArray(path)) path = path.split('.')
 
     const key = path.pop() // Focus on the last key in the path
@@ -96,6 +103,8 @@ export class Page extends LitElement {
         else target[key][k] = v
       }
     } else target[key] = toMerge
+
+    return isTemp ? target.temp : target
   }
 
   addSession ({ subject, session, info }) {
