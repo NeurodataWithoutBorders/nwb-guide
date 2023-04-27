@@ -107,4 +107,3 @@ Handsontable.cellTypes.registerCellType('array', {
 Handsontable.cellTypes.registerCellType('date-time', {
     editor: DateTimeEditor,
   });
-
