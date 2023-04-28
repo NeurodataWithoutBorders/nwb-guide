@@ -104,16 +104,18 @@ To run Storybook, simply run ``npm run storybook`` in the root directory of the 
 Testing
 ---------------------------
 
-We use :pytest:`pytest <>` for testing. To run the tests, simply run ``pytest`` in the root directory of the repository.
+We use Chromatic on the Storybook to test changes to front-end components as well as to demonstrate example cases of what those components would look like on a real project.
+
+We use :pytest:`pytest <>` for testing the back-end manager and REST API. To run the tests, simply run ``pytest`` in the root directory of the repository.
 
 .. _style:
 
 Coding Style
 ---------------------------
 
-For all Python code on the backend, we use the :black-coding-style:`black coding style <>` with parameters defined in the ``pyproject.toml`` configuration file.
-
 For all JavaScript code on the frontend, we use the :prettier-code-formatter:`prettier code formatter <>` with parameters defined in the ``prettier.config.js`` configuration file.
+
+For all Python code on the backend, we use the :black-coding-style:`black coding style <>` with parameters defined in the ``pyproject.toml`` configuration file.
 
 Pre-Commit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
