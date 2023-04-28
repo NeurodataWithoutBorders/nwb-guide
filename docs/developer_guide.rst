@@ -8,12 +8,12 @@ Starting a New Feature
 
 1. Create a new branch off of the ``main`` branch. The branch name should be descriptive of the feature you are working on.
 
-.. hint::   
+.. hint::
     For example, if you are working on a feature to add a new page, you could name the branch ``add-new-metadata-page``.
 
 2. Make your changes on the new branch.
 
-.. important::   
+.. important::
     When you are ready to commit, make sure to run ``pre-commit run --all-files`` to ensure that your code is formatted correctly. If you are adding new code, make sure to add :ref:`tests <testing>` for it as well.
 
 1. Push your changes to the remote branch. Then, open a pull request to merge your branch into the ``main`` branch.
@@ -48,7 +48,7 @@ New pages can be added by linking a component in the ``src/pages.js`` file. For 
 
                 // ...
 
-                newpage: new NewPage({  
+                newpage: new NewPage({
                     label: "New Page", // This is the label that will be displayed in the sidebar
                 }),
 
@@ -109,13 +109,13 @@ We use :pytest:`pytest <>` for testing. To run the tests, simply run ``pytest`` 
 Coding Style
 ---------------------------
 
-For all Python code on the backend, we use the :black-coding-style:`black coding style <>` with parameters defined in the ``pyproject.toml`` configuration file. 
+For all Python code on the backend, we use the :black-coding-style:`black coding style <>` with parameters defined in the ``pyproject.toml`` configuration file.
 
 For all JavaScript code on the frontend, we use the :prettier-code-formatter:`prettier code formatter <>` with parameters defined in the ``prettier.config.js`` configuration file.
 
-Pre-Commit 
+Pre-Commit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use an automated pre-commit bot to enforce these on the main repo, but contributions from external forks would either have to grant bot permissions on their own fork (via :pre-commit-bot:`the pre-commit bot website <>`) or run pre-commit manually. 
+We use an automated pre-commit bot to enforce these on the main repo, but contributions from external forks would either have to grant bot permissions on their own fork (via :pre-commit-bot:`the pre-commit bot website <>`) or run pre-commit manually.
 
 For instructions to install pre-commit, as well as some other minor coding styles we follow, refer to the :neuroconv-coding-style:`NeuroConv style guide <>`.
