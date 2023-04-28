@@ -30,7 +30,10 @@ extlinks = {
         "https://neuroconv.readthedocs.io/en/main/developer_guide/style_guide.html#style-guide-and-general-conventions%s",
         None,
     ),
+    "pytest": ("https://docs.pytest.org/en/stable/%s", None),
     "black-coding-style": ("https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html%s", None),
+    "prettier-code-formatter": ("https://prettier.io/docs/en/%s", None),
+
     "ncbi": ("https://www.ncbi.nlm.nih.gov/taxonomy%s", None),
     "ontobee": ("https://ontobee.org/%s", None),
 }
