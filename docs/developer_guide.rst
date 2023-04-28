@@ -94,7 +94,7 @@ Extending the ``Page`` class rather than the ``LitElement`` class provides each 
 Discover Existing Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While developing NWB GUIDE, you may find that you need to use a component that already exists in the codebase. To find a component, you can manually peruse the ``src/stories`` directory or run the project's Storybook instance to see all of the components in action. 
+While developing NWB GUIDE, you may find that you need to use a component that already exists in the codebase. To find a component, you can manually peruse the ``src/stories`` directory or run the project's Storybook instance to see all of the components in action.
 
 To run Storybook, simply run ``npm run storybook`` in the root directory of the repository. This will start a local server that you can access using the link provided on the command line.
 
