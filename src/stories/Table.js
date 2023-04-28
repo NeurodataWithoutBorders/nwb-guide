@@ -223,9 +223,12 @@ export class Table extends LitElement {
 
 
   render() {
+
     return html`
-      <div></div>
-      <nwb-button style="margin-top: 25px;" @click=${() => this.table.alter("insert_row_below")}>Add New Row</nwb-button>
+      <div>
+      </div>
+      <p style="width: 100%; margin: 10px 0px"><small style="color: gray;" >Right click to add or remove rows.</small></p>
+      <nwb-button style="margin-top: 10px;" @click=${() => this.table.alter("insert_row_below")}>Add New Row</nwb-button>
     `;
   }
 
