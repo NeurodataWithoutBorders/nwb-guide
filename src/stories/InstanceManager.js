@@ -3,6 +3,7 @@
 import { LitElement, css, html } from 'lit';
 import './Button';
 import { notify } from '../globals';
+import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol } from './globals';
 
 export class InstanceManager extends LitElement {
 
@@ -39,7 +40,6 @@ export class InstanceManager extends LitElement {
       }
 
       #instance-sidebar {
-        width: 200px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -76,7 +76,9 @@ export class InstanceManager extends LitElement {
       }
 
       .item > span {
-        padding: 10px;
+        position: relative;
+        overflow: hidden;
+        padding: 10px 20px;
         cursor: pointer;
         width: 100%;
         display: flex;
@@ -84,12 +86,11 @@ export class InstanceManager extends LitElement {
         align-items: center;
         font-weight: bold;
         border-radius: 8px;
-        border: 1px solid transparent;
+        border: 1px solid #c3c3c3;
       }
 
       .item[selected] > span, span:hover {
         background: #ececec;
-        border: 1px solid #c3c3c3;
       }
 
       #instance-display {
@@ -136,25 +137,48 @@ export class InstanceManager extends LitElement {
       }
 
       .indicator {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        border: 1px solid gray;
-        background: lightgray;
-        margin-left: 5px;
-        transition: background 0.5s;
+        height: 100%;
+        width: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        font-size: 0.8em;
       }
 
-      .indicator.warning {
-        background: rgb(255, 228, 143);
+      .item.valid .indicator, .item.error .indicator, .item.warning .indicator {
+        background: rgb(250, 250, 250);
+        border-left: 1px solid rgb(195, 195, 195);
       }
 
-      .indicator.valid {
-        background: rgb(162, 255, 143);
+      .item.warning .indicator {
+        background: hsl(${warningHue}, 100%, 90%);
       }
 
-      .indicator.error {
-        background: rgb(255, 143, 143);
+      .item.valid .indicator {
+        background: hsl(${successHue}, 100%, 90%);
+      }
+
+      .item.error .indicator {
+        background: hsl(${errorHue}, 100%, 95%);
+      }
+
+      .item.valid span, .item.error span, .item.warning span {
+        padding-right: 60px;
+      }
+
+      .item.valid .indicator::before {
+        content: '${successSymbol}';
+      }
+
+      .item.error .indicator::before {
+        content: '${errorSymbol}';
+      }
+
+      .item.warning .indicator::before {
+        content: '${warningSymbol}';
       }
     `
   }
@@ -248,7 +272,7 @@ export class InstanceManager extends LitElement {
         </div>
         <ul id="instance-list">
         ${Object.entries(instances).map(([key, info], i) => html`
-          <li class="item" ?selected=${isSelected[i] === true} data-instance="${key}">
+          <li class="item ${info.status}" ?selected=${isSelected[i] === true} data-instance="${key}">
             <span @click="${() => {
 
               this.#selected = key
@@ -267,7 +291,7 @@ export class InstanceManager extends LitElement {
                   if (el !== sidebarElement) el.removeAttribute('selected')
                 })
               }
-            }}">${key} <div class="indicator ${info.status}"></div> </span>
+            }}">${key} <div class="indicator"></div> </span>
             ${this.onRemoved ? html`<nwb-button
               size="small"
               primary
