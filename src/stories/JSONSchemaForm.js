@@ -370,6 +370,8 @@ export class JSONSchemaForm extends LitElement {
       else {
         const linkResults = await this.#applyToLinkedProperties(this.#checkRequiredAfterChange, fullPath) // Check links
         if (linkResults.includes(true)) return true
+
+        // Handle updates when no longer required
         else return false
       }
      }
@@ -572,22 +574,26 @@ export class JSONSchemaForm extends LitElement {
     let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === 'warning' && (!isRequired || !info.missing)) : []
     const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === 'error' || (isRequired && info.missing)) : []
 
-    if (checkLinks) {
-      const isLinkResolved = await this.#isLinkResolved(fullPath)
-      if (!isLinkResolved) {
-        errors.push(...warnings) // Move warnings to errors if the element is linked
-        warnings = []
+    const hasLinks = this.#getLink(fullPath)
+    if (hasLinks) {
+      if (checkLinks) {
+        const isLinkResolved = await this.#isLinkResolved(fullPath)
+        if (!isLinkResolved) {
+          errors.push(...warnings) // Move warnings to errors if the element is linked
+          warnings = []
 
-        // Clear old errors and warnings on linked properties
-        this.#applyToLinkedProperties((path) => {
-          this.#clearMessages(path, 'errors')
-          this.#clearMessages(path, 'warnings')
-        }, fullPath)
+          // Clear old errors and warnings on linked properties
+          this.#applyToLinkedProperties((path) => {
+            this.#clearMessages(path, 'errors')
+            this.#clearMessages(path, 'warnings')
+          }, fullPath)
+        }
       }
-    }
-
-    if (!errors.length && isRequired && !parent[name]) {
-      errors.push({ message: `${name} is a required property.`, type: 'error', missing: true}) // Throw at least a basic error if the property is required
+    } else {
+      // For non-links, throw a basic requirement error if the property is required
+      if (!errors.length && isRequired && !parent[name]) {
+        errors.push({ message: `${name} is a required property.`, type: 'error', missing: true}) // Throw at least a basic error if the property is required
+      }
     }
 
     // Clear old errors and warnings
@@ -608,7 +614,7 @@ export class JSONSchemaForm extends LitElement {
       const linkEl = this.#getLinkElement(fullPath)
       if (linkEl) linkEl.classList.remove('required', 'conditional')
 
-      await this.#applyToLinkedProperties((name, element) => {
+      await this.#applyToLinkedProperties((path, element) => {
         element.classList.remove('required', 'conditional') // Links manage their own error and validity states, but only one needs to be valid
       }, fullPath)
 
