@@ -100,12 +100,14 @@ To run Storybook, simply run ``npm run storybook`` in the root directory of the 
 
 
 .. _testing:
+
 Testing
 ---------------------------
 
 We use :pytest:`pytest <>` for testing. To run the tests, simply run ``pytest`` in the root directory of the repository.
 
 .. _style:
+
 Coding Style
 ---------------------------
 
