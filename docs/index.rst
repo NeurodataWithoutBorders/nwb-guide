@@ -2,12 +2,15 @@
 Welcome to the NWB GUIDE documentation!
 ===================================================================================================================
 |
+
 .. image:: ../src/assets/img/logo-guide-draft-transparent-tight.png
   :scale: 50 %
   :align: center
   :alt: NWB GUIDE logo
   :class: no-scaled-link
+
 |
+
 The **NWB Graphical User Interface for Data Entry (GUIDE)** is an Electron-based application designed to help you navigate
 the complex process of converting data from common proprietary formats into the ::nwb-overview::`nwb-overview <Neurodata Without Borders (NWB)>`_ standard.
 
