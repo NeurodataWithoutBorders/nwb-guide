@@ -98,6 +98,8 @@ While developing NWB GUIDE, you may find that you need to use a component that a
 
 To run Storybook, simply run ``npm run storybook`` in the root directory of the repository. This will start a local server that you can access using the link provided on the command line.
 
+To see if someone else has developed a third-party component to fit your needs, you can refer to :web-components:`WebComponents.org <>` and search based on your particular needs. :npm:`NPM` may also be useful to search for third-party packages (e.g. Handsontable) that implement the feature you need.
+
 
 .. _testing:
 
