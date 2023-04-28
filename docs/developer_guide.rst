@@ -8,17 +8,17 @@ Starting a New Feature
 
 1. Create a new branch off of the ``main`` branch. The branch name should be descriptive of the feature you are working on.
 
-.. hint::
+.. note::
     For example, if you are working on a feature to add a new page, you could name the branch ``add-new-metadata-page``.
 
 2. Make your changes on the new branch.
 
 .. important::
-    When you are ready to commit, make sure to run ``pre-commit run --all-files`` to ensure that your code is formatted correctly. If you are adding new code, make sure to add :ref:`tests <testing>` for it as well.
+    When you are ready to commit, make sure to add :ref:`tests <testing>` for your new code as well.
 
 1. Push your changes to the remote branch. Then, open a pull request to merge your branch into the ``main`` branch.
 
-.. tip::
+.. note::
     Make sure to add a description of the changes you made in the pull request.
 
 4. Once the pull request is approved, merge it into the ``main`` branch. You can then delete the branch you created in step 1.
