@@ -14,7 +14,7 @@ extensions = [
     "sphinx.ext.napoleon",  # Support for NumPy and Google style docstrings
     "sphinx.ext.autodoc",  # Includes documentation from docstrings in docs/api
     "sphinx.ext.intersphinx",  # Allows links to other sphinx project documentation sites
-    # "sphinx_search.extension",  # Allows for auto search function the documentation
+    "sphinx_search.extension",  # Allows for auto search function the documentation
     "sphinx.ext.viewcode",  # Shows source code in the documentation
     "sphinx.ext.extlinks",  # Allows to use shorter external links defined in the extlinks variable.
 ]
