@@ -191,13 +191,13 @@ export class InstanceManager extends LitElement {
     if (props.renderInstance) this.renderInstance = props.renderInstance
     if (props.onAdded) this.onAdded = props.onAdded
     if (props.onRemoved) this.onRemoved = props.onRemoved
-    this.add = props.add ?? true
     this.controls = props.controls ?? []
   }
 
   renderInstance = (_, value) => value.content ?? value
-  onAdded = () => {}
-  onRemoved = () => {}
+
+  // onAdded = () => {}
+  // onRemoved = () => {}
 
   toggleInput = (force) => {
     const newInfoDiv = this.shadowRoot.querySelector('#new-info')
@@ -292,7 +292,7 @@ export class InstanceManager extends LitElement {
                 })
               }
             }}">${key} <div class="indicator"></div> </span>
-            <nwb-button
+            ${this.onRemoved ? html`<nwb-button
               size="small"
               primary
               color="gray"
@@ -327,11 +327,11 @@ export class InstanceManager extends LitElement {
               .buttonStyles=${{
                 padding: '7px'
               }}
-            >x</nwb-button>
+            >x</nwb-button>` : ''}
           </li>
         `)}
       </ul>
-      ${this.add ? html`<div id="new-manager">
+      ${this.onAdded ? html`<div id="new-manager">
         <div id="new-info" class="item" hidden>
           <input></input>
           <nwb-button size="small" primary @click=${() => {

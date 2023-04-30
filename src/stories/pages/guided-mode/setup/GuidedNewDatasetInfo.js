@@ -72,7 +72,7 @@ updateForm = () => {
    const schema = { ...projectMetadataSchema }
    schema.properties = {...schema.properties}
 
-   const pages = schemaToPages.call(this, schema, projectGlobalState, { validateEmptyValues: false })
+   const pages = schemaToPages.call(this, schema, ['project'], { validateEmptyValues: false })
 
    pages.forEach(page => this.addPage(page.info.label, page))
 

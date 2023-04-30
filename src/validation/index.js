@@ -38,7 +38,6 @@ export const validateOnChange = async (name, parent, path) => {
       }).then(res => res.json())
     }))).flat()
 
-
     if (res.find(res => res)) return res.filter(res => res).map(o => {
       return {
         message: o.message,
