@@ -99,10 +99,6 @@ const pages = {
                 label: "Project details",
                 section: sections[0]
             }),
-            // subjects: new GuidedSubjectsPage({
-            //     label: "Subjects",
-            //     section: sections[0],
-            // }),
             structure: new GuidedStructurePage({
                 label: "Data formats",
                 section: sections[0]
@@ -111,6 +107,11 @@ const pages = {
             locate: new GuidedPathExpansionPage({
                 label: "Locate data",
                 section: sections[0]
+            }),
+
+            subjects: new GuidedSubjectsPage({
+                label: "Subject details",
+                section: sections[0],
             }),
 
             sourcedata: new GuidedSourceDataPage({

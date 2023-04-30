@@ -86,10 +86,10 @@ export class FilesystemSelector extends LitElement {
 
   #handleFile = async (path) => {
     if (!path) throw new Error('Unable to parse file path')
-    this.value = path.replaceAll('\\', '\/')
+    this.value = path
+    this.onSelect(this.value)
     const event = new Event('change'); // Create a new change event
     this.dispatchEvent(event)
-    this.onSelect(this.value)
   }
 
 

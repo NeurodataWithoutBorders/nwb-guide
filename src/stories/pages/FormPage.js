@@ -6,12 +6,10 @@ import { Page } from './Page.js';
 import { validateOnChange } from '../../validation/index.js';
 
 
-export function schemaToPages (schema, sharedGlobalState, options) {
+export function schemaToPages (schema, globalStatePath, options) {
    return Object.entries(schema.properties)
     .filter(([_, value]) => value.properties)
     .map(([key, value]) => {
-
-            sharedGlobalState[key] = sharedGlobalState[key] ?? {} // Create global state object if it doesn't exist
 
             const optionsCopy = { ...options }
             if (optionsCopy.required && optionsCopy.required[key]) optionsCopy.required = { [key] : optionsCopy.required[key] } // Only bring requirements from the current page
@@ -19,11 +17,12 @@ export function schemaToPages (schema, sharedGlobalState, options) {
 
             const page = new GuidedFormPage({
                 label: key,
+                key,
                 section: this.info.section,
+                globalStatePath,
                 formOptions: {
                     ...optionsCopy,
                     schema: { properties: { [key]: value } },
-                    results: { [key]: sharedGlobalState[key] },
                 }
             })
 
@@ -38,6 +37,7 @@ export class GuidedFormPage extends Page {
 
   constructor(...args) {
     super(...args)
+    if (!this.info.globalStatePath) this.info.globalStatePath = []
     if (!this.info.formOptions) this.info.formOptions = {}
     if (!this.info.formOptions.schema) this.info.formOptions.schema = {}
     if (!this.info.formOptions.results) this.info.formOptions.results = {}
@@ -54,8 +54,14 @@ export class GuidedFormPage extends Page {
 
   render() {
 
+    const key = this.info.key
+    const temp = (this.info.globalStatePath) ? this.info.globalStatePath.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.info.globalState) : {}
+    const results = { [key]: temp[key] ?? (temp[key] = {})}
+
+
     const form = this.form = new JSONSchemaForm({
       ...this.info.formOptions,
+      results,
       validateOnChange
     })
 

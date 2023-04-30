@@ -20,7 +20,13 @@ const globalState = {
     name: 'test',
     NWBFile: {
       lab: 'My Lab',
+    },
+    Subject: {
+      species: 'Mus musculus',
     }
+  },
+  subjects: {
+    subject_id: {}
   },
   results: {
     subject_id: {
