@@ -1,6 +1,9 @@
 *.[oa]
 *~
 
+dist
+out
+
 *.log
 
 # Ignore node_modules folder
@@ -9,7 +12,6 @@ build/api
 pysodadist
 pyflaskdist
 pyflask/ds
-dist
 src/Users
 semantic
 semantic.json

@@ -3,7 +3,7 @@ import { app, isElectron, path, port } from './electron/index.js'
 import { Notyf } from 'notyf'
 import checkChromatic from 'chromatic/isChromatic';
 
-import paths from '../paths.config.json' assert { type: "json" }
+import paths from '../../../paths.config.json' assert { type: "json" }
 
 import lottie from 'lottie-web'
 
