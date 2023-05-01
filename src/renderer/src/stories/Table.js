@@ -40,20 +40,6 @@ export class Table extends LitElement {
         padding-left: 20px
       }
 
-      .ht_clone_top {
-        pointer-events: none;
-      }
-
-      .ht_clone_top th:not([title]) {
-        pointer-events: auto;
-      }
-
-      .ht_master [title] {
-        overflow: unset !important;
-        visibility: visible !important;
-        position: relative;
-      }
-
       [title] .relative::after {
         content: 'ℹ️';
         display: inline-block;
@@ -62,6 +48,25 @@ export class Table extends LitElement {
         font-size: 80%;
       }
 `
+
+//       .ht_clone_top {
+//         pointer-events: none;
+//       }
+
+//       .ht_clone_top th:not([title]) {
+//         pointer-events: auto;
+//       }
+
+//       .ht_master [title] {
+//         overflow: unset !important;
+//         visibility: visible !important;
+//         position: relative;
+//       }
+
+//       .htColumnHeaders {
+//         overflow: visible !important;
+//       }
+// `
 
     //   .ht_master [title]::after {
     //     position: absolute;
@@ -203,15 +208,15 @@ export class Table extends LitElement {
       // rowHeaders: rowHeaders.map(v => `sub-${v}`),
       colHeaders: displayHeaders,
       columns,
-      height: 'auto', // Will have issues with presenting the dropdowns
+      // height: 'auto', // Will have issues with presenting the dropdowns
       stretchH: 'all',
       manualColumnResize: true,
+      preventOverflow: 'horizontal',
       width: '100%',
       contextMenu: ['row_below', 'remove_row'],//, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
       licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
       afterGetColHeader: onAfterGetHeader,
       afterGetRowHeader: onAfterGetHeader,
-      beforeRefreshDimensions() { return false; }
     });
 
     this.table = table;
