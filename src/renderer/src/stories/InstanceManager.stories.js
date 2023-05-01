@@ -15,10 +15,10 @@ const Template = (args) => new InstanceManager(args);
 export const Primary = Template.bind({});
 
 const instances = {
-  '000': {
-    content: 'This is not started',
+  'thisisalongidentifier': {
+    content: 'This has no status',
   },
-  '001': {
+  'thisisanevenlongeridentifierwithincorrectinfo': {
       content: 'This is very wrong',
       status: 'error'
   },

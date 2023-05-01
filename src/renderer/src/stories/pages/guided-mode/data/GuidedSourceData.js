@@ -84,8 +84,8 @@ export class GuidedSourceDataPage extends ManagedPage {
       ignore: ['verbose'],
       onlyRequired: true,
       onStatusChange: (state) => {
-        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${instanceId}'] .indicator`)
-        const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${instanceId}']`)
+        const currentState = Array.from(indicator.classList).find(c => c !== 'item')
         if (currentState) indicator.classList.remove(currentState)
         indicator.classList.add(state)
       }
@@ -111,30 +111,30 @@ export class GuidedSourceDataPage extends ManagedPage {
 
     this.manager = new InstanceManager({
       header: 'Source Data',
-      instanceType: 'Session',
+      // instanceType: 'Session',
       instances,
-      onAdded: (path) => {
+      // onAdded: (path) => {
 
-        let details = this.getDetails(path)
+      //   let details = this.getDetails(path)
 
-        const info = this.addSession(details)
+      //   const info = this.addSession(details)
 
-        const form = this.createForm({
-          ...details,
-          info
-        })
+      //   const form = this.createForm({
+      //     ...details,
+      //     info
+      //   })
 
-        this.forms.push(form)
+      //   this.forms.push(form)
 
-        return {
-          key: `sub-${details.subject}/ses-${details.session}`,
-          value: form.form
-        }
-      },
-      onRemoved: (_, path) => {
-        let details = this.getDetails(path)
-        this.removeSession(details)
-      }
+      //   return {
+      //     key: `sub-${details.subject}/ses-${details.session}`,
+      //     value: form.form
+      //   }
+      // },
+      // onRemoved: (_, path) => {
+      //   let details = this.getDetails(path)
+      //   this.removeSession(details)
+      // }
     })
 
     return html`

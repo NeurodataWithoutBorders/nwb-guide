@@ -41,6 +41,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
   createForm = ({subject, session, info}) => {
     const results = this.populateWithProjectMetadata(info.metadata)
+    this.merge('Subject', this.info.globalState.subjects[subject], results)
 
     const instanceId = `sub-${subject}/ses-${session}`
 
@@ -59,8 +60,8 @@ export class GuidedMetadataPage extends ManagedPage {
       validateOnChange,
       onlyRequired: false,
       onStatusChange: (state) => {
-        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='sub-${subject}/ses-${session}'] .indicator`)
-        const currentState = Array.from(indicator.classList).find(c => c !== 'indicator')
+        const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='sub-${subject}/ses-${session}']`)
+        const currentState = Array.from(indicator.classList).find(c => c !== 'item')
         if (currentState) indicator.classList.remove(currentState)
         indicator.classList.add(state)
       }
@@ -88,7 +89,6 @@ export class GuidedMetadataPage extends ManagedPage {
       header: 'File Metadata',
       instanceType: 'Session',
       instances,
-      add: false,
 
       controls: [
         {name: 'Preview', onClick: async (key, el) => {

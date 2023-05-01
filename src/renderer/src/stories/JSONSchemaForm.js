@@ -287,7 +287,7 @@ export class JSONSchemaForm extends LitElement {
     const isValid = !invalidInputs.length
 
     // Print out a detailed error message if any inputs are missing
-    let message = isValid ? '' : `<b>${invalidInputs.length} required inputs are not specified properly.</b>`
+    let message = isValid ? '' : `${invalidInputs.length} required inputs are not specified properly.`
 
 
     // Check if all inputs are valid
@@ -300,8 +300,7 @@ export class JSONSchemaForm extends LitElement {
 
 
     if (message) {
-      if (this.identifier) message = `[${this.identifier}]: ${message}`
-      notify(message, 'error', 7000)
+      notify(this.identifier ?  `<b>[${this.identifier}]</b>: ${message}` : message, 'error', 7000)
       throw new Error(message)
     }
 
@@ -370,6 +369,8 @@ export class JSONSchemaForm extends LitElement {
       else {
         const linkResults = await this.#applyToLinkedProperties(this.#checkRequiredAfterChange, fullPath) // Check links
         if (linkResults.includes(true)) return true
+
+        // Handle updates when no longer required
         else return false
       }
      }
@@ -405,14 +406,17 @@ export class JSONSchemaForm extends LitElement {
         else if (info.type === 'string' || (isStringArray && !hasItemsRef) || info.type === 'number') {
 
           // Handle file and directory formats
-          if (this.#filesystemQueries.includes(info.format)) return new FilesystemSelector({
-            type: info.format,
-            value: parent[name],
-            onSelect: (filePath) => this.#updateParent(name, filePath, parent),
-            onChange: (filePath) => this.#validateOnChange(name, parent, filePath, path),
-            dialogOptions: this.dialogOptions,
-            dialogType: this.dialogType
-          })
+          if (this.#filesystemQueries.includes(info.format)) {
+            const el = new FilesystemSelector({
+              type: info.format,
+              value: parent[name],
+              onSelect: (filePath) => this.#updateParent(name, filePath, parent),
+              onChange: (filePath) => this.#validateOnChange(name, parent, el, path),
+              dialogOptions: this.dialogOptions,
+              dialogType: this.dialogType
+            })
+            return el
+          }
 
           // Handle long string formats
           else if (info.format === 'long' || isArray) return html`<textarea
@@ -563,22 +567,31 @@ export class JSONSchemaForm extends LitElement {
 
     const valid = (!this.validateEmptyValues && !(name in parent)) ? true : await this.validateOnChange(name, parent, path)
 
+
     const fullPath = [...path, name]
     const isRequired = this.#isRequired(fullPath)
     let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === 'warning' && (!isRequired || !info.missing)) : []
     const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === 'error' || (isRequired && info.missing)) : []
 
-    if (checkLinks) {
-      const isLinkResolved = await this.#isLinkResolved(fullPath)
-      if (!isLinkResolved) {
-        errors.push(...warnings) // Move warnings to errors if the element is linked
-        warnings = []
+    const hasLinks = this.#getLink(fullPath)
+    if (hasLinks) {
+      if (checkLinks) {
+        const isLinkResolved = await this.#isLinkResolved(fullPath)
+        if (!isLinkResolved) {
+          errors.push(...warnings) // Move warnings to errors if the element is linked
+          warnings = []
 
-        // Clear old errors and warnings on linked properties
-        this.#applyToLinkedProperties((path) => {
-          this.#clearMessages(path, 'errors')
-          this.#clearMessages(path, 'warnings')
-        }, fullPath)
+          // Clear old errors and warnings on linked properties
+          this.#applyToLinkedProperties((path) => {
+            this.#clearMessages(path, 'errors')
+            this.#clearMessages(path, 'warnings')
+          }, fullPath)
+        }
+      }
+    } else {
+      // For non-links, throw a basic requirement error if the property is required
+      if (!errors.length && isRequired && !parent[name]) {
+        errors.push({ message: `${name} is a required property.`, type: 'error', missing: true}) // Throw at least a basic error if the property is required
       }
     }
 
@@ -594,13 +607,13 @@ export class JSONSchemaForm extends LitElement {
     // Show aggregated errors and warnings (if any)
     warnings.forEach((info) => this.#addMessage(fullPath, info.message, 'warnings'))
 
-    if (valid === true || valid == undefined || errors.length === 0) {
+    if ((valid === true || valid == undefined || !valid.find(o => o.type === 'error')) && errors.length === 0) {
       element.classList.remove('invalid')
 
       const linkEl = this.#getLinkElement(fullPath)
       if (linkEl) linkEl.classList.remove('required', 'conditional')
 
-      await this.#applyToLinkedProperties((name, element) => {
+      await this.#applyToLinkedProperties((path, element) => {
         element.classList.remove('required', 'conditional') // Links manage their own error and validity states, but only one needs to be valid
       }, fullPath)
 
@@ -716,6 +729,8 @@ export class JSONSchemaForm extends LitElement {
 
         if (this.mode === 'accordion' && hasMany) {
 
+          const headerName = this.#parseStringToHeader(name)
+
         this.#nestedForms[name] = new JSONSchemaForm({
           identifier: this.identifier,
           schema: info,
@@ -729,19 +744,24 @@ export class JSONSchemaForm extends LitElement {
           conditionalRequirements: this.conditionalRequirements,
           validateOnChange: (...args) => this.validateOnChange(...args),
           validateEmptyValues: this.validateEmptyValues,
-          onStatusChange: () => this.#checkStatus(), // Forward status changes to the parent form
+          onStatusChange: (status) => {
+            accordion.setSectionStatus(headerName, status)
+            this.#checkStatus()
+          }, // Forward status changes to the parent form
           onInvalid: (...args) => this.onInvalid(...args),
           base: [...path, name]
         })
 
-          return new Accordion({
+        const accordion = new Accordion({
             sections: {
-              [this.#parseStringToHeader(name)]: {
+              [headerName]: {
                 subtitle: `${Object.keys(info.properties).length} fields`,
                 content: this.#nestedForms[name]
               }
             }
           })
+
+          return accordion
         }
 
         // Render properties in the sub-schema

@@ -32,7 +32,7 @@ const componentCSS = css`
     }
 
     :host(.active) button {
-      background: Gainsboro;
+      background: rgb(240,240,240);
     }
 
 `
@@ -87,13 +87,19 @@ export class FilesystemSelector extends LitElement {
   #handleFile = async (path) => {
     if (!path) throw new Error('Unable to parse file path')
     this.value = path
+    this.onSelect(this.value)
     const event = new Event('change'); // Create a new change event
     this.dispatchEvent(event)
-    this.onSelect(path)
   }
 
 
   render() {
+
+    const preprocessed = this.value.replaceAll('\\', '\/')
+    if (preprocessed !== this.value) {
+      this.value = preprocessed
+      this.#handleFile(this.value) // Notify of the change to the separators
+    }
 
     return html`
     <button @click=${async () => {
