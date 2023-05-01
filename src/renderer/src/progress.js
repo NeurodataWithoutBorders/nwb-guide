@@ -1,4 +1,4 @@
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 
 import {
   joinPath,
@@ -11,9 +11,11 @@ import { fs } from "./electron/index.js";
 
 export const hasEntry = (name) => {
   const existingProgressNames = getEntries();
-  existingProgressNames.forEach((element, index) => existingProgressNames[index] = element.replace(".json", ""));
+  existingProgressNames.forEach(
+    (element, index) => (existingProgressNames[index] = element.replace(".json", ""))
+  );
   return existingProgressNames.includes(name);
-}
+};
 
 export const update = (newDatasetName, previousDatasetName) => {
   return new Promise((resolve, reject) => {
@@ -21,7 +23,10 @@ export const update = (newDatasetName, previousDatasetName) => {
     if (previousDatasetName) {
       if (previousDatasetName === newDatasetName) resolve("No changes made to dataset name");
 
-      if (hasEntry(newDatasetName)) reject("An existing progress file already exists with that name. Please choose a different name.");
+      if (hasEntry(newDatasetName))
+        reject(
+          "An existing progress file already exists with that name. Please choose a different name."
+        );
 
       // update old progress file with new dataset name
       const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
@@ -32,25 +37,22 @@ export const update = (newDatasetName, previousDatasetName) => {
         localStorage.removeItem(oldProgressFilePath);
       }
       resolve("Dataset name updated");
-    }
-
-    else reject('No previous dataset name provided');
+    } else reject("No previous dataset name provided");
   });
-}
+};
 
 export const save = (page, overrides = {}) => {
-
-  const globalState = page.info.globalState
-  let guidedProgressFileName = overrides.globalState?.project?.name ?? globalState.project?.name
+  const globalState = page.info.globalState;
+  let guidedProgressFileName = overrides.globalState?.project?.name ?? globalState.project?.name;
 
   //return if guidedProgressFileName is not a string greater than 0
-  if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return
+  if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return;
   const params = new URLSearchParams(location.search);
 
-  params.set('project', guidedProgressFileName);
+  params.set("project", guidedProgressFileName);
 
-  const value = `${location.pathname}?${params}`
-  history.state.project = guidedProgressFileName
+  const value = `${location.pathname}?${params}`;
+  history.state.project = guidedProgressFileName;
 
   window.history.pushState(history.state, null, value);
 
@@ -62,50 +64,52 @@ export const save = (page, overrides = {}) => {
 
   // Save the file through the available mechanisms
   if (fs) {
-    if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create Guided-Progress folder if one does not exist
+    if (!fs.existsSync(guidedProgressFilePath))
+      fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create Guided-Progress folder if one does not exist
     fs.writeFileSync(guidedFilePath, JSON.stringify(globalState, null, 2));
-  }
-  else localStorage.setItem(guidedFilePath, JSON.stringify(globalState));
+  } else localStorage.setItem(guidedFilePath, JSON.stringify(globalState));
 };
 
-
 export const getEntries = () => {
-  if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true });  //Check if Guided-Progress folder exists. If not, create it.
+  if (fs && !fs.existsSync(guidedProgressFilePath))
+    fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if Guided-Progress folder exists. If not, create it.
   const progressFiles = fs ? fs.readdirSync(guidedProgressFilePath) : Object.keys(localStorage);
-  return progressFiles.filter(path => path.slice(-5) === '.json')
-}
+  return progressFiles.filter((path) => path.slice(-5) === ".json");
+};
 
 export const getAll = (progressFiles) => {
   return progressFiles.map((progressFile) => {
     let progressFilePath = joinPath(guidedProgressFilePath, progressFile);
-    return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
-  })
+    return JSON.parse(
+      fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)
+    );
+  });
 };
-
 
 export const get = (name) => {
   if (!name) {
     const params = new URLSearchParams(location.search);
-    const projectName = params.get('project')
+    const projectName = params.get("project");
     if (!projectName) {
-
-      if (isStorybook) return {}
+      if (isStorybook) return {};
 
       runOnLoad(() => {
         Swal.fire({
-          title: 'No project specified.',
-          text: 'Reload the application and load a project to view.',
-          icon: 'error',
-          confirmButtonText: 'Restart'
-        }).then(reloadPageToHome)
-      })
+          title: "No project specified.",
+          text: "Reload the application and load a project to view.",
+          icon: "error",
+          confirmButtonText: "Restart",
+        }).then(reloadPageToHome);
+      });
 
-      return
+      return;
     }
   }
 
   let progressFilePath = joinPath(guidedProgressFilePath, name + ".json");
-  return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
+  return JSON.parse(
+    fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)
+  );
 };
 
 export const deleteProgressCard = async (progressCardDeleteButton) => {
@@ -130,7 +134,6 @@ export const deleteProgressCard = async (progressCardDeleteButton) => {
       guidedProgressFilePath,
       progressCardNameToDelete + ".json"
     );
-
 
     //delete the progress file
     if (fs) fs.unlinkSync(progressFilePathToDelete, (err) => console.log(err));

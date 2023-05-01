@@ -1,22 +1,17 @@
-import "./pages.js"
-import { isElectron, electron, app } from './electron/index.js'
+import "./pages.js";
+import { isElectron, electron, app } from "./electron/index.js";
 const { ipcRenderer } = electron;
 
-import { Dashboard } from './stories/Dashboard.js'
+import { Dashboard } from "./stories/Dashboard.js";
 
-import {
-  notyf,
-  baseUrl,
-  notify
-} from './globals.js'
+import { notyf, baseUrl, notify } from "./globals.js";
 
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 
 // Set the sidebar subtitle to the current app version
-const dashboard = document.querySelector('nwb-dashboard') as Dashboard
+const dashboard = document.querySelector("nwb-dashboard") as Dashboard;
 const appVersion = app?.getVersion();
-dashboard.subtitle = appVersion ?? 'Web Version';
-
+dashboard.subtitle = appVersion ?? "Web Version";
 
 //////////////////////////////////
 // Connect to Python back-end
@@ -30,8 +25,7 @@ const wait = async (delay: number) => new Promise((resolve) => setTimeout(resolv
 // check that the client connected to the server using exponential backoff
 // verify the api versions match
 const startupServerAndApiCheck = async () => {
-
-  const waitTime = 1000*60*(isElectron ? 2 : 0.1); // Wait 2 seconds if in electron context
+  const waitTime = 1000 * 60 * (isElectron ? 2 : 0.1); // Wait 2 seconds if in electron context
   let status = false;
   let time_start = new Date();
   let error = "";
@@ -50,7 +44,7 @@ const startupServerAndApiCheck = async () => {
   if (!status) {
     //two minutes pass then handle connection error
     // SWAL that the server needs to be restarted for the app to work
-    console.error(error)
+    console.error(error);
 
     if (isElectron) {
       await Swal.fire({
@@ -66,7 +60,7 @@ const startupServerAndApiCheck = async () => {
       // Restart the app
       app.relaunch();
       app.exit();
-    } else console.warn('Python server was not found in development mode.')
+    } else console.warn("Python server was not found in development mode.");
   } else {
     console.log("Connected to Python back-end successfully");
   }
@@ -107,14 +101,16 @@ async function run_pre_flight_checks(check_update = true) {
       return resolve(false);
     }
   });
-};
+}
 
 // Check if the Pysoda server is live
 const serverIsLiveStartup = async () => {
   let echoResponse;
 
   try {
-    echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json())
+    echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then((res) =>
+      res.json()
+    );
   } catch (error) {
     throw error;
   }
@@ -133,30 +129,30 @@ async function check_internet_connection(show_notification = true) {
 
   await wait(800);
 
-  if ( navigator.onLine) {
+  if (navigator.onLine) {
     console.log("Connected to the internet");
 
-      if (show_notification) {
-        notyf.dismiss(notification);
-        notyf.open({
-          type: "success",
-          message: "Connected to the internet",
-        });
-      }
-  } else {
-      console.error("No internet connection");
-      // if (electronImports.ipcRenderer) electronImports.ipcRenderer.send("warning-no-internet-connection"); // NOTE: Proposed syntax t continue accessing the ipcRenderer
-      if (show_notification) {
-        notyf.dismiss(notification);
-        notyf.open({
-          type: "error",
-          message: "Not connected to internet",
-        });
-      }
+    if (show_notification) {
+      notyf.dismiss(notification);
+      notyf.open({
+        type: "success",
+        message: "Connected to the internet",
+      });
     }
+  } else {
+    console.error("No internet connection");
+    // if (electronImports.ipcRenderer) electronImports.ipcRenderer.send("warning-no-internet-connection"); // NOTE: Proposed syntax t continue accessing the ipcRenderer
+    if (show_notification) {
+      notyf.dismiss(notification);
+      notyf.open({
+        type: "error",
+        message: "Not connected to internet",
+      });
+    }
+  }
 
-    return navigator.onLine;
-};
+  return navigator.onLine;
+}
 
 // Check for update and show the pop up box
 ipcRenderer?.on("update_available", () => {
@@ -191,13 +187,12 @@ ipcRenderer?.on("update_downloaded", async () => {
 
 // Restart the app for update. Does not restart on macos
 const restartApp = async () => {
-  notify("Closing NWB GUIDE now...", "app_update_warning")
+  notify("Closing NWB GUIDE now...", "app_update_warning");
   ipcRenderer?.send("restart_app");
 };
-
 
 // Check API
 startupServerAndApiCheck();
 
 // check integrity of all the core systems
-run_pre_flight_checks()
+run_pre_flight_checks();

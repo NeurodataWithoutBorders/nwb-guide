@@ -1,7 +1,7 @@
-import { MultiSelectForm } from './MultiSelectForm.js';
+import { MultiSelectForm } from "./MultiSelectForm.js";
 
 export default {
-  title: 'Components/Multiselect Form',
+  title: "Components/Multiselect Form",
   parameters: {
     chromatic: { disableSnapshot: false },
   },
@@ -14,21 +14,21 @@ Default.args = {
   header: "Test Header",
   options: {
     option1: {
-      name: 'Option 1',
-      modality: 'Modality 1',
-      technique: 'Technique 1',
+      name: "Option 1",
+      modality: "Modality 1",
+      technique: "Technique 1",
     },
 
     option2: {
-      name: 'Option 2',
-      modality: 'Modality 1',
-      technique: 'Technique 1',
+      name: "Option 2",
+      modality: "Modality 1",
+      technique: "Technique 1",
     },
 
     otheroption1: {
-      name: 'Other Option 1',
-      modality: 'Modality 2',
-      technique: 'Technique 1',
-    }
-  }
+      name: "Other Option 1",
+      modality: "Modality 2",
+      technique: "Technique 1",
+    },
+  },
 };

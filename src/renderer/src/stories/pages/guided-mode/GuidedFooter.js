@@ -1,17 +1,16 @@
-import { LitElement, html, css } from 'lit';
-import '../../Footer';
-import '../../Button'
+import { LitElement, html, css } from "lit";
+import "../../Footer";
+import "../../Button";
 
 // NOTE: Must be set with the page's onTransition function
 export class GuidedFooter extends LitElement {
-
   static get styles() {
     return css`
       :host {
         display: flex;
         width: 100%;
       }
-    `
+    `;
   }
 
   static get properties() {
@@ -31,9 +30,9 @@ export class GuidedFooter extends LitElement {
     exit = "Exit",
     onBack = () => this.onTransition(-1),
     onNext = () => this.onTransition(1),
-    onExit = () => this.onTransition('/'),
+    onExit = () => this.onTransition("/"),
   } = {}) {
-    super()
+    super();
     this.back = back;
     this.next = next;
     this.exit = exit;
@@ -43,26 +42,28 @@ export class GuidedFooter extends LitElement {
   }
 
   attributeChangedCallback(...args) {
-    const attrs = ['back', 'next', 'exit', 'onBack', 'onNext', 'onExit']
-    super.attributeChangedCallback(...args)
-    if (attrs.includes(args[0])) this.requestUpdate()
+    const attrs = ["back", "next", "exit", "onBack", "onNext", "onExit"];
+    super.attributeChangedCallback(...args);
+    if (attrs.includes(args[0])) this.requestUpdate();
   }
 
-  updated(){
+  updated() {
     this.onTransition = this.parentElement.onTransition;
   }
 
   render() {
     return html`
-    <nwb-footer style="display: flex; align-items: center; justify-content: space-between;">
+      <nwb-footer style="display: flex; align-items: center; justify-content: space-between;">
         <div>
-            ${this.back ? html`<nwb-button @click=${this.onBack}>${this.back}</nwb-button>` : ''}
-            ${this.next ? html`<nwb-button @click=${this.onNext} primary>${this.next}</nwb-button>` : ''}
+          ${this.back ? html`<nwb-button @click=${this.onBack}>${this.back}</nwb-button>` : ""}
+          ${this.next
+            ? html`<nwb-button @click=${this.onNext} primary>${this.next}</nwb-button>`
+            : ""}
         </div>
-        ${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ''}
-    </nwb-footer>
+        ${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ""}
+      </nwb-footer>
     `;
   }
-};
+}
 
-customElements.get('nwb-guided-footer') || customElements.define('nwb-guided-footer', GuidedFooter);
+customElements.get("nwb-guided-footer") || customElements.define("nwb-guided-footer", GuidedFooter);

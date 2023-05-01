@@ -1,25 +1,25 @@
-import { app, BrowserWindow, dialog, shell } from 'electron';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { app, BrowserWindow, dialog, shell } from "electron";
+import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 
-import main from '@electron/remote/main';
-main.initialize()
+import main from "@electron/remote/main";
+main.initialize();
 
 let showExitPrompt = true;
-import path from 'path';
-import { autoUpdater } from 'electron-updater';
-import { ipcMain } from 'electron';
-import fp from 'find-free-port';
-import 'v8-compile-cache'
+import path from "path";
+import { autoUpdater } from "electron-updater";
+import { ipcMain } from "electron";
+import fp from "find-free-port";
+import "v8-compile-cache";
 
-import child_process from 'child_process';
-import fs from 'fs';
-import axios from 'axios';
+import child_process from "child_process";
+import fs from "fs";
+import axios from "axios";
 
-import './application-menu.js';
-import './shortcuts.js';
+import "./application-menu.js";
+import "./shortcuts.js";
 
-import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
-import splashHTML from './splash-screen.html?asset'
+import icon from "../renderer/assets/img/logo-guide-draft.png?asset";
+import splashHTML from "./splash-screen.html?asset";
 
 autoUpdater.channel = "latest";
 
@@ -28,8 +28,8 @@ autoUpdater.channel = "latest";
  *************************************************************/
 
 // flask setup environment variables
-const PY_FLASK_DIST_FOLDER = path.join('..', '..', "pyflaskdist");
-const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
+const PY_FLASK_DIST_FOLDER = path.join("..", "..", "pyflaskdist");
+const PY_FLASK_FOLDER = path.join("..", "..", "pyflask");
 const PY_FLASK_MODULE = "app";
 let pyflaskProcess: any = null;
 
@@ -43,7 +43,6 @@ const portRange = 100;
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
 const guessPackaged = () => {
-
   const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER);
   const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
 
@@ -87,7 +86,7 @@ const createPyProc = async () => {
 
   await killAllPreviousProcesses();
 
-  const defaultPort = PORT as number
+  const defaultPort = PORT as number;
 
   fp(defaultPort, defaultPort + portRange)
     .then(([freePort]: string[]) => {
@@ -123,16 +122,10 @@ const createPyProc = async () => {
  * Kill the python server process. Needs to be called before GUIDE closes.
  */
 const exitPyProc = async () => {
-
   // Windows does not properly shut off the python server process. This ensures it is killed.
   const killPythonProcess = () => {
     // kill pyproc with command line
-    const cmd = child_process.spawnSync("taskkill", [
-      "/pid",
-      pyflaskProcess.pid,
-      "/f",
-      "/t",
-    ]);
+    const cmd = child_process.spawnSync("taskkill", ["/pid", pyflaskProcess.pid, "/f", "/t"]);
   };
 
   await killAllPreviousProcesses();
@@ -157,15 +150,13 @@ const killAllPreviousProcesses = async () => {
   // kill all previous python processes that could be running.
   let promisesArray = [];
 
-  const defaultPort = PORT as number
+  const defaultPort = PORT as number;
 
   let endRange = defaultPort + portRange;
 
   // create a loop of 100
   for (let currentPort = defaultPort; currentPort <= endRange; currentPort++) {
-    promisesArray.push(
-      axios.get(`http://127.0.0.1:${currentPort}/server_shutdown`, {})
-    );
+    promisesArray.push(axios.get(`http://127.0.0.1:${currentPort}/server_shutdown`, {}));
   }
 
   // wait for all the promises to resolve
@@ -185,7 +176,6 @@ let user_restart_confirmed = false;
 let updatechecked = false;
 
 function initialize() {
-
   makeSingleInstance();
 
   function createWindow() {
@@ -244,21 +234,23 @@ function initialize() {
 
     // Listen after first load
     promise.then(() => {
-      const chokidar = require('chokidar');
-      let done = true
-      chokidar.watch(path.join(__dirname, "../../pyflask"), {
-        ignored:  ['**/__pycache__/**']
-      }).on('all', async (event: string) => {
-        if (event === 'change' && done) {
-          done = false
-          await exitPyProc();
-          setTimeout(async () => {
-            await createPyProc();
-            done = true
-          }, 1000)
-        }
-      });
-    })
+      const chokidar = require("chokidar");
+      let done = true;
+      chokidar
+        .watch(path.join(__dirname, "../../pyflask"), {
+          ignored: ["**/__pycache__/**"],
+        })
+        .on("all", async (event: string) => {
+          if (event === "change" && done) {
+            done = false;
+            await exitPyProc();
+            setTimeout(async () => {
+              await createPyProc();
+              done = true;
+            }, 1000);
+          }
+        });
+    });
 
     const windowOptions = {
       minWidth: 1121,
@@ -280,12 +272,11 @@ function initialize() {
     mainWindow = new BrowserWindow(windowOptions);
     main.enable(mainWindow.webContents);
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  else mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
-
-
+    // HMR for renderer base on electron-vite cli.
+    // Load the remote URL for development or the local html file for production.
+    if (is.dev && process.env["ELECTRON_RENDERER_URL"])
+      mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
+    else mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 
     const splash = new BrowserWindow({
       width: 340,
@@ -296,8 +287,7 @@ function initialize() {
       transparent: true,
     });
 
-    splash.loadFile(splashHTML)
-
+    splash.loadFile(splashHTML);
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
     mainWindow.once("ready-to-show", () => {
@@ -345,7 +335,6 @@ function makeSingleInstance() {
     });
   }
 }
-
 
 initialize();
 

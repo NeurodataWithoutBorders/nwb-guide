@@ -1,15 +1,15 @@
 name: Back-end Tests
 on:
   schedule:
-    - cron: "0 16 * * *"  # Daily at noon EST
+    - cron: "0 16 * * *" # Daily at noon EST
   pull_request:
 
-concurrency:  # Cancel previous workflows on the same pull request
+concurrency: # Cancel previous workflows on the same pull request
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  CACHE_NUMBER: 1  # increase to reset cache manually
+  CACHE_NUMBER: 1 # increase to reset cache manually
 
 jobs:
   testing:
@@ -37,7 +37,6 @@ jobs:
             label: tools/anaconda-env/environment-Windows.yml
             prefix: C:\Miniconda3\envs\env-electron-python
 
-
     steps:
       - uses: actions/checkout@v3
       - run: git fetch --prune --unshallow --tags
@@ -54,11 +53,11 @@ jobs:
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
         with:
-            miniforge-version: latest
-            environment-file: ${{ matrix.label }}
-            activate-environment: env-electron-python
-            python-version: ${{ matrix.python-version }}
-            use-only-tar-bz2: true
+          miniforge-version: latest
+          environment-file: ${{ matrix.label }}
+          activate-environment: env-electron-python
+          python-version: ${{ matrix.python-version }}
+          use-only-tar-bz2: true
 
       - name: Install GUIDE
         run: npm ci

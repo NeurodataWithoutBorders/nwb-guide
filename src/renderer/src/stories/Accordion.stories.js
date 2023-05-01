@@ -1,7 +1,7 @@
-import { Accordion } from './Accordion';
+import { Accordion } from "./Accordion";
 
 export default {
-  title: 'Components/Accordion'
+  title: "Components/Accordion",
 };
 
 const Template = (args) => new Accordion(args);
@@ -9,33 +9,33 @@ const Template = (args) => new Accordion(args);
 export const Default = Template.bind({});
 Default.args = {
   sections: {
-    'NWBFile': {
+    NWBFile: {
       open: true,
-      status: 'valid',
-      content: 'WOOHOO',
-      subtitle: 'General NWB File Properties'
+      status: "valid",
+      content: "WOOHOO",
+      subtitle: "General NWB File Properties",
     },
-    'Subject': {
-      status: 'warning',
-      content: 'OOO'
+    Subject: {
+      status: "warning",
+      content: "OOO",
     },
-    'Ecephys': {
-      status: 'error',
-      content: 'BOO'
+    Ecephys: {
+      status: "error",
+      content: "BOO",
     },
-    'Standard': {
-      content: 'Whatever you want'
-    }
-  }
+    Standard: {
+      content: "Whatever you want",
+    },
+  },
 };
 
 // {
-  // pages: {
-  //   'Page 1': {
-  //     active: true
-  //   },
-  //   'Page 2': {
-  //     active: false
-  //   },
-  // }
+// pages: {
+//   'Page 1': {
+//     active: true
+//   },
+//   'Page 2': {
+//     active: false
+//   },
+// }
 // }
