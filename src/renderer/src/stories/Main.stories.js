@@ -1,7 +1,7 @@
-import { Main } from './Main.js';
+import { Main } from "./Main.js";
 
 export default {
-  title: 'Components/Main',
+  title: "Components/Main",
   parameters: {
     chromatic: { disableSnapshot: true },
   },
@@ -10,4 +10,4 @@ export default {
 const Template = (args) => new Main(args);
 
 export const Default = Template.bind({});
-Default.args = {}
+Default.args = {};

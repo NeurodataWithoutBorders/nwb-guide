@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html } from "lit";
 
 // Adapted from https://web.dev/building-a-multi-select-component/
 
@@ -49,13 +49,11 @@ const componentCSS = `
         gap: 2ch;
         align-items: baseline;
     }
-`
+`;
 
 export class MultiSelectForm extends LitElement {
-
-
   static get styles() {
-    return css([componentCSS])
+    return css([componentCSS]);
   }
 
   static get properties() {
@@ -65,24 +63,23 @@ export class MultiSelectForm extends LitElement {
     };
   }
 
-  constructor (props = {}) {
-    super()
-    this.options = props.options ?? {}
-    this.selected = props.selected ?? {}
+  constructor(props = {}) {
+    super();
+    this.options = props.options ?? {};
+    this.selected = props.selected ?? {};
   }
 
   attributeChangedCallback(changedProperties, oldValue, newValue) {
-    super.attributeChangedCallback(changedProperties, oldValue, newValue)
-    if (changedProperties === 'options') this.requestUpdate()
+    super.attributeChangedCallback(changedProperties, oldValue, newValue);
+    if (changedProperties === "options") this.requestUpdate();
   }
 
-//   NOTE: We can move these into their own components in the future
-  async updated(){
-
+  //   NOTE: We can move these into their own components in the future
+  async updated() {
     const dataFormatsForm = (this.shadowRoot ?? this).querySelector("#neuroconv-data-formats-form");
-    dataFormatsForm.innerHTML = '' // Clear the form
+    dataFormatsForm.innerHTML = ""; // Clear the form
 
-    const formats = this.options
+    const formats = this.options;
 
     if (formats.message) {
       throw new Error(formats.message);
@@ -112,8 +109,7 @@ export class MultiSelectForm extends LitElement {
       const technique = format.technique;
       let targetInfo = modality;
       if (technique) {
-
-        targetInfo = modality.techniques[technique]
+        targetInfo = modality.techniques[technique];
         if (!targetInfo) {
           const fieldset = document.createElement("fieldset");
           const legend = document.createElement("legend");
@@ -139,8 +135,8 @@ export class MultiSelectForm extends LitElement {
       if (this.selected[name]) input.checked = true;
 
       input.onchange = (ev) => {
-        this.selected[name] = input.checked
-      }
+        this.selected[name] = input.checked;
+      };
       label.for = name;
       label.textContent = name;
       div.appendChild(label);
@@ -151,12 +147,13 @@ export class MultiSelectForm extends LitElement {
   render() {
     return html`
       <div>
-          <form id="neuroconv-data-formats-form">
+        <form id="neuroconv-data-formats-form">
           <slot></slot>
-          </form>
+        </form>
       </div>
     `;
   }
-};
+}
 
-customElements.get('nwb-multiselect-form') || customElements.define('nwb-multiselect-form',  MultiSelectForm);
+customElements.get("nwb-multiselect-form") ||
+  customElements.define("nwb-multiselect-form", MultiSelectForm);

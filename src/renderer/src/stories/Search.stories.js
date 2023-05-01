@@ -1,8 +1,8 @@
-import { Search } from './Search';
+import { Search } from "./Search";
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/web-components/writing-stories/introduction
 export default {
-  title: 'Example/Search',
+  title: "Example/Search",
   // tags: ['autodocs'],
 };
 
@@ -12,17 +12,12 @@ export const Default = Template.bind({});
 Default.args = {
   options: [
     {
-      label: 'SpikeGLXRecording',
-      keywords: [
-        "extracellular electrophysiology",
-        "voltage",
-        "recording",
-        "neuropixels",
-    ]
+      label: "SpikeGLXRecording",
+      keywords: ["extracellular electrophysiology", "voltage", "recording", "neuropixels"],
     },
     {
-      label: 'DeepLabCut',
-      keywords: ['DLC', 'tracking', 'pose estimation']
+      label: "DeepLabCut",
+      keywords: ["DLC", "tracking", "pose estimation"],
     },
-  ]
+  ],
 };

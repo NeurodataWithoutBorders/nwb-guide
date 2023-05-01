@@ -651,7 +651,6 @@ h1.guided--text-sub-step {
   padding-right: 7px;
 }
 
-
 .guided--text-dataset-card {
   margin: 0px;
   color: black;
@@ -670,7 +669,6 @@ h1.guided--text-sub-step {
 .guided--dataset-card-row:first-of-type h1 {
   font-size: 16px !important;
 }
-
 
 .guided--text-dataset-card-sub {
   margin: 0px;

@@ -1,7 +1,6 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css } from "lit";
 
 export class Footer extends LitElement {
-
   static get styles() {
     return css`
       :host {
@@ -10,18 +9,16 @@ export class Footer extends LitElement {
         border-top: 1px solid #c3c3c3;
         width: 100%;
       }
-    `
+    `;
   }
 
   constructor() {
-    super()
+    super();
   }
 
   render() {
-    return html`
-        <slot></slot>
-    `;
+    return html` <slot></slot> `;
   }
-};
+}
 
-customElements.get('nwb-footer') || customElements.define('nwb-footer', Footer);
+customElements.get("nwb-footer") || customElements.define("nwb-footer", Footer);

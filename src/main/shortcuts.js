@@ -1,4 +1,4 @@
-import {app, globalShortcut} from 'electron';
+import { app, globalShortcut } from "electron";
 
 app.on("will-quit", () => {
   globalShortcut.unregisterAll();

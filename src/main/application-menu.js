@@ -1,4 +1,3 @@
-
 import { BrowserWindow, Menu, app } from "electron";
 
 let template = [
