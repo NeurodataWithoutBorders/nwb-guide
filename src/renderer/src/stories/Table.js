@@ -212,7 +212,7 @@ export class Table extends LitElement {
       // rowHeaders: rowHeaders.map(v => `sub-${v}`),
       colHeaders: displayHeaders,
       columns,
-      height: 'auto',
+      // height: 'auto', // Will have issues with presenting the dropdowns
       stretchH: 'all',
       manualColumnResize: true,
       width: '100%',
