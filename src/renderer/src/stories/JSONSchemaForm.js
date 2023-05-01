@@ -373,7 +373,7 @@ export class JSONSchemaForm extends LitElement {
 
     return html`
     <div id=${fullPath.join('-')} class="form-section ${(isRequired || isConditional) ? 'required' : ''} ${isConditional ? 'conditional' : ''}">
-      <label class="guided--form-label">${this.#parseStringToHeader(name)}</label>
+      <label class="guided--form-label">${header(name)}</label>
       ${(() => {
 
         // Basic enumeration of properties on a select element

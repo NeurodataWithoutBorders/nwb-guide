@@ -5,6 +5,27 @@ const removeSubset = (data, subset) => {
     for (let key in subsetData) delete data[key]
     return subsetData
   }
+
+  const species = [
+    "Mus musculus - House mouse",
+    "Homo sapiens - Human",
+    "Rattus norvegicus - Norway rat",
+    "Rattus rattus - Black rat",
+    "Macaca mulatta - Rhesus monkey",
+    "Callithrix jacchus - Common marmoset",
+    "Drosophila melanogaster - Fruit fly",
+    "Danio rerio - Zebra fish",
+    "Caenorhabditis elegans"
+  ]
+
+nwbBaseSchema.properties.Subject.properties.species = {
+    type: 'string',
+    enum: species,
+    items: { 
+        type: 'string' 
+    },
+    description: 'The species of your subject. You may specify a custom species for your subject on the File Metadata page.'
+}
   
 // Sort the subject schema
 const ageGroupKeys = ['age', 'age__reference', 'date_of_birth']

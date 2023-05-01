@@ -6,7 +6,7 @@ import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { Page } from '../../Page.js';
 import { validateOnChange } from '../../../../validation/index.js';
 
-import projectMetadataSchema from '../../../../../../../schemas/project-metadata.schema.json' assert { type: 'json' };
+import projectMetadataSchema from '../../../../../../../schemas/json/project-metadata.schema.json' assert { type: 'json' };
 import { schemaToPages } from '../../FormPage.js';
 
 export class GuidedNewDatasetPage extends Page {

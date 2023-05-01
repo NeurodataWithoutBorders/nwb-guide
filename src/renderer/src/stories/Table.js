@@ -61,26 +61,27 @@ export class Table extends LitElement {
         text-align: center;
         font-size: 80%;
       }
+`
 
-      .ht_master [title]::after {
-        position: absolute;
-        content: attr(title);
-        background: dimgray;
-        color: #fff;
-        font-size: 80%;
-        padding: 10px;
-        border-radius: 5px;
-        z-index: 100;
-        display: none;
-        width: 200px;
-        white-space: pre-wrap;
-        text-align: left;
-      }
+    //   .ht_master [title]::after {
+    //     position: absolute;
+    //     content: attr(title);
+    //     background: dimgray;
+    //     color: #fff;
+    //     font-size: 80%;
+    //     padding: 10px;
+    //     border-radius: 5px;
+    //     z-index: 100;
+    //     display: none;
+    //     width: 200px;
+    //     white-space: pre-wrap;
+    //     text-align: left;
+    //   }
 
-      .ht_master [title]:hover::after {
-        display: block;
-      }
-    `
+    //   .ht_master [title]:hover::after {
+    //     display: block;
+    //   }
+    // `
 
     const styleEl = document.createElement('style');
     styleEl.innerHTML = style;
@@ -212,12 +213,13 @@ export class Table extends LitElement {
       colHeaders: displayHeaders,
       columns,
       height: 'auto',
-      autoColumnSize: true,
+      stretchH: 'all',
+      manualColumnResize: true,
       width: '100%',
       contextMenu: ['row_below', 'remove_row'],//, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
       licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
       afterGetColHeader: onAfterGetHeader,
-      afterGetRowHeader: onAfterGetHeader
+      afterGetRowHeader: onAfterGetHeader,
     });
 
     this.table = table;

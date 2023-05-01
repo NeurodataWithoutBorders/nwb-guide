@@ -9,7 +9,7 @@ import { JSONSchemaForm } from '../../../JSONSchemaForm.js';
 import { OptionalSection } from '../../../OptionalSection.js';
 import { run } from '../options/utils.js';
 
-import pathExpansionSchema from '../../../../../../../schemas/path-expansion.schema'
+import pathExpansionSchema from '../../../../../../../schemas/json/path-expansion.schema.json' assert { type: 'json' };
 
 export class GuidedPathExpansionPage extends Page {
 
