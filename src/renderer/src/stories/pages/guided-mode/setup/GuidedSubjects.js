@@ -17,6 +17,8 @@ export class GuidedSubjectsPage extends Page {
 
       const { results, subjects } = this.info.globalState
 
+      console.log(this.table.table.data) // Validate that all rows have a subject_id
+
       const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => { acc[key] = {}; return acc }, {})
 
       const toRemove = Object.keys(results).filter(sub => !Object.keys(subjects).includes(sub))
@@ -66,7 +68,7 @@ export class GuidedSubjectsPage extends Page {
       subjects[subject].sessions = sessions
     }
 
-    const subjectTable = new Table({
+    this.table = new Table({
       schema: subjectSchema,
       data: subjects,
       template: this.info.globalState.project.Subject,
@@ -86,7 +88,7 @@ export class GuidedSubjectsPage extends Page {
           <div style="
             width: 100%;
           ">
-            ${subjectTable}
+            ${this.table}
           </div>
       </div>
     `;

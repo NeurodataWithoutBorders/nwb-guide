@@ -138,6 +138,11 @@ Locate.args = {
   activePage: 'guided/locate'
 }
 
+export const Subjects = Template.bind({});
+Subjects.args = {
+  activePage: 'guided/subjects'
+}
+
 export const SourceData = Template.bind({});
 SourceData.args = {
   activePage: 'guided/sourcedata'
@@ -174,6 +179,7 @@ const statefulPages = [
   NewDataset,
   Structure,
   Locate,
+  Subjects,
   SourceData,
   Metadata,
   ConversionOptions,

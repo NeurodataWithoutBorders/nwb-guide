@@ -189,22 +189,13 @@ export class Table extends LitElement {
       return info
     })
 
-    let registeredHeaders = {}
-
     const onAfterGetHeader = function(index, TH) {
-      if (!registeredHeaders[index]) registeredHeaders[index] = []
-      if (registeredHeaders[index].includes(TH)) return
-      registeredHeaders[index].push(TH)
-      // else return
-      console.log(colHeaders[index], TH)
       const desc = entries[colHeaders[index]].description
       if (desc) TH.setAttribute('title', desc);
     };
 
-    console.log(registeredHeaders)
-
     const data = this.#getData()
-
+ 
     let nRows = rowHeaders.length
 
     const table = new Handsontable(div, {
@@ -212,7 +203,7 @@ export class Table extends LitElement {
       // rowHeaders: rowHeaders.map(v => `sub-${v}`),
       colHeaders: displayHeaders,
       columns,
-      // height: 'auto', // Will have issues with presenting the dropdowns
+      height: 'auto', // Will have issues with presenting the dropdowns
       stretchH: 'all',
       manualColumnResize: true,
       width: '100%',
@@ -220,6 +211,7 @@ export class Table extends LitElement {
       licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
       afterGetColHeader: onAfterGetHeader,
       afterGetRowHeader: onAfterGetHeader,
+      beforeRefreshDimensions() { return false; }
     });
 
     this.table = table;
