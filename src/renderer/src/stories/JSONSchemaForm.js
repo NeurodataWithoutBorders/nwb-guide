@@ -3,6 +3,8 @@ import { notify } from '../globals';
 import { FilesystemSelector } from './FileSystemSelector';
 import { Accordion } from './Accordion';
 
+import { capitalize, header } from './forms/utils'
+
 const componentCSS = `
 
     * {
@@ -245,8 +247,6 @@ export class JSONSchemaForm extends LitElement {
     else parent[name] = value
   }
 
-  #capitalize = (str) => str[0].toUpperCase() + str.slice(1)
-
 
   #addMessage = (name, message, type) => {
     if (Array.isArray(name)) name = name.join('-') // Convert array to string
@@ -329,10 +329,6 @@ export class JSONSchemaForm extends LitElement {
 
     return true
 
-  }
-
-  #parseStringToHeader = (headerStr) => {
-    return headerStr.split('_').filter(str => !!str).map(this.#capitalize).join(' ')
   }
 
   #get = (path) => {
@@ -453,7 +449,7 @@ export class JSONSchemaForm extends LitElement {
       // Print out the immutable default value
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
-      ${info.description ? html`<p class="guided--text-input-instructions">${this.#capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
+      ${info.description ? html`<p class="guided--text-input-instructions">${capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
       <div class="errors"></div>
       <div class="warnings"></div>
     </div>
@@ -729,7 +725,7 @@ export class JSONSchemaForm extends LitElement {
 
         if (this.mode === 'accordion' && hasMany) {
 
-          const headerName = this.#parseStringToHeader(name)
+          const headerName = header(name)
 
         this.#nestedForms[name] = new JSONSchemaForm({
           identifier: this.identifier,
@@ -768,7 +764,7 @@ export class JSONSchemaForm extends LitElement {
         const rendered = this.#render(info, results[name], required[name], [...path, name])
         return (hasMany || path.length > 1) ? html`
           <div style="margin-top: 40px;">
-            <label class="guided--form-label header">${this.#parseStringToHeader(name)}</label>
+            <label class="guided--form-label header">${header(name)}</label>
             <hr/>
             ${rendered}
           </div>

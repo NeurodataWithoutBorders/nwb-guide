@@ -2,6 +2,7 @@ import { LitElement, html } from 'lit';
 import './Button';
 import { notify } from '../globals';
 import { Handsontable } from './hot';
+import { header } from './forms/utils';
 
 export class Table extends LitElement {
 
@@ -85,13 +86,14 @@ export class Table extends LitElement {
 
     const rowHeaders = this.rowHeaders = Object.keys(this.data)
 
-    const displayHeaders = [...colHeaders]
+    const displayHeaders = [...colHeaders].map(header)
 
     const columns = colHeaders.map((k, i) => {
 
       const info = { type: 'text' }
 
-      if (entries[k].unit) displayHeaders[i] = `${k} (${entries[k].unit})`
+      console.log(k, entries[k])
+      if (entries[k].unit) displayHeaders[i] = `${displayHeaders[i]} (${entries[k].unit})`
 
       // Enumerate Possible Values
       if (entries[k].enum) {

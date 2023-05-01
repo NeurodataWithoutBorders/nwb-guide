@@ -3,17 +3,8 @@
 import { html } from 'lit';
 import { Page } from '../../Page.js';
 import { Table } from '../../../Table.js';
-import nwbBaseSchema from '../../../../../../../schemas/base_metadata_schema.json'
+import subjectSchema from '../../../../../../../schemas/subject.schema'
 import { validateOnChange } from '../../../../validation/index.js';
-
-// Add unit to weight
-nwbBaseSchema.properties.Subject.properties.weight.unit = 'kg'
-
-const removeSubset = (data, subset) => {
-  const subsetData = subset.reduce((acc, key) => { acc[key] = data[key]; return acc }, {})
-  for (let key in subsetData) delete data[key]
-  return subsetData
-}
 
 export class GuidedSubjectsPage extends Page {
 
@@ -75,27 +66,8 @@ export class GuidedSubjectsPage extends Page {
       subjects[subject].sessions = sessions
     }
 
-    const groupedKeys = ['age', 'date_of_birth']
-    const standardOrder = {...nwbBaseSchema.properties.Subject.properties}
-    const grouped = removeSubset(standardOrder, groupedKeys)
-    const required = removeSubset(standardOrder, nwbBaseSchema.properties.Subject.required)
-
-    const schema = {
-      ...nwbBaseSchema.properties.Subject,
-      properties: {
-        sessions: {
-          type: 'array',
-          uniqueItems: true,
-          items: { type: 'string' }
-        },
-        ...required,
-        ...grouped,
-        ...standardOrder,
-      }
-    }
-
     const subjectTable = new Table({
-      schema,
+      schema: subjectSchema,
       data: subjects,
       template: this.info.globalState.project.Subject,
       keyColumn: 'subject_id',
