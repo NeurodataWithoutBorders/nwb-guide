@@ -12,6 +12,6 @@ repos:
     -   id: black
         exclude: ^docs/
 - repo: https://github.com/pre-commit/mirrors-prettier
-  rev: 2.8.8
+  rev: ""
   hooks:
     - id: prettier
