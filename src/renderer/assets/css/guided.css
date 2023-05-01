@@ -143,7 +143,10 @@
     visibility: hidden;
     opacity: 0;
     transform: translateX(-20px);
-    transition: visibility 0s 0.12s linear, opacity 0.12s ease-in, transform 0.12s ease-in-out;
+    transition:
+        visibility 0s 0.12s linear,
+        opacity 0.12s ease-in,
+        transform 0.12s ease-in-out;
 }
 .guided--container-file-import {
     display: flex;
@@ -491,7 +494,9 @@
 .neumorphic {
     border-radius: 10px;
     background: #ffffff;
-    box-shadow: 5px 5px 10px #b5b5b5, -5px -5px 10px #ffffff;
+    box-shadow:
+        5px 5px 10px #b5b5b5,
+        -5px -5px 10px #ffffff;
     padding: 20px;
     border: var(--color-border) 1px solid;
 }
@@ -783,7 +788,10 @@ h1.guided--text-sub-step {
     opacity: 1;
     z-index: 1000;
     transform: translateX(0);
-    transition: visibility 0s 0s linear, opacity 0.36s ease-out, transform 0.36s ease-out;
+    transition:
+        visibility 0s 0s linear,
+        opacity 0.36s ease-out,
+        transform 0.36s ease-out;
 }
 
 .guided-section {
