@@ -798,7 +798,8 @@ table.table-save-metadata {
 }
 
 .nav-status-bar[value]::-webkit-progress-value {
-    background-image: -webkit-linear-gradient(
+    background-image:
+        -webkit-linear-gradient(
             -45deg,
             transparent 33%,
             rgba(0, 0, 0, 0.1) 33%,
@@ -807,7 +808,10 @@ table.table-save-metadata {
         ),
         -webkit-linear-gradient(left, hsl(339, 90%, 30%), hsl(190, 60%, 36%));
     border-radius: 2px;
-    background-size: 35px 25px, 100% 100%, 100% 100%;
+    background-size:
+        35px 25px,
+        100% 100%,
+        100% 100%;
 }
 
 .progresstrack::-webkit-progress-value {
@@ -828,7 +832,8 @@ progress.progresstrack[value]::-webkit-progress-bar {
 }
 
 progress.progresstrack[value]::-webkit-progress-value {
-    background-image: -webkit-linear-gradient(
+    background-image:
+        -webkit-linear-gradient(
             -45deg,
             transparent 33%,
             rgba(0, 0, 0, 0.1) 33%,
@@ -837,7 +842,10 @@ progress.progresstrack[value]::-webkit-progress-value {
         ),
         -webkit-linear-gradient(left, hsl(339, 90%, 30%), hsl(190, 60%, 36%));
     border-radius: 2px;
-    background-size: 35px 25px, 100% 100%, 100% 100%;
+    background-size:
+        35px 25px,
+        100% 100%,
+        100% 100%;
 }
 
 /*https://codepen.io/holdencreative/pen/vEVbwv*/
@@ -1261,9 +1269,15 @@ input::-webkit-calendar-picker-indicator {
     content: "";
     -webkit-transform: translateX(-50%);
     transform: translateX(-50%);
-    transition: all 0.15s linear 0s, -webkit-transform 0.15s cubic-bezier(0.05, 1.09, 0.16, 1.4) 0s;
-    transition: all 0.15s linear 0s, transform 0.15s cubic-bezier(0.05, 1.09, 0.16, 1.4) 0s;
-    transition: all 0.15s linear 0s, transform 0.15s cubic-bezier(0.05, 1.09, 0.16, 1.4) 0s,
+    transition:
+        all 0.15s linear 0s,
+        -webkit-transform 0.15s cubic-bezier(0.05, 1.09, 0.16, 1.4) 0s;
+    transition:
+        all 0.15s linear 0s,
+        transform 0.15s cubic-bezier(0.05, 1.09, 0.16, 1.4) 0s;
+    transition:
+        all 0.15s linear 0s,
+        transform 0.15s cubic-bezier(0.05, 1.09, 0.16, 1.4) 0s,
         -webkit-transform 0.15s cubic-bezier(0.05, 1.09, 0.16, 1.4) 0s;
     border: 2px solid currentColor;
     border-radius: 50%;
