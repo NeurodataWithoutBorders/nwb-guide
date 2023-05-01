@@ -29,10 +29,56 @@ export class Table extends LitElement {
         padding: 0;
       }
 
+
       ul li:before {
         content: '-';
         position: absolute;
-        margin-left: -20px;
+        margin-left: -10px;
+      }
+
+      ul li {
+        padding-left: 20px
+      }
+
+      .ht_clone_top {
+        pointer-events: none;
+      }
+
+      .ht_clone_top th:not([title]) {
+        pointer-events: auto;
+      }
+
+      .ht_master [title] {
+        overflow: unset !important;
+        visibility: visible !important;
+        position: relative;
+      }
+
+      [title] .relative::after {
+        content: 'ℹ️';
+        display: inline-block;
+        margin: 0px 5px;
+        text-align: center;
+        font-size: 80%;
+      }
+
+      .ht_master [title]::after {
+        position: absolute;
+        content: attr(title);
+        background: dimgray;
+        color: #fff;
+        font-size: 80%;
+        padding: 10px;
+        border-radius: 5px;
+        z-index: 100;
+        display: none;
+        width: 200px;
+        white-space: pre-wrap;
+        text-align: left;
+      }
+
+      .ht_master [title]:hover::after {
+        display: block;
       }
     `
 
@@ -92,7 +138,6 @@ export class Table extends LitElement {
 
       const info = { type: 'text' }
 
-      console.log(k, entries[k])
       if (entries[k].unit) displayHeaders[i] = `${displayHeaders[i]} (${entries[k].unit})`
 
       // Enumerate Possible Values
@@ -143,6 +188,20 @@ export class Table extends LitElement {
       return info
     })
 
+    let registeredHeaders = {}
+
+    const onAfterGetHeader = function(index, TH) {
+      if (!registeredHeaders[index]) registeredHeaders[index] = []
+      if (registeredHeaders[index].includes(TH)) return
+      registeredHeaders[index].push(TH)
+      // else return
+      console.log(colHeaders[index], TH)
+      const desc = entries[colHeaders[index]].description
+      if (desc) TH.setAttribute('title', desc);
+    };
+
+    console.log(registeredHeaders)
+
     const data = this.#getData()
 
     let nRows = rowHeaders.length
@@ -153,9 +212,12 @@ export class Table extends LitElement {
       colHeaders: displayHeaders,
       columns,
       height: 'auto',
+      autoColumnSize: true,
       width: '100%',
       contextMenu: ['row_below', 'remove_row'],//, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
-      licenseKey: 'non-commercial-and-evaluation' // for non-commercial use only
+      licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
+      afterGetColHeader: onAfterGetHeader,
+      afterGetRowHeader: onAfterGetHeader
     });
 
     this.table = table;
@@ -230,7 +292,6 @@ export class Table extends LitElement {
       <div>
       </div>
       <p style="width: 100%; margin: 10px 0px"><small style="color: gray;" >Right click to add or remove rows.</small></p>
-      <nwb-button style="margin-top: 10px;" @click=${() => this.table.alter("insert_row_below")}>Add New Row</nwb-button>
     `;
   }
 
