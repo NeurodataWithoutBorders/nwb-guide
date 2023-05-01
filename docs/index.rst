@@ -1,6 +1,5 @@
-
 Welcome to the NWB GUIDE documentation!
-===================================================================================================================
+=======================================
 |
 
 .. image:: ../src/assets/img/logo-guide-draft-transparent-tight.png
