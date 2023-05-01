@@ -14,3 +14,4 @@ repos:
     rev: ""
     hooks:
       - id: prettier
+        types_or: [css, javascript]
