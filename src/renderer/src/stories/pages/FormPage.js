@@ -11,7 +11,8 @@ export function schemaToPages(schema, globalStatePath, options) {
       if (optionsCopy.required && optionsCopy.required[key])
         optionsCopy.required = {
           [key]: optionsCopy.required[key],
-        }; // Only bring requirements from the current page
+        };
+      // Only bring requirements from the current page
       else delete optionsCopy.required;
 
       const page = new GuidedFormPage({
