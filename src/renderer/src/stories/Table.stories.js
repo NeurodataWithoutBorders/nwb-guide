@@ -1,6 +1,6 @@
 import { Table } from './Table.js';
 
-import nwbBaseSchema from '../../schemas/base_metadata_schema.json'
+import nwbBaseSchema from '../../../../schemas/base_metadata_schema.json'
 
 export default {
   title: 'Components/Table',
