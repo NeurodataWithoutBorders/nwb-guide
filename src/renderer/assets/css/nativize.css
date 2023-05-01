@@ -4,14 +4,14 @@
 */
 
 html {
-  font-family: sans-serif;
-  -webkit-user-select: none; /* disable selection */
-  -webkit-user-drag: none; /* disable dragging */
-  cursor: default; /* use default cursor */
+    font-family: sans-serif;
+    -webkit-user-select: none; /* disable selection */
+    -webkit-user-drag: none; /* disable dragging */
+    cursor: default; /* use default cursor */
 }
 
 body {
-  margin: 0; /* remove default margin */
+    margin: 0; /* remove default margin */
 }
 
 /* enable text selection */
@@ -19,21 +19,21 @@ body {
 .is-selectable,
 pre,
 code {
-  -webkit-user-select: auto;
-  cursor: auto;
+    -webkit-user-select: auto;
+    cursor: auto;
 }
 
 /* Buttons and links */
 
 button {
-  cursor: default;
+    cursor: default;
 }
 
 /* Internal links */
 a {
-  cursor: pointer;
-  text-decoration: none;
-  outline: none;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
 }
 
 /* New window (target) + external links */
@@ -41,30 +41,30 @@ a[target],
 a[href^="https://"],
 a[href^="http://"]
 {
-  border-bottom: 1px solid;
+    border-bottom: 1px solid;
 }
 /* For YouTube Video links */
 a[href^="https://www.youtube.com"]
 {
-  border-bottom: 0px solid;
+    border-bottom: 0px solid;
 }
 
 .github-wiki-link {
-  text-decoration: none;
-  border: 0px !important;
-  outline: none;
-  border-width: 0px;
-  outline-width: 0px;
-  border-bottom: none;
+    text-decoration: none;
+    border: 0px !important;
+    outline: none;
+    border-width: 0px;
+    outline-width: 0px;
+    border-bottom: none;
 }
 
 a:hover,
 a:focus {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 /* Images */
 
 img {
-  -webkit-user-drag: none; /* disable dragging */
+    -webkit-user-drag: none; /* disable dragging */
 }

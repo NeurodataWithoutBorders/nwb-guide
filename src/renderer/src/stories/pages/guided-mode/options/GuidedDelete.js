@@ -2,23 +2,23 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 export class GuidedDeleteFilesPage extends Page {
-  constructor(...args) {
-    super(...args);
-  }
+    constructor(...args) {
+        super(...args);
+    }
 
-  render() {
-    return html`
-      <div id="guided-mode-starting-container" class="guided--main-tab">
-        <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-          <div class="title">
-            <h1 class="guided--text-sub-step">Delete Intermediate Files</h1>
-          </div>
-          <div class="guided--section">Coming soon...</div>
-        </div>
-      </div>
-    `;
-  }
+    render() {
+        return html`
+            <div id="guided-mode-starting-container" class="guided--main-tab">
+                <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
+                    <div class="title">
+                        <h1 class="guided--text-sub-step">Delete Intermediate Files</h1>
+                    </div>
+                    <div class="guided--section">Coming soon...</div>
+                </div>
+            </div>
+        `;
+    }
 }
 
 customElements.get("nwbguide-guided-deletefiles-page") ||
-  customElements.define("nwbguide-guided-deletefiles-page", GuidedDeleteFilesPage);
+    customElements.define("nwbguide-guided-deletefiles-page", GuidedDeleteFilesPage);

@@ -7,143 +7,141 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 
 export class GuidedSourceDataPage extends ManagedPage {
-  constructor(...args) {
-    super(...args);
-  }
+    constructor(...args) {
+        super(...args);
+    }
 
-  footer = {
-    onNext: async () => {
-      this.save(); // Save in case the conversion fails
-      for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
+    footer = {
+        onNext: async () => {
+            this.save(); // Save in case the conversion fails
+            for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
-      Swal.fire({
-        title: "Getting metadata for source data",
-        html: "Please wait...",
-        allowEscapeKey: false,
-        allowOutsideClick: false,
-        heightAuto: false,
-        backdrop: "rgba(0,0,0, 0.4)",
-        timerProgressBar: false,
-        didOpen: () => {
-          Swal.showLoading();
+            Swal.fire({
+                title: "Getting metadata for source data",
+                html: "Please wait...",
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                heightAuto: false,
+                backdrop: "rgba(0,0,0, 0.4)",
+                timerProgressBar: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            // const previousResults = this.info.globalState.metadata.results
+
+            this.save(); // Save in case the metadata request fails
+
+            await Promise.all(
+                this.mapSessions(async ({ subject, session, info }) => {
+                    // NOTE: This clears all user-defined results
+                    const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            source_data: info.source_data,
+                            interfaces: this.info.globalState.interfaces,
+                        }),
+                    }).then((res) => res.json());
+
+                    Swal.close();
+
+                    if (result.message) {
+                        const message = "Failed to get metadata with current source data. Please try again.";
+                        this.notify(message, "error");
+                        throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
+                    }
+
+                    // Merge metadata results with the generated info
+                    this.merge("metadata", result.results, info);
+
+                    // Mirror structure with metadata schema
+                    const schema = this.info.globalState.schema;
+                    if (!schema.metadata) schema.metadata = {};
+                    if (!schema.metadata[subject]) schema.metadata[subject] = {};
+                    schema.metadata[subject][session] = result.schema;
+                })
+            );
+
+            this.onTransition(1);
         },
-      });
-
-      // const previousResults = this.info.globalState.metadata.results
-
-      this.save(); // Save in case the metadata request fails
-
-      await Promise.all(
-        this.mapSessions(async ({ subject, session, info }) => {
-          // NOTE: This clears all user-defined results
-          const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              source_data: info.source_data,
-              interfaces: this.info.globalState.interfaces,
-            }),
-          }).then((res) => res.json());
-
-          Swal.close();
-
-          if (result.message) {
-            const message = "Failed to get metadata with current source data. Please try again.";
-            this.notify(message, "error");
-            throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
-          }
-
-          // Merge metadata results with the generated info
-          this.merge("metadata", result.results, info);
-
-          // Mirror structure with metadata schema
-          const schema = this.info.globalState.schema;
-          if (!schema.metadata) schema.metadata = {};
-          if (!schema.metadata[subject]) schema.metadata[subject] = {};
-          schema.metadata[subject][session] = result.schema;
-        })
-      );
-
-      this.onTransition(1);
-    },
-  };
-
-  createForm = ({ subject, session, info }) => {
-    const instanceId = `sub-${subject}/ses-${session}`;
-
-    const form = new JSONSchemaForm({
-      identifier: instanceId,
-      mode: "accordion",
-      schema: this.info.globalState.schema.source_data,
-      results: info.source_data,
-      ignore: ["verbose"],
-      onlyRequired: true,
-      onStatusChange: (state) => {
-        const indicator = this.manager.shadowRoot.querySelector(
-          `li[data-instance='${instanceId}']`
-        );
-        const currentState = Array.from(indicator.classList).find((c) => c !== "item");
-        if (currentState) indicator.classList.remove(currentState);
-        indicator.classList.add(state);
-      },
-    });
-
-    return {
-      subject,
-      session,
-      form,
     };
-  };
 
-  render() {
-    this.forms = this.mapSessions(this.createForm);
+    createForm = ({ subject, session, info }) => {
+        const instanceId = `sub-${subject}/ses-${session}`;
 
-    let instances = {};
-    this.forms.forEach(({ subject, session, form }) => {
-      if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
-      instances[`sub-${subject}`][`ses-${session}`] = form;
-    });
+        const form = new JSONSchemaForm({
+            identifier: instanceId,
+            mode: "accordion",
+            schema: this.info.globalState.schema.source_data,
+            results: info.source_data,
+            ignore: ["verbose"],
+            onlyRequired: true,
+            onStatusChange: (state) => {
+                const indicator = this.manager.shadowRoot.querySelector(`li[data-instance='${instanceId}']`);
+                const currentState = Array.from(indicator.classList).find((c) => c !== "item");
+                if (currentState) indicator.classList.remove(currentState);
+                indicator.classList.add(state);
+            },
+        });
 
-    this.manager = new InstanceManager({
-      header: "Source Data",
-      // instanceType: 'Session',
-      instances,
-      // onAdded: (path) => {
+        return {
+            subject,
+            session,
+            form,
+        };
+    };
 
-      //   let details = this.getDetails(path)
+    render() {
+        this.forms = this.mapSessions(this.createForm);
 
-      //   const info = this.addSession(details)
+        let instances = {};
+        this.forms.forEach(({ subject, session, form }) => {
+            if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
+            instances[`sub-${subject}`][`ses-${session}`] = form;
+        });
 
-      //   const form = this.createForm({
-      //     ...details,
-      //     info
-      //   })
+        this.manager = new InstanceManager({
+            header: "Source Data",
+            // instanceType: 'Session',
+            instances,
+            // onAdded: (path) => {
 
-      //   this.forms.push(form)
+            //   let details = this.getDetails(path)
 
-      //   return {
-      //     key: `sub-${details.subject}/ses-${details.session}`,
-      //     value: form.form
-      //   }
-      // },
-      // onRemoved: (_, path) => {
-      //   let details = this.getDetails(path)
-      //   this.removeSession(details)
-      // }
-    });
+            //   const info = this.addSession(details)
 
-    return html`
-      <div id="guided-mode-starting-container" class="guided--main-tab">
-        <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-          <div class="title">
-            <h1 class="guided--text-sub-step">Source Data</h1>
-          </div>
-          <div class="guided--section">${this.manager}</div>
-        </div>
-      </div>
-    `;
-  }
+            //   const form = this.createForm({
+            //     ...details,
+            //     info
+            //   })
+
+            //   this.forms.push(form)
+
+            //   return {
+            //     key: `sub-${details.subject}/ses-${details.session}`,
+            //     value: form.form
+            //   }
+            // },
+            // onRemoved: (_, path) => {
+            //   let details = this.getDetails(path)
+            //   this.removeSession(details)
+            // }
+        });
+
+        return html`
+            <div id="guided-mode-starting-container" class="guided--main-tab">
+                <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
+                    <div class="title">
+                        <h1 class="guided--text-sub-step">Source Data</h1>
+                    </div>
+                    <div class="guided--section">${this.manager}</div>
+                </div>
+            </div>
+        `;
+    }
 }
 
 customElements.get("nwbguide-guided-sourcedata-page") ||
-  customElements.define("nwbguide-guided-sourcedata-page", GuidedSourceDataPage);
+    customElements.define("nwbguide-guided-sourcedata-page", GuidedSourceDataPage);

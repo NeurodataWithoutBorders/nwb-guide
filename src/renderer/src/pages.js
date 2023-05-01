@@ -84,72 +84,72 @@ style="margin-right: 30px; margin-bottom: -5px"
 `;
 
 const pages = {
-  "/": new GettingStartedPage({
-    label: "Overview",
-    icon: overviewIcon,
-  }),
-  guided: new GuidedHomePage({
-    label: "Guided Mode",
-    icon: guidedIcon,
-    pages: {
-      start: new GuidedStartPage({
-        label: "Start",
-      }),
-      details: new GuidedNewDatasetPage({
-        label: "Project details",
-        section: sections[0],
-      }),
-      structure: new GuidedStructurePage({
-        label: "Data formats",
-        section: sections[0],
-      }),
+    "/": new GettingStartedPage({
+        label: "Overview",
+        icon: overviewIcon,
+    }),
+    guided: new GuidedHomePage({
+        label: "Guided Mode",
+        icon: guidedIcon,
+        pages: {
+            start: new GuidedStartPage({
+                label: "Start",
+            }),
+            details: new GuidedNewDatasetPage({
+                label: "Project details",
+                section: sections[0],
+            }),
+            structure: new GuidedStructurePage({
+                label: "Data formats",
+                section: sections[0],
+            }),
 
-      locate: new GuidedPathExpansionPage({
-        label: "Locate data",
-        section: sections[0],
-      }),
+            locate: new GuidedPathExpansionPage({
+                label: "Locate data",
+                section: sections[0],
+            }),
 
-      subjects: new GuidedSubjectsPage({
-        label: "Subject details",
-        section: sections[0],
-      }),
+            subjects: new GuidedSubjectsPage({
+                label: "Subject details",
+                section: sections[0],
+            }),
 
-      sourcedata: new GuidedSourceDataPage({
-        label: "Source data",
-        section: sections[1],
-      }),
-      metadata: new GuidedMetadataPage({
-        label: "File metadata",
-        section: sections[1],
-      }),
+            sourcedata: new GuidedSourceDataPage({
+                label: "Source data",
+                section: sections[1],
+            }),
+            metadata: new GuidedMetadataPage({
+                label: "File metadata",
+                section: sections[1],
+            }),
 
-      options: new GuidedConversionOptionsPage({
-        label: "Basic options",
-        section: sections[2],
-      }),
-      preview: new GuidedStubPreviewPage({
-        label: "Preview conversion",
-        section: sections[2],
-      }),
-      upload: new GuidedUploadPage({
-        label: "Upload to DANDI",
-        section: sections[2],
-      }),
+            options: new GuidedConversionOptionsPage({
+                label: "Basic options",
+                section: sections[2],
+            }),
+            preview: new GuidedStubPreviewPage({
+                label: "Preview conversion",
+                section: sections[2],
+            }),
+            upload: new GuidedUploadPage({
+                label: "Upload to DANDI",
+                section: sections[2],
+            }),
 
-      review: new GuidedResultsPage({
-        label: "Review results",
-        section: sections[3],
-      }),
-    },
-  }),
-  docs: new DocumentationPage({
-    label: "Documentation",
-    icon: documentationIcon,
-  }),
-  contact: new ContactPage({
-    label: "Contact Us",
-    icon: contactIcon,
-  }),
+            review: new GuidedResultsPage({
+                label: "Review results",
+                section: sections[3],
+            }),
+        },
+    }),
+    docs: new DocumentationPage({
+        label: "Documentation",
+        icon: documentationIcon,
+    }),
+    contact: new ContactPage({
+        label: "Contact Us",
+        icon: contactIcon,
+    }),
 };
 
 dashboard.pages = pages;
