@@ -24,7 +24,8 @@ nwbBaseSchema.properties.Subject.properties.species = {
     items: { 
         type: 'string' 
     },
-    description: 'The species of your subject. You may specify a custom species for your subject on the File Metadata page.'
+    strict: false,
+    description: 'The species of your subject.'
 }
   
 // Sort the subject schema

@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import './Button';
-import { notify } from '../globals';
+import { isStorybook, notify } from '../globals';
 import { Handsontable } from './hot';
 import { header } from './forms/utils';
 
@@ -46,6 +46,10 @@ export class Table extends LitElement {
         margin: 0px 5px;
         text-align: center;
         font-size: 80%;
+      }
+
+      .handsontable {
+        overflow: unset !important;
       }
 `
 
@@ -144,34 +148,36 @@ export class Table extends LitElement {
 
       const info = { type: 'text' }
 
-      if (entries[k].unit) displayHeaders[i] = `${displayHeaders[i]} (${entries[k].unit})`
+      const colInfo = entries[k]
+      if (colInfo.unit) displayHeaders[i] = `${displayHeaders[i]} (${colInfo.unit})`
 
       // Enumerate Possible Values
-      if (entries[k].enum) {
-        info.source = entries[k].enum
-        info.type = 'dropdown'
+      if (colInfo.enum) {
+        info.source = colInfo.enum
+        if (colInfo.strict === false) info.type = 'autocomplete'
+        else info.type = 'dropdown'
       }
 
       // Constrain to Date Format
-      if (entries[k].format === 'date-time') {
+      if (colInfo.format === 'date-time') {
         info.type = 'date-time'
         info.correctFormat = false
       }
 
-      if (entries[k].type === 'array') {
+      if (colInfo.type === 'array') {
         info.data = k
         info.type = 'array'
-        info.uniqueItems = entries[k].uniqueItems
+        info.uniqueItems = colInfo.uniqueItems
       }
 
       // Validate Regex Pattern
-      if (entries[k].pattern){
-        const regex = new RegExp(entries[k].pattern)
+      if (colInfo.pattern){
+        const regex = new RegExp(colInfo.pattern)
         info.validator = (value, callback) => callback(regex.test(value))
       }
 
       const runThisValidator = async (value, row) => {
-        const valid = this.validateOnChange ? await this.validateOnChange(k, this.data[rowHeaders[row]], value) : true
+        const valid = this.validateOnChange ? await this.validateOnChange(k, this.data[rowHeaders[row]], value).catch(() => true) : true // Return true if validation errored out on the JavaScript side (e.g. server is down)
         let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === 'warning') : []
         const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === 'error') : []
         return (valid === true || valid == undefined || errors.length === 0)
@@ -208,7 +214,8 @@ export class Table extends LitElement {
       // rowHeaders: rowHeaders.map(v => `sub-${v}`),
       colHeaders: displayHeaders,
       columns,
-      // height: 'auto', // Will have issues with presenting the dropdowns
+      // height: 'auto', // Commenting this will fix dropdown issue
+      height: 'auto', // Keeping this will ensure there is no infinite loop that adds length to the table
       stretchH: 'all',
       manualColumnResize: true,
       preventOverflow: 'horizontal',
