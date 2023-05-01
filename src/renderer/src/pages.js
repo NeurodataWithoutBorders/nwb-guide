@@ -16,7 +16,7 @@ import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedRes
 import { Dashboard } from "./stories/Dashboard"
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview"
 
-import logo from './assets/img/logo-guide-draft-transparent-tight.png'
+import logo from '../assets/img/logo-guide-draft-transparent-tight.png'
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion"
 let dashboard = document.querySelector("nwb-dashboard")
 if (!dashboard) dashboard = new Dashboard()

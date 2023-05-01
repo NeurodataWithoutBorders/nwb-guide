@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import lottie from 'lottie-web';
-import { column1Lottie, column2Lottie, column3Lottie } from '../../../assets/lotties/overview-lotties.js';
+import { column1Lottie, column2Lottie, column3Lottie } from '../../../../assets/lotties/overview-lotties.js';
 import { openLink } from '../../../links.js';
 import { Page } from '../Page.js';
 

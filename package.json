@@ -3,15 +3,14 @@
   "productName": "NWB GUIDE",
   "version": "0.0.1",
   "description": "",
-  "main": "main.js",
+  "main": "./out/main/main.js",
   "scripts": {
-    "start": "npm run build && npm run start:electron",
-    "start:electron": "NODE_ENV=development electron .",
+    "start": "electron-vite dev",
     "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
-    "dev:app": "vite",
+    "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
-    "build:app": "vite build",
+    "build:app": "electron-vite build",
     "test": "npm run test:server",
     "test:server": "pytest pyflask/tests/ -s",
     "build-win": "electron-builder build --win --publish never",
@@ -53,7 +52,7 @@
     "win": {
       "asar": false,
       "target": "nsis",
-      "icon": "src/assets/app-icon/logo-guide-draft.ico"
+      "icon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
     },
     "mac": {
       "asar": true,
@@ -61,7 +60,7 @@
         "dmg",
         "zip"
       ],
-      "icon": "src/assets/img/logo-guide-draft.png",
+      "icon": "src/renderer/assets/img/logo-guide-draft.png",
       "darkModeSupport": false,
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -76,7 +75,7 @@
     "linux": {
       "asar": true,
       "target": "AppImage",
-      "icon": "src/assets/img/logo-guide-draft.png",
+      "icon": "src/renderer/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
           "from": "./pyflaskdist/app"
@@ -88,7 +87,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/assets/app-icon/logo-guide-draft.ico"
+      "installerIcon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
       "provider": "github",
@@ -101,10 +100,12 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@electron-toolkit/utils": "^1.0.2",
     "@electron/remote": "2.0.8",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@sweetalert2/theme-bulma": "^4.0.3",
     "axios": "^0.19.2",
+    "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
     "electron-log": "^4.3.5",
     "electron-notarize": "^1.2.1",
@@ -130,8 +131,7 @@
     "electron": "19.0.0",
     "electron-builder": "22.10.5",
     "electron-packager": "^14.0.6",
-    "electron-rebuild": "^1.11.0",
-    "electron-reloader": "^1.2.3",
+    "electron-vite": "^1.0.22",
     "prettier": "^2.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
