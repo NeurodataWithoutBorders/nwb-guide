@@ -357,6 +357,8 @@ export class JSONSchemaForm extends LitElement {
 
     const resolved = path.reduce((acc, curr) => acc = acc[curr], schema)
     if (resolved['$ref']) return this.#getSchema(resolved['$ref'].split('/').slice(1)) // NOTE: This assumes reference to the root of the schema
+    
+    console.log('Get schema', path, resolved)
     return resolved
   }
 
@@ -768,8 +770,10 @@ export class JSONSchemaForm extends LitElement {
       }
 
         // Directly render the interactive property element
-        if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path)
-
+        if (!info.properties) {
+          if (name === 'definitions') return '' // Skip definitions
+          return this.#renderInteractiveElement(name, info, results, required, path)
+        }
 
         const hasMany = renderable.length > 1 // How many siblings?
 
