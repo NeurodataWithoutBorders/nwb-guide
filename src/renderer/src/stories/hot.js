@@ -39,8 +39,23 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
         // Attach node to DOM, by appending it to the container holding the table
         this.hot.rootElement.appendChild(this.DATETIME);
 
+        // // Immediately transfers the CopyPastePlugin FocusableWrapper element to the WC Shadow Root
+        const copyPastePlugin = this.hot.getPlugin('copyPaste');
+        const ogFn = copyPastePlugin.getOrCreateFocusableElement.bind(copyPastePlugin)
+        copyPastePlugin.getOrCreateFocusableElement = () => {
+            const res = ogFn()
+            const focusable = copyPastePlugin.focusableElement.getFocusableElement()
+            const root = this.hot.rootElement.getRootNode()
+            focusable.style.position = 'absolute'
+            focusable.style.opacity = '0'
+            focusable.style.pointerEvents = 'none'
+            copyPastePlugin.getOrCreateFocusableElement = ogFn 
+            root.append(focusable)
+            return res
+        }
+
     }
-    
+
     getValue() {
         return this.DATETIME.value;
     }

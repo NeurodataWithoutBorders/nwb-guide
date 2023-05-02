@@ -234,17 +234,6 @@ export class Table extends LitElement {
         });
 
 
-        // Immediately transfers the CopyPastePlugin FocusableWrapper element to the WC Shadow Root
-        const copyPastePlugin = table.getPlugin('copyPaste');
-        const updateFn = copyPastePlugin.getOrCreateFocusableElement.bind(copyPastePlugin)
-        copyPastePlugin.getOrCreateFocusableElement = () => {
-            const res = updateFn()
-            const focusable = copyPastePlugin.focusableElement.getFocusableElement()
-            this.shadowRoot.append(focusable)
-            return res
-        }
-
-
         this.table = table;
 
         // Move context menu
