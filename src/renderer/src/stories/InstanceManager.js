@@ -214,10 +214,15 @@ export class InstanceManager extends LitElement {
         this.requestUpdate();
     }
 
+    #hideAll(element){
+        Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((el) => {
+            if (el !== element) el.hidden = true;
+        });
+    }
+
     #render (toRender = this.instances, path=[]) {
         let instances = {}
         let categories = [];
-        let displays = {};
 
         Object.entries(toRender).forEach(([key, value]) => {
             const isCategory = this.#isCategory(value)
@@ -273,9 +278,7 @@ export class InstanceManager extends LitElement {
 
                         if (element) {
                             element.hidden = false;
-                            instances.forEach((el) => {
-                                if (el !== element) el.hidden = true;
-                            });
+                            this.#hideAll(element);
 
                             this.#items.forEach((el) => {
                                 if (el !== item) el.removeAttribute("selected");
@@ -330,7 +333,12 @@ export class InstanceManager extends LitElement {
                       target[key] = resolvedValue;
 
                       this.#onKeyDone();
+
+                      // Swap the selected item to the new one
                       this.#selected = input.value
+                      this.#hideAll()
+
+                      // Trigger new update
                       this.requestUpdate();
                   } catch (e) {
                       notify(e.message, "error");
@@ -378,7 +386,7 @@ export class InstanceManager extends LitElement {
                         ${this.#items.map(
                             (item, i) => {
                                 return html`
-                                    <div data-instance="${item.id}" ?hidden=${this.#selected === item.id}>
+                                    <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id}>
                                         ${this.renderInstance(item.id, item.metadata)}
                                     </div>
                                 `
