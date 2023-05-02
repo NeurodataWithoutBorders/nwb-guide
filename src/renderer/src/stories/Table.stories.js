@@ -1,6 +1,6 @@
 import { Table } from "./Table.js";
 
-import subjectSchema from '../../../../schemas/subject.schema'
+import subjectSchema from "../../../../schemas/subject.schema";
 
 export default {
     title: "Components/Table",
@@ -19,11 +19,10 @@ const data = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "01
     return acc;
 }, {});
 
-
 export const Default = Template.bind({});
 Default.args = {
-  schema: subjectSchema,
-  data,
-  keyColumn: 'subject_id',
-  validateOnChange: () => true // Always validate as true
-}
+    schema: subjectSchema,
+    data,
+    keyColumn: "subject_id",
+    validateOnChange: () => true, // Always validate as true
+};

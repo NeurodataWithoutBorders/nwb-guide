@@ -138,8 +138,8 @@ Locate.args = {
 
 export const Subjects = Template.bind({});
 Subjects.args = {
-  activePage: 'guided/subjects'
-}
+    activePage: "guided/subjects",
+};
 
 export const SourceData = Template.bind({});
 SourceData.args = {
@@ -172,16 +172,16 @@ Results.args = {
 };
 
 const statefulPages = [
-  NewDataset,
-  Structure,
-  Locate,
-  Subjects,
-  SourceData,
-  Metadata,
-  ConversionOptions,
-  StubPreview,
-  Upload,
-  Results
-]
+    NewDataset,
+    Structure,
+    Locate,
+    Subjects,
+    SourceData,
+    Metadata,
+    ConversionOptions,
+    StubPreview,
+    Upload,
+    Results,
+];
 
 statefulPages.forEach((page) => (page.args.globalState = globalState));
