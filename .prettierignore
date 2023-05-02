@@ -1,2 +1,4 @@
-curate.html
 tools/**/*
+**/dist/**/*
+**/build/**/*
+src/renderer/src/stories/JSONSchemaForm.js

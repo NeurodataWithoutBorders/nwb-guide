@@ -1,122 +1,116 @@
-
-
-import { LitElement, html } from 'lit';
-import useGlobalStyles from './utils/useGlobalStyles.js';
+import { LitElement, html } from "lit";
+import useGlobalStyles from "./utils/useGlobalStyles.js";
 
 const componentCSS = `
 
-`
+`;
 
 export class NavigationSidebar extends LitElement {
-
-  static get styles() {
-    return useGlobalStyles(componentCSS, sheet => sheet.href && sheet.href.includes('bootstrap'), this.shadowRoot)
-  }
-
-  static get properties() {
-    return {
-      sections: { type: Object, reflect: false },
-      active: { type: String, reflect: true },
-    };
-  }
-
-  constructor ({
-    sections = {}
-  } = {}) {
-    super()
-    this.sections = sections
-  }
-
-  createRenderRoot() {
-    return this;
-  }
-
-  attributeChangedCallback(...args) {
-    const attrs = ['page', 'active']
-    super.attributeChangedCallback(...args)
-    if (attrs.includes(args[0])) this.requestUpdate()
-  }
-
-  #queue = []
-
-  updated(){
-    this.nav = (this.shadowRoot ?? this).querySelector("#guided-nav");
-
-    Object.entries(this.sections).map(([sectionName, info]) => {
-      const isActive = Object.values(info.pages).find((state) => state.active)
-      if (isActive) this.#toggleDropdown(sectionName, true)
-      else this.#toggleDropdown(sectionName, false)
-    })
-
-    if (this.#queue.length) {
-      this.#queue.forEach(content => content())
-      this.#queue = []
+    static get styles() {
+        return useGlobalStyles(
+            componentCSS,
+            (sheet) => sheet.href && sheet.href.includes("bootstrap"),
+            this.shadowRoot
+        );
     }
-  }
 
-  show(){
-    if (this.nav) this.nav.style.display = "block";
-    else this.#queue.push(() => this.show())
-  }
+    static get properties() {
+        return {
+            sections: { type: Object, reflect: false },
+            active: { type: String, reflect: true },
+        };
+    }
 
-  hide(){
-    if (this.nav) this.nav.style.display = "none";
-    else this.#queue.push(() => this.hide())
-  }
+    constructor({ sections = {} } = {}) {
+        super();
+        this.sections = sections;
+    }
 
-  onClick = () => {} // Set by the user
+    createRenderRoot() {
+        return this;
+    }
 
+    attributeChangedCallback(...args) {
+        const attrs = ["page", "active"];
+        super.attributeChangedCallback(...args);
+        if (attrs.includes(args[0])) this.requestUpdate();
+    }
 
-  #updateClass = (name, el, force) => {
-    if (force === undefined) el.classList.toggle(name);
-      else {
-        if (force) el.classList.remove(name);
-        else el.classList.add(name);
-      }
-  }
+    #queue = [];
 
-  #toggleDropdown = (sectionName, forcedState) => {
+    updated() {
+        this.nav = (this.shadowRoot ?? this).querySelector("#guided-nav");
 
-    const hasForce = forcedState !== undefined
-    //remove hidden from child elements with guided--nav-bar-section-page class
-    const children = this.querySelectorAll( "[data-section='" + sectionName + "']");
-    for (const child of children) this.#updateClass('hidden', child, forcedState)
+        Object.entries(this.sections).map(([sectionName, info]) => {
+            const isActive = Object.values(info.pages).find((state) => state.active);
+            if (isActive) this.#toggleDropdown(sectionName, true);
+            else this.#toggleDropdown(sectionName, false);
+        });
 
-    const dropdown = this.querySelector( "[data-section-name='" + sectionName + "']");
+        if (this.#queue.length) {
+            this.#queue.forEach((content) => content());
+            this.#queue = [];
+        }
+    }
 
-    const toggledState = !this.sections[sectionName].open
+    show() {
+        if (this.nav) this.nav.style.display = "block";
+        else this.#queue.push(() => this.show());
+    }
 
-    //toggle the chevron
-    const chevron = dropdown.querySelector("i");
-    this.#updateClass("fa-chevron-right", chevron, forcedState)
-    this.#updateClass("fa-chevron-down", chevron, hasForce ? !forcedState : forcedState)
+    hide() {
+        if (this.nav) this.nav.style.display = "none";
+        else this.#queue.push(() => this.hide());
+    }
 
-    this.sections[sectionName].open = hasForce ? forcedState : toggledState
-}
+    onClick = () => {}; // Set by the user
 
-  render() {
+    #updateClass = (name, el, force) => {
+        if (force === undefined) el.classList.toggle(name);
+        else {
+            if (force) el.classList.remove(name);
+            else el.classList.add(name);
+        }
+    };
 
-    return html`
-<nav id="guided-nav" class="guided--nav">
-    <h1 class="guided--text-sub-step mb-0 mt-0">Guided Mode</h1>
+    #toggleDropdown = (sectionName, forcedState) => {
+        const hasForce = forcedState !== undefined;
+        //remove hidden from child elements with guided--nav-bar-section-page class
+        const children = this.querySelectorAll("[data-section='" + sectionName + "']");
+        for (const child of children) this.#updateClass("hidden", child, forcedState);
 
-    <ul id="guided-nav-items" class="guided--container-nav-items">
-      ${Object.entries(this.sections).map(([sectionName, info]) => {
+        const dropdown = this.querySelector("[data-section-name='" + sectionName + "']");
+
+        const toggledState = !this.sections[sectionName].open;
+
+        //toggle the chevron
+        const chevron = dropdown.querySelector("i");
+        this.#updateClass("fa-chevron-right", chevron, forcedState);
+        this.#updateClass("fa-chevron-down", chevron, hasForce ? !forcedState : forcedState);
+
+        this.sections[sectionName].open = hasForce ? forcedState : toggledState;
+    };
+
+    render() {
         return html`
-        <div class="guided--nav-bar-section">
-          <div
-            class="guided--nav-bar-dropdown"
-            data-section-name=${sectionName}
-            @click=${() => this.#toggleDropdown(sectionName)}
-          >
-            <p class="guided--help-text mb-0">
-              ${sectionName}
-            </p>
-            <i class="fas fa-chevron-right"></i>
-          </div>
-          ${Object.entries(info.pages).map(([id, state]) => {
+            <nav id="guided-nav" class="guided--nav">
+                <h1 class="guided--text-sub-step mb-0 mt-0">Guided Mode</h1>
 
-            return html`<div
+                <ul id="guided-nav-items" class="guided--container-nav-items">
+                    ${Object.entries(this.sections)
+                        .map(([sectionName, info]) => {
+                            return html`
+                                <div class="guided--nav-bar-section">
+                                    <div
+                                        class="guided--nav-bar-dropdown"
+                                        data-section-name=${sectionName}
+                                        @click=${() => this.#toggleDropdown(sectionName)}
+                                    >
+                                        <p class="guided--help-text mb-0">${sectionName}</p>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                    ${Object.entries(info.pages).map(([id, state]) => {
+                                        return html`<div
               data-section="${sectionName}"
               class="
                 guided--nav-bar-section-page
@@ -131,14 +125,16 @@ export class NavigationSidebar extends LitElement {
               </div>
             </div>
           </div>
-          `
-        })}
-        `
-      }).flat()}
-    </ul>
-</nav>
-    `;
-  }
-};
+          `;
+                                    })}
+                                </div>
+                            `;
+                        })
+                        .flat()}
+                </ul>
+            </nav>
+        `;
+    }
+}
 
-customElements.get('nwb-navigation-sidebar') || customElements.define('nwb-navigation-sidebar',  NavigationSidebar);
+customElements.get("nwb-navigation-sidebar") || customElements.define("nwb-navigation-sidebar", NavigationSidebar);

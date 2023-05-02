@@ -1,29 +1,27 @@
 import { LitElement, html } from 'lit';
-import './Button';
 import { isStorybook, notify } from '../globals';
 import { Handsontable } from './hot';
 import { header } from './forms/utils';
 
 export class Table extends LitElement {
+    validateOnChange;
 
-  validateOnChange
+    constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
+        super();
+        this.schema = schema ?? {};
+        this.data = data ?? [];
+        this.keyColumn = keyColumn ?? "id";
+        this.template = template ?? {};
+        if (validateOnChange) this.validateOnChange = validateOnChange;
 
-  constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
-    super();
-    this.schema = schema ?? {}
-    this.data = data ?? [];
-    this.keyColumn = keyColumn ?? 'id'
-    this.template = template ?? {}
-    if (validateOnChange) this.validateOnChange = validateOnChange
+        this.style.width = "100%";
+        this.style.display = "flex";
+        this.style.flexWrap = "wrap";
+        this.style.alignItems = "center";
+        this.style.justifyContent = "center";
 
-    this.style.width = '100%';
-    this.style.display = 'flex';
-    this.style.flexWrap = 'wrap';
-    this.style.alignItems = 'center';
-    this.style.justifyContent = 'center';
-
-    // Inject scoped stylesheet
-    const style = `
+        // Inject scoped stylesheet
+        const style = `
       ul {
         list-style-type: none;
         padding: 0;
@@ -308,7 +306,6 @@ export class Table extends LitElement {
       <p style="width: 100%; margin: 10px 0px"><small style="color: gray;" >Right click to add or remove rows.</small></p>
     `;
   }
-
 }
 
-customElements.get('nwb-table') || customElements.define('nwb-table',  Table);
+customElements.get("nwb-table") || customElements.define("nwb-table", Table);
