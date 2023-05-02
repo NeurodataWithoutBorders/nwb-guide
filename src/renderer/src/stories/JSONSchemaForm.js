@@ -4,6 +4,7 @@ import { FilesystemSelector } from './FileSystemSelector';
 import { Accordion } from './Accordion';
 
 import { capitalize, header } from './forms/utils'
+import { Table } from './Table';
 
 const componentCSS = `
 
@@ -346,6 +347,19 @@ export class JSONSchemaForm extends LitElement {
       if (!isValid) return true
   }
 
+  #getSchema(path, schema = this.schema) {
+    if (typeof path === 'string') path = path.split('.')
+    if (this.#base.length) {
+      const base = this.#base.slice(-1)[0]
+      const indexOf = path.indexOf(base)
+      if (indexOf !== -1) path = path.slice(indexOf + 1)
+    }
+
+    const resolved = path.reduce((acc, curr) => acc = acc[curr], schema)
+    if (resolved['$ref']) return this.#getSchema(resolved['$ref'].split('/').slice(1)) // NOTE: This assumes reference to the root of the schema
+    return resolved
+  }
+
   #renderInteractiveElement = (name, info, parent, required, path = []) => {
 
     let isRequired = required[name]
@@ -445,8 +459,44 @@ export class JSONSchemaForm extends LitElement {
           }
         }
 
+        if (info.type === 'array') {
+          const itemSchema = this.#getSchema('items', info)
+          console.log(name, parent[name], itemSchema)
+          if (itemSchema.type === 'object') {
+            return new Table({
+              schema: itemSchema,
+              data: parent[name],
+            })
+          }
+        // {
+        //   return html`
+        //   <div class="guided--array">
+        //     <div class="guided--array-items">
+        //       ${parent[name]?.map((item, i) => html`
+        //         <div class="guided--array-item">  
+        //           ${JSON.stringify(item, null, 2)}
+        //           <button class="guided--array-item-remove" @click=${() => {
+        //             const newArray = [...parent[name]]
+        //             newArray.splice(i, 1)
+        //             this.#updateParent(name, newArray, parent)
+        //           }}>Remove</button>
+        //         </div>
+        //       `)}
+        //     </div>
+        //     <button class="guided--array-add" @click=${() => {
+        //       const newArray = [...parent[name] ?? []]
+        //       newArray.push(info.items.default ?? '')
+        //       this.#updateParent(name, newArray, parent)
+        //     }}>Add</button>
+        //   </div>
+        //   `
+        // }
+        }
+
+
 
       // Print out the immutable default value
+      console.log('Nothing', name, info, parent[name])
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
       ${info.description ? html`<p class="guided--text-input-instructions">${capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}

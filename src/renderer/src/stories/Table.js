@@ -1,55 +1,47 @@
-import { LitElement, html } from "lit";
-import { isStorybook, notify } from "../globals";
-import { Handsontable } from "./hot";
+import { LitElement, css, html, unsafeCSS } from "lit";
+import { notify } from "../globals";
+import { Handsontable, css as HotCSS } from "./hot";
 import { header } from "./forms/utils";
 
 export class Table extends LitElement {
     validateOnChange;
 
-    constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
-        super();
-        this.schema = schema ?? {};
-        this.data = data ?? [];
-        this.keyColumn = keyColumn ?? "id";
-        this.template = template ?? {};
-        if (validateOnChange) this.validateOnChange = validateOnChange;
+    static get styles() {
+        return [
+          unsafeCSS(HotCSS),
+          css`
+          ul {
+            list-style-type: none;
+            padding: 0;
+          }
+    
+    
+          ul li:before {
+            content: '-';
+            position: absolute;
+            margin-left: -10px;
+          }
+    
+          ul li {
+            padding-left: 20px
+          }
+    
+          [title] .relative::after {
+            content: 'ℹ️';
+            display: inline-block;
+            margin: 0px 5px;
+            text-align: center;
+            font-size: 80%;
+          }
+    
+          .handsontable {
+            overflow: unset !important;
+          }
+          `
+        ]
+    }
 
-        this.style.width = "100%";
-        this.style.display = "flex";
-        this.style.flexWrap = "wrap";
-        this.style.alignItems = "center";
-        this.style.justifyContent = "center";
 
-        // Inject scoped stylesheet
-        const style = `
-      ul {
-        list-style-type: none;
-        padding: 0;
-      }
-
-
-      ul li:before {
-        content: '-';
-        position: absolute;
-        margin-left: -10px;
-      }
-
-      ul li {
-        padding-left: 20px
-      }
-
-      [title] .relative::after {
-        content: 'ℹ️';
-        display: inline-block;
-        margin: 0px 5px;
-        text-align: center;
-        font-size: 80%;
-      }
-
-      .handsontable {
-        overflow: unset !important;
-      }
-`;
 
         //       .ht_clone_top {
         //         pointer-events: none;
@@ -90,9 +82,19 @@ export class Table extends LitElement {
         //   }
         // `
 
-        const styleEl = document.createElement("style");
-        styleEl.innerHTML = style;
-        this.appendChild(styleEl);
+    constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
+        super();
+        this.schema = schema ?? {};
+        this.data = data ?? [];
+        this.keyColumn = keyColumn ?? "id";
+        this.template = template ?? {};
+        if (validateOnChange) this.validateOnChange = validateOnChange;
+
+        this.style.width = "100%";
+        this.style.display = "flex";
+        this.style.flexWrap = "wrap";
+        this.style.alignItems = "center";
+        this.style.justifyContent = "center";
     }
 
     static get properties() {
@@ -101,9 +103,9 @@ export class Table extends LitElement {
         };
     }
 
-    createRenderRoot() {
-        return this;
-    }
+    // createRenderRoot() {
+    //     return this;
+    // }
 
     #getRowData(row, cols = this.colHeaders) {
         const hasRow = row in this.data;
@@ -127,7 +129,7 @@ export class Table extends LitElement {
     }
 
     updated() {
-        const div = this.querySelector("div");
+        const div = this.shadowRoot.querySelector("div");
 
         const entries = this.schema.properties;
 
@@ -176,12 +178,16 @@ export class Table extends LitElement {
             }
 
             const runThisValidator = async (value, row) => {
-                const valid = this.validateOnChange
-                    ? await this.validateOnChange(k, this.data[rowHeaders[row]], value).catch(() => true)
-                    : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
-                let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
-                const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === "error") : [];
-                return valid === true || valid == undefined || errors.length === 0;
+              try{
+                  const valid = this.validateOnChange
+                      ? await this.validateOnChange(k, this.data[rowHeaders[row]], value)
+                      : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
+                  let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
+                  const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === "error") : [];
+                  return valid === true || valid == undefined || errors.length === 0;
+              } catch (e) {
+                  return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
+              }
             };
 
             if (info.validator) {
@@ -227,7 +233,24 @@ export class Table extends LitElement {
             afterGetRowHeader: onAfterGetHeader,
         });
 
+
+        // Immediately transfers the CopyPastePlugin FocusableWrapper element to the WC Shadow Root
+        const copyPastePlugin = table.getPlugin('copyPaste');
+        const updateFn = copyPastePlugin.getOrCreateFocusableElement.bind(copyPastePlugin)
+        copyPastePlugin.getOrCreateFocusableElement = () => {
+            const res = updateFn()
+            const focusable = copyPastePlugin.focusableElement.getFocusableElement()
+            this.shadowRoot.append(focusable)
+            return res
+        }
+
+
         this.table = table;
+
+        // Move context menu
+        const menu = div.ownerDocument.querySelector(".htContextMenu");
+        if (menu) div.appendChild(menu)
+
 
         const unresolved = (this.unresolved = {});
 

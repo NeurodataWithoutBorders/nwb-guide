@@ -48,7 +48,7 @@ export class GuidedMetadataPage extends ManagedPage {
             mode: "accordion",
             schema: this.info.globalState.schema.metadata[subject][session],
             results,
-            ignore: ["Ecephys", "source_script", "source_script_file_name"],
+            ignore: ["source_script", "source_script_file_name"],
             conditionalRequirements: [
                 {
                     name: "Subject Age",
