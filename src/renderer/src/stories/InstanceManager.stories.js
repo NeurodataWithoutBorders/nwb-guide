@@ -29,6 +29,12 @@ const instances = {
         content: "This is done",
         status: "valid",
     },
+    category: {
+        item: {
+            content: "This is nested",
+            status: "valid",
+        }
+    }
 };
 
 const convertToElement = (_, o) => {
