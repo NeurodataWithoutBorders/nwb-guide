@@ -228,19 +228,23 @@ export class Table extends LitElement {
 
     this.table = table;
 
-    const unresolved = {}
+    const unresolved = this.unresolved = {}
 
     table.addHook('afterValidate', (isValid, value, row, prop) => {
 
       const header = typeof prop === 'number' ? colHeaders[prop] : prop
-      const rowName = rowHeaders[row]
+      let rowName = rowHeaders[row]
 
       if (isValid) {
 
-        const isResolved = rowName in  this.data
-        let target = isResolved ? this.data : unresolved
+        const isResolved = rowName in this.data
+        let target = this.data
 
-        if (!isResolved && !unresolved[rowName]) unresolved[rowName] = {}
+        if (!isResolved) {
+          if (!unresolved[row]) unresolved[row] = {} // Ensure row exists
+          rowName = row
+          target = unresolved
+        }
 
         // Transfer data to object
         if (header === this.keyColumn) {
@@ -248,6 +252,7 @@ export class Table extends LitElement {
             const old = target[rowName] ?? {}
             this.data[value] = old
             delete target[rowName]
+            delete unresolved[row]
             rowHeaders[row] = value
           }
         }
@@ -270,7 +275,10 @@ export class Table extends LitElement {
 
     table.addHook('afterRemoveRow', (_, amount, physicalRows) => {
       nRows -= amount
-      physicalRows.forEach(row => delete this.data[rowHeaders[row]])
+      physicalRows.forEach(row => {
+        delete this.data[rowHeaders[row]]
+        delete unresolved[row]
+      })
     })
 
 

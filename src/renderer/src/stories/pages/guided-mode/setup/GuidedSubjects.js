@@ -17,7 +17,11 @@ export class GuidedSubjectsPage extends Page {
 
       const { results, subjects } = this.info.globalState
 
-      console.log(this.table.table.data) // Validate that all rows have a subject_id
+      const nUnresolved = Object.keys(this.table.unresolved).length
+      if (nUnresolved) return this.notify(`${nUnresolved} subject${nUnresolved > 1 ? 's are' : ' is'} missing a Subject ID value`, 'error')
+
+      const noSessions = Object.keys(subjects).filter(sub => !subjects[sub].sessions?.length)
+      if (noSessions.length) return this.notify(`${noSessions.length} subject${noSessions.length > 1 ? 's are' : ' is'} missing Sessions entries`, 'error')
 
       const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => { acc[key] = {}; return acc }, {})
 
