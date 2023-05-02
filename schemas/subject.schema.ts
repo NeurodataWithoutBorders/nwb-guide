@@ -21,13 +21,13 @@ const removeSubset = (data, subset) => {
 nwbBaseSchema.properties.Subject.properties.species = {
     type: 'string',
     enum: species,
-    items: { 
-        type: 'string' 
+    items: {
+        type: 'string'
     },
     strict: false,
     description: 'The species of your subject.'
 }
-  
+
 // Sort the subject schema
 const ageGroupKeys = ['age', 'age__reference', 'date_of_birth']
 const genotypeGroupKeys = ['genotype', 'strain']
