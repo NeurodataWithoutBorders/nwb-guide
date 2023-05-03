@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
-import "./Button";
-import { notify } from "../globals";
+import { isStorybook, notify } from "../globals";
 import { Handsontable } from "./hot";
+import { header } from "./forms/utils";
 
 export class Table extends LitElement {
     validateOnChange;
@@ -27,13 +27,30 @@ export class Table extends LitElement {
         padding: 0;
       }
 
+
       ul li:before {
         content: '-';
         position: absolute;
-        margin-left: -20px;
+        margin-left: -10px;
       }
-    `;
 
+      ul li {
+        padding-left: 20px
+      }
+
+      [title] .relative::after {
+        content: 'ℹ️';
+        display: inline-block;
+        margin: 0px 5px;
+        text-align: center;
+        font-size: 80%;
+        font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",  "Noto Color Emoji", "EmojiOne Color",  "Android Emoji", sans-serif;
+      }
+
+      .handsontable {
+        overflow: unset !important;
+      }
+`;
         const styleEl = document.createElement("style");
         styleEl.innerHTML = style;
         this.appendChild(styleEl);
@@ -86,41 +103,43 @@ export class Table extends LitElement {
 
         const rowHeaders = (this.rowHeaders = Object.keys(this.data));
 
-        const displayHeaders = [...colHeaders];
+        const displayHeaders = [...colHeaders].map(header);
 
         const columns = colHeaders.map((k, i) => {
             const info = { type: "text" };
 
-            if (entries[k].unit) displayHeaders[i] = `${k} (${entries[k].unit})`;
+            const colInfo = entries[k];
+            if (colInfo.unit) displayHeaders[i] = `${displayHeaders[i]} (${colInfo.unit})`;
 
             // Enumerate Possible Values
-            if (entries[k].enum) {
-                info.source = entries[k].enum;
-                info.type = "dropdown";
+            if (colInfo.enum) {
+                info.source = colInfo.enum;
+                if (colInfo.strict === false) info.type = "autocomplete";
+                else info.type = "dropdown";
             }
 
             // Constrain to Date Format
-            if (entries[k].format === "date-time") {
+            if (colInfo.format === "date-time") {
                 info.type = "date-time";
                 info.correctFormat = false;
             }
 
-            if (entries[k].type === "array") {
+            if (colInfo.type === "array") {
                 info.data = k;
                 info.type = "array";
-                info.uniqueItems = entries[k].uniqueItems;
+                info.uniqueItems = colInfo.uniqueItems;
             }
 
             // Validate Regex Pattern
-            if (entries[k].pattern) {
-                const regex = new RegExp(entries[k].pattern);
+            if (colInfo.pattern) {
+                const regex = new RegExp(colInfo.pattern);
                 info.validator = (value, callback) => callback(regex.test(value));
             }
 
             const runThisValidator = async (value, row) => {
                 const valid = this.validateOnChange
-                    ? await this.validateOnChange(k, this.data[rowHeaders[row]], value)
-                    : true;
+                    ? await this.validateOnChange(k, this.data[rowHeaders[row]], value).catch(() => true)
+                    : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
                 let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
                 const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === "error") : [];
                 return valid === true || valid == undefined || errors.length === 0;
@@ -143,6 +162,11 @@ export class Table extends LitElement {
             return info;
         });
 
+        const onAfterGetHeader = function (index, TH) {
+            const desc = entries[colHeaders[index]].description;
+            if (desc) TH.setAttribute("title", desc);
+        };
+
         const data = this.#getData();
 
         let nRows = rowHeaders.length;
@@ -152,25 +176,35 @@ export class Table extends LitElement {
             // rowHeaders: rowHeaders.map(v => `sub-${v}`),
             colHeaders: displayHeaders,
             columns,
-            height: "auto",
+            // height: 'auto', // Commenting this will fix dropdown issue
+            height: "auto", // Keeping this will ensure there is no infinite loop that adds length to the table
+            stretchH: "all",
+            manualColumnResize: true,
+            preventOverflow: "horizontal",
             width: "100%",
             contextMenu: ["row_below", "remove_row"], //, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
             licenseKey: "non-commercial-and-evaluation", // for non-commercial use only
+            afterGetColHeader: onAfterGetHeader,
+            afterGetRowHeader: onAfterGetHeader,
         });
 
         this.table = table;
 
-        const unresolved = {};
+        const unresolved = (this.unresolved = {});
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
-            const rowName = rowHeaders[row];
+            let rowName = rowHeaders[row];
 
             if (isValid) {
                 const isResolved = rowName in this.data;
-                let target = isResolved ? this.data : unresolved;
+                let target = this.data;
 
-                if (!isResolved && !unresolved[rowName]) unresolved[rowName] = {};
+                if (!isResolved) {
+                    if (!unresolved[row]) unresolved[row] = {}; // Ensure row exists
+                    rowName = row;
+                    target = unresolved;
+                }
 
                 // Transfer data to object
                 if (header === this.keyColumn) {
@@ -178,6 +212,7 @@ export class Table extends LitElement {
                         const old = target[rowName] ?? {};
                         this.data[value] = old;
                         delete target[rowName];
+                        delete unresolved[row];
                         rowHeaders[row] = value;
                     }
                 }
@@ -200,7 +235,10 @@ export class Table extends LitElement {
 
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
-            physicalRows.forEach((row) => delete this.data[rowHeaders[row]]);
+            physicalRows.forEach((row) => {
+                delete this.data[rowHeaders[row]];
+                delete unresolved[row];
+            });
         });
 
         table.addHook("afterCreateRow", (index, amount) => {
@@ -225,9 +263,6 @@ export class Table extends LitElement {
             <p style="width: 100%; margin: 10px 0px">
                 <small style="color: gray;">Right click to add or remove rows.</small>
             </p>
-            <nwb-button style="margin-top: 10px;" @click=${() => this.table.alter("insert_row_below")}
-                >Add New Row</nwb-button
-            >
         `;
     }
 }

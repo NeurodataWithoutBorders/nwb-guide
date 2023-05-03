@@ -2,10 +2,12 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 // For Multi-Select Form
-import { baseUrl, notyf } from "../../../../globals.js";
+import { notyf } from "../../../../globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { OptionalSection } from "../../../OptionalSection.js";
 import { run } from "../options/utils.js";
+
+import pathExpansionSchema from "../../../../../../../schemas/json/path-expansion.schema.json" assert { type: "json" };
 
 export class GuidedPathExpansionPage extends Page {
     constructor(...args) {

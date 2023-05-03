@@ -1,5 +1,5 @@
 import { dashboard } from "../../pages.js";
-import nwbBaseSchema from "../../../../../schemas/base_metadata_schema.json";
+import nwbBaseSchema from "../../../../../schemas/base-metadata.schema";
 
 const options = Object.keys(dashboard.pagesById).filter((k) => k.includes("guided"));
 
@@ -94,6 +94,11 @@ Locate.args = {
     activePage: "guided/locate",
 };
 
+export const Subjects = Template.bind({});
+Subjects.args = {
+    activePage: "guided/subjects",
+};
+
 export const SourceData = Template.bind({});
 SourceData.args = {
     activePage: "guided/sourcedata",
@@ -130,6 +135,7 @@ const statefulPages = [
     NewDataset,
     Structure,
     Locate,
+    Subjects,
     SourceData,
     Metadata,
     ConversionOptions,
