@@ -93,11 +93,13 @@ export class Page extends LitElement {
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
-        const folder = this.info.globalState.conversion.info.output_folder;
+        const folder = this.info.globalState.conversion?.info?.output_folder; // Do not require output_folder on the frontend
         let results = [];
 
         for (let { subject, session } of toRun) {
-            const file = `${folder}/sub-${subject}/sub-${subject}_ses-${session}.nwb`;
+            const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`
+            const file = folder ? `${folder}/${basePath}` : basePath;
+
             const result = await runConversion({
                 folder,
                 nwbfile_path: file,
