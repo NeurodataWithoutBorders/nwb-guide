@@ -6,6 +6,7 @@ import { ManagedPage } from "./ManagedPage.js";
 import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
+import { createResults } from "./utils.js";
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -21,25 +22,8 @@ export class GuidedMetadataPage extends ManagedPage {
         },
     };
 
-    // Merge project-wide data into metadata
-    populateWithProjectMetadata(info) {
-        const toMerge = Object.entries(this.info.globalState.project).filter(
-            ([_, value]) => value && typeof value === "object"
-        );
-        toMerge.forEach(([key, value]) => {
-            let internalMetadata = info[key];
-            if (!info[key]) internalMetadata = info[key] = {};
-            for (let key in value) {
-                if (!(key in internalMetadata)) internalMetadata[key] = value[key]; // Prioritize existing results (cannot override with new information...)
-            }
-        });
-
-        return info;
-    }
-
     createForm = ({ subject, session, info }) => {
-        const results = this.populateWithProjectMetadata(info.metadata);
-        this.merge("Subject", this.info.globalState.subjects[subject], results);
+        const results = createResults({ subject, info }, this.info.globalState);
 
         const instanceId = `sub-${subject}/ses-${session}`;
 
@@ -60,14 +44,7 @@ export class GuidedMetadataPage extends ManagedPage {
             ],
             validateOnChange,
             onlyRequired: false,
-            onStatusChange: (state) => {
-                const indicator = this.manager.shadowRoot.querySelector(
-                    `li[data-instance='sub-${subject}/ses-${session}']`
-                );
-                const currentState = Array.from(indicator.classList).find((c) => c !== "item");
-                if (currentState) indicator.classList.remove(currentState);
-                indicator.classList.add(state);
-            },
+            onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
         });
 
         return {
