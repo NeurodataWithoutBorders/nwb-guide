@@ -10,6 +10,7 @@ export class Table extends LitElement {
         return [
           unsafeCSS(HotCSS),
           css`
+
           ul {
             list-style-type: none;
             padding: 0;
@@ -86,9 +87,11 @@ export class Table extends LitElement {
         super();
         this.schema = schema ?? {};
         this.data = data ?? [];
-        this.keyColumn = keyColumn ?? "id";
+        this.keyColumn = keyColumn;
         this.template = template ?? {};
         if (validateOnChange) this.validateOnChange = validateOnChange;
+
+        if (this.data.length > 20) this.data = this.data.slice(0, 20)
 
         this.style.width = "100%";
         this.style.display = "flex";
@@ -131,7 +134,17 @@ export class Table extends LitElement {
     updated() {
         const div = this.shadowRoot.querySelector("div");
 
-        const entries = this.schema.properties;
+        const entries = {...this.schema.properties};
+
+        // Add existing additional properties to the entries variable if necessary
+        if (this.schema.additionalProperties) {
+            Object.values(this.data).reduce((acc, v) => {
+                Object.keys(v).forEach(k => (!(k in entries)) ? entries[k] = {
+                    type: typeof v[k]
+                } : '')
+                return acc
+            }, entries)
+        }
 
         // Sort Columns by Key Column and Requirement
         const colHeaders = (this.colHeaders = Object.keys(entries).sort((a, b) => {
@@ -141,6 +154,13 @@ export class Table extends LitElement {
             if (!entries[a].required && entries[b].required) return 1;
             return 0;
         }));
+
+        // Try to guess the key column if unspecified
+        if (!Array.isArray(this.data) && !this.keyColumn) {
+            const [ key , value ] = Object.entries(this.data)[0]
+            const foundKey = Object.keys(value).find(k => value[k] === key)
+            if (foundKey) this.keyColumn = foundKey
+        }
 
         const rowHeaders = (this.rowHeaders = Object.keys(this.data));
 
@@ -216,18 +236,20 @@ export class Table extends LitElement {
 
         let nRows = rowHeaders.length;
 
+        const contextMenu = ["row_below", "remove_row"]
+        if (this.schema.additionalProperties) contextMenu.push(['col_right', 'remove_col'])
+
         const table = new Handsontable(div, {
             data,
             // rowHeaders: rowHeaders.map(v => `sub-${v}`),
             colHeaders: displayHeaders,
             columns,
-            // height: 'auto', // Commenting this will fix dropdown issue
             height: "auto", // Keeping this will ensure there is no infinite loop that adds length to the table
             stretchH: "all",
             manualColumnResize: true,
             preventOverflow: "horizontal",
             width: "100%",
-            contextMenu: ["row_below", "remove_row"], //, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
+            contextMenu, //, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
             licenseKey: "non-commercial-and-evaluation", // for non-commercial use only
             afterGetColHeader: onAfterGetHeader,
             afterGetRowHeader: onAfterGetHeader,
@@ -283,6 +305,10 @@ export class Table extends LitElement {
                 return false;
             }
         });
+
+        table.addHook("afterContextMenuShow", (context) => {
+            console.error(context)
+        })
 
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;

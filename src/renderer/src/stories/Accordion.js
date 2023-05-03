@@ -206,8 +206,8 @@ export class Accordion extends LitElement {
         let state = hasForce ? forcedState : toggledState;
 
         //remove hidden from child elements with guided--nav-bar-section-page class
-        const children = this.shadowRoot.querySelectorAll("[data-section='" + sectionName + "']");
-        for (const child of children) this.#updateClass("hidden", child, state);
+        const section = this.shadowRoot.querySelector("[data-section='" + sectionName + "']");
+        this.#updateClass("hidden", section, state);
 
         const dropdown = this.shadowRoot.querySelector("[data-section-name='" + sectionName + "']");
         this.#updateClass("active", dropdown, !state);
@@ -231,7 +231,7 @@ export class Accordion extends LitElement {
                                 <div
                                     class="guided--nav-bar-dropdown ${info.status}"
                                     data-section-name=${sectionName}
-                                    @click=${() => this.#toggleDropdown(sectionName)}
+                                    @click=${() => this.#toggleDropdown(sectionName, undefined)}
                                 >
                                     <div class="header">
                                         <span>${sectionName}</span>
@@ -244,7 +244,7 @@ export class Accordion extends LitElement {
                                     class="content hidden"
                                     style="padding: ${this.contentPadding ?? "25px"}"
                                 >
-                                    ${info.content}
+                                ${info.content}
                                 </div>
                             </div>
                         `;

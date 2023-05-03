@@ -1,6 +1,7 @@
 from typing import List, Dict, Optional, Union
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
+from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
 
 import json
 from neuroconv.utils import NWBMetaDataEncoder
@@ -103,7 +104,26 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     converter = instantiate_custom_converter(source_data, interfaces)
     schema = converter.get_metadata_schema()
     metadata = converter.get_metadata()
-    return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
+    to_return = json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
+
+    # Handle electrode table results
+    electrode_table_info = [
+        interface.get_electrode_table_json() for interface in converter.data_interface_objects.values() if isinstance(interface, BaseRecordingExtractorInterface)
+    ]
+
+    flat_electrode_table_info = [item for sublist in electrode_table_info for item in sublist]
+
+
+    # Replace electrodes entry with the full table data
+    to_return['results']['Ecephys']['Electrodes'] = [
+        dict(**info, name=f"{info['channel_name']}_{info['group_name']}") for info in flat_electrode_table_info
+    ]
+
+    ## Allow additional properties to be added and rendered for this table
+    to_return['schema']['properties']['Ecephys']['properties']['definitions']['Electrodes']['additionalProperties'] = True
+
+    return to_return
+
 
 
 def get_check_function(check_function_name: str) -> callable:
@@ -193,8 +213,6 @@ def convert_to_nwb(info: dict) -> str:
     nwbfile_path = Path(info["nwbfile_path"])
     parent_folder = nwbfile_path.parent
 
-    folder = Path(info["folder"]) if "folder" in info else parent_folder
-
     run_stub_test = info.get("stub_test")
 
     parent_folder.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
@@ -218,6 +236,9 @@ def convert_to_nwb(info: dict) -> str:
         if run_stub_test
         else None
     )
+
+    ## NOTE: Modify this as necessary to prepare the electrodes table for the converter
+    # info["metadata"]['results']['Ecephys']['Electrodes']
 
     file = converter.run_conversion(
         metadata=info["metadata"],

@@ -101,7 +101,6 @@ export class Page extends LitElement {
             const file = folder ? `${folder}/${basePath}` : basePath;
 
             const result = await runConversion({
-                folder,
                 nwbfile_path: file,
                 overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                 ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here

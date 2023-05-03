@@ -7,13 +7,19 @@ export const validateOnChange = async (name, parent, path) => {
     let functions = [];
 
     const fullPath = [...path, name];
-    functions = fullPath.reduce((acc, key) => acc[key], json);
 
-    if (functions === undefined) {
+    let lastResolved
+    functions = fullPath.reduce((acc, key, i) => {
+        if (acc && key in acc) return lastResolved = acc[key]
+        else return 
+    }, json); // Pass the top level until it runs out
+
+    // Skip wildcard check for categories marked with false
+    if (lastResolved !== false && functions === undefined) {
         let lastWildcard;
         fullPath.reduce((acc, key) => {
             if (acc?.["*"]) lastWildcard = acc["*"].replace(`{*}`, `${name}`);
-            return acc[key];
+            return acc?.[key];
         }, json);
 
         if (lastWildcard) functions = [lastWildcard];

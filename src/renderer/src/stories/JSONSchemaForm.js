@@ -358,7 +358,6 @@ export class JSONSchemaForm extends LitElement {
     const resolved = path.reduce((acc, curr) => acc = acc[curr], schema)
     if (resolved['$ref']) return this.#getSchema(resolved['$ref'].split('/').slice(1)) // NOTE: This assumes reference to the root of the schema
     
-    console.log('Get schema', path, resolved)
     return resolved
   }
 
@@ -463,7 +462,6 @@ export class JSONSchemaForm extends LitElement {
 
         if (info.type === 'array') {
           const itemSchema = this.#getSchema('items', info)
-          console.log(name, parent[name], itemSchema)
           if (itemSchema.type === 'object') {
             return new Table({
               schema: itemSchema,
@@ -498,7 +496,6 @@ export class JSONSchemaForm extends LitElement {
 
 
       // Print out the immutable default value
-      console.log('Nothing', name, info, parent[name])
       return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : 'No default value'}</pre>`
       })()}
       ${info.description ? html`<p class="guided--text-input-instructions">${capitalize(info.description)}${info.description.slice(-1)[0] === '.' ? '' : '.'}${isStringArray ? html`<span style="color: #202020;"> Separate on new lines.</span>` : ''}</p>` : ''}
@@ -534,9 +531,12 @@ export class JSONSchemaForm extends LitElement {
     for (let name in properties) {
       const info = properties[name]
       const props = info.properties
-      if (props && !results[name]) results[name] = {} // Regisiter new interfaces in results
-      else if (info.default) results[name] = info.default
 
+      if (!results[name]){
+        if (props) results[name] = {} // Regisiter new interfaces in results
+        if (info.default) results[name] = info.default
+      }
+      
       if (props) {
         Object.entries(props).forEach(([key, value]) => {
           if (!(key in results[name])) {
@@ -781,32 +781,33 @@ export class JSONSchemaForm extends LitElement {
 
           const headerName = header(name)
 
-        this.#nestedForms[name] = new JSONSchemaForm({
-          identifier: this.identifier,
-          schema: info,
-          results: results[name],
-          required: required[name], // Scoped to the sub-schema
-          ignore: this.ignore,
-          dialogOptions: this.dialogOptions,
-          dialogType: this.dialogType,
-          onlyRequired: this.onlyRequired,
-          showLevelOverride: this.showLevelOverride,
-          conditionalRequirements: this.conditionalRequirements,
-          validateOnChange: (...args) => this.validateOnChange(...args),
-          validateEmptyValues: this.validateEmptyValues,
-          onStatusChange: (status) => {
-            accordion.setSectionStatus(headerName, status)
-            this.#checkStatus()
-          }, // Forward status changes to the parent form
-          onInvalid: (...args) => this.onInvalid(...args),
-          base: [...path, name]
-        })
+          this.#nestedForms[name] = new JSONSchemaForm({
+            identifier: this.identifier,
+            schema: info,
+            results: results[name],
+            required: required[name], // Scoped to the sub-schema
+            ignore: this.ignore,
+            dialogOptions: this.dialogOptions,
+            dialogType: this.dialogType,
+            onlyRequired: this.onlyRequired,
+            showLevelOverride: this.showLevelOverride,
+            conditionalRequirements: this.conditionalRequirements,
+            validateOnChange: (...args) => this.validateOnChange(...args),
+            validateEmptyValues: this.validateEmptyValues,
+            onStatusChange: (status) => {
+              accordion.setSectionStatus(headerName, status)
+              this.#checkStatus()
+            }, // Forward status changes to the parent form
+            onInvalid: (...args) => this.onInvalid(...args),
+            base: [...path, name]
+          })
 
-        const accordion = new Accordion({
+
+          const accordion = new Accordion({
             sections: {
               [headerName]: {
                 subtitle: `${Object.keys(info.properties).length} fields`,
-                content: this.#nestedForms[name]
+                content: this.#nestedForms[name] //generateForm
               }
             }
           })
@@ -868,7 +869,7 @@ export class JSONSchemaForm extends LitElement {
     this.#deleteExtraneousResults(this.results, this.schema)
 
     this.#registerRequirements(this.schema, this.required)
-
+    
     return html`
     <div>
     ${false ? html`<h2>${schema.title}</h2>` : ''}
