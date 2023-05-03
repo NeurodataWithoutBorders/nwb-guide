@@ -58,9 +58,7 @@ const globalState = {
         },
         metadata: {
             subject_id: {
-                session_id: {
-                    properties: nwbBaseSchema
-                }
+                session_id: nwbBaseSchema
             },
         },
     },
