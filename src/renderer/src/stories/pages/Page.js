@@ -66,7 +66,7 @@ export class Page extends LitElement {
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
 
-    merge = merge
+    merge = merge;
 
     addSession({ subject, session, info }) {
         if (!this.info.globalState.results[subject]) this.info.globalState.results[subject] = {};
@@ -82,7 +82,7 @@ export class Page extends LitElement {
         delete this.info.globalState.results[subject][session];
     }
 
-    mapSessions = (callback) => mapSessions(callback, this.info.globalState)
+    mapSessions = (callback) => mapSessions(callback, this.info.globalState);
 
     async runConversions(conversionOptions = {}, toRun) {
         let original = toRun;

@@ -23,7 +23,7 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     createForm = ({ subject, session, info }) => {
-        const results = createResults({ subject, info }, this.info.globalState)
+        const results = createResults({ subject, info }, this.info.globalState);
 
         const instanceId = `sub-${subject}/ses-${session}`;
 

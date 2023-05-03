@@ -1,10 +1,8 @@
 import { merge } from "../../utils.js";
 
- // Merge project-wide data into metadata
+// Merge project-wide data into metadata
 export function populateWithProjectMetadata(info, globalState) {
-    const toMerge = Object.entries(globalState.project).filter(
-        ([_, value]) => value && typeof value === "object"
-    );
+    const toMerge = Object.entries(globalState.project).filter(([_, value]) => value && typeof value === "object");
     toMerge.forEach(([key, value]) => {
         let internalMetadata = info[key];
         if (!info[key]) internalMetadata = info[key] = {};
@@ -16,10 +14,10 @@ export function populateWithProjectMetadata(info, globalState) {
     return info;
 }
 
-export function createResults ({ subject, info }, globalState){
+export function createResults({ subject, info }, globalState) {
     const results = populateWithProjectMetadata(info.metadata, globalState);
     const metadataCopy = { ...globalState.subjects[subject] };
     delete metadataCopy.sessions; // Remove extra key from metadata
     merge("Subject", metadataCopy, results);
-    return results
+    return results;
 }

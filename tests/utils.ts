@@ -1,5 +1,5 @@
 export function createMockGlobalState() {
-    
+
     const globalState = {
         project: {
             name: "test",
