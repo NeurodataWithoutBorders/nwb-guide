@@ -1,4 +1,5 @@
 import { dashboard } from "../../pages.js";
+import nwbBaseSchema from "../../../../../schemas/base_metadata_schema.json";
 
 const options = Object.keys(dashboard.pagesById).filter((k) => k.includes("guided"));
 
@@ -58,49 +59,8 @@ const globalState = {
         metadata: {
             subject_id: {
                 session_id: {
-                    properties: {
-                        NWBFile: {
-                            type: "object",
-                            properties: {
-                                session_description: {
-                                    type: "string",
-                                    description: "Enter a description of the session.",
-                                },
-                                identifier: {
-                                    type: "string",
-                                    description: "Enter a unique identifier for the session.",
-                                },
-                                session_start_time: {
-                                    type: "string",
-                                    description: "Enter the start time of the session.",
-                                    format: "date-time",
-                                },
-                            },
-                        },
-                        Subject: {
-                            type: "object",
-                            properties: {
-                                subject_id: {
-                                    type: "string",
-                                    description: "Enter a subject ID.",
-                                },
-                                species: {
-                                    type: "string",
-                                    description: "Enter a common species for your subjects.",
-                                },
-                                age: {
-                                    type: "number",
-                                    description: "The age of the subject",
-                                },
-                                date_of_birth: {
-                                    type: "string",
-                                    description: "The date of birth of the subject",
-                                },
-                            },
-                            required: ["subject_id"],
-                        },
-                    },
-                },
+                    properties: nwbBaseSchema
+                }
             },
         },
     },
@@ -167,6 +127,8 @@ Results.args = {
 };
 
 const statefulPages = [
+    Home, 
+    Start,
     NewDataset,
     Structure,
     Locate,
