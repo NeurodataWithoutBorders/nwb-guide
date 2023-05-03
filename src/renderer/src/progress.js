@@ -98,7 +98,7 @@ export const get = (name) => {
 
 export const deleteProgressCard = async (progressCardDeleteButton) => {
     const progressCard = progressCardDeleteButton.parentElement.parentElement;
-    const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent;
+    const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent.trim();
 
     const result = await Swal.fire({
         title: `Are you sure you would like to delete NWB GUIDE progress made on the dataset: ${progressCardNameToDelete}?`,
