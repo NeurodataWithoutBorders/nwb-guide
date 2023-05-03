@@ -2,7 +2,7 @@ Welcome to the NWB GUIDE documentation!
 =======================================
 |
 
-.. image:: ..src/renderer/assets/img/logo-guide-draft-transparent.png
+.. image:: ...src/renderer/assets/img/logo-guide-draft-transparent.png
   :scale: 50 %
   :align: center
   :alt: NWB GUIDE logo
