@@ -40,7 +40,6 @@ const componentCSS = `
         display: flex;
         height: 100%;
         width: 100%;
-        position: relative;
     }
 
     nwb-main {
@@ -324,7 +323,6 @@ export class Dashboard extends LitElement {
         this.style.height = "100%";
         this.style.display = "grid";
         this.style.gridTemplateColumns = "fit-content(0px) 1fr";
-        this.style.position = "relative";
 
         if (this.name) this.sidebar.name = this.name;
         if (this.logo) this.sidebar.logo = this.logo;

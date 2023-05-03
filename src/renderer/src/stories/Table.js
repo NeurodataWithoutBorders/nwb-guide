@@ -237,7 +237,7 @@ export class Table extends LitElement {
         let nRows = rowHeaders.length;
 
         const contextMenu = ["row_below", "remove_row"]
-        if (this.schema.additionalProperties) contextMenu.push(['col_right', 'remove_col'])
+        if (this.schema.additionalProperties) contextMenu.push('col_right', 'remove_col')
 
         const table = new Handsontable(div, {
             data,
@@ -249,7 +249,7 @@ export class Table extends LitElement {
             manualColumnResize: true,
             preventOverflow: "horizontal",
             width: "100%",
-            contextMenu, //, 'row_above', 'col_left', 'col_right', 'remove_row', 'remove_col'],
+            contextMenu,
             licenseKey: "non-commercial-and-evaluation", // for non-commercial use only
             afterGetColHeader: onAfterGetHeader,
             afterGetRowHeader: onAfterGetHeader,
@@ -260,7 +260,7 @@ export class Table extends LitElement {
 
         // Move context menu
         const menu = div.ownerDocument.querySelector(".htContextMenu");
-        if (menu) div.appendChild(menu)
+        if (menu) this.shadowRoot.appendChild(menu)
 
 
         const unresolved = (this.unresolved = {});
@@ -305,10 +305,6 @@ export class Table extends LitElement {
                 return false;
             }
         });
-
-        table.addHook("afterContextMenuShow", (context) => {
-            console.error(context)
-        })
 
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
