@@ -12,7 +12,7 @@
     "build": "npm run build:app",
     "build:app": "electron-vite build",
     "test": "npm run test:app && npm run test:server",
-    "test:app": "vitest",
+    "test:app": "vitest run",
     "test:server": "pytest pyflask/tests/ -s",
     "coverage": "vitest run --coverage",
     "build-win": "electron-builder build --win --publish never",
