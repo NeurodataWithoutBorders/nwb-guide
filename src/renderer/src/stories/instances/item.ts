@@ -11,6 +11,11 @@ export class InstanceListItem extends LitElement {
 
     static get styles() {
         return css`
+
+        :host {
+            display: block;
+        }
+        
         .item {
             padding: 5px;
             transition: background 0.5s;
@@ -43,6 +48,7 @@ export class InstanceListItem extends LitElement {
             font-weight: bold;
             border-radius: 8px;
             border: 1px solid #c3c3c3;
+            white-space: nowrap;
         }
 
         :host([selected]) span,

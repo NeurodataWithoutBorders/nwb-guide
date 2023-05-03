@@ -17,6 +17,7 @@ export class Accordion extends LitElement {
                 display: flex;
                 align-items: end;
                 padding: 20px 0px;
+                white-space: nowrap;
             }
 
             .chevron {
@@ -114,6 +115,10 @@ export class Accordion extends LitElement {
 
             .guided--nav-bar-dropdown.valid {
                 border-bottom: 5px solid hsl(${successHue}, 100%, 70%) !important;
+            }
+
+            .guided--nav-bar-dropdown {
+                margin-right: 50px;
             }
 
             .guided--nav-bar-dropdown::after {

@@ -45,6 +45,7 @@ export class InstanceManager extends LitElement {
                 background: #e5e5e5;
                 border-bottom: 1px solid #c3c3c3;
                 padding: 15px;
+                white-space: nowrap;
             }
 
             #instance-list {
@@ -121,6 +122,19 @@ export class InstanceManager extends LitElement {
     }
 
     renderInstance = (_, value) => value.content ?? value;
+
+    updateState = (id, state) => {
+        const item = this.#items.find(i => i.id === id)
+        item.status = state
+
+        // Carry the status upwards
+        const path = id.split('/')
+        for (let i = 0; i < path.length; i++) {
+            const id = path.slice(0, i + 1).join('/')
+            const accordion = this.#accordions[id]
+            if (accordion) accordion.setSectionStatus(id, state)
+        }
+    }
 
     // onAdded = () => {}
     // onRemoved = () => {}
@@ -220,6 +234,8 @@ export class InstanceManager extends LitElement {
         });
     }
 
+    #accordions = {}
+
     #render (toRender = this.instances, path=[]) {
         let instances = {}
         let categories = [];
@@ -241,6 +257,9 @@ export class InstanceManager extends LitElement {
                     },
                     contentPadding: '10px'
                 })
+
+                this.#accordions[resolvedKey] = accordion
+                
                 categories.push(accordion)
             } 
             
