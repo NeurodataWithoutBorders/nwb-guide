@@ -44,14 +44,7 @@ export class GuidedMetadataPage extends ManagedPage {
             ],
             validateOnChange,
             onlyRequired: false,
-            onStatusChange: (state) => {
-                const indicator = this.manager.shadowRoot.querySelector(
-                    `li[data-instance='sub-${subject}/ses-${session}']`
-                );
-                const currentState = Array.from(indicator.classList).find((c) => c !== "item");
-                if (currentState) indicator.classList.remove(currentState);
-                indicator.classList.add(state);
-            },
+            onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
         });
 
         return {

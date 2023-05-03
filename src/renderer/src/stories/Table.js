@@ -259,7 +259,7 @@ export class Table extends LitElement {
 
                 // Update data on passed object
                 else {
-                    if (value == undefined && value === "") delete target[rowName][header];
+                    if (value == undefined || value === "") delete target[rowName][header];
                     else target[rowName][header] = value;
                 }
             }

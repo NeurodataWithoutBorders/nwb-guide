@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit";
 import "./Button";
 import { notify } from "../globals";
-import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol } from "./globals";
+import { Accordion } from "./Accordion";
+import { InstanceListItem } from "./instances/item";
 
 export class InstanceManager extends LitElement {
     static get styles() {
@@ -44,6 +45,7 @@ export class InstanceManager extends LitElement {
                 background: #e5e5e5;
                 border-bottom: 1px solid #c3c3c3;
                 padding: 15px;
+                white-space: nowrap;
             }
 
             #instance-list {
@@ -53,40 +55,6 @@ export class InstanceManager extends LitElement {
                 overflow-x: hidden;
                 overflow-y: auto;
                 height: 100%;
-            }
-
-            .item {
-                padding: 5px;
-                transition: background 0.5s;
-                display: flex;
-                align-items: center;
-            }
-
-            .item > * {
-                margin-right: 10px;
-            }
-
-            .item > *:last-child {
-                margin-right: 0;
-            }
-
-            .item > span {
-                position: relative;
-                overflow: hidden;
-                padding: 10px 20px;
-                cursor: pointer;
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-weight: bold;
-                border-radius: 8px;
-                border: 1px solid #c3c3c3;
-            }
-
-            .item[selected] > span,
-            span:hover {
-                background: #ececec;
             }
 
             #instance-display {
@@ -105,10 +73,6 @@ export class InstanceManager extends LitElement {
 
             input {
                 width: 100%;
-            }
-
-            .item#new-info {
-                align-items: unset;
             }
 
             #new-manager *[hidden] {
@@ -131,53 +95,15 @@ export class InstanceManager extends LitElement {
                 align-items: center;
             }
 
-            .indicator {
-                height: 100%;
-                width: 40px;
+            #new-info {
+                align-items: unset;
+                width: 100%;
+                padding: 10px 30px;
                 display: flex;
-                justify-content: center;
-                align-items: center;
-                position: absolute;
-                right: 0px;
-                top: 0px;
-                font-size: 0.8em;
             }
 
-            .item.valid .indicator,
-            .item.error .indicator,
-            .item.warning .indicator {
-                background: rgb(250, 250, 250);
-                border-left: 1px solid rgb(195, 195, 195);
-            }
-
-            .item.warning .indicator {
-                background: hsl(${warningHue}, 100%, 90%);
-            }
-
-            .item.valid .indicator {
-                background: hsl(${successHue}, 100%, 90%);
-            }
-
-            .item.error .indicator {
-                background: hsl(${errorHue}, 100%, 95%);
-            }
-
-            .item.valid span,
-            .item.error span,
-            .item.warning span {
-                padding-right: 60px;
-            }
-
-            .item.valid .indicator::before {
-                content: "${successSymbol}";
-            }
-
-            .item.error .indicator::before {
-                content: "${errorSymbol}";
-            }
-
-            .item.warning .indicator::before {
-                content: "${warningSymbol}";
+            #new-info > input {
+                margin-right: 10px;
             }
         `;
     }
@@ -194,6 +120,19 @@ export class InstanceManager extends LitElement {
     }
 
     renderInstance = (_, value) => value.content ?? value;
+
+    updateState = (id, state) => {
+        const item = this.#items.find((i) => i.id === id);
+        item.status = state;
+
+        // Carry the status upwards
+        const path = id.split("/");
+        for (let i = 0; i < path.length; i++) {
+            const id = path.slice(0, i + 1).join("/");
+            const accordion = this.#accordions[id];
+            if (accordion) accordion.setSectionStatus(id, state);
+        }
+    };
 
     // onAdded = () => {}
     // onRemoved = () => {}
@@ -232,8 +171,7 @@ export class InstanceManager extends LitElement {
         let instances = {};
         Object.entries(category).forEach(([key, value]) => {
             const newKey = `${base}/${key}`;
-            if (typeof value === "object" && !(value instanceof HTMLElement))
-                instances = { ...this.#mapCategoryToInstances(value) };
+            if (this.#isCategory(value)) instances = { ...this.#mapCategoryToInstances(value) };
             else instances[newKey] = value;
         });
         return instances;
@@ -252,16 +190,123 @@ export class InstanceManager extends LitElement {
             });
     };
 
-    render() {
-        let instances = {};
+    #isCategory(value) {
+        return typeof value === "object" && !(value instanceof HTMLElement) && !("content" in value);
+    }
 
-        Object.entries(this.instances).forEach(([key, value]) => {
-            const isCategory = typeof value === "object" && !(value instanceof HTMLElement) && !("content" in value);
-            if (isCategory) instances = { ...instances, ...this.#mapCategoryToInstances(key, value) };
-            else instances[key] = value;
+    #items = [];
+
+    #onRemoved(ev) {
+        const parent = ev.target.parentNode;
+        const name = parent.getAttribute("data-instance");
+        const ogPath = name.split("/");
+        const path = [...ogPath];
+        let target = toRender;
+        const key = path.pop();
+        target = path.reduce((acc, cur) => acc[cur], target);
+        this.onRemoved(target[key], ogPath);
+        delete target[key];
+
+        if (parent.hasAttribute("selected")) {
+            const previous = parent.previousElementSibling?.getAttribute("data-instance");
+            if (previous) this.#selected = previous;
+            else {
+                const next = parent.nextElementSibling?.getAttribute("data-instance");
+                if (next) this.#selected = next;
+                else this.#selected = undefined;
+            }
+        }
+
+        // parent.remove()
+        // const instance = this.shadowRoot.querySelector(`div[data-instance="${name}"]`)
+        // instance.remove()
+
+        this.requestUpdate();
+    }
+
+    #hideAll(element) {
+        Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((el) => {
+            if (el !== element) el.hidden = true;
+        });
+    }
+
+    #accordions = {};
+
+    #render(toRender = this.instances, path = []) {
+        let instances = {};
+        let categories = [];
+
+        Object.entries(toRender).forEach(([key, value]) => {
+            const isCategory = this.#isCategory(value);
+            // if (isCategory) instances = { ...instances, ...this.#mapCategoryToInstances(key, value) };
+            // else instances[key] = value;
+            let resolvedKey = [...path, key].join("/");
+
+            if (isCategory) {
+                const list = this.#render(value, [...path, key]);
+
+                const accordion = new Accordion({
+                    sections: {
+                        [key]: {
+                            content: list,
+                        },
+                    },
+                    contentPadding: "10px",
+                });
+
+                this.#accordions[resolvedKey] = accordion;
+
+                categories.push(accordion);
+            } else {
+                if (!this.#selected) this.#selected = resolvedKey;
+                instances[resolvedKey] = value;
+            }
         });
 
-        const isSelected = Object.keys(instances).map((key, i) => (this.#selected ? key === this.#selected : i === 0));
+        const list = html`
+            ${Object.entries(instances).map(([key, info], i) => {
+                if (info instanceof HTMLElement) info = { content: info };
+                const listItemInfo = {
+                    id: key,
+                    label: key.split("/").pop(),
+                    selected: key === this.#selected,
+                    onRemoved: this.#onRemoved.bind(this),
+                    ...info,
+                };
+
+                const item = new InstanceListItem(listItemInfo);
+
+                this.#items.push(item);
+
+                item.onClick = () => {
+                    this.#selected = key;
+
+                    const instances = Array.from(this.shadowRoot.querySelectorAll("div[data-instance]"));
+
+                    const element = instances.find((el) => el.getAttribute("data-instance") === this.#selected);
+
+                    if (element) {
+                        element.hidden = false;
+                        this.#hideAll(element);
+
+                        this.#items.forEach((el) => {
+                            if (el !== item) el.removeAttribute("selected");
+                        });
+                    }
+                };
+
+                return item;
+            })}
+            ${categories}
+        `;
+
+        return list;
+    }
+
+    render() {
+        this.#items = [];
+
+        const instances = this.#render();
 
         return html`
             <div>
@@ -270,86 +315,7 @@ export class InstanceManager extends LitElement {
                         <h2>${this.header}</h2>
                     </div>
                     <ul id="instance-list">
-                        ${Object.entries(instances).map(
-                            ([key, info], i) => html`
-                                <li
-                                    class="item ${info.status}"
-                                    ?selected=${isSelected[i] === true}
-                                    data-instance="${key}"
-                                >
-                                    <span
-                                        @click="${() => {
-                                            this.#selected = key;
-                                            const sidebarInstances = Array.from(
-                                                this.shadowRoot.querySelectorAll("li[data-instance]")
-                                            );
-                                            const instances = Array.from(
-                                                this.shadowRoot.querySelectorAll("div[data-instance]")
-                                            );
-                                            const sidebarElement = sidebarInstances.find(
-                                                (el) => el.getAttribute("data-instance") === key
-                                            );
-                                            const element = instances.find(
-                                                (el) => el.getAttribute("data-instance") === key
-                                            );
-                                            if (element) {
-                                                sidebarElement.setAttribute("selected", "");
-                                                element.hidden = false;
-                                                instances.forEach((el) => {
-                                                    if (el !== element) el.hidden = true;
-                                                });
-
-                                                sidebarInstances.forEach((el) => {
-                                                    if (el !== sidebarElement) el.removeAttribute("selected");
-                                                });
-                                            }
-                                        }}"
-                                        >${key}
-                                        <div class="indicator"></div>
-                                    </span>
-                                    ${this.onRemoved
-                                        ? html`<nwb-button
-                                              size="small"
-                                              primary
-                                              color="gray"
-                                              @click=${(ev) => {
-                                                  const parent = ev.target.parentNode;
-                                                  const name = parent.getAttribute("data-instance");
-                                                  const ogPath = name.split("/");
-                                                  const path = [...ogPath];
-                                                  let target = this.instances;
-                                                  const key = path.pop();
-                                                  target = path.reduce((acc, cur) => acc[cur], target);
-                                                  this.onRemoved(target[key], ogPath);
-                                                  delete target[key];
-
-                                                  if (parent.hasAttribute("selected")) {
-                                                      const previous =
-                                                          parent.previousElementSibling?.getAttribute("data-instance");
-                                                      if (previous) this.#selected = previous;
-                                                      else {
-                                                          const next =
-                                                              parent.nextElementSibling?.getAttribute("data-instance");
-                                                          if (next) this.#selected = next;
-                                                          else this.#selected = undefined;
-                                                      }
-                                                  }
-
-                                                  // parent.remove()
-                                                  // const instance = this.shadowRoot.querySelector(`div[data-instance="${name}"]`)
-                                                  // instance.remove()
-
-                                                  this.requestUpdate();
-                                              }}
-                                              .buttonStyles=${{
-                                                  padding: "7px",
-                                              }}
-                                              >x</nwb-button
-                                          >`
-                                        : ""}
-                                </li>
-                            `
-                        )}
+                        ${instances}
                     </ul>
                     ${this.onAdded
                         ? html`<div id="new-manager">
@@ -373,6 +339,12 @@ export class InstanceManager extends LitElement {
                       target[key] = resolvedValue;
 
                       this.#onKeyDone();
+
+                      // Swap the selected item to the new one
+                      this.#selected = input.value;
+                      this.#hideAll();
+
+                      // Trigger new update
                       this.requestUpdate();
                   } catch (e) {
                       notify(e.message, "error");
@@ -417,13 +389,13 @@ export class InstanceManager extends LitElement {
                         : ``}
 
                     <div id="instance-display">
-                        ${Object.entries(instances).map(
-                            ([key, o], i) => html`
-                                <div data-instance="${key}" ?hidden=${isSelected[i] === false}>
-                                    ${this.renderInstance(key, o)}
+                        ${this.#items.map((item, i) => {
+                            return html`
+                                <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id}>
+                                    ${this.renderInstance(item.id, item.metadata)}
                                 </div>
-                            `
-                        )}
+                            `;
+                        })}
                     </div>
                 </div>
             </div>
