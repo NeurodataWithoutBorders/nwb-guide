@@ -14,3 +14,8 @@ build:
 sphinx:
   configuration: docs/conf.py
   fail_on_warning: true
+
+# Python requirements required to build the docs with things like search bar
+python:
+  install:
+    - requirements: requirements-rtd.txt
