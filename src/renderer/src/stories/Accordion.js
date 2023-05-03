@@ -1,5 +1,5 @@
-import { LitElement, css, html } from "lit";
-import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol } from "./globals";
+import { LitElement, css, html, unsafeCSS } from "lit";
+import { emojiFontFamily, errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol } from "./globals";
 
 // import 'fa-icons';
 
@@ -125,6 +125,7 @@ export class Accordion extends LitElement {
                 font-size: 0.8em;
                 position: absolute;
                 right: 50px;
+                font-family: ${unsafeCSS(emojiFontFamily)}
             }
 
             .guided--nav-bar-dropdown.error::after {
