@@ -97,7 +97,7 @@ export class Page extends LitElement {
         let results = [];
 
         for (let { subject, session } of toRun) {
-            const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`
+            const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
             const file = folder ? `${folder}/${basePath}` : basePath;
 
             const result = await runConversion({
