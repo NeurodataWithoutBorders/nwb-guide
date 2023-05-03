@@ -33,8 +33,8 @@ const instances = {
         item: {
             content: "This is nested",
             status: "valid",
-        }
-    }
+        },
+    },
 };
 
 const convertToElement = (_, o) => {

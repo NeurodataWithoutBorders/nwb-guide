@@ -81,7 +81,7 @@ export class Accordion extends LitElement {
             }
 
             .content {
-                width: 100%;;
+                width: 100%;
             }
 
             .guided--nav-bar-dropdown {
@@ -239,11 +239,13 @@ export class Accordion extends LitElement {
                                     </div>
                                     <div class="chevron right" color="${faColor}" size="${faSize}"></div>
                                 </div>
-                                <div 
-                                    data-section="${sectionName}" 
+                                <div
+                                    data-section="${sectionName}"
                                     class="content hidden"
-                                    style="padding: ${this.contentPadding ?? '25px'}"
-                                >${info.content}</div>
+                                    style="padding: ${this.contentPadding ?? "25px"}"
+                                >
+                                    ${info.content}
+                                </div>
                             </div>
                         `;
                     })

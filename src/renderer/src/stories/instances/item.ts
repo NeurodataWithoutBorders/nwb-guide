@@ -15,7 +15,7 @@ export class InstanceListItem extends LitElement {
         :host {
             display: block;
         }
-        
+
         .item {
             padding: 5px;
             transition: background 0.5s;
@@ -104,7 +104,7 @@ export class InstanceListItem extends LitElement {
         :host([status=warning]) .indicator::before {
             content: "${warningSymbol}";
         }
-        
+
         `
     }
 

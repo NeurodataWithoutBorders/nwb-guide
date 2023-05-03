@@ -2,7 +2,7 @@ import { LitElement, css, html } from "lit";
 import "./Button";
 import { notify } from "../globals";
 import { Accordion } from "./Accordion";
-import { InstanceListItem } from './instances/item'
+import { InstanceListItem } from "./instances/item";
 
 export class InstanceManager extends LitElement {
     static get styles() {
@@ -57,7 +57,6 @@ export class InstanceManager extends LitElement {
                 height: 100%;
             }
 
-
             #instance-display {
                 padding: 25px;
                 border-left: 0;
@@ -106,7 +105,6 @@ export class InstanceManager extends LitElement {
             #new-info > input {
                 margin-right: 10px;
             }
-
         `;
     }
 
@@ -124,17 +122,17 @@ export class InstanceManager extends LitElement {
     renderInstance = (_, value) => value.content ?? value;
 
     updateState = (id, state) => {
-        const item = this.#items.find(i => i.id === id)
-        item.status = state
+        const item = this.#items.find((i) => i.id === id);
+        item.status = state;
 
         // Carry the status upwards
-        const path = id.split('/')
+        const path = id.split("/");
         for (let i = 0; i < path.length; i++) {
-            const id = path.slice(0, i + 1).join('/')
-            const accordion = this.#accordions[id]
-            if (accordion) accordion.setSectionStatus(id, state)
+            const id = path.slice(0, i + 1).join("/");
+            const accordion = this.#accordions[id];
+            if (accordion) accordion.setSectionStatus(id, state);
         }
-    }
+    };
 
     // onAdded = () => {}
     // onRemoved = () => {}
@@ -192,13 +190,13 @@ export class InstanceManager extends LitElement {
             });
     };
 
-    #isCategory (value) {
-        return typeof value === "object" && !(value instanceof HTMLElement) && !("content" in value)
+    #isCategory(value) {
+        return typeof value === "object" && !(value instanceof HTMLElement) && !("content" in value);
     }
 
-    #items = []
+    #items = [];
 
-    #onRemoved (ev) {
+    #onRemoved(ev) {
         const parent = ev.target.parentNode;
         const name = parent.getAttribute("data-instance");
         const ogPath = name.split("/");
@@ -210,12 +208,10 @@ export class InstanceManager extends LitElement {
         delete target[key];
 
         if (parent.hasAttribute("selected")) {
-            const previous =
-                parent.previousElementSibling?.getAttribute("data-instance");
+            const previous = parent.previousElementSibling?.getAttribute("data-instance");
             if (previous) this.#selected = previous;
             else {
-                const next =
-                    parent.nextElementSibling?.getAttribute("data-instance");
+                const next = parent.nextElementSibling?.getAttribute("data-instance");
                 if (next) this.#selected = next;
                 else this.#selected = undefined;
             }
@@ -228,98 +224,89 @@ export class InstanceManager extends LitElement {
         this.requestUpdate();
     }
 
-    #hideAll(element){
+    #hideAll(element) {
         Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((el) => {
             if (el !== element) el.hidden = true;
         });
     }
 
-    #accordions = {}
+    #accordions = {};
 
-    #render (toRender = this.instances, path=[]) {
-        let instances = {}
+    #render(toRender = this.instances, path = []) {
+        let instances = {};
         let categories = [];
 
         Object.entries(toRender).forEach(([key, value]) => {
-            const isCategory = this.#isCategory(value)
+            const isCategory = this.#isCategory(value);
             // if (isCategory) instances = { ...instances, ...this.#mapCategoryToInstances(key, value) };
             // else instances[key] = value;
-            let resolvedKey = [...path, key].join('/')
-            
+            let resolvedKey = [...path, key].join("/");
+
             if (isCategory) {
-                const list = this.#render(value, [...path, key])
+                const list = this.#render(value, [...path, key]);
 
                 const accordion = new Accordion({
                     sections: {
                         [key]: {
-                            content: list
+                            content: list,
                         },
                     },
-                    contentPadding: '10px'
-                })
+                    contentPadding: "10px",
+                });
 
-                this.#accordions[resolvedKey] = accordion
-                
-                categories.push(accordion)
-            } 
-            
-            else {
+                this.#accordions[resolvedKey] = accordion;
+
+                categories.push(accordion);
+            } else {
                 if (!this.#selected) this.#selected = resolvedKey;
                 instances[resolvedKey] = value;
             }
         });
 
         const list = html`
-        ${Object.entries(instances).map(
-            ([key, info], i) => {
-
-                if (info instanceof HTMLElement) info = { content: info }
+            ${Object.entries(instances).map(([key, info], i) => {
+                if (info instanceof HTMLElement) info = { content: info };
                 const listItemInfo = {
-                    id: key, 
+                    id: key,
                     label: key.split("/").pop(),
                     selected: key === this.#selected,
                     onRemoved: this.#onRemoved.bind(this),
-                    ...info
-                }
+                    ...info,
+                };
 
-                const item = new InstanceListItem(listItemInfo)
+                const item = new InstanceListItem(listItemInfo);
 
-                this.#items.push(item)
+                this.#items.push(item);
 
                 item.onClick = () => {
-                        this.#selected = key
+                    this.#selected = key;
 
-                        const instances = Array.from(
-                            this.shadowRoot.querySelectorAll("div[data-instance]")
-                        );
-  
-                        const element = instances.find( (el) => el.getAttribute("data-instance") === this.#selected );
+                    const instances = Array.from(this.shadowRoot.querySelectorAll("div[data-instance]"));
 
-                        if (element) {
-                            element.hidden = false;
-                            this.#hideAll(element);
+                    const element = instances.find((el) => el.getAttribute("data-instance") === this.#selected);
 
-                            this.#items.forEach((el) => {
-                                if (el !== item) el.removeAttribute("selected");
-                            });
-                        }
-                }
+                    if (element) {
+                        element.hidden = false;
+                        this.#hideAll(element);
 
-                return item
-            }
-        )}
-        ${categories}
-        `
+                        this.#items.forEach((el) => {
+                            if (el !== item) el.removeAttribute("selected");
+                        });
+                    }
+                };
 
-        return list
+                return item;
+            })}
+            ${categories}
+        `;
 
+        return list;
     }
 
     render() {
+        this.#items = [];
 
-        this.#items = []
-
-        const instances = this.#render()
+        const instances = this.#render();
 
         return html`
             <div>
@@ -354,8 +341,8 @@ export class InstanceManager extends LitElement {
                       this.#onKeyDone();
 
                       // Swap the selected item to the new one
-                      this.#selected = input.value
-                      this.#hideAll()
+                      this.#selected = input.value;
+                      this.#hideAll();
 
                       // Trigger new update
                       this.requestUpdate();
@@ -402,15 +389,13 @@ export class InstanceManager extends LitElement {
                         : ``}
 
                     <div id="instance-display">
-                        ${this.#items.map(
-                            (item, i) => {
-                                return html`
-                                    <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id}>
-                                        ${this.renderInstance(item.id, item.metadata)}
-                                    </div>
-                                `
-                            }
-                        )}
+                        ${this.#items.map((item, i) => {
+                            return html`
+                                <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id}>
+                                    ${this.renderInstance(item.id, item.metadata)}
+                                </div>
+                            `;
+                        })}
                     </div>
                 </div>
             </div>
