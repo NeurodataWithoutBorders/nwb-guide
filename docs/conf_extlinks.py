@@ -37,8 +37,8 @@ extlinks = {
     "ncbi": ("https://www.ncbi.nlm.nih.gov/taxonomy%s", None),
     "ontobee": ("https://ontobee.org/%s", None),
 
-    "web-components": ("https://www.webcomponents.org/", None),
-    "npm": ("https://www.npmjs.com/", None)
+    "web-components": ("https://www.webcomponents.org/%s", None),
+    "npm": ("https://www.npmjs.com/%s", None)
 }
 
 # Use this for mapping for links to commonly used documentation
