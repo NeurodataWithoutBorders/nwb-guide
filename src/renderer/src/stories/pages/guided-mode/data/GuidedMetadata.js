@@ -39,8 +39,8 @@ export class GuidedMetadataPage extends ManagedPage {
 
     createForm = ({ subject, session, info }) => {
         const results = this.populateWithProjectMetadata(info.metadata);
-        const metadataCopy = {...this.info.globalState.subjects[subject]}
-        delete metadataCopy.sessions // Remove extra key from metadata
+        const metadataCopy = { ...this.info.globalState.subjects[subject] };
+        delete metadataCopy.sessions; // Remove extra key from metadata
         this.merge("Subject", this.info.globalState.subjects[subject], results);
 
         const instanceId = `sub-${subject}/ses-${session}`;
