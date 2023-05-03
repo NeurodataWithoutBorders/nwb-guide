@@ -18,4 +18,4 @@ sphinx:
 # Python requirements required to build the docs with things like search bar
 python:
   install:
-    - requirements: requirements-rtd.txt
+    - requirements: docs/requirements-rtd.txt
