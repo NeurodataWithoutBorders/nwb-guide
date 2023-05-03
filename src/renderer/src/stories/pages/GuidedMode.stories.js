@@ -58,7 +58,7 @@ const globalState = {
         },
         metadata: {
             subject_id: {
-                session_id: nwbBaseSchema
+                session_id: nwbBaseSchema,
             },
         },
     },
@@ -125,7 +125,7 @@ Results.args = {
 };
 
 const statefulPages = [
-    Home, 
+    Home,
     Start,
     NewDataset,
     Structure,
