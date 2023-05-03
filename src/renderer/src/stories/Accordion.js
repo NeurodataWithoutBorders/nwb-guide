@@ -17,6 +17,7 @@ export class Accordion extends LitElement {
                 display: flex;
                 align-items: end;
                 padding: 20px 0px;
+                white-space: nowrap;
             }
 
             .chevron {
@@ -81,7 +82,6 @@ export class Accordion extends LitElement {
 
             .content {
                 width: 100%;
-                padding: 25px;
             }
 
             .guided--nav-bar-dropdown {
@@ -115,6 +115,10 @@ export class Accordion extends LitElement {
 
             .guided--nav-bar-dropdown.valid {
                 border-bottom: 5px solid hsl(${successHue}, 100%, 70%) !important;
+            }
+
+            .guided--nav-bar-dropdown {
+                margin-right: 50px;
             }
 
             .guided--nav-bar-dropdown::after {
@@ -164,9 +168,10 @@ export class Accordion extends LitElement {
         };
     }
 
-    constructor({ sections = {} } = {}) {
+    constructor({ sections = {}, contentPadding } = {}) {
         super();
         this.sections = sections;
+        this.contentPadding = contentPadding;
     }
 
     updated() {
@@ -234,7 +239,13 @@ export class Accordion extends LitElement {
                                     </div>
                                     <div class="chevron right" color="${faColor}" size="${faSize}"></div>
                                 </div>
-                                <div data-section="${sectionName}" class="content hidden">${info.content}</div>
+                                <div
+                                    data-section="${sectionName}"
+                                    class="content hidden"
+                                    style="padding: ${this.contentPadding ?? "25px"}"
+                                >
+                                    ${info.content}
+                                </div>
                             </div>
                         `;
                     })
