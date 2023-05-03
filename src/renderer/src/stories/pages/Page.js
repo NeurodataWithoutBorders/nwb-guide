@@ -3,22 +3,7 @@ import useGlobalStyles from "../utils/useGlobalStyles.js";
 import { runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress.js";
 import { dismissNotification, notify } from "../../globals.js";
-
-const randomizeIndex = (count) => Math.floor(count * Math.random());
-
-const randomizeElements = (array, count) => {
-    if (count > array.length) throw new Error("Array size cannot be smaller than expected random numbers count.");
-    const result = [];
-    const guardian = new Set();
-    while (result.length < count) {
-        const index = randomizeIndex(array.length);
-        if (guardian.has(index)) continue;
-        const element = array[index];
-        guardian.add(index);
-        result.push(element);
-    }
-    return result;
-};
+import { merge, randomizeElements, mapSessions } from "./utils.js";
 
 const componentCSS = `
 
@@ -81,31 +66,7 @@ export class Page extends LitElement {
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
 
-    merge = (path, toMerge = {}, target = this.info.globalState) => {
-        // Provide a temporary data structure to merge into
-        const isTemp = !path || path.length === 0;
-        if (isTemp) {
-            path = ["temp"];
-            target = { temp: target };
-        }
-
-        if (!Array.isArray(path)) path = path.split(".");
-
-        const key = path.pop(); // Focus on the last key in the path
-        path.forEach((key) => (target = target[key]));
-
-        // Deep merge objects
-        if (key in target) {
-            for (const [k, v] of Object.entries(toMerge)) {
-                if (typeof v === "object" && !Array.isArray(v)) {
-                    if (!target[key][k]) target[key][k] = v;
-                    else this.merge(`${k}`, v, target[key]);
-                } else target[key][k] = v;
-            }
-        } else target[key] = toMerge;
-
-        return isTemp ? target.temp : target;
-    };
+    merge = merge
 
     addSession({ subject, session, info }) {
         if (!this.info.globalState.results[subject]) this.info.globalState.results[subject] = {};
@@ -121,14 +82,7 @@ export class Page extends LitElement {
         delete this.info.globalState.results[subject][session];
     }
 
-    mapSessions(callback = (v) => v) {
-        console.warn("this.info.globalState.results", this.info.globalState.results);
-        return Object.entries(this.info.globalState.results)
-            .map(([subject, sessions]) => {
-                return Object.entries(sessions).map(([session, info]) => callback({ subject, session, info }));
-            })
-            .flat(2);
-    }
+    mapSessions = (callback) => mapSessions(callback, this.info.globalState)
 
     async runConversions(conversionOptions = {}, toRun) {
         let original = toRun;
