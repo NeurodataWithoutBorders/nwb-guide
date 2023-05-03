@@ -51,46 +51,6 @@ export class Table extends LitElement {
         overflow: unset !important;
       }
 `;
-
-        //       .ht_clone_top {
-        //         pointer-events: none;
-        //       }
-
-        //       .ht_clone_top th:not([title]) {
-        //         pointer-events: auto;
-        //       }
-
-        //       .ht_master [title] {
-        //         overflow: unset !important;
-        //         visibility: visible !important;
-        //         position: relative;
-        //       }
-
-        //       .htColumnHeaders {
-        //         overflow: visible !important;
-        //       }
-        // `
-
-        //   .ht_master [title]::after {
-        //     position: absolute;
-        //     content: attr(title);
-        //     background: dimgray;
-        //     color: #fff;
-        //     font-size: 80%;
-        //     padding: 10px;
-        //     border-radius: 5px;
-        //     z-index: 100;
-        //     display: none;
-        //     width: 200px;
-        //     white-space: pre-wrap;
-        //     text-align: left;
-        //   }
-
-        //   .ht_master [title]:hover::after {
-        //     display: block;
-        //   }
-        // `
-
         const styleEl = document.createElement("style");
         styleEl.innerHTML = style;
         this.appendChild(styleEl);
