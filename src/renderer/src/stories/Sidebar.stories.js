@@ -1,16 +1,16 @@
-import { Sidebar } from './sidebar.js';
+import { Sidebar } from "./sidebar.js";
 
 export default {
-  title: 'Components/Sidebar',
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
+    title: "Components/Sidebar",
+    parameters: {
+        chromatic: { disableSnapshot: true },
+    },
 };
 
 const Template = (args) => new Sidebar(args);
 
 export const Default = Template.bind({});
 Default.args = {
-  primary: true,
-  label: 'Sidebar',
+    primary: true,
+    label: "Sidebar",
 };
