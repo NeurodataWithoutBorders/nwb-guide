@@ -361,7 +361,7 @@ export class JSONSchemaForm extends LitElement {
     if (isConditional && !isRequired) isRequired = required[name] = async () => {
 
       const isRequiredAfterChange = await this.#checkRequiredAfterChange(fullPath)
-      if (isRequiredAfterChange) return true // Check self
+      if (isRequiredAfterChange) return true // Check this property
       else {
         const linkResults = await this.#applyToLinkedProperties(this.#checkRequiredAfterChange, fullPath) // Check links
         if (linkResults.includes(true)) return true
