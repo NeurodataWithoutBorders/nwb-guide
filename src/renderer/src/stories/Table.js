@@ -1,45 +1,48 @@
-import { LitElement, css, html, unsafeCSS } from "lit";
+import { LitElement, html } from "lit";
 import { notify } from "../globals";
-import { Handsontable, css as HotCSS } from "./hot";
+import { Handsontable, css } from "./hot";
 import { header } from "./forms/utils";
+
+
+        // Inject scoped stylesheet
+const styles = `
+
+        ${css}
+        
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+
+      ul li:before {
+        content: '-';
+        position: absolute;
+        margin-left: -10px;
+      }
+
+      ul li {
+        padding-left: 20px
+      }
+
+      [title] .relative::after {
+        content: 'ℹ️';
+        display: inline-block;
+        margin: 0px 5px;
+        text-align: center;
+        font-size: 80%;
+        font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",  "Noto Color Emoji", "EmojiOne Color",  "Android Emoji", sans-serif;
+      }
+
+      .handsontable {
+        overflow: unset !important;
+      }
+`;
+
+const styleSymbol = Symbol('table-styles')
 
 export class Table extends LitElement {
     validateOnChange;
-
-    static get styles() {
-        return [
-            unsafeCSS(HotCSS),
-            css`
-                ul {
-                    list-style-type: none;
-                    padding: 0;
-                }
-
-                ul li:before {
-                    content: "-";
-                    position: absolute;
-                    margin-left: -10px;
-                }
-
-                ul li {
-                    padding-left: 20px;
-                }
-
-                [title] .relative::after {
-                    content: "ℹ️";
-                    display: inline-block;
-                    margin: 0px 5px;
-                    text-align: center;
-                    font-size: 80%;
-                    font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",  "Noto Color Emoji", "EmojiOne Color",  "Android Emoji", sans-serif;
-                }
-
-                .handsontable {
-                    overflow: unset !important;
-                }
-            `,
-        ];
-    }
 
     constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
         super();
@@ -56,41 +59,6 @@ export class Table extends LitElement {
         this.style.flexWrap = "wrap";
         this.style.alignItems = "center";
         this.style.justifyContent = "center";
-
-//         // Inject scoped stylesheet
-//         const style = `
-//       ul {
-//         list-style-type: none;
-//         padding: 0;
-//       }
-
-
-//       ul li:before {
-//         content: '-';
-//         position: absolute;
-//         margin-left: -10px;
-//       }
-
-//       ul li {
-//         padding-left: 20px
-//       }
-
-//       [title] .relative::after {
-//         content: 'ℹ️';
-//         display: inline-block;
-//         margin: 0px 5px;
-//         text-align: center;
-//         font-size: 80%;
-//         font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",  "Noto Color Emoji", "EmojiOne Color",  "Android Emoji", sans-serif;
-//       }
-
-//       .handsontable {
-//         overflow: unset !important;
-//       }
-// `;
-//         const styleEl = document.createElement("style");
-//         styleEl.innerHTML = style;
-//         this.appendChild(styleEl);
     }
 
     static get properties() {
@@ -99,9 +67,9 @@ export class Table extends LitElement {
         };
     }
 
-    // createRenderRoot() {
-    //     return this;
-    // }
+    createRenderRoot() {
+        return this;
+    }
 
     #getRowData(row, cols = this.colHeaders) {
         const hasRow = row in this.data;
@@ -256,7 +224,7 @@ export class Table extends LitElement {
 
         // Move context menu
         const menu = div.ownerDocument.querySelector(".htContextMenu");
-        if (this.shadowRoot && menu) this.shadowRoot.appendChild(menu);
+        if (menu) this.#root.appendChild(menu); // Move to style root
 
         const unresolved = (this.unresolved = {});
 
@@ -325,7 +293,23 @@ export class Table extends LitElement {
         });
     }
 
+
+    #root
+
     render() {
+
+        const root = this.getRootNode().body ?? this.getRootNode()
+        this.#root = root
+        const stylesheets = Array.from(root.querySelectorAll('style'))
+        const exists = stylesheets.find(el => el[styleSymbol])
+
+        if (!exists) {
+            const stylesheet = document.createElement("style");
+            stylesheet.innerHTML = styles;
+            stylesheet[styleSymbol] = true
+            root.append(stylesheet);
+        }
+
         return html`
             <div></div>
             <p style="width: 100%; margin: 10px 0px">
