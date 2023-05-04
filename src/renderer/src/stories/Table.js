@@ -128,7 +128,7 @@ export class Table extends LitElement {
     }
 
     updated() {
-        const div = this.shadowRoot.querySelector("div");
+        const div = (this.shadowRoot ?? this).querySelector("div");
 
         const entries = { ...this.schema.properties };
 
@@ -259,7 +259,7 @@ export class Table extends LitElement {
 
         // Move context menu
         const menu = div.ownerDocument.querySelector(".htContextMenu");
-        if (menu) this.shadowRoot.appendChild(menu);
+        if (this.shadowRoot && menu) this.shadowRoot.appendChild(menu);
 
         const unresolved = (this.unresolved = {});
 
