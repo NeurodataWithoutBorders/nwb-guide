@@ -5,8 +5,10 @@ import { header } from "./forms/utils";
 import { errorHue, warningHue } from "./globals";
 import { checkStatus } from "../validation";
 
+const maxRows = 20
 
-        // Inject scoped stylesheet
+
+// Inject scoped stylesheet
 const styles = `
 
         ${css}
@@ -73,7 +75,7 @@ export class Table extends LitElement {
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange
 
-        if (this.data.length > 20) this.data = this.data.slice(0, 20);
+        if (this.data.length > maxRows) this.data = this.data.slice(0, maxRows);
 
         this.style.width = "100%";
         this.style.display = "flex";
