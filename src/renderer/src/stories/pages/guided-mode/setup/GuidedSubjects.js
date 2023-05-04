@@ -82,7 +82,13 @@ export class GuidedSubjectsPage extends Page {
             data: subjects,
             template: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
-            validateOnChange: (key, v, parent) => validateOnChange(key, parent, ["Subject"], v),
+            validateOnChange: (key, parent, v) => {
+                if (key === 'sessions') return true
+                else {
+                    delete parent.sessions // Delete dessions from parent copy
+                    return validateOnChange(key, parent, ["Subject"], v)
+                }
+            },
         });
 
         return html`

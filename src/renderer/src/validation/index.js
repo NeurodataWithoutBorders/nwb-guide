@@ -1,45 +1,57 @@
 import { baseUrl } from "../globals";
-import json from "./validation.json" assert { type: "json" };
+import validationSchema from "./validation"
 
 // NOTE: Only validation missing on NWBFile Metadata is check_subject_exists and check_processing_module_name
 
-export const validateOnChange = async (name, parent, path) => {
+export async function validateOnChange (name, parent, path, value) {
     let functions = [];
 
     const fullPath = [...path, name];
+
+    const copy = { ...parent } // Validate on a copy of the parent
+    if (arguments.length > 3) copy[name] = value // Update value on copy
+
 
     let lastResolved;
     functions = fullPath.reduce((acc, key, i) => {
         if (acc && key in acc) return (lastResolved = acc[key]);
         else return;
-    }, json); // Pass the top level until it runs out
+    }, validationSchema); // Pass the top level until it runs out
 
     // Skip wildcard check for categories marked with false
-    if (lastResolved !== false && functions === undefined) {
+    if (lastResolved !== false && (functions === undefined || functions === true)) {
+        let overridden = false
         let lastWildcard;
         fullPath.reduce((acc, key) => {
-            if (acc?.["*"]) lastWildcard = acc["*"].replace(`{*}`, `${name}`);
+            if (acc && "*" in acc) {
+                if (!acc["*"]) overridden = true // Disable if undefined
+                else lastWildcard = acc["*"].replace(`{*}`, `${name}`)
+            }
             return acc?.[key];
-        }, json);
+        }, validationSchema);
 
+        if (overridden && functions !== true) lastWildcard = false // Disable if not promised to exist
         if (lastWildcard) functions = [lastWildcard];
     }
 
-    if (!functions || functions.length === 0) return; // No validation for this field
+    if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
     if (!Array.isArray(functions)) functions = [functions];
+    
 
-    // Client-side validation of multiple conditions. May be able to offload this to a single server-side call
+    // Validate multiple conditions. May be able to offload this to a single server-side call
     const res = (
         await Promise.all(
             functions.map(async (func) => {
-                return await fetch(`${baseUrl}/neuroconv/validate`, {
+                if (typeof func === 'function') return await func(name, copy, path, this.results) // Can specify alternative client-side validation
+                else return await fetch(`${baseUrl}/neuroconv/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        parent,
+                        parent: copy,
                         function_name: func,
                     }),
-                }).then((res) => res.json());
+                })
+                .then((res) => res.json());
             })
         )
     ).flat();
@@ -50,8 +62,8 @@ export const validateOnChange = async (name, parent, path) => {
             .map((o) => {
                 return {
                     message: o.message,
-                    type: o.importance === "CRITICAL" ? "error" : "warning",
-                    missing: o.message.includes("is missing"), // Indicates that the field is missing
+                    type: o.type ?? o.importance === "CRITICAL" ? "error" : "warning",
+                    missing: o.missing ?? o.message.includes("is missing"), // Indicates that the field is missing
                 };
             }); // Some of the requests end in errors
 

@@ -16,7 +16,7 @@ const removeSubset = (data, subset) => {
     "Drosophila melanogaster - Fruit fly",
     "Danio rerio - Zebra fish",
     "Caenorhabditis elegans"
-  ]
+  ].map(str => str.split(' - ')[0]) // Remove common names so this passes the validator
 
 nwbBaseSchema.properties.Subject.properties.species = {
     type: 'string',

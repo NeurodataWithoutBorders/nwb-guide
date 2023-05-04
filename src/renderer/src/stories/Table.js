@@ -2,12 +2,22 @@ import { LitElement, html } from "lit";
 import { notify } from "../globals";
 import { Handsontable, css } from "./hot";
 import { header } from "./forms/utils";
+import { errorHue, warningHue } from "./globals";
 
 
         // Inject scoped stylesheet
 const styles = `
 
         ${css}
+
+
+        .handsontable td.htInvalid {
+            background: hsl(${errorHue}, 100%, 90%) !important;
+        }
+
+        [warning] {
+            background: hsl(${warningHue}, 100%, 90%) !important;
+        }
         
       ul {
         list-style-type: none;
@@ -162,13 +172,33 @@ export class Table extends LitElement {
                 info.validator = (value, callback) => callback(regex.test(value));
             }
 
-            const runThisValidator = async (value, row) => {
+            const runThisValidator = async (value, row, prop) => {
                 try {
                     const valid = this.validateOnChange
-                        ? await this.validateOnChange(k, this.data[rowHeaders[row]], value)
+                        ? await this.validateOnChange(
+                            k, 
+                            { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
+                            value
+                        )
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
-                    let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
+                    
+                    const warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
                     const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === "error") : [];
+
+                    // Display errors as tooltip
+                    const cell = this.table.getCell(row, prop) // NOTE: Does not resolve unless the cell is rendered...
+                    if (cell) {
+                        let title = ''
+                        if (warnings.length) {
+                            cell.setAttribute('warning', '')
+                            title = warnings.map(o => o.message).join('\n')
+                        } else cell.removeAttribute('warning')
+
+                        if (errors.length) title = errors.map(o => o.message).join('\n') // Class switching handled automatically
+
+                        if (title) cell.title = title
+                    }
+
                     return valid === true || valid == undefined || errors.length === 0;
                 } catch (e) {
                     return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
@@ -179,13 +209,13 @@ export class Table extends LitElement {
                 const og = info.validator;
                 info.validator = async function (value, callback) {
                     if (!value) return callback(true); // Allow empty values
-                    if (!(await runThisValidator(value, this.row))) return callback(false);
+                    if (!(await runThisValidator(value, this.row, this.col))) return callback(false);
                     og(value, callback);
                 };
             } else {
                 info.validator = async function (value, callback) {
                     if (!value) return callback(true); // Allow empty values
-                    callback(await runThisValidator(value, this.row));
+                    callback(await runThisValidator(value, this.row, this.col));
                 };
             }
 
