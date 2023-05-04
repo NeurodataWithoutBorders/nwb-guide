@@ -36,6 +36,8 @@ const standardOrder = {...nwbBaseSchema.properties.Subject.properties}
 const group = removeSubset(standardOrder, groups)
 const required = removeSubset(standardOrder, nwbBaseSchema.properties.Subject.required)
 
+let newRequiredArray = [...nwbBaseSchema.properties.Subject.required, 'sessions']
+
 export default {
     ...nwbBaseSchema.properties.Subject,
     properties: {
@@ -47,5 +49,6 @@ export default {
       ...required,
       ...group,
       ...standardOrder,
-    }
+    },
+    required: newRequiredArray
   }

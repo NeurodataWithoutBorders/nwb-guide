@@ -10,8 +10,7 @@ const styles = `
 
         ${css}
 
-
-        .handsontable td.htInvalid {
+        .handsontable td[error] {
             background: hsl(${errorHue}, 100%, 90%) !important;
         }
 
@@ -191,24 +190,8 @@ export class Table extends LitElement {
                         )
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
                     
-                    const warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
-                    const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === "error") : [];
+                    return this.#handleValidationResult(valid, row, prop)
 
-                    // Display errors as tooltip
-                    const cell = this.table.getCell(row, prop) // NOTE: Does not resolve unless the cell is rendered...
-                    if (cell) {
-                        let title = ''
-                        if (warnings.length) {
-                            cell.setAttribute('warning', '')
-                            title = warnings.map(o => o.message).join('\n')
-                        } else cell.removeAttribute('warning')
-
-                        if (errors.length) title = errors.map(o => o.message).join('\n') // Class switching handled automatically
-
-                        if (title) cell.title = title
-                    }
-
-                    return valid === true || valid == undefined || errors.length === 0;
                 } catch (e) {
                     return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
                 }
@@ -216,18 +199,35 @@ export class Table extends LitElement {
 
             let ogThis = this
             const isRequired = ogThis.schema?.required?.includes(k)
+
+            const validator = async function (value, callback) {
+                if (!value) {
+                    if (isRequired) {
+                        ogThis.#handleValidationResult([ { message: `${k} is a required property.`, type: 'error' } ], this.row, this.col)
+                        callback(false)
+                        return true
+                    }
+                    if (!ogThis.validateEmptyCells) {
+                        callback(true); // Allow empty value
+                        return true
+                    }
+                }
+                
+                if (!(await runThisValidator(value, this.row, this.col))) {
+                    callback(false);
+                    return true
+                }
+            };
+
             if (info.validator) {
                 const og = info.validator;
                 info.validator = async function (value, callback) {
-                    if (!value && !ogThis.validateEmptyCells && !isRequired) return callback(true); // Allow empty values
-                    if (!(await runThisValidator(value, this.row, this.col))) return callback(false);
-                    og(value, callback);
+                    const called = await validator.call(this, value, callback)
+                    if (!called) og(value, callback);
                 };
-            } else {
-                info.validator = async function (value, callback) {
-                    if (!value && !ogThis.validateEmptyCells && !isRequired) return callback(true); // Allow empty values
-                    callback(await runThisValidator(value, this.row, this.col));
-                };
+            } else info.validator = async function (value, callback) {
+                const called = await validator.call(this, value, callback)
+                if (!called) callback(true) // Default to true if not called earlier
             }
 
             return info;
@@ -330,6 +330,30 @@ export class Table extends LitElement {
 
     #setRow(row, data) {
         data.forEach((value, j) => this.table.setDataAtCell(row, j, value));
+    }
+
+    #handleValidationResult = (result, row, prop) => {
+        const warnings = Array.isArray(result) ? result.filter((info) => info.type === "warning") : [];
+        const errors = Array.isArray(result) ? result?.filter((info) => info.type === "error") : [];
+
+        // Display errors as tooltip
+        const cell = this.table.getCell(row, prop) // NOTE: Does not resolve unless the cell is rendered...
+
+        if (cell) {
+            let title = ''
+            if (warnings.length) {
+                cell.setAttribute('warning', '')
+                title = warnings.map(o => o.message).join('\n')
+            } else cell.removeAttribute('warning')
+
+            if (errors.length) {
+                cell.setAttribute('error', '')
+                title = errors.map(o => o.message).join('\n') // Class switching handled automatically
+            } else cell.removeAttribute('error')
+
+            if (title) cell.title = title
+        }
+        return result === true || result == undefined || errors.length === 0;
     }
 
 
