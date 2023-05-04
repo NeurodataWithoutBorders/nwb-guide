@@ -11,7 +11,10 @@ export default {
 
 const Template = (args) => new Table(args);
 
-const data = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"].reduce((acc, key) => {
+const subjects = 10
+const subjectIds = Array.from({length: subjects}, (_, i) => i)
+
+const data = subjectIds.reduce((acc, key) => {
     acc[key] = {
         weight: (60 * Math.random()).toFixed(2),
         sessions: [1],
