@@ -882,6 +882,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
   }
 
   render() {
+
     const schema = this.schema ?? {};
 
     // Register default properties

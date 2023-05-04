@@ -78,7 +78,10 @@ export class GuidedMetadataPage extends ManagedPage {
 
                         const [{ file, result }] = await this.runConversions({ stub_test: true }, [
                             { subject, session },
-                        ]).catch((e) => this.notify(e.message, "error"));
+                        ]).catch((e) => {
+                            this.notify(e.message, "error")
+                            throw e
+                        });
 
                         const modal = new Modal({
                             header: file,
