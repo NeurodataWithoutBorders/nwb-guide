@@ -16,7 +16,7 @@ export class GuidedMetadataPage extends ManagedPage {
     form;
     footer = {
         onNext: async () => {
-            console.warn(this.info.globalState)
+            console.warn(this.info.globalState);
             this.save();
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
             this.onTransition(1);
@@ -33,11 +33,7 @@ export class GuidedMetadataPage extends ManagedPage {
             mode: "accordion",
             schema: this.info.globalState.schema.metadata[subject][session],
             results,
-            ignore: [
-                "ElectricalSeriesAP", 
-                "source_script", 
-                "source_script_file_name"
-            ],
+            ignore: ["ElectricalSeriesAP", "source_script", "source_script_file_name"],
             conditionalRequirements: [
                 {
                     name: "Subject Age",

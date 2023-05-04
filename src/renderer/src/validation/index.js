@@ -8,10 +8,10 @@ export const validateOnChange = async (name, parent, path) => {
 
     const fullPath = [...path, name];
 
-    let lastResolved
+    let lastResolved;
     functions = fullPath.reduce((acc, key, i) => {
-        if (acc && key in acc) return lastResolved = acc[key]
-        else return 
+        if (acc && key in acc) return (lastResolved = acc[key]);
+        else return;
     }, json); // Pass the top level until it runs out
 
     // Skip wildcard check for categories marked with false

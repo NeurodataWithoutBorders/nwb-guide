@@ -8,80 +8,76 @@ export class Table extends LitElement {
 
     static get styles() {
         return [
-          unsafeCSS(HotCSS),
-          css`
+            unsafeCSS(HotCSS),
+            css`
+                ul {
+                    list-style-type: none;
+                    padding: 0;
+                }
 
-          ul {
-            list-style-type: none;
-            padding: 0;
-          }
-    
-    
-          ul li:before {
-            content: '-';
-            position: absolute;
-            margin-left: -10px;
-          }
-    
-          ul li {
-            padding-left: 20px
-          }
-    
-          [title] .relative::after {
-            content: 'ℹ️';
-            display: inline-block;
-            margin: 0px 5px;
-            text-align: center;
-            font-size: 80%;
-          }
-    
-          .handsontable {
-            overflow: unset !important;
-          }
-          `
-        ]
+                ul li:before {
+                    content: "-";
+                    position: absolute;
+                    margin-left: -10px;
+                }
+
+                ul li {
+                    padding-left: 20px;
+                }
+
+                [title] .relative::after {
+                    content: "ℹ️";
+                    display: inline-block;
+                    margin: 0px 5px;
+                    text-align: center;
+                    font-size: 80%;
+                }
+
+                .handsontable {
+                    overflow: unset !important;
+                }
+            `,
+        ];
     }
 
+    //       .ht_clone_top {
+    //         pointer-events: none;
+    //       }
 
+    //       .ht_clone_top th:not([title]) {
+    //         pointer-events: auto;
+    //       }
 
-        //       .ht_clone_top {
-        //         pointer-events: none;
-        //       }
+    //       .ht_master [title] {
+    //         overflow: unset !important;
+    //         visibility: visible !important;
+    //         position: relative;
+    //       }
 
-        //       .ht_clone_top th:not([title]) {
-        //         pointer-events: auto;
-        //       }
+    //       .htColumnHeaders {
+    //         overflow: visible !important;
+    //       }
+    // `
 
-        //       .ht_master [title] {
-        //         overflow: unset !important;
-        //         visibility: visible !important;
-        //         position: relative;
-        //       }
+    //   .ht_master [title]::after {
+    //     position: absolute;
+    //     content: attr(title);
+    //     background: dimgray;
+    //     color: #fff;
+    //     font-size: 80%;
+    //     padding: 10px;
+    //     border-radius: 5px;
+    //     z-index: 100;
+    //     display: none;
+    //     width: 200px;
+    //     white-space: pre-wrap;
+    //     text-align: left;
+    //   }
 
-        //       .htColumnHeaders {
-        //         overflow: visible !important;
-        //       }
-        // `
-
-        //   .ht_master [title]::after {
-        //     position: absolute;
-        //     content: attr(title);
-        //     background: dimgray;
-        //     color: #fff;
-        //     font-size: 80%;
-        //     padding: 10px;
-        //     border-radius: 5px;
-        //     z-index: 100;
-        //     display: none;
-        //     width: 200px;
-        //     white-space: pre-wrap;
-        //     text-align: left;
-        //   }
-
-        //   .ht_master [title]:hover::after {
-        //     display: block;
-        //   }
-        // `
+    //   .ht_master [title]:hover::after {
+    //     display: block;
+    //   }
+    // `
 
     constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
         super();
@@ -91,7 +87,7 @@ export class Table extends LitElement {
         this.template = template ?? {};
         if (validateOnChange) this.validateOnChange = validateOnChange;
 
-        if (this.data.length > 20) this.data = this.data.slice(0, 20)
+        if (this.data.length > 20) this.data = this.data.slice(0, 20);
 
         this.style.width = "100%";
         this.style.display = "flex";
@@ -134,16 +130,20 @@ export class Table extends LitElement {
     updated() {
         const div = this.shadowRoot.querySelector("div");
 
-        const entries = {...this.schema.properties};
+        const entries = { ...this.schema.properties };
 
         // Add existing additional properties to the entries variable if necessary
         if (this.schema.additionalProperties) {
             Object.values(this.data).reduce((acc, v) => {
-                Object.keys(v).forEach(k => (!(k in entries)) ? entries[k] = {
-                    type: typeof v[k]
-                } : '')
-                return acc
-            }, entries)
+                Object.keys(v).forEach((k) =>
+                    !(k in entries)
+                        ? (entries[k] = {
+                              type: typeof v[k],
+                          })
+                        : ""
+                );
+                return acc;
+            }, entries);
         }
 
         // Sort Columns by Key Column and Requirement
@@ -157,9 +157,9 @@ export class Table extends LitElement {
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
-            const [ key , value ] = Object.entries(this.data)[0]
-            const foundKey = Object.keys(value).find(k => value[k] === key)
-            if (foundKey) this.keyColumn = foundKey
+            const [key, value] = Object.entries(this.data)[0];
+            const foundKey = Object.keys(value).find((k) => value[k] === key);
+            if (foundKey) this.keyColumn = foundKey;
         }
 
         const rowHeaders = (this.rowHeaders = Object.keys(this.data));
@@ -198,16 +198,16 @@ export class Table extends LitElement {
             }
 
             const runThisValidator = async (value, row) => {
-              try{
-                  const valid = this.validateOnChange
-                      ? await this.validateOnChange(k, this.data[rowHeaders[row]], value)
-                      : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
-                  let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
-                  const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === "error") : [];
-                  return valid === true || valid == undefined || errors.length === 0;
-              } catch (e) {
-                  return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
-              }
+                try {
+                    const valid = this.validateOnChange
+                        ? await this.validateOnChange(k, this.data[rowHeaders[row]], value)
+                        : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
+                    let warnings = Array.isArray(valid) ? valid.filter((info) => info.type === "warning") : [];
+                    const errors = Array.isArray(valid) ? valid?.filter((info) => info.type === "error") : [];
+                    return valid === true || valid == undefined || errors.length === 0;
+                } catch (e) {
+                    return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
+                }
             };
 
             if (info.validator) {
@@ -236,8 +236,8 @@ export class Table extends LitElement {
 
         let nRows = rowHeaders.length;
 
-        const contextMenu = ["row_below", "remove_row"]
-        if (this.schema.additionalProperties) contextMenu.push('col_right', 'remove_col')
+        const contextMenu = ["row_below", "remove_row"];
+        if (this.schema.additionalProperties) contextMenu.push("col_right", "remove_col");
 
         const table = new Handsontable(div, {
             data,
@@ -255,13 +255,11 @@ export class Table extends LitElement {
             afterGetRowHeader: onAfterGetHeader,
         });
 
-
         this.table = table;
 
         // Move context menu
         const menu = div.ownerDocument.querySelector(".htContextMenu");
-        if (menu) this.shadowRoot.appendChild(menu)
-
+        if (menu) this.shadowRoot.appendChild(menu);
 
         const unresolved = (this.unresolved = {});
 

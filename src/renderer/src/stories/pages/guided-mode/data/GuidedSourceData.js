@@ -35,7 +35,6 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }) => {
-
                     // NOTE: This clears all user-defined results
                     const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
                         method: "POST",
@@ -54,7 +53,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                         throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
                     }
 
-                    console.log(result.results.Ecephys.Electrodes, result.schema.properties.Ecephys)
+                    console.log(result.results.Ecephys.Electrodes, result.schema.properties.Ecephys);
 
                     // Merge metadata results with the generated info
                     this.merge("metadata", result.results, info);

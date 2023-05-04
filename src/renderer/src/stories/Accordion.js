@@ -244,7 +244,7 @@ export class Accordion extends LitElement {
                                     class="content hidden"
                                     style="padding: ${this.contentPadding ?? "25px"}"
                                 >
-                                ${info.content}
+                                    ${info.content}
                                 </div>
                             </div>
                         `;

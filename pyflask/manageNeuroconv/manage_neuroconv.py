@@ -108,22 +108,24 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # Handle electrode table results
     electrode_table_info = [
-        interface.get_electrode_table_json() for interface in converter.data_interface_objects.values() if isinstance(interface, BaseRecordingExtractorInterface)
+        interface.get_electrode_table_json()
+        for interface in converter.data_interface_objects.values()
+        if isinstance(interface, BaseRecordingExtractorInterface)
     ]
 
     flat_electrode_table_info = [item for sublist in electrode_table_info for item in sublist]
 
-
     # Replace electrodes entry with the full table data
-    to_return['results']['Ecephys']['Electrodes'] = [
+    to_return["results"]["Ecephys"]["Electrodes"] = [
         dict(**info, name=f"{info['channel_name']}_{info['group_name']}") for info in flat_electrode_table_info
     ]
 
     ## Allow additional properties to be added and rendered for this table
-    to_return['schema']['properties']['Ecephys']['properties']['definitions']['Electrodes']['additionalProperties'] = True
+    to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"][
+        "additionalProperties"
+    ] = True
 
     return to_return
-
 
 
 def get_check_function(check_function_name: str) -> callable:
