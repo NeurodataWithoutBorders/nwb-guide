@@ -11,8 +11,8 @@ export default {
 
 const Template = (args) => new Table(args);
 
-const subjects = 10
-const subjectIds = Array.from({length: subjects}, (_, i) => i)
+const subjects = 10;
+const subjectIds = Array.from({ length: subjects }, (_, i) => i);
 
 const data = subjectIds.reduce((acc, key) => {
     acc[key] = {
