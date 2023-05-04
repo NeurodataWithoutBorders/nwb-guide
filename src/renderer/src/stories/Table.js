@@ -3,6 +3,7 @@ import { notify } from "../globals";
 import { Handsontable, css } from "./hot";
 import { header } from "./forms/utils";
 import { errorHue, warningHue } from "./globals";
+import { checkStatus } from "../validation";
 
 
         // Inject scoped stylesheet
@@ -59,7 +60,8 @@ export class Table extends LitElement {
         template, 
         keyColumn, 
         validateOnChange,
-        validateEmptyCells
+        validateEmptyCells,
+        onStatusChange
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -69,6 +71,7 @@ export class Table extends LitElement {
         this.validateEmptyCells = validateEmptyCells ?? true
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
+        if (onStatusChange) this.onStatusChange = onStatusChange
 
         if (this.data.length > 20) this.data = this.data.slice(0, 20);
 
@@ -109,6 +112,33 @@ export class Table extends LitElement {
     #getData(rows = this.rowHeaders, cols = this.colHeaders) {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
+    
+    #checkStatus = () => {
+        const hasWarning = this.querySelector('[warning]')
+        const hasError = this.querySelector('[error]')
+        checkStatus.call(this, hasWarning, hasError)
+    }
+
+    validate = () => {
+
+        let message;
+
+        if (!message) {
+            const errors = this.querySelectorAll('[error]')
+            const len = errors.length
+            if (len === 1) message = errors[0].title
+            else if (len) message = `${len} errors exist on this table.`
+        }
+
+        const nUnresolved = Object.keys(this.unresolved).length;
+        if (nUnresolved) message = `${nUnresolved} subject${nUnresolved > 1 ? "s are" : " is"} missing a ${this.keyColumn ? `${this.keyColumn} `: ''}value`
+
+
+        if (message) throw new Error(message)
+    }
+
+    status;
+    onStatusChange = () => {}
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -273,7 +303,8 @@ export class Table extends LitElement {
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
             let rowName = rowHeaders[row];
 
-            if (isValid) {
+            // NOTE: We would like to allow invalid values to mutate the results
+            // if (isValid) {
                 const isResolved = rowName in this.data;
                 let target = this.data;
 
@@ -299,7 +330,7 @@ export class Table extends LitElement {
                     if (value == undefined || value === "") delete target[rowName][header];
                     else target[rowName][header] = value;
                 }
-            }
+            // }
         });
 
         // If only one row, do not allow deletion
@@ -353,6 +384,10 @@ export class Table extends LitElement {
 
             if (title) cell.title = title
         }
+
+        this.#checkStatus() // Check status after every validation update
+
+
         return result === true || result == undefined || errors.length === 0;
     }
 

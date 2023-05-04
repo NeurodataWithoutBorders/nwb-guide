@@ -13,12 +13,10 @@ export class GuidedSubjectsPage extends Page {
         onNext: () => {
             const { results, subjects } = this.info.globalState;
 
-            const nUnresolved = Object.keys(this.table.unresolved).length;
-            if (nUnresolved)
-                return this.notify(
-                    `${nUnresolved} subject${nUnresolved > 1 ? "s are" : " is"} missing a Subject ID value`,
-                    "error"
-                );
+            try { this.table.validate() } catch (e) { 
+                this.notify(e.message, 'error') 
+                throw e
+            }
 
             const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
             if (noSessions.length)

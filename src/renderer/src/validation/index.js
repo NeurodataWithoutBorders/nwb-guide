@@ -69,3 +69,15 @@ export async function validateOnChange (name, parent, path, value) {
 
     return true;
 };
+
+
+export function checkStatus (warnings, errors, items = []) {
+    let newStatus = "valid";
+    const nestedStatus = items.map((f) => f.status);
+    if (nestedStatus.includes("error")) newStatus = "error";
+    else if (errors) newStatus = "error";
+    else if (nestedStatus.includes("warning")) newStatus = "warning";
+    else if (warnings) newStatus = "warning";
+
+    if (newStatus !== this.status) this.onStatusChange((this.status = newStatus));
+  };
