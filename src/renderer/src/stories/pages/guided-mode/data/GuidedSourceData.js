@@ -53,8 +53,6 @@ export class GuidedSourceDataPage extends ManagedPage {
                         throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
                     }
 
-                    console.log(result.results.Ecephys.Electrodes, result.schema.properties.Ecephys);
-
                     // Merge metadata results with the generated info
                     this.merge("metadata", result.results, info);
 
