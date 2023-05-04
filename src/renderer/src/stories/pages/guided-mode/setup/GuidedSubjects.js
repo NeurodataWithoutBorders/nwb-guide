@@ -13,9 +13,11 @@ export class GuidedSubjectsPage extends Page {
         onNext: () => {
             const { results, subjects } = this.info.globalState;
 
-            try { this.table.validate() } catch (e) { 
-                this.notify(e.message, 'error') 
-                throw e
+            try {
+                this.table.validate();
+            } catch (e) {
+                this.notify(e.message, "error");
+                throw e;
             }
 
             const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
@@ -82,10 +84,10 @@ export class GuidedSubjectsPage extends Page {
             keyColumn: "subject_id",
             validateEmptyCells: false,
             validateOnChange: (key, parent, v) => {
-                if (key === 'sessions') return true
+                if (key === "sessions") return true;
                 else {
-                    delete parent.sessions // Delete dessions from parent copy
-                    return validateOnChange(key, parent, ["Subject"], v)
+                    delete parent.sessions; // Delete dessions from parent copy
+                    return validateOnChange(key, parent, ["Subject"], v);
                 }
             },
         });

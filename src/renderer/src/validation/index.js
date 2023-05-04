@@ -36,7 +36,7 @@ export async function validateOnChange (name, parent, path, value) {
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
     if (!Array.isArray(functions)) functions = [functions];
-    
+
 
     // Validate multiple conditions. May be able to offload this to a single server-side call
     const res = (

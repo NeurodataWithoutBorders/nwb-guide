@@ -109,7 +109,7 @@ export class Dashboard extends LitElement {
                 document.title = `${e.state.label} - ${this.name}`;
                 const page = this.pagesById[e.state.page]; // ?? this.pagesById[this.#activatePage]
                 if (!page) return;
-                if (page === this.#active) return; // Do not rerender current page 
+                if (page === this.#active) return; // Do not rerender current page
                 this.setMain(page);
             }
         };

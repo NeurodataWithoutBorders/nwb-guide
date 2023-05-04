@@ -12,6 +12,6 @@ schema.Ecephys.ElectrodeGroup.device = (name, parent, path, baseResult) => {
             }
         ]
     }
-} 
+}
 
 export default schema
