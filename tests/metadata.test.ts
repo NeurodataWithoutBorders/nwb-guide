@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { createResults } from '../src/renderer/src/stories/pages/guided-mode/data/utils'
 import { mapSessions } from '../src/renderer/src/stories/pages/utils'
 
-import baseMetadataSchema from '../schemas/base_metadata_schema.json' assert {type: 'json'}
+import baseMetadataSchema from '../schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 

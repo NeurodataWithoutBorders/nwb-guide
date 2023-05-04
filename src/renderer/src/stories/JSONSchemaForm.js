@@ -825,7 +825,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     sections: {
                         [headerName]: {
                             subtitle: `${Object.keys(info.properties).length} fields`,
-                            content: this.#nestedForms[name], //generateForm
+                            content: this.#nestedForms[name],
                         },
                     },
                 });
