@@ -473,7 +473,8 @@ export class JSONSchemaForm extends LitElement {
                             return new Table({
                                 schema: itemSchema,
                                 data: parent[name],
-                                validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v)
+                                validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v),
+                                validateEmptyCells: this.validateEmptyValues
                             });
                         }
                         // {

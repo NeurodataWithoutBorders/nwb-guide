@@ -54,12 +54,21 @@ const styleSymbol = Symbol('table-styles')
 export class Table extends LitElement {
     validateOnChange;
 
-    constructor({ schema, data, template, keyColumn, validateOnChange } = {}) {
+    constructor({ 
+        schema, 
+        data, 
+        template, 
+        keyColumn, 
+        validateOnChange,
+        validateEmptyCells
+    } = {}) {
         super();
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
         this.template = template ?? {};
+        this.validateEmptyCells = validateEmptyCells ?? true
+
         if (validateOnChange) this.validateOnChange = validateOnChange;
 
         if (this.data.length > 20) this.data = this.data.slice(0, 20);
@@ -205,16 +214,18 @@ export class Table extends LitElement {
                 }
             };
 
+            let ogThis = this
+            const isRequired = ogThis.schema?.required?.includes(k)
             if (info.validator) {
                 const og = info.validator;
                 info.validator = async function (value, callback) {
-                    if (!value) return callback(true); // Allow empty values
+                    if (!value && !ogThis.validateEmptyCells && !isRequired) return callback(true); // Allow empty values
                     if (!(await runThisValidator(value, this.row, this.col))) return callback(false);
                     og(value, callback);
                 };
             } else {
                 info.validator = async function (value, callback) {
-                    if (!value) return callback(true); // Allow empty values
+                    if (!value && !ogThis.validateEmptyCells && !isRequired) return callback(true); // Allow empty values
                     callback(await runThisValidator(value, this.row, this.col));
                 };
             }
@@ -318,9 +329,7 @@ export class Table extends LitElement {
     }
 
     #setRow(row, data) {
-        data.forEach((value, j) => {
-            if (value !== "") this.table.setDataAtCell(row, j, value);
-        });
+        data.forEach((value, j) => this.table.setDataAtCell(row, j, value));
     }
 
 
