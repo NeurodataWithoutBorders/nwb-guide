@@ -90,7 +90,7 @@ export class TableCell extends LitElement {
         }
 
         document.onclick = () => this.input.style.pointerEvents = ''
-        
+
         this.input.onchange = () => {
             const currentValue = this.input.innerText;
             this.value = currentValue

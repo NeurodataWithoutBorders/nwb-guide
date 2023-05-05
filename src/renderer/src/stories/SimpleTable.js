@@ -407,10 +407,10 @@ export class SimpleTable extends LitElement {
 
     #cells = [];
 
-    #unresolved = {}
+    #unresolved = {};
     #onCellChange = (cell) => {
-        const value = cell.value
-        const { i: row, j: prop } = cell.simpleTableInfo
+        const value = cell.value;
+        const { i: row, j: prop } = cell.simpleTableInfo;
         const header = typeof prop === "number" ? this.colHeaders[prop] : prop;
         let rowName = Object.keys(this.data)[row];
 
@@ -437,7 +437,7 @@ export class SimpleTable extends LitElement {
             if (value == undefined || value === "") delete target[rowName][header];
             else target[rowName][header] = value;
         }
-    }
+    };
 
     #renderCell = (value, info) => {
         const td = document.createElement("td");
@@ -468,10 +468,9 @@ export class SimpleTable extends LitElement {
                     else td.setAttribute(key, info[key]);
                 }
 
-                this.#onCellChange(cell)
+                this.#onCellChange(cell);
                 this.#checkStatus(); // Check status after every validation update
             },
-
         });
 
         cell.simpleTableInfo = fullInfo;
