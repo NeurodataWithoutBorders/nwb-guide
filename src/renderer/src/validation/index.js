@@ -42,8 +42,9 @@ export async function validateOnChange (name, parent, path, value) {
     const res = (
         await Promise.all(
             functions.map(async (func) => {
-                if (typeof func === 'function') return await func(name, copy, path, this.results) // Can specify alternative client-side validation
-                else return await fetch(`${baseUrl}/neuroconv/validate`, {
+                if (typeof func === 'function') {
+                    return await func(name, copy, path, this.results) // Can specify alternative client-side validation
+                } else return await fetch(`${baseUrl}/neuroconv/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
