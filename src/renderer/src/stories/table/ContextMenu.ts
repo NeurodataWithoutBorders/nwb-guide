@@ -70,7 +70,7 @@ export class ContextMenu extends LitElement{
     }
 
     #hide() {
-        this.style.display = "" 
+        this.style.display = ""
     }
 
     #activePath: HTMLElement[] | null = null
@@ -82,19 +82,19 @@ export class ContextMenu extends LitElement{
             this.#hide()
         } else {
             this.#activePath = e.path || e.composedPath()
-            this.style.display = 'block'; 
-            this.style.left = e.pageX + "px"; 
+            this.style.display = 'block';
+            this.style.left = e.pageX + "px";
             this.style.top = e.pageY + "px";
-        } 
+        }
     }
 
     render () {
         return html`
-        <ul class="menu"> 
+        <ul class="menu">
             ${this.items.map((o) => html`<li class="share" @click=${() => {
                 if (o.onclick) o.onclick(this.#activePath)
             }}><a href="#">${o.icon ?? ''}${o.label}</a></li>`)}
-        </ul> 
+        </ul>
         `
     }
 }
