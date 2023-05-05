@@ -5,6 +5,7 @@ import { checkStatus } from "../validation";
 import { TableCell } from "./table/Cell";
 import { ContextMenu } from "./table/ContextMenu";
 import { errorHue, warningHue } from "./globals";
+import { notify } from "../globals";
 
 export class SimpleTable extends LitElement {
     validateOnChange;
@@ -343,62 +344,6 @@ export class SimpleTable extends LitElement {
         //         };
         //     return info;
         // });
-        // const onAfterGetHeader = function (index, TH) {
-        //     const desc = entries[colHeaders[index]].description;
-        //     if (desc) TH.setAttribute("title", desc);
-        // };
-        // table.addHook("afterValidate", (isValid, value, row, prop) => {
-        //     const header = typeof prop === "number" ? colHeaders[prop] : prop;
-        //     let rowName = rowHeaders[row];
-        //     // NOTE: We would like to allow invalid values to mutate the results
-        //     // if (isValid) {
-        //     const isResolved = rowName in this.data;
-        //     let target = this.data;
-        //     if (!isResolved) {
-        //         if (!unresolved[row]) unresolved[row] = {}; // Ensure row exists
-        //         rowName = row;
-        //         target = unresolved;
-        //     }
-        //     // Transfer data to object
-        //     if (header === this.keyColumn) {
-        //         if (value !== rowName) {
-        //             const old = target[rowName] ?? {};
-        //             this.data[value] = old;
-        //             delete target[rowName];
-        //             delete unresolved[row];
-        //             rowHeaders[row] = value;
-        //         }
-        //     }
-        //     // Update data on passed object
-        //     else {
-        //         if (value == undefined || value === "") delete target[rowName][header];
-        //         else target[rowName][header] = value;
-        //     }
-        //     // }
-        // });
-        // // If only one row, do not allow deletion
-        // table.addHook("beforeRemoveRow", (index, amount) => {
-        //     if (nRows - amount < 1) {
-        //         notify("You must have at least one row", "error");
-        //         return false;
-        //     }
-        // });
-        // table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
-        //     nRows -= amount;
-        //     physicalRows.forEach((row) => {
-        //         delete this.data[rowHeaders[row]];
-        //         delete unresolved[row];
-        //     });
-        // });
-        // table.addHook("afterCreateRow", (index, amount) => {
-        //     nRows += amount;
-        //     const physicalRows = Array.from({ length: amount }, (e, i) => index + i);
-        //     physicalRows.forEach((row) => this.#setRow(row, this.#getRowData(row)));
-        // });
-    }
-
-    #setRow(row, data) {
-        data.forEach((value, j) => (this.#cells[row][j].value = value));
     }
 
     #updateRows(row, nRows) {
@@ -413,8 +358,14 @@ export class SimpleTable extends LitElement {
 
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
+            if (nRows - children.length < 1) {
+                notify("You must have at least one row", "error");
+                return false;
+            }
             range.map((i) => {
                 children[i].remove();
+                delete this.data[rowHeaders[row]];
+                delete this.unresolved[row];
                 delete this.#cells[i];
             });
         }
@@ -456,6 +407,38 @@ export class SimpleTable extends LitElement {
 
     #cells = [];
 
+    #unresolved = {}
+    #onCellChange = (cell) => {
+        const value = cell.value
+        const { i: row, j: prop } = cell.simpleTableInfo
+        const header = typeof prop === "number" ? this.colHeaders[prop] : prop;
+        let rowName = Object.keys(this.data)[row];
+
+        // NOTE: We would like to allow invalid values to mutate the results
+        // if (isValid) {
+        const isResolved = rowName in this.data;
+        let target = this.data;
+        if (!isResolved) {
+            if (!this.#unresolved[row]) this.#unresolved[row] = {}; // Ensure row exists
+            rowName = row;
+            target = this.#unresolved;
+        }
+        // Transfer data to object
+        if (header === this.keyColumn) {
+            if (value !== rowName) {
+                const old = target[rowName] ?? {};
+                this.data[value] = old;
+                delete target[rowName];
+                delete this.#unresolved[row];
+            }
+        }
+        // Update data on passed object
+        else {
+            if (value == undefined || value === "") delete target[rowName][header];
+            else target[rowName][header] = value;
+        }
+    }
+
     #renderCell = (value, info) => {
         const td = document.createElement("td");
 
@@ -485,8 +468,10 @@ export class SimpleTable extends LitElement {
                     else td.setAttribute(key, info[key]);
                 }
 
+                this.#onCellChange(cell)
                 this.#checkStatus(); // Check status after every validation update
             },
+
         });
 
         cell.simpleTableInfo = fullInfo;

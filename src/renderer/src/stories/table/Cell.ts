@@ -90,19 +90,10 @@ export class TableCell extends LitElement {
         }
 
         document.onclick = () => this.input.style.pointerEvents = ''
-
-        // this.onclick = (ev) => {
-        //     console.log(this.#nClicks)
-        //     this.#nClicks++
-        //     if (this.#nClicks < 2) ev.preventDefault()
-        // }
-
-           this.input.oninput = () => {
+        
+        this.input.onchange = () => {
             const currentValue = this.input.innerText;
-            // document.execCommand('undo');   // undo this change
-            // this.input.value = currentValue;  // ... but immediately reset the value
             this.value = currentValue
-            // pushNewUndoState(currentValue);  // ... our special state to keep
         }
     }
 

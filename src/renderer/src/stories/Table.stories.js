@@ -42,3 +42,14 @@ Simple.args = {
     //     return false
     // }, // Always validate as true
 };
+
+
+// NOTE: Detect a change to the data
+let lastJSON;
+setInterval(() => {
+    const thisJSON = JSON.stringify(data)
+    if (lastJSON) {
+        if (lastJSON !== thisJSON) console.log('Changed!')
+    }
+    lastJSON = thisJSON
+}, 1000)
