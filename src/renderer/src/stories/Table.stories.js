@@ -1,6 +1,7 @@
 import { Table } from "./Table.js";
 
 import subjectSchema from "../../../../schemas/subject.schema";
+import { SimpleTable } from "./SimpleTable.js";
 
 export default {
     title: "Components/Table",
@@ -28,4 +29,16 @@ Default.args = {
     data,
     keyColumn: "subject_id",
     validateOnChange: () => true, // Always validate as true
+};
+
+const SimpleTemplate = (args) => new SimpleTable(args);
+export const Simple = SimpleTemplate.bind({});
+Simple.args = {
+    schema: subjectSchema,
+    data,
+    keyColumn: "subject_id",
+    // validateOnChange: (key, parent, value) => {
+    //     if (key === 'subject_id' && !value) return true
+    //     return false
+    // }, // Always validate as true
 };
