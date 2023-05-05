@@ -65,7 +65,7 @@ export class TableCell extends LitElement {
             value: { reflect: true }
         }
     }
-    
+
     constructor({ value, schema, validateOnChange, onValidate }: TableCellProps) {
         super()
         this.value = value
@@ -132,7 +132,7 @@ export class TableCell extends LitElement {
         if (warnings.length) {
             info.warning = ''
             info.title = warnings.map((o) => o.message).join("\n");
-        } 
+        }
 
         if (errors.length) {
             info.error = ''
