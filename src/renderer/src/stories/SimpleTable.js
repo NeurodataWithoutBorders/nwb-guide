@@ -196,10 +196,10 @@ export class SimpleTable extends LitElement {
             {
                 label: "Remove Row",
                 onclick: (path) => {
-                    const cell = this.#getCellFromPath(path)
-                    const { i } = cell.simpleTableInfo // TODO: Support detecting when the user would like to remove more than one row
-                    this.#updateRows(i, -1)
-                }
+                    const cell = this.#getCellFromPath(path);
+                    const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
+                    this.#updateRows(i, -1);
+                },
             },
             // {
             //     label: 'Add Column',
