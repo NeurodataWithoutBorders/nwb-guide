@@ -1,6 +1,7 @@
 import { LitElement, css, html } from "lit"
 import { ArrayRenderer } from "./renderers/array"
 import { TableCellBase } from "./base"
+import { DateTimeEditor } from "./editors/date-time"
 
 type ValidationResult = {
     title?: string,
@@ -159,6 +160,9 @@ export class TableCell extends LitElement {
 
         let renderer, editor = this.input;
         if (this.schema.type === "array") renderer = new ArrayRenderer(this.schema)
+
+        // if (this.schema.format === "date-time") editor = new DateTimeEditor()
+        
         if (renderer) renderer.value = this.value
 
         return html`

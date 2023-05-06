@@ -31,6 +31,7 @@ export class ArrayRenderer extends LitElement {
         }
     }
 
+    // Parse to an array
     #parseValue = (value: any = this.value): any[] => {
         if (!value) return [];
         else if (typeof value === "string") return value.split(",");
