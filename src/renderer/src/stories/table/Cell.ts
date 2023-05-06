@@ -1,5 +1,6 @@
 import { LitElement, css, html } from "lit"
 import { ArrayRenderer } from "./renderers/array"
+import { TableCellBase } from "./base"
 
 type ValidationResult = {
     title?: string,
@@ -65,11 +66,6 @@ export class TableCell extends LitElement {
                 padding-left: 20px
             }
 
-            [contenteditable] {
-                padding: 5px;
-                pointer-events: none;
-            }
-
         `
     }
 
@@ -87,31 +83,15 @@ export class TableCell extends LitElement {
 
         if (onValidate) this.onValidate = onValidate
 
-        this.#div.append(this.input)
-
         // Set Information from Schema
         if (schema.pattern) {
             const regex = new RegExp(schema.pattern);
             this.#validator = (value) => regex.test(value)
         }
 
+        this.ondblclick = () => this.input.toggle(true)
+        document.onclick = () => this.input.toggle(false)
 
-        this.input.setAttribute('contenteditable', true)
-        this.ondblclick = () => {
-            this.setAttribute('editing', '')
-            this.input.style.pointerEvents = 'all'
-            this.input.focus()
-        }
-
-        document.onclick = () => {
-            this.input.style.pointerEvents = ''
-        }
-
-        this.input.addEventListener('blur', () => {
-            const currentValue = this.input.innerText;
-            if (this.value !== currentValue) this.value = currentValue
-            this.removeAttribute('editing')
-        })
     }
 
     validateOnChange?: ValidationFunction
@@ -152,25 +132,25 @@ export class TableCell extends LitElement {
         return info
     };
 
-    input = document.createElement('div')
-    #div = document.createElement('div')
+    input = new TableCellBase({
+        onOpen: () => this.setAttribute('editing', ''),
+        onClose: () => this.removeAttribute('editing'),
+        onChange: (v: any) => this.value = v
+    })
 
     setInput(value: any) {
-        this.input.focus();
-        document.execCommand('selectAll');
-        document.execCommand('insertText', false, value);
-        this.input.blur();
+        this.input.set(value)
     }
 
     #value
     firstUpdated() {
-        this.input.innerText = this.value ?? '' // Set directly without the undo feature
-        this.#value = this.input.innerText // Ensure value is coerced
+        this.input.setText(this.value ?? '')
+        this.#value = this.input.value // Ensure value is coerced
     }
 
     updated() {
         const value = this.#value ?? ''
-        if (value !== this.input.innerText) this.setInput(value) // Ensure all operations are undoable
+        if (value !== this.input.value) this.setInput(value) // Ensure all operations are undoable
         this.validate()
     }
 

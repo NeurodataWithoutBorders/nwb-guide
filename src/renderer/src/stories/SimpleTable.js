@@ -119,6 +119,14 @@ export class SimpleTable extends LitElement {
         });
 
         document.addEventListener('keydown', (ev) => {
+
+            var key = ev.keyCode || ev.charCode;
+            if( key == 8 || key == 46 ) {
+                Object.values(this.#selected).forEach(row => row.forEach(o => o.setInput('')))
+                return
+            }
+
+            // Undo / Redo
             if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === 'z') {
                 this.#clearSelected()
                 if (ev.shiftKey) console.error('redo')
