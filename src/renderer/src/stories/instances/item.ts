@@ -1,6 +1,6 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, unsafeCSS } from "lit";
 
-import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol } from "../globals";
+import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol, emojiFontFamily } from "../globals";
 
 export class InstanceListItem extends LitElement {
 
@@ -91,6 +91,10 @@ export class InstanceListItem extends LitElement {
         :host([status=error]) span,
         :host([status=warning]) span {
             padding-right: 60px;
+        }
+
+        .indicator::before {
+            font-family: ${unsafeCSS(emojiFontFamily)}
         }
 
         :host([status=valid]) .indicator::before {

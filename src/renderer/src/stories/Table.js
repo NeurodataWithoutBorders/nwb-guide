@@ -4,6 +4,7 @@ import { Handsontable, css } from "./hot";
 import { header } from "./forms/utils";
 import { errorHue, warningHue } from "./globals";
 import { checkStatus } from "../validation";
+import { emojiFontFamily } from "./globals";
 
 const maxRows = 20;
 
@@ -42,7 +43,7 @@ const styles = `
         margin: 0px 5px;
         text-align: center;
         font-size: 80%;
-        font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",  "Noto Color Emoji", "EmojiOne Color",  "Android Emoji", sans-serif;
+        font-family: ${emojiFontFamily}
       }
 
       .handsontable {
