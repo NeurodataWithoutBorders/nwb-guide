@@ -424,7 +424,6 @@
     flex-direction: column;
     align-items: center;
     width: 90%;
-    max-width: 800px;
 }
 
 .guided--container-sub {
