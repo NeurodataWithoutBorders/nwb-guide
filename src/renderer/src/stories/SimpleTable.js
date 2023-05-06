@@ -7,9 +7,9 @@ import { ContextMenu } from "./table/ContextMenu";
 import { errorHue, warningHue } from "./globals";
 import { notify } from "../globals";
 
-import { ArrayRenderer } from './table/renderers/array'
+import { ArrayRenderer } from "./table/renderers/array";
 
-var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
 export class SimpleTable extends LitElement {
     validateOnChange;
@@ -21,7 +21,7 @@ export class SimpleTable extends LitElement {
                 display: block;
                 font-family: sans-serif;
                 font-size: 13px;
-                box-sizing:border-box;
+                box-sizing: border-box;
             }
 
             [error] {
@@ -83,7 +83,6 @@ export class SimpleTable extends LitElement {
         `;
     }
 
-
     constructor({ schema, data, template, keyColumn, validateOnChange, validateEmptyCells, onStatusChange } = {}) {
         super();
         this.schema = schema ?? {};
@@ -118,21 +117,20 @@ export class SimpleTable extends LitElement {
             ev.clipboardData.setData("text/plain", tsv);
         });
 
-        document.addEventListener('keydown', (ev) => {
-
+        document.addEventListener("keydown", (ev) => {
             var key = ev.keyCode || ev.charCode;
-            if( key == 8 || key == 46 ) {
-                Object.values(this.#selected).forEach(row => row.forEach(o => o.setInput('')))
-                return
+            if (key == 8 || key == 46) {
+                Object.values(this.#selected).forEach((row) => row.forEach((o) => o.setInput("")));
+                return;
             }
 
             // Undo / Redo
-            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === 'z') {
-                this.#clearSelected()
-                if (ev.shiftKey) console.error('redo')
-                else console.error('Undo')
+            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") {
+                this.#clearSelected();
+                if (ev.shiftKey) console.error("redo");
+                else console.error("Undo");
             }
-        })
+        });
 
         document.addEventListener("paste", (ev) => {
             ev.preventDefault();
@@ -146,7 +144,7 @@ export class SimpleTable extends LitElement {
                 str.split("\t").forEach((v, j) => {
                     const cell = this.#cells[firstI + i]?.[firstJ + j];
                     if (cell) {
-                        cell.value = v
+                        cell.value = v;
                         // cell.input.innerText = v; // Not undoable
                         lastCell = cell;
                     }
@@ -174,9 +172,9 @@ export class SimpleTable extends LitElement {
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
     #getCellFromPath = (path) => {
         const found = path.find((el) => el instanceof TableCell || el.children?.[0] instanceof TableCell);
-        if (found instanceof HTMLTableCellElement) return found.children[0]
-        else return found
-    }
+        if (found instanceof HTMLTableCellElement) return found.children[0];
+        else return found;
+    };
 
     #selectCells = (cell, firstSelected = this.#firstSelected) => {
         if (!firstSelected) {
@@ -267,7 +265,6 @@ export class SimpleTable extends LitElement {
     status;
     onStatusChange = () => {};
 
-
     #context = new ContextMenu({
         target: this,
         items: [
@@ -303,9 +300,8 @@ export class SimpleTable extends LitElement {
             // },
         ],
     });
-    
+
     updated() {
- 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
         //     const colInfo = entries[k];
@@ -395,12 +391,12 @@ export class SimpleTable extends LitElement {
 
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
-            if ((children.length - count) < 1) {
+            if (children.length - count < 1) {
                 notify("You must have at least one row", "error");
                 return false;
             }
 
-            const rowHeaders = Object.keys(this.data)
+            const rowHeaders = Object.keys(this.data);
             range.map((i) => {
                 children[i].remove();
                 delete this.data[rowHeaders[row]];
@@ -486,7 +482,6 @@ export class SimpleTable extends LitElement {
         const fullInfo = { ...info, col: this.colHeaders[info.j], row: rowNames[info.i] };
 
         const schema = this.#schema[fullInfo.col];
-
 
         // Track the cell renderer
         const cell = new TableCell({

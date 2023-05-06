@@ -6,7 +6,7 @@ export class ArrayRenderer extends LitElement {
 
     static get styles() {
         return css`
-    
+
             ul {
                 list-style-type: none;
                 padding: 0;

@@ -162,13 +162,13 @@ export class TableCell extends LitElement {
         if (this.schema.type === "array") renderer = new ArrayRenderer(this.schema)
 
         // if (this.schema.format === "date-time") editor = new DateTimeEditor()
-        
+
         if (renderer) renderer.value = this.value
 
         return html`
             <div>
                 ${renderer ? html`<div class="renderer">${renderer}</div><div class="editor">${editor}</div>` : (editor)}
-            </div>   
+            </div>
         `
     }
 }

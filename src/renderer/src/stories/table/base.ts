@@ -69,7 +69,7 @@ export class TableCellBase extends LitElement {
             this.onClose()
             this.style.pointerEvents = ''
         }
-        
+
         this.#active = state
 
     }
