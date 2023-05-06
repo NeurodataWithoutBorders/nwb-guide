@@ -74,8 +74,8 @@ export class TableCellBase extends LitElement {
 
     }
 
-    setText(value: any) {
-        this.editable.innerText = value
+    setText(value: any, setOnInput = true) {
+        if (setOnInput) this.editable.innerText = value
         this.value = this.editable.innerText // Coerce to string
     }
 
@@ -85,7 +85,7 @@ export class TableCellBase extends LitElement {
         document.execCommand('selectAll');
         document.execCommand('insertText', false, value);
         this.editable.blur();
-        this.setText(value)
+        this.setText(value, false)
     }
 
 
