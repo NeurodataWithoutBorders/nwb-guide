@@ -7,6 +7,10 @@ import { ContextMenu } from "./table/ContextMenu";
 import { errorHue, warningHue } from "./globals";
 import { notify } from "../globals";
 
+import { ArrayRenderer } from './table/renderers/array'
+
+var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+
 export class SimpleTable extends LitElement {
     validateOnChange;
 
@@ -15,9 +19,9 @@ export class SimpleTable extends LitElement {
             :host {
                 width: 100%;
                 display: block;
-                overflow: auto;
                 font-family: sans-serif;
                 font-size: 13px;
+                box-sizing:border-box;
             }
 
             [error] {
@@ -30,6 +34,11 @@ export class SimpleTable extends LitElement {
 
             [selected] {
                 border: 1px solid blue;
+            }
+
+            table {
+                display: block;
+                overflow: auto;
             }
 
             th {
@@ -58,6 +67,7 @@ export class SimpleTable extends LitElement {
             }
 
             td {
+                background: white;
                 user-select: none;
             }
 
@@ -73,6 +83,7 @@ export class SimpleTable extends LitElement {
         `;
     }
 
+
     constructor({ schema, data, template, keyColumn, validateOnChange, validateEmptyCells, onStatusChange } = {}) {
         super();
         this.schema = schema ?? {};
@@ -85,7 +96,6 @@ export class SimpleTable extends LitElement {
         if (onStatusChange) this.onStatusChange = onStatusChange;
 
         this.onmousedown = (ev) => {
-            this.#firstSelected = null;
             this.#clearSelected();
             this.#selecting = true;
             const cell = this.#getCellFromEvent(ev);
@@ -96,10 +106,7 @@ export class SimpleTable extends LitElement {
 
         document.onmousedown = (ev) => {
             const path = this.#getPath(ev);
-            if (!path.includes(this)) {
-                this.#firstSelected = null;
-                this.#clearSelected();
-            }
+            if (!path.includes(this)) this.#clearSelected();
         };
 
         // Handle Copy-Paste Commands
@@ -111,6 +118,14 @@ export class SimpleTable extends LitElement {
             ev.clipboardData.setData("text/plain", tsv);
         });
 
+        document.addEventListener('keydown', (ev) => {
+            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === 'z') {
+                this.#clearSelected()
+                if (ev.shiftKey) console.error('redo')
+                else console.error('Undo')
+            }
+        })
+
         document.addEventListener("paste", (ev) => {
             ev.preventDefault();
             const topLeftCell = Object.values(this.#selected)[0][0];
@@ -118,12 +133,13 @@ export class SimpleTable extends LitElement {
             const { i: firstI, j: firstJ } = topLeftCell.simpleTableInfo;
             const tsv = ev.clipboardData.getData("text/plain");
             let lastCell;
+
             tsv.split("\n").map((str, i) =>
                 str.split("\t").forEach((v, j) => {
                     const cell = this.#cells[firstI + i]?.[firstJ + j];
                     if (cell) {
-                        // cell.value = v
-                        cell.input.innerText; // Not undoable
+                        cell.value = v
+                        // cell.input.innerText = v; // Not undoable
                         lastCell = cell;
                     }
                 })
@@ -137,22 +153,33 @@ export class SimpleTable extends LitElement {
     #selecting = false;
     #firstSelected; // TableCell
 
-    #clearSelected = () => {
+    #clearSelected = (clearFirst = true) => {
+        if (clearFirst && this.#firstSelected) {
+            // this.#firstSelected.parentNode.removeAttribute("first");
+            this.#firstSelected = null;
+        }
         Object.values(this.#selected).forEach((arr) => arr.forEach((el) => el.parentNode.removeAttribute("selected")));
         this.#selected = {};
     };
 
     #getPath = (ev) => ev.path || ev.composedPath();
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
-    #getCellFromPath = (path) => path.find((el) => el instanceof TableCell);
+    #getCellFromPath = (path) => {
+        const found = path.find((el) => el instanceof TableCell || el.children?.[0] instanceof TableCell);
+        if (found instanceof HTMLTableCellElement) return found.children[0]
+        else return found
+    }
 
     #selectCells = (cell, firstSelected = this.#firstSelected) => {
-        if (!firstSelected) firstSelected = this.#firstSelected = cell;
+        if (!firstSelected) {
+            firstSelected = this.#firstSelected = cell;
+            // cell.parentNode.setAttribute("first", "");
+        }
 
         const { i, j } = firstSelected.simpleTableInfo;
         const { i: lastI, j: lastJ } = cell.simpleTableInfo;
 
-        this.#clearSelected();
+        this.#clearSelected(false);
 
         // if (i === lastI && j === lastJ) this.#selectCell(i, j)
         // else {
@@ -182,42 +209,6 @@ export class SimpleTable extends LitElement {
             data: { type: Object, reflect: true },
         };
     }
-
-    #context = new ContextMenu({
-        target: this,
-        items: [
-            {
-                label: "Add Row",
-                onclick: (path) => {
-                    const cell = this.#getCellFromPath(path);
-                    const { i } = cell.simpleTableInfo;
-                    this.#updateRows(i, 1); //2) // TODO: Support adding more than one row
-                },
-            },
-            {
-                label: "Remove Row",
-                onclick: (path) => {
-                    const cell = this.#getCellFromPath(path);
-                    const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
-                    this.#updateRows(i, -1);
-                },
-            },
-            // {
-            //     label: 'Add Column',
-            //     onclick: (path) => {
-            //         console.log('add column')
-            //         this.#getCellFromPath(path)
-            //     }
-            // },
-            // {
-            //     label: 'Remove Column',
-            //     onclick: (path) => {
-            //         console.log('remove column')
-            //         this.#getCellFromPath(path)
-            //     }
-            // },
-        ],
-    });
 
     #getRowData(row, cols = this.colHeaders) {
         const hasRow = row in this.data;
@@ -256,7 +247,7 @@ export class SimpleTable extends LitElement {
             else if (len) message = `${len} errors exist on this table.`;
         }
 
-        const nUnresolved = Object.keys(this.unresolved).length;
+        const nUnresolved = Object.keys(this.#unresolved).length;
         if (nUnresolved)
             message = `${nUnresolved} subject${nUnresolved > 1 ? "s are" : " is"} missing a ${
                 this.keyColumn ? `${this.keyColumn} ` : ""
@@ -268,7 +259,45 @@ export class SimpleTable extends LitElement {
     status;
     onStatusChange = () => {};
 
+
+    #context = new ContextMenu({
+        target: this,
+        items: [
+            {
+                label: "Add Row",
+                onclick: (path) => {
+                    const cell = this.#getCellFromPath(path);
+                    const { i } = cell.simpleTableInfo;
+                    this.#updateRows(i, 1); //2) // TODO: Support adding more than one row
+                },
+            },
+            {
+                label: "Remove Row",
+                onclick: (path) => {
+                    const cell = this.#getCellFromPath(path);
+                    const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
+                    this.#updateRows(i, -1);
+                },
+            },
+            // {
+            //     label: 'Add Column',
+            //     onclick: (path) => {
+            //         console.log('add column')
+            //         this.#getCellFromPath(path)
+            //     }
+            // },
+            // {
+            //     label: 'Remove Column',
+            //     onclick: (path) => {
+            //         console.log('remove column')
+            //         this.#getCellFromPath(path)
+            //     }
+            // },
+        ],
+    });
+    
     updated() {
+ 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
         //     const colInfo = entries[k];
@@ -358,14 +387,16 @@ export class SimpleTable extends LitElement {
 
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
-            if (nRows - children.length < 1) {
+            if ((children.length - count) < 1) {
                 notify("You must have at least one row", "error");
                 return false;
             }
+
+            const rowHeaders = Object.keys(this.data)
             range.map((i) => {
                 children[i].remove();
                 delete this.data[rowHeaders[row]];
-                delete this.unresolved[row];
+                delete this.#unresolved[row];
                 delete this.#cells[i];
             });
         }
@@ -448,6 +479,7 @@ export class SimpleTable extends LitElement {
 
         const schema = this.#schema[fullInfo.col];
 
+
         // Track the cell renderer
         const cell = new TableCell({
             value,
@@ -522,8 +554,6 @@ export class SimpleTable extends LitElement {
 
         const data = this.#getData();
 
-        const rowNames = Object.keys(this.data);
-
         return html`
             ${this.#context}
             <table cellspacing="0">
@@ -539,8 +569,10 @@ export class SimpleTable extends LitElement {
                         </tr> `;
                     })}
                 </tbody>
-                <tfooter> </tfooter>
             </table>
+            <p style="margin: 10px 0px">
+                <small style="color: gray;">Right click to add or remove rows.</small>
+            </p>
         `;
     }
 }

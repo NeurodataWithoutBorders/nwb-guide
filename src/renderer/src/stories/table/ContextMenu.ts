@@ -9,6 +9,8 @@ export class ContextMenu extends LitElement{
         :host {
             display: none;
             position: absolute;
+            z-index: 100;
+            pointer-events: none;
           }
 
           ul {
@@ -22,6 +24,7 @@ export class ContextMenu extends LitElement{
             border-radius: 10px;
             box-shadow: 0 10px 20px rgb(64 64 64 / 5%);
             padding: 10px 0;
+            pointer-events: all;
           }
 
           .menu > li > a {
@@ -66,26 +69,24 @@ export class ContextMenu extends LitElement{
         this.items = items ?? []
 
         document.addEventListener('click', () => this.#hide()) // Hide at the last step of any click
-        this.target.addEventListener('contextmenu', (e) => this.#rightClick(e))
+        document.addEventListener('contextmenu', () => this.#hide())
+        this.target.addEventListener('contextmenu', (e) => this.#open(e))
     }
 
     #hide() {
+        this.#activePath = null
         this.style.display = ""
     }
 
     #activePath: HTMLElement[] | null = null
 
-    #rightClick(e: MouseEvent) {
+    #open(e: MouseEvent) {
         e.preventDefault()
-        if (this.style.display == "block") {
-            this.#activePath = null
-            this.#hide()
-        } else {
-            this.#activePath = e.path || e.composedPath()
-            this.style.display = 'block';
-            this.style.left = e.pageX + "px";
-            this.style.top = e.pageY + "px";
-        }
+        e.stopPropagation()
+        this.#activePath = e.path || e.composedPath()
+        this.style.display = 'block';
+        this.style.left = e.pageX + "px";
+        this.style.top = e.pageY + "px";
     }
 
     render () {

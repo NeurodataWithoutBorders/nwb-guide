@@ -1,4 +1,5 @@
-import { LitElement, css } from "lit"
+import { LitElement, css, html } from "lit"
+import { ArrayRenderer } from "./renderers/array"
 
 type ValidationResult = {
     title?: string,
@@ -14,7 +15,7 @@ type TableCellProps = {
     value: string,
     schema: {[key: string]: any},
     validateOnChange?: ValidationFunction,
-    onValidate?: OnValidateFunction
+    onValidate?: OnValidateFunction,
 }
 
 
@@ -34,6 +35,18 @@ export class TableCell extends LitElement {
             :host > div {
                 padding: 5px;
                 width: 100%;
+            }
+
+            .editor {
+                display: none;
+            }
+
+            :host([editing]) .renderer {
+                display: none;
+            }
+
+            :host([editing]) .editor {
+                display: block;
             }
 
             ul {
@@ -85,16 +98,20 @@ export class TableCell extends LitElement {
 
         this.input.setAttribute('contenteditable', true)
         this.ondblclick = () => {
+            this.setAttribute('editing', '')
             this.input.style.pointerEvents = 'all'
             this.input.focus()
         }
 
-        document.onclick = () => this.input.style.pointerEvents = ''
-
-        this.input.onchange = () => {
-            const currentValue = this.input.innerText;
-            this.value = currentValue
+        document.onclick = () => {
+            this.input.style.pointerEvents = ''
         }
+
+        this.input.addEventListener('blur', () => {
+            const currentValue = this.input.innerText;
+            if (this.value !== currentValue) this.value = currentValue
+            this.removeAttribute('editing')
+        })
     }
 
     validateOnChange?: ValidationFunction
@@ -139,7 +156,6 @@ export class TableCell extends LitElement {
     #div = document.createElement('div')
 
     setInput(value: any) {
-        console.log('Set input', value)
         this.input.focus();
         document.execCommand('selectAll');
         document.execCommand('insertText', false, value);
@@ -160,7 +176,16 @@ export class TableCell extends LitElement {
 
     render() {
         this.#value = this.value
-        return this.#div
+
+        let renderer, editor = this.input;
+        if (this.schema.type === "array") renderer = new ArrayRenderer(this.schema)
+        if (renderer) renderer.value = this.value
+
+        return html`
+            <div>
+                ${renderer ? html`<div class="renderer">${renderer}</div><div class="editor">${editor}</div>` : (editor)}
+            </div>   
+        `
     }
 }
 
