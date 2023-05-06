@@ -2,6 +2,7 @@ import { LitElement, html } from "lit";
 import { isStorybook, notify } from "../globals";
 import { Handsontable } from "./hot";
 import { header } from "./forms/utils";
+import { emojiFontFamily } from "./globals";
 
 export class Table extends LitElement {
     validateOnChange;
@@ -44,7 +45,7 @@ export class Table extends LitElement {
         margin: 0px 5px;
         text-align: center;
         font-size: 80%;
-        font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",  "Noto Color Emoji", "EmojiOne Color",  "Android Emoji", sans-serif;
+        font-family: ${emojiFontFamily}
       }
 
       .handsontable {
