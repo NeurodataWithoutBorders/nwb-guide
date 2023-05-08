@@ -222,7 +222,7 @@ export class JSONSchemaForm extends LitElement {
         this.required = props.required ?? {};
         this.dialogOptions = props.dialogOptions ?? {};
         this.dialogType = props.dialogType ?? "showOpenDialog";
-        this.deferLoading = props.deferLoading ?? false
+        this.deferLoading = props.deferLoading ?? false;
 
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
@@ -232,7 +232,7 @@ export class JSONSchemaForm extends LitElement {
         this.validateEmptyValues = props.validateEmptyValues ?? true;
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
-        if (props.onLoaded) this.onLoaded = props.onLoaded
+        if (props.onLoaded) this.onLoaded = props.onLoaded;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
 
@@ -484,9 +484,9 @@ export class JSONSchemaForm extends LitElement {
                                 validateEmptyCells: this.validateEmptyValues,
                                 deferLoading: this.deferLoading,
                                 onLoaded: () => {
-                                    this.#nLoaded++
-                                    this.#checkAllLoaded()
-                                }
+                                    this.#nLoaded++;
+                                    this.#checkAllLoaded();
+                                },
                             }));
                         }
                         // {
@@ -534,20 +534,19 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         `;
     };
 
-
     load = () => {
-        if (!this.#loaded) Object.values(this.#tables).forEach(t => t.load())
-    }
+        if (!this.#loaded) Object.values(this.#tables).forEach((t) => t.load());
+    };
 
-    #loaded = false
-    #nLoaded = 0
+    #loaded = false;
+    #nLoaded = 0;
     #checkAllLoaded = () => {
-        const expected = [ ...Object.keys(this.#nestedForms), ...Object.keys(this.#tables) ].length
+        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.#tables)].length;
         if (this.#nLoaded === expected) {
-            this.#loaded = true
-            this.onLoaded()
+            this.#loaded = true;
+            this.onLoaded();
         }
-    }
+    };
 
     #filesystemQueries = ["file", "directory"];
 
@@ -570,7 +569,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     // Checks missing required properties and throws an error if any are found
     onInvalid = () => {};
-    onLoaded = () => {}
+    onLoaded = () => {};
 
     #registerDefaultProperties = (properties = {}, results) => {
         for (let name in properties) {
@@ -849,8 +848,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     }, // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
-                        this.#nLoaded++
-                        this.#checkAllLoaded()
+                        this.#nLoaded++;
+                        this.#checkAllLoaded();
                     },
                     base: [...path, name],
                 });
@@ -909,7 +908,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     async updated() {
         this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
-        this.#checkAllLoaded() // Throw if no tables
+        this.#checkAllLoaded(); // Throw if no tables
     }
 
     render() {

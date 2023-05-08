@@ -79,7 +79,6 @@ export class GuidedSubjectsPage extends Page {
             subjects[subject].sessions = sessions;
         }
 
-
         this.table = new SimpleTable({
             schema: subjectSchema,
             data: subjects,

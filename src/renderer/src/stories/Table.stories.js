@@ -43,5 +43,5 @@ Simple.args = {
     }, // Always validate as true
     onLoaded: () => {
         Swal.close();
-    }
+    },
 };

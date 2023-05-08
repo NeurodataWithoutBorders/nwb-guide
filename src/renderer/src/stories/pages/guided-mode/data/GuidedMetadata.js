@@ -45,8 +45,8 @@ export class GuidedMetadataPage extends ManagedPage {
             ],
             deferLoading: true,
             onLoaded: () => {
-                this.#nLoaded++
-                this.#checkAllLoaded()
+                this.#nLoaded++;
+                this.#checkAllLoaded();
             },
             validateOnChange,
             onlyRequired: false,
@@ -60,21 +60,19 @@ export class GuidedMetadataPage extends ManagedPage {
         };
     };
 
-    #nLoaded = 0
+    #nLoaded = 0;
     #checkAllLoaded = () => {
-        if (this.#nLoaded === this.forms.length) this.#onLoaded()
-    }
+        if (this.#nLoaded === this.forms.length) this.#onLoaded();
+    };
 
-    #loaded = false
+    #loaded = false;
     #onLoaded = () => {
-        this.#loaded = true
-        Swal.close()
-    }
+        this.#loaded = true;
+        Swal.close();
+    };
 
     render() {
-
-        if (!this.#loaded){
-
+        if (!this.#loaded) {
             Swal.fire({
                 title: "Waiting for the Ecephys tables to render",
                 html: "Please wait...",
@@ -83,11 +81,11 @@ export class GuidedMetadataPage extends ManagedPage {
                 heightAuto: false,
                 backdrop: "rgba(0,0,0, 0.4)",
                 timerProgressBar: false,
-                didOpen: () =>{
-                    if (this.#loaded) return false
-                    Swal.showLoading()
+                didOpen: () => {
+                    if (this.#loaded) return false;
+                    Swal.showLoading();
                     // this.forms.forEach(o => o.form.load()) // Wait until Swal is active to check load status for tables
-                }
+                },
             });
         }
 
