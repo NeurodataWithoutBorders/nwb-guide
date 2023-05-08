@@ -42,7 +42,7 @@ export class ArrayRenderer extends BaseRenderer {
     ul = document.createElement('ul')
 
     // set = (value: any) => {
-        
+
     // }
 
     get = () => {

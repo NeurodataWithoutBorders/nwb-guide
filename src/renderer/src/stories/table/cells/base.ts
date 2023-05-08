@@ -161,7 +161,7 @@ export class TableCellBase extends LitElement {
         //     container.append(renderer, editor)
         //     return container
         // }
-        
+
         return html`<div class="renderer">${renderer}</div><div class="editor">${editor}</div>`
     }
 }

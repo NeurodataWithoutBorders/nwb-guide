@@ -120,8 +120,9 @@ export class SimpleTable extends LitElement {
         document.addEventListener("keydown", (ev) => {
             var key = ev.keyCode || ev.charCode;
             if (key == 8 || key == 46) {
-                const path = this.#getPath(ev)
-                if (path[0] === document.body) Object.values(this.#selected).forEach((row) => row.forEach((o) => o.setInput("")));
+                const path = this.#getPath(ev);
+                if (path[0] === document.body)
+                    Object.values(this.#selected).forEach((row) => row.forEach((o) => o.setInput("")));
                 return;
             }
 
@@ -137,7 +138,7 @@ export class SimpleTable extends LitElement {
             }
 
             if (this.#firstSelected) {
-                const path = this.#getPath(ev)
+                const path = this.#getPath(ev);
                 if (path[0] === document.body) {
                     this.#firstSelected.input.toggle(true) // Open editor
                     this.#firstSelected.input.execute('selectAll') // redirect keydown to the hidden input
@@ -460,7 +461,7 @@ export class SimpleTable extends LitElement {
         const value = cell.value;
         const { i: row, col: header, row: possibleRowName, j: prop } = cell.simpleTableInfo;
         // const header = typeof prop === "number" ? col : prop;
-        let rowName = possibleRowName
+        let rowName = possibleRowName;
 
         // NOTE: We would like to allow invalid values to mutate the results
         // if (isValid) {
