@@ -38,6 +38,6 @@ Simple.args = {
     data,
     keyColumn: "subject_id",
     validateOnChange: (key, parent, value) => {
-        return !!value
+        return !!value;
     }, // Always validate as true
 };

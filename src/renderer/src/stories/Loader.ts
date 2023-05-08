@@ -15,7 +15,7 @@ export class Loader extends LitElement {
             width: 80px;
             height: 80px;
           }
-          
+
           .lds-default div {
             position: absolute;
             width: 6px;
@@ -91,7 +91,7 @@ export class Loader extends LitElement {
             50% {
               transform: scale(1.5);
             }
-          }  
+          }
         `
     }
 

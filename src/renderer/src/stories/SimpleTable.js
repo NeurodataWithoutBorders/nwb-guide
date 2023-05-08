@@ -7,10 +7,9 @@ import { ContextMenu } from "./table/ContextMenu";
 import { errorHue, successHue, warningHue } from "./globals";
 import { notify } from "../globals";
 
-import { Loader } from './Loader'
+import { Loader } from "./Loader";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
-
 
 const isVisible = function (ele, container) {
     const { bottom, height, top } = ele.getBoundingClientRect();
@@ -24,7 +23,6 @@ export class SimpleTable extends LitElement {
 
     static get styles() {
         return css`
-
             :host {
                 width: 100%;
                 display: block;
@@ -39,7 +37,8 @@ export class SimpleTable extends LitElement {
                 display: none;
             }
 
-            tfoot tr, tfoot td {
+            tfoot tr,
+            tfoot td {
                 background: transparent;
                 display: block;
             }
@@ -52,7 +51,7 @@ export class SimpleTable extends LitElement {
                 display: block;
             }
 
-            :host([loading]) tfoot td  {
+            :host([loading]) tfoot td {
                 position: absolute;
                 top: 50%;
                 left: 50%;
@@ -61,11 +60,9 @@ export class SimpleTable extends LitElement {
                 border: none;
             }
 
-
             :host([measure]) td {
                 height: 50px;
             }
-
 
             [error] {
                 background: hsl(${errorHue}, 100%, 90%) !important;
@@ -77,7 +74,7 @@ export class SimpleTable extends LitElement {
 
             [selected] {
                 border: 1px solid hsl(240, 100%, 50%);
-                background: hsl(240, 100%, 98%)
+                background: hsl(240, 100%, 98%);
             }
 
             table {
@@ -88,7 +85,7 @@ export class SimpleTable extends LitElement {
                 min-height: 400px;
                 background: white;
             }
-            
+
             thead {
                 position: sticky;
                 top: 0;
@@ -117,13 +114,12 @@ export class SimpleTable extends LitElement {
                 background: gainsboro;
             }
 
-
             td {
                 border: 1px solid gainsboro;
                 background: white;
                 user-select: none;
             }
-            
+
             [title] .relative::after {
                 content: "ℹ️";
                 cursor: help;
@@ -370,58 +366,54 @@ export class SimpleTable extends LitElement {
     });
 
     mapCells(callback) {
-        return this.#cells.map(row => Object.values(row).map(c => callback(c)))
+        return this.#cells.map((row) => Object.values(row).map((c) => callback(c)));
     }
 
     #switchDisplay = (cell, container, on = true) => {
-
-        const parent = cell.parentNode
-        let visible = isVisible(parent, container)
+        const parent = cell.parentNode;
+        let visible = isVisible(parent, container);
         if (on && visible) {
-            cell.style.display = ''
-            cell.input.firstUpdated() // Trigger initialization of contents
+            cell.style.display = "";
+            cell.input.firstUpdated(); // Trigger initialization of contents
+        } else if (!visible) {
+            cell.style.display = "none"; // Ensure cells are not immediately rendered
+            return cell;
         }
-        else if (!visible) {
-            cell.style.display = 'none' // Ensure cells are not immediately rendered
-            return cell
-        }
-
-    }
+    };
 
     updated() {
-
-        const scrollRoot = this.shadowRoot.querySelector('table')
+        const scrollRoot = this.shadowRoot.querySelector("table");
 
         // Add cells to body after the initial table render
-        const body = this.shadowRoot.querySelector('tbody')
+        const body = this.shadowRoot.querySelector("tbody");
         const data = this.#getData();
 
-        this.setAttribute('loading', '')
+        this.setAttribute("loading", "");
 
         setTimeout(() => {
+            const tStart = performance.now();
+            body.append(
+                ...data.map((row, i) => {
+                    const tr = document.createElement("tr");
+                    tr.append(...row.map((v, j) => this.#renderCell(v, { i, j })));
+                    return tr;
+                })
+            );
 
-            const tStart = performance.now()
-            body.append(...data.map((row, i) => {
-                const tr = document.createElement('tr')
-                tr.append(...row.map((v, j) => this.#renderCell(v, { i, j })))
-                return tr
-            }))
+            this.setAttribute("measure", "");
+            const mapped = this.mapCells((c) => this.#switchDisplay(c, scrollRoot, false)).flat();
 
-            this.setAttribute('measure', '')
-            const mapped = this.mapCells(c => this.#switchDisplay(c, scrollRoot, false)).flat()
-
-            let filtered = mapped.filter(c => c)
+            let filtered = mapped.filter((c) => c);
             scrollRoot.onscroll = () => {
-                filtered = filtered.map(c => this.#switchDisplay(c, scrollRoot)).filter(c => c)
-                if (!filtered.length) scrollRoot.onscroll = null
-            }
-            this.removeAttribute('measure')
+                filtered = filtered.map((c) => this.#switchDisplay(c, scrollRoot)).filter((c) => c);
+                if (!filtered.length) scrollRoot.onscroll = null;
+            };
+            this.removeAttribute("measure");
 
-            console.warn('Milliseconds to render table:', performance.now() - tStart)
+            console.warn("Milliseconds to render table:", performance.now() - tStart);
 
-            this.removeAttribute('loading')
-        }, 1000)
-
+            this.removeAttribute("loading");
+        }, 1000);
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
@@ -693,16 +685,12 @@ export class SimpleTable extends LitElement {
                         ${[...keys].map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
                     </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody></tbody>
                 <tfoot>
                     <tr>
-                        <td>
-                            ${new Loader()}
-                            Rendering table data...
-                        </td>
+                        <td>${new Loader()} Rendering table data...</td>
                     </tr>
-                    </tfoot>
+                </tfoot>
             </table>
             <p style="margin: 10px 0px">
                 <small style="color: gray;">Right click to add or remove rows.</small>
