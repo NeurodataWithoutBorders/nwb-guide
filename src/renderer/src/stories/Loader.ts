@@ -1,5 +1,6 @@
 import { LitElement, css, html } from "lit";
 
+// From https://loading.io/css/
 
 export class Loader extends LitElement {
 

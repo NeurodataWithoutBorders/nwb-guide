@@ -25,7 +25,7 @@ export class SimpleTable extends LitElement {
         return css`
             :host {
                 width: 100%;
-                display: block;
+                display: inline-block;
                 font-family: sans-serif;
                 font-size: 13px;
                 box-sizing: border-box;
@@ -45,6 +45,7 @@ export class SimpleTable extends LitElement {
 
             :host([loading]) table {
                 background: whitesmoke;
+                min-height: 400px;
             }
 
             :host([loading]) tfoot {
@@ -78,11 +79,10 @@ export class SimpleTable extends LitElement {
             }
 
             table {
-                display: block;
+                display: inline-block;
                 overflow: auto;
                 position: relative;
                 max-height: 400px;
-                min-height: 400px;
                 background: white;
             }
 
@@ -329,41 +329,7 @@ export class SimpleTable extends LitElement {
     status;
     onStatusChange = () => {};
 
-    #context = new ContextMenu({
-        target: this,
-        items: [
-            {
-                label: "Add Row",
-                onclick: (path) => {
-                    const cell = this.#getCellFromPath(path);
-                    const { i } = cell.simpleTableInfo;
-                    this.#updateRows(i, 1); //2) // TODO: Support adding more than one row
-                },
-            },
-            {
-                label: "Remove Row",
-                onclick: (path) => {
-                    const cell = this.#getCellFromPath(path);
-                    const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
-                    this.#updateRows(i, -1);
-                },
-            },
-            // {
-            //     label: 'Add Column',
-            //     onclick: (path) => {
-            //         console.log('add column')
-            //         this.#getCellFromPath(path)
-            //     }
-            // },
-            // {
-            //     label: 'Remove Column',
-            //     onclick: (path) => {
-            //         console.log('remove column')
-            //         this.#getCellFromPath(path)
-            //     }
-            // },
-        ],
-    });
+    #context
 
     mapCells(callback) {
         return this.#cells.map((row) => Object.values(row).map((c) => callback(c)));
@@ -381,8 +347,65 @@ export class SimpleTable extends LitElement {
         }
     };
 
+    #menuOptions = {
+        row: {
+            add: {
+                label: "Add Row",
+                onclick: (path) => {
+                    const cell = this.#getCellFromPath(path);
+                    const { i } = cell.simpleTableInfo;
+                    this.#updateRows(i, 1); //2) // TODO: Support adding more than one row
+                },
+            },
+            remove:{
+                    label: "Remove Row",
+                    onclick: (path) => {
+                        const cell = this.#getCellFromPath(path);
+                        const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
+                        this.#updateRows(i, -1);
+                    },
+                },
+            },
+
+            column: {
+                add: {
+                    label: 'Add Column',
+                    onclick: (path) => {
+                        console.log('add column')
+                        this.#getCellFromPath(path)
+                    }
+                },
+                remove: {
+                    label: 'Remove Column',
+                    onclick: (path) => {
+                        console.log('remove column')
+                        this.#getCellFromPath(path)
+                    }
+                },
+            }
+    }
+
+    generateContextMenu(options) {
+        const items = []
+        if (options.row?.add) items.push(this.#menuOptions.row.add)
+        if (options.row?.remove) items.push(this.#menuOptions.row.remove)
+        if (options.column?.add) items.push(this.#menuOptions.column.add)
+        if (options.column?.remove) items.push(this.#menuOptions.column.remove)
+
+        this.#context = new ContextMenu({ target: this.shadowRoot.querySelector('table'), items });
+
+        this.shadowRoot.append(this.#context) // Insert context menu
+    }
+
     updated() {
         const scrollRoot = this.shadowRoot.querySelector("table");
+
+        this.generateContextMenu({
+            row: {
+                add: true,
+                remove: true
+            }
+        })
 
         // Add cells to body after the initial table render
         const body = this.shadowRoot.querySelector("tbody");
@@ -410,10 +433,10 @@ export class SimpleTable extends LitElement {
             };
             this.removeAttribute("measure");
 
-            console.warn("Milliseconds to render table:", performance.now() - tStart);
+            console.warn('Milliseconds to render table:', performance.now() - tStart)
 
-            this.removeAttribute("loading");
-        }, 1000);
+            this.removeAttribute('loading')
+        }, 100)
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
