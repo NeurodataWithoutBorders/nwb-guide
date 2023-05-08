@@ -94,22 +94,25 @@ export class TableCellBase extends LitElement {
         }
     }
 
-    setVisible(value: any) {
-        [ this.#editor, this.#renderer ].forEach(el => this.setChild(el, value))
-    }
-
     setText(value: any, setOnInput = true) {
-        if (setOnInput) this.setVisible(value)
+        if (setOnInput) [ this.#editor, this.#renderer ].forEach(el => this.setChild(el, value)) // RESETS HISTORY
         this.#update(`${value}`) // Coerce to string
     }
 
+    clear = () => this.#editable.innerText = ''
+
+
+    execute = (command: string, show: boolean, value: any) => {
+        this.#editable.focus();
+        document.execCommand(command, show, value)
+    }
 
     set(value: any) {
         this.#editable.focus();
         document.execCommand('selectAll');
         document.execCommand('insertText', false, value);
+        this.setText(value)
         this.#editable.blur();
-        this.setText(value) //, force) // Coerce to string
     }
 
     #render(property: 'renderer' | 'editor') {
@@ -126,9 +129,9 @@ export class TableCellBase extends LitElement {
     setChild = (el: HTMLElement, value = this.value) => {
         if (el) {
             if ('value' in el) el.value = value
-            else{
-                if (el.innerText !== value)  el.innerText = value
-            } // No history
+            else {
+                if (el.innerText !== value)  el.innerText = value // No history
+            }
         }
         return value
     }

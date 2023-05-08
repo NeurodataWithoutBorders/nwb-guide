@@ -126,23 +126,21 @@ export class SimpleTable extends LitElement {
             }
 
             // Undo / Redo
-            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") {
-                this.#clearSelected();
-                if (ev.shiftKey) console.error("redo");
-                else console.error("Undo");
+            if (ev.metaKey || ev.ctrlKey || ev.shiftKey) {
+                if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") {
+                    this.#clearSelected();
+                    if (ev.shiftKey) console.error("redo");
+                    else console.error("Undo");
+                }
                 return
+
             }
 
             if (this.#firstSelected) {
                 const path = this.#getPath(ev)
                 if (path[0] === document.body) {
-                    this.#firstSelected.input.setVisible('') // Do not log in history or trigger updates
-                    const event = new MouseEvent('dblclick', {
-                        'view': window,
-                        'bubbles': true,
-                        'cancelable': true
-                    });
-                    this.#firstSelected.dispatchEvent(event);
+                    this.#firstSelected.input.toggle(true) // Open editor
+                    this.#firstSelected.input.execute('selectAll') // redirect keydown to the hidden input
                 }
             }
         });
