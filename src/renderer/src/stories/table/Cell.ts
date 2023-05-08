@@ -1,7 +1,7 @@
-import { LitElement, css, html } from "lit"
-import { ArrayRenderer } from "./renderers/array"
-import { TableCellBase } from "./base"
-import { DateTimeEditor } from "./editors/date-time"
+import { LitElement, css } from "lit"
+import { ArrayCell } from "./cells/array"
+import { TableCellBase } from "./cells/base"
+import { DateTimeCell } from "./cells/date-time"
 
 type ValidationResult = {
     title?: string,
@@ -23,7 +23,6 @@ type TableCellProps = {
 
 export class TableCell extends LitElement {
 
-    declare value: TableCellProps['value']
     declare schema: TableCellProps['schema']
 
     static get styles() {
@@ -34,21 +33,9 @@ export class TableCell extends LitElement {
                 white-space: nowrap;
             }
 
-            :host > div {
+            :host > * {
                 padding: 5px;
                 width: 100%;
-            }
-
-            .editor {
-                display: none;
-            }
-
-            :host([editing]) .renderer {
-                display: none;
-            }
-
-            :host([editing]) .editor {
-                display: block;
             }
 
             ul {
@@ -70,15 +57,15 @@ export class TableCell extends LitElement {
         `
     }
 
-    static get properties() {
-        return {
-            value: { reflect: true }
-        }
-    }
+    // static get properties() {
+    //     return {
+    //         value: { reflect: true }
+    //     }
+    // }
 
     constructor({ value, schema, validateOnChange, onValidate }: TableCellProps) {
         super()
-        this.value = value
+        this.#value = value
         this.schema = schema
         if (validateOnChange) this.validateOnChange = validateOnChange
 
@@ -92,8 +79,16 @@ export class TableCell extends LitElement {
 
         this.ondblclick = () => this.input.toggle(true)
         document.onclick = () => this.input.toggle(false)
-
     }
+
+    get value() {
+        return this.input.value
+    }
+
+    set value(v) {
+        this.input.set(v ?? '')
+        this.#value = this.input.value // Ensure value is coerced
+     }
 
     validateOnChange?: ValidationFunction
     onValidate: OnValidateFunction = () => {}
@@ -101,7 +96,9 @@ export class TableCell extends LitElement {
     #validator: ValidationFunction = () => true
 
     validate = async () => {
+
         const validator = this.validateOnChange ?? this.#validator
+
         let result = await validator(this.value)
 
         if (result === true) result = this.#validator(this.value)
@@ -133,43 +130,45 @@ export class TableCell extends LitElement {
         return info
     };
 
-    input = new TableCellBase({
-        onOpen: () => this.setAttribute('editing', ''),
-        onClose: () => this.removeAttribute('editing'),
-        onChange: (v: any) => this.value = v
-    })
-
     setInput(value: any) {
-        this.input.set(value)
+        this.input.set(value)  // Ensure all operations are undoable
     }
 
     #value
     firstUpdated() {
-        this.input.setText(this.value ?? '')
-        this.#value = this.input.value // Ensure value is coerced
+        this.value = this.#value
     }
 
     updated() {
-        const value = this.#value ?? ''
-        if (value !== this.input.value) this.setInput(value) // Ensure all operations are undoable
+        // const value = this.#value ?? ''
+        // if (value !== this.value) this.setInput(value) // Ensure all operations are undoable
         this.validate()
     }
 
+    #cls: any
+    
+    // input = new TableCellBase({ })
+
+    input: TableCellBase
+
     render() {
-        this.#value = this.value
 
-        let renderer, editor = this.input;
-        if (this.schema.type === "array") renderer = new ArrayRenderer(this.schema)
+        let cls = TableCellBase
 
-        // if (this.schema.format === "date-time") editor = new DateTimeEditor()
+        if (this.schema.type === "array") cls = ArrayCell
+        else if (this.schema.format === "date-time") cls =  DateTimeCell
 
-        if (renderer) renderer.value = this.value
+        // Only actually rerender if new class type
+        if (cls !== this.#cls) {
+            this.input = new cls({
+                onChange: (v: any) => this.validate(),
+                schema: this.schema
+            })
+        }
 
-        return html`
-            <div>
-                ${renderer ? html`<div class="renderer">${renderer}</div><div class="editor">${editor}</div>` : (editor)}
-            </div>
-        `
+        this.#cls = cls
+
+        return this.input
     }
 }
 

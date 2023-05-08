@@ -7,7 +7,7 @@ import { ContextMenu } from "./table/ContextMenu";
 import { errorHue, warningHue } from "./globals";
 import { notify } from "../globals";
 
-import { ArrayRenderer } from "./table/renderers/array";
+import { ArrayRenderer } from "./table/cells/array";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -120,7 +120,8 @@ export class SimpleTable extends LitElement {
         document.addEventListener("keydown", (ev) => {
             var key = ev.keyCode || ev.charCode;
             if (key == 8 || key == 46) {
-                Object.values(this.#selected).forEach((row) => row.forEach((o) => o.setInput("")));
+                const path = this.#getPath(ev)
+                if (path[0] === document.body) Object.values(this.#selected).forEach((row) => row.forEach((o) => o.setInput("")));
                 return;
             }
 
@@ -129,6 +130,20 @@ export class SimpleTable extends LitElement {
                 this.#clearSelected();
                 if (ev.shiftKey) console.error("redo");
                 else console.error("Undo");
+                return
+            }
+
+            if (this.#firstSelected) {
+                const path = this.#getPath(ev)
+                if (path[0] === document.body) {
+                    this.#firstSelected.input.setVisible('') // Do not log in history or trigger updates
+                    const event = new MouseEvent('dblclick', {
+                        'view': window,
+                        'bubbles': true,
+                        'cancelable': true
+                    });
+                    this.#firstSelected.dispatchEvent(event);
+                }
             }
         });
 
@@ -445,9 +460,9 @@ export class SimpleTable extends LitElement {
     #unresolved = {};
     #onCellChange = (cell) => {
         const value = cell.value;
-        const { i: row, j: prop } = cell.simpleTableInfo;
-        const header = typeof prop === "number" ? this.colHeaders[prop] : prop;
-        let rowName = Object.keys(this.data)[row];
+        const { i: row, col: header, row: possibleRowName, j: prop } = cell.simpleTableInfo;
+        // const header = typeof prop === "number" ? col : prop;
+        let rowName = possibleRowName
 
         // NOTE: We would like to allow invalid values to mutate the results
         // if (isValid) {

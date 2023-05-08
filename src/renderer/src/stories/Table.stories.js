@@ -37,10 +37,10 @@ Simple.args = {
     schema: subjectSchema,
     data,
     keyColumn: "subject_id",
-    // validateOnChange: (key, parent, value) => {
-    //     if (key === 'subject_id' && !value) return true
-    //     return false
-    // }, // Always validate as true
+    validateOnChange: (key, parent, value) => {
+        if (key === 'subject_id' && !value) return true
+        return false
+    }, // Always validate as true
 };
 
 // NOTE: Detect a change to the data
@@ -48,7 +48,7 @@ let lastJSON;
 setInterval(() => {
     const thisJSON = JSON.stringify(data);
     if (lastJSON) {
-        if (lastJSON !== thisJSON) console.log("Changed!");
+        if (lastJSON !== thisJSON) console.log("Changed!", data);
     }
     lastJSON = thisJSON;
 }, 1000);
