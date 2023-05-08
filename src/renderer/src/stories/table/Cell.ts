@@ -1,4 +1,4 @@
-import { LitElement, css } from "lit"
+import { LitElement, css, html } from "lit"
 import { ArrayCell } from "./cells/array"
 import { TableCellBase } from "./cells/base"
 import { DateTimeCell } from "./cells/date-time"
@@ -19,7 +19,6 @@ type TableCellProps = {
     validateOnChange?: ValidationFunction,
     onValidate?: OnValidateFunction,
 }
-
 
 export class TableCell extends LitElement {
 
@@ -80,6 +79,7 @@ export class TableCell extends LitElement {
 
         this.ondblclick = () => this.input.toggle(true)
         document.onclick = () => this.input.toggle(false)
+
     }
 
     get value() {
@@ -141,8 +141,6 @@ export class TableCell extends LitElement {
     }
 
     updated() {
-        // const value = this.#value ?? ''
-        // if (value !== this.value) this.setInput(value) // Ensure all operations are undoable
         this.validate()
     }
 

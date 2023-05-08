@@ -6,6 +6,7 @@ import { Accordion } from "./Accordion";
 import { capitalize, header } from "./forms/utils";
 import { Table } from "./Table";
 import { checkStatus } from "../validation";
+import { SimpleTable } from "./SimpleTable";
 
 const componentCSS = `
 
@@ -473,7 +474,7 @@ export class JSONSchemaForm extends LitElement {
                     if (info.type === "array") {
                         const itemSchema = this.#getSchema("items", info);
                         if (itemSchema.type === "object") {
-                            return (this.#tables[name] = new Table({
+                            return (this.#tables[name] = new SimpleTable({
                                 schema: itemSchema,
                                 data: parent[name],
                                 validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v),

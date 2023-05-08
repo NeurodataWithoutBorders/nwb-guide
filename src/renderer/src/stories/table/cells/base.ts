@@ -102,8 +102,6 @@ export class TableCellBase extends LitElement {
         this.#update(`${value}`) // Coerce to string
     }
 
-    clear = () => this.#editable.innerText = ''
-
 
     execute = (command: string, show: boolean, value: any) => {
         this.#editable.focus();
@@ -133,7 +131,9 @@ export class TableCellBase extends LitElement {
         if (el) {
             if ('value' in el) el.value = value // Directly set test (no setValue method)
             else {
-                if (el.innerText !== value)  el.innerText = value // No history
+                if (el.innerText !== value) {
+                    el.innerText = value // No history
+                }
             }
         }
         return value

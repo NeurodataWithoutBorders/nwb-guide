@@ -4,23 +4,68 @@ import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
 import { ContextMenu } from "./table/ContextMenu";
-import { errorHue, warningHue } from "./globals";
+import { errorHue, successHue, warningHue } from "./globals";
 import { notify } from "../globals";
 
+import { Loader } from './Loader'
+
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+
+
+const isVisible = function (ele, container) {
+    const { bottom, height, top } = ele.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    return top <= containerRect.top ? containerRect.top - top <= height : bottom - containerRect.bottom <= height;
+};
 
 export class SimpleTable extends LitElement {
     validateOnChange;
 
     static get styles() {
         return css`
+
             :host {
                 width: 100%;
                 display: block;
                 font-family: sans-serif;
                 font-size: 13px;
                 box-sizing: border-box;
+                --loader-color: hsl(200, 80%, 50%);
+                max-height: 400px;
             }
+
+            tfoot {
+                display: none;
+            }
+
+            tfoot tr, tfoot td {
+                background: transparent;
+                display: block;
+            }
+
+            :host([loading]) table {
+                background: whitesmoke;
+            }
+
+            :host([loading]) tfoot {
+                display: block;
+            }
+
+            :host([loading]) tfoot td  {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, calc(-50% + 10px));
+                text-align: center;
+                border: none;
+            }
+
+
+            :host([measure]) td {
+                height: 50px;
+            }
+
 
             [error] {
                 background: hsl(${errorHue}, 100%, 90%) !important;
@@ -31,12 +76,23 @@ export class SimpleTable extends LitElement {
             }
 
             [selected] {
-                border: 1px solid blue;
+                border: 1px solid hsl(240, 100%, 50%);
+                background: hsl(240, 100%, 98%)
             }
 
             table {
                 display: block;
                 overflow: auto;
+                position: relative;
+                max-height: 400px;
+                min-height: 400px;
+                background: white;
+            }
+            
+            thead {
+                position: sticky;
+                top: 0;
+                left: 0;
             }
 
             th {
@@ -61,12 +117,12 @@ export class SimpleTable extends LitElement {
                 background: gainsboro;
             }
 
+
             td {
                 border: 1px solid gainsboro;
                 background: white;
                 user-select: none;
             }
-
             
             [title] .relative::after {
                 content: "ℹ️";
@@ -313,7 +369,60 @@ export class SimpleTable extends LitElement {
         ],
     });
 
+    mapCells(callback) {
+        return this.#cells.map(row => Object.values(row).map(c => callback(c)))
+    }
+
+    #switchDisplay = (cell, container, on = true) => {
+
+        const parent = cell.parentNode
+        let visible = isVisible(parent, container)
+        if (on && visible) {
+            cell.style.display = ''
+            cell.input.firstUpdated() // Trigger initialization of contents
+        }
+        else if (!visible) {
+            cell.style.display = 'none' // Ensure cells are not immediately rendered
+            return cell
+        }
+
+    }
+
     updated() {
+
+        const scrollRoot = this.shadowRoot.querySelector('table')
+
+        // Add cells to body after the initial table render
+        const body = this.shadowRoot.querySelector('tbody')
+        const data = this.#getData();
+
+        this.setAttribute('loading', '')
+
+        setTimeout(() => {
+
+            const tStart = performance.now()
+            body.append(...data.map((row, i) => {
+                const tr = document.createElement('tr')
+                tr.append(...row.map((v, j) => this.#renderCell(v, { i, j })))
+                return tr
+            }))
+
+            this.setAttribute('measure', '')
+            const mapped = this.mapCells(c => this.#switchDisplay(c, scrollRoot, false)).flat()
+
+            let filtered = mapped.filter(c => c)
+            scrollRoot.onscroll = () => {
+                filtered = filtered.map(c => this.#switchDisplay(c, scrollRoot)).filter(c => c)
+                if (!filtered.length) scrollRoot.onscroll = null
+            }
+            this.removeAttribute('measure')
+
+            console.warn('Milliseconds to render table:', performance.now() - tStart)
+
+            this.removeAttribute('loading')
+        }, 1000)
+
+
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
         //     const colInfo = entries[k];
@@ -578,8 +687,6 @@ export class SimpleTable extends LitElement {
             if (foundKey) this.keyColumn = foundKey;
         }
 
-        const data = this.#getData();
-
         return html`
             ${this.#context}
             <table cellspacing="0">
@@ -589,12 +696,15 @@ export class SimpleTable extends LitElement {
                     </tr>
                 </thead>
                 <tbody>
-                    ${data.map((row, i) => {
-                        return html`<tr>
-                            ${row.map((v, j) => this.#renderCell(v, { i, j }))}
-                        </tr> `;
-                    })}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td>
+                            ${new Loader()}
+                            Rendering table data...
+                        </td>
+                    </tr>
+                    </tfoot>
             </table>
             <p style="margin: 10px 0px">
                 <small style="color: gray;">Right click to add or remove rows.</small>

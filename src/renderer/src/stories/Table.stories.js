@@ -12,7 +12,7 @@ export default {
 
 const Template = (args) => new Table(args);
 
-const subjects = 50;
+const subjects = 200;
 const subjectIds = Array.from({ length: subjects }, (_, i) => i);
 
 const data = subjectIds.reduce((acc, key) => {
@@ -38,7 +38,6 @@ Simple.args = {
     data,
     keyColumn: "subject_id",
     validateOnChange: (key, parent, value) => {
-        if (key === "subject_id" && !value) return true;
-        return false;
+        return !!value
     }, // Always validate as true
 };
