@@ -144,7 +144,7 @@ export class SimpleTable extends LitElement {
         onStatusChange,
         onLoaded,
         deferLoading,
-        maxHeight
+        maxHeight,
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -152,8 +152,8 @@ export class SimpleTable extends LitElement {
         this.keyColumn = keyColumn;
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
-        this.deferLoading = deferLoading ?? false
-        this.maxHeight = maxHeight ?? ''
+        this.deferLoading = deferLoading ?? false;
+        this.maxHeight = maxHeight ?? "";
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
