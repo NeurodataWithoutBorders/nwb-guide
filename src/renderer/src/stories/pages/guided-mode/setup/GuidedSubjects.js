@@ -14,7 +14,7 @@ export class GuidedSubjectsPage extends Page {
         onNext: () => {
             const { results, subjects } = this.info.globalState;
 
-            console.log('Results', subjects, results)
+            console.log("Results", subjects, results);
 
             try {
                 this.table.validate();

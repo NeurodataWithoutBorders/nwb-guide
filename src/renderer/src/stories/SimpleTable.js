@@ -181,14 +181,14 @@ export class SimpleTable extends LitElement {
             }
 
             // Avoid special key clicks
-            if ((ev.metaKey || ev.ctrlKey || ev.shiftKey) && !ev.key) return
+            if ((ev.metaKey || ev.ctrlKey || ev.shiftKey) && !ev.key) return;
 
             // Undo / Redo
             if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") {
                 this.#clearSelected();
                 if (ev.shiftKey) console.error("redo");
                 else console.error("Undo");
-                return
+                return;
             }
 
             if (this.#firstSelected) {
@@ -587,9 +587,7 @@ export class SimpleTable extends LitElement {
                 if (value) {
                     this.data[value] = old; // Allow renaming when different
                     delete this.#unresolved[row];
-                } 
-                
-                else this.#unresolved[row] = old // Allow tracking when keyColumn is deleted
+                } else this.#unresolved[row] = old; // Allow tracking when keyColumn is deleted
 
                 delete target[rowName]; // Delete the old name from source
             }
@@ -615,17 +613,17 @@ export class SimpleTable extends LitElement {
             value,
             schema,
             validateOnChange: (value) => {
-                if (!value && !this.validateEmptyCells) return true // Empty cells are valid
+                if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
-               const res = this.validateOnChange
+                const res = this.validateOnChange
                     ? this.validateOnChange(
                           fullInfo.col,
                           { ...this.data[fullInfo.row] }, // Validate on a copy of the parent
                           value
                       )
-                    : true
+                    : true;
 
-                return res
+                return res;
             },
 
             onValidate: (info) => {
