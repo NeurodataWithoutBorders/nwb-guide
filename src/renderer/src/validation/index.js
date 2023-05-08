@@ -55,9 +55,9 @@ export async function validateOnChange(name, parent, path, value) {
         )
     ).flat();
 
-    if (res.find((res) => res))
+    if (res.find((res) => res?.message))
         return res
-            .filter((res) => res)
+            .filter((res) => res?.message)
             .map((o) => {
                 return {
                     message: o.message,

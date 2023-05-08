@@ -1,6 +1,5 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
-import { Table } from "../../../Table.js";
 import subjectSchema from "../../../../../../../schemas/subject.schema";
 import { validateOnChange } from "../../../../validation/index.js";
 import { SimpleTable } from "../../../SimpleTable.js";
@@ -79,6 +78,7 @@ export class GuidedSubjectsPage extends Page {
             const sessions = Object.keys(this.info.globalState.results[subject]);
             subjects[subject].sessions = sessions;
         }
+
 
         this.table = new SimpleTable({
             schema: subjectSchema,

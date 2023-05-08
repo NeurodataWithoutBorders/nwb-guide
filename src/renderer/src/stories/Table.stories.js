@@ -32,6 +32,7 @@ Default.args = {
 };
 
 const SimpleTemplate = (args) => new SimpleTable(args);
+
 export const Simple = SimpleTemplate.bind({});
 Simple.args = {
     schema: subjectSchema,
@@ -40,4 +41,7 @@ Simple.args = {
     validateOnChange: (key, parent, value) => {
         return !!value;
     }, // Always validate as true
+    onLoaded: () => {
+        Swal.close();
+    }
 };

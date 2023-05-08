@@ -133,16 +133,18 @@ export class SimpleTable extends LitElement {
         `;
     }
 
-    constructor({ schema, data, template, keyColumn, validateOnChange, validateEmptyCells, onStatusChange } = {}) {
+    constructor({ schema, data, template, keyColumn, validateOnChange, validateEmptyCells, onStatusChange, onLoaded, deferLoading } = {}) {
         super();
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
+        this.deferLoading = deferLoading ?? false
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
+        if (onLoaded) this.onLoaded = onLoaded;
 
         this.onmousedown = (ev) => {
             this.#clearSelected();
@@ -328,6 +330,7 @@ export class SimpleTable extends LitElement {
 
     status;
     onStatusChange = () => {};
+    onLoaded = () => {};
 
     #context
 
@@ -397,23 +400,9 @@ export class SimpleTable extends LitElement {
         this.shadowRoot.append(this.#context) // Insert context menu
     }
 
-    updated() {
-        const scrollRoot = this.shadowRoot.querySelector("table");
-
-        this.generateContextMenu({
-            row: {
-                add: true,
-                remove: true
-            }
-        })
-
-        // Add cells to body after the initial table render
-        const body = this.shadowRoot.querySelector("tbody");
-        const data = this.#getData();
-
-        this.setAttribute("loading", "");
-
-        setTimeout(() => {
+    #loaded = false
+    load = () => {
+        if (!this.#loaded) {
             const tStart = performance.now();
             body.append(
                 ...data.map((row, i) => {
@@ -436,7 +425,55 @@ export class SimpleTable extends LitElement {
             console.warn('Milliseconds to render table:', performance.now() - tStart)
 
             this.removeAttribute('loading')
-        }, 100)
+            this.#loaded = true
+            this.onLoaded()
+        }
+    }
+
+    updated() {
+        const scrollRoot = this.shadowRoot.querySelector("table");
+
+        this.generateContextMenu({
+            row: {
+                add: true,
+                remove: true
+            }
+        })
+
+        // Add cells to body after the initial table render
+        const body = this.shadowRoot.querySelector("tbody");
+        const data = this.#getData();
+
+        this.setAttribute("loading", "");
+
+        // Trigger load after a short delay if not deferred
+        if (!this.deferLoading) {
+            setTimeout(() => {
+                const tStart = performance.now();
+                body.append(
+                    ...data.map((row, i) => {
+                        const tr = document.createElement("tr");
+                        tr.append(...row.map((v, j) => this.#renderCell(v, { i, j })));
+                        return tr;
+                    })
+                );
+
+                this.setAttribute("measure", "");
+                const mapped = this.mapCells((c) => this.#switchDisplay(c, scrollRoot, false)).flat();
+
+                let filtered = mapped.filter((c) => c);
+                scrollRoot.onscroll = () => {
+                    filtered = filtered.map((c) => this.#switchDisplay(c, scrollRoot)).filter((c) => c);
+                    if (!filtered.length) scrollRoot.onscroll = null;
+                };
+                this.removeAttribute("measure");
+
+                console.warn('Milliseconds to render table:', performance.now() - tStart)
+
+                this.removeAttribute('loading')
+                this.onLoaded()
+            }, 100)
+        }
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
