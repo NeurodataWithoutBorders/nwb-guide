@@ -3,6 +3,7 @@ import { Page } from "../../Page.js";
 import { Table } from "../../../Table.js";
 import subjectSchema from "../../../../../../../schemas/subject.schema";
 import { validateOnChange } from "../../../../validation/index.js";
+import { SimpleTable } from "../../../SimpleTable.js";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
@@ -12,6 +13,8 @@ export class GuidedSubjectsPage extends Page {
     footer = {
         onNext: () => {
             const { results, subjects } = this.info.globalState;
+
+            console.log('Results', subjects, results)
 
             try {
                 this.table.validate();
@@ -77,7 +80,7 @@ export class GuidedSubjectsPage extends Page {
             subjects[subject].sessions = sessions;
         }
 
-        this.table = new Table({
+        this.table = new SimpleTable({
             schema: subjectSchema,
             data: subjects,
             template: this.info.globalState.project.Subject,

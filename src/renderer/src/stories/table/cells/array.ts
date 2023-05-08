@@ -59,7 +59,7 @@ export class ArrayCell extends TableCellBase {
         super(...args)
     }
 
-    getValue = parseArray
+    getValue = (value = this.value) => parseArray(value) // NOTE: Must default to current value
 
     renderer = new ArrayRenderer({ value: this.value })
 }

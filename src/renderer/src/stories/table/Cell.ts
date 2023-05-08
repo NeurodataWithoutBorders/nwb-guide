@@ -31,6 +31,7 @@ export class TableCell extends LitElement {
             :host {
                 display: flex;
                 white-space: nowrap;
+                color: black;
             }
 
             :host > * {
@@ -95,13 +96,13 @@ export class TableCell extends LitElement {
 
     #validator: ValidationFunction = () => true
 
-    validate = async () => {
+    validate = async (v = this.value) => {
 
         const validator = this.validateOnChange ?? this.#validator
 
-        let result = await validator(this.value)
+        let result = await validator(v)
 
-        if (result === true) result = this.#validator(this.value)
+        if (result === true) result = this.#validator(v)
 
 
         let info: ValidationResult = {
@@ -161,7 +162,7 @@ export class TableCell extends LitElement {
         // Only actually rerender if new class type
         if (cls !== this.#cls) {
             this.input = new cls({
-                onChange: (v: any) => this.validate(),
+                onChange: () => this.validate(),
                 schema: this.schema
             })
         }

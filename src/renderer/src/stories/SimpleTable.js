@@ -7,8 +7,6 @@ import { ContextMenu } from "./table/ContextMenu";
 import { errorHue, warningHue } from "./globals";
 import { notify } from "../globals";
 
-import { ArrayRenderer } from "./table/cells/array";
-
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
 export class SimpleTable extends LitElement {
@@ -42,6 +40,7 @@ export class SimpleTable extends LitElement {
             }
 
             th {
+                border: 1px solid silver;
                 color: #222;
                 font-weight: 400;
                 text-align: center;
@@ -64,15 +63,14 @@ export class SimpleTable extends LitElement {
 
             td {
                 border: 1px solid gainsboro;
-            }
-
-            td {
                 background: white;
                 user-select: none;
             }
 
+            
             [title] .relative::after {
                 content: "ℹ️";
+                cursor: help;
                 display: inline-block;
                 margin: 0px 5px;
                 text-align: center;
@@ -126,15 +124,15 @@ export class SimpleTable extends LitElement {
                 return;
             }
 
-            // Undo / Redo
-            if (ev.metaKey || ev.ctrlKey || ev.shiftKey) {
-                if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") {
-                    this.#clearSelected();
-                    if (ev.shiftKey) console.error("redo");
-                    else console.error("Undo");
-                }
-                return
+            // Avoid special key clicks
+            if ((ev.metaKey || ev.ctrlKey || ev.shiftKey) && !ev.key) return
 
+            // Undo / Redo
+            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") {
+                this.#clearSelected();
+                if (ev.shiftKey) console.error("redo");
+                else console.error("Undo");
+                return
             }
 
             if (this.#firstSelected) {
@@ -252,8 +250,8 @@ export class SimpleTable extends LitElement {
     }
 
     #checkStatus = () => {
-        const hasWarning = this.querySelector("[warning]");
-        const hasError = this.querySelector("[error]");
+        const hasWarning = this.shadowRoot.querySelector("[warning]");
+        const hasError = this.shadowRoot.querySelector("[error]");
         checkStatus.call(this, hasWarning, hasError);
     };
 
@@ -261,7 +259,7 @@ export class SimpleTable extends LitElement {
         let message;
 
         if (!message) {
-            const errors = this.querySelectorAll("[error]");
+            const errors = this.shadowRoot.querySelectorAll("[error]");
             const len = errors.length;
             if (len === 1) message = errors[0].title;
             else if (len) message = `${len} errors exist on this table.`;
@@ -507,14 +505,19 @@ export class SimpleTable extends LitElement {
         const cell = new TableCell({
             value,
             schema,
-            validateOnChange: (value) =>
-                this.validateOnChange
+            validateOnChange: (value) => {
+                if (!value && !this.validateEmptyCells) return true // Empty cells are valid
+
+               const res = this.validateOnChange
                     ? this.validateOnChange(
                           fullInfo.col,
                           { ...this.data[fullInfo.row] }, // Validate on a copy of the parent
                           value
                       )
-                    : true,
+                    : true
+
+                return res
+            },
 
             onValidate: (info) => {
                 for (let key in info) {
