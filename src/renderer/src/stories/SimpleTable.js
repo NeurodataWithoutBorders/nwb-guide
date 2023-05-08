@@ -329,7 +329,7 @@ export class SimpleTable extends LitElement {
     status;
     onStatusChange = () => {};
 
-    #context
+    #context;
 
     mapCells(callback) {
         return this.#cells.map((row) => Object.values(row).map((c) => callback(c)));
@@ -357,44 +357,44 @@ export class SimpleTable extends LitElement {
                     this.#updateRows(i, 1); //2) // TODO: Support adding more than one row
                 },
             },
-            remove:{
-                    label: "Remove Row",
-                    onclick: (path) => {
-                        const cell = this.#getCellFromPath(path);
-                        const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
-                        this.#updateRows(i, -1);
-                    },
+            remove: {
+                label: "Remove Row",
+                onclick: (path) => {
+                    const cell = this.#getCellFromPath(path);
+                    const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
+                    this.#updateRows(i, -1);
                 },
             },
+        },
 
-            column: {
-                add: {
-                    label: 'Add Column',
-                    onclick: (path) => {
-                        console.log('add column')
-                        this.#getCellFromPath(path)
-                    }
+        column: {
+            add: {
+                label: "Add Column",
+                onclick: (path) => {
+                    console.log("add column");
+                    this.#getCellFromPath(path);
                 },
-                remove: {
-                    label: 'Remove Column',
-                    onclick: (path) => {
-                        console.log('remove column')
-                        this.#getCellFromPath(path)
-                    }
+            },
+            remove: {
+                label: "Remove Column",
+                onclick: (path) => {
+                    console.log("remove column");
+                    this.#getCellFromPath(path);
                 },
-            }
-    }
+            },
+        },
+    };
 
     generateContextMenu(options) {
-        const items = []
-        if (options.row?.add) items.push(this.#menuOptions.row.add)
-        if (options.row?.remove) items.push(this.#menuOptions.row.remove)
-        if (options.column?.add) items.push(this.#menuOptions.column.add)
-        if (options.column?.remove) items.push(this.#menuOptions.column.remove)
+        const items = [];
+        if (options.row?.add) items.push(this.#menuOptions.row.add);
+        if (options.row?.remove) items.push(this.#menuOptions.row.remove);
+        if (options.column?.add) items.push(this.#menuOptions.column.add);
+        if (options.column?.remove) items.push(this.#menuOptions.column.remove);
 
-        this.#context = new ContextMenu({ target: this.shadowRoot.querySelector('table'), items });
+        this.#context = new ContextMenu({ target: this.shadowRoot.querySelector("table"), items });
 
-        this.shadowRoot.append(this.#context) // Insert context menu
+        this.shadowRoot.append(this.#context); // Insert context menu
     }
 
     updated() {
@@ -403,9 +403,9 @@ export class SimpleTable extends LitElement {
         this.generateContextMenu({
             row: {
                 add: true,
-                remove: true
-            }
-        })
+                remove: true,
+            },
+        });
 
         // Add cells to body after the initial table render
         const body = this.shadowRoot.querySelector("tbody");
@@ -433,10 +433,10 @@ export class SimpleTable extends LitElement {
             };
             this.removeAttribute("measure");
 
-            console.warn('Milliseconds to render table:', performance.now() - tStart)
+            console.warn("Milliseconds to render table:", performance.now() - tStart);
 
-            this.removeAttribute('loading')
-        }, 100)
+            this.removeAttribute("loading");
+        }, 100);
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
