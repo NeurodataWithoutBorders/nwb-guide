@@ -77,7 +77,7 @@ export class TableCellBase extends LitElement {
             this.style.pointerEvents = 'all'
             placeCaretAtEnd(this.#editable)
         } else {
-            const current = this.getValue(this.#editable)
+            const current = this.getElementValue(this.#editable)
             this.removeAttribute('editing')
             this.onClose()
             this.style.pointerEvents = ''
@@ -87,10 +87,13 @@ export class TableCellBase extends LitElement {
         this.#active = state
     }
 
+    getValue = (input: any = this.value) => input // Process inputs from the editor
+
     #update(current: any) {
-        if (this.value !== current) {
-            this.value = current
-            this.onChange(current)
+        let value = this.getValue(current)
+        if (this.value !== value) {
+            this.value = value
+            this.onChange(value)
         }
     }
 
@@ -128,7 +131,7 @@ export class TableCellBase extends LitElement {
 
     setChild = (el: HTMLElement, value = this.value) => {
         if (el) {
-            if ('value' in el) el.value = value
+            if ('value' in el) el.value = value // Directly set test (no setValue method)
             else {
                 if (el.innerText !== value)  el.innerText = value // No history
             }
@@ -136,7 +139,7 @@ export class TableCellBase extends LitElement {
         return value
     }
 
-    getValue = (el: HTMLElement) => el.value || el.innerText
+    getElementValue = (el: HTMLElement) => el.value || el.innerText
 
     render() {
 

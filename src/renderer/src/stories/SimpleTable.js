@@ -459,6 +459,7 @@ export class SimpleTable extends LitElement {
     #unresolved = {};
     #onCellChange = (cell) => {
         const value = cell.value;
+
         const { i: row, col: header, row: possibleRowName, j: prop } = cell.simpleTableInfo;
         // const header = typeof prop === "number" ? col : prop;
         let rowName = possibleRowName;
@@ -476,9 +477,14 @@ export class SimpleTable extends LitElement {
         if (header === this.keyColumn) {
             if (value !== rowName) {
                 const old = target[rowName] ?? {};
-                this.data[value] = old;
-                delete target[rowName];
-                delete this.#unresolved[row];
+                if (value) {
+                    this.data[value] = old; // Allow renaming when different
+                    delete this.#unresolved[row];
+                } 
+                
+                else this.#unresolved[row] = old // Allow tracking when keyColumn is deleted
+
+                delete target[rowName]; // Delete the old name from source
             }
         }
         // Update data on passed object

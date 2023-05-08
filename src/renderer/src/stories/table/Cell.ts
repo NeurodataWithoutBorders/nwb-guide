@@ -82,7 +82,7 @@ export class TableCell extends LitElement {
     }
 
     get value() {
-        return this.input.value
+        return this.input.getValue()
     }
 
     set value(v) {

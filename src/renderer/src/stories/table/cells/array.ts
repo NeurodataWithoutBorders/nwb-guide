@@ -2,6 +2,14 @@ import { css, html } from "lit";
 import { TableCellBase } from "./base";
 import { BaseRenderer } from "./renderers/base";
 
+
+const parseArray = (value: any): any[] => {
+    if (!value) return [];
+    else if (typeof value === "string") return value.trim().split(",").filter(str => str);
+    else if (!Array.isArray(value)) return [value];
+    return value
+}
+
 export class ArrayRenderer extends BaseRenderer {
 
 
@@ -27,32 +35,16 @@ export class ArrayRenderer extends BaseRenderer {
         ]
     }
 
-    // Parse to an array
-    #parseValue = (value: any = this.value): any[] => {
-        if (!value) return [];
-        else if (typeof value === "string") return value.split(",");
-        else if (!Array.isArray(value)) return [value];
-        return value
-    }
-
     constructor(...args: any[]) {
         super(...args)
     }
 
     ul = document.createElement('ul')
 
-    // set = (value: any) => {
-
-    // }
-
-    get = () => {
-        return this.#parseValue()
-    }
-
     render() {
         return html`
             <ul>
-                ${this.get().map(v => html`<li>${v}</li>`)}
+                ${parseArray(this.value).map(v => html`<li>${v}</li>`)}
             </ul>
         `
     }
@@ -66,6 +58,8 @@ export class ArrayCell extends TableCellBase {
     constructor(...args){
         super(...args)
     }
+
+    getValue = parseArray
 
     renderer = new ArrayRenderer({ value: this.value })
 }
