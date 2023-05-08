@@ -42,6 +42,6 @@ Simple.args = {
         return !!value;
     }, // Always validate as true
     onLoaded: () => {
-        Swal.close();
-    },
+        console.log('Loaded!')
+    }
 };

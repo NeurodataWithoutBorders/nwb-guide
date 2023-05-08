@@ -8,6 +8,7 @@ import { errorHue, successHue, warningHue } from "./globals";
 import { notify } from "../globals";
 
 import { Loader } from "./Loader";
+import { styleMap } from "lit/directives/style-map.js";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -30,7 +31,6 @@ export class SimpleTable extends LitElement {
                 font-size: 13px;
                 box-sizing: border-box;
                 --loader-color: hsl(200, 80%, 50%);
-                max-height: 400px;
             }
 
             tfoot {
@@ -45,7 +45,7 @@ export class SimpleTable extends LitElement {
 
             :host([loading]) table {
                 background: whitesmoke;
-                min-height: 400px;
+                max-height: 400px;
             }
 
             :host([loading]) tfoot {
@@ -84,6 +84,7 @@ export class SimpleTable extends LitElement {
                 position: relative;
                 max-height: 400px;
                 background: white;
+                width: 100%;
             }
 
             thead {
@@ -143,6 +144,7 @@ export class SimpleTable extends LitElement {
         onStatusChange,
         onLoaded,
         deferLoading,
+        maxHeight
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -150,7 +152,8 @@ export class SimpleTable extends LitElement {
         this.keyColumn = keyColumn;
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
-        this.deferLoading = deferLoading ?? false;
+        this.deferLoading = deferLoading ?? false
+        this.maxHeight = maxHeight ?? ''
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
@@ -726,7 +729,7 @@ export class SimpleTable extends LitElement {
 
         return html`
             ${this.#context}
-            <table cellspacing="0">
+            <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                 <thead>
                     <tr>
                         ${[...keys].map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
