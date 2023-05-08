@@ -146,7 +146,7 @@ export class TableCell extends LitElement {
     }
 
     #cls: any
-    
+
     // input = new TableCellBase({ })
 
     input: TableCellBase
