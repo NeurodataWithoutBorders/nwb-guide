@@ -138,8 +138,8 @@ export class SimpleTable extends LitElement {
             if (this.#firstSelected) {
                 const path = this.#getPath(ev);
                 if (path[0] === document.body) {
-                    this.#firstSelected.input.toggle(true) // Open editor
-                    this.#firstSelected.input.execute('selectAll') // redirect keydown to the hidden input
+                    this.#firstSelected.input.toggle(true); // Open editor
+                    this.#firstSelected.input.execute("selectAll"); // redirect keydown to the hidden input
                 }
             }
         });
