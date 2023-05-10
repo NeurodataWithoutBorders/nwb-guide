@@ -47,7 +47,7 @@ export class SimpleTable extends LitElement {
 
             :host([loading]) table {
                 background: whitesmoke;
-                height: 250px;
+                height: 150px;
             }
 
             :host([loading]) tfoot {
@@ -62,6 +62,11 @@ export class SimpleTable extends LitElement {
                 text-align: center;
                 border: none;
             }
+            
+            :host([loading]:not([waiting])) table {
+                height: 250px;
+            }
+
 
             :host([loading]:not([waiting])) .loadTrigger {
                 display: none;
@@ -464,7 +469,7 @@ export class SimpleTable extends LitElement {
             };
             this.removeAttribute("measure");
 
-            console.warn(`Visible Cell Load Time: ${(performance.now() - tStart).toFixed(2)}ms`)
+            console.warn(`Visible Cell Load Time: ${(performance.now() - tStart).toFixed(2)}ms`);
 
             this.removeAttribute("loading");
             this.#loaded = true;
@@ -730,8 +735,7 @@ export class SimpleTable extends LitElement {
     #schema = {};
 
     render() {
-
-        this.#resetLoadState()
+        this.#resetLoadState();
 
         const entries = (this.#schema = { ...this.schema.properties });
 

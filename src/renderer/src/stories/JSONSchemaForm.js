@@ -913,13 +913,12 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     }
 
     #resetLoadState() {
-        this.#loaded = false
-        this.#nLoaded = 0
+        this.#loaded = false;
+        this.#nLoaded = 0;
     }
 
     render() {
-
-        this.#resetLoadState()
+        this.#resetLoadState();
 
         const schema = this.schema ?? {};
 
