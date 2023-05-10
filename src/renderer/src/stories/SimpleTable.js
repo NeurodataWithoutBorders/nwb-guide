@@ -414,6 +414,10 @@ export class SimpleTable extends LitElement {
     }
 
     #loaded = false;
+    #resetLoadState(){
+        this.#loaded = false
+    }
+
     load = () => {
         const scrollRoot = this.shadowRoot.querySelector("table");
         // Add cells to body after the initial table render
@@ -440,7 +444,7 @@ export class SimpleTable extends LitElement {
             };
             this.removeAttribute("measure");
 
-            console.warn("Milliseconds to render table:", performance.now() - tStart);
+            console.warn(`Visible Cell Load Time: ${(performance.now() - tStart).toFixed(2)}ms`)
 
             this.removeAttribute("loading");
             this.#loaded = true;
@@ -459,11 +463,7 @@ export class SimpleTable extends LitElement {
         this.setAttribute("loading", "");
 
         // Trigger load after a short delay if not deferred
-        if (!this.deferLoading) {
-            setTimeout(() => {
-                this.load();
-            }, 100);
-        }
+        if (!this.deferLoading) setTimeout(() => this.load(), 100);
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
@@ -695,6 +695,9 @@ export class SimpleTable extends LitElement {
     #schema = {};
 
     render() {
+
+        this.#resetLoadState()
+        
         const entries = (this.#schema = { ...this.schema.properties });
 
         // Add existing additional properties to the entries variable if necessary

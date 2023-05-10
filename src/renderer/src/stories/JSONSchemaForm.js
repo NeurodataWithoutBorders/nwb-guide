@@ -911,7 +911,15 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         this.#checkAllLoaded(); // Throw if no tables
     }
 
+    #resetLoadState() {
+        this.#loaded = false
+        this.#nLoaded = 0
+    }
+
     render() {
+
+        this.#resetLoadState()
+
         const schema = this.schema ?? {};
 
         // Register default properties
