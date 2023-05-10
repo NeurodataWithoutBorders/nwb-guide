@@ -48,10 +48,6 @@ export class Search extends LitElement {
                 background: white;
             }
 
-            .hidden {
-                display: none;
-            }
-
             .option {
                 padding: 25px;
                 border-top: 1px solid #f2f2f2;
@@ -95,7 +91,7 @@ export class Search extends LitElement {
 
     #options = [];
     #initialize = () =>
-        this.#options.forEach(({ option }) => option.classList[this.showAllWhenEmpty ? "remove" : "add"]("hidden"));
+        this.#options.forEach(({ option }) => option[this.showAllWhenEmpty ? "removeAttribute" : "setAttribute"]("hidden", ''));
 
     list = document.createElement("ul");
 
@@ -111,7 +107,7 @@ export class Search extends LitElement {
             this.options.forEach((option) => {
                 const li = document.createElement("li");
                 li.classList.add("option");
-                li.classList.add("hidden");
+                li.setAttribute('hidden', '')
                 li.setAttribute("data-keywords", JSON.stringify(option.keywords));
                 li.addEventListener("click", () => this.#onSelect(option));
 
@@ -155,10 +151,11 @@ export class Search extends LitElement {
 
           this.#options.forEach(({ option }, i) => {
               if (toShow.includes(i)) {
-                  option.classList.remove("hidden");
+                  option.removeAttribute('hidden')
               } else {
-                  option.classList.add("hidden");
+                  option.setAttribute('hidden', '')
               }
+
           });
       }}></input>
     </div>

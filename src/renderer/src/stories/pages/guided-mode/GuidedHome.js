@@ -197,29 +197,7 @@ export class GuidedHomePage extends Page {
                             class="container--dashed"
                             id="guided-button-start-new-curate"
                             style="width: 320px; margin: 5px; width: 28rem; height: 16.5rem"
-                            @click="${() => {
-                                this.onTransition("guided/start");
-                                // //Hide the home screen
-                                // document.getElementById("guided-home").classList.add("hidden");
-                                // //Hide the header and footer for the dataset name/subtitle page
-                                // $("#guided-header-div").hide();
-                                // $("#guided-footer-div").hide();
-
-                                // //Show the guided mode starting container
-                                // document.getElementById("guided-mode-starting-container").classList.remove("hidden");
-
-                                // //hide the name+subtitle page and show the intro page
-                                // switchElementVisibility("guided-new-dataset-info", "guided-intro-page");
-                                // //Reset name, subtitle, and subtitle char count
-                                // document.getElementById("guided-dataset-name-input").value = "";
-                                // document.getElementById("guided-dataset-subtitle-input").value = "";
-                                // document.getElementById("guided-subtitle-char-count").innerHTML = `255 characters remaining`;
-
-                                // guidedLockSideBar();
-
-                                // //Show the intro footer
-                                // document.getElementById("guided-footer-intro").classList.remove("hidden");
-                            }}"
+                            @click="${() => this.onTransition(1)}"
                         >
                             <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
                             <h2 class="guided--text-sub-step" style="width: 100%;">Convert a new dataset</h2>

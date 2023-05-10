@@ -21,6 +21,7 @@ export class Page extends LitElement {
         Object.assign(this.info, info);
 
         this.style.height = '100%'
+        this.style.color = 'black'
     }
 
     createRenderRoot() {
