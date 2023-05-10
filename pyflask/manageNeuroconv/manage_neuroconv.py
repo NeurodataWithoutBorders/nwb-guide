@@ -122,7 +122,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     del electrode_definition["properties"]["name"]
     del electrode_definition["properties"]["description"]
     electrode_definition["required"] = []
-    
+
     return to_return
 
 

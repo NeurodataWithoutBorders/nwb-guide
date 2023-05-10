@@ -28,7 +28,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const instanceId = `sub-${subject}/ses-${session}`;
 
-        const schema = this.info.globalState.schema.metadata[subject][session] // TODO: Order the Electrodes schema properties differently once present
+        const schema = this.info.globalState.schema.metadata[subject][session]; // TODO: Order the Electrodes schema properties differently once present
 
         const form = new JSONSchemaForm({
             identifier: instanceId,

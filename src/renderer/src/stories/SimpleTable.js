@@ -62,6 +62,10 @@ export class SimpleTable extends LitElement {
                 border: none;
             }
 
+            :host([loading]:not([waiting])) table {
+                height: 250px;
+            }
+
             :host([loading]:not([waiting])) .loadTrigger {
                 display: none;
             }
@@ -73,7 +77,6 @@ export class SimpleTable extends LitElement {
             :host([loading][waiting]) .loader {
                 display: none;
             }
-            
 
             :host([measure]) td {
                 height: 50px;
@@ -430,14 +433,13 @@ export class SimpleTable extends LitElement {
     }
 
     #loaded = false;
-    #resetLoadState(){
-        this.setAttribute('waiting', '')
-        this.#loaded = false
+    #resetLoadState() {
+        this.setAttribute("waiting", "");
+        this.#loaded = false;
     }
 
     load = () => {
-
-        this.removeAttribute('waiting')
+        this.removeAttribute("waiting");
 
         const scrollRoot = this.shadowRoot.querySelector("table");
         // Add cells to body after the initial table render
@@ -446,13 +448,12 @@ export class SimpleTable extends LitElement {
         if (!this.#loaded) {
             const tStart = performance.now();
             body.append(
-                ...Object.values(this.#cells).map((row) =>{
+                ...Object.values(this.#cells).map((row) => {
                     const tr = document.createElement("tr");
                     tr.append(...Object.values(row).map((cell, j) => this.#renderCell(cell)));
                     return tr;
                 })
             );
-            
 
             this.setAttribute("measure", "");
             const mapped = this.mapCells((c) => this.#switchDisplay(c, scrollRoot, false)).flat();
@@ -483,13 +484,12 @@ export class SimpleTable extends LitElement {
         this.setAttribute("loading", "");
 
         const data = this.#getData();
-        const cells = data.map((row, i) =>row.map((v, j) => this.#createCell(v, { i, j }))).flat();
+        const cells = data.map((row, i) => row.map((v, j) => this.#createCell(v, { i, j }))).flat();
 
         // Trigger load after a short delay if not deferred
         if (!this.deferLoading) setTimeout(() => this.load(), 100);
-
         // Otherwise validate the data itself without rendering
-        else cells.forEach(c => c.validate())
+        else cells.forEach((c) => c.validate());
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
@@ -693,7 +693,7 @@ export class SimpleTable extends LitElement {
             },
 
             onValidate: (info) => {
-                const td = cell.simpleTableInfo.td
+                const td = cell.simpleTableInfo.td;
                 if (td) {
                     for (let key in info) {
                         const value = info[key];
@@ -702,8 +702,8 @@ export class SimpleTable extends LitElement {
                     }
                 }
 
-                    this.#onCellChange(cell);
-                    this.#checkStatus(); // Check status after every validation update
+                this.#onCellChange(cell);
+                this.#checkStatus(); // Check status after every validation update
             },
         });
 
@@ -711,14 +711,14 @@ export class SimpleTable extends LitElement {
 
         if (!this.#cells[fullInfo.i]) this.#cells[fullInfo.i] = {};
         this.#cells[fullInfo.i][fullInfo.j] = cell;
-        return cell
-    }
+        return cell;
+    };
 
     #renderCell = (value, info) => {
         const td = document.createElement("td");
         const cell = value instanceof TableCell ? value : this.#createCell(value, info);
 
-        cell.simpleTableInfo.td = td
+        cell.simpleTableInfo.td = td;
         td.onmouseover = () => {
             if (this.#selecting) this.#selectCells(cell);
         };
@@ -777,14 +777,15 @@ export class SimpleTable extends LitElement {
                     <tfoot>
                         <tr>
                             <td>
-                                <div class="loader">
-                                    ${new Loader()} 
-                                    Rendering table data...
-                                </div>
-                                <nwb-button class="loadTrigger"  @click=${() => {
-                                    this.removeAttribute('waiting')
-                                    setTimeout(() => this.load(), 100) 
-                                }}>Load Data</nwb-button>
+                                <div class="loader">${new Loader()} Rendering table data...</div>
+                                <nwb-button
+                                    class="loadTrigger"
+                                    @click=${() => {
+                                        this.removeAttribute("waiting");
+                                        setTimeout(() => this.load(), 100);
+                                    }}
+                                    >Load Data</nwb-button
+                                >
                             </td>
                         </tr>
                     </tfoot>
