@@ -73,13 +73,12 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     #resetLoadState() {
-        this.#loaded = false
-        this.#nLoaded = 0
+        this.#loaded = false;
+        this.#nLoaded = 0;
     }
 
     render() {
-
-        this.#resetLoadState() // Reset on each render
+        this.#resetLoadState(); // Reset on each render
 
         Swal.fire({
             title: "Waiting for your metadata to render",

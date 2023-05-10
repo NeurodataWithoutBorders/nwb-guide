@@ -414,8 +414,8 @@ export class SimpleTable extends LitElement {
     }
 
     #loaded = false;
-    #resetLoadState(){
-        this.#loaded = false
+    #resetLoadState() {
+        this.#loaded = false;
     }
 
     load = () => {
@@ -444,7 +444,7 @@ export class SimpleTable extends LitElement {
             };
             this.removeAttribute("measure");
 
-            console.warn(`Visible Cell Load Time: ${(performance.now() - tStart).toFixed(2)}ms`)
+            console.warn(`Visible Cell Load Time: ${(performance.now() - tStart).toFixed(2)}ms`);
 
             this.removeAttribute("loading");
             this.#loaded = true;
@@ -695,9 +695,8 @@ export class SimpleTable extends LitElement {
     #schema = {};
 
     render() {
+        this.#resetLoadState();
 
-        this.#resetLoadState()
-        
         const entries = (this.#schema = { ...this.schema.properties });
 
         // Add existing additional properties to the entries variable if necessary
