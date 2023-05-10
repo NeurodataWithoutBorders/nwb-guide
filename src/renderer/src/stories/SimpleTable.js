@@ -9,6 +9,7 @@ import { notify } from "../globals";
 
 import { Loader } from "./Loader";
 import { styleMap } from "lit/directives/style-map.js";
+import "./Button";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -43,9 +44,10 @@ export class SimpleTable extends LitElement {
                 display: block;
             }
 
+
             :host([loading]) table {
                 background: whitesmoke;
-                max-height: 400px;
+                height: 250px;
             }
 
             :host([loading]) tfoot {
@@ -60,6 +62,19 @@ export class SimpleTable extends LitElement {
                 text-align: center;
                 border: none;
             }
+
+            :host([loading]:not([waiting])) .loadTrigger {
+                display: none;
+            }
+
+            :host([loading]:not([waiting])) thead {
+                filter: blur(1.5px);
+            }
+
+            :host([loading][waiting]) .loader {
+                display: none;
+            }
+            
 
             :host([measure]) td {
                 height: 50px;
@@ -78,9 +93,10 @@ export class SimpleTable extends LitElement {
                 background: hsl(240, 100%, 98%);
             }
 
-            table {
-                display: inline-block;
+            .table-container {
                 overflow: auto;
+            }
+            table {
                 position: relative;
                 max-height: 400px;
                 background: white;
@@ -415,24 +431,28 @@ export class SimpleTable extends LitElement {
 
     #loaded = false;
     #resetLoadState(){
+        this.setAttribute('waiting', '')
         this.#loaded = false
     }
 
     load = () => {
+
+        this.removeAttribute('waiting')
+
         const scrollRoot = this.shadowRoot.querySelector("table");
         // Add cells to body after the initial table render
         const body = this.shadowRoot.querySelector("tbody");
-        const data = this.#getData();
 
         if (!this.#loaded) {
             const tStart = performance.now();
             body.append(
-                ...data.map((row, i) => {
+                ...Object.values(this.#cells).map((row) =>{
                     const tr = document.createElement("tr");
-                    tr.append(...row.map((v, j) => this.#renderCell(v, { i, j })));
+                    tr.append(...Object.values(row).map((cell, j) => this.#renderCell(cell)));
                     return tr;
                 })
             );
+            
 
             this.setAttribute("measure", "");
             const mapped = this.mapCells((c) => this.#switchDisplay(c, scrollRoot, false)).flat();
@@ -462,8 +482,14 @@ export class SimpleTable extends LitElement {
     updated() {
         this.setAttribute("loading", "");
 
+        const data = this.#getData();
+        const cells = data.map((row, i) =>row.map((v, j) => this.#createCell(v, { i, j }))).flat();
+
         // Trigger load after a short delay if not deferred
         if (!this.deferLoading) setTimeout(() => this.load(), 100);
+
+        // Otherwise validate the data itself without rendering
+        else cells.forEach(c => c.validate())
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };
@@ -641,9 +667,7 @@ export class SimpleTable extends LitElement {
         }
     };
 
-    #renderCell = (value, info) => {
-        const td = document.createElement("td");
-
+    #createCell = (value, info) => {
         const rowNames = Object.keys(this.data);
 
         const fullInfo = { ...info, col: this.colHeaders[info.j], row: rowNames[info.i] };
@@ -669,24 +693,35 @@ export class SimpleTable extends LitElement {
             },
 
             onValidate: (info) => {
-                for (let key in info) {
-                    const value = info[key];
-                    if (value === undefined) td.removeAttribute(key);
-                    else td.setAttribute(key, info[key]);
+                const td = cell.simpleTableInfo.td
+                if (td) {
+                    for (let key in info) {
+                        const value = info[key];
+                        if (value === undefined) td.removeAttribute(key);
+                        else td.setAttribute(key, info[key]);
+                    }
                 }
 
-                this.#onCellChange(cell);
-                this.#checkStatus(); // Check status after every validation update
+                    this.#onCellChange(cell);
+                    this.#checkStatus(); // Check status after every validation update
             },
         });
 
         cell.simpleTableInfo = fullInfo;
-        td.onmouseover = () => {
-            if (this.#selecting) this.#selectCells(cell);
-        };
 
         if (!this.#cells[fullInfo.i]) this.#cells[fullInfo.i] = {};
         this.#cells[fullInfo.i][fullInfo.j] = cell;
+        return cell
+    }
+
+    #renderCell = (value, info) => {
+        const td = document.createElement("td");
+        const cell = value instanceof TableCell ? value : this.#createCell(value, info);
+
+        cell.simpleTableInfo.td = td
+        td.onmouseover = () => {
+            if (this.#selecting) this.#selectCells(cell);
+        };
 
         td.appendChild(cell);
         return td;
@@ -697,7 +732,7 @@ export class SimpleTable extends LitElement {
     render() {
 
         this.#resetLoadState()
-        
+
         const entries = (this.#schema = { ...this.schema.properties });
 
         // Add existing additional properties to the entries variable if necessary
@@ -732,19 +767,30 @@ export class SimpleTable extends LitElement {
 
         return html`
             ${this.#context}
-            <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
-                <thead>
-                    <tr>
-                        ${[...keys].map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
-                    </tr>
-                </thead>
-                <tbody></tbody>
-                <tfoot>
-                    <tr>
-                        <td>${new Loader()} Rendering table data...</td>
-                    </tr>
-                </tfoot>
-            </table>
+            <div class="table-container">
+                <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
+                    <thead>
+                        <tr>
+                            ${[...keys].map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>
+                                <div class="loader">
+                                    ${new Loader()} 
+                                    Rendering table data...
+                                </div>
+                                <nwb-button class="loadTrigger"  @click=${() => {
+                                    this.removeAttribute('waiting')
+                                    setTimeout(() => this.load(), 100) 
+                                }}>Load Data</nwb-button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
             <p style="margin: 10px 0px">
                 <small style="color: gray;">Right click to add or remove rows.</small>
             </p>

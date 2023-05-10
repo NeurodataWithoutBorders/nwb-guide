@@ -78,17 +78,17 @@ export class TableCell extends LitElement {
         }
 
         this.ondblclick = () => this.input.toggle(true)
-        document.onclick = () => this.input.toggle(false)
+        document.onclick = () => this.input ? this.input.toggle(false) : false
 
     }
 
     get value() {
-        return this.input.getValue()
+        return this.input ? this.input.getValue() : this.#value
     }
 
     set value(v) {
-        this.input.set(v ?? '')
-        this.#value = this.input.value // Ensure value is coerced
+        if (this.input) this.input.set(v ?? '')
+        this.#value = this.input ? this.input.value: v // Ensure value is coerced
      }
 
     validateOnChange?: ValidationFunction

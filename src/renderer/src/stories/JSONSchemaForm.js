@@ -839,6 +839,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
                     showLevelOverride: this.showLevelOverride,
+                    deferLoading: this.deferLoading,
                     conditionalRequirements: this.conditionalRequirements,
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     validateEmptyValues: this.validateEmptyValues,

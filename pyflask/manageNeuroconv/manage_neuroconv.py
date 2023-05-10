@@ -114,17 +114,15 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     ]
 
     flat_electrode_table_info = [item for sublist in electrode_table_info for item in sublist]
-
-    # Replace electrodes entry with the full table data
-    to_return["results"]["Ecephys"]["Electrodes"] = [
-        dict(**info, name=f"{info['channel_name']}_{info['group_name']}") for info in flat_electrode_table_info
-    ]
+    to_return["results"]["Ecephys"]["Electrodes"] = flat_electrode_table_info
 
     ## Allow additional properties to be added and rendered for this table
-    to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"][
-        "additionalProperties"
-    ] = True
-
+    electrode_definition = to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"]
+    electrode_definition["additionalProperties"] = True
+    del electrode_definition["properties"]["name"]
+    del electrode_definition["properties"]["description"]
+    electrode_definition["required"] = []
+    
     return to_return
 
 

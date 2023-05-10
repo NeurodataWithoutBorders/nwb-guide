@@ -28,10 +28,12 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const instanceId = `sub-${subject}/ses-${session}`;
 
+        const schema = this.info.globalState.schema.metadata[subject][session] // TODO: Order the Electrodes schema properties differently once present
+
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema: this.info.globalState.schema.metadata[subject][session],
+            schema,
             results,
             ignore: ["ElectricalSeriesAP", "source_script", "source_script_file_name"],
             conditionalRequirements: [
@@ -81,20 +83,20 @@ export class GuidedMetadataPage extends ManagedPage {
 
         this.#resetLoadState() // Reset on each render
 
-        Swal.fire({
-            title: "Waiting for your metadata to render",
-            html: "Please wait...",
-            allowEscapeKey: false,
-            allowOutsideClick: false,
-            heightAuto: false,
-            backdrop: "rgba(0,0,0, 0.4)",
-            timerProgressBar: false,
-            didOpen: () => {
-                if (this.#loaded) return false;
-                Swal.showLoading();
-                // this.forms.forEach(o => o.form.load()) // Wait until Swal is active to check load status for tables
-            },
-        });
+        // Swal.fire({
+        //     title: "Waiting for your metadata to render",
+        //     html: "Please wait...",
+        //     allowEscapeKey: false,
+        //     allowOutsideClick: false,
+        //     heightAuto: false,
+        //     backdrop: "rgba(0,0,0, 0.4)",
+        //     timerProgressBar: false,
+        //     didOpen: () => {
+        //         if (this.#loaded) return false;
+        //         Swal.showLoading();
+        //         this.forms.forEach(o => o.form.load()) // Wait until Swal is active to check load status for tables
+        //     },
+        // });
 
         this.forms = this.mapSessions(this.createForm);
 
