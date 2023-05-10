@@ -5,6 +5,8 @@ export class GuidedCapsules extends LitElement {
         super();
         this.n = n;
         this.selected = selected;
+
+        this.style.width = '100%'
     }
 
     static get properties() {

@@ -92,15 +92,10 @@ export class GuidedNewDatasetPage extends Page {
         form.style.width = "100%";
 
         return html`
-        <div class="guided--panel" id="guided-new-dataset-info" style="flex-grow: 1">
         <div class="title">
           <h1 class="guided--text-sub-step">Project Setup</h1>
         </div>
-        <div class="guided--section">
-         ${form}
-        </div>
-      </div>
-    </div>
+        ${form}
     `;
     }
 }

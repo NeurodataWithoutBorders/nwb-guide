@@ -310,9 +310,6 @@ export class Dashboard extends LitElement {
 
     #first = true;
     updated() {
-        const div = (this.shadowRoot ?? this).querySelector("div");
-        div.style.height = "100vh";
-
         if (this.#first) {
             this.#first = false;
             this.#updated();
@@ -325,13 +322,14 @@ export class Dashboard extends LitElement {
         this.style.display = "grid";
         this.style.gridTemplateColumns = "fit-content(0px) 1fr";
         this.style.position = "relative";
+        this.main.style.height = '100vh'
 
         if (this.name) this.sidebar.name = this.name;
         if (this.logo) this.sidebar.logo = this.logo;
         if ("renderNameInSidebar" in this) this.sidebar.renderName = this.renderNameInSidebar;
 
         return html`
-            <div>${this.sidebar} ${this.subSidebar}</div>
+            <div style="height: 100vh;">${this.sidebar} ${this.subSidebar}</div>
             ${this.main}
         `;
     }
