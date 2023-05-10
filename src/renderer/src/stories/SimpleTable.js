@@ -44,10 +44,9 @@ export class SimpleTable extends LitElement {
                 display: block;
             }
 
-
             :host([loading]) table {
                 background: whitesmoke;
-                height: 150px;
+                height: 250px;
             }
 
             :host([loading]) tfoot {
@@ -62,11 +61,6 @@ export class SimpleTable extends LitElement {
                 text-align: center;
                 border: none;
             }
-            
-            :host([loading]:not([waiting])) table {
-                height: 250px;
-            }
-
 
             :host([loading]:not([waiting])) .loadTrigger {
                 display: none;
@@ -100,10 +94,11 @@ export class SimpleTable extends LitElement {
 
             .table-container {
                 overflow: auto;
+                max-height: 400px;
             }
+
             table {
                 position: relative;
-                max-height: 400px;
                 background: white;
                 width: 100%;
             }
