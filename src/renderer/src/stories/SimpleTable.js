@@ -96,12 +96,12 @@ export class SimpleTable extends LitElement {
             }
 
             .table-container {
+                position: relative;
                 overflow: auto;
                 max-height: 400px;
             }
 
             table {
-                position: relative;
                 background: white;
                 width: 100%;
             }
