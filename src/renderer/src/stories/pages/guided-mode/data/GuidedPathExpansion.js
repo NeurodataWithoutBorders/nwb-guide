@@ -167,7 +167,7 @@ export class GuidedPathExpansionPage extends Page {
 
         form.style.width = "100%";
 
-        return this.optional
+        return this.optional;
     }
 }
 

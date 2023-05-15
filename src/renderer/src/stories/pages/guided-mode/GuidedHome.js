@@ -23,7 +23,7 @@ export class GuidedHomePage extends Page {
             const elementButtonControls = guidedRadioButton.getAttribute("data-next-element");
             if (elementButtonControls) {
                 const elementToHide = (this.shadowRoot ?? this).querySelector(`#${elementButtonControls}`);
-                elementToHide.setAttribute('hidden', '')
+                elementToHide.setAttribute("hidden", "");
             }
         }
     }
@@ -117,14 +117,14 @@ export class GuidedHomePage extends Page {
         //Hide all child containers of non-selected buttons
         notSelectedButton.forEach((button) => {
             const id = button.getAttribute("data-next-element");
-            if (id) (this.shadowRoot ?? this).querySelector(`#${id}`).setAttribute('hidden', '')
+            if (id) (this.shadowRoot ?? this).querySelector(`#${id}`).setAttribute("hidden", "");
         });
 
         //Display and scroll to selected element container if data-next-element exists
         const nextQuestionID = selectedButton.getAttribute("data-next-element");
         if (nextQuestionID) {
             const nextQuestionElement = (this.shadowRoot ?? this).querySelector(`#${nextQuestionID}`);
-            nextQuestionElement.removeAttribute('hidden')
+            nextQuestionElement.removeAttribute("hidden");
             //slow scroll to the next question
             //temp fix to prevent scrolling error
             const elementsToNotScrollTo = [
@@ -170,13 +170,13 @@ export class GuidedHomePage extends Page {
 
         //render progress resumption cards from progress file array on first page of guided mode
         if (guidedSavedProgressFiles.length != 0) {
-            datasetCardsRadioButtonsContainer.removeAttribute('hidden')
+            datasetCardsRadioButtonsContainer.removeAttribute("hidden");
             const progressFileData = progress.getAll(guidedSavedProgressFiles);
             this.renderProgressCards(progressFileData);
             htmlBase.querySelector("#guided-button-view-datasets-in-progress").click();
         } else {
             htmlBase.querySelector("#guided-continue-curation-header").innerHTML = "";
-            datasetCardsRadioButtonsContainer.setAttribute('hidden', '')
+            datasetCardsRadioButtonsContainer.setAttribute("hidden", "");
         }
     }
 
@@ -205,7 +205,11 @@ export class GuidedHomePage extends Page {
                     </div>
 
                     <div style="max-width: 800px; width: 100%;">
-                        <div class="guided--panel" id="continue-curating-existing" style="margin-top: 20px; width: 100%">
+                        <div
+                            class="guided--panel"
+                            id="continue-curating-existing"
+                            style="margin-top: 20px; width: 100%"
+                        >
                             <h2 class="guided--text-sub-step" id="guided-continue-curation-header"></h2>
                             <div
                                 class="guided--radio-button-container guided--button-tab-container"

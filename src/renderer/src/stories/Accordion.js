@@ -213,7 +213,7 @@ export class Accordion extends LitElement {
 
         //remove hidden from child elements with guided--nav-bar-section-page class
         const children = this.shadowRoot.querySelectorAll("[data-section='" + sectionName + "']");
-        for (const child of children) child.toggleAttribute('hidden', hasForce ? !state : undefined);
+        for (const child of children) child.toggleAttribute("hidden", hasForce ? !state : undefined);
 
         const dropdown = this.shadowRoot.querySelector("[data-section-name='" + sectionName + "']");
         this.#updateClass("active", dropdown, !state);

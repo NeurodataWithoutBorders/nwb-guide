@@ -18,18 +18,18 @@ export class GuidedStubPreviewPage extends Page {
 
     render() {
         return html`
-        <div class="title">
-            <h1 class="guided--text-sub-step">Conversion Preview</h1>
-        </div>
-        <div style="text-align: center;">
-            ${this.info.globalState.preview
-                ? this.info.globalState.preview.map(
-                    (preview) =>
-                        html`<h2 class="guided--text-sub-step">${preview.file}</h2>
-                            <pre>${preview.result}</pre>`
-                )
-                : html`<p>Your conversion preview failed. Please try again.</p>`}
-        </div>
+            <div class="title">
+                <h1 class="guided--text-sub-step">Conversion Preview</h1>
+            </div>
+            <div style="text-align: center;">
+                ${this.info.globalState.preview
+                    ? this.info.globalState.preview.map(
+                          (preview) =>
+                              html`<h2 class="guided--text-sub-step">${preview.file}</h2>
+                                  <pre>${preview.result}</pre>`
+                      )
+                    : html`<p>Your conversion preview failed. Please try again.</p>`}
+            </div>
         `;
     }
 }

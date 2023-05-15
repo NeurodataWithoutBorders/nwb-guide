@@ -322,7 +322,7 @@ export class Dashboard extends LitElement {
         this.style.display = "grid";
         this.style.gridTemplateColumns = "fit-content(0px) 1fr";
         this.style.position = "relative";
-        this.main.style.height = '100vh'
+        this.main.style.height = "100vh";
 
         if (this.name) this.sidebar.name = this.name;
         if (this.logo) this.sidebar.logo = this.logo;

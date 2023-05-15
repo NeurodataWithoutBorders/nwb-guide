@@ -125,7 +125,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             // }
         });
 
-        return this.manager
+        return this.manager;
     }
 }
 
