@@ -487,9 +487,13 @@ export class SimpleTable extends LitElement {
         const cells = data.map((row, i) => row.map((v, j) => this.#createCell(v, { i, j }))).flat();
 
         // Trigger load after a short delay if not deferred
-        if (!this.deferLoading) setTimeout(() => this.load(), 100);
+        if (!this.deferLoading) {
+            this.removeAttribute("waiting");
+            setTimeout(() => this.load(), 100);
         // Otherwise validate the data itself without rendering
-        else cells.forEach((c) => c.validate());
+        } else {
+            cells.forEach((c) => c.validate());
+        }
 
         // const columns = colHeaders.map((k, i) => {
         //     const info = { type: "text" };

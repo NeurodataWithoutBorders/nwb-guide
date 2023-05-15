@@ -2,6 +2,7 @@ import { Table } from "./Table.js";
 
 import subjectSchema from "../../../../schemas/subject.schema";
 import { SimpleTable } from "./SimpleTable.js";
+import { BasicTable } from "./BasicTable.js";
 
 export default {
     title: "Components/Table",
@@ -12,7 +13,7 @@ export default {
 
 const Template = (args) => new Table(args);
 
-const subjects = 200;
+const subjects = 100;
 const subjectIds = Array.from({ length: subjects }, (_, i) => i);
 
 const data = subjectIds.reduce((acc, key) => {
@@ -45,3 +46,15 @@ Simple.args = {
         console.log("Loaded!");
     },
 };
+
+const BasicTableTemplate = (args) => new BasicTable(args);
+
+export const Basic = BasicTableTemplate.bind({});
+Basic.args = {
+    name: 'basic_table_test',
+    schema: subjectSchema,
+    data,
+    keyColumn: "subject_id",
+    validateOnChange: (key, parent, value) => !!value, // Always validate as true
+};
+
