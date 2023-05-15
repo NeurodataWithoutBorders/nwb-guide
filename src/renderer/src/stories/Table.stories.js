@@ -24,6 +24,20 @@ const data = subjectIds.reduce((acc, key) => {
     return acc;
 }, {});
 
+
+const BasicTableTemplate = (args) => new BasicTable(args);
+
+subjectSchema.additionalProperties = true
+
+export const Basic = BasicTableTemplate.bind({});
+Basic.args = {
+    name: "basic_table_test",
+    schema: subjectSchema,
+    data,
+    keyColumn: "subject_id",
+    validateOnChange: (key, parent, value) => !!value, // Always validate as true
+};
+
 export const Default = Template.bind({});
 Default.args = {
     schema: subjectSchema,
@@ -45,15 +59,4 @@ Simple.args = {
     onLoaded: () => {
         console.log("Loaded!");
     },
-};
-
-const BasicTableTemplate = (args) => new BasicTable(args);
-
-export const Basic = BasicTableTemplate.bind({});
-Basic.args = {
-    name: "basic_table_test",
-    schema: subjectSchema,
-    data,
-    keyColumn: "subject_id",
-    validateOnChange: (key, parent, value) => !!value, // Always validate as true
 };

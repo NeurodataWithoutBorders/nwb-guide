@@ -224,7 +224,80 @@ export class BasicTable extends LitElement {
         this.onLoaded();
     }
 
+    #keys = []
     #data = [];
+
+    #getTSV = ( ) => {
+        console.log(  this.schema.additionalProperties)
+
+        const hasAdditional = this.schema.additionalProperties
+
+        const data = this.#data
+        let keys = [...this.#keys]
+
+        if (this.schema.additionalProperties) keys.unshift('Row Name') // Add extra column
+
+        const sections = [
+            keys.map((k) => k).join("\t"),
+            (hasAdditional ? Array.from(new Set(Object.values(this.schema.properties).map(o => Object.keys(o)).flat())) // Unique metadata properties
+            .map(k => [k, ...Object.values(this.schema.properties).map(o => o[k] ? typeof o[k] === 'object' ? JSON.stringify(o[k]) : o[k] : "")].join("\t")).join("\n") : ''),
+            data.map((row, i) => {
+                const mapped = row.map((col) => typeof col !== 'string' ? JSON.stringify(col) : col)
+                if (hasAdditional) mapped.unshift(i)
+                return mapped.join("\t")
+            }).join("\n")
+        ]
+
+        return sections.filter(v => v).join("\n");
+    }
+
+    #readTSV(text) {
+        let data = text.split("\n").map((row) => row.split("\t").map(v => { try { return JSON.parse(v)} catch { return v.trim() } })); // Map to actual values using JSON.parse
+
+        let header = data.shift();
+        if (header[0] == 'Row Name') {
+
+            const firstDataRow = data.findIndex(row => typeof row[0] === 'number')
+
+            // Handle schema
+            const schemaRows = data.splice(0, firstDataRow)
+            const schemaKeys = schemaRows.map(row => row[0])
+            const schemaEntries = schemaRows.map((row, i) => [schemaKeys[i], row.slice(1)])
+            
+            const newHeader = header.slice(1)
+            const schema = newHeader.reduce((acc, str) => {
+                acc[str] = {}
+                return acc
+            }, {})
+
+            schemaEntries.forEach(([k, arr], i) => {
+                arr.forEach((v, j) => {
+                    if (v) schema[newHeader[j]][k] = v
+                })
+            })            
+
+            this.schema.properties = schema // Update the real schema
+
+            // Shift everything
+            header = newHeader
+            data = data.map(row => row.slice(1))
+        }
+
+        const structuredData = data.map((row) =>
+            row.reduce((acc, col, i) => {
+                acc[header[i]] = col;
+                return acc;
+            }, {})
+        );
+
+        console.log(this.keyColumn, structuredData)
+        Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
+        Object.keys(data).forEach((row) => {
+            const cols = structuredData[row];
+            this.data[this.keyColumn ? cols[this.keyColumn] : row] = cols;
+        });
+
+    }
 
     // Render Code
     render() {
@@ -245,7 +318,7 @@ export class BasicTable extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        const keys = (this.colHeaders = Object.keys(entries).sort((a, b) => {
+        const keys = this.#keys = (this.colHeaders = Object.keys(entries).sort((a, b) => {
             if (a === this.keyColumn) return -1;
             if (b === this.keyColumn) return 1;
             if (entries[a].required && !entries[b].required) return -1;
@@ -282,10 +355,9 @@ export class BasicTable extends LitElement {
             </div>
             <nwb-button
                 @click=${() => {
-                    const tsv =
-                        keys.map((k) => k).join("\t") +
-                        "\n" +
-                        data.map((row) => row.map((col) => col).join("\t")).join("\n");
+
+                    const tsv = this.#getTSV()
+
                     const element = document.createElement("a");
                     element.setAttribute(
                         "href",
@@ -309,22 +381,7 @@ export class BasicTable extends LitElement {
                         const file = input.files[0];
                         const reader = new FileReader();
                         reader.onload = () => {
-                            const data = reader.result.split("\n").map((row) => row.split("\t"));
-                            const header = data.shift();
-
-                            const structuredData = data.map((row) =>
-                                row.reduce((acc, col, i) => {
-                                    acc[header[i]] = col;
-                                    return acc;
-                                }, {})
-                            );
-
-                            Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
-                            Object.keys(data).forEach((row) => {
-                                const cols = structuredData[row];
-                                this.data[this.keyColumn ? cols[this.keyColumn] : row] = cols;
-                            });
-
+                            this.#readTSV(reader.result)
                             this.requestUpdate();
                         };
                         reader.readAsText(file);
