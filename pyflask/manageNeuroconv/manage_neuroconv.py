@@ -116,16 +116,29 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     flat_electrode_table_info = [item for sublist in electrode_table_info for item in sublist]
     to_return["results"]["Ecephys"]["Electrodes"] = flat_electrode_table_info
 
+    
+    # Handle electrode table schema
+    electrode_table_schema = [
+        interface.get_electrode_table_schema()
+        for interface in converter.data_interface_objects.values()
+        if isinstance(interface, BaseRecordingExtractorInterface)
+    ][0] # Only grab the first one for now
+    
+    original_electrodes_schema = to_return["schema"]["properties"]["Ecephys"]["properties"]['Electrodes']['default']
+    pandas_schema = { info['name']: { **info } for info in electrode_table_schema['fields'] } # From Pandas
+    generated_schema = { info['name']: { **info } for info in original_electrodes_schema } # From Internal Generation
+    merged_schema = { key: { **info, **pandas_schema.get(key, {}) } for key, info in generated_schema.items() }
+    
+    with open('neuroconv_electrode_table_schema.json', 'w', encoding='utf-8') as f:
+        json.dump(pandas_schema, f, ensure_ascii=False, indent=4)
+    
     ## Allow additional properties to be added and rendered for this table
-    electrode_definition = to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"]
-    electrode_definition["additionalProperties"] = True
-
-    # Remove header metadata
-    del electrode_definition["properties"]["name"]
-    del electrode_definition["properties"]["description"]
-    del electrode_definition["properties"]["data_type"]
-
-    electrode_definition["required"] = []
+    to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"] = dict(
+        type = "object",
+        properties = merged_schema,
+        additionalProperties = True,
+        required = []
+    )
 
     return to_return
 
