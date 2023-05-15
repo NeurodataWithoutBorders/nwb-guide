@@ -297,7 +297,7 @@ export class BasicTable extends LitElement {
                     element.click();
                     document.body.removeChild(element);
                 }}
-                >Download File</nwb-button
+                >Download TSV File</nwb-button
             >
             <nwb-button
                 @click=${() => {
@@ -330,7 +330,7 @@ export class BasicTable extends LitElement {
                         reader.readAsText(file);
                     };
                 }}
-                >Upload File</nwb-button
+                >Upload TSV File</nwb-button
             >
         `;
     }
