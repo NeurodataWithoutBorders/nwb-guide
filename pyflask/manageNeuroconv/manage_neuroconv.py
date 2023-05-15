@@ -133,9 +133,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     for key in merged_schema:
         del merged_schema[key]["name"] # Get rid of the name property inside the object
 
-    with open("neuroconv_electrode_table_schema.json", "w", encoding="utf-8") as f:
-        json.dump(pandas_schema, f, ensure_ascii=False, indent=4)
-
     ## Allow additional properties to be added and rendered for this table
     to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"] = dict(
         type="object", properties=merged_schema, additionalProperties=True, required=[]
