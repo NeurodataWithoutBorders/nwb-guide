@@ -4,10 +4,9 @@ import { header } from "./forms/utils";
 import { checkStatus } from "../validation";
 import { errorHue, warningHue } from "./globals";
 
-import "./Button"
+import "./Button";
 
 export class BasicTable extends LitElement {
-
     static get styles() {
         return css`
             :host {
@@ -18,7 +17,6 @@ export class BasicTable extends LitElement {
                 box-sizing: border-box;
             }
 
-
             [error] {
                 background: hsl(${errorHue}, 100%, 90%) !important;
             }
@@ -26,7 +24,6 @@ export class BasicTable extends LitElement {
             [warning] {
                 background: hsl(${warningHue}, 100%, 90%) !important;
             }
-
 
             .table-container {
                 position: relative;
@@ -106,7 +103,7 @@ export class BasicTable extends LitElement {
         onLoaded,
     } = {}) {
         super();
-        this.name = name ?? 'data_table'
+        this.name = name ?? "data_table";
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
@@ -146,7 +143,6 @@ export class BasicTable extends LitElement {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
-
     // Validation Code
 
     #checkStatus = () => {
@@ -172,66 +168,66 @@ export class BasicTable extends LitElement {
     onStatusChange = () => {};
     onLoaded = () => {};
 
-
     #validateCell = async (value, col, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
-        if (!this.validateOnChange) return true
-        
-        let result = await this.validateOnChange(col, parent, value)
+        if (!this.validateOnChange) return true;
+
+        let result = await this.validateOnChange(col, parent, value);
 
         let info = {
             title: undefined,
             warning: undefined,
-            error: undefined
-        }
+            error: undefined,
+        };
 
         const warnings = Array.isArray(result) ? result.filter((info) => info.type === "warning") : [];
         const errors = Array.isArray(result) ? result?.filter((info) => info.type === "error") : [];
 
-        if (result === false) errors.push({ message: 'Cell is invalid' })
+        if (result === false) errors.push({ message: "Cell is invalid" });
 
         if (warnings.length) {
-            info.warning = ''
+            info.warning = "";
             info.title = warnings.map((o) => o.message).join("\n");
         }
 
         if (errors.length) {
-            info.error = ''
+            info.error = "";
             info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
         }
 
-        return info
-    }
+        return info;
+    };
 
     async updated() {
+        const rows = Object.keys(this.data);
 
-        const rows = Object.keys(this.data)
-        
-        await Promise.all(this.#data.map((v, i) => {
+        await Promise.all(
+            this.#data.map((v, i) => {
+                return Promise.all(
+                    v.map(async (vv, j) => {
+                        const info = await this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] });
+                        if (info === true) return;
+                        const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
+                        if (td) {
+                            for (let key in info) {
+                                const value = info[key];
+                                if (value === undefined) td.removeAttribute(key);
+                                else td.setAttribute(key, info[key]);
+                            }
+                        }
+                    })
+                );
+            })
+        );
 
-            return Promise.all(v.map(async (vv, j) => {
-                const info = await this.#validateCell(vv, this.colHeaders[j], {...this.data[rows[i]]})
-                if (info === true) return
-                const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
-                if (td) {
-                    for (let key in info) {
-                        const value = info[key];
-                        if (value === undefined) td.removeAttribute(key);
-                        else td.setAttribute(key, info[key]);
-                    }
-                }
-            }))
-        }))
-
-        this.#checkStatus()
-        this.onLoaded()
+        this.#checkStatus();
+        this.onLoaded();
     }
 
-    #data = []
+    #data = [];
 
     // Render Code
     render() {
-        
         const entries = { ...this.schema.properties };
 
         // Add existing additional properties to the entries variable if necessary
@@ -264,47 +260,64 @@ export class BasicTable extends LitElement {
             if (foundKey) this.keyColumn = foundKey;
         }
 
-        const data = this.#data = this.#getData()
+        const data = (this.#data = this.#getData());
 
         return html`
-        <div class="table-container">
-            <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
-                <thead>
-                    <tr>
-                        ${keys.map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${data.map((row, i) => html`<tr>${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${col}</div></td>`)}</tr>`)}
-                </tbody>
-            </table>
-        </div>
-        <nwb-button @click=${() => {
-            const tsv = keys.map((k) => k).join("\t") + "\n" + data.map((row) => row.map((col) => col).join("\t")).join("\n");  
-            const element = document.createElement('a');
-            element.setAttribute("href", "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv));
-            element.setAttribute("download", `${this.name.split(' ').join('_')}.tsv`);
-            element.style.display = "none";
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-        }}>Download File</nwb-button>
-        <nwb-button @click=${() => {
-            const input = document.createElement("input");
-            input.type = "file";
-            input.accept = "text/tab-separated-values";
-            input.click();
-            input.onchange = () => {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const data = reader.result.split("\n").map((row) => row.split("\t"));
-                    const header = data.shift()
+            <div class="table-container">
+                <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
+                    <thead>
+                        <tr>
+                            ${keys.map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(
+                            (row, i) =>
+                                html`<tr>
+                                    ${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${col}</div></td>`)}
+                                </tr>`
+                        )}
+                    </tbody>
+                </table>
+            </div>
+            <nwb-button
+                @click=${() => {
+                    const tsv =
+                        keys.map((k) => k).join("\t") +
+                        "\n" +
+                        data.map((row) => row.map((col) => col).join("\t")).join("\n");
+                    const element = document.createElement("a");
+                    element.setAttribute(
+                        "href",
+                        "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
+                    );
+                    element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
+                    element.style.display = "none";
+                    document.body.appendChild(element);
+                    element.click();
+                    document.body.removeChild(element);
+                }}
+                >Download File</nwb-button
+            >
+            <nwb-button
+                @click=${() => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "text/tab-separated-values";
+                    input.click();
+                    input.onchange = () => {
+                        const file = input.files[0];
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const data = reader.result.split("\n").map((row) => row.split("\t"));
+                            const header = data.shift();
 
-                    const structuredData = data.map(row => row.reduce((acc, col, i) => {
-                        acc[header[i]] = col
-                        return acc
-                    }, {}))
+                            const structuredData = data.map((row) =>
+                                row.reduce((acc, col, i) => {
+                                    acc[header[i]] = col;
+                                    return acc;
+                                }, {})
+                            );
 
                     Object.keys(this.data).forEach((row) => delete this.data[row]) // Delete all previous rows
                     Object.keys(data).forEach((row) => {
@@ -312,12 +325,14 @@ export class BasicTable extends LitElement {
                         this.data[this.keyColumn ? cols[this.keyColumn] : row] = cols
                     })
 
-                    this.requestUpdate();
-                };
-                reader.readAsText(file);
-            };
-        }}>Upload File</nwb-button>
-        `
+                            this.requestUpdate();
+                        };
+                        reader.readAsText(file);
+                    };
+                }}
+                >Upload File</nwb-button
+            >
+        `;
     }
 }
 
