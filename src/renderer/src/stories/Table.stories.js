@@ -24,10 +24,9 @@ const data = subjectIds.reduce((acc, key) => {
     return acc;
 }, {});
 
-
 const BasicTableTemplate = (args) => new BasicTable(args);
 
-subjectSchema.additionalProperties = true
+subjectSchema.additionalProperties = true;
 
 export const Basic = BasicTableTemplate.bind({});
 Basic.args = {
