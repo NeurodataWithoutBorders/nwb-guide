@@ -14,4 +14,17 @@ schema.Ecephys.ElectrodeGroup.device = (name, parent, path, baseResult) => {
     }
 }
 
+schema.Ecephys.Electrodes.group_name = (name, parent, path, baseResult) => {
+    const groups = baseResult.Ecephys.ElectrodeGroup.map(o => o.name)
+    if (groups.includes(parent[name])) return true
+    else {
+        return [
+            {
+                message: 'Not a valid group name',
+                type: 'error'
+            }
+        ]
+    }
+}
+
 export default schema

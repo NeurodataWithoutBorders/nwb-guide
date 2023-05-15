@@ -309,7 +309,7 @@ export class BasicTable extends LitElement {
                     Object.keys(this.data).forEach((row) => delete this.data[row]) // Delete all previous rows
                     Object.keys(data).forEach((row) => {
                         const cols = structuredData[row]
-                        this.data[cols[this.keyColumn]] = cols
+                        this.data[this.keyColumn ? cols[this.keyColumn] : row] = cols
                     })
 
                     this.requestUpdate();

@@ -26,6 +26,10 @@
         "ElectrodeGroup": {
             "*": false,
             "device": true
+        },
+        "Electrodes": {
+            "*": false,
+            "group_name": true
         }
     },
 
