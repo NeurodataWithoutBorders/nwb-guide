@@ -126,12 +126,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     ]  # Only grab the first one for now
 
     original_electrodes_schema = to_return["schema"]["properties"]["Ecephys"]["properties"]["Electrodes"]["default"]
-    pandas_schema = {info["name"]: { **info } for info in electrode_table_schema["fields"]}  # From Pandas
-    generated_schema = {info["name"]: { **info } for info in original_electrodes_schema}  # From Internal Generation
-    merged_schema = {key: { **info, **pandas_schema.get(key, {}) } for key, info in generated_schema.items()}
+    pandas_schema = {info["name"]: {**info} for info in electrode_table_schema["fields"]}  # From Pandas
+    generated_schema = {info["name"]: {**info} for info in original_electrodes_schema}  # From Internal Generation
+    merged_schema = {key: {**info, **pandas_schema.get(key, {})} for key, info in generated_schema.items()}
 
     for key in merged_schema:
-        del merged_schema[key]["name"] # Get rid of the name property inside the object
+        del merged_schema[key]["name"]  # Get rid of the name property inside the object
 
     ## Allow additional properties to be added and rendered for this table
     to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"] = dict(
