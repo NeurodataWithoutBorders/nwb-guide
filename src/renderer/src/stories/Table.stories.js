@@ -51,10 +51,9 @@ const BasicTableTemplate = (args) => new BasicTable(args);
 
 export const Basic = BasicTableTemplate.bind({});
 Basic.args = {
-    name: 'basic_table_test',
+    name: "basic_table_test",
     schema: subjectSchema,
     data,
     keyColumn: "subject_id",
     validateOnChange: (key, parent, value) => !!value, // Always validate as true
 };
-

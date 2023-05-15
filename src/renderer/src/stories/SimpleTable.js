@@ -490,7 +490,7 @@ export class SimpleTable extends LitElement {
         if (!this.deferLoading) {
             this.removeAttribute("waiting");
             setTimeout(() => this.load(), 100);
-        // Otherwise validate the data itself without rendering
+            // Otherwise validate the data itself without rendering
         } else {
             cells.forEach((c) => c.validate());
         }
