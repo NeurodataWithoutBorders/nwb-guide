@@ -27,10 +27,16 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const instanceId = `sub-${subject}/ses-${session}`;
 
+        const schema = this.info.globalState.schema.metadata[subject][session]
+
+        // NOTE: This was a correction for differences in the expected values to be passed back to neuroconv
+        // delete schema.properties.Ecephys.properties.Electrodes
+        // delete results['Ecephys']['Electrodes']
+
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema: this.info.globalState.schema.metadata[subject][session],
+            schema,
             results,
             ignore: ["Ecephys", "source_script", "source_script_file_name"],
             conditionalRequirements: [
@@ -63,6 +69,7 @@ export class GuidedMetadataPage extends ManagedPage {
             instances[`sub-${subject}`][`ses-${session}`] = form;
         });
 
+
         this.manager = new InstanceManager({
             header: "File Metadata",
             instanceType: "Session",
@@ -78,7 +85,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
                         const [{ file, result }] = await this.runConversions({ stub_test: true }, [
                             { subject, session },
-                        ]).catch((e) => this.notify(e.message, "error"));
+                        ], {title: 'Running conversion preview'}).catch((e) => this.notify(e.message, "error"));
 
                         const modal = new Modal({
                             header: file,

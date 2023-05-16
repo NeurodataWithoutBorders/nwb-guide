@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "../utils/useGlobalStyles.js";
-import { runConversion } from "./guided-mode/options/utils.js";
+import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress.js";
 import { dismissNotification, notify } from "../../globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
@@ -84,7 +84,7 @@ export class Page extends LitElement {
 
     mapSessions = (callback) => mapSessions(callback, this.info.globalState);
 
-    async runConversions(conversionOptions = {}, toRun) {
+    async runConversions(conversionOptions = {}, toRun, options = {}) {
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
@@ -96,7 +96,45 @@ export class Page extends LitElement {
         const folder = this.info.globalState.conversion?.info?.output_folder; // Do not require output_folder on the frontend
         let results = [];
 
-        for (let { subject, session } of toRun) {
+       const popup = await openProgressSwal({ title: `Running conversion`, ...options })
+
+       const isMultiple = toRun.length > 1
+
+       let elements = {}
+       if (isMultiple) {
+        popup.hideLoading()
+        const element = popup.getHtmlContainer()
+
+        // Create Progress Bar
+        const container = document.createElement('div')
+        container.style.display = 'flex'
+        container.style.alignItems = 'center'
+
+        const progressBar = document.createElement('div')
+        progressBar.style.width = '100%'
+        progressBar.style.height = '10px'
+        progressBar.style.border = '1px solid gainsboro'
+
+        const internalBar = elements.progress = document.createElement('div')
+        internalBar.style.width = '0%'
+        internalBar.style.height = '100%'
+        internalBar.style.backgroundColor = '#4A8ECE'
+        internalBar.style.transition = 'width 0.5s'
+        progressBar.appendChild(internalBar)
+
+        // Create Text
+        const label = elements.label = document.createElement('small')
+        label.style.marginLeft = '15px'
+        label.innerHTML = '0%'
+
+        element.innerText = ''
+        container.append(progressBar, label)
+        element.append(container)
+       }
+
+        let completed = 0
+        for (let info of toRun) {
+            const { subject, session } = info
             const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
             const file = folder ? `${folder}/${basePath}` : basePath;
 
@@ -108,13 +146,23 @@ export class Page extends LitElement {
                 ...conversionOptions, // Any additional conversion options override the defaults
 
                 interfaces: this.info.globalState.interfaces,
-            }).catch((e) => {
+            }, { swal: popup , ...options }).catch((e) => {
                 this.notify(e.message, "error");
+                popup.close()
                 throw e.message;
             });
 
+            completed++
+            if (isMultiple) {
+                const progressInfo = {b: completed, bsize: 1, tsize: toRun.length}
+                elements.progress.style.width = elements.label.innerText = `${progressInfo.b / progressInfo.tsize * 100}%`
+            }
+
             results.push({ file, result });
         }
+
+        popup.close()
+
 
         return results;
     }
