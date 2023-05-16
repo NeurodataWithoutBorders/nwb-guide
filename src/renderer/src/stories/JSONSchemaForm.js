@@ -426,7 +426,7 @@ export class JSONSchemaForm extends LitElement {
                                     this.#updateParent(
                                         name,
                                         isStringArray
-                                            ? ev.target.value.split("\n").map((str) => str.trim())
+                                            ? ev.target.value.split("\n").map((str) => str.trim()).filter(str => str) // Only keep strings that are not empty
                                             : ev.target.value,
                                         parent
                                     );
