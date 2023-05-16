@@ -96,73 +96,77 @@ export class Page extends LitElement {
         const folder = this.info.globalState.conversion?.info?.output_folder; // Do not require output_folder on the frontend
         let results = [];
 
-       const popup = await openProgressSwal({ title: `Running conversion`, ...options })
+        const popup = await openProgressSwal({ title: `Running conversion`, ...options });
 
-       const isMultiple = toRun.length > 1
+        const isMultiple = toRun.length > 1;
 
-       let elements = {}
-       if (isMultiple) {
-        popup.hideLoading()
-        const element = popup.getHtmlContainer()
+        let elements = {};
+        if (isMultiple) {
+            popup.hideLoading();
+            const element = popup.getHtmlContainer();
 
-        // Create Progress Bar
-        const container = document.createElement('div')
-        container.style.display = 'flex'
-        container.style.alignItems = 'center'
+            // Create Progress Bar
+            const container = document.createElement("div");
+            container.style.display = "flex";
+            container.style.alignItems = "center";
 
-        const progressBar = document.createElement('div')
-        progressBar.style.width = '100%'
-        progressBar.style.height = '10px'
-        progressBar.style.border = '1px solid gainsboro'
+            const progressBar = document.createElement("div");
+            progressBar.style.width = "100%";
+            progressBar.style.height = "10px";
+            progressBar.style.border = "1px solid gainsboro";
 
-        const internalBar = elements.progress = document.createElement('div')
-        internalBar.style.width = '0%'
-        internalBar.style.height = '100%'
-        internalBar.style.backgroundColor = '#4A8ECE'
-        internalBar.style.transition = 'width 0.5s'
-        progressBar.appendChild(internalBar)
+            const internalBar = (elements.progress = document.createElement("div"));
+            internalBar.style.width = "0%";
+            internalBar.style.height = "100%";
+            internalBar.style.backgroundColor = "#4A8ECE";
+            internalBar.style.transition = "width 0.5s";
+            progressBar.appendChild(internalBar);
 
-        // Create Text
-        const label = elements.label = document.createElement('small')
-        label.style.marginLeft = '15px'
-        label.innerHTML = '0%'
+            // Create Text
+            const label = (elements.label = document.createElement("small"));
+            label.style.marginLeft = "15px";
+            label.innerHTML = "0%";
 
-        element.innerText = ''
-        container.append(progressBar, label)
-        element.append(container)
-       }
+            element.innerText = "";
+            container.append(progressBar, label);
+            element.append(container);
+        }
 
-        let completed = 0
+        let completed = 0;
         for (let info of toRun) {
-            const { subject, session } = info
+            const { subject, session } = info;
             const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
             const file = folder ? `${folder}/${basePath}` : basePath;
 
-            const result = await runConversion({
-                folder,
-                nwbfile_path: file,
-                overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-                ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
-                ...conversionOptions, // Any additional conversion options override the defaults
+            const result = await runConversion(
+                {
+                    folder,
+                    nwbfile_path: file,
+                    overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
+                    ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
+                    ...conversionOptions, // Any additional conversion options override the defaults
 
-                interfaces: this.info.globalState.interfaces,
-            }, { swal: popup , ...options }).catch((e) => {
+                    interfaces: this.info.globalState.interfaces,
+                },
+                { swal: popup, ...options }
+            ).catch((e) => {
                 this.notify(e.message, "error");
-                popup.close()
+                popup.close();
                 throw e.message;
             });
 
-            completed++
+            completed++;
             if (isMultiple) {
-                const progressInfo = {b: completed, bsize: 1, tsize: toRun.length}
-                elements.progress.style.width = elements.label.innerText = `${progressInfo.b / progressInfo.tsize * 100}%`
+                const progressInfo = { b: completed, bsize: 1, tsize: toRun.length };
+                elements.progress.style.width = elements.label.innerText = `${
+                    (progressInfo.b / progressInfo.tsize) * 100
+                }%`;
             }
 
             results.push({ file, result });
         }
 
-        popup.close()
-
+        popup.close();
 
         return results;
     }

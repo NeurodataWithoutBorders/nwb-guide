@@ -15,7 +15,9 @@ export class GuidedConversionOptionsPage extends Page {
 
             // Preview a random conversion
             delete this.info.globalState.preview; // Clear the preview results
-            const results = await this.runConversions({ stub_test: true }, 1, { title: 'Testing conversion on a random session'});
+            const results = await this.runConversions({ stub_test: true }, 1, {
+                title: "Testing conversion on a random session",
+            });
             this.info.globalState.preview = results; // Save the preview results
 
             this.onTransition(1);

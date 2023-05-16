@@ -2,7 +2,7 @@ import Swal from "sweetalert2";
 import { baseUrl } from "../../../../globals.js";
 
 export const openProgressSwal = (options) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         Swal.fire({
             title: options.title ?? "Requesting data from server",
             html: `Please wait...`,
@@ -14,17 +14,15 @@ export const openProgressSwal = (options) => {
             timerProgressBar: false,
             didOpen: () => {
                 Swal.showLoading();
-                resolve(Swal)
+                resolve(Swal);
             },
-        });    
-    })
-
-}
+        });
+    });
+};
 
 export const run = async (url, payload, options = {}) => {
-
-    const needsSwal = !options.swal
-    if (needsSwal) openProgressSwal(options).then(swal => (options.onOpen) ? options.onOpen(swal)  :undefined)
+    const needsSwal = !options.swal;
+    if (needsSwal) openProgressSwal(options).then((swal) => (options.onOpen ? options.onOpen(swal) : undefined));
 
     const results = await fetch(`${baseUrl}/neuroconv/${url}`, {
         method: "POST",
@@ -39,7 +37,8 @@ export const run = async (url, payload, options = {}) => {
     return results || true;
 };
 
-export const runConversion = async (info, options = {}) => run(`convert`, info, {
+export const runConversion = async (info, options = {}) =>
+    run(`convert`, info, {
         title: "Running the conversion",
         onError: (results) => {
             if (results.message.includes("already exists")) {
@@ -48,5 +47,5 @@ export const runConversion = async (info, options = {}) => run(`convert`, info, 
                 return "Conversion failed with current metadata. Please try again.";
             }
         },
-        ...options
+        ...options,
     });
