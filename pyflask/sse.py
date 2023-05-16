@@ -1,14 +1,15 @@
 import queue
 import json
 
+
 def format_sse(data: str, event=None) -> str:
-    msg = f'data: {json.dumps(data)}\n\n'
+    msg = f"data: {json.dumps(data)}\n\n"
     if event is not None:
-        msg = f'event: {event}\n{msg}'
+        msg = f"event: {event}\n{msg}"
     return msg
 
-class MessageAnnouncer:
 
+class MessageAnnouncer:
     def __init__(self):
         self.listeners = []
 

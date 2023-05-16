@@ -10,7 +10,7 @@ from manageNeuroconv import (
     convert_to_nwb,
     validate_metadata,
     upload_to_dandi,
-    listen_to_neuroconv_events
+    listen_to_neuroconv_events,
 )
 
 from errorHandlers import notBadRequestException
@@ -114,16 +114,15 @@ class Upload(Resource):
                 api.abort(500, str(e))
 
 
-
 # Create an events endpoint
 # announcer.announce('test', 'publish')
-@api.route('/events', methods=['GET'])
+@api.route("/events", methods=["GET"])
 class Events(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
         try:
-            return Response(listen_to_neuroconv_events(), mimetype='text/event-stream')
-        
+            return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
+
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
