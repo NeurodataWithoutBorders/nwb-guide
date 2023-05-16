@@ -13,6 +13,9 @@ from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
 from datetime import datetime
+from sse import MessageAnnouncer
+announcer = MessageAnnouncer() 
+
 
 from pathlib import Path
 import os
@@ -192,11 +195,7 @@ def convert_to_nwb(info: dict) -> str:
 
     nwbfile_path = Path(info["nwbfile_path"])
     parent_folder = nwbfile_path.parent
-
-    folder = Path(info["folder"]) if "folder" in info else parent_folder
-
     run_stub_test = info.get("stub_test")
-
     parent_folder.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
     # add a subdirectory to a filepath if stub_test is true
@@ -206,11 +205,14 @@ def convert_to_nwb(info: dict) -> str:
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
+    def update_conversion_progress(**kwargs):
+        announcer.announce(dict( **kwargs, nwbfile_path = nwbfile_path ), 'conversion_progress')
+
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
         {
-            interface: {"stub_test": info["stub_test"]}
+            interface: { "stub_test": info["stub_test"], "iter_opts": { "report_hook": update_conversion_progress }}
             if available_options.get("properties").get(interface).get("properties").get("stub_test")
             else {}
             for interface in info["source_data"]
@@ -244,3 +246,12 @@ def upload_to_dandi(
         staging=staging,
         cleanup=cleanup,
     )
+
+
+
+# Create an events endpoint
+def listen_to_neuroconv_events():
+    messages = announcer.listen()  # returns a queue.Queue
+    while True:
+        msg = messages.get()  # blocks until a new message arrives
+        yield msg
