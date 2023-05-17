@@ -48,14 +48,10 @@ export class GuidedConversionOptionsPage extends Page {
         });
 
         return html`
-            <div id="guided-mode-starting-container" class="guided--main-tab">
-                <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-                    <div class="title">
-                        <h1 class="guided--text-sub-step">Conversion Details</h1>
-                    </div>
-                    <div class="guided--section">${this.form}</div>
-                </div>
+            <div class="title">
+                <h1 class="guided--text-sub-step">Conversion Details</h1>
             </div>
+            ${this.form}
         `;
     }
 }

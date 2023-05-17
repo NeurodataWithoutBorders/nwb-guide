@@ -23,7 +23,7 @@ export class GuidedHomePage extends Page {
             const elementButtonControls = guidedRadioButton.getAttribute("data-next-element");
             if (elementButtonControls) {
                 const elementToHide = (this.shadowRoot ?? this).querySelector(`#${elementButtonControls}`);
-                elementToHide.classList.add("hidden");
+                elementToHide.setAttribute("hidden", "");
             }
         }
     }
@@ -117,14 +117,14 @@ export class GuidedHomePage extends Page {
         //Hide all child containers of non-selected buttons
         notSelectedButton.forEach((button) => {
             const id = button.getAttribute("data-next-element");
-            if (id) (this.shadowRoot ?? this).querySelector(`#${id}`).classList.add("hidden");
+            if (id) (this.shadowRoot ?? this).querySelector(`#${id}`).setAttribute("hidden", "");
         });
 
         //Display and scroll to selected element container if data-next-element exists
         const nextQuestionID = selectedButton.getAttribute("data-next-element");
         if (nextQuestionID) {
             const nextQuestionElement = (this.shadowRoot ?? this).querySelector(`#${nextQuestionID}`);
-            nextQuestionElement.classList.remove("hidden");
+            nextQuestionElement.removeAttribute("hidden");
             //slow scroll to the next question
             //temp fix to prevent scrolling error
             const elementsToNotScrollTo = [
@@ -170,13 +170,13 @@ export class GuidedHomePage extends Page {
 
         //render progress resumption cards from progress file array on first page of guided mode
         if (guidedSavedProgressFiles.length != 0) {
-            datasetCardsRadioButtonsContainer.classList.remove("hidden");
+            datasetCardsRadioButtonsContainer.removeAttribute("hidden");
             const progressFileData = progress.getAll(guidedSavedProgressFiles);
             this.renderProgressCards(progressFileData);
             htmlBase.querySelector("#guided-button-view-datasets-in-progress").click();
         } else {
             htmlBase.querySelector("#guided-continue-curation-header").innerHTML = "";
-            datasetCardsRadioButtonsContainer.classList.add("hidden");
+            datasetCardsRadioButtonsContainer.setAttribute("hidden", "");
         }
     }
 
@@ -197,54 +197,39 @@ export class GuidedHomePage extends Page {
                             class="container--dashed"
                             id="guided-button-start-new-curate"
                             style="width: 320px; margin: 5px; width: 28rem; height: 16.5rem"
-                            @click="${() => {
-                                this.onTransition("guided/start");
-                                // //Hide the home screen
-                                // document.getElementById("guided-home").classList.add("hidden");
-                                // //Hide the header and footer for the dataset name/subtitle page
-                                // $("#guided-header-div").hide();
-                                // $("#guided-footer-div").hide();
-
-                                // //Show the guided mode starting container
-                                // document.getElementById("guided-mode-starting-container").classList.remove("hidden");
-
-                                // //hide the name+subtitle page and show the intro page
-                                // switchElementVisibility("guided-new-dataset-info", "guided-intro-page");
-                                // //Reset name, subtitle, and subtitle char count
-                                // document.getElementById("guided-dataset-name-input").value = "";
-                                // document.getElementById("guided-dataset-subtitle-input").value = "";
-                                // document.getElementById("guided-subtitle-char-count").innerHTML = `255 characters remaining`;
-
-                                // guidedLockSideBar();
-
-                                // //Show the intro footer
-                                // document.getElementById("guided-footer-intro").classList.remove("hidden");
-                            }}"
+                            @click="${() => this.onTransition(1)}"
                         >
                             <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
                             <h2 class="guided--text-sub-step" style="width: 100%;">Convert a new dataset</h2>
                         </div>
                     </div>
 
-                    <div class="guided--panel" id="continue-curating-existing" style="margin-top: 20px; width: 100%">
-                        <h2 class="guided--text-sub-step" id="guided-continue-curation-header"></h2>
+                    <div style="max-width: 800px; width: 100%;">
                         <div
-                            class="guided--radio-button-container hidden guided--button-tab-container"
-                            id="guided-div-dataset-cards-radio-buttons"
-                            style="justify-content: space-evenly"
+                            class="guided--panel"
+                            id="continue-curating-existing"
+                            style="margin-top: 20px; width: 100%"
                         >
-                            <button
-                                class="ui button guided--radio-button guided--tab-button"
-                                id="guided-button-view-datasets-in-progress"
-                                data-next-element="guided-div-resume-progress-cards"
-                                style="width: 250px"
+                            <h2 class="guided--text-sub-step" id="guided-continue-curation-header"></h2>
+                            <div
+                                class="guided--radio-button-container guided--button-tab-container"
+                                hidden
+                                id="guided-div-dataset-cards-radio-buttons"
+                                style="justify-content: space-evenly"
                             >
-                                Conversions in Progress
-                            </button>
+                                <button
+                                    class="ui button guided--radio-button guided--tab-button"
+                                    id="guided-button-view-datasets-in-progress"
+                                    data-next-element="guided-div-resume-progress-cards"
+                                    style="width: 250px"
+                                >
+                                    Conversions in Progress
+                                </button>
+                            </div>
                         </div>
+                        <div class="guided--section" hidden id="guided-div-resume-progress-cards"></div>
+                        <div class="guided--section" hidden id="guided-div-update-uploaded-cards"></div>
                     </div>
-                    <div class="guided--section hidden" id="guided-div-resume-progress-cards"></div>
-                    <div class="guided--section hidden" id="guided-div-update-uploaded-cards"></div>
                 </div>
             </div>
         `;

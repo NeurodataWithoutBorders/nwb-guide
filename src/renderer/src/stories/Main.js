@@ -127,7 +127,7 @@ export class Main extends LitElement {
 
         return html`
             ${headerEl}
-            <main id="content" class="js-content" style="overflow: hidden;">
+            <main id="content" class="js-content" style="overflow: hidden; display: flex;">
                 <section class="section js-section u-category-windows">${capsuleEl} ${page}</section>
             </main>
             ${footerEl}
