@@ -77,7 +77,7 @@ export class NavigationSidebar extends LitElement {
         const hasForce = forcedState !== undefined;
         //remove hidden from child elements with guided--nav-bar-section-page class
         const children = this.querySelectorAll("[data-section='" + sectionName + "']");
-        for (const child of children) this.#updateClass("hidden", child, forcedState);
+        for (const child of children) child.toggleAttribute("hidden", hasForce ? !forcedState : undefined);
 
         const dropdown = this.querySelector("[data-section-name='" + sectionName + "']");
 

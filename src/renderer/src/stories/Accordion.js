@@ -30,6 +30,7 @@ export class Accordion extends LitElement {
 
             .chevron {
                 padding: 0 10px;
+                transform: translateY(-3px);
             }
 
             .chevron::before {
@@ -39,7 +40,7 @@ export class Accordion extends LitElement {
                 display: inline-block;
                 height: 0.45em;
                 transform: rotate(-45deg);
-                vertical-align: top;
+                vertical-align: middle;
                 width: 0.45em;
             }
 
@@ -69,10 +70,6 @@ export class Accordion extends LitElement {
 
             .header > *:nth-child(2) {
                 padding-bottom: 2px;
-            }
-
-            .hidden {
-                display: none !important;
             }
 
             .guided--nav-bar-section {
@@ -216,7 +213,7 @@ export class Accordion extends LitElement {
 
         //remove hidden from child elements with guided--nav-bar-section-page class
         const children = this.shadowRoot.querySelectorAll("[data-section='" + sectionName + "']");
-        for (const child of children) this.#updateClass("hidden", child, state);
+        for (const child of children) child.toggleAttribute("hidden", hasForce ? !state : undefined);
 
         const dropdown = this.shadowRoot.querySelector("[data-section-name='" + sectionName + "']");
         this.#updateClass("active", dropdown, !state);
