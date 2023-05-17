@@ -5,24 +5,23 @@ import { get, save } from "../../progress.js";
 import { dismissNotification, notify } from "../../globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
 
-const componentCSS = `
-
-`;
-
 export class Page extends LitElement {
-    static get styles() {
-        return useGlobalStyles(
-            componentCSS,
-            (sheet) => sheet.href && sheet.href.includes("bootstrap"),
-            this.shadowRoot
-        );
-    }
+    // static get styles() {
+    //     return useGlobalStyles(
+    //         componentCSS,
+    //         (sheet) => sheet.href && sheet.href.includes("bootstrap"),
+    //         this.shadowRoot
+    //     );
+    // }
 
     info = { globalState: {} };
 
     constructor(info = {}) {
         super();
         Object.assign(this.info, info);
+
+        this.style.height = "100%";
+        this.style.color = "black";
     }
 
     createRenderRoot() {
