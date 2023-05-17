@@ -169,16 +169,15 @@ export class GuidedStructurePage extends Page {
         this.#selected = {};
         this.list.remove();
         this.list = document.createElement("ul");
+        this.list.style.display = "inline-block";
+        this.addButton.style.display = "block";
 
         return html`
-            <div id="guided-mode-starting-container" class="guided--main-tab" data-parent-tab-name="Dataset Structure">
-                <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-                    <div class="title">
-                        <h1 class="guided--text-sub-step">Data Formats</h1>
-                    </div>
-                    <div class="guided--section">${this.list} ${this.addButton} ${this.searchModal}</div>
-                </div>
+            <div class="title">
+                <h1 class="guided--text-sub-step">Data Formats</h1>
             </div>
+            <div style="width: 100%; text-align: center;">${this.list} ${this.addButton}</div>
+            ${this.searchModal}
         `;
     }
 }

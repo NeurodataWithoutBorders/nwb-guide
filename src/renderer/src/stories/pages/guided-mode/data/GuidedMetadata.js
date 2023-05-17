@@ -101,13 +101,7 @@ export class GuidedMetadataPage extends ManagedPage {
             ],
         });
 
-        return html`
-            <div id="guided-mode-starting-container" class="guided--main-tab">
-                <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
-                    <div class="guided--section">${this.manager}</div>
-                </div>
-            </div>
-        `;
+        return this.manager;
     }
 }
 
