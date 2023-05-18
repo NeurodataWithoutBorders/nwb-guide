@@ -50,6 +50,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const newElectrodeItemSchema = ecephysProps['Electrodes'].items.properties = {}
         sortedProps.forEach(k => newElectrodeItemSchema[k] = ogElectrodeItemSchema[k])
 
+        // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
