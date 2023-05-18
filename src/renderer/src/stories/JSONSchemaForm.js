@@ -865,6 +865,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     },
                 });
 
+                accordion.id = name // assign name to accordion id
+
                 return accordion;
             }
 

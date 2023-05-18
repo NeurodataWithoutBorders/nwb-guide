@@ -17,14 +17,18 @@ export async function validateOnChange(name, parent, path, value) {
         else return;
     }, validationSchema); // Pass the top level until it runs out
 
+    let overridden = false;
     // Skip wildcard check for categories marked with false
     if (lastResolved !== false && (functions === undefined || functions === true)) {
-        let overridden = false;
+        // let overridden = false;
         let lastWildcard;
         fullPath.reduce((acc, key) => {
             if (acc && "*" in acc) {
-                if (!acc["*"]) overridden = true; // Disable if undefined
-                else lastWildcard = acc["*"].replace(`{*}`, `${name}`);
+                if (!acc["*"] && lastWildcard) overridden = true; // Disable if false and a wildcard has already been specified
+                else {
+                    lastWildcard = typeof acc["*"] === 'string' ? acc["*"].replace(`{*}`, `${name}`): acc["*"];
+                    overridden = false // Re-enable if a new one is specified below
+                }
             }
             return acc?.[key];
         }, validationSchema);
@@ -36,12 +40,13 @@ export async function validateOnChange(name, parent, path, value) {
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
     if (!Array.isArray(functions)) functions = [functions];
 
+
     // Validate multiple conditions. May be able to offload this to a single server-side call
     const res = (
         await Promise.all(
             functions.map(async (func) => {
                 if (typeof func === "function") {
-                    return await func(name, copy, path, this.results); // Can specify alternative client-side validation
+                    return await func.call(this, name, copy, path); // Can specify alternative client-side validation
                 } else
                     return await fetch(`${baseUrl}/neuroconv/validate`, {
                         method: "POST",

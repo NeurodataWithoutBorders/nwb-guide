@@ -30,7 +30,8 @@
         "Electrodes": {
             "*": false,
             "group_name": true
-        }
+        },
+        "ElectrodeColumns": { }
     },
 
     "Subject": {

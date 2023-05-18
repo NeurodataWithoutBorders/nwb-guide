@@ -107,36 +107,34 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     to_return = json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
     # Handle electrode table results
-    electrode_table_info = [
-        interface.get_electrode_table_json()
-        for interface in converter.data_interface_objects.values()
-        if isinstance(interface, BaseRecordingExtractorInterface)
-    ]
+    flat_electrode_table_info = []
+    for interface in converter.data_interface_objects.values():
+        if isinstance(interface, BaseRecordingExtractorInterface):
+            flat_electrode_table_info.extend(interface.get_electrode_table_json())
 
-    flat_electrode_table_info = [item for sublist in electrode_table_info for item in sublist]
     to_return["results"]["Ecephys"]["Electrodes"] = flat_electrode_table_info
 
-    # Handle electrode table schema
-    electrode_table_schema = [
-        interface.get_electrode_table_schema()
-        for interface in converter.data_interface_objects.values()
-        if isinstance(interface, BaseRecordingExtractorInterface)
-    ][
-        0
-    ]  # Only grab the first one for now
+    ecephys_properties = to_return["schema"]["properties"]["Ecephys"]["properties"]
+    original_electrodes_schema = ecephys_properties["Electrodes"]
+    ecephys_properties["Electrodes"] = {
+        'type': 'array',
+        'minItems': 0,
+        'items': {
+            'type': 'object',
+            'properties': {
+                properties['name']: { key: item for key, item in properties.items() if key != 'name' } for properties in original_electrodes_schema['default']
+            }
+        }
+    }
 
-    original_electrodes_schema = to_return["schema"]["properties"]["Ecephys"]["properties"]["Electrodes"]["default"]
-    pandas_schema = {info["name"]: {**info} for info in electrode_table_schema["fields"]}  # From Pandas
-    generated_schema = {info["name"]: {**info} for info in original_electrodes_schema}  # From Internal Generation
-    merged_schema = {key: {**info, **pandas_schema.get(key, {})} for key, info in generated_schema.items()}
+    to_return["results"]["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema['default']
 
-    for key in merged_schema:
-        del merged_schema[key]["name"]  # Get rid of the name property inside the object
+    defs = ecephys_properties["definitions"]
+    ecephys_properties["ElectrodeColumns"] = { "type": "array",  "items": defs['Electrodes'] }
+    ecephys_properties["ElectrodeColumns"]['items']['required'] = list(defs['Electrodes']['properties'].keys())
+    del defs['Electrodes']
 
-    ## Allow additional properties to be added and rendered for this table
-    to_return["schema"]["properties"]["Ecephys"]["properties"]["definitions"]["Electrodes"] = dict(
-        type="object", properties=merged_schema, additionalProperties=True, required=[]
-    )
+    # NOTE: Must remap when passed back as results...
 
     return to_return
 
