@@ -116,7 +116,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
 
         # Get Electrode metadata
-        electrode_table_schema = recording_interface.get_electrode_table_schema()
         ecephys_properties = schema["properties"]["Ecephys"]["properties"]
         original_electrodes_schema = ecephys_properties["Electrodes"]
 
@@ -135,21 +134,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             },
         }
 
-        electrode_columns = metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
-
-        # Provide JSON Schema type information to the schema and results
-        for info in electrode_table_schema["fields"]:
-            schema_property = new_electrodes_properties.get(
-                info["name"], {}
-            )  # NOTE: Does not add new properties to the schema (e.g. group)
-            item = next((x for x in electrode_columns if x["name"] == info["name"]), None)
-            item["type"] = schema_property["type"] = info["type"]
-
+        metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
         defs = ecephys_properties["definitions"]
-        defs["Electrodes"]["properties"]["type"] = {
-            "type": "string",
-            "description": "Type for JSON Schema validation",
-        }  # Ensure type is added as a required property of columns
+        
         ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
         ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
         del defs["Electrodes"]
@@ -268,31 +255,25 @@ def convert_to_nwb(info: dict) -> str:
         else None
     )
 
-    ## NOTE: Modify this as necessary to prepare the electrodes table for the converter
-    # info["metadata"]['results']['Ecephys']['Electrodes']
-
+    # Update the first recording interface with Ecephys table data
     recording_interface = get_first_recording_interface(converter)
 
     if recording_interface:
         ecephys_metadata = info["metadata"]["Ecephys"]
         electrode_column_results = ecephys_metadata["ElectrodeColumns"]
+        electrode_results = ecephys_metadata["Electrodes"]
         del ecephys_metadata["ElectrodeColumns"]
-        # with open('electrode_table_json.json', 'w', encoding='utf-8') as f:
-        #     json.dump(ecephys_metadata["Electrodes"], f, ensure_ascii=False, indent=4)
+        del ecephys_metadata["Electrodes"]
 
         recording_interface.update_electrode_table(
-            electrode_table_json=ecephys_metadata["Electrodes"]
-        )  # Pass the electrode table data to the converter
+            electrode_table_json=electrode_results,
+            electrode_column_info=electrode_column_results
+        )  
 
-        metadata = recording_interface.get_metadata()
-
-        # with open('electrode_column_results.json', 'w', encoding='utf-8') as f:
-        #     json.dump(electrode_column_results, f, ensure_ascii=False, indent=4)
-
-        metadata["Ecephys"][
-            "Electrodes"
-        ] = electrode_column_results  # Update the electrode metadata to represent the columns
-
+        # Update with the latest metadata for the electrodes
+        info["metadata"]["Ecephys"]["Electrodes"] = [ {key: value for key, value in entry.items() if key != 'data_type'} for entry in electrode_column_results ]
+        
+    # Actually run the conversion
     file = converter.run_conversion(
         metadata=info["metadata"],
         nwbfile_path=preview_path if run_stub_test else nwbfile_path,

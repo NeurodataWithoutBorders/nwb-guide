@@ -186,22 +186,38 @@ export class BasicTable extends LitElement {
         if (!this.validateOnChange) return true;
 
         let result;
-        let type = this.schema.properties[col]?.type;
+
+        const propInfo = this.schema.properties[col]
         let thisTypeOf = typeof value;
+        let ogType
+        let type = ogType = propInfo.type || propInfo.data_type;
 
-        // Map to javascript type
-        if (type === "integer") type = "number";
+        // Handle based on JSON Schema types
+        if ('type' in propInfo){
 
-        // Convert to json schema type
-        if (Array.isArray(value)) thisTypeOf = "array";
-        if (value == undefined) thisTypeOf = "null";
+            // Map to javascript type
+            if (type === "integer") type = "number";
+
+            // Convert to json schema type
+            if (Array.isArray(value)) thisTypeOf = "array";
+            if (value == undefined) thisTypeOf = "null";
+        } 
+        
+        else if ('data_type' in propInfo) {
+
+            if (type.includes('array')) type = 'array'
+            if (type.includes('int') || type.includes('float')) type = 'number'
+            if (type.startsWith('bool')) type = 'boolean'
+            if (type.startsWith('str')) type = 'string'
+
+        }
 
         // Check if required
         if (!value && "required" in this.schema && this.schema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
         // If not required, check matching types for values that are defined
         else if (value !== "" && thisTypeOf !== type)
-            result = [{ message: `${col} is expected to be of ${type} type, not ${thisTypeOf}`, type: "error" }];
+            result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
         else result = await this.validateOnChange(col, parent, value);
 
@@ -298,7 +314,8 @@ export class BasicTable extends LitElement {
         Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
-            this.data[this.keyColumn ? cols[this.keyColumn] : row] = cols;
+            const latest = this.data[this.keyColumn ? cols[this.keyColumn] : row] = {}; 
+            Object.entries(cols).forEach(([key, value]) => key in this.schema.properties ? latest[key] = value : '') // Only include data from schema
         });
     }
 

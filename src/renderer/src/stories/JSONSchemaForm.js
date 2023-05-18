@@ -609,7 +609,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     #getRenderable = (schema = {}, required, path) => {
         const entries = Object.entries(schema.properties ?? {});
 
-        return entries.filter(([key]) => {
+        return entries.filter(([key, value]) => {
+            if (!value.properties && key === "definitions") return false; // Skip definitions
             if (this.ignore.includes(key)) return false;
             if (this.showLevelOverride >= path.length) return true;
             if (required[key]) return true;
@@ -805,7 +806,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             });
 
         let rendered = sorted.map((entry) => {
-            const [name, info] = entry;
+            const [ name, info ] = entry;
 
             // Render linked properties
             if (entry[isLink]) {
@@ -822,12 +823,11 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             }
 
             // Directly render the interactive property element
-            if (!info.properties) {
-                if (name === "definitions") return ""; // Skip definitions
-                return this.#renderInteractiveElement(name, info, results, required, path);
-            }
+            if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path);
 
             const hasMany = renderable.length > 1; // How many siblings?
+
+            const fullPath = [...path, name]
 
             if (this.mode === "accordion" && hasMany) {
                 const headerName = header(name);
@@ -855,13 +855,13 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                         this.#checkAllLoaded();
                     },
                     renderTable: (...args) => this.renderTable(...args),
-                    base: [...path, name],
+                    base: fullPath,
                 });
 
                 const accordion = new Accordion({
                     sections: {
                         [headerName]: {
-                            subtitle: `${Object.keys(info.properties).length} fields`,
+                            subtitle: `${this.#getRenderable(info, required[name], fullPath).length} fields`,
                             content: this.#nestedForms[name],
                         },
                     },
@@ -873,7 +873,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             }
 
             // Render properties in the sub-schema
-            const rendered = this.#render(info, results[name], required[name], [...path, name]);
+            const rendered = this.#render(info, results[name], required[name], fullPath);
             return hasMany || path.length > 1
                 ? html`
                       <div style="margin-top: 40px;">
@@ -930,8 +930,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         // Register default properties
         this.#registerDefaultProperties(schema.properties, this.results);
 
-        // Delete extraneous results
-        this.#deleteExtraneousResults(this.results, this.schema);
+        // // Delete extraneous results
+        // this.#deleteExtraneousResults(this.results, this.schema);
 
         this.#registerRequirements(this.schema, this.required);
 
