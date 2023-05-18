@@ -19,14 +19,17 @@
     }
 
     function handleSSEEvent(event) {
-        addListItem(`<small>${event.data}</small>`)
+        const info = JSON.parse(event.data)
+        const { n, total, rate } = info
+        console.log(n, total, event.data)
+        addListItem(`<small>${(n*100/total).toFixed(1)}% - ${rate.toFixed(2)}/s</small>`)
     }
 
     function onOpen(event) {
         addListItem(`<p><b>Event source opened!</b></p>`)
     }
 
-    source.addEventListener('progress', handleSSEEvent, false);
+    // source.addEventListener('progress', handleSSEEvent, false);
     source.addEventListener('message', handleSSEEvent);
 
     source.addEventListener('error', function(event) {
@@ -35,8 +38,6 @@
 
     source.addEventListener("open", onOpen);
 
-    fetch('/tqdm').then(res => {
-        addListItem(`<p><b>tqdm finished!</b></p>`)
-    })
+    fetch('/tqdm').then(res => addListItem(`<p><b>tqdm finished!</b></p>`))
 </script>
 </html>

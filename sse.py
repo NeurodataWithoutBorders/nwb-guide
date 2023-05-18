@@ -59,10 +59,10 @@ def tqdm():
     n = 10**5
     sleep_durations = [random.uniform(0, 5.0) for _ in range(n)]
     asyncio.run(run_multiple_sleeps(sleep_durations=sleep_durations))
+    return Response()
 
 @app.route("/events", methods=["GET"])
 def events():
-    print('connected')
     return Response(listen(), mimetype="text/event-stream")
 
 if __name__ == '__main__':
