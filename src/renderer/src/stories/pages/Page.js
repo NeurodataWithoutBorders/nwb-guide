@@ -103,32 +103,11 @@ export class Page extends LitElement {
         if (isMultiple) {
             popup.hideLoading();
             const element = popup.getHtmlContainer();
-
-            // Create Progress Bar
-            const container = document.createElement("div");
-            container.style.display = "flex";
-            container.style.alignItems = "center";
-
-            const progressBar = document.createElement("div");
-            progressBar.style.width = "100%";
-            progressBar.style.height = "10px";
-            progressBar.style.border = "1px solid gainsboro";
-
-            const internalBar = (elements.progress = document.createElement("div"));
-            internalBar.style.width = "0%";
-            internalBar.style.height = "100%";
-            internalBar.style.backgroundColor = "#4A8ECE";
-            internalBar.style.transition = "width 0.5s";
-            progressBar.appendChild(internalBar);
-
-            // Create Text
-            const label = (elements.label = document.createElement("small"));
-            label.style.marginLeft = "15px";
-            label.innerHTML = "0%";
-
             element.innerText = "";
-            container.append(progressBar, label);
-            element.append(container);
+
+            const progressBar = new ProgressBar()
+            elements.progress = progressBar
+            element.append(progressBar);
         }
 
         let completed = 0;
@@ -157,9 +136,7 @@ export class Page extends LitElement {
             completed++;
             if (isMultiple) {
                 const progressInfo = { b: completed, bsize: 1, tsize: toRun.length };
-                elements.progress.style.width = elements.label.innerText = `${
-                    (progressInfo.b / progressInfo.tsize) * 100
-                }%`;
+                elements.progress.value = progressInfo
             }
 
             results.push({ file, result });
