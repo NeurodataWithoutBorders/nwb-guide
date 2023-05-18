@@ -31,8 +31,11 @@ schema.Ecephys.Electrodes.group_name = function (this: JSONSchemaForm, name, par
 
 // Update the columns available on the Electrodes table when there is a new name in the ElectrodeColumns table
 schema.Ecephys.ElectrodeColumns = {
-    '*': function (this: JSONSchemaForm, name, parent, path) {
-        if (name === 'name' && !(parent[name] in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
+    '*': function (this: JSONSchemaForm, prop, parent, path) {
+
+        const name = parent['name']
+
+        if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
 
             const linkedPath = ['Ecephys', 'Electrodes']
             const element = this.shadowRoot.getElementById(linkedPath[0]) // Accordion
@@ -41,11 +44,13 @@ schema.Ecephys.ElectrodeColumns = {
                 .children[1] // Nested table element
 
 
-            element.schema.properties[parent[name]] = {} // Ensure property is present in the schema now
-            element.data.forEach(o => o[parent[name]] = '') // Set column value as blank on all rows
+            element.schema.properties[name] = {} // Ensure property is present in the schema now
+            element.data.forEach(o => name in o ? undefined : o[name] = '') // Set column value as blank if not existent on row
 
-            element.requestUpdate(); // Re-render table to show new column
+            setTimeout(() => element.requestUpdate(), 100); // Re-render table to show new column
         }
+
+        this.schema.properties.Ecephys.properties.Electrodes.items.properties[name][prop] = parent[prop] // Update the actual schema for this (e.g. to update visible descriptions)
         return true
     }
 }

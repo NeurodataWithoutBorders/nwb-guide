@@ -25,6 +25,11 @@ export class BasicTable extends LitElement {
                 background: hsl(${warningHue}, 100%, 90%) !important;
             }
 
+            [required]::after {
+                content: " *";
+                color: #ff0033;
+              }
+
             .table-container {
                 position: relative;
                 overflow: auto;
@@ -115,7 +120,11 @@ export class BasicTable extends LitElement {
         if (onLoaded) this.onLoaded = onLoaded;
     }
 
-    #renderHeaderContent = (str) => html`<div class="relative"><span>${str}</span></div>`;
+    #renderHeaderContent = (str) => {
+        const required = this.schema.required ? this.schema.required.includes(str) : false
+        if (required) return html`<div class="relative"><span required>${header(str)}</span></div>`;
+        return html`<div class="relative"><span>${header(str)}</span></div>`;
+    }
 
     #renderHeader = (str, { description }) => {
         if (description) return html`<th title="${description}">${this.#renderHeaderContent(str)}</th>`;
@@ -172,12 +181,27 @@ export class BasicTable extends LitElement {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
+
         let result;
+        let type = this.schema.properties[col]?.type
+        let thisTypeOf = typeof value
 
-        if (!value && "required" in this.schema && this.schema.required.includes(col))
-            result = [{ message: `${col} is a required property`, type: "error" }];
+        // Map to javascript type
+        if (type === 'integer') type = 'number'
 
-        if (!result) result = await this.validateOnChange(col, parent, value);
+        // Convert to json schema type
+        if (Array.isArray(value) ) thisTypeOf = 'array'
+        if (value == undefined) thisTypeOf = 'null'
+
+        
+        // Check if required
+        if (!value && "required" in this.schema && this.schema.required.includes(col)) result = [{ message: `${col} is a required property`, type: "error" }];
+        
+        // If not required, check matching types for values that are defined
+        else if (value !== '' && thisTypeOf !== type) result = [ { message: `${col} is expected to be of ${type} type, not ${thisTypeOf}`, type: "error" } ]
+        
+        // Otherwise validate using the specified onChange function
+        else result = await this.validateOnChange(col, parent, value);
 
         let info = {
             title: undefined,
@@ -306,6 +330,8 @@ export class BasicTable extends LitElement {
                     return 0;
                 }));
 
+                
+
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
             const [key, value] = Object.entries(this.data)[0];
@@ -320,7 +346,7 @@ export class BasicTable extends LitElement {
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                     <thead>
                         <tr>
-                            ${keys.map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
+                            ${keys.map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
                         </tr>
                     </thead>
                     <tbody>
