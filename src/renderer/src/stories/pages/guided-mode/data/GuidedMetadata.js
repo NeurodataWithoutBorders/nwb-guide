@@ -29,17 +29,26 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const instanceId = `sub-${subject}/ses-${session}`;
 
-        const schema = this.info.globalState.schema.metadata[subject][session]; // TODO: Order the Electrodes schema properties differently once present
+        // Ignore specific metadata in the form by removing their schema value
+        const schema = this.info.globalState.schema.metadata[subject][session];
         delete schema.properties.NWBFile.properties.source_script;
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
+        // Only include a select group of Ecephys metadata here
         const toInclude = ['Device', 'ElectrodeGroup', 'Electrodes', 'ElectrodeColumns', 'definitions']
         const ecephysProps = schema.properties.Ecephys.properties;
-        Object.keys(ecephysProps).forEach((k) => {
-            if (!toInclude.includes(k)) delete ecephysProps[k];
-            // if (k.match(/ElectricalSeries.*/)) delete ecephysProps[k];
-        });
-        console.log(ecephysProps)
+         Object.keys(ecephysProps).forEach((k) => (!toInclude.includes(k)) ? delete ecephysProps[k] : '');
+
+        // Change rendering order for electrode table columns
+        const ogElectrodeItemSchema = ecephysProps['Electrodes'].items.properties
+        const order = ['channel_name', 'group_name', 'shank_electrode_number']
+        const sortedProps = Object.keys(ogElectrodeItemSchema).sort((a,b) => {
+            if (order.includes(a)) return -1
+            if (order.includes(b)) return 1
+        })
+
+        const newElectrodeItemSchema = ecephysProps['Electrodes'].items.properties = {}
+        sortedProps.forEach(k => newElectrodeItemSchema[k] = ogElectrodeItemSchema[k])
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
