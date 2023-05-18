@@ -33,13 +33,13 @@ export class GuidedMetadataPage extends ManagedPage {
         delete schema.properties.NWBFile.properties.source_script;
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
-        const toInclude = ['Device', 'ElectrodeGroup', 'Electrodes', 'ElectrodeColumns', 'definitions']
+        const toInclude = ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"];
         const ecephysProps = schema.properties.Ecephys.properties;
         Object.keys(ecephysProps).forEach((k) => {
             if (!toInclude.includes(k)) delete ecephysProps[k];
             // if (k.match(/ElectricalSeries.*/)) delete ecephysProps[k];
         });
-        console.log(ecephysProps)
+        console.log(ecephysProps);
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
