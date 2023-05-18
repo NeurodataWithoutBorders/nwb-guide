@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <ul></ul>
+</body>
+<script>
+    var source = new EventSource('/events');
+
+    const ul = document.querySelector('ul')
+
+    function addListItem(html) {
+        ul.insertAdjacentHTML('beforeend', `<li>${html}</li>`)
+    }
+
+    function handleSSEEvent(event) {
+        addListItem(`<small>${event.data}</small>`)
+    }
+
+    function onOpen(event) {
+        addListItem(`<p><b>Event source opened!</b></p>`)
+    }
+
+    source.addEventListener('progress', handleSSEEvent, false);
+    source.addEventListener('message', handleSSEEvent);
+
+    source.addEventListener('error', function(event) {
+        console.error("Failed to connect to event stream.");
+    }, false);
+
+    source.addEventListener("open", onOpen);
+
+    fetch('/tqdm').then(res => {
+        addListItem(`<p><b>tqdm finished!</b></p>`)
+    })
+</script>
+</html>
