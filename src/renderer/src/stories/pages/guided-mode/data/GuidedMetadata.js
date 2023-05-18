@@ -33,10 +33,13 @@ export class GuidedMetadataPage extends ManagedPage {
         delete schema.properties.NWBFile.properties.source_script;
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
+        const toInclude = ['Device', 'ElectrodeGroup', 'Electrodes', 'ElectrodeColumns', 'definitions']
         const ecephysProps = schema.properties.Ecephys.properties;
         Object.keys(ecephysProps).forEach((k) => {
-            if (k.match(/ElectricalSeries.*/)) delete ecephysProps[k];
+            if (!toInclude.includes(k)) delete ecephysProps[k];
+            // if (k.match(/ElectricalSeries.*/)) delete ecephysProps[k];
         });
+        console.log(ecephysProps)
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
@@ -94,21 +97,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
     render() {
         this.#resetLoadState(); // Reset on each render
-
-        // Swal.fire({
-        //     title: "Waiting for your metadata to render",
-        //     html: "Please wait...",
-        //     allowEscapeKey: false,
-        //     allowOutsideClick: false,
-        //     heightAuto: false,
-        //     backdrop: "rgba(0,0,0, 0.4)",
-        //     timerProgressBar: false,
-        //     didOpen: () => {
-        //         if (this.#loaded) return false;
-        //         Swal.showLoading();
-        //         this.forms.forEach(o => o.form.load()) // Wait until Swal is active to check load status for tables
-        //     },
-        // });
 
         this.forms = this.mapSessions(this.createForm);
 

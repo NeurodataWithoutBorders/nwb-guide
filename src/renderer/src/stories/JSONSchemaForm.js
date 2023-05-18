@@ -483,7 +483,7 @@ export class JSONSchemaForm extends LitElement {
                                 validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v),
                                 onStatusChange: () => this.#checkStatus(), // Check status on all elements
                                 validateEmptyCells: this.validateEmptyValues,
-                                // deferLoading: this.deferLoading,
+                                deferLoading: this.deferLoading,
                                 onLoaded: () => {
                                     this.#nLoaded++;
                                     this.#checkAllLoaded();
@@ -494,29 +494,6 @@ export class JSONSchemaForm extends LitElement {
                                 (this.renderTable ? this.renderTable(name, tableMetadata, fullPath) : "") ||
                                 new BasicTable(tableMetadata));
                         }
-                        // {
-                        //   return html`
-                        //   <div class="guided--array">
-                        //     <div class="guided--array-items">
-                        //       ${parent[name]?.map((item, i) => html`
-                        //         <div class="guided--array-item">
-                        //           ${JSON.stringify(item, null, 2)}
-                        //           <button class="guided--array-item-remove" @click=${() => {
-                        //             const newArray = [...parent[name]]
-                        //             newArray.splice(i, 1)
-                        //             this.#updateParent(name, newArray, parent)
-                        //           }}>Remove</button>
-                        //         </div>
-                        //       `)}
-                        //     </div>
-                        //     <button class="guided--array-add" @click=${() => {
-                        //       const newArray = [...parent[name] ?? []]
-                        //       newArray.push(info.items.default ?? '')
-                        //       this.#updateParent(name, newArray, parent)
-                        //     }}>Add</button>
-                        //   </div>
-                        //   `
-                        // }
                     }
 
                     // Print out the immutable default value
