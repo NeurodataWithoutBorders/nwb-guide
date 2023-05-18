@@ -187,29 +187,24 @@ export class BasicTable extends LitElement {
 
         let result;
 
-        const propInfo = this.schema.properties[col]
+        const propInfo = this.schema.properties[col];
         let thisTypeOf = typeof value;
-        let ogType
-        let type = ogType = propInfo.type || propInfo.data_type;
+        let ogType;
+        let type = (ogType = propInfo.type || propInfo.data_type);
 
         // Handle based on JSON Schema types
-        if ('type' in propInfo){
-
+        if ("type" in propInfo) {
             // Map to javascript type
             if (type === "integer") type = "number";
 
             // Convert to json schema type
             if (Array.isArray(value)) thisTypeOf = "array";
             if (value == undefined) thisTypeOf = "null";
-        } 
-        
-        else if ('data_type' in propInfo) {
-
-            if (type.includes('array')) type = 'array'
-            if (type.includes('int') || type.includes('float')) type = 'number'
-            if (type.startsWith('bool')) type = 'boolean'
-            if (type.startsWith('str')) type = 'string'
-
+        } else if ("data_type" in propInfo) {
+            if (type.includes("array")) type = "array";
+            if (type.includes("int") || type.includes("float")) type = "number";
+            if (type.startsWith("bool")) type = "boolean";
+            if (type.startsWith("str")) type = "string";
         }
 
         // Check if required
@@ -314,8 +309,10 @@ export class BasicTable extends LitElement {
         Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
-            const latest = this.data[this.keyColumn ? cols[this.keyColumn] : row] = {}; 
-            Object.entries(cols).forEach(([key, value]) => key in this.schema.properties ? latest[key] = value : '') // Only include data from schema
+            const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
+            Object.entries(cols).forEach(([key, value]) =>
+                key in this.schema.properties ? (latest[key] = value) : ""
+            ); // Only include data from schema
         });
     }
 

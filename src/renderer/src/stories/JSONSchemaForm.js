@@ -808,7 +808,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             });
 
         let rendered = sorted.map((entry) => {
-            const [ name, info ] = entry;
+            const [name, info] = entry;
 
             // Render linked properties
             if (entry[isLink]) {
@@ -829,7 +829,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
             const hasMany = renderable.length > 1; // How many siblings?
 
-            const fullPath = [...path, name]
+            const fullPath = [...path, name];
 
             if (this.mode === "accordion" && hasMany) {
                 const headerName = header(name);

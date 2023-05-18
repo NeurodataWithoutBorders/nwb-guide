@@ -136,7 +136,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
         defs = ecephys_properties["definitions"]
-        
+
         ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
         ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
         del defs["Electrodes"]
@@ -266,13 +266,14 @@ def convert_to_nwb(info: dict) -> str:
         del ecephys_metadata["Electrodes"]
 
         recording_interface.update_electrode_table(
-            electrode_table_json=electrode_results,
-            electrode_column_info=electrode_column_results
-        )  
+            electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
+        )
 
         # Update with the latest metadata for the electrodes
-        info["metadata"]["Ecephys"]["Electrodes"] = [ {key: value for key, value in entry.items() if key != 'data_type'} for entry in electrode_column_results ]
-        
+        info["metadata"]["Ecephys"]["Electrodes"] = [
+            {key: value for key, value in entry.items() if key != "data_type"} for entry in electrode_column_results
+        ]
+
     # Actually run the conversion
     file = converter.run_conversion(
         metadata=info["metadata"],
