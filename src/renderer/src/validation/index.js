@@ -24,10 +24,11 @@ export async function validateOnChange(name, parent, path, value) {
         let lastWildcard;
         fullPath.reduce((acc, key) => {
             if (acc && "*" in acc) {
-                if (!acc["*"] && lastWildcard) overridden = true; // Disable if false and a wildcard has already been specified
+                if (!acc["*"] && lastWildcard)
+                    overridden = true; // Disable if false and a wildcard has already been specified
                 else {
-                    lastWildcard = typeof acc["*"] === 'string' ? acc["*"].replace(`{*}`, `${name}`): acc["*"];
-                    overridden = false // Re-enable if a new one is specified below
+                    lastWildcard = typeof acc["*"] === "string" ? acc["*"].replace(`{*}`, `${name}`) : acc["*"];
+                    overridden = false; // Re-enable if a new one is specified below
                 }
             }
             return acc?.[key];
@@ -39,7 +40,6 @@ export async function validateOnChange(name, parent, path, value) {
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
     if (!Array.isArray(functions)) functions = [functions];
-
 
     // Validate multiple conditions. May be able to offload this to a single server-side call
     const res = (

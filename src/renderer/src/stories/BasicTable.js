@@ -169,13 +169,13 @@ export class BasicTable extends LitElement {
     onLoaded = () => {};
 
     #validateCell = async (value, col, parent) => {
-        
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
         let result;
 
-        if (!value && 'required' in this.schema && this.schema.required.includes(col)) result = [ { message: `${col} is a required property`, type: 'error' } ]
+        if (!value && "required" in this.schema && this.schema.required.includes(col))
+            result = [{ message: `${col} is a required property`, type: "error" }];
 
         if (!result) result = await this.validateOnChange(col, parent, value);
 
@@ -233,7 +233,6 @@ export class BasicTable extends LitElement {
     #data = [];
 
     #getTSV = () => {
-
         const data = this.#data;
         let keys = [...this.#keys];
 

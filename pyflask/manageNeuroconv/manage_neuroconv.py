@@ -117,22 +117,23 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     ecephys_properties = to_return["schema"]["properties"]["Ecephys"]["properties"]
     original_electrodes_schema = ecephys_properties["Electrodes"]
     ecephys_properties["Electrodes"] = {
-        'type': 'array',
-        'minItems': 0,
-        'items': {
-            'type': 'object',
-            'properties': {
-                properties['name']: { key: item for key, item in properties.items() if key != 'name' } for properties in original_electrodes_schema['default']
-            }
-        }
+        "type": "array",
+        "minItems": 0,
+        "items": {
+            "type": "object",
+            "properties": {
+                properties["name"]: {key: item for key, item in properties.items() if key != "name"}
+                for properties in original_electrodes_schema["default"]
+            },
+        },
     }
 
-    to_return["results"]["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema['default']
+    to_return["results"]["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
 
     defs = ecephys_properties["definitions"]
-    ecephys_properties["ElectrodeColumns"] = { "type": "array",  "items": defs['Electrodes'] }
-    ecephys_properties["ElectrodeColumns"]['items']['required'] = list(defs['Electrodes']['properties'].keys())
-    del defs['Electrodes']
+    ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
+    ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
+    del defs["Electrodes"]
 
     # NOTE: Must remap when passed back as results...
 
