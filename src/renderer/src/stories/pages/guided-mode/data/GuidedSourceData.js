@@ -76,9 +76,8 @@ export class GuidedSourceDataPage extends ManagedPage {
             mode: "accordion",
             schema: this.info.globalState.schema.source_data,
             results: info.source_data,
-            ignore: ["verbose"],
             onlyRequired: true,
-            onStatusChange: (state) => this.manager.updateState(instanceId, state),
+            onStatusChange: (state) => this.manager.updateState(instanceId, state)
         });
 
         return {

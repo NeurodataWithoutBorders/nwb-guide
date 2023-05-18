@@ -39,6 +39,7 @@ Nested.args = {
     mode: "accordion",
     results: {
         name: "name",
+        ignored: true
     },
     schema: {
         properties: {
@@ -51,7 +52,6 @@ Nested.args = {
             nested: defaultSchema,
         },
     },
-    ignore: ["ignored"],
     required: {
         name: true,
     },

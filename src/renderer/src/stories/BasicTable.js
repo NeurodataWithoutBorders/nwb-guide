@@ -66,7 +66,7 @@ export class BasicTable extends LitElement {
             }
 
             thead {
-                background: gainsboro;
+                background: whitesmoke;
             }
 
             td {
@@ -78,8 +78,8 @@ export class BasicTable extends LitElement {
             td > * {
                 display: flex;
                 white-space: nowrap;
-                color: black;
-                padding: 5px;
+                color: rgb(10, 10, 10);
+                padding: 0px 5px;
                 width: 100%;
             }
 
@@ -92,6 +92,10 @@ export class BasicTable extends LitElement {
                 font-size: 80%;
                 font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
                     "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif;
+            }
+
+            #buttons {
+                margin-top: 10px;
             }
         `;
     }
@@ -355,41 +359,45 @@ export class BasicTable extends LitElement {
                     </tbody>
                 </table>
             </div>
-            <nwb-button
-                @click=${() => {
-                    const tsv = this.#getTSV();
-
-                    const element = document.createElement("a");
-                    element.setAttribute(
-                        "href",
-                        "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
-                    );
-                    element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
-                    element.style.display = "none";
-                    document.body.appendChild(element);
-                    element.click();
-                    document.body.removeChild(element);
-                }}
-                >Download TSV File</nwb-button
-            >
-            <nwb-button
-                @click=${() => {
-                    const input = document.createElement("input");
-                    input.type = "file";
-                    input.accept = "text/tab-separated-values";
-                    input.click();
-                    input.onchange = () => {
-                        const file = input.files[0];
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            this.#readTSV(reader.result);
-                            this.requestUpdate();
+            <div id="buttons">
+                <nwb-button
+                    primary
+                    size="small"
+                    @click=${() => {
+                        const input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = "text/tab-separated-values";
+                        input.click();
+                        input.onchange = () => {
+                            const file = input.files[0];
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                this.#readTSV(reader.result);
+                                this.requestUpdate();
+                            };
+                            reader.readAsText(file);
                         };
-                        reader.readAsText(file);
-                    };
-                }}
-                >Upload TSV File</nwb-button
-            >
+                    }}
+                    >Upload TSV File</nwb-button
+                >
+                <nwb-button 
+                    size="small"
+                    @click=${() => {
+                        const tsv = this.#getTSV();
+
+                        const element = document.createElement("a");
+                        element.setAttribute(
+                            "href",
+                            "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
+                        );
+                        element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
+                        element.style.display = "none";
+                        document.body.appendChild(element);
+                        element.click();
+                        document.body.removeChild(element);
+                    }}
+                >Download TSV File</nwb-button>
+            </div>
         `;
     }
 }

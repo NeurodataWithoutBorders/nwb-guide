@@ -199,7 +199,6 @@ export class JSONSchemaForm extends LitElement {
             mode: { type: String, reflect: true },
             schema: { type: Object, reflect: false },
             results: { type: Object, reflect: false },
-            ignore: { type: Array, reflect: false },
             required: { type: Object, reflect: false },
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
@@ -234,6 +233,7 @@ export class JSONSchemaForm extends LitElement {
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
+        if (props.renderTable) this.renderTable = props.renderTable
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
 
@@ -477,7 +477,7 @@ export class JSONSchemaForm extends LitElement {
                     if (info.type === "array") {
                         const itemSchema = this.#getSchema("items", info);
                         if (itemSchema.type === "object") {
-                            return (this.#tables[name] = new BasicTable({
+                            const tableMetadata = {
                                 schema: itemSchema,
                                 data: parent[name],
                                 validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v),
@@ -488,7 +488,9 @@ export class JSONSchemaForm extends LitElement {
                                     this.#nLoaded++;
                                     this.#checkAllLoaded();
                                 },
-                            }));
+                            }
+
+                            return this.#tables[name] =  ((this.renderTable) ? this.renderTable(name, tableMetadata, fullPath) : '') || new BasicTable(tableMetadata);
                         }
                         // {
                         //   return html`
@@ -835,7 +837,6 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     schema: info,
                     results: results[name],
                     required: required[name], // Scoped to the sub-schema
-                    ignore: this.ignore,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
@@ -853,6 +854,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                         this.#nLoaded++;
                         this.#checkAllLoaded();
                     },
+                    renderTable: (...args) => this.renderTable(...args),
                     base: [...path, name],
                 });
 
