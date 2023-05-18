@@ -105,8 +105,8 @@ export class Page extends LitElement {
             const element = popup.getHtmlContainer();
             element.innerText = "";
 
-            const progressBar = new ProgressBar()
-            elements.progress = progressBar
+            const progressBar = new ProgressBar();
+            elements.progress = progressBar;
             element.append(progressBar);
         }
 
@@ -136,7 +136,7 @@ export class Page extends LitElement {
             completed++;
             if (isMultiple) {
                 const progressInfo = { b: completed, bsize: 1, tsize: toRun.length };
-                elements.progress.value = progressInfo
+                elements.progress.value = progressInfo;
             }
 
             results.push({ file, result });
