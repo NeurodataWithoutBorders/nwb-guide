@@ -77,7 +77,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             schema: this.info.globalState.schema.source_data,
             results: info.source_data,
             onlyRequired: true,
-            onStatusChange: (state) => this.manager.updateState(instanceId, state)
+            onStatusChange: (state) => this.manager.updateState(instanceId, state),
         });
 
         return {

@@ -233,7 +233,7 @@ export class JSONSchemaForm extends LitElement {
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
-        if (props.renderTable) this.renderTable = props.renderTable
+        if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
 
@@ -488,9 +488,11 @@ export class JSONSchemaForm extends LitElement {
                                     this.#nLoaded++;
                                     this.#checkAllLoaded();
                                 },
-                            }
+                            };
 
-                            return this.#tables[name] =  ((this.renderTable) ? this.renderTable(name, tableMetadata, fullPath) : '') || new BasicTable(tableMetadata);
+                            return (this.#tables[name] =
+                                (this.renderTable ? this.renderTable(name, tableMetadata, fullPath) : "") ||
+                                new BasicTable(tableMetadata));
                         }
                         // {
                         //   return html`

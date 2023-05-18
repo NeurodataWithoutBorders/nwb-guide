@@ -39,7 +39,7 @@ Nested.args = {
     mode: "accordion",
     results: {
         name: "name",
-        ignored: true
+        ignored: true,
     },
     schema: {
         properties: {

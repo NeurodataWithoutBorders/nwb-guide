@@ -397,7 +397,7 @@ export class BasicTable extends LitElement {
                     }}
                     >Upload TSV File</nwb-button
                 >
-                <nwb-button 
+                <nwb-button
                     size="small"
                     @click=${() => {
                         const tsv = this.#getTSV();
@@ -413,7 +413,8 @@ export class BasicTable extends LitElement {
                         element.click();
                         document.body.removeChild(element);
                     }}
-                >Download TSV File</nwb-button>
+                    >Download TSV File</nwb-button
+                >
             </div>
         `;
     }

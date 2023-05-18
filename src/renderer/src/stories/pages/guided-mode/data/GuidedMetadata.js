@@ -30,13 +30,13 @@ export class GuidedMetadataPage extends ManagedPage {
         const instanceId = `sub-${subject}/ses-${session}`;
 
         const schema = this.info.globalState.schema.metadata[subject][session]; // TODO: Order the Electrodes schema properties differently once present
-        delete schema.properties.NWBFile.properties.source_script
-        delete schema.properties.NWBFile.properties.source_script_file_name
+        delete schema.properties.NWBFile.properties.source_script;
+        delete schema.properties.NWBFile.properties.source_script_file_name;
 
-        const ecephysProps = schema.properties.Ecephys.properties
-        Object.keys(ecephysProps).forEach(k => {
-            if (k.match(/ElectricalSeries.*/)) delete ecephysProps[k]
-        })
+        const ecephysProps = schema.properties.Ecephys.properties;
+        Object.keys(ecephysProps).forEach((k) => {
+            if (k.match(/ElectricalSeries.*/)) delete ecephysProps[k];
+        });
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
@@ -53,7 +53,7 @@ export class GuidedMetadataPage extends ManagedPage {
                     ],
                 },
             ],
-            
+
             deferLoading: true,
             onLoaded: () => {
                 this.#nLoaded++;
@@ -64,8 +64,8 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             renderTable: (name, metadata, path) => {
-                if (name !== 'ElectrodeColumns' && name !== 'Electrodes') return new Table(metadata) // Use Handsontable if table is small enough
-            }
+                if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata); // Use Handsontable if table is small enough
+            },
         });
 
         return {
