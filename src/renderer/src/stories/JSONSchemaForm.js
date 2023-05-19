@@ -3,7 +3,7 @@ import { notify } from "../globals";
 import { FilesystemSelector } from "./FileSystemSelector";
 import { Accordion } from "./Accordion";
 
-import { capitalize, header } from "./forms/utils";
+import { capitalize, header, textToArray } from "./forms/utils";
 
 const componentCSS = `
 
@@ -425,9 +425,7 @@ export class JSONSchemaForm extends LitElement {
                                 @input=${(ev) => {
                                     this.#updateParent(
                                         name,
-                                        isStringArray
-                                            ? ev.target.value.split("\n").map((str) => str.trim())
-                                            : ev.target.value,
+                                        isStringArray ? textToArray(ev.target.value) : ev.target.value,
                                         parent
                                     );
                                 }}

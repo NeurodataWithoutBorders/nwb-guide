@@ -1,19 +1,28 @@
 import Swal from "sweetalert2";
 import { baseUrl } from "../../../../globals.js";
 
-export const run = async (url, payload, options = {}) => {
-    Swal.fire({
-        title: options.title ?? "Requesting data from server",
-        html: "Please wait...",
-        allowEscapeKey: false,
-        allowOutsideClick: false,
-        heightAuto: false,
-        backdrop: "rgba(0,0,0, 0.4)",
-        timerProgressBar: false,
-        didOpen: () => {
-            Swal.showLoading();
-        },
+export const openProgressSwal = (options) => {
+    return new Promise((resolve) => {
+        Swal.fire({
+            title: options.title ?? "Requesting data from server",
+            html: `Please wait...`,
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            heightAuto: false,
+            backdrop: "rgba(0,0,0, 0.4)",
+            timerProgressBar: false,
+            didOpen: () => {
+                Swal.showLoading();
+                resolve(Swal);
+            },
+        });
     });
+};
+
+export const run = async (url, payload, options = {}) => {
+    const needsSwal = !options.swal;
+    if (needsSwal) openProgressSwal(options).then((swal) => (options.onOpen ? options.onOpen(swal) : undefined));
 
     const results = await fetch(`${baseUrl}/neuroconv/${url}`, {
         method: "POST",
@@ -21,14 +30,14 @@ export const run = async (url, payload, options = {}) => {
         body: JSON.stringify(payload),
     }).then((res) => res.json());
 
-    Swal.close();
+    if (needsSwal) Swal.close();
 
     if (results?.message) throw new Error(`Request to ${url} failed: ${results.message}`);
 
     return results || true;
 };
 
-export const runConversion = async (info) =>
+export const runConversion = async (info, options = {}) =>
     run(`convert`, info, {
         title: "Running the conversion",
         onError: (results) => {
@@ -38,4 +47,5 @@ export const runConversion = async (info) =>
                 return "Conversion failed with current metadata. Please try again.";
             }
         },
+        ...options,
     });
