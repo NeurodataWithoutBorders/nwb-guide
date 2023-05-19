@@ -252,7 +252,7 @@ def convert_to_nwb(info: dict) -> str:
     available_options = converter.get_conversion_options_schema()
     options = (
         {
-            interface: {"stub_test": info["stub_test"], "iter_opts": {"report_hook": update_conversion_progress}}
+            interface: {"stub_test": info["stub_test"] } #, "iter_opts": {"report_hook": update_conversion_progress}}
             if available_options.get("properties").get(interface).get("properties").get("stub_test")
             else {}
             for interface in info["source_data"]
@@ -276,9 +276,7 @@ def convert_to_nwb(info: dict) -> str:
         )
 
         # Update with the latest metadata for the electrodes
-        info["metadata"]["Ecephys"]["Electrodes"] = [
-            {key: value for key, value in entry.items() if key != "data_type"} for entry in electrode_column_results
-        ]
+        info["metadata"]["Ecephys"]["Electrodes"] = electrode_column_results
 
     # Actually run the conversion
     file = converter.run_conversion(
