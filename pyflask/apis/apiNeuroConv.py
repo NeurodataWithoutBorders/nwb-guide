@@ -1,4 +1,6 @@
 from flask_restx import Namespace, Resource, reqparse
+from flask import Response
+
 from namespaces import get_namespace, NamespaceEnum
 from manageNeuroconv import (
     get_all_interface_info,
@@ -8,7 +10,9 @@ from manageNeuroconv import (
     convert_to_nwb,
     validate_metadata,
     upload_to_dandi,
+    listen_to_neuroconv_events,
 )
+
 from errorHandlers import notBadRequestException
 
 api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")
@@ -42,7 +46,7 @@ class Schemas(Resource):
 
 
 @api.route("/locate")
-class Schemas(Resource):
+class Locate(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
@@ -53,7 +57,7 @@ class Schemas(Resource):
 
 
 @api.route("/metadata")
-class Schemas(Resource):
+class Metadata(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
@@ -65,7 +69,7 @@ class Schemas(Resource):
 
 
 @api.route("/convert")
-class Schemas(Resource):
+class Convert(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
@@ -86,7 +90,7 @@ validate_parser.add_argument("function_name", type=str, required=True)
 #   }}).then(res => res.text())
 @api.route("/validate")
 @api.expect(validate_parser)
-class Schemas(Resource):
+class Validate(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
@@ -99,11 +103,25 @@ class Schemas(Resource):
 
 
 @api.route("/upload")
-class Schemas(Resource):
+class Upload(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
             return upload_to_dandi(**api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
+
+
+# Create an events endpoint
+# announcer.announce('test', 'publish')
+@api.route("/events", methods=["GET"])
+class Events(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def get(self):
+        try:
+            return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
 
         except Exception as e:
             if notBadRequestException(e):
