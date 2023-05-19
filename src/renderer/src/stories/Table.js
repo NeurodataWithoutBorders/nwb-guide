@@ -125,9 +125,9 @@ export class Table extends LitElement {
 
         const nUnresolved = Object.keys(this.unresolved).length;
         if (nUnresolved)
-            message = `${nUnresolved} subject${nUnresolved > 1 ? "s are" : " is"} missing a ${
-                this.keyColumn ? `${this.keyColumn} ` : ""
-            }value`;
+            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a${
+                this.keyColumn ? `${this.keyColumn} ` : "n "
+            }entry`;
 
         if (message) throw new Error(message);
     };
