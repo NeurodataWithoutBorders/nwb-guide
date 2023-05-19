@@ -129,12 +129,11 @@ export class GuidedMetadataPage extends ManagedPage {
                         if (subject.startsWith("sub-")) subject = subject.slice(4);
                         if (session.startsWith("ses-")) session = session.slice(4);
 
-                        const [{ file, result }] = await this.runConversions({ stub_test: true }, [
-                            { subject, session },
-                        ]).catch((e) => {
-                            this.notify(e.message, "error");
-                            throw e;
-                        });
+                        const [{ file, result }] = await this.runConversions(
+                            { stub_test: true },
+                            [{ subject, session }],
+                            { title: "Running conversion preview" }
+                        ).catch((e) => this.notify(e.message, "error"));
 
                         const modal = new Modal({
                             header: file,
