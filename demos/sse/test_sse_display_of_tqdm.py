@@ -8,7 +8,7 @@ from tqdm import tqdm as base_tqdm
 import sys
 import os
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(os.path.join(__file__, '..','..', 'pyflask')))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(os.path.join(__file__, "..", "..", "pyflask")))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 from pyflask.sse import MessageAnnouncer
 
@@ -38,7 +38,6 @@ async def run_multiple_sleeps(sleep_durations: List[float]) -> List[float]:
     actual_sleep_durations = [await f for f in SSEProgress(asyncio.as_completed(tasks), total=len(tasks))]
 
     return actual_sleep_durations
-
 
 
 announcer = MessageAnnouncer()

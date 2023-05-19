@@ -1,7 +1,7 @@
 # Server Side Events Demo
 This demo visualizes events from `tqdm` during a standard HTTP request.
 
-To start the demo, run: 
+To start the demo, run:
 ```bash
 python3 test_sse_display_of_tqdm.py
 ```
