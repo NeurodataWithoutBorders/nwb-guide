@@ -15,7 +15,7 @@ export class InstanceManager extends LitElement {
                 width: 100%;
                 display: flex;
                 background: white;
-                height: 400px;
+                height: 100%;
             }
 
             :host > div {
