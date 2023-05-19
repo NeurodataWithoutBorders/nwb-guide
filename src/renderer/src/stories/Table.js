@@ -300,7 +300,7 @@ export class Table extends LitElement {
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
-            let rowName = (this.keyColumn) ? rowHeaders[row] : row;
+            let rowName = this.keyColumn ? rowHeaders[row] : row;
 
             // NOTE: We would like to allow invalid values to mutate the results
             // if (isValid) {
@@ -308,7 +308,7 @@ export class Table extends LitElement {
             let target = this.data;
 
             if (!isResolved) {
-                if (!this.keyColumn) this.data[rowName] = {}  // Add new row to array
+                if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
                 else {
                     rowName = row;
                     if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
@@ -324,10 +324,9 @@ export class Table extends LitElement {
                     delete target[rowName];
                     delete unresolved[row];
                     rowHeaders[row] = value;
-
                 }
-            } 
-            
+            }
+
             // Update data on passed object
             else {
                 if (value == undefined || value === "") delete target[rowName][header];
