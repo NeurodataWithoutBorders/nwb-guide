@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "../utils/useGlobalStyles.js";
-import { runConversion } from "./guided-mode/options/utils.js";
+import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress.js";
 import { dismissNotification, notify } from "../../globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
@@ -83,7 +83,7 @@ export class Page extends LitElement {
 
     mapSessions = (callback) => mapSessions(callback, this.info.globalState);
 
-    async runConversions(conversionOptions = {}, toRun) {
+    async runConversions(conversionOptions = {}, toRun, options = {}) {
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
@@ -95,25 +95,54 @@ export class Page extends LitElement {
         const folder = this.info.globalState.conversion?.info?.output_folder; // Do not require output_folder on the frontend
         let results = [];
 
-        for (let { subject, session } of toRun) {
+        const popup = await openProgressSwal({ title: `Running conversion`, ...options });
+
+        const isMultiple = toRun.length > 1;
+
+        let elements = {};
+        if (isMultiple) {
+            popup.hideLoading();
+            const element = popup.getHtmlContainer();
+            element.innerText = "";
+
+            const progressBar = new ProgressBar();
+            elements.progress = progressBar;
+            element.append(progressBar);
+        }
+
+        let completed = 0;
+        for (let info of toRun) {
+            const { subject, session } = info;
             const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
             const file = folder ? `${folder}/${basePath}` : basePath;
 
-            const result = await runConversion({
-                folder,
-                nwbfile_path: file,
-                overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-                ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
-                ...conversionOptions, // Any additional conversion options override the defaults
+            const result = await runConversion(
+                {
+                    folder,
+                    nwbfile_path: file,
+                    overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
+                    ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
+                    ...conversionOptions, // Any additional conversion options override the defaults
 
-                interfaces: this.info.globalState.interfaces,
-            }).catch((e) => {
+                    interfaces: this.info.globalState.interfaces,
+                },
+                { swal: popup, ...options }
+            ).catch((e) => {
                 this.notify(e.message, "error");
+                popup.close();
                 throw e.message;
             });
 
+            completed++;
+            if (isMultiple) {
+                const progressInfo = { b: completed, bsize: 1, tsize: toRun.length };
+                elements.progress.value = progressInfo;
+            }
+
             results.push({ file, result });
         }
+
+        popup.close();
 
         return results;
     }
