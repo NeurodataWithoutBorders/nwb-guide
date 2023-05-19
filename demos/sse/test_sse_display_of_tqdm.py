@@ -3,8 +3,14 @@ from typing import List
 import random
 import asyncio
 import time
-
 from tqdm import tqdm as base_tqdm
+
+import sys
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(os.path.join(__file__, '..','..', 'pyflask')))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+from pyflask.sse import MessageAnnouncer
 
 
 class SSEProgress(base_tqdm):
@@ -34,7 +40,6 @@ async def run_multiple_sleeps(sleep_durations: List[float]) -> List[float]:
     return actual_sleep_durations
 
 
-from pyflask.sse import MessageAnnouncer
 
 announcer = MessageAnnouncer()
 
