@@ -14,12 +14,11 @@ export class GuidedSubjectsPage extends Page {
             const { results, subjects } = this.info.globalState;
 
             const nUnresolved = Object.keys(this.table.unresolved).length;
-            if (nUnresolved)
-                return this.notify(
-                    `${nUnresolved} subject${nUnresolved > 1 ? "s are" : " is"} missing a Subject ID value`,
-                    "error"
-                );
-
+            if (nUnresolved) return this.notify(
+                `${nUnresolved} subject${nUnresolved > 1 ? "s are" : " is"} missing a Subject ID value`,
+                "error"
+            );
+            
             const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
             if (noSessions.length)
                 return this.notify(
@@ -38,12 +37,13 @@ export class GuidedSubjectsPage extends Page {
             for (let subject in subjects) {
                 const { sessions = [] } = subjects[subject];
                 let subObj = results[subject];
+                
 
                 if (!subObj) subObj = results[subject] = {};
                 else {
                     const toRemove = Object.keys(subObj).filter((s) => !sessions.includes(s));
                     for (let s of toRemove) delete subObj[s]; // Delete extra sessions from results
-                    if (!Object.keys(subObj).length) delete results[subject]; // Delete subjects without sessions
+                    if (!sessions.length && !Object.keys(subObj).length) delete results[subject]; // Delete subjects without sessions
                 }
 
                 for (let session of sessions) {
