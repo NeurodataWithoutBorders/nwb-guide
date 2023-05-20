@@ -47,17 +47,16 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     Swal.close();
 
-                    if (isStorybook) return
+                    if (isStorybook) return;
 
-                        if (result.message) {
-                            const message = "Failed to get metadata with current source data. Please try again.";
-                            this.notify(message, "error");
-                            throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
-                        }
+                    if (result.message) {
+                        const message = "Failed to get metadata with current source data. Please try again.";
+                        this.notify(message, "error");
+                        throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
+                    }
 
-                        // Merge metadata results with the generated info
-                        this.merge("metadata", result.results, info);
-
+                    // Merge metadata results with the generated info
+                    this.merge("metadata", result.results, info);
 
                     // Mirror structure with metadata schema
                     const schema = this.info.globalState.schema;

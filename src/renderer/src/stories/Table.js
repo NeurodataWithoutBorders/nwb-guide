@@ -348,7 +348,7 @@ export class Table extends LitElement {
             });
         });
 
-        console.log('Adding hook')
+        console.log("Adding hook");
         table.addHook("afterCreateRow", (index, amount) => {
             nRows += amount;
             const physicalRows = Array.from({ length: amount }, (e, i) => index + i);

@@ -37,7 +37,7 @@ export class GuidedMetadataPage extends ManagedPage {
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
         // Only include a select group of Ecephys metadata here
-        if ('Ecephys' in schema.properties) {
+        if ("Ecephys" in schema.properties) {
             const toInclude = ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"];
             const ecephysProps = schema.properties.Ecephys.properties;
             Object.keys(ecephysProps).forEach((k) => (!toInclude.includes(k) ? delete ecephysProps[k] : ""));
@@ -83,7 +83,7 @@ export class GuidedMetadataPage extends ManagedPage {
             renderTable: (name, metadata, path) => {
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
                 if (name !== "ElectrodeColumns" && name !== "Electrodes") return new SimpleTable(metadata);
-                // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata); 
+                // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
             },
         });
 

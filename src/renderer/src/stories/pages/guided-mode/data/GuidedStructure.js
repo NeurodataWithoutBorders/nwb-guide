@@ -45,7 +45,7 @@ export class GuidedStructurePage extends Page {
 
         keyEl.innerText = resolvedKey;
         keyEl.contentEditable = true;
-        keyEl.style.cursor = 'text'
+        keyEl.style.cursor = "text";
 
         li.style.display = "flex";
         li.style.alignItems = "center";

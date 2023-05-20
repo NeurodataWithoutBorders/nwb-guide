@@ -17,7 +17,7 @@ export default {
     },
 };
 
-nwbBaseSchema.properties.Ecephys = exephysExampleSchema
+nwbBaseSchema.properties.Ecephys = exephysExampleSchema;
 
 const globalState = {
     project: {

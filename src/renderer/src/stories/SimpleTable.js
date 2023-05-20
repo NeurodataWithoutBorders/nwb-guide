@@ -185,15 +185,14 @@ export class SimpleTable extends LitElement {
             if (cell) this.#selectCells(cell);
         };
 
-        this.onmouseup = (ev) => this.#selecting = false;
-        
-        document.addEventListener('onmouseup', this.onmouseup)
+        this.onmouseup = (ev) => (this.#selecting = false);
 
-        document.addEventListener('mousedown', (ev) => {
+        document.addEventListener("onmouseup", this.onmouseup);
+
+        document.addEventListener("mousedown", (ev) => {
             const path = this.#getPath(ev);
             if (!path.includes(this)) this.#clearSelected();
-        })
-
+        });
 
         // Handle Copy-Paste Commands
         this.addEventListener("copy", (ev) => {
