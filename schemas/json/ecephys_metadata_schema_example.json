@@ -1,0 +1,181 @@
+{
+    "required": [
+      "Device",
+      "ElectrodeGroup"
+    ],
+    "properties": {
+      "Device": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "$ref": "#/properties/Ecephys/properties/definitions/Device"
+        },
+        "default": [
+          {
+            "name": "Neuropixel-Imec",
+            "description": "{\"probe_type\": \"0\", \"probe_type_description\": \"NP1.0\", \"flex_part_number\": \"NP2_FLEX_0\", \"connected_base_station_part_number\": \"NP2_QBSC_00\"}",
+            "manufacturer": "Imec"
+          }
+        ]
+      },
+      "ElectrodeGroup": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "$ref": "#/properties/Ecephys/properties/definitions/ElectrodeGroup"
+        },
+        "default": [
+          {
+            "name": "s0",
+            "description": "A group representing shank s0.",
+            "location": "unknown",
+            "device": "Neuropixel-Imec"
+          }
+        ]
+      },
+      "Electrodes": {
+        "type": "array",
+        "minItems": 0,
+        "items": {
+          "type": "object",
+          "properties": {
+            "group_name": {
+              "description": "The name of the ElectrodeGroup this channel's electrode is a part of.",
+              "data_type": "str",
+              "type": "string",
+              "name": "group_name"
+            },
+            "channel_name": {
+              "description": "The name of this channel.",
+              "data_type": "str",
+              "type": "string",
+              "name": "channel_name"
+            },
+            "shank_electrode_number": {
+              "description": "0-based index of the electrode on the shank.",
+              "data_type": "int64",
+              "type": "integer",
+              "name": "shank_electrode_number"
+            },
+            "offset_to_uV": {
+              "description": "The offset from the data type to microVolts, applied after the gain.",
+              "data_type": "float64",
+              "type": "number",
+              "name": "offset_to_uV"
+            },
+            "contact_shapes": {
+              "description": "The shape of the electrode.",
+              "data_type": "str",
+              "type": "string",
+              "name": "contact_shapes"
+            },
+            "gain_to_uV": {
+              "description": "The scaling factor from the data type to microVolts, applied before the offset.",
+              "data_type": "float64",
+              "type": "number",
+              "name": "gain_to_uV"
+            },
+            "inter_sample_shift": {
+              "description": "Time-delay of each channel sampling in proportion to the per-frame sampling period.",
+              "data_type": "float64",
+              "type": "number",
+              "name": "inter_sample_shift"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "definitions": {
+        "Device": {
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "description": "the name of this device",
+              "type": "string"
+            },
+            "description": {
+              "description": "Description of the device (e.g., model, firmware version, processing software version, etc.)",
+              "type": "string"
+            },
+            "manufacturer": {
+              "description": "the name of the manufacturer of this device",
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "additionalProperties": false,
+          "tag": "pynwb.device.Device"
+        },
+        "ElectrodeGroup": {
+          "required": [
+            "name",
+            "description",
+            "location",
+            "device"
+          ],
+          "properties": {
+            "name": {
+              "description": "the name of this electrode group",
+              "type": "string"
+            },
+            "description": {
+              "description": "description of this electrode group",
+              "type": "string"
+            },
+            "location": {
+              "description": "description of location of this electrode group",
+              "type": "string"
+            },
+            "device": {
+              "description": "the device that was used to record from this electrode group",
+              "type": "string",
+              "target": "pynwb.device.Device"
+            },
+            "position": {
+              "description": "stereotaxic position of this electrode group (x, y, z)",
+              "type": "array"
+            }
+          },
+          "type": "object",
+          "additionalProperties": false,
+          "tag": "pynwb.ecephys.ElectrodeGroup"
+        }
+      },
+      "ElectrodeColumns": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "description",
+            "data_type",
+            "type"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of this electrodes column."
+            },
+            "description": {
+              "type": "string",
+              "description": "The description of this electrodes column."
+            },
+            "data_type": {
+              "type": "string",
+              "description": "The data type to use for decoding values of this column."
+            },
+            "type": {
+              "type": "string",
+              "description": "Type for JSON Schema validation"
+            }
+          }
+        }
+      }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "tag": "Ecephys"
+  }

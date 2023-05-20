@@ -31,10 +31,10 @@ export class TableCell extends LitElement {
                 display: flex;
                 white-space: nowrap;
                 color: black;
+                font-size: 13px;
             }
 
             :host > * {
-                padding: 5px;
                 width: 100%;
             }
 
@@ -78,7 +78,7 @@ export class TableCell extends LitElement {
         }
 
         this.ondblclick = () => this.input.toggle(true)
-        document.onclick = () => this.input ? this.input.toggle(false) : false
+        document.addEventListener('click', () => this.input ? this.input.toggle(false) : false)
 
     }
 

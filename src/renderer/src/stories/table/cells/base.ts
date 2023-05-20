@@ -22,9 +22,15 @@ export class TableCellBase extends LitElement {
 
     static get styles() {
         return css`
-            [contenteditable] {
-                padding: 5px;
+
+            #editable {
+                padding: 5px 10px;
                 pointer-events: none;
+            }
+
+            [contenteditable]:focus {
+                outline: none;
+                cursor: text;
             }
 
              .editor, :host([editing]) .renderer {
@@ -61,6 +67,8 @@ export class TableCellBase extends LitElement {
             if (ev.inputType.includes('history')) this.setText(this.#editable.innerText) // Catch undo / redo}
         })
 
+        this.#editable.addEventListener('blur', () => this.#editable.removeAttribute('contenteditable'))
+
     }
 
     #active = false
@@ -72,15 +80,16 @@ export class TableCellBase extends LitElement {
         if (state === this.#active) return
 
         if (state) {
+            this.#editable.setAttribute('contenteditable', '')
             this.setAttribute('editing', ''),
             this.onOpen()
-            this.style.pointerEvents = 'all'
+            this.#editable.style.pointerEvents = 'auto'
             placeCaretAtEnd(this.#editable)
         } else {
             const current = this.getElementValue(this.#editable)
             this.removeAttribute('editing')
             this.onClose()
-            this.style.pointerEvents = ''
+            this.#editable.style.pointerEvents = ''
             this.setText( current )
         }
 
@@ -109,11 +118,13 @@ export class TableCellBase extends LitElement {
     }
 
     set(value: any) {
+        this.#editable.setAttribute('contenteditable', '')
         this.#editable.focus();
         document.execCommand('selectAll');
         document.execCommand('insertText', false, value);
         this.setText(value)
         this.#editable.blur();
+        this.#editable.removeAttribute('contenteditable')
     }
 
     #render(property: 'renderer' | 'editor') {
@@ -143,10 +154,11 @@ export class TableCellBase extends LitElement {
 
     render() {
 
+        this.#editable.id = 'editable'
+
         const editor = this.#editor = this.#render('editor')
         const renderer = this.#renderer = this.#render('renderer')
 
-        editor.setAttribute('contenteditable', '')
         this.addEventListener('blur', () => this.toggle(false))
 
 

@@ -9,6 +9,8 @@ import { validateOnChange } from "../../../../validation/index.js";
 import { createResults } from "./utils.js";
 import Swal from "sweetalert2";
 import { Table } from "../../../Table.js";
+import { BasicTable } from "../../../BasicTable.js";
+import { SimpleTable } from "../../../SimpleTable.js";
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -35,20 +37,22 @@ export class GuidedMetadataPage extends ManagedPage {
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
         // Only include a select group of Ecephys metadata here
-        const toInclude = ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"];
-        const ecephysProps = schema.properties.Ecephys.properties;
-        Object.keys(ecephysProps).forEach((k) => (!toInclude.includes(k) ? delete ecephysProps[k] : ""));
+        if ('Ecephys' in schema.properties) {
+            const toInclude = ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"];
+            const ecephysProps = schema.properties.Ecephys.properties;
+            Object.keys(ecephysProps).forEach((k) => (!toInclude.includes(k) ? delete ecephysProps[k] : ""));
 
-        // Change rendering order for electrode table columns
-        const ogElectrodeItemSchema = ecephysProps["Electrodes"].items.properties;
-        const order = ["channel_name", "group_name", "shank_electrode_number"];
-        const sortedProps = Object.keys(ogElectrodeItemSchema).sort((a, b) => {
-            if (order.includes(a)) return -1;
-            if (order.includes(b)) return 1;
-        });
+            // Change rendering order for electrode table columns
+            const ogElectrodeItemSchema = ecephysProps["Electrodes"].items.properties;
+            const order = ["channel_name", "group_name", "shank_electrode_number"];
+            const sortedProps = Object.keys(ogElectrodeItemSchema).sort((a, b) => {
+                if (order.includes(a)) return -1;
+                if (order.includes(b)) return 1;
+            });
 
-        const newElectrodeItemSchema = (ecephysProps["Electrodes"].items.properties = {});
-        sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
+            const newElectrodeItemSchema = (ecephysProps["Electrodes"].items.properties = {});
+            sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
+        }
 
         // Create the form
         const form = new JSONSchemaForm({
@@ -67,7 +71,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 },
             ],
 
-            deferLoading: true,
+            // deferLoading: true,
             onLoaded: () => {
                 this.#nLoaded++;
                 this.#checkAllLoaded();
@@ -77,7 +81,9 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             renderTable: (name, metadata, path) => {
-                if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata); // Use Handsontable if table is small enough
+                // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
+                if (name !== "ElectrodeColumns" && name !== "Electrodes") return new SimpleTable(metadata);
+                // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata); 
             },
         });
 

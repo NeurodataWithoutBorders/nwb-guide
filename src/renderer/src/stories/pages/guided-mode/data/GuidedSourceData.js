@@ -1,7 +1,7 @@
 import { html } from "lit";
 
 import Swal from "sweetalert2";
-import { notyf, baseUrl, notify } from "../../../../globals.js";
+import { notyf, baseUrl, notify, isStorybook } from "../../../../globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
@@ -47,14 +47,17 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     Swal.close();
 
-                    if (result.message) {
-                        const message = "Failed to get metadata with current source data. Please try again.";
-                        this.notify(message, "error");
-                        throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
-                    }
+                    if (isStorybook) return
 
-                    // Merge metadata results with the generated info
-                    this.merge("metadata", result.results, info);
+                        if (result.message) {
+                            const message = "Failed to get metadata with current source data. Please try again.";
+                            this.notify(message, "error");
+                            throw new Error(`Failed to get metadata for source data provided: ${result.message}`);
+                        }
+
+                        // Merge metadata results with the generated info
+                        this.merge("metadata", result.results, info);
+
 
                     // Mirror structure with metadata schema
                     const schema = this.info.globalState.schema;

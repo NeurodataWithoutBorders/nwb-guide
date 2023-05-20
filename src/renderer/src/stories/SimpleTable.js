@@ -131,7 +131,7 @@ export class SimpleTable extends LitElement {
             }
 
             thead {
-                background: gainsboro;
+                background: whitesmoke;
             }
 
             td {
@@ -185,19 +185,23 @@ export class SimpleTable extends LitElement {
             if (cell) this.#selectCells(cell);
         };
 
-        this.onmouseup = document.onmouseup = (ev) => (this.#selecting = false);
+        this.onmouseup = (ev) => this.#selecting = false;
+        
+        document.addEventListener('onmouseup', this.onmouseup)
 
-        document.onmousedown = (ev) => {
+        document.addEventListener('mousedown', (ev) => {
             const path = this.#getPath(ev);
             if (!path.includes(this)) this.#clearSelected();
-        };
+        })
+
 
         // Handle Copy-Paste Commands
-        document.addEventListener("copy", (ev) => {
+        this.addEventListener("copy", (ev) => {
             ev.preventDefault();
             const tsv = Object.values(this.#selected)
                 .map((arr) => arr.map((el) => el.value).join("\t"))
                 .join("\n");
+
             ev.clipboardData.setData("text/plain", tsv);
         });
 
@@ -214,12 +218,7 @@ export class SimpleTable extends LitElement {
             if ((ev.metaKey || ev.ctrlKey || ev.shiftKey) && !ev.key) return;
 
             // Undo / Redo
-            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") {
-                this.#clearSelected();
-                if (ev.shiftKey) console.error("redo");
-                else console.error("Undo");
-                return;
-            }
+            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") return this.#clearSelected();
 
             if (this.#firstSelected) {
                 const path = this.#getPath(ev);
@@ -230,9 +229,9 @@ export class SimpleTable extends LitElement {
             }
         });
 
-        document.addEventListener("paste", (ev) => {
+        this.addEventListener("paste", (ev) => {
             ev.preventDefault();
-            const topLeftCell = Object.values(this.#selected)[0][0];
+            const topLeftCell = Object.values(this.#selected)[0]?.[0];
             if (!topLeftCell) return;
             const { i: firstI, j: firstJ } = topLeftCell.simpleTableInfo;
             const tsv = ev.clipboardData.getData("text/plain");
@@ -262,6 +261,7 @@ export class SimpleTable extends LitElement {
             // this.#firstSelected.parentNode.removeAttribute("first");
             this.#firstSelected = null;
         }
+
         Object.values(this.#selected).forEach((arr) => arr.forEach((el) => el.parentNode.removeAttribute("selected")));
         this.#selected = {};
     };
