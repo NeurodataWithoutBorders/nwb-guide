@@ -395,7 +395,14 @@ export class SimpleTable extends LitElement {
                 label: "Remove Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
-                    const { i } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
+                    const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
+                    
+                    // Validate with empty values before removing (to trigger any dependent validations)
+                    const cols = this.data[row]
+                    Object.keys(cols).map(k => cols[k] = '')
+                    if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k]))
+
+                    // Actually update the rows
                     this.#updateRows(i, -1);
                 },
             },
@@ -640,17 +647,24 @@ export class SimpleTable extends LitElement {
 
         const { i: row, col: header, row: possibleRowName, j: prop } = cell.simpleTableInfo;
         // const header = typeof prop === "number" ? col : prop;
-        let rowName = possibleRowName;
+
+        let rowName = this.keyColumn ? possibleRowName : row;
 
         // NOTE: We would like to allow invalid values to mutate the results
         // if (isValid) {
+
         const isResolved = rowName in this.data;
         let target = this.data;
+
         if (!isResolved) {
-            if (!this.#unresolved[row]) this.#unresolved[row] = {}; // Ensure row exists
-            rowName = row;
-            target = this.#unresolved;
+            if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+            else {
+                rowName = row;
+                if (!this.#unresolved[rowName]) this.#unresolved[rowName] = {}; // Ensure row exists
+                target = this.#unresolved;
+            }
         }
+
         // Transfer data to object
         if (header === this.keyColumn) {
             if (value !== rowName) {

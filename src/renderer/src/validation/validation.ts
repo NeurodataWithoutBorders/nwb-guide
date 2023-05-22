@@ -35,6 +35,7 @@ schema.Ecephys.ElectrodeGroup.name = function(this: JSONSchemaForm, name, parent
     const currentGroups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
 
     if (JSON.stringify(groups) !== JSON.stringify(currentGroups)) {
+        registeredGroups[id] = currentGroups
         rerender.call(this, ['Ecephys', 'Electrodes'])
     }
 }
