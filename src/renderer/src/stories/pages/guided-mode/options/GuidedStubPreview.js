@@ -23,14 +23,14 @@ export class GuidedStubPreviewPage extends Page {
             <div class="title">
                 <h1 class="guided--text-sub-step">Conversion Preview</h1>
             </div>
-            <div style="text-align: center;">
+            <div>
                 ${this.info.globalState.preview
                     ? this.info.globalState.preview.map(
                           (preview) =>
                               html`<h2 class="guided--text-sub-step">${preview.file}</h2>
                                   <pre>${preview.result}</pre>`
                       )
-                    : html`<p>Your conversion preview failed. Please try again.</p>`}
+                    : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`}
             </div>
         `;
     }

@@ -7,6 +7,10 @@ import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
 import { createResults } from "./utils.js";
+import Swal from "sweetalert2";
+import { Table } from "../../../Table.js";
+import { BasicTable } from "../../../BasicTable.js";
+import { SimpleTable } from "../../../SimpleTable.js";
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -27,18 +31,39 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const instanceId = `sub-${subject}/ses-${session}`;
 
+        // Ignore specific metadata in the form by removing their schema value
         const schema = this.info.globalState.schema.metadata[subject][session];
+        delete schema.properties.NWBFile.properties.source_script;
+        delete schema.properties.NWBFile.properties.source_script_file_name;
 
-        // NOTE: This was a correction for differences in the expected values to be passed back to neuroconv
-        // delete schema.properties.Ecephys.properties.Electrodes
-        // delete results['Ecephys']['Electrodes']
+        // Only include a select group of Ecephys metadata here
+        if ("Ecephys" in schema.properties) {
+            const toInclude = ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"];
+            const ecephysProps = schema.properties.Ecephys.properties;
+            Object.keys(ecephysProps).forEach((k) => (!toInclude.includes(k) ? delete ecephysProps[k] : ""));
 
+            // Change rendering order for electrode table columns
+            const ogElectrodeItemSchema = ecephysProps["Electrodes"].items.properties;
+            const order = ["channel_name", "group_name", "shank_electrode_number"];
+            const sortedProps = Object.keys(ogElectrodeItemSchema).sort((a, b) => {
+                const iA = order.indexOf(a);
+                if (iA === -1) return 1;
+                const iB = order.indexOf(b);
+                if (iB === -1) return -1;
+                return iA - iB;
+            });
+
+            const newElectrodeItemSchema = (ecephysProps["Electrodes"].items.properties = {});
+            sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
+        }
+
+        // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
             schema,
             results,
-            ignore: ["Ecephys", "source_script", "source_script_file_name"],
+
             conditionalRequirements: [
                 {
                     name: "Subject Age",
@@ -48,9 +73,21 @@ export class GuidedMetadataPage extends ManagedPage {
                     ],
                 },
             ],
+
+            // deferLoading: true,
+            onLoaded: () => {
+                this.#nLoaded++;
+                this.#checkAllLoaded();
+            },
             validateOnChange,
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
+
+            renderTable: (name, metadata, path) => {
+                // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
+                if (name !== "ElectrodeColumns" && name !== "Electrodes") return new SimpleTable(metadata);
+                // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
+            },
         });
 
         return {
@@ -60,7 +97,26 @@ export class GuidedMetadataPage extends ManagedPage {
         };
     };
 
+    #nLoaded = 0;
+    #loaded = false;
+
+    #checkAllLoaded = () => {
+        if (this.#nLoaded === this.forms.length) this.#onLoaded();
+    };
+
+    #onLoaded = () => {
+        this.#loaded = true;
+        Swal.close();
+    };
+
+    #resetLoadState() {
+        this.#loaded = false;
+        this.#nLoaded = 0;
+    }
+
     render() {
+        this.#resetLoadState(); // Reset on each render
+
         this.forms = this.mapSessions(this.createForm);
 
         let instances = {};

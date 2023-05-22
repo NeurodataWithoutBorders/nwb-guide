@@ -1,6 +1,7 @@
 from typing import List, Dict, Optional, Union
 from neuroconv.datainterfaces import SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
+from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
 
 import json
 from neuroconv.utils import NWBMetaDataEncoder
@@ -99,6 +100,12 @@ def get_source_schema(interface_class_dict: dict) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
+def get_first_recording_interface(converter):
+    for interface in converter.data_interface_objects.values():
+        if isinstance(interface, BaseRecordingExtractorInterface):
+            return interface
+
+
 def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[str, dict]:
     """
     Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
@@ -107,6 +114,37 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     converter = instantiate_custom_converter(source_data, interfaces)
     schema = converter.get_metadata_schema()
     metadata = converter.get_metadata()
+
+    recording_interface = get_first_recording_interface(converter)
+    if recording_interface:
+        metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
+
+        # Get Electrode metadata
+        ecephys_properties = schema["properties"]["Ecephys"]["properties"]
+        original_electrodes_schema = ecephys_properties["Electrodes"]
+
+        new_electrodes_properties = {
+            properties["name"]: {key: value for key, value in properties.items() if key != "name"}
+            for properties in original_electrodes_schema["default"]
+        }
+
+        ecephys_properties["Electrodes"] = {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+                "type": "object",
+                "properties": new_electrodes_properties,
+                "additionalProperties": True,  # Allow for new columns
+            },
+        }
+
+        metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
+        defs = ecephys_properties["definitions"]
+
+        ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
+        ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
+        del defs["Electrodes"]
+
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
@@ -196,6 +234,7 @@ def convert_to_nwb(info: dict) -> str:
 
     nwbfile_path = Path(info["nwbfile_path"])
     parent_folder = nwbfile_path.parent
+
     run_stub_test = info.get("stub_test")
     parent_folder.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
@@ -213,7 +252,7 @@ def convert_to_nwb(info: dict) -> str:
     available_options = converter.get_conversion_options_schema()
     options = (
         {
-            interface: {"stub_test": info["stub_test"], "iter_opts": {"report_hook": update_conversion_progress}}
+            interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
             if available_options.get("properties").get(interface).get("properties").get("stub_test")
             else {}
             for interface in info["source_data"]
@@ -222,6 +261,24 @@ def convert_to_nwb(info: dict) -> str:
         else None
     )
 
+    # Update the first recording interface with Ecephys table data
+    recording_interface = get_first_recording_interface(converter)
+
+    if recording_interface:
+        ecephys_metadata = info["metadata"]["Ecephys"]
+        electrode_column_results = ecephys_metadata["ElectrodeColumns"]
+        electrode_results = ecephys_metadata["Electrodes"]
+        del ecephys_metadata["ElectrodeColumns"]
+        del ecephys_metadata["Electrodes"]
+
+        recording_interface.update_electrode_table(
+            electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
+        )
+
+        # Update with the latest metadata for the electrodes
+        info["metadata"]["Ecephys"]["Electrodes"] = electrode_column_results
+
+    # Actually run the conversion
     file = converter.run_conversion(
         metadata=info["metadata"],
         nwbfile_path=preview_path if run_stub_test else nwbfile_path,

@@ -1,7 +1,7 @@
 import Handsontable from "handsontable";
-import "handsontable/dist/handsontable.full.min.css";
+import css from "handsontable/dist/handsontable.full.min.css?inline";
 
-export { Handsontable };
+export { Handsontable, css };
 
 import { DateTimeSelector } from "./DateTimeSelector";
 
@@ -38,6 +38,21 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
 
         // Attach node to DOM, by appending it to the container holding the table
         this.hot.rootElement.appendChild(this.DATETIME);
+
+        // // Immediately transfers the CopyPastePlugin FocusableWrapper element to the WC Shadow Root
+        const copyPastePlugin = this.hot.getPlugin("copyPaste");
+        const ogFn = copyPastePlugin.getOrCreateFocusableElement.bind(copyPastePlugin);
+        copyPastePlugin.getOrCreateFocusableElement = () => {
+            const res = ogFn();
+            const focusable = copyPastePlugin.focusableElement.getFocusableElement();
+            const root = this.hot.rootElement.getRootNode();
+            focusable.style.position = "absolute";
+            focusable.style.opacity = "0";
+            focusable.style.pointerEvents = "none";
+            copyPastePlugin.getOrCreateFocusableElement = ogFn;
+            root.append(focusable);
+            return res;
+        };
     }
 
     getValue() {
@@ -51,7 +66,6 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
     open() {
         const { top, start, width, height } = this.getEditedCellRect();
         const style = this.DATETIME.style;
-
         this._opened = true;
 
         style.height = `${height}px`;
@@ -69,6 +83,7 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
     close() {
         this._opened = false;
         this.DATETIME.style.display = "none";
+        // setTimeout(() => this.correctCopyPasteElement(), 40)
     }
 }
 

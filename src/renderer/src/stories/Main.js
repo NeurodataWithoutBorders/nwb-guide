@@ -6,7 +6,6 @@ import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
 
 const componentCSS = `
     :host {
-        position: relative;
         display: grid;
         grid-template-rows: fit-content(100%) 1fr fit-content(100%);
     }
@@ -72,7 +71,6 @@ export class Main extends LitElement {
     }
 
     render() {
-        this.style.position = "relative";
         let { page = "", sections = {} } = this.toRender ?? {};
 
         let footer = page?.footer; // Page-specific footer
