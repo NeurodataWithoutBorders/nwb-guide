@@ -4,8 +4,7 @@ import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
 import { ContextMenu } from "./table/ContextMenu";
-import { errorHue, successHue, warningHue } from "./globals";
-import { notify } from "../globals";
+import { errorHue, warningHue } from "./globals";
 
 import { Loader } from "./Loader";
 import { styleMap } from "lit/directives/style-map.js";
@@ -153,6 +152,10 @@ export class SimpleTable extends LitElement {
         `;
     }
 
+    #rendered;
+    #updateRendered = (force) => (force || this.rendered === true) ? this.rendered = new Promise(resolve => this.#rendered = () => resolve(this.rendered = true)) : this.rendered
+    rendered = this.#updateRendered(true);
+
     constructor({
         schema,
         data,
@@ -162,8 +165,9 @@ export class SimpleTable extends LitElement {
         validateEmptyCells,
         onStatusChange,
         onLoaded,
+        onThrow,
         deferLoading,
-        maxHeight,
+        maxHeight
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -177,6 +181,7 @@ export class SimpleTable extends LitElement {
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
+        if (onThrow) this.onThrow = onThrow
 
         this.onmousedown = (ev) => {
             this.#clearSelected();
@@ -347,7 +352,10 @@ export class SimpleTable extends LitElement {
             const errors = this.shadowRoot.querySelectorAll("[error]");
             const len = errors.length;
             if (len === 1) message = errors[0].title;
-            else if (len) message = `${len} errors exist on this table.`;
+            else if (len) {
+                message = `${len} errors exist on this table.`;
+                console.error(Array.from(errors).map(o => o.title))
+            }
         }
 
         const nUnresolved = Object.keys(this.#unresolved).length;
@@ -362,6 +370,7 @@ export class SimpleTable extends LitElement {
     status;
     onStatusChange = () => {};
     onLoaded = () => {};
+    onThrow = () => {};
 
     #context;
 
@@ -381,6 +390,9 @@ export class SimpleTable extends LitElement {
         }
     };
 
+    addRow = (anchorRow = this.#cells.length - 1, n) => this.#updateRows(anchorRow, 1)[0]
+    getRow = (i) => Object.values(this.#cells[i])
+
     #menuOptions = {
         row: {
             add: {
@@ -388,7 +400,7 @@ export class SimpleTable extends LitElement {
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
                     const { i } = cell.simpleTableInfo;
-                    this.#updateRows(i, 1); //2) // TODO: Support adding more than one row
+                    this.addRow(i); //2) // TODO: Support adding more than one row
                 },
             },
             remove: {
@@ -496,87 +508,15 @@ export class SimpleTable extends LitElement {
         // Trigger load after a short delay if not deferred
         if (!this.deferLoading) {
             this.removeAttribute("waiting");
-            setTimeout(() => this.load(), 100);
+            setTimeout(() => {
+                this.load()
+                this.#rendered(true)
+            }, 100);
             // Otherwise validate the data itself without rendering
         } else {
             cells.forEach((c) => c.validate());
+            this.#rendered(true)
         }
-
-        // const columns = colHeaders.map((k, i) => {
-        //     const info = { type: "text" };
-        //     const colInfo = entries[k];
-        //     if (colInfo.unit) displayHeaders[i] = `${displayHeaders[i]} (${colInfo.unit})`;
-        //     // Enumerate Possible Values
-        //     if (colInfo.enum) {
-        //         info.source = colInfo.enum;
-        //         if (colInfo.strict === false) info.type = "autocomplete";
-        //         else info.type = "dropdown";
-        //     }
-        //     // Constrain to Date Format
-        //     if (colInfo.format === "date-time") {
-        //         info.type = "date-time";
-        //         info.correctFormat = false;
-        //     }
-        //     if (colInfo.type === "array") {
-        //         info.data = k;
-        //         info.type = "array";
-        //         info.uniqueItems = colInfo.uniqueItems;
-        //     }
-        //     // Validate Regex Pattern
-        //     if (colInfo.pattern) {
-        //         const regex = new RegExp(colInfo.pattern);
-        //         info.validator = (value, callback) => callback(regex.test(value));
-        //     }
-        //     const runThisValidator = async (value, row, prop) => {
-        //         try {
-        //             const valid = this.validateOnChange
-        //                 ? await this.validateOnChange(
-        //                       k,
-        //                       { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
-        //                       value
-        //                   )
-        //                 : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
-        //             return this.#handleValidationResult(valid, row, prop);
-        //         } catch (e) {
-        //             return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
-        //         }
-        //     };
-        //     let ogThis = this;
-        //     const isRequired = ogThis.schema?.required?.includes(k);
-        //     const validator = async function (value, callback) {
-        //         if (!value) {
-        //             if (isRequired) {
-        //                 ogThis.#handleValidationResult(
-        //                     [{ message: `${k} is a required property.`, type: "error" }],
-        //                     this.row,
-        //                     this.col
-        //                 );
-        //                 callback(false);
-        //                 return true;
-        //             }
-        //             if (!ogThis.validateEmptyCells) {
-        //                 callback(true); // Allow empty value
-        //                 return true;
-        //             }
-        //         }
-        //         if (!(await runThisValidator(value, this.row, this.col))) {
-        //             callback(false);
-        //             return true;
-        //         }
-        //     };
-        //     if (info.validator) {
-        //         const og = info.validator;
-        //         info.validator = async function (value, callback) {
-        //             const called = await validator.call(this, value, callback);
-        //             if (!called) og(value, callback);
-        //         };
-        //     } else
-        //         info.validator = async function (value, callback) {
-        //             const called = await validator.call(this, value, callback);
-        //             if (!called) callback(true); // Default to true if not called earlier
-        //         };
-        //     return info;
-        // });
     }
 
     #updateRows(row, nRows) {
@@ -592,7 +532,7 @@ export class SimpleTable extends LitElement {
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
             if (children.length - count < 1) {
-                notify("You must have at least one row", "error");
+                this.onThrow("You must have at least one row")
                 return false;
             }
 
@@ -621,15 +561,18 @@ export class SimpleTable extends LitElement {
 
             // Replace deleted base row(s) with new one
             let latest = current;
-            return range.map((idx) => {
+            const mapped = range.map((idx) => {
                 const i = idx + 1;
                 delete this.#cells[i];
                 const data = this.#getRowData(); // Get information for an undefined row
                 const newRow = document.createElement("tr");
                 newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
-                latest.after(newRow);
-                return (latest = newRow);
+                latest.insertAdjacentElement('afterend', newRow)
+                latest = newRow
+                return this.getRow(i)
             });
+
+            return mapped
         }
     }
 
@@ -748,6 +691,9 @@ export class SimpleTable extends LitElement {
     #schema = {};
 
     render() {
+
+        this.#updateRendered()
+        
         this.#resetLoadState();
 
         const entries = (this.#schema = { ...this.schema.properties });

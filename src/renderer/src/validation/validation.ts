@@ -1,13 +1,10 @@
 import schema from './validation.json'
 import { JSONSchemaForm } from '../stories/JSONSchemaForm.js'
+import { getTableFromForm } from '../stories/forms/utils'
 
 function rerender (this: JSONSchemaForm, linkedPath: string[]) {
-    const element = this.shadowRoot.getElementById(linkedPath[0]) // Accordion
-    .shadowRoot.querySelector('nwb-jsonschema-form') // Nested form
-    .shadowRoot.getElementById(linkedPath.join('-')) // Encapsulating container
-    .children[1] // Nested table element
-
-    setTimeout(() => element.requestUpdate(), 100); // Re-render table to show new column
+    const element = getTableFromForm(this, linkedPath)
+    if (element) setTimeout(() => element.requestUpdate(), 100); // Re-render table to show new column
 }
 
 // Specify JavaScript-side validation
@@ -41,6 +38,7 @@ schema.Ecephys.ElectrodeGroup.name = function(this: JSONSchemaForm, name, parent
 }
 
 schema.Ecephys.Electrodes.group_name = function (this: JSONSchemaForm, name, parent, path) {
+
     const groups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
 
     if (groups.includes(parent[name])) return true

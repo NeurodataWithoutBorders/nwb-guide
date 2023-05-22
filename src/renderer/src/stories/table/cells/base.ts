@@ -118,13 +118,15 @@ export class TableCellBase extends LitElement {
     }
 
     set(value: any) {
-        this.#editable.setAttribute('contenteditable', '')
-        this.#editable.focus();
-        document.execCommand('selectAll');
-        document.execCommand('insertText', false, value);
-        this.setText(value)
-        this.#editable.blur();
-        this.#editable.removeAttribute('contenteditable')
+        if (document.execCommand) {
+            this.#editable.setAttribute('contenteditable', '')
+            this.#editable.focus();
+            document.execCommand('selectAll');
+            document.execCommand('insertText', false, value);
+            this.setText(value)
+            this.#editable.blur();
+            this.#editable.removeAttribute('contenteditable')
+        }
     }
 
     #render(property: 'renderer' | 'editor') {

@@ -1,7 +1,8 @@
 import Swal from "sweetalert2";
 
-import { joinPath, guidedProgressFilePath, runOnLoad, reloadPageToHome, isStorybook } from "./globals.js";
+import { guidedProgressFilePath, reloadPageToHome, isStorybook } from "./dependencies/globals.js";
 import { fs } from "./electron/index.js";
+import { joinPath, runOnLoad } from "./globals.js";
 
 export const hasEntry = (name) => {
     const existingProgressNames = getEntries();

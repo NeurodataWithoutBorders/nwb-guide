@@ -6,9 +6,10 @@ import { Dashboard } from './stories/Dashboard.js'
 
 import {
   notyf,
-  baseUrl,
   notify
-} from './globals.js'
+} from './dependencies/globals.js'
+
+import { baseUrl } from './globals.js'
 
 import Swal from 'sweetalert2'
 

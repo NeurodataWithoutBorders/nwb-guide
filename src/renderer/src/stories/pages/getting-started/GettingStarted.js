@@ -4,7 +4,7 @@ import { column1Lottie, column2Lottie, column3Lottie } from "../../../../assets/
 import { openLink } from "../../../links.js";
 import { Page } from "../Page.js";
 
-import { startLottie } from "../../../globals.js";
+import { startLottie } from "../../../dependencies/globals.js";
 
 export class GettingStartedPage extends Page {
     constructor(...args) {

@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { notify } from "../globals";
+import { notify } from "../dependencies/globals";
 import { Handsontable, css } from "./hot";
 import { header } from "./forms/utils";
 import { errorHue, warningHue } from "./globals";

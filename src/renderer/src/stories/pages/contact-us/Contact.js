@@ -2,7 +2,7 @@ import { html } from "lit";
 import { contact_lottie } from "../../../../assets/lotties/contact-us-lotties.js";
 import { Page } from "../Page.js";
 
-import { startLottie } from "../../../globals.js";
+import { startLottie } from "../../../dependencies/globals.js";
 
 export class ContactPage extends Page {
     constructor(...args) {

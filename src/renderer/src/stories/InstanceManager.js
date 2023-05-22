@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit";
 import "./Button";
-import { notify } from "../globals";
+import { notify } from "../dependencies/globals";
 import { Accordion } from "./Accordion";
 import { InstanceListItem } from "./instances/item";
 

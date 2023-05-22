@@ -4,6 +4,8 @@ import { header } from "./forms/utils";
 import { checkStatus } from "../validation";
 import { errorHue, warningHue } from "./globals";
 
+import * as promises from '../promises'
+
 import "./Button";
 
 export class BasicTable extends LitElement {
@@ -167,11 +169,12 @@ export class BasicTable extends LitElement {
     validate = () => {
         let message;
 
-        if (!message) {
-            const errors = this.shadowRoot.querySelectorAll("[error]");
-            const len = errors.length;
-            if (len === 1) message = errors[0].title;
-            else if (len) message = `${len} errors exist on this table.`;
+        const errors = this.shadowRoot.querySelectorAll("[error]");
+        const len = errors.length;
+        if (len === 1) message = errors[0].title;
+        else if (len) {
+            message = `${len} errors exist on this table.`;
+            console.error(Array.from(errors).map(o => o.title))
         }
 
         if (message) throw new Error(message);
@@ -181,13 +184,13 @@ export class BasicTable extends LitElement {
     onStatusChange = () => {};
     onLoaded = () => {};
 
-    #validateCell = async (value, col, parent) => {
+    #validateCell = (value, col, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
         let result;
 
-        const propInfo = this.schema.properties[col];
+        const propInfo = this.schema.properties[col] ?? {};
         let thisTypeOf = typeof value;
         let ogType;
         let type = (ogType = propInfo.type || propInfo.data_type);
@@ -207,6 +210,7 @@ export class BasicTable extends LitElement {
             if (type.startsWith("str")) type = "string";
         }
 
+
         // Check if required
         if (!value && "required" in this.schema && this.schema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
@@ -214,40 +218,42 @@ export class BasicTable extends LitElement {
         else if (value !== "" && thisTypeOf !== type)
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = await this.validateOnChange(col, parent, value);
+        else result = this.validateOnChange(col, parent, value);
 
-        let info = {
-            title: undefined,
-            warning: undefined,
-            error: undefined,
-        };
+        // Will run synchronously if not a promise result
+        return promises.resolve(result, () => {
+            let info = {
+                title: undefined,
+                warning: undefined,
+                error: undefined,
+            };
+    
+            const warnings = Array.isArray(result) ? result.filter((info) => info.type === "warning") : [];
+            const errors = Array.isArray(result) ? result?.filter((info) => info.type === "error") : [];
+    
+            if (result === false) errors.push({ message: "Cell is invalid" });
+    
+            if (warnings.length) {
+                info.warning = "";
+                info.title = warnings.map((o) => o.message).join("\n");
+            }
+    
+            if (errors.length) {
+                info.error = "";
+                info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+            }
 
-        const warnings = Array.isArray(result) ? result.filter((info) => info.type === "warning") : [];
-        const errors = Array.isArray(result) ? result?.filter((info) => info.type === "error") : [];
-
-        if (result === false) errors.push({ message: "Cell is invalid" });
-
-        if (warnings.length) {
-            info.warning = "";
-            info.title = warnings.map((o) => o.message).join("\n");
-        }
-
-        if (errors.length) {
-            info.error = "";
-            info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
-        }
-
-        return info;
+            return info
+        })
     };
 
     async updated() {
         const rows = Object.keys(this.data);
 
-        await Promise.all(
-            this.#data.map((v, i) => {
-                return Promise.all(
-                    v.map(async (vv, j) => {
-                        const info = await this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] });
+        const results = this.#data.map((v, i) => {
+            return v.map((vv, j) => {
+                    const info = this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] }); // Could be a promise or a basic response
+                    return promises.resolve(info, (info) => {
                         if (info === true) return;
                         const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
                         if (td) {
@@ -258,12 +264,14 @@ export class BasicTable extends LitElement {
                             }
                         }
                     })
-                );
-            })
-        );
+                }
+            );
+        })
 
-        this.#checkStatus();
-        this.onLoaded();
+        promises.resolveAll(results, () => {
+            this.#checkStatus();
+            this.onLoaded();
+        })
     }
 
     #keys = [];
