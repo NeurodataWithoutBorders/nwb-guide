@@ -5,8 +5,7 @@ import { validateOnChange } from "../../../../validation/index.js";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { Table } from "../../../Table.js";
 
-import {convertSubjectsToResults} from './utils'
-
+import { convertSubjectsToResults } from "./utils";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
@@ -36,7 +35,7 @@ export class GuidedSubjectsPage extends Page {
                 return acc;
             }, {});
 
-            convertSubjectsToResults(results, subjects, sourceDataObject) // NOTE: This directly mutates the results object
+            convertSubjectsToResults(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
 
             this.onTransition(1);
         },
