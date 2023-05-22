@@ -6,7 +6,7 @@ import { notyf } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { OptionalSection } from "../../../OptionalSection.js";
 import { run } from "../options/utils.js";
-import { onThrow } from '../../../../errors'
+import { onThrow } from "../../../../errors";
 
 import pathExpansionSchema from "../../../../../../../schemas/json/path-expansion.schema.json" assert { type: "json" };
 

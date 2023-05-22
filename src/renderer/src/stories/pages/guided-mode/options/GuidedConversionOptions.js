@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
-import { onThrow } from '../../../../errors'
+import { onThrow } from "../../../../errors";
 
 export class GuidedConversionOptionsPage extends Page {
     constructor(...args) {
@@ -48,7 +48,7 @@ export class GuidedConversionOptionsPage extends Page {
             dialogOptions: {
                 properties: ["openDirectory", "createDirectory"],
             },
-            onThrow
+            onThrow,
         });
 
         return html`

@@ -4,7 +4,7 @@ import { header } from "./forms/utils";
 import { checkStatus } from "../validation";
 import { errorHue, warningHue } from "./globals";
 
-import * as promises from '../promises'
+import * as promises from "../promises";
 
 import "./Button";
 
@@ -174,7 +174,7 @@ export class BasicTable extends LitElement {
         if (len === 1) message = errors[0].title;
         else if (len) {
             message = `${len} errors exist on this table.`;
-            console.error(Array.from(errors).map(o => o.title))
+            console.error(Array.from(errors).map((o) => o.title));
         }
 
         if (message) throw new Error(message);
@@ -210,7 +210,6 @@ export class BasicTable extends LitElement {
             if (type.startsWith("str")) type = "string";
         }
 
-
         // Check if required
         if (!value && "required" in this.schema && this.schema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
@@ -227,24 +226,24 @@ export class BasicTable extends LitElement {
                 warning: undefined,
                 error: undefined,
             };
-    
+
             const warnings = Array.isArray(result) ? result.filter((info) => info.type === "warning") : [];
             const errors = Array.isArray(result) ? result?.filter((info) => info.type === "error") : [];
-    
+
             if (result === false) errors.push({ message: "Cell is invalid" });
-    
+
             if (warnings.length) {
                 info.warning = "";
                 info.title = warnings.map((o) => o.message).join("\n");
             }
-    
+
             if (errors.length) {
                 info.error = "";
                 info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
             }
 
-            return info
-        })
+            return info;
+        });
     };
 
     async updated() {
@@ -252,26 +251,25 @@ export class BasicTable extends LitElement {
 
         const results = this.#data.map((v, i) => {
             return v.map((vv, j) => {
-                    const info = this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] }); // Could be a promise or a basic response
-                    return promises.resolve(info, (info) => {
-                        if (info === true) return;
-                        const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
-                        if (td) {
-                            for (let key in info) {
-                                const value = info[key];
-                                if (value === undefined) td.removeAttribute(key);
-                                else td.setAttribute(key, info[key]);
-                            }
+                const info = this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] }); // Could be a promise or a basic response
+                return promises.resolve(info, (info) => {
+                    if (info === true) return;
+                    const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
+                    if (td) {
+                        for (let key in info) {
+                            const value = info[key];
+                            if (value === undefined) td.removeAttribute(key);
+                            else td.setAttribute(key, info[key]);
                         }
-                    })
-                }
-            );
-        })
+                    }
+                });
+            });
+        });
 
         promises.resolveAll(results, () => {
             this.#checkStatus();
             this.onLoaded();
-        })
+        });
     }
 
     #keys = [];

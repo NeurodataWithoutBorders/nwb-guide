@@ -57,7 +57,7 @@ test('inter-table updates are triggered', async () => {
 
     const randomStringId = Math.random().toString(36).substring(7)
 
-    
+
     // Create dummy results for the form
     const results = {
         NWBFile: {

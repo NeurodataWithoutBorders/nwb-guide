@@ -7,7 +7,7 @@ import { validateOnChange } from "../../../../validation/index.js";
 import projectMetadataSchema from "../../../../../../../schemas/json/project-metadata.schema.json" assert { type: "json" };
 import { schemaToPages } from "../../FormPage.js";
 
-import { onThrow } from '../../../../errors'
+import { onThrow } from "../../../../errors";
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -82,7 +82,7 @@ export class GuidedNewDatasetPage extends Page {
             results: this.state,
             validateEmptyValues: false,
             validateOnChange,
-            onThrow
+            onThrow,
         });
 
         return this.form;

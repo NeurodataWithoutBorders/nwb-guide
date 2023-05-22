@@ -8,7 +8,7 @@ import { validateOnChange } from "../../../../validation/index.js";
 import { createResults } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
-import { onThrow } from '../../../../errors'
+import { onThrow } from "../../../../errors";
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -86,7 +86,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 if (name !== "ElectrodeColumns" && name !== "Electrodes") return new SimpleTable(metadata);
                 // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
             },
-            onThrow
+            onThrow,
         });
 
         return {

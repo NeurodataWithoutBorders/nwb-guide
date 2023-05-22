@@ -9,7 +9,7 @@ export const textToArray = (value: string) => value.split("\n")
                                             .map((str) => str.trim())
                                             .filter((str) => str) // Only keep strings that are not empty
 
-                                            
+
 export const getTableFromForm = (form: any, path: string[]) => {
 
     const accordion = form.shadowRoot.getElementById(path[0])
@@ -20,6 +20,6 @@ export const getTableFromForm = (form: any, path: string[]) => {
 
     const container = nestedForm.shadowRoot.getElementById(path.join('-')) // Encapsulating container
     if (!container) return
-    
+
     return container.children[1] // Nested table element
 }
