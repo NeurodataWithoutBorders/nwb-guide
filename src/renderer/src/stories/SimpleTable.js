@@ -396,11 +396,12 @@ export class SimpleTable extends LitElement {
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
-                    
+
                     // Validate with empty values before removing (to trigger any dependent validations)
-                    const cols = this.data[row]
-                    Object.keys(cols).map(k => cols[k] = '')
-                    if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k]))
+                    const cols = this.data[row];
+                    Object.keys(cols).map((k) => (cols[k] = ""));
+                    if (this.validateOnChange)
+                        Object.keys(cols).map((k) => this.validateOnChange(k, { ...cols }, cols[k]));
 
                     // Actually update the rows
                     this.#updateRows(i, -1);
