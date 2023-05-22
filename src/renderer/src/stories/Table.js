@@ -300,7 +300,7 @@ export class Table extends LitElement {
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
-            let rowName = rowHeaders[row];
+            let rowName = this.keyColumn ? rowHeaders[row] : row;
 
             // NOTE: We would like to allow invalid values to mutate the results
             // if (isValid) {
@@ -308,9 +308,12 @@ export class Table extends LitElement {
             let target = this.data;
 
             if (!isResolved) {
-                if (!unresolved[row]) unresolved[row] = {}; // Ensure row exists
-                rowName = row;
-                target = unresolved;
+                if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+                else {
+                    rowName = row;
+                    if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
+                    target = unresolved;
+                }
             }
 
             // Transfer data to object
@@ -342,7 +345,10 @@ export class Table extends LitElement {
 
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
-            physicalRows.forEach((row) => {
+            physicalRows.map(async (row) => {
+                // const cols = this.data[rowHeaders[row]]
+                // Object.keys(cols).map(k => cols[k] = '')
+                // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k])) // Validate with empty values before removing
                 delete this.data[rowHeaders[row]];
                 delete unresolved[row];
             });

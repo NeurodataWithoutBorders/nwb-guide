@@ -18,6 +18,7 @@ export async function validateOnChange(name, parent, path, value) {
     }, validationSchema); // Pass the top level until it runs out
 
     let overridden = false;
+
     // Skip wildcard check for categories marked with false
     if (lastResolved !== false && (functions === undefined || functions === true)) {
         // let overridden = false;

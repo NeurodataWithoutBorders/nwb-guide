@@ -46,8 +46,11 @@ export class GuidedMetadataPage extends ManagedPage {
             const ogElectrodeItemSchema = ecephysProps["Electrodes"].items.properties;
             const order = ["channel_name", "group_name", "shank_electrode_number"];
             const sortedProps = Object.keys(ogElectrodeItemSchema).sort((a, b) => {
-                if (order.includes(a)) return -1;
-                if (order.includes(b)) return 1;
+                const iA = order.indexOf(a);
+                if (iA === -1) return 1;
+                const iB = order.indexOf(b);
+                if (iB === -1) return -1;
+                return iA - iB;
             });
 
             const newElectrodeItemSchema = (ecephysProps["Electrodes"].items.properties = {});
