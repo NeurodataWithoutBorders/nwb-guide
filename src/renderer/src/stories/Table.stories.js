@@ -1,6 +1,8 @@
 import { Table } from "./Table.js";
 
 import subjectSchema from "../../../../schemas/subject.schema";
+import { SimpleTable } from "./SimpleTable.js";
+import { BasicTable } from "./BasicTable.js";
 
 export default {
     title: "Components/Table",
@@ -11,7 +13,10 @@ export default {
 
 const Template = (args) => new Table(args);
 
-const data = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"].reduce((acc, key) => {
+const subjects = 100;
+const subjectIds = Array.from({ length: subjects }, (_, i) => i);
+
+const data = subjectIds.reduce((acc, key) => {
     acc[key] = {
         weight: (60 * Math.random()).toFixed(2),
         sessions: [1],
@@ -19,10 +24,38 @@ const data = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "01
     return acc;
 }, {});
 
+const BasicTableTemplate = (args) => new BasicTable(args);
+
+subjectSchema.additionalProperties = true;
+
+export const Basic = BasicTableTemplate.bind({});
+Basic.args = {
+    name: "basic_table_test",
+    schema: subjectSchema,
+    data,
+    keyColumn: "subject_id",
+    validateOnChange: (key, parent, value) => !!value, // Always validate as true
+};
+
 export const Default = Template.bind({});
 Default.args = {
     schema: subjectSchema,
     data,
     keyColumn: "subject_id",
     validateOnChange: () => true, // Always validate as true
+};
+
+const SimpleTemplate = (args) => new SimpleTable(args);
+
+export const Simple = SimpleTemplate.bind({});
+Simple.args = {
+    schema: subjectSchema,
+    data,
+    keyColumn: "subject_id",
+    validateOnChange: (key, parent, value) => {
+        return !!value;
+    }, // Always validate as true
+    onLoaded: () => {
+        console.log("Loaded!");
+    },
 };

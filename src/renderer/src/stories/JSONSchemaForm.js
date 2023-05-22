@@ -3,6 +3,8 @@ import { notify } from "../globals";
 import { FilesystemSelector } from "./FileSystemSelector";
 import { Accordion } from "./Accordion";
 
+import { checkStatus } from "../validation";
+import { BasicTable } from "./BasicTable";
 import { capitalize, header, textToArray } from "./forms/utils";
 
 const componentCSS = `
@@ -195,7 +197,6 @@ export class JSONSchemaForm extends LitElement {
             mode: { type: String, reflect: true },
             schema: { type: Object, reflect: false },
             results: { type: Object, reflect: false },
-            ignore: { type: Array, reflect: false },
             required: { type: Object, reflect: false },
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
@@ -204,6 +205,7 @@ export class JSONSchemaForm extends LitElement {
 
     #base = [];
     #nestedForms = {};
+    #tables = {};
     #nErrors = 0;
     #nWarnings = 0;
 
@@ -218,6 +220,7 @@ export class JSONSchemaForm extends LitElement {
         this.required = props.required ?? {};
         this.dialogOptions = props.dialogOptions ?? {};
         this.dialogType = props.dialogType ?? "showOpenDialog";
+        this.deferLoading = props.deferLoading ?? false;
 
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
@@ -227,6 +230,8 @@ export class JSONSchemaForm extends LitElement {
         this.validateEmptyValues = props.validateEmptyValues ?? true;
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
+        if (props.onLoaded) this.onLoaded = props.onLoaded;
+        if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
 
@@ -265,15 +270,15 @@ export class JSONSchemaForm extends LitElement {
     };
 
     status;
-    #checkStatus = () => {
-        let newStatus = "valid";
-        const nestedStatus = Object.values(this.#nestedForms).map((f) => f.status);
-        if (nestedStatus.includes("error")) newStatus = "error";
-        else if (this.#nErrors) newStatus = "error";
-        else if (nestedStatus.includes("warning")) newStatus = "warning";
-        else if (this.#nWarnings) newStatus = "warning";
+    #checkStatus = () =>
+        checkStatus.call(this, this.#nWarnings, this.#nErrors, [
+            ...Object.values(this.#nestedForms),
+            ...Object.values(this.#tables),
+        ]);
 
-        if (newStatus !== this.status) this.onStatusChange((this.status = newStatus));
+    throw = (message) => {
+        notify(this.identifier ? `<b>[${this.identifier}]</b>: ${message}` : message, "error", 7000);
+        throw new Error(message);
     };
 
     validate = async () => {
@@ -292,13 +297,14 @@ export class JSONSchemaForm extends LitElement {
             message += ` Please check the highlighted fields.`;
         }
 
-        if (message) {
-            notify(this.identifier ? `<b>[${this.identifier}]</b>: ${message}` : message, "error", 7000);
-            throw new Error(message);
-        }
+        if (message) this.throw(message);
 
         for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
-
+        try {
+            for (let key in this.#tables) await this.#tables[key].validate(); // Validate nested tables too
+        } catch (e) {
+            this.throw(e.message);
+        }
         // NOTE: Ensure user is aware of any warnings before moving on
         // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
 
@@ -337,6 +343,20 @@ export class JSONSchemaForm extends LitElement {
         if (!isValid) return true;
     };
 
+    #getSchema(path, schema = this.schema) {
+        if (typeof path === "string") path = path.split(".");
+        if (this.#base.length) {
+            const base = this.#base.slice(-1)[0];
+            const indexOf = path.indexOf(base);
+            if (indexOf !== -1) path = path.slice(indexOf + 1);
+        }
+
+        const resolved = path.reduce((acc, curr) => (acc = acc[curr]), schema);
+        if (resolved["$ref"]) return this.#getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
+
+        return resolved;
+    }
+
     #renderInteractiveElement = (name, info, parent, required, path = []) => {
         let isRequired = required[name];
 
@@ -354,7 +374,7 @@ export class JSONSchemaForm extends LitElement {
             isRequired = required[name] = async () => {
                 const isRequiredAfterChange = await this.#checkRequiredAfterChange(fullPath);
                 if (isRequiredAfterChange) {
-                    return true; // Check this property
+                    return true;
                 } else {
                     const linkResults = await this.#applyToLinkedProperties(this.#checkRequiredAfterChange, fullPath); // Check links
                     if (linkResults.includes(true)) return true;
@@ -450,6 +470,28 @@ export class JSONSchemaForm extends LitElement {
                         }
                     }
 
+                    if (info.type === "array") {
+                        const itemSchema = this.#getSchema("items", info);
+                        if (itemSchema.type === "object") {
+                            const tableMetadata = {
+                                schema: itemSchema,
+                                data: parent[name],
+                                validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v),
+                                onStatusChange: () => this.#checkStatus(), // Check status on all elements
+                                validateEmptyCells: this.validateEmptyValues,
+                                deferLoading: this.deferLoading,
+                                onLoaded: () => {
+                                    this.#nLoaded++;
+                                    this.#checkAllLoaded();
+                                },
+                            };
+
+                            return (this.#tables[name] =
+                                (this.renderTable ? this.renderTable(name, tableMetadata, fullPath) : "") ||
+                                new BasicTable(tableMetadata));
+                        }
+                    }
+
                     // Print out the immutable default value
                     return html`<pre>
 ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pre
@@ -468,6 +510,20 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                 <div class="warnings"></div>
             </div>
         `;
+    };
+
+    load = () => {
+        if (!this.#loaded) Object.values(this.#tables).forEach((t) => t.load());
+    };
+
+    #loaded = false;
+    #nLoaded = 0;
+    #checkAllLoaded = () => {
+        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.#tables)].length;
+        if (this.#nLoaded === expected) {
+            this.#loaded = true;
+            this.onLoaded();
+        }
     };
 
     #filesystemQueries = ["file", "directory"];
@@ -491,13 +547,17 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     // Checks missing required properties and throws an error if any are found
     onInvalid = () => {};
+    onLoaded = () => {};
 
     #registerDefaultProperties = (properties = {}, results) => {
         for (let name in properties) {
             const info = properties[name];
             const props = info.properties;
-            if (props && !results[name]) results[name] = {}; // Regisiter new interfaces in results
-            else if (info.default) results[name] = info.default;
+
+            if (!results[name]) {
+                if (props) results[name] = {}; // Regisiter new interfaces in results
+                if (info.default) results[name] = info.default;
+            }
 
             if (props) {
                 Object.entries(props).forEach(([key, value]) => {
@@ -524,7 +584,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     #getRenderable = (schema = {}, required, path) => {
         const entries = Object.entries(schema.properties ?? {});
 
-        return entries.filter(([key]) => {
+        return entries.filter(([key, value]) => {
+            if (!value.properties && key === "definitions") return false; // Skip definitions
             if (this.ignore.includes(key)) return false;
             if (this.showLevelOverride >= path.length) return true;
             if (required[key]) return true;
@@ -741,6 +802,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
             const hasMany = renderable.length > 1; // How many siblings?
 
+            const fullPath = [...path, name];
+
             if (this.mode === "accordion" && hasMany) {
                 const headerName = header(name);
 
@@ -749,11 +812,11 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     schema: info,
                     results: results[name],
                     required: required[name], // Scoped to the sub-schema
-                    ignore: this.ignore,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
                     showLevelOverride: this.showLevelOverride,
+                    deferLoading: this.deferLoading,
                     conditionalRequirements: this.conditionalRequirements,
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     validateEmptyValues: this.validateEmptyValues,
@@ -762,23 +825,30 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                         this.#checkStatus();
                     }, // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
-                    base: [...path, name],
+                    onLoaded: () => {
+                        this.#nLoaded++;
+                        this.#checkAllLoaded();
+                    },
+                    renderTable: (...args) => this.renderTable(...args),
+                    base: fullPath,
                 });
 
                 const accordion = new Accordion({
                     sections: {
                         [headerName]: {
-                            subtitle: `${Object.keys(info.properties).length} fields`,
+                            subtitle: `${this.#getRenderable(info, required[name], fullPath).length} fields`,
                             content: this.#nestedForms[name],
                         },
                     },
                 });
 
+                accordion.id = name; // assign name to accordion id
+
                 return accordion;
             }
 
             // Render properties in the sub-schema
-            const rendered = this.#render(info, results[name], required[name], [...path, name]);
+            const rendered = this.#render(info, results[name], required[name], fullPath);
             return hasMany || path.length > 1
                 ? html`
                       <div style="margin-top: 40px;">
@@ -819,16 +889,24 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     async updated() {
         this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
+        this.#checkAllLoaded(); // Throw if no tables
+    }
+
+    #resetLoadState() {
+        this.#loaded = false;
+        this.#nLoaded = 0;
     }
 
     render() {
+        this.#resetLoadState();
+
         const schema = this.schema ?? {};
 
         // Register default properties
         this.#registerDefaultProperties(schema.properties, this.results);
 
-        // Delete extraneous results
-        this.#deleteExtraneousResults(this.results, this.schema);
+        // // Delete extraneous results
+        // this.#deleteExtraneousResults(this.results, this.schema);
 
         this.#registerRequirements(this.schema, this.required);
 

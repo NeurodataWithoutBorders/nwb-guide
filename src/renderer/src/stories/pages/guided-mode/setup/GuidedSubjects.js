@@ -1,8 +1,9 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
-import { Table } from "../../../Table.js";
 import subjectSchema from "../../../../../../../schemas/subject.schema";
 import { validateOnChange } from "../../../../validation/index.js";
+import { SimpleTable } from "../../../SimpleTable.js";
+import { Table } from "../../../Table.js";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
@@ -13,12 +14,14 @@ export class GuidedSubjectsPage extends Page {
         onNext: () => {
             const { results, subjects } = this.info.globalState;
 
-            const nUnresolved = Object.keys(this.table.unresolved).length;
-            if (nUnresolved)
-                return this.notify(
-                    `${nUnresolved} subject${nUnresolved > 1 ? "s are" : " is"} missing a Subject ID value`,
-                    "error"
-                );
+            console.log("Results", subjects, results);
+
+            try {
+                this.table.validate();
+            } catch (e) {
+                this.notify(e.message, "error");
+                throw e;
+            }
 
             const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
             if (noSessions.length)
@@ -82,7 +85,14 @@ export class GuidedSubjectsPage extends Page {
             data: subjects,
             template: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
-            validateOnChange: (key, v, parent) => validateOnChange(key, parent, ["Subject"], v),
+            validateEmptyCells: false,
+            validateOnChange: (key, parent, v) => {
+                if (key === "sessions") return true;
+                else {
+                    delete parent.sessions; // Delete dessions from parent copy
+                    return validateOnChange(key, parent, ["Subject"], v);
+                }
+            },
         });
 
         return html`

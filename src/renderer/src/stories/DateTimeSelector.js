@@ -29,6 +29,14 @@ export class DateTimeSelector extends LitElement {
         });
     }
 
+    focus() {
+        this.click();
+    }
+
+    blur() {
+        this.input.blur();
+    }
+
     render() {
         return this.input;
     }

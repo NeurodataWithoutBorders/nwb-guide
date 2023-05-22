@@ -1,7 +1,7 @@
 import { html } from "lit";
 
 import Swal from "sweetalert2";
-import { notyf, baseUrl, notify } from "../../../../globals.js";
+import { notyf, baseUrl, notify, isStorybook } from "../../../../globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
@@ -47,6 +47,8 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     Swal.close();
 
+                    if (isStorybook) return;
+
                     if (result.message) {
                         const message = "Failed to get metadata with current source data. Please try again.";
                         this.notify(message, "error");
@@ -76,7 +78,6 @@ export class GuidedSourceDataPage extends ManagedPage {
             mode: "accordion",
             schema: this.info.globalState.schema.source_data,
             results: info.source_data,
-            ignore: ["verbose"],
             onlyRequired: true,
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
         });

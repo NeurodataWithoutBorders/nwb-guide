@@ -132,30 +132,10 @@ export class GuidedPathExpansionPage extends Page {
         const state = this.info.globalState.structure.state;
         if (state !== undefined) this.optional.state = state;
 
-        const baseSchema = {
-            properties: {
-                base_directory: {
-                    type: "string",
-                    format: "directory",
-                    description: "Enter the base directory of your data.",
-                },
-
-                // Transposed from Metadata (manual entry)
-                file_path: {
-                    type: "string",
-                    description: "Enter a format string to locate data.",
-                    placeholder:
-                        "{subject_id}_{session_id}_{task_name}/{subject_id}_{session_id}_{task_name}_imec0/{subject_id}_{session_id}_{task_name}_t0.imec0.ap.bin",
-                },
-                // {subject_id}_{session_id}_{task_name}/{subject_id}_{session_id}_{task_name}_imec0/{subject_id}_{session_id}_{task_name}_t0.imec0.ap.bin
-            },
-            required: ["base_directory", "file_path"],
-        };
-
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {} };
         for (let key in this.info.globalState.interfaces)
-            generatedSchema.properties[key] = { type: "object", ...baseSchema };
+            generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
         structureGlobalState.schema = generatedSchema;
 
         this.optional.requestUpdate();
