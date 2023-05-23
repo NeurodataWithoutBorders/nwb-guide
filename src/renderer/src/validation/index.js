@@ -45,8 +45,9 @@ export function validateOnChange(name, parent, path, value) {
 
     // Validate multiple conditions. May be able to offload this to a single server-side call
     const results = functions.map((func) => {
-        if (typeof func === "function") return func.call(this, name, copy, path); // Can specify alternative client-side validation
-        else
+        if (typeof func === "function") {
+            return func.call(this, name, copy, path); // Can specify alternative client-side validation
+        } else {
             return globalThis.fetch ? fetch(`${baseUrl}/neuroconv/validate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -55,6 +56,7 @@ export function validateOnChange(name, parent, path, value) {
                     function_name: func,
                 }),
             }).then((res) => res.json()).catch(e => {}) : undefined // Let failed fetch succeed
+        }
     })
 
     return resolveAll(results, arr => {
