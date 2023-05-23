@@ -47,14 +47,14 @@ export function validateOnChange(name, parent, path, value) {
     const results = functions.map((func) => {
         if (typeof func === "function") return func.call(this, name, copy, path); // Can specify alternative client-side validation
         else
-            return fetch(`${baseUrl}/neuroconv/validate`, {
+            return globalThis.fetch ? fetch(`${baseUrl}/neuroconv/validate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     parent: copy,
                     function_name: func,
                 }),
-            }).then((res) => res.json()).catch(e => {}) // Let failed fetch succeed
+            }).then((res) => res.json()).catch(e => {}) : undefined // Let failed fetch succeed
     })
 
     return resolveAll(results, arr => {
