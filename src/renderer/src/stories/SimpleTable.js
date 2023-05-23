@@ -153,7 +153,10 @@ export class SimpleTable extends LitElement {
     }
 
     #rendered;
-    #updateRendered = (force) => (force || this.rendered === true) ? this.rendered = new Promise(resolve => this.#rendered = () => resolve(this.rendered = true)) : this.rendered
+    #updateRendered = (force) =>
+        force || this.rendered === true
+            ? (this.rendered = new Promise((resolve) => (this.#rendered = () => resolve((this.rendered = true)))))
+            : this.rendered;
     rendered = this.#updateRendered(true);
 
     constructor({
@@ -167,7 +170,7 @@ export class SimpleTable extends LitElement {
         onLoaded,
         onThrow,
         deferLoading,
-        maxHeight
+        maxHeight,
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -181,7 +184,7 @@ export class SimpleTable extends LitElement {
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
-        if (onThrow) this.onThrow = onThrow
+        if (onThrow) this.onThrow = onThrow;
 
         this.onmousedown = (ev) => {
             this.#clearSelected();
@@ -354,7 +357,7 @@ export class SimpleTable extends LitElement {
             if (len === 1) message = errors[0].title;
             else if (len) {
                 message = `${len} errors exist on this table.`;
-                console.error(Array.from(errors).map(o => o.title))
+                console.error(Array.from(errors).map((o) => o.title));
             }
         }
 
@@ -390,8 +393,8 @@ export class SimpleTable extends LitElement {
         }
     };
 
-    addRow = (anchorRow = this.#cells.length - 1, n) => this.#updateRows(anchorRow, 1)[0]
-    getRow = (i) => Object.values(this.#cells[i])
+    addRow = (anchorRow = this.#cells.length - 1, n) => this.#updateRows(anchorRow, 1)[0];
+    getRow = (i) => Object.values(this.#cells[i]);
 
     #menuOptions = {
         row: {
@@ -509,13 +512,13 @@ export class SimpleTable extends LitElement {
         if (!this.deferLoading) {
             this.removeAttribute("waiting");
             setTimeout(() => {
-                this.load()
-                this.#rendered(true)
+                this.load();
+                this.#rendered(true);
             }, 100);
             // Otherwise validate the data itself without rendering
         } else {
             cells.forEach((c) => c.validate());
-            this.#rendered(true)
+            this.#rendered(true);
         }
     }
 
@@ -532,7 +535,7 @@ export class SimpleTable extends LitElement {
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
             if (children.length - count < 1) {
-                this.onThrow("You must have at least one row")
+                this.onThrow("You must have at least one row");
                 return false;
             }
 
@@ -567,12 +570,12 @@ export class SimpleTable extends LitElement {
                 const data = this.#getRowData(); // Get information for an undefined row
                 const newRow = document.createElement("tr");
                 newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
-                latest.insertAdjacentElement('afterend', newRow)
-                latest = newRow
-                return this.getRow(i)
+                latest.insertAdjacentElement("afterend", newRow);
+                latest = newRow;
+                return this.getRow(i);
             });
 
-            return mapped
+            return mapped;
         }
     }
 
@@ -691,9 +694,8 @@ export class SimpleTable extends LitElement {
     #schema = {};
 
     render() {
+        this.#updateRendered();
 
-        this.#updateRendered()
-        
         this.#resetLoadState();
 
         const entries = (this.#schema = { ...this.schema.properties });

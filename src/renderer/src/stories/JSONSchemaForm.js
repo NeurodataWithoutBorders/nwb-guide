@@ -209,9 +209,11 @@ export class JSONSchemaForm extends LitElement {
     #nWarnings = 0;
 
     #rendered;
-    #updateRendered = (force) => (force || this.rendered === true) ? this.rendered = new Promise(resolve => this.#rendered = () => resolve(this.rendered = true)) : this.rendered
+    #updateRendered = (force) =>
+        force || this.rendered === true
+            ? (this.rendered = new Promise((resolve) => (this.#rendered = () => resolve((this.rendered = true)))))
+            : this.rendered;
     rendered = this.#updateRendered(true);
-
 
     constructor(props = {}) {
         super();
@@ -244,31 +246,28 @@ export class JSONSchemaForm extends LitElement {
     }
 
     getTable = (path) => {
-        if (typeof path === 'string') path = path.split('.')
-        if (path.length === 1) return this.#tables[path[0]] // return table if accessible
+        if (typeof path === "string") path = path.split(".");
+        if (path.length === 1) return this.#tables[path[0]]; // return table if accessible
 
-        const copy = [...path]
-        const tableName = copy.pop()
-        let target = this
+        const copy = [...path];
+        const tableName = copy.pop();
+        let target = this;
 
-        if (this.mode === 'accordion') target = this.getForm(copy)
-        else target = this.shadowRoot.getElementById(copy.join('-'))
+        if (this.mode === "accordion") target = this.getForm(copy);
+        else target = this.shadowRoot.getElementById(copy.join("-"));
 
-        return  target.getTable(tableName) // Just get the table from self if needed
+        return target.getTable(tableName); // Just get the table from self if needed
     };
 
     getForm = (path) => {
-        if (!path.length) return this
+        if (!path.length) return this;
 
-        if (this.mode === 'accordion') {
-            if (typeof path === 'string') path = path.split('.')
-            const [name, ...otherPath] = path
+        if (this.mode === "accordion") {
+            if (typeof path === "string") path = path.split(".");
+            const [name, ...otherPath] = path;
             return this.#nestedForms[name].getForm(otherPath);
-        } 
-        
-        else return this.shadowRoot.getElementById(path.join('-'))
+        } else return this.shadowRoot.getElementById(path.join("-"));
     };
-    
 
     #requirements = {};
 
@@ -309,7 +308,7 @@ export class JSONSchemaForm extends LitElement {
         ]);
 
     throw = (message) => {
-        this.onThrow(message, this.identifier)
+        this.onThrow(message, this.identifier);
         throw new Error(message);
     };
 
@@ -520,8 +519,7 @@ export class JSONSchemaForm extends LitElement {
                             };
 
                             return (this.#tables[name] =
-                                this.renderTable(name, tableMetadata, fullPath) ||
-                                new BasicTable(tableMetadata));
+                                this.renderTable(name, tableMetadata, fullPath) || new BasicTable(tableMetadata));
                         }
                     }
 
@@ -630,8 +628,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     validateOnChange = () => {};
     onStatusChange = () => {};
-    onThrow = () => {}
-    renderTable = () => {}
+    onThrow = () => {};
+    renderTable = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -929,9 +927,11 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
         this.#checkAllLoaded(); // Throw if no tables
 
-        Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map(o => o.rendered)).then(res => {
-            this.#rendered(true)
-        }) // Wait for all the forms to render to resolve self
+        Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered)).then(
+            (res) => {
+                this.#rendered(true);
+            }
+        ); // Wait for all the forms to render to resolve self
     }
 
     #resetLoadState() {
@@ -940,8 +940,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     }
 
     render() {
-
-        this.#updateRendered() // Create a new promise to check on the rendered state
+        this.#updateRendered(); // Create a new promise to check on the rendered state
 
         this.#resetLoadState();
 
@@ -962,8 +961,6 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             </div>
         `;
     }
-
-    
 }
 
 customElements.get("nwb-jsonschema-form") || customElements.define("nwb-jsonschema-form", JSONSchemaForm);

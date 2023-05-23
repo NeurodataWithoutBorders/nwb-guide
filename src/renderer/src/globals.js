@@ -1,4 +1,3 @@
-
 import { path, port } from "./electron/index.js";
 
 export const joinPath = (...args) => (path ? path.join(...args) : args.filter((str) => str).join("/"));

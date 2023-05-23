@@ -70,7 +70,7 @@ export function validateOnChange(name, parent, path, value) {
                     };
                 }); // Some of the requests end in errors
             }
-        
+
             return true
     })
 }

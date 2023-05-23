@@ -6,7 +6,7 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
-import { onThrow } from '../../../../errors'
+import { onThrow } from "../../../../errors";
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
@@ -82,7 +82,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             results: info.source_data,
             onlyRequired: true,
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
-            onThrow
+            onThrow,
         });
 
         return {

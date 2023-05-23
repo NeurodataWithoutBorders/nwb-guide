@@ -2,7 +2,7 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { run } from "./utils.js";
-import { onThrow } from '../../../../errors'
+import { onThrow } from "../../../../errors";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -65,7 +65,7 @@ export class GuidedUploadPage extends Page {
                 //   { name: 'NWB File', extensions: ['nwb'] }
                 // ]
             },
-            onThrow
+            onThrow,
         });
 
         return html`
