@@ -48,19 +48,23 @@ export function validateOnChange(name, parent, path, value) {
         if (typeof func === "function") {
             return func.call(this, name, copy, path); // Can specify alternative client-side validation
         } else {
-            return globalThis.fetch ? fetch(`${baseUrl}/neuroconv/validate`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    parent: copy,
-                    function_name: func,
-                }),
-            }).then((res) => res.json()).catch(e => {}) : undefined // Let failed fetch succeed
+            return globalThis.fetch
+                ? fetch(`${baseUrl}/neuroconv/validate`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                          parent: copy,
+                          function_name: func,
+                      }),
+                  })
+                      .then((res) => res.json())
+                      .catch((e) => {})
+                : undefined; // Let failed fetch succeed
         }
-    })
+    });
 
-    return resolveAll(results, arr => {
-        const flat = arr.flat()
+    return resolveAll(results, (arr) => {
+        const flat = arr.flat();
         if (flat.find((res) => res?.message)) {
             return flat
                 .filter((res) => res?.message)
@@ -71,10 +75,10 @@ export function validateOnChange(name, parent, path, value) {
                         missing: o.missing ?? o.message.includes("is missing"), // Indicates that the field is missing
                     };
                 }); // Some of the requests end in errors
-            }
+        }
 
-            return true
-    })
+        return true;
+    });
 }
 
 export function checkStatus(warnings, errors, items = []) {
