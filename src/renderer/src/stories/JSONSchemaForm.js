@@ -5,6 +5,7 @@ import { Accordion } from "./Accordion";
 import { checkStatus } from "../validation";
 import { BasicTable } from "./BasicTable";
 import { capitalize, header, textToArray } from "./forms/utils";
+import { resolve } from "../promises";
 
 const componentCSS = `
 
@@ -208,15 +209,18 @@ export class JSONSchemaForm extends LitElement {
     #nErrors = 0;
     #nWarnings = 0;
 
-    #rendered;
+    #toggleRendered
+    #rendered
     #updateRendered = (force) =>
-        force || this.rendered === true
-            ? (this.rendered = new Promise((resolve) => (this.#rendered = () => resolve((this.rendered = true)))))
-            : this.rendered;
-    rendered = this.#updateRendered(true);
+        force || this.#rendered === true
+            ? (this.#rendered = new Promise((resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))))
+            : this.#rendered;
+
 
     constructor(props = {}) {
         super();
+
+        this.#rendered = this.#updateRendered(true);
 
         this.identifier = props.identifier;
         this.mode = props.mode ?? "default";
@@ -251,22 +255,16 @@ export class JSONSchemaForm extends LitElement {
 
         const copy = [...path];
         const tableName = copy.pop();
-        let target = this;
-
-        if (this.mode === "accordion") target = this.getForm(copy);
-        else target = this.shadowRoot.getElementById(copy.join("-"));
-
-        return target.getTable(tableName); // Just get the table from self if needed
+        if (this.mode === "accordion") return this.getForm(copy).getTable(tableName);
+        else return this.shadowRoot.getElementById(path.join("-")).children[1]; // Get table from UI container
     };
 
     getForm = (path) => {
-        if (!path.length) return this;
+        if (typeof path === "string") path = path.split(".");
+        const form = this.#nestedForms[path[0]]
+        if (!path.length || !form) return this; // No nested form with this name. Returning self.
 
-        if (this.mode === "accordion") {
-            if (typeof path === "string") path = path.split(".");
-            const [name, ...otherPath] = path;
-            return this.#nestedForms[name].getForm(otherPath);
-        } else return this.shadowRoot.getElementById(path.join("-"));
+        return form.getForm(path.slice(1))
     };
 
     #requirements = {};
@@ -333,9 +331,8 @@ export class JSONSchemaForm extends LitElement {
         for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
         try {
             for (let key in this.#tables) await this.#tables[key].validate(); // Validate nested tables too
-        } catch (e) {
-            this.throw(e.message);
-        }
+        } catch (e) { this.throw(e.message) }
+
         // NOTE: Ensure user is aware of any warnings before moving on
         // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
 
@@ -721,8 +718,10 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
         // Show aggregated errors and warnings (if any)
         warnings.forEach((info) => this.#addMessage(fullPath, info.message, "warnings"));
+        
+        const isFunction = typeof valid === 'function'
 
-        if ((valid === true || valid == undefined || !valid.find((o) => o.type === "error")) && errors.length === 0) {
+        if ((valid === true || valid == undefined || isFunction || !valid.find((o) => o.type === "error")) && errors.length === 0) {
             element.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(fullPath);
@@ -731,6 +730,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             await this.#applyToLinkedProperties((path, element) => {
                 element.classList.remove("required", "conditional"); // Links manage their own error and validity states, but only one needs to be valid
             }, fullPath);
+
+            if (isFunction) valid() // Run if returned value is a function
 
             return true;
         } else {
@@ -926,17 +927,18 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     updated() {
         this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
         this.#checkAllLoaded(); // Throw if no tables
-
-        Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered)).then(
-            (res) => {
-                this.#rendered(true);
-            }
-        ); // Wait for all the forms to render to resolve self
+        this.#toggleRendered() // Toggle internal render state
     }
 
     #resetLoadState() {
         this.#loaded = false;
         this.#nLoaded = 0;
+    }
+
+    // Check if everything is internally rendered
+    get rendered() {
+        const isRendered = resolve(this.#rendered, () => Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered)))
+        return isRendered
     }
 
     render() {

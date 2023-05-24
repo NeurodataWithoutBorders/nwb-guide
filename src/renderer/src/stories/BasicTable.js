@@ -126,6 +126,14 @@ export class BasicTable extends LitElement {
         if (onLoaded) this.onLoaded = onLoaded;
     }
 
+    #rendered;
+    #updateRendered = (force) =>
+        force || this.rendered === true
+            ? (this.rendered = new Promise((resolve) => (this.#rendered = () => resolve((this.rendered = true)))))
+            : this.rendered;
+    rendered = this.#updateRendered(true);
+
+
     #renderHeaderContent = (str) => {
         const required = this.schema.required ? this.schema.required.includes(str) : false;
         if (required) return html`<div class="relative"><span required>${header(str)}</span></div>`;
@@ -171,7 +179,7 @@ export class BasicTable extends LitElement {
 
         const errors = this.shadowRoot.querySelectorAll("[error]");
         const len = errors.length;
-        if (len === 1) message = errors[0].title;
+        if (len === 1) message = errors[0].title || 'Error found';
         else if (len) {
             message = `${len} errors exist on this table.`;
             console.error(Array.from(errors).map((o) => o.title));
@@ -242,6 +250,8 @@ export class BasicTable extends LitElement {
                 info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
             }
 
+            if (typeof result === 'function') result() // Run if returned value is a function
+
             return info;
         });
     };
@@ -268,6 +278,7 @@ export class BasicTable extends LitElement {
 
         promises.resolveAll(results, () => {
             this.#checkStatus();
+            this.#rendered(true)
             this.onLoaded();
         });
     }
@@ -324,6 +335,9 @@ export class BasicTable extends LitElement {
 
     // Render Code
     render() {
+
+        this.#updateRendered()
+
         const entries = { ...this.schema.properties };
 
         // Add existing additional properties to the entries variable if necessary

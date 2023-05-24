@@ -1,10 +1,13 @@
 import schema from './validation.json'
 import { JSONSchemaForm } from '../stories/JSONSchemaForm.js'
-import { getTableFromForm } from '../stories/forms/utils'
 
 function rerender (this: JSONSchemaForm, linkedPath: string[]) {
-    const element = getTableFromForm(this, linkedPath)
-    if (element) setTimeout(() => element.requestUpdate(), 100); // Re-render table to show new column
+    const element = this.getTable(linkedPath)
+    if (element) element.requestUpdate() // Re-render table to show updates
+    // if (element) setTimeout(() => {
+    //     element.requestUpdate()
+    // }, 100); // Re-render table to show new column
+    return element
 }
 
 // Specify JavaScript-side validation
@@ -21,19 +24,17 @@ schema.Ecephys.ElectrodeGroup.device = function (this: JSONSchemaForm, name, par
     }
 }
 
-let registeredGroups: {[x:string]: string[]} = {};
 
-schema.Ecephys.ElectrodeGroup.name = function(this: JSONSchemaForm, name, parent, path) {
-    const id = path.join('.')
-
-    let groups = registeredGroups[id]
-    if (!groups) groups = registeredGroups[id] = []
-
+// NOTE: Does this maintain separation between multiple sessions?
+schema.Ecephys.ElectrodeGroup.name = function(this: JSONSchemaForm, name, parent, path, value) {
     const currentGroups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
 
-    if (JSON.stringify(groups) !== JSON.stringify(currentGroups)) {
-        registeredGroups[id] = currentGroups
-        rerender.call(this, ['Ecephys', 'Electrodes'])
+     // Check if the latest value will be new. Run function after validation
+
+    if (!value || !currentGroups.includes(value)) {
+        return () => {
+            rerender.call(this, ['Ecephys', 'Electrodes'])
+        }
     }
 }
 
@@ -62,7 +63,6 @@ schema.Ecephys.ElectrodeColumns = {
         if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
 
             const element = rerender.call(this, ['Ecephys', 'Electrodes'])
-
             element.schema.properties[name] = {} // Ensure property is present in the schema now
             element.data.forEach(o => name in o ? undefined : o[name] = '') // Set column value as blank if not existent on row
         }

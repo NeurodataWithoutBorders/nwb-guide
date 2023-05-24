@@ -6,18 +6,17 @@ import baseMetadataSchema from '../schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
-import { Validator } from 'jsonschema'
+import { Validator, validate } from 'jsonschema'
 import { textToArray } from '../src/renderer/src/stories/forms/utils'
 import { convertSubjectsToResults } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
 import { JSONSchemaForm } from '../src/renderer/src/stories/JSONSchemaForm'
 
-import nwbBaseSchema from "../schemas/base-metadata.schema";
-import exephysExampleSchema from "../schemas/json/ecephys_metadata_schema_example.json";
 import { validateOnChange } from "../src/renderer/src/validation/index.js";
-import { testEcephysData } from './data'
 import { SimpleTable } from '../src/renderer/src/stories/SimpleTable'
 
-nwbBaseSchema.properties.Ecephys = exephysExampleSchema;
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 var v = new Validator();
 
@@ -50,39 +49,62 @@ test('removing all existing sessions will maintain the related subject entry on 
 })
 
 
-
-// NOTE: This requires a polyfill for Element.after
-
+// TODO: Convert an integration
 test('inter-table updates are triggered', async () => {
 
-    const randomStringId = Math.random().toString(36).substring(7)
-
-
-    // Create dummy results for the form
     const results = {
-        NWBFile: {
-            session_start_time: (new Date()).toUTCString()
-        },
-        Subject: {
-            subject_id: '00001',
-            species: 'Mus musculus'
-        },
-
-        Ecephys: testEcephysData
+        Ecephys: { // NOTE: This layer is required to place the properties at the right level for the hardcoded validation function
+            ElectrodeGroup: [ { name: 's1' } ],
+            Electrodes: [{ group_name: 's1' }]
+        }
     }
 
+    const schema = {
+        properties: {
+            Ecephys: {
+                properties: {
+                    ElectrodeGroup: {
+                        type: "array",
+                        items: {
+                            required: ["name"],
+                            properties: {
+                                name: {
+                                    type: "string"
+                                },
+                            },
+                            type: "object",
+                        },
+                    },
+                    Electrodes: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            properties: {
+                                group_name: {
+                                    type: "string",
+                                },
+                            },
+                        }
+                    },
+                }
+            }
+        }
+    }
+
+
+
     // Add invalid electrode
-    results.Ecephys.Electrodes.push({ ... results.Ecephys.Electrodes[0], group_name: randomStringId })
+    const randomStringId = Math.random().toString(36).substring(7)
+    results.Ecephys.Electrodes.push({ group_name: randomStringId })
 
     // Create the form
     const form = new JSONSchemaForm({
-        schema: nwbBaseSchema,
+        schema,
         results,
         validateOnChange,
         renderTable: (name, metadata, path) => {
-            if (name !== "ElectrodeColumns" && name !== "Electrodes") return new SimpleTable(metadata);
+            if (name !== "Electrodes") return new SimpleTable(metadata);
         },
-        mode: 'accordion'
     })
 
     document.body.append(form)
@@ -94,7 +116,7 @@ test('inter-table updates are triggered', async () => {
     await form.validate().catch(e => errors = true)
     expect(errors).toBe(true) // Is invalid
 
-    // TODO: Actually update the table with the missing electrode group
+    // Update the table with the missing electrode group
     const table = form.getTable(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
     const row = table.addRow()
 
@@ -104,15 +126,7 @@ test('inter-table updates are triggered', async () => {
         else cell.value = baseRow[i].value // Otherwise carry over info
     })
 
-    // Ensure the rendered attribute has been reset / the cell has been rerendered
-    setTimeout(async () => {
-        await form.rendered
-
-        // Valalidate that the new structure is correct
-        await form.validate().then(res => errors = false).catch(e => {
-            console.log('Errors', e)
-            errors = true
-        })
-        expect(errors).toBe(false) // Is valid
-    }, 1000)
+    // Valalidate that the new structure is correct
+    await form.validate().then(res => errors = false).catch(e => errors = true)
+    expect(errors).toBe(false) // Is valid
 })

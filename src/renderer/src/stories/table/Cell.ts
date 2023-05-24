@@ -88,7 +88,7 @@ export class TableCell extends LitElement {
 
     set value(v) {
         if (this.input) this.input.set(v ?? '')
-        this.#value = this.input ? this.input.value: v // Ensure value is coerced
+        this.#value = this.input ? this.input.getValue() : v // Ensure value is coerced
      }
 
     validateOnChange?: ValidationFunction
@@ -99,11 +99,8 @@ export class TableCell extends LitElement {
     validate = async (v = this.value) => {
 
         const validator = this.validateOnChange ?? this.#validator
-
         let result = await validator(v)
-
         if (result === true) result = this.#validator(v)
-
 
         let info: ValidationResult = {
             title: undefined,
@@ -128,6 +125,9 @@ export class TableCell extends LitElement {
 
         this.onValidate(info)
 
+        if (typeof result === 'function') result() // Run if returned value is a function
+
+
         return info
     };
 
@@ -141,7 +141,7 @@ export class TableCell extends LitElement {
     }
 
     updated() {
-        this.validate()
+        this.validate() // Validate immediately when placed in the DOM
     }
 
     #cls: any
