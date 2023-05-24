@@ -354,7 +354,7 @@ export class SimpleTable extends LitElement {
         if (!message) {
             const errors = this.shadowRoot.querySelectorAll("[error]");
             const len = errors.length;
-            if (len === 1) message = errors[0].title || 'Error found';
+            if (len === 1) message = errors[0].title || "Error found";
             else if (len) {
                 message = `${len} errors exist on this table.`;
             }
@@ -416,8 +416,8 @@ export class SimpleTable extends LitElement {
                     Object.keys(cols).map((k) => (cols[k] = ""));
                     if (this.validateOnChange)
                         Object.keys(cols).map((k) => {
-                            const res = this.validateOnChange(k, { ...cols }, cols[k])
-                            if (typeof res === 'function') res()
+                            const res = this.validateOnChange(k, { ...cols }, cols[k]);
+                            if (typeof res === "function") res();
                         });
 
                     // Actually update the rows
@@ -636,7 +636,11 @@ export class SimpleTable extends LitElement {
     #createCell = (value, info) => {
         const rowNames = Object.keys(this.data);
 
-        const fullInfo = { ...info, col: this.colHeaders[info.j], row: Array.isArray(this.data) ? `${info.i}` : rowNames[info.i]};
+        const fullInfo = {
+            ...info,
+            col: this.colHeaders[info.j],
+            row: Array.isArray(this.data) ? `${info.i}` : rowNames[info.i],
+        };
 
         const schema = this.#schema[fullInfo.col];
 

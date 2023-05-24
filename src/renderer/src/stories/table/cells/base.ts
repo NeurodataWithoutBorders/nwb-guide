@@ -126,8 +126,8 @@ export class TableCellBase extends LitElement {
             this.setText(value)
             this.#editable.blur();
             this.#editable.removeAttribute('contenteditable')
-        } 
-        
+        }
+
         else this.setText(value) // Ensure value is still set
     }
 

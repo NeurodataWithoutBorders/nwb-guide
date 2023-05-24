@@ -209,13 +209,14 @@ export class JSONSchemaForm extends LitElement {
     #nErrors = 0;
     #nWarnings = 0;
 
-    #toggleRendered
-    #rendered
+    #toggleRendered;
+    #rendered;
     #updateRendered = (force) =>
         force || this.#rendered === true
-            ? (this.#rendered = new Promise((resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))))
+            ? (this.#rendered = new Promise(
+                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+              ))
             : this.#rendered;
-
 
     constructor(props = {}) {
         super();
@@ -261,10 +262,10 @@ export class JSONSchemaForm extends LitElement {
 
     getForm = (path) => {
         if (typeof path === "string") path = path.split(".");
-        const form = this.#nestedForms[path[0]]
+        const form = this.#nestedForms[path[0]];
         if (!path.length || !form) return this; // No nested form with this name. Returning self.
 
-        return form.getForm(path.slice(1))
+        return form.getForm(path.slice(1));
     };
 
     #requirements = {};
@@ -331,7 +332,9 @@ export class JSONSchemaForm extends LitElement {
         for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
         try {
             for (let key in this.#tables) await this.#tables[key].validate(); // Validate nested tables too
-        } catch (e) { this.throw(e.message) }
+        } catch (e) {
+            this.throw(e.message);
+        }
 
         // NOTE: Ensure user is aware of any warnings before moving on
         // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
@@ -718,10 +721,13 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
         // Show aggregated errors and warnings (if any)
         warnings.forEach((info) => this.#addMessage(fullPath, info.message, "warnings"));
-        
-        const isFunction = typeof valid === 'function'
 
-        if ((valid === true || valid == undefined || isFunction || !valid.find((o) => o.type === "error")) && errors.length === 0) {
+        const isFunction = typeof valid === "function";
+
+        if (
+            (valid === true || valid == undefined || isFunction || !valid.find((o) => o.type === "error")) &&
+            errors.length === 0
+        ) {
             element.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(fullPath);
@@ -731,7 +737,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                 element.classList.remove("required", "conditional"); // Links manage their own error and validity states, but only one needs to be valid
             }, fullPath);
 
-            if (isFunction) valid() // Run if returned value is a function
+            if (isFunction) valid(); // Run if returned value is a function
 
             return true;
         } else {
@@ -927,7 +933,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     updated() {
         this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
         this.#checkAllLoaded(); // Throw if no tables
-        this.#toggleRendered() // Toggle internal render state
+        this.#toggleRendered(); // Toggle internal render state
     }
 
     #resetLoadState() {
@@ -937,8 +943,10 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     // Check if everything is internally rendered
     get rendered() {
-        const isRendered = resolve(this.#rendered, () => Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered)))
-        return isRendered
+        const isRendered = resolve(this.#rendered, () =>
+            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered))
+        );
+        return isRendered;
     }
 
     render() {

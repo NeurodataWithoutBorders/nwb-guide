@@ -119,7 +119,7 @@ export class Table extends LitElement {
         if (!message) {
             const errors = this.querySelectorAll("[error]");
             const len = errors.length;
-            if (len === 1) message = errors[0].title || 'Error found';
+            if (len === 1) message = errors[0].title || "Error found";
             else if (len) message = `${len} errors exist on this table.`;
         }
 
@@ -333,7 +333,7 @@ export class Table extends LitElement {
                 else target[rowName][header] = value;
             }
 
-            if (typeof isValid === 'function') isValid()
+            if (typeof isValid === "function") isValid();
             // }
         });
 

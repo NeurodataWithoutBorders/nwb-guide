@@ -49,15 +49,15 @@ export function validateOnChange(name, parent, path, value) {
             return func.call(this, name, copy, path, value); // Can specify alternative client-side validation
         } else {
             return fetch(`${baseUrl}/neuroconv/validate`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                          parent: copy,
-                          function_name: func,
-                      }),
-                  })
-                      .then((res) => res.json())
-                      .catch((e) => {}); // Let failed fetch succeed
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    parent: copy,
+                    function_name: func,
+                }),
+            })
+                .then((res) => res.json())
+                .catch((e) => {}); // Let failed fetch succeed
         }
     });
 
@@ -76,8 +76,8 @@ export function validateOnChange(name, parent, path, value) {
         }
 
         // Allow for providing one function to execute after data update
-        const hasFunc = results.find(f => typeof f === 'function')
-        if (hasFunc) return hasFunc
+        const hasFunc = results.find((f) => typeof f === "function");
+        if (hasFunc) return hasFunc;
 
         return true;
     });
