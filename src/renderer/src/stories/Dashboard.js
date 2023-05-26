@@ -30,7 +30,7 @@ import "../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 // import "../../node_modules/intro.js/minified/introjs.min.css"
 import "../../assets/css/guided.css";
 import isElectron from "../electron/check.js";
-import { isStorybook, reloadPageToHome } from "../globals.js";
+import { isStorybook, reloadPageToHome } from "../dependencies/globals.js";
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"

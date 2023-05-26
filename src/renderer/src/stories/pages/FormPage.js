@@ -2,6 +2,7 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../JSONSchemaForm.js";
 import { Page } from "./Page.js";
 import { validateOnChange } from "../../validation/index.js";
+import { onThrow } from "../../errors";
 
 export function schemaToPages(schema, globalStatePath, options) {
     return Object.entries(schema.properties)
@@ -62,6 +63,7 @@ export class GuidedFormPage extends Page {
             ...this.info.formOptions,
             results,
             validateOnChange,
+            onThrow,
         }));
 
         form.style.width = "100%";

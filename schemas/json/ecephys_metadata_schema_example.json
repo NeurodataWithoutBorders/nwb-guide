@@ -151,8 +151,7 @@
           "required": [
             "name",
             "description",
-            "data_type",
-            "type"
+            "data_type"
           ],
           "properties": {
             "name": {
@@ -166,10 +165,6 @@
             "data_type": {
               "type": "string",
               "description": "The data type to use for decoding values of this column."
-            },
-            "type": {
-              "type": "string",
-              "description": "Type for JSON Schema validation"
             }
           }
         }

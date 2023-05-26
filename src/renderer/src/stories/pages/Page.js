@@ -2,7 +2,7 @@ import { LitElement, html } from "lit";
 import useGlobalStyles from "../utils/useGlobalStyles.js";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress.js";
-import { dismissNotification, notify } from "../../globals.js";
+import { dismissNotification, notify } from "../../dependencies/globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
 
 export class Page extends LitElement {

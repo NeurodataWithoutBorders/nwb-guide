@@ -3,7 +3,7 @@ import { openLink } from "../../../links.js";
 import { docu_lottie } from "../../../../assets/lotties/documentation-lotties.js";
 import { Page } from "../Page.js";
 
-import { startLottie } from "../../../globals.js";
+import { startLottie } from "../../../dependencies/globals.js";
 
 export class DocumentationPage extends Page {
     constructor(...args) {

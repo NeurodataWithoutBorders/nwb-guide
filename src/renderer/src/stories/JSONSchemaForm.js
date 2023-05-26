@@ -1,11 +1,11 @@
 import { LitElement, css, html } from "lit";
-import { notify } from "../globals";
 import { FilesystemSelector } from "./FileSystemSelector";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
 import { BasicTable } from "./BasicTable";
 import { capitalize, header, textToArray } from "./forms/utils";
+import { resolve } from "../promises";
 
 const componentCSS = `
 
@@ -209,8 +209,19 @@ export class JSONSchemaForm extends LitElement {
     #nErrors = 0;
     #nWarnings = 0;
 
+    #toggleRendered;
+    #rendered;
+    #updateRendered = (force) =>
+        force || this.#rendered === true
+            ? (this.#rendered = new Promise(
+                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+              ))
+            : this.#rendered;
+
     constructor(props = {}) {
         super();
+
+        this.#rendered = this.#updateRendered(true);
 
         this.identifier = props.identifier;
         this.mode = props.mode ?? "default";
@@ -230,6 +241,7 @@ export class JSONSchemaForm extends LitElement {
         this.validateEmptyValues = props.validateEmptyValues ?? true;
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
+        if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
         if (props.renderTable) this.renderTable = props.renderTable;
 
@@ -237,6 +249,24 @@ export class JSONSchemaForm extends LitElement {
 
         if (props.base) this.#base = props.base;
     }
+
+    getTable = (path) => {
+        if (typeof path === "string") path = path.split(".");
+        if (path.length === 1) return this.#tables[path[0]]; // return table if accessible
+
+        const copy = [...path];
+        const tableName = copy.pop();
+        if (this.mode === "accordion") return this.getForm(copy).getTable(tableName);
+        else return this.shadowRoot.getElementById(path.join("-")).children[1]; // Get table from UI container
+    };
+
+    getForm = (path) => {
+        if (typeof path === "string") path = path.split(".");
+        const form = this.#nestedForms[path[0]];
+        if (!path.length || !form) return this; // No nested form with this name. Returning self.
+
+        return form.getForm(path.slice(1));
+    };
 
     #requirements = {};
 
@@ -277,7 +307,7 @@ export class JSONSchemaForm extends LitElement {
         ]);
 
     throw = (message) => {
-        notify(this.identifier ? `<b>[${this.identifier}]</b>: ${message}` : message, "error", 7000);
+        this.onThrow(message, this.identifier);
         throw new Error(message);
     };
 
@@ -290,7 +320,7 @@ export class JSONSchemaForm extends LitElement {
         let message = isValid ? "" : `${invalidInputs.length} required inputs are not specified properly.`;
 
         // Check if all inputs are valid
-        const flaggedInputs = this.shadowRoot.querySelectorAll(".invalid");
+        const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
             if (!message) message = `${flaggedInputs.length} invalid form values.`;
@@ -305,6 +335,7 @@ export class JSONSchemaForm extends LitElement {
         } catch (e) {
             this.throw(e.message);
         }
+
         // NOTE: Ensure user is aware of any warnings before moving on
         // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
 
@@ -484,11 +515,11 @@ export class JSONSchemaForm extends LitElement {
                                     this.#nLoaded++;
                                     this.#checkAllLoaded();
                                 },
+                                onThrow: (...args) => this.onThrow(...args),
                             };
 
                             return (this.#tables[name] =
-                                (this.renderTable ? this.renderTable(name, tableMetadata, fullPath) : "") ||
-                                new BasicTable(tableMetadata));
+                                this.renderTable(name, tableMetadata, fullPath) || new BasicTable(tableMetadata));
                         }
                     }
 
@@ -597,6 +628,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     validateOnChange = () => {};
     onStatusChange = () => {};
+    onThrow = () => {};
+    renderTable = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -641,6 +674,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         return this.shadowRoot.querySelector(`[data-name="${link.name}"]`);
     };
 
+    // Assume this is going to return as a Promise—even if the change function isn't returning one
     #validateOnChange = async (name, parent, element, path = [], checkLinks = true) => {
         const valid =
             !this.validateEmptyValues && !(name in parent) ? true : await this.validateOnChange(name, parent, path);
@@ -688,7 +722,12 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         // Show aggregated errors and warnings (if any)
         warnings.forEach((info) => this.#addMessage(fullPath, info.message, "warnings"));
 
-        if ((valid === true || valid == undefined || !valid.find((o) => o.type === "error")) && errors.length === 0) {
+        const isFunction = typeof valid === "function";
+
+        if (
+            (valid === true || valid == undefined || isFunction || !valid.find((o) => o.type === "error")) &&
+            errors.length === 0
+        ) {
             element.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(fullPath);
@@ -697,6 +736,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             await this.#applyToLinkedProperties((path, element) => {
                 element.classList.remove("required", "conditional"); // Links manage their own error and validity states, but only one needs to be valid
             }, fullPath);
+
+            if (isFunction) valid(); // Run if returned value is a function
 
             return true;
         } else {
@@ -713,6 +754,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             );
 
             errors.forEach((info) => this.#addMessage(fullPath, info.message, "errors"));
+            // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;
         }
@@ -819,6 +861,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     deferLoading: this.deferLoading,
                     conditionalRequirements: this.conditionalRequirements,
                     validateOnChange: (...args) => this.validateOnChange(...args),
+                    onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusChange: (status) => {
                         accordion.setSectionStatus(headerName, status);
@@ -887,9 +930,10 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         filtered.forEach((input) => input.dispatchEvent(new Event("change")));
     };
 
-    async updated() {
+    updated() {
         this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
         this.#checkAllLoaded(); // Throw if no tables
+        this.#toggleRendered(); // Toggle internal render state
     }
 
     #resetLoadState() {
@@ -897,7 +941,17 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         this.#nLoaded = 0;
     }
 
+    // Check if everything is internally rendered
+    get rendered() {
+        const isRendered = resolve(this.#rendered, () =>
+            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered))
+        );
+        return isRendered;
+    }
+
     render() {
+        this.#updateRendered(); // Create a new promise to check on the rendered state
+
         this.#resetLoadState();
 
         const schema = this.schema ?? {};

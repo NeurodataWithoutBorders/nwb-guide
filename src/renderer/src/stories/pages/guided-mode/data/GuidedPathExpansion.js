@@ -2,10 +2,11 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 // For Multi-Select Form
-import { notyf } from "../../../../globals.js";
+import { notyf } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { OptionalSection } from "../../../OptionalSection.js";
 import { run } from "../options/utils.js";
+import { onThrow } from "../../../../errors";
 
 import pathExpansionSchema from "../../../../../../../schemas/json/path-expansion.schema.json" assert { type: "json" };
 
@@ -140,7 +141,7 @@ export class GuidedPathExpansionPage extends Page {
 
         this.optional.requestUpdate();
 
-        const form = (this.form = new JSONSchemaForm({ ...structureGlobalState }));
+        const form = (this.form = new JSONSchemaForm({ ...structureGlobalState, onThrow }));
 
         this.optional.innerHTML = "";
         this.optional.insertAdjacentElement("afterbegin", form);

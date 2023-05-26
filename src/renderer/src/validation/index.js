@@ -1,9 +1,10 @@
 import { baseUrl } from "../globals";
+import { resolveAll } from "../promises";
 import validationSchema from "./validation";
 
 // NOTE: Only validation missing on NWBFile Metadata is check_subject_exists and check_processing_module_name
 
-export async function validateOnChange(name, parent, path, value) {
+export function validateOnChange(name, parent, path, value) {
     let functions = [];
 
     const fullPath = [...path, name];
@@ -43,36 +44,43 @@ export async function validateOnChange(name, parent, path, value) {
     if (!Array.isArray(functions)) functions = [functions];
 
     // Validate multiple conditions. May be able to offload this to a single server-side call
-    const res = (
-        await Promise.all(
-            functions.map(async (func) => {
-                if (typeof func === "function") {
-                    return await func.call(this, name, copy, path); // Can specify alternative client-side validation
-                } else
-                    return await fetch(`${baseUrl}/neuroconv/validate`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            parent: copy,
-                            function_name: func,
-                        }),
-                    }).then((res) => res.json());
+    const results = functions.map((func) => {
+        if (typeof func === "function") {
+            return func.call(this, name, copy, path, value); // Can specify alternative client-side validation
+        } else {
+            return fetch(`${baseUrl}/neuroconv/validate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    parent: copy,
+                    function_name: func,
+                }),
             })
-        )
-    ).flat();
+                .then((res) => res.json())
+                .catch((e) => {}); // Let failed fetch succeed
+        }
+    });
 
-    if (res.find((res) => res?.message))
-        return res
-            .filter((res) => res?.message)
-            .map((o) => {
-                return {
-                    message: o.message,
-                    type: o.type ?? o.importance === "CRITICAL" ? "error" : "warning",
-                    missing: o.missing ?? o.message.includes("is missing"), // Indicates that the field is missing
-                };
-            }); // Some of the requests end in errors
+    return resolveAll(results, (arr) => {
+        const flat = arr.flat();
+        if (flat.find((res) => res?.message)) {
+            return flat
+                .filter((res) => res?.message)
+                .map((o) => {
+                    return {
+                        message: o.message,
+                        type: o.type ?? o.importance === "CRITICAL" ? "error" : "warning",
+                        missing: o.missing ?? o.message.includes("is missing"), // Indicates that the field is missing
+                    };
+                }); // Some of the requests end in errors
+        }
 
-    return true;
+        // Allow for providing one function to execute after data update
+        const hasFunc = results.find((f) => typeof f === "function");
+        if (hasFunc) return hasFunc;
+
+        return true;
+    });
 }
 
 export function checkStatus(warnings, errors, items = []) {

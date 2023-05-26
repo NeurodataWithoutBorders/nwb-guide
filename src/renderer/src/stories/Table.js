@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { notify } from "../globals";
+import { notify } from "../dependencies/globals";
 import { Handsontable, css } from "./hot";
 import { header } from "./forms/utils";
 import { errorHue, warningHue } from "./globals";
@@ -119,7 +119,7 @@ export class Table extends LitElement {
         if (!message) {
             const errors = this.querySelectorAll("[error]");
             const len = errors.length;
-            if (len === 1) message = errors[0].title;
+            if (len === 1) message = errors[0].title || "Error found";
             else if (len) message = `${len} errors exist on this table.`;
         }
 
@@ -332,6 +332,8 @@ export class Table extends LitElement {
                 if (value == undefined || value === "") delete target[rowName][header];
                 else target[rowName][header] = value;
             }
+
+            if (typeof isValid === "function") isValid();
             // }
         });
 
