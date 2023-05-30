@@ -4,7 +4,7 @@ import { get, save } from "../../progress.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
 
-import { ProgressBar } from '../ProgressBar'
+import { ProgressBar } from "../ProgressBar";
 
 export class Page extends LitElement {
     // static get styles() {
@@ -112,7 +112,7 @@ export class Page extends LitElement {
         }
 
         let completed = 0;
-        elements.progress.value = { b: completed, tsize: toRun.length }
+        elements.progress.value = { b: completed, tsize: toRun.length };
         for (let info of toRun) {
             const { subject, session } = info;
             const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
