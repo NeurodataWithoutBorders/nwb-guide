@@ -59,9 +59,9 @@ schema.Ecephys.ElectrodeColumns = {
     '*': function (this: JSONSchemaForm, prop, parent, path) {
 
         const name = parent['name']
+        if (!name) return true // Allow blank rows
 
         if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
-
             const element = rerender.call(this, ['Ecephys', 'Electrodes'])
             element.schema.properties[name] = {} // Ensure property is present in the schema now
             element.data.forEach(o => name in o ? undefined : o[name] = '') // Set column value as blank if not existent on row
