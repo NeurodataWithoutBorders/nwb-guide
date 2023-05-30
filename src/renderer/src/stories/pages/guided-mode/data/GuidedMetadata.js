@@ -83,7 +83,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             renderTable: (name, metadata, path) => {
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
-                if (name !== "ElectrodeColumns" && name !== "Electrodes") return new SimpleTable(metadata);
+                if (name !== "Electrodes") return new SimpleTable(metadata);
                 // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
             },
             onThrow,
