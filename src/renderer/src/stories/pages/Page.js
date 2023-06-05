@@ -102,18 +102,18 @@ export class Page extends LitElement {
 
         let elements = {};
         // if (isMultiple) {
-            popup.hideLoading();
-            const element = popup.getHtmlContainer();
-            element.innerText = "";
+        popup.hideLoading();
+        const element = popup.getHtmlContainer();
+        element.innerText = "";
 
-            const progressBar = new ProgressBar();
-            elements.progress = progressBar;
-            element.append(progressBar);
+        const progressBar = new ProgressBar();
+        elements.progress = progressBar;
+        element.append(progressBar);
         // }
 
         let completed = 0;
         elements.progress.value = { b: completed, tsize: toRun.length };
-        
+
         for (let info of toRun) {
             const { subject, session } = info;
             const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
