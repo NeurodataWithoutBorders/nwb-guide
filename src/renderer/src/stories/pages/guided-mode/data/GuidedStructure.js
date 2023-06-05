@@ -3,7 +3,7 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { Button } from "../../../Button.js";
-import { baseUrl } from "../../../../globals.js";
+import { baseUrl, supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 
@@ -137,11 +137,6 @@ export class GuidedStructurePage extends Page {
 
         const selected = this.info.globalState.interfaces;
 
-        const accepted = [
-            "SpikeGLXRecordingInterface", 
-            "PhySortingInterface"
-        ]
-
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
             .then((json) =>
@@ -150,7 +145,7 @@ export class GuidedStructurePage extends Page {
                         ...value,
                         key: key.replace("Interface", ""),
                         value: key,
-                        disabled: !accepted.includes(key)
+                        disabled: !supportedInterfaces.includes(key)
                     }; // Has label and keywords property already
                 })
             )
