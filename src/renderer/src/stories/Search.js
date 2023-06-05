@@ -117,32 +117,32 @@ export class Search extends LitElement {
                     if (a.label > b.label) return 1;
                     return 0;
                 }) // Sort alphabetically
-                .sort((a,b) => {
-                    if (a.disabled && b.disabled) return 0
-                    else if (a.disabled) return 1
-                    else if (b.disabled) return -1
+                .sort((a, b) => {
+                    if (a.disabled && b.disabled) return 0;
+                    else if (a.disabled) return 1;
+                    else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
                 .forEach((option) => {
-                const li = document.createElement("li");
-                li.classList.add("option");
-                li.setAttribute("hidden", "");
-                li.setAttribute("data-keywords", JSON.stringify(option.keywords));
-                li.addEventListener("click", () => this.#onSelect(option));
+                    const li = document.createElement("li");
+                    li.classList.add("option");
+                    li.setAttribute("hidden", "");
+                    li.setAttribute("data-keywords", JSON.stringify(option.keywords));
+                    li.addEventListener("click", () => this.#onSelect(option));
 
-                if (option.disabled) li.setAttribute('disabled', '')
+                    if (option.disabled) li.setAttribute("disabled", "");
 
-                const label = document.createElement("h4");
-                label.classList.add("label");
-                label.innerText = option.label;
-                li.appendChild(label);
+                    const label = document.createElement("h4");
+                    label.classList.add("label");
+                    label.innerText = option.label;
+                    li.appendChild(label);
 
-                const keywords = document.createElement("small");
-                keywords.classList.add("keywords");
-                keywords.innerText = option.keywords.join(", ");
-                li.appendChild(keywords);
+                    const keywords = document.createElement("small");
+                    keywords.classList.add("keywords");
+                    keywords.innerText = option.keywords.join(", ");
+                    li.appendChild(keywords);
 
-                this.list.appendChild(li);
-            });
+                    this.list.appendChild(li);
+                });
         }
 
         return html`

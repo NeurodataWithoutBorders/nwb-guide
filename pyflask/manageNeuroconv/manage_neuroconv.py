@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional, Union
-from neuroconv.datainterfaces import interface_list #, SpikeGLXRecordingInterface, PhySortingInterface
+from neuroconv.datainterfaces import interface_list  # , SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
 
@@ -63,7 +63,9 @@ def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
 
     # Hard coded for now - eventual goal will be to import this from NeuroConv
-    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list} # dict(SpikeGLX=SpikeGLXRecordingInterface, Phy=PhySortingInterface)
+    interfaces_to_load = {
+        interface.__name__.replace("Interface", ""): interface for interface in interface_list
+    }  # dict(SpikeGLX=SpikeGLXRecordingInterface, Phy=PhySortingInterface)
 
     return {
         interface.__name__: {

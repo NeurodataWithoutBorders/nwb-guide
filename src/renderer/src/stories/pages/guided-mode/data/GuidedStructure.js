@@ -134,13 +134,9 @@ export class GuidedStructurePage extends Page {
     };
 
     async updated() {
-
         const selected = this.info.globalState.interfaces;
 
-        const accepted = [
-            "SpikeGLXRecordingInterface", 
-            "PhySortingInterface"
-        ]
+        const accepted = ["SpikeGLXRecordingInterface", "PhySortingInterface"];
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
@@ -150,7 +146,7 @@ export class GuidedStructurePage extends Page {
                         ...value,
                         key: key.replace("Interface", ""),
                         value: key,
-                        disabled: !accepted.includes(key)
+                        disabled: !accepted.includes(key),
                     }; // Has label and keywords property already
                 })
             )
