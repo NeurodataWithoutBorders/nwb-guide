@@ -134,7 +134,6 @@ export class GuidedStructurePage extends Page {
     };
 
     async updated() {
-
         const selected = this.info.globalState.interfaces;
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
