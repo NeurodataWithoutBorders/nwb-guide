@@ -36,7 +36,7 @@ export class GuidedUploadPage extends Page {
             properties: {
                 api_key: {
                     type: "string",
-                    format: 'password'
+                    format: "password",
                 },
                 dandiset_id: {
                     type: "string",
