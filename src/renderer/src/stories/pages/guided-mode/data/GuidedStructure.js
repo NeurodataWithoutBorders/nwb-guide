@@ -144,7 +144,7 @@ export class GuidedStructurePage extends Page {
                         ...value,
                         key: key.replace("Interface", ""),
                         value: key,
-                        disabled: !supportedInterfaces.includes(key)
+                        disabled: !supportedInterfaces.includes(key),
                     }; // Has label and keywords property already
                 })
             )

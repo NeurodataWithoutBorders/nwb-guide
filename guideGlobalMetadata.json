@@ -1,6 +1,6 @@
 {
     "supported_interfaces": [
-        "SpikeGLXRecordingInterface", 
+        "SpikeGLXRecordingInterface",
         "PhySortingInterface"
     ]
 }
