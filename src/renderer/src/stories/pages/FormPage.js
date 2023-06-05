@@ -4,7 +4,7 @@ import { Page } from "./Page.js";
 import { validateOnChange } from "../../validation/index.js";
 import { onThrow } from "../../errors";
 
-export function schemaToPages(schema, globalStatePath, options) {
+export function schemaToPages(schema, globalStatePath, options, transformationCallback = info => info) {
     return Object.entries(schema.properties)
         .filter(([_, value]) => value.properties)
         .map(([key, value]) => {
@@ -16,7 +16,7 @@ export function schemaToPages(schema, globalStatePath, options) {
             // Only bring requirements from the current page
             else delete optionsCopy.required;
 
-            const page = new GuidedFormPage({
+            const page = new GuidedFormPage(transformationCallback({
                 label: key,
                 key,
                 section: this.info.section,
@@ -25,7 +25,7 @@ export function schemaToPages(schema, globalStatePath, options) {
                     ...optionsCopy,
                     schema: { properties: { [key]: value } },
                 },
-            });
+            }));
 
             delete schema.properties[key];
 
@@ -66,13 +66,15 @@ export class GuidedFormPage extends Page {
             onThrow,
         }));
 
+        const { title, label } = this.info
+
         form.style.width = "100%";
 
         return html`
             <div id="guided-mode-starting-container" class="guided--main-tab" data-parent-tab-name="Dataset Structure">
                 <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
                     <div class="title">
-                        <h1 class="guided--text-sub-step">Data Formats</h1>
+                        <h1 class="guided--text-sub-step">${title ?? label}</h1>
                     </div>
                     <div class="guided--section">${form}</div>
                 </div>
