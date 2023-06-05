@@ -8,7 +8,6 @@ export class GuidedStartPage extends Page {
     }
 
     updated() {
-        
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         // Handle dropdown text
         const infoDropdowns = (this.shadowRoot ?? this).getElementsByClassName("guided--info-dropdown");
