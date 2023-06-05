@@ -74,8 +74,8 @@ export class GuidedNewDatasetPage extends Page {
         schema.properties = { ...schema.properties };
 
         const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
-            info.title = `${info.label} Global Metadata`
-            return info
+            info.title = `${info.label} Global Metadata`;
+            return info;
         });
 
         pages.forEach((page) => this.addPage(page.info.label, page));

@@ -4,7 +4,7 @@ import { Page } from "./Page.js";
 import { validateOnChange } from "../../validation/index.js";
 import { onThrow } from "../../errors";
 
-export function schemaToPages(schema, globalStatePath, options, transformationCallback = info => info) {
+export function schemaToPages(schema, globalStatePath, options, transformationCallback = (info) => info) {
     return Object.entries(schema.properties)
         .filter(([_, value]) => value.properties)
         .map(([key, value]) => {
@@ -16,16 +16,18 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
             // Only bring requirements from the current page
             else delete optionsCopy.required;
 
-            const page = new GuidedFormPage(transformationCallback({
-                label: key,
-                key,
-                section: this.info.section,
-                globalStatePath,
-                formOptions: {
-                    ...optionsCopy,
-                    schema: { properties: { [key]: value } },
-                },
-            }));
+            const page = new GuidedFormPage(
+                transformationCallback({
+                    label: key,
+                    key,
+                    section: this.info.section,
+                    globalStatePath,
+                    formOptions: {
+                        ...optionsCopy,
+                        schema: { properties: { [key]: value } },
+                    },
+                })
+            );
 
             delete schema.properties[key];
 
@@ -66,7 +68,7 @@ export class GuidedFormPage extends Page {
             onThrow,
         }));
 
-        const { title, label } = this.info
+        const { title, label } = this.info;
 
         form.style.width = "100%";
 
