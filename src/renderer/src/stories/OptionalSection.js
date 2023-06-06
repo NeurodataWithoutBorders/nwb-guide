@@ -9,6 +9,10 @@ export class OptionalSection extends LitElement {
                 text-align: center;
             }
 
+            h2 {
+                margin: 0;
+            }
+
             .optional-section__content {
                 text-align: left;
             }
@@ -32,7 +36,7 @@ export class OptionalSection extends LitElement {
 
     constructor(props) {
         super();
-        this.title = props.title ?? "";
+        this.header = props.header ?? "";
         this.description = props.description ?? "This is the description of the optional section.";
         this.content = props.content ?? "";
         this.altContent = props.altContent ?? "";
@@ -85,8 +89,8 @@ export class OptionalSection extends LitElement {
         return html`
             <div class="optional-section">
                 <div class="optional-section__header">
-                    ${this.title ? html`<h2 class="optional-section__title">${this.title}</h2>` : ""}
-                    <p class="optional-section__description">${this.description}</p>
+                    ${this.header ? html`<h2>${this.header}</h2>` : ""}
+                    <div>${this.description}</div>
                     <div class="optional-section__toggle">${this.yes} ${this.no}</div>
                 </div>
                 <div class="optional-section__content" hidden>
