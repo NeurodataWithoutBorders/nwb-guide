@@ -38,7 +38,9 @@ export class DocumentationPage extends Page {
                                             class="view_doc_button sodaVideo-button"
                                             style="margin-top: 1rem"
                                             @click="${() => {
-                                                window.open("https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda")
+                                                window.open(
+                                                    "https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda"
+                                                );
                                             }}"
                                         >
                                             View the Documentation

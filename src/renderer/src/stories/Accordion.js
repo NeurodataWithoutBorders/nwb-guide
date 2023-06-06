@@ -9,7 +9,7 @@ import {
     warningSymbol,
 } from "./globals";
 
-import { Chevron } from './Chevron'
+import { Chevron } from "./Chevron";
 
 // import 'fa-icons';
 
@@ -45,7 +45,7 @@ export class Accordion extends LitElement {
             .header > *:nth-child(2) {
                 padding-bottom: 2px;
             }
-            
+
             nwb-chevron {
                 margin: 10px;
             }
@@ -198,7 +198,7 @@ export class Accordion extends LitElement {
 
         //toggle the chevron
         const chevron = dropdown.querySelector("nwb-chevron");
-        chevron.direction = state ? "bottom" : "right"
+        chevron.direction = state ? "bottom" : "right";
 
         this.sections[sectionName].open = state;
     };
@@ -220,9 +220,9 @@ export class Accordion extends LitElement {
                                         <small>${info.subtitle}</small>
                                     </div>
                                     ${new Chevron({
-                                        direction: 'right',
+                                        direction: "right",
                                         color: faColor,
-                                        size: faSize
+                                        size: faSize,
                                     })}
                                 </div>
                                 <div

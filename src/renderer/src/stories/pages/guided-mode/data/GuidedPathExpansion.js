@@ -122,8 +122,7 @@ export class GuidedPathExpansionPage extends Page {
 
     optional = new OptionalSection({
         header: "Would you like to locate data programmatically?",
-        description:
-            html`<p>Automatically detect source data for multiple subjects and sessions.</p>`,
+        description: html`<p>Automatically detect source data for multiple subjects and sessions.</p>`,
         // altContent: this.altForm,
     });
 
@@ -144,13 +143,16 @@ export class GuidedPathExpansionPage extends Page {
 
         const form = (this.form = new JSONSchemaForm({ ...structureGlobalState, onThrow }));
 
-
         const pathExpansionInfoBox = new InfoBox({
-            header: 'How do I use a Python format string for path expansion?',
-            content: html`For complete documentation of the path expansion feature of neuroconv, visit the <a href="https://neuroconv.readthedocs.io/en/main/user_guide/expand_path.html" target="_blank">Path Expansion documentation</a> page.`
-        })
+            header: "How do I use a Python format string for path expansion?",
+            content: html`For complete documentation of the path expansion feature of neuroconv, visit the
+                <a href="https://neuroconv.readthedocs.io/en/main/user_guide/expand_path.html" target="_blank"
+                    >Path Expansion documentation</a
+                >
+                page.`,
+        });
 
-        pathExpansionInfoBox.style.margin = '10px 0px'
+        pathExpansionInfoBox.style.margin = "10px 0px";
 
         this.optional.innerHTML = "";
         this.optional.append(pathExpansionInfoBox, form);

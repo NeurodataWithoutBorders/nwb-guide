@@ -63,14 +63,14 @@ export class GuidedStartPage extends Page {
                             of your local data files will ever be modified or moved.
                         </p>
                         ${new InfoBox({
-                            header: 'Learn more about the conversion process',
+                            header: "Learn more about the conversion process",
                             content: html`
-                            Although not required to use Guided Mode, you can learn more about the NWB conversion
-                            process in the
-                            <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
-                                >neuroconv documentation page</a
-                            >
-                            `
+                                Although not required to use Guided Mode, you can learn more about the NWB conversion
+                                process in the
+                                <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
+                                    >neuroconv documentation page</a
+                                >
+                            `,
                         })}
                     </div>
                 </div>

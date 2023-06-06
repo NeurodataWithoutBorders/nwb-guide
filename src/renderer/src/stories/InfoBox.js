@@ -2,10 +2,8 @@ import { LitElement, css, html } from "lit";
 import { Chevron } from "./Chevron";
 
 export class InfoBox extends LitElement {
-
     static get styles() {
         return css`
-
             @keyframes demo-box-fade-in {
                 0% {
                     opacity: 0;
@@ -49,7 +47,6 @@ export class InfoBox extends LitElement {
                 color: #000;
             }
 
-
             .guided--info-container {
                 background-color: var(--color-transparent-soda-green);
 
@@ -70,32 +67,31 @@ export class InfoBox extends LitElement {
                 font-size: 13px;
                 color: hsl(0, 0%, 22%);
             }
-            
+
             .container-open {
                 display: flex;
                 margin-bottom: 0px;
                 animation: demo-box-fade-in 0.2s cubic-bezier(0, 0.2, 0.2, 0.96);
             }
-        `
+        `;
     }
 
-    constructor({ header = "Info", content, type = 'info'} = {}){
-        super()
-        this.header = header
-        this.content = content
-        this.type = type
+    constructor({ header = "Info", content, type = "info" } = {}) {
+        super();
+        this.header = header;
+        this.content = content;
+        this.type = type;
     }
 
     updated() {
-
         const infoDropdowns = this.shadowRoot.querySelectorAll(".guided--info-dropdown");
         for (const infoDropdown of Array.from(infoDropdowns)) {
-
             const infoTextElement = infoDropdown.querySelector("#header");
 
             // Auto-add icons if they're not there
             if (this.type === "info") infoTextElement.insertAdjacentHTML("beforebegin", `<span class="icon">ℹ️</span>`);
-            if (this.type === "warning") infoTextElement.insertAdjacentHTML("beforebegin", ` <span class="icon">⚠️</span>`);
+            if (this.type === "warning")
+                infoTextElement.insertAdjacentHTML("beforebegin", ` <span class="icon">⚠️</span>`);
 
             infoDropdown.onclick = () => {
                 const infoContainer = infoDropdown.nextElementSibling;
@@ -104,10 +100,10 @@ export class InfoBox extends LitElement {
                 const infoContainerIsopen = infoContainer.classList.contains("container-open");
 
                 if (infoContainerIsopen) {
-                    infoContainerChevron.direction = 'right';
+                    infoContainerChevron.direction = "right";
                     infoContainer.classList.remove("container-open");
                 } else {
-                    infoContainerChevron.direction = 'bottom';
+                    infoContainerChevron.direction = "bottom";
                     infoContainer.classList.add("container-open");
                 }
             };
@@ -117,17 +113,14 @@ export class InfoBox extends LitElement {
     render() {
         return html`
             <div class="guided--info-dropdown">
-            <span id="header">
-                ${this.header}
-            </span>
-            ${new Chevron({ direction: 'right' })}
+                <span id="header"> ${this.header} </span>
+                ${new Chevron({ direction: "right" })}
             </div>
             <div class="guided--info-container">
                 <span class="guided--help-text">${this.content}</span>
             </div>
-        `
+        `;
     }
 }
 
-customElements.get("nwbguide-info-box") ||
-    customElements.define("nwbguide-info-box", InfoBox);
+customElements.get("nwbguide-info-box") || customElements.define("nwbguide-info-box", InfoBox);
