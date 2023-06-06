@@ -29,7 +29,7 @@ export class ContactPage extends Page {
                                 <div class="docu-content-container">
                                     <h2 class="document_text">
                                         If you have any issue or suggestions, please email us at
-                                        <a style="text-decoration: underline" href="mailto:help@fairdataihub.org"
+                                        <a style="text-decoration: underline" target="_blank" href="mailto:help@fairdataihub.org"
                                             >help@fairdataihub.org</a
                                         >
                                     </h2>

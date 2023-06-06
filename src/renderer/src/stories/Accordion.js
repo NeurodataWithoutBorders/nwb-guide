@@ -9,6 +9,8 @@ import {
     warningSymbol,
 } from "./globals";
 
+import { Chevron } from './Chevron'
+
 // import 'fa-icons';
 
 const faSize = "1em";
@@ -28,34 +30,6 @@ export class Accordion extends LitElement {
                 white-space: nowrap;
             }
 
-            .chevron {
-                padding: 0 10px;
-                transform: translateY(-3px);
-            }
-
-            .chevron::before {
-                border-style: solid;
-                border-width: 0.23em 0.23em 0 0;
-                content: "";
-                display: inline-block;
-                height: 0.45em;
-                transform: rotate(-45deg);
-                vertical-align: middle;
-                width: 0.45em;
-            }
-
-            .chevron.right:before {
-                left: 0;
-                position: relative;
-                top: 0.15em;
-                transform: rotate(45deg);
-            }
-
-            .chevron.bottom:before {
-                top: 0;
-                transform: rotate(135deg);
-            }
-
             .header > * {
                 line-height: initial;
                 margin: 0;
@@ -70,6 +44,10 @@ export class Accordion extends LitElement {
 
             .header > *:nth-child(2) {
                 padding-bottom: 2px;
+            }
+            
+            nwb-chevron {
+                margin: 10px;
             }
 
             .guided--nav-bar-section {
@@ -219,10 +197,8 @@ export class Accordion extends LitElement {
         this.#updateClass("active", dropdown, !state);
 
         //toggle the chevron
-        const chevron = dropdown.querySelector(".chevron");
-
-        chevron.classList.add(state ? "bottom" : "right");
-        chevron.classList.remove(state ? "right" : "bottom");
+        const chevron = dropdown.querySelector("nwb-chevron");
+        chevron.direction = state ? "bottom" : "right"
 
         this.sections[sectionName].open = state;
     };
@@ -243,7 +219,11 @@ export class Accordion extends LitElement {
                                         <span>${sectionName}</span>
                                         <small>${info.subtitle}</small>
                                     </div>
-                                    <div class="chevron right" color="${faColor}" size="${faSize}"></div>
+                                    ${new Chevron({
+                                        direction: 'right',
+                                        color: faColor,
+                                        size: faSize
+                                    })}
                                 </div>
                                 <div
                                     data-section="${sectionName}"

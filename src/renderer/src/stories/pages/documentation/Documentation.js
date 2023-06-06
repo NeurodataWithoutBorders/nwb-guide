@@ -1,5 +1,4 @@
 import { html } from "lit";
-import { openLink } from "../../../links.js";
 import { docu_lottie } from "../../../../assets/lotties/documentation-lotties.js";
 import { Page } from "../Page.js";
 
@@ -39,9 +38,7 @@ export class DocumentationPage extends Page {
                                             class="view_doc_button sodaVideo-button"
                                             style="margin-top: 1rem"
                                             @click="${() => {
-                                                openLink(
-                                                    "https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda"
-                                                );
+                                                window.open("https://docs.sodaforsparc.io/docs/getting-started/organize-and-submit-sparc-datasets-with-soda")
                                             }}"
                                         >
                                             View the Documentation
