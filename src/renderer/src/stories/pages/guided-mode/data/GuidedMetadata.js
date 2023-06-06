@@ -30,7 +30,7 @@ export class GuidedMetadataPage extends ManagedPage {
             this.info.globalState.preview = results; // Save the preview results
 
             this.onTransition(1);
-        }
+        },
     };
 
     createForm = ({ subject, session, info }) => {

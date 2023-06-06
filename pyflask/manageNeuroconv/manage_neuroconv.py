@@ -244,7 +244,7 @@ def convert_to_nwb(info: dict) -> str:
     else:
         resolved_output_path = conversion_save_path / nwbfile_path
 
-    resolved_output_path.parent.mkdir(exist_ok=True, parents=True) # Ensure all parent directories exist
+    resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
@@ -289,10 +289,7 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    return dict(
-        preview = str(file),
-        file = str(resolved_output_path)
-    )
+    return dict(preview=str(file), file=str(resolved_output_path))
 
 
 def upload_to_dandi(
@@ -306,7 +303,7 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path=stub_save_path / project, # Scope valid DANDI upload paths to GUIDE projects
+        nwb_folder_path=stub_save_path / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )

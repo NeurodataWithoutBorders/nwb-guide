@@ -116,9 +116,9 @@ export class Page extends LitElement {
         for (let info of toRun) {
             const { subject, session } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
-            const relativePath = `${this.info.globalState.project.name}/${file}`
+            const relativePath = `${this.info.globalState.project.name}/${file}`;
 
-            console.log('relativePath', relativePath)
+            console.log("relativePath", relativePath);
             const result = await runConversion(
                 {
                     nwbfile_path: relativePath,
