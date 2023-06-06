@@ -8,8 +8,6 @@ export class GuidedStartPage extends Page {
     }
 
     updated() {
-        this.info.globalState = {}; // Reset global state when navigating back to this page
-
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         // Handle dropdown text
         const infoDropdowns = (this.shadowRoot ?? this).getElementsByClassName("guided--info-dropdown");
