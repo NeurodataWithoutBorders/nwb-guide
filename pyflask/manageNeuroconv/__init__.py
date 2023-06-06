@@ -8,3 +8,9 @@ from .manage_neuroconv import (
     upload_to_dandi,
     listen_to_neuroconv_events,
 )
+
+
+from .info import (
+    stub_save_path,
+    conversion_save_path
+)

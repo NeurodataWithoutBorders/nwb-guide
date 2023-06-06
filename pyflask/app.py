@@ -13,6 +13,10 @@ configure_namespaces()
 
 from setupUtils import configureLogger, configureRouteHandlers, configureAPI
 
+# get urls to serve files
+from manageNeuroconv.info import stub_save_path, conversion_save_path
+
+
 app = Flask(__name__)
 
 # Always enable CORS
