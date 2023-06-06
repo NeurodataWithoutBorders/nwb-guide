@@ -75,7 +75,10 @@ export class GuidedNewDatasetPage extends Page {
 
         this.state = structuredClone(this.info.globalState.project);
 
-        const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false });
+        const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
+            info.title = `${info.label} Global Metadata`;
+            return info;
+        });
 
         pages.forEach((page) => this.addPage(page.info.label, page));
 
