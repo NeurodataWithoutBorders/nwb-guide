@@ -42,9 +42,9 @@ export const save = (page, overrides = {}) => {
 
     params.set("project", guidedProgressFileName);
 
+    // Update browser history state
     const value = `${location.pathname}?${params}`;
-    history.state.project = guidedProgressFileName;
-
+    if (history.state) history.state.project = guidedProgressFileName;
     window.history.pushState(history.state, null, value);
 
     //Destination: HOMEDIR/NWBGUIDE/Guided-Progress

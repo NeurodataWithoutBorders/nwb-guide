@@ -191,9 +191,9 @@ function initialize() {
   function createWindow() {
     // mainWindow.webContents.openDevTools();
 
-    mainWindow.webContents.on("new-window", (event, url) => {
-      event.preventDefault();
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url);
+      return { action: 'deny' };
     });
 
     mainWindow.webContents.once("dom-ready", () => {
