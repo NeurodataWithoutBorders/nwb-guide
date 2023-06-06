@@ -27,6 +27,7 @@ configureRouteHandlers(api)
 
 api.init_app(app)
 
+
 @api.route("/server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
     def get(self):
