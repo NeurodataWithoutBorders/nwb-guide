@@ -30,13 +30,16 @@ configureRouteHandlers(api)
 
 api.init_app(app)
 
-@app.route('/conversions/<path:path>')
+
+@app.route("/conversions/<path:path>")
 def send_conversions(path):
     return send_from_directory(conversion_save_path, path)
 
-@app.route('/stubs/<path:path>')
+
+@app.route("/stubs/<path:path>")
 def send_stubs(path):
     return send_from_directory(stub_save_path, path)
+
 
 @api.route("/server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
