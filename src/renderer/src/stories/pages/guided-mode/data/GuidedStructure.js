@@ -3,7 +3,7 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { Button } from "../../../Button.js";
-import { baseUrl } from "../../../../globals.js";
+import { baseUrl, supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 
@@ -144,6 +144,7 @@ export class GuidedStructurePage extends Page {
                         ...value,
                         key: key.replace("Interface", ""),
                         value: key,
+                        disabled: !supportedInterfaces.includes(key),
                     }; // Has label and keywords property already
                 })
             )
