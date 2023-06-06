@@ -4,9 +4,6 @@ from __future__ import print_function
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 
-from manageNeuroconv.info import conversion_save_path, stub_save_path
-
-
 # from flask_cors import CORS
 from namespaces import configure_namespaces
 from flask_restx import Resource
