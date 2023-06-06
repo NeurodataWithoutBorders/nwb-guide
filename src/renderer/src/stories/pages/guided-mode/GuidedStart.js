@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { Page } from "../Page.js";
 import "./GuidedFooter";
+import { InfoBox } from "../../InfoBox.js";
 
 export class GuidedStartPage extends Page {
     constructor(...args) {
@@ -59,21 +60,16 @@ export class GuidedStartPage extends Page {
                             generate a valid NWB file and ask for your review before uploading to DANDI. Note that none
                             of your local data files will ever be modified or moved.
                         </p>
-                        <div class="guided--info-dropdown">
-                            <p class="guided--dropdown-text" data-dropdown-type="info">
-                                Learn more about the conversion process
-                            </p>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                        <div class="guided--info-container">
-                            <p class="guided--help-text">
+                        ${new InfoBox({
+                            header: "Learn more about the conversion process",
+                            content: html`
                                 Although not required to use Guided Mode, you can learn more about the NWB conversion
                                 process in the
                                 <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
                                     >neuroconv documentation page</a
-                                >.
-                            </p>
-                        </div>
+                                >
+                            `,
+                        })}
                     </div>
                 </div>
             </div>

@@ -1,7 +1,6 @@
 import { html } from "lit";
 import lottie from "lottie-web";
 import { column1Lottie, column2Lottie, column3Lottie } from "../../../../assets/lotties/overview-lotties.js";
-import { openLink } from "../../../links.js";
 import { Page } from "../Page.js";
 
 import { startLottie } from "../../../dependencies/globals.js";
@@ -56,7 +55,7 @@ export class GettingStartedPage extends Page {
                     <button
                         id="home-button-interface-instructions-link"
                         class="getting-started-btn secondary-plain-button text-base"
-                        @click="${() => openLink("https://www.nwb.org/")}"
+                        @click="${() => window.open("https://www.nwb.org/")}"
                     >
                         <p class="interface-btn-txt">Learn about NWB and DANDI</p>
 
