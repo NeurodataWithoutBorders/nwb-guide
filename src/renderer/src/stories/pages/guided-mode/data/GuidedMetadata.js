@@ -17,11 +17,20 @@ export class GuidedMetadataPage extends ManagedPage {
 
     form;
     footer = {
+        next: "Run Conversion Preview",
         onNext: async () => {
-            this.save();
+            this.save(); // Save in case the conversion fails
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
+
+            // Preview a random conversion
+            delete this.info.globalState.preview; // Clear the preview results
+            const results = await this.runConversions({ stub_test: true }, 1, {
+                title: "Testing conversion on a random session",
+            });
+            this.info.globalState.preview = results; // Save the preview results
+
             this.onTransition(1);
-        },
+        }
     };
 
     createForm = ({ subject, session, info }) => {
@@ -137,7 +146,7 @@ export class GuidedMetadataPage extends ManagedPage {
                         if (subject.startsWith("sub-")) subject = subject.slice(4);
                         if (session.startsWith("ses-")) session = session.slice(4);
 
-                        const [{ file, result }] = await this.runConversions(
+                        const [{ file, preview }] = await this.runConversions(
                             { stub_test: true },
                             [{ subject, session }],
                             { title: "Running conversion preview" }
@@ -149,7 +158,7 @@ export class GuidedMetadataPage extends ManagedPage {
                             onClose: () => modal.remove(),
                         });
 
-                        modal.insertAdjacentHTML("beforeend", `<pre>${result}</pre>`);
+                        modal.insertAdjacentHTML("beforeend", `<pre>${preview}</pre>`);
                         document.body.appendChild(modal);
                     },
                 },

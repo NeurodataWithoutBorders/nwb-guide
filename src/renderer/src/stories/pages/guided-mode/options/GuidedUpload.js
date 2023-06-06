@@ -19,7 +19,7 @@ export class GuidedUploadPage extends Page {
             await this.form.validate(); // Will throw an error in the callback
 
             const info = { ...this.info.globalState.upload.info };
-            info.nwb_folder_path = this.info.globalState.conversion.info.output_folder;
+            info.project = this.info.globalState.project.name
 
             const results = await run("upload", info, { title: "Uploading to DANDI" }).catch((e) =>
                 this.notify(e.message, "error")

@@ -93,7 +93,6 @@ export class Page extends LitElement {
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
-        const folder = this.info.globalState.conversion?.info?.output_folder; // Do not require output_folder on the frontend
         let results = [];
 
         const popup = await openProgressSwal({ title: `Running conversion`, ...options });
@@ -116,12 +115,13 @@ export class Page extends LitElement {
 
         for (let info of toRun) {
             const { subject, session } = info;
-            const basePath = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
-            const file = folder ? `${folder}/${basePath}` : basePath;
+            const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
+            const relativePath = `${this.info.globalState.project.name}/${file}`
 
+            console.log('relativePath', relativePath)
             const result = await runConversion(
                 {
-                    nwbfile_path: file,
+                    nwbfile_path: relativePath,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                     ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
                     ...conversionOptions, // Any additional conversion options override the defaults
@@ -141,7 +141,7 @@ export class Page extends LitElement {
                 elements.progress.value = progressInfo;
             }
 
-            results.push({ file, result });
+            results.push(result);
         }
 
         popup.close();

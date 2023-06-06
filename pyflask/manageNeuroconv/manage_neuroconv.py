@@ -28,6 +28,7 @@ path_config = Path(project_base_path, "paths.config.json")
 f = path_config.open()
 data = json.load(f)
 stub_save_path = Path(Path.home(), *data["stubs"])
+conversion_save_path = Path(Path.home(), *data["conversions"])
 f.close()
 
 
@@ -233,15 +234,17 @@ def convert_to_nwb(info: dict) -> str:
     """
 
     nwbfile_path = Path(info["nwbfile_path"])
-    parent_folder = nwbfile_path.parent
 
     run_stub_test = info.get("stub_test")
-    parent_folder.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        stub_save_path.mkdir(exist_ok=True)
-        preview_path = stub_save_path / nwbfile_path.name
+        resolved_output_path = stub_save_path / nwbfile_path
+
+    else:
+        resolved_output_path = conversion_save_path / nwbfile_path
+
+    resolved_output_path.parent.mkdir(exist_ok=True, parents=True) # Ensure all parent directories exist
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
@@ -281,17 +284,20 @@ def convert_to_nwb(info: dict) -> str:
     # Actually run the conversion
     file = converter.run_conversion(
         metadata=info["metadata"],
-        nwbfile_path=preview_path if run_stub_test else nwbfile_path,
+        nwbfile_path=resolved_output_path,
         overwrite=info.get("overwrite", False),
         conversion_options=options,
     )
 
-    return str(file)
+    return dict(
+        preview = str(file),
+        file = str(resolved_output_path)
+    )
 
 
 def upload_to_dandi(
     dandiset_id: str,
-    nwb_folder_path: str,
+    project: str,
     api_key: str,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
@@ -300,7 +306,7 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path=Path(nwb_folder_path),
+        nwb_folder_path=stub_save_path / project, # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )
