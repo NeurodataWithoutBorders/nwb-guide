@@ -20,7 +20,8 @@ export class GuidedUploadPage extends Page {
 
             const info = { ...this.info.globalState.upload.info };
             info.project = this.info.globalState.project.name;
-
+            info.staging = parseInt(info.dandiset_id) >= 100000 // Automatically detect staging IDs
+             
             const results = await run("upload", info, { title: "Uploading to DANDI" }).catch((e) =>
                 this.notify(e.message, "error")
             );
@@ -40,10 +41,6 @@ export class GuidedUploadPage extends Page {
                 },
                 dandiset_id: {
                     type: "string",
-                },
-                staging: {
-                    type: "boolean",
-                    default: true, // Defualt to staging for now
                 },
                 cleanup: {
                     type: "boolean",
