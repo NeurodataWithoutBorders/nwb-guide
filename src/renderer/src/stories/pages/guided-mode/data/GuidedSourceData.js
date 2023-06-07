@@ -54,7 +54,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     if (result.message) {
                         const message = "Failed to get metadata with current source data. Please try again.";
                         this.notify(message, "error");
-                        throw result
+                        throw result;
                     }
 
                     // Merge metadata results with the generated info

@@ -239,7 +239,9 @@ def convert_to_nwb(info: dict) -> str:
         resolved_output_path = STUB_SAVE_FOLDER_PATH / nwbfile_path
 
     else:
-        resolved_output_path = (Path(output_folder) if output_folder else CONVERSION_SAVE_FOLDER_PATH) / project_name / nwbfile_path
+        resolved_output_path = (
+            (Path(output_folder) if output_folder else CONVERSION_SAVE_FOLDER_PATH) / project_name / nwbfile_path
+        )
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 

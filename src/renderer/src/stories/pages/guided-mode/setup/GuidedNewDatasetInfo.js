@@ -47,7 +47,7 @@ export class GuidedNewDatasetPage extends Page {
                     })
                     .catch((e) => {
                         this.notify(e, "error");
-                        throw e
+                        throw e;
                     });
                 if (!res) return;
             } else {
