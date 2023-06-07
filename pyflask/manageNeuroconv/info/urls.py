@@ -7,7 +7,7 @@ path_config = Path(
 )  # NOTE: You're going to have to ensure that this copies over to the Python distribution
 f = path_config.open()
 data = json.load(f)
-stub_save_path = Path(Path.home(), *data["stubs"])
-conversion_save_path = Path(Path.home(), *data["conversions"])
+STUB_SAVE_FOLDER_PATH = Path(Path.home(), *data["stubs"])
+CONVERSION_SAVE_FOLDER_PATH = Path(Path.home(), *data["conversions"])
 
 f.close()

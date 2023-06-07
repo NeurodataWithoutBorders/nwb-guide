@@ -13,7 +13,7 @@ from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
-from .info import stub_save_path, conversion_save_path
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 from datetime import datetime
 from sse import MessageAnnouncer
@@ -234,10 +234,10 @@ def convert_to_nwb(info: dict) -> str:
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        resolved_output_path = stub_save_path / nwbfile_path
+        resolved_output_path = STUB_SAVE_FOLDER_PATH / nwbfile_path
 
     else:
-        resolved_output_path = conversion_save_path / nwbfile_path
+        resolved_output_path = CONVERSION_SAVE_FOLDER_PATH / nwbfile_path
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
@@ -298,7 +298,7 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path=stub_save_path / project,  # Scope valid DANDI upload paths to GUIDE projects
+        nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )

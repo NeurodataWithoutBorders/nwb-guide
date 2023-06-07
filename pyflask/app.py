@@ -14,7 +14,7 @@ configure_namespaces()
 from setupUtils import configureLogger, configureRouteHandlers, configureAPI
 
 # get urls to serve files
-from manageNeuroconv.info import stub_save_path, conversion_save_path
+from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 
 app = Flask(__name__)
@@ -34,12 +34,12 @@ api.init_app(app)
 
 @app.route("/conversions/<path:path>")
 def send_conversions(path):
-    return send_from_directory(conversion_save_path, path)
+    return send_from_directory(CONVERSION_SAVE_FOLDER_PATH, path)
 
 
 @app.route("/stubs/<path:path>")
 def send_stubs(path):
-    return send_from_directory(stub_save_path, path)
+    return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
 
 
 @api.route("/server_shutdown", endpoint="shutdown")

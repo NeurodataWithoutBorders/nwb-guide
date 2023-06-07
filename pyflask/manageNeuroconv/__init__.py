@@ -10,4 +10,4 @@ from .manage_neuroconv import (
 )
 
 
-from .info import stub_save_path, conversion_save_path
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
