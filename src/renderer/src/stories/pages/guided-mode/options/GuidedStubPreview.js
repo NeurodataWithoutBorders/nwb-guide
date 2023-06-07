@@ -10,8 +10,9 @@ export class GuidedStubPreviewPage extends Page {
         next: "Run Conversion",
         onNext: async () => {
             this.save(); // Save in case the conversion fails
-            delete this.info.globalState.conversion.results;
-            this.info.globalState.conversion.results = await this.runConversions({}, true, {
+
+            delete this.info.globalState.conversion;
+            this.info.globalState.conversion = await this.runConversions({}, true, {
                 title: "Running all conversions",
             });
             this.onTransition(1);
@@ -23,9 +24,9 @@ export class GuidedStubPreviewPage extends Page {
             <div>
                 ${this.info.globalState.preview
                     ? this.info.globalState.preview.map(
-                          (preview) =>
-                              html`<h2 class="guided--text-sub-step">${preview.file}</h2>
-                                  <pre>${preview.result}</pre>`
+                          (o) =>
+                              html`<h2 class="guided--text-sub-step">${o.file}</h2>
+                                  <pre>${o.preview}</pre>`
                       )
                     : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`}
             </div>

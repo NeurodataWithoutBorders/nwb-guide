@@ -63,7 +63,17 @@ export class GuidedPathExpansionPage extends Page {
             else if (!hidden && hidden !== undefined) {
                 const structure = this.info.globalState.structure.results;
 
-                const results = await run(`locate`, structure, { title: "Locating Data" }).catch((e) =>
+                const finalStructure = {};
+                for (let key in structure) {
+                    const entry = { ...structure[key] };
+                    const fstring = entry.format_string_path;
+                    if (fstring.split(".").length > 1) entry.file_path = fstring;
+                    else entry.folder_path = fstring;
+                    delete entry.format_string_path;
+                    finalStructure[key] = entry;
+                }
+
+                const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((e) =>
                     this.notify(e.message, "error")
                 );
 

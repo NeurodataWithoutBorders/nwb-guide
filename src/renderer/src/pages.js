@@ -10,8 +10,7 @@ import { GuidedSubjectsPage } from "./stories/pages/guided-mode/setup/GuidedSubj
 import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSourceData";
 import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata";
 import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload";
-import { GuidedDeleteFilesPage } from "./stories/pages/guided-mode/options/GuidedDelete";
-import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions";
+// import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions";
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./stories/Dashboard";
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
@@ -130,11 +129,12 @@ const pages = {
                 section: sections[1],
             }),
 
-            options: new GuidedConversionOptionsPage({
-                title: "Conversion Options",
-                label: "Conversion options",
-                section: sections[2],
-            }),
+            // options: new GuidedConversionOptionsPage({
+            // title: "Conversion Options",
+            //     label: "Basic options",
+            //     section: sections[2],
+            // }),
+
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
                 label: "Preview conversion",
