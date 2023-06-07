@@ -151,8 +151,8 @@ export class GuidedMetadataPage extends ManagedPage {
                             [{ subject, session }],
                             { title: "Running conversion preview" }
                         ).catch((e) => {
-                            this.notify(e.message, "error")
-                            throw e
+                            this.notify(e.message, "error");
+                            throw e;
                         });
 
                         const modal = new Modal({

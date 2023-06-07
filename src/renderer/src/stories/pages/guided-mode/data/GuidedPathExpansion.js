@@ -74,8 +74,8 @@ export class GuidedPathExpansionPage extends Page {
                 }
 
                 const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((e) => {
-                    this.notify(e.message, "error")
-                    throw e
+                    this.notify(e.message, "error");
+                    throw e;
                 });
 
                 const subjects = Object.keys(results);
