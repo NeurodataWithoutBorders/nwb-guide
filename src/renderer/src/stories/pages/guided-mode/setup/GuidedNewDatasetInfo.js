@@ -99,12 +99,7 @@ export class GuidedNewDatasetPage extends Page {
         const form = this.updateForm();
         form.style.width = "100%";
 
-        return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">Project Setup</h1>
-            </div>
-            ${form}
-        `;
+        return html` ${form} `;
     }
 }
 

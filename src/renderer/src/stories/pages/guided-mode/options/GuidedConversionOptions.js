@@ -51,12 +51,7 @@ export class GuidedConversionOptionsPage extends Page {
             onThrow,
         });
 
-        return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">Conversion Details</h1>
-            </div>
-            ${this.form}
-        `;
+        return html` ${this.form} `;
     }
 }
 

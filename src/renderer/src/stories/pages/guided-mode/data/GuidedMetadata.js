@@ -134,7 +134,7 @@ export class GuidedMetadataPage extends ManagedPage {
         });
 
         this.manager = new InstanceManager({
-            header: "File Metadata",
+            header: "Sessions",
             instanceType: "Session",
             instances,
 

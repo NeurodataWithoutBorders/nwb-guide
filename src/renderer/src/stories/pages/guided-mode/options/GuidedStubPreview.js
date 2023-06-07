@@ -21,9 +21,6 @@ export class GuidedStubPreviewPage extends Page {
 
     render() {
         return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">Conversion Preview</h1>
-            </div>
             <div>
                 ${this.info.globalState.preview
                     ? this.info.globalState.preview.map(
