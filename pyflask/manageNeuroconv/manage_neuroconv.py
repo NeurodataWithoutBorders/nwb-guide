@@ -229,6 +229,8 @@ def convert_to_nwb(info: dict) -> str:
     """
 
     nwbfile_path = Path(info["nwbfile_path"])
+    output_folder = info.get("output_folder")
+    project_name = info.get("project_name")
 
     run_stub_test = info.get("stub_test")
 
@@ -283,6 +285,11 @@ def convert_to_nwb(info: dict) -> str:
         overwrite=info.get("overwrite", False),
         conversion_options=options,
     )
+
+    if output_folder:
+        os.symlink(
+            Path(output_folder) / project_name, conversion_save_path / project_name
+        )  # Have a scoped pointer to the converted project
 
     return dict(preview=str(file), file=str(resolved_output_path))
 

@@ -128,7 +128,7 @@ const pages = {
                 label: "File metadata",
                 section: sections[1],
             }),
-            
+
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
                 label: "Preview conversion",

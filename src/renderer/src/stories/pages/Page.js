@@ -116,12 +116,14 @@ export class Page extends LitElement {
         for (let info of toRun) {
             const { subject, session } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
-            const relativePath = `${this.info.globalState.project.name}/${file}`;
 
-            console.log("relativePath", relativePath);
+            const { output_folder, name } = this.info.globalState.project;
+
             const result = await runConversion(
                 {
-                    nwbfile_path: relativePath,
+                    output_folder,
+                    project_name: name,
+                    nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                     ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
                     ...conversionOptions, // Any additional conversion options override the defaults

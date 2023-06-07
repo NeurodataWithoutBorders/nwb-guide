@@ -5,7 +5,7 @@
             "format": "directory",
             "description": "Enter the base directory of your data."
         },
-        "file_path": {
+        "format_string_path": {
             "type": "string",
             "description": "Enter a format string to locate data.",
             "placeholder": "{subject_id}_{session_id}_{task_name}/{subject_id}_{session_id}_{task_name}_imec0/{subject_id}_{session_id}_{task_name}_t0.imec0.ap.bin"
@@ -13,6 +13,6 @@
     },
     "required": [
         "base_directory",
-        "file_path"
+        "format_string_path"
     ]
 }
