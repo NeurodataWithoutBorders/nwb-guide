@@ -29,8 +29,8 @@ export class GuidedResultsPage extends Page {
 
         const otherElIds = [ 'embargo_status' ]
 
-        const liveId = '000552' // From Huszar
-        const isStaging = false // staging
+        const liveId = dandiset_id // '000552' // From Huszar
+        const isStaging = staging //false // staging
         const dandiset = await get(liveId, isStaging ? "staging" : undefined);
         
         otherElIds.forEach((str) => handleId(str, dandiset));
