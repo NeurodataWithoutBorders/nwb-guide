@@ -223,7 +223,7 @@ export class GuidedHomePage extends Page {
                                     data-next-element="guided-div-resume-progress-cards"
                                     style="width: 250px"
                                 >
-                                    Conversions in Progress
+                                    Existing Conversions
                                 </button>
                             </div>
                         </div>
