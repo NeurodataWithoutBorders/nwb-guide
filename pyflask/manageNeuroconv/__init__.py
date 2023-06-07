@@ -8,3 +8,6 @@ from .manage_neuroconv import (
     upload_to_dandi,
     listen_to_neuroconv_events,
 )
+
+
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH

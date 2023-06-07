@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 # import config
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 
 # from flask_cors import CORS
@@ -12,6 +12,10 @@ import sys
 configure_namespaces()
 
 from setupUtils import configureLogger, configureRouteHandlers, configureAPI
+
+# get urls to serve files
+from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+
 
 app = Flask(__name__)
 
@@ -26,6 +30,16 @@ api = configureAPI()
 configureRouteHandlers(api)
 
 api.init_app(app)
+
+
+@app.route("/conversions/<path:path>")
+def send_conversions(path):
+    return send_from_directory(CONVERSION_SAVE_FOLDER_PATH, path)
+
+
+@app.route("/stubs/<path:path>")
+def send_stubs(path):
+    return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
 
 
 @api.route("/server_shutdown", endpoint="shutdown")

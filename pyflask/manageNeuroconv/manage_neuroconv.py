@@ -13,6 +13,8 @@ from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+
 from datetime import datetime
 from sse import MessageAnnouncer
 
@@ -21,14 +23,6 @@ announcer = MessageAnnouncer()
 
 from pathlib import Path
 import os
-
-# Get stub save path
-project_base_path = Path(__file__).parent.parent.parent
-path_config = Path(project_base_path, "paths.config.json")
-f = path_config.open()
-data = json.load(f)
-stub_save_path = Path(Path.home(), *data["stubs"])
-f.close()
 
 
 def locate_data(info: dict) -> dict:
@@ -235,15 +229,19 @@ def convert_to_nwb(info: dict) -> str:
     """
 
     nwbfile_path = Path(info["nwbfile_path"])
-    parent_folder = nwbfile_path.parent
+    output_folder = info.get("output_folder")
+    project_name = info.get("project_name")
 
     run_stub_test = info.get("stub_test")
-    parent_folder.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        stub_save_path.mkdir(exist_ok=True)
-        preview_path = stub_save_path / nwbfile_path.name
+        resolved_output_path = STUB_SAVE_FOLDER_PATH / nwbfile_path
+
+    else:
+        resolved_output_path = CONVERSION_SAVE_FOLDER_PATH / nwbfile_path
+
+    resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
@@ -283,17 +281,22 @@ def convert_to_nwb(info: dict) -> str:
     # Actually run the conversion
     file = converter.run_conversion(
         metadata=info["metadata"],
-        nwbfile_path=preview_path if run_stub_test else nwbfile_path,
+        nwbfile_path=resolved_output_path,
         overwrite=info.get("overwrite", False),
         conversion_options=options,
     )
 
-    return str(file)
+    if output_folder:
+        os.symlink(
+            Path(output_folder) / project_name, conversion_save_path / project_name
+        )  # Have a scoped pointer to the converted project
+
+    return dict(preview=str(file), file=str(resolved_output_path))
 
 
 def upload_to_dandi(
     dandiset_id: str,
-    nwb_folder_path: str,
+    project: str,
     api_key: str,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
@@ -302,7 +305,7 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path=Path(nwb_folder_path),
+        nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )
