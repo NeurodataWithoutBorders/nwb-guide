@@ -106,7 +106,8 @@ export class Dashboard extends LitElement {
 
         window.onpushstate = window.onpopstate = (e) => {
             if (e.state) {
-                document.title = `${e.state.label} - ${this.name}`;
+                const titleString = e.state.title ?? e.state.label;
+                document.title = `${titleString} - ${this.name}`;
                 const page = this.pagesById[e.state.page]; // ?? this.pagesById[this.#activatePage]
                 if (!page) return;
                 if (page === this.#active) return; // Do not rerender current page
@@ -208,6 +209,7 @@ export class Dashboard extends LitElement {
                         visited: false,
                         active: false,
                         pageLabel: page.info.label,
+                        pageTitle: page.info.title,
                     };
 
                 state.active = false;

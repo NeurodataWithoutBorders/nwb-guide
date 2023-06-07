@@ -96,47 +96,58 @@ const pages = {
                 label: "Start",
             }),
             details: new GuidedNewDatasetPage({
+                title: "Project Setup",
                 label: "Project details",
                 section: sections[0],
             }),
             structure: new GuidedStructurePage({
+                title: "Data Formats",
                 label: "Data formats",
                 section: sections[0],
             }),
 
             locate: new GuidedPathExpansionPage({
+                title: "Locate Data",
                 label: "Locate data",
                 section: sections[0],
             }),
 
             subjects: new GuidedSubjectsPage({
+                title: "Subjects",
                 label: "Subject details",
                 section: sections[0],
             }),
 
             sourcedata: new GuidedSourceDataPage({
+                title: "Source Data",
                 label: "Source data",
                 section: sections[1],
             }),
+
             metadata: new GuidedMetadataPage({
+                title: "File Metadata",
                 label: "File metadata",
                 section: sections[1],
             }),
 
             options: new GuidedConversionOptionsPage({
-                label: "Basic options",
+                title: "Conversion Options",
+                label: "Conversion options",
                 section: sections[2],
             }),
             preview: new GuidedStubPreviewPage({
+                title: "Conversion Preview",
                 label: "Preview conversion",
                 section: sections[2],
             }),
             upload: new GuidedUploadPage({
-                label: "Upload to DANDI",
+                title: "DANDI Upload Options",
+                label: "DANDI upload",
                 section: sections[2],
             }),
 
             review: new GuidedResultsPage({
+                title: "Conversion Review",
                 label: "Review results",
                 section: sections[3],
             }),

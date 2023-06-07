@@ -69,12 +69,7 @@ export class GuidedUploadPage extends Page {
             onThrow,
         });
 
-        return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">DANDI Upload Details</h1>
-            </div>
-            ${this.form}
-        `;
+        return html` ${this.form} `;
     }
 }
 
