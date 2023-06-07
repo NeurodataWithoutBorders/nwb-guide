@@ -6,6 +6,12 @@
         "placeholder": "Enter project name here"
       },
 
+      "output_folder": {
+        "type": "string",
+        "format": "directory",
+        "description": "Provide a custom output location for this project. Will default to ~/NWB GUIDE/Conversions"
+      },
+
       "NWBFile": {
         "type": "object",
         "properties": {

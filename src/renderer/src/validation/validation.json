@@ -2,6 +2,7 @@
     "*": "check_{*}",
 
     "name": false,
+    "output_folder": false,
 
     "NWBFile": {
         "identifier": false,
