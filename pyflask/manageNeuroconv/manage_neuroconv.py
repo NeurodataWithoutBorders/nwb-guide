@@ -305,7 +305,7 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path=stub_save_path / project,  # Scope valid DANDI upload paths to GUIDE projects
+        nwb_folder_path=conversion_save_path / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )
