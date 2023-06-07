@@ -68,16 +68,9 @@ export class GuidedFormPage extends Page {
             onThrow,
         }));
 
-        const { title, label } = this.info;
-
         form.style.width = "100%";
 
-        return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">${title ?? label}</h1>
-            </div>
-            <div class="guided--section">${form}</div>
-        `;
+        return html` <div class="guided--section">${form}</div> `;
     }
 }
 

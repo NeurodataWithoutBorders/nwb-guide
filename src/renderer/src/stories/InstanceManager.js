@@ -60,7 +60,7 @@ export class InstanceManager extends LitElement {
             #instance-display {
                 padding: 25px;
                 border-left: 0;
-                overflow-y: scroll;
+                overflow-y: auto;
                 overflow-x: hidden;
                 height: 100%;
             }
@@ -111,7 +111,7 @@ export class InstanceManager extends LitElement {
     constructor(props = {}) {
         super();
         this.instances = props.instances ?? {};
-        this.header = props.header ?? "Instances";
+        this.header = props.header;
         this.instanceType = props.instanceType ?? "Instance";
         if (props.renderInstance) this.renderInstance = props.renderInstance;
         if (props.onAdded) this.onAdded = props.onAdded;
@@ -311,9 +311,7 @@ export class InstanceManager extends LitElement {
         return html`
             <div>
                 <div id="instance-sidebar">
-                    <div id="instance-header">
-                        <h2>${this.header}</h2>
-                    </div>
+                    ${this.header ? html`<div id="instance-header"><h2>${this.header}</h2></div>` : ""}
                     <ul id="instance-list">
                         ${instances}
                     </ul>
