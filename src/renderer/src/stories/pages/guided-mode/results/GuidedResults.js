@@ -27,12 +27,12 @@ export class GuidedResultsPage extends Page {
 
         const elIds = ["name", "modified"];
 
-        const otherElIds = [ 'embargo_status' ]
+        const otherElIds = ["embargo_status"];
 
         const liveId = dandiset_id // '000552' // From Huszar
-        const isStaging = staging //false // staging
+        const isStaging = staging //false
         const dandiset = await get(liveId, isStaging ? "staging" : undefined);
-        
+
         otherElIds.forEach((str) => handleId(str, dandiset));
         elIds.forEach((str) => handleId(str, dandiset.draft_version));
 
@@ -41,21 +41,30 @@ export class GuidedResultsPage extends Page {
         const secondElIds = ["description", "url"];
         secondElIds.forEach((str) => handleId(str, info));
 
-        const publicationEl = document.getElementById('publication')
-        const publications = (info.relatedResource ?? []).filter(o => o.relation === 'dcite:IsDescribedBy')
+        const publicationEl = document.getElementById("publication");
+        const publications = (info.relatedResource ?? []).filter((o) => o.relation === "dcite:IsDescribedBy");
 
-        if (publications.length) publicationEl.append(...await Promise.all(publications.map(async o => {
-            const li = document.createElement('li')
-            const { message } = await fetch(`http://api.crossref.org/works${(new URL(o.identifier)).pathname}`).then(res => res.json())
-            li.innerHTML = `${message.author.map(o => `${o.family}, ${o.given[0]}.`).join(', ')} (${message.created['date-parts'][0][0]}). ${message.title[0]}. <i>${message['container-title']}</i>, <i>${message.volume}</i>(${message.issue}), ${message.page}. doi:${message.DOI}`
-            return li
-        })))
-
-        else publicationEl.innerText = 'N/A'
-    } 
+        if (publications.length)
+            publicationEl.append(
+                ...(await Promise.all(
+                    publications.map(async (o) => {
+                        const li = document.createElement("li");
+                        const { message } = await fetch(
+                            `http://api.crossref.org/works${new URL(o.identifier).pathname}`
+                        ).then((res) => res.json());
+                        li.innerHTML = `${message.author.map((o) => `${o.family}, ${o.given[0]}.`).join(", ")} (${
+                            message.created["date-parts"][0][0]
+                        }). ${message.title[0]}. <i>${message["container-title"]}</i>, <i>${message.volume}</i>(${
+                            message.issue
+                        }), ${message.page}. doi:${message.DOI}`;
+                        return li;
+                    })
+                ))
+            );
+        else publicationEl.innerText = "N/A";
+    }
 
     render() {
-        
         const { dandiset_id } = this.info.globalState.upload.info;
         const { results } = this.info.globalState.conversion;
 
@@ -76,9 +85,7 @@ export class GuidedResultsPage extends Page {
 
                     <h3 style="padding: 0;">Related Publications</h3>
                     <hr />
-                    <ol id="publication">
-
-                    </ol>
+                    <ol id="publication"></ol>
 
                     <h3 style="padding: 0;">Files Uploaded with this Conversion</h3>
                     <hr />
