@@ -7,7 +7,7 @@ from .manage_neuroconv import (
     validate_metadata,
     upload_to_dandi,
     listen_to_neuroconv_events,
-    generate_dataset
+    generate_dataset,
 )
 
 

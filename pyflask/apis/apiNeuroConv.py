@@ -11,7 +11,7 @@ from manageNeuroconv import (
     validate_metadata,
     upload_to_dandi,
     listen_to_neuroconv_events,
-    generate_dataset
+    generate_dataset,
 )
 
 from errorHandlers import notBadRequestException
@@ -125,7 +125,6 @@ class GenerateDataset(Resource):
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
-
 
 
 # Create an events endpoint

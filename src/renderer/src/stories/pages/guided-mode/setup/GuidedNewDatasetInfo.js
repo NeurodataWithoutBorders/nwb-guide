@@ -39,7 +39,7 @@ export class GuidedNewDatasetPage extends Page {
 
             // Check if name is already used
             // Update existing progress file
-            console.log(globalState)
+            console.log(globalState);
             if (globalState.initialized) {
                 const res = await update(name, globalState.name)
                     .then((res) => {

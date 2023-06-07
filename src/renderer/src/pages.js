@@ -151,8 +151,8 @@ const pages = {
         },
     }),
     tutorial: new TutorialPage({
-        label: 'Tutorial',
-        icon: tutorialIcon
+        label: "Tutorial",
+        icon: tutorialIcon,
     }),
     docs: new DocumentationPage({
         label: "Documentation",
