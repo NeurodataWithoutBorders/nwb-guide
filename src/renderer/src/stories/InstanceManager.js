@@ -311,7 +311,7 @@ export class InstanceManager extends LitElement {
         return html`
             <div>
                 <div id="instance-sidebar">
-                ${this.header ? html`<div id="instance-header"><h2>${this.header}</h2></div>` : ''}
+                    ${this.header ? html`<div id="instance-header"><h2>${this.header}</h2></div>` : ""}
                     <ul id="instance-list">
                         ${instances}
                     </ul>

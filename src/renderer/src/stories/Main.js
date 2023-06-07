@@ -120,19 +120,23 @@ export class Main extends LitElement {
 
         const headerEl = header ? new GuidedHeader(header) : html`<div></div>`; // Render for grid
 
-        const capsuleEl = capsules ? new GuidedCapsules(capsules) : '';
+        const capsuleEl = capsules ? new GuidedCapsules(capsules) : "";
         const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
 
-        const title = page.info?.title
+        const title = page.info?.title;
         return html`
             ${headerEl}
-            ${capsules ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsuleEl}</div>` : html`<div style="height: 25px;"></div>`}
+            ${capsules
+                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsuleEl}</div>`
+                : html`<div style="height: 25px;"></div>`}
             <main id="content" class="js-content" style="overflow: hidden; display: flex;">
-                <section class="section js-section u-category-windows"> 
-                    ${title ? html`<div>
-                        <h1 class="title">${title}</h1>
-                        <hr>
-                    </div>` : ''}
+                <section class="section js-section u-category-windows">
+                    ${title
+                        ? html`<div>
+                              <h1 class="title">${title}</h1>
+                              <hr />
+                          </div>`
+                        : ""}
                     <div style="height: 10px;"></div>
                     ${page}
                 </section>

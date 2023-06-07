@@ -70,9 +70,7 @@ export class GuidedFormPage extends Page {
 
         form.style.width = "100%";
 
-        return html`
-            <div class="guided--section">${form}</div>
-        `;
+        return html` <div class="guided--section">${form}</div> `;
     }
 }
 
