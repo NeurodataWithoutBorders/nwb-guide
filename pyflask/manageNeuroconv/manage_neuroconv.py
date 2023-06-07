@@ -246,7 +246,9 @@ def convert_to_nwb(info: dict) -> str:
         resolved_output_path = stub_save_path / project_name / nwbfile_path
 
     else:
-        resolved_output_path = (Path(output_folder) if output_folder else conversion_save_path) / project_name / nwbfile_path
+        resolved_output_path = (
+            (Path(output_folder) if output_folder else conversion_save_path) / project_name / nwbfile_path
+        )
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
@@ -293,9 +295,10 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    if (output_folder):
-        os.symlink(Path(output_folder) / project_name, conversion_save_path / project_name) # Have a scoped pointer to the converted project
-
+    if output_folder:
+        os.symlink(
+            Path(output_folder) / project_name, conversion_save_path / project_name
+        )  # Have a scoped pointer to the converted project
 
     return dict(preview=str(file), file=str(resolved_output_path))
 

@@ -117,8 +117,8 @@ export class Page extends LitElement {
             const { subject, session } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const {  output_folder, name } = this.info.globalState.project
-            
+            const { output_folder, name } = this.info.globalState.project;
+
             const result = await runConversion(
                 {
                     output_folder,
