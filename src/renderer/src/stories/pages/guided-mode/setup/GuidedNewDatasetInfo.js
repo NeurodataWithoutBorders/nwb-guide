@@ -45,7 +45,10 @@ export class GuidedNewDatasetPage extends Page {
                         if (typeof res === "string") this.notify(res);
                         return res !== false;
                     })
-                    .catch((e) => this.notify(e, "error"));
+                    .catch((e) => {
+                        this.notify(e, "error");
+                        throw e;
+                    });
                 if (!res) return;
             } else {
                 const has = await hasEntry(name);
