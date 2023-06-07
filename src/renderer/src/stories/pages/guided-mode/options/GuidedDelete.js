@@ -8,9 +8,9 @@ export class GuidedDeleteFilesPage extends Page {
 
     render() {
         return html`
-        <h1 class="guided--text-sub-step">Delete Intermediate Files</h1>
-        <hr>
-        <div class="guided--section">Coming soon...</div>
+            <h1 class="guided--text-sub-step">Delete Intermediate Files</h1>
+            <hr />
+            <div class="guided--section">Coming soon...</div>
         `;
     }
 }

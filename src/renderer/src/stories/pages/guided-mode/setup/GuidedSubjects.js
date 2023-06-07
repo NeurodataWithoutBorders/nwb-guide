@@ -71,9 +71,7 @@ export class GuidedSubjectsPage extends Page {
             },
         });
 
-        return html`
-            <div style="width: 100%;">${this.table}</div>
-        `;
+        return html` <div style="width: 100%;">${this.table}</div> `;
     }
 }
 

@@ -99,9 +99,7 @@ export class GuidedNewDatasetPage extends Page {
         const form = this.updateForm();
         form.style.width = "100%";
 
-        return html`
-            ${form}
-        `;
+        return html` ${form} `;
     }
 }
 

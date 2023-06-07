@@ -69,9 +69,7 @@ export class GuidedUploadPage extends Page {
             onThrow,
         });
 
-        return html`
-            ${this.form}
-        `;
+        return html` ${this.form} `;
     }
 }
 

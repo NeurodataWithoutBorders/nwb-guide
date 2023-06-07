@@ -106,7 +106,7 @@ export class Dashboard extends LitElement {
 
         window.onpushstate = window.onpopstate = (e) => {
             if (e.state) {
-                const titleString = e.state.title ?? e.state.label
+                const titleString = e.state.title ?? e.state.label;
                 document.title = `${titleString} - ${this.name}`;
                 const page = this.pagesById[e.state.page]; // ?? this.pagesById[this.#activatePage]
                 if (!page) return;
