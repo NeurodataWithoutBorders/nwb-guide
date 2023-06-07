@@ -134,7 +134,7 @@ export class Page extends LitElement {
             ).catch((e) => {
                 this.notify(e.message, "error");
                 popup.close();
-                throw e.message;
+                throw e;
             });
 
             completed++;
