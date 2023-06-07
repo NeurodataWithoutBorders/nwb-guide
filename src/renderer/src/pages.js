@@ -129,12 +129,6 @@ const pages = {
                 section: sections[1],
             }),
 
-            // options: new GuidedConversionOptionsPage({
-            // title: "Conversion Options",
-            //     label: "Basic options",
-            //     section: sections[2],
-            // }),
-
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
                 label: "Preview conversion",

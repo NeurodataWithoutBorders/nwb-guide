@@ -13,6 +13,8 @@ from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+
 from datetime import datetime
 from sse import MessageAnnouncer
 
@@ -21,15 +23,6 @@ announcer = MessageAnnouncer()
 
 from pathlib import Path
 import os
-
-# Get stub save path
-project_base_path = Path(__file__).parent.parent.parent
-path_config = Path(project_base_path, "paths.config.json")
-f = path_config.open()
-data = json.load(f)
-stub_save_path = Path(Path.home(), *data["stubs"])
-conversion_save_path = Path(Path.home(), *data["conversions"])
-f.close()
 
 
 def locate_data(info: dict) -> dict:
@@ -243,12 +236,10 @@ def convert_to_nwb(info: dict) -> str:
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        resolved_output_path = stub_save_path / project_name / nwbfile_path
+        resolved_output_path = STUB_SAVE_FOLDER_PATH / nwbfile_path
 
     else:
-        resolved_output_path = (
-            (Path(output_folder) if output_folder else conversion_save_path) / project_name / nwbfile_path
-        )
+        resolved_output_path = CONVERSION_SAVE_FOLDER_PATH / nwbfile_path
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
@@ -314,7 +305,7 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path=conversion_save_path / project,  # Scope valid DANDI upload paths to GUIDE projects
+        nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )
