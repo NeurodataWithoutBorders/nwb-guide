@@ -45,7 +45,7 @@ export class Modal extends LitElement {
 
 /* Modal Body */
 .modal-body {
-  overflow-y: scroll;
+  overflow-y: auto;
   width: 100%;
   flex-grow: 1;
 }

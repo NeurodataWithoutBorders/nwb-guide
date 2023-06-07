@@ -102,7 +102,7 @@ export class GuidedSourceDataPage extends ManagedPage {
         });
 
         this.manager = new InstanceManager({
-            header: "Source Data",
+            header: "Sessions",
             // instanceType: 'Session',
             instances,
             // onAdded: (path) => {

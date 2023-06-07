@@ -100,9 +100,6 @@ export class GuidedNewDatasetPage extends Page {
         form.style.width = "100%";
 
         return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">Project Setup</h1>
-            </div>
             ${form}
         `;
     }

@@ -52,9 +52,6 @@ export class GuidedConversionOptionsPage extends Page {
         });
 
         return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">Conversion Details</h1>
-            </div>
             ${this.form}
         `;
     }

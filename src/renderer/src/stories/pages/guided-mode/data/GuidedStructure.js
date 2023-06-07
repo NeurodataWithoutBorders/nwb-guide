@@ -175,9 +175,6 @@ export class GuidedStructurePage extends Page {
         this.addButton.style.display = "block";
 
         return html`
-            <div class="title">
-                <h1 class="guided--text-sub-step">Data Formats</h1>
-            </div>
             <div style="width: 100%; text-align: center;">${this.list} ${this.addButton}</div>
             ${this.searchModal}
         `;
