@@ -118,7 +118,6 @@ export class Page extends LitElement {
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
             const relativePath = `${this.info.globalState.project.name}/${file}`;
 
-            console.log("relativePath", relativePath);
             const result = await runConversion(
                 {
                     nwbfile_path: relativePath,
