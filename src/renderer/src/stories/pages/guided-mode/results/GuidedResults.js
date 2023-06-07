@@ -25,42 +25,60 @@ export class GuidedResultsPage extends Page {
 
         const { dandiset_id, staging } = this.info.globalState.upload.info;
 
-        const elIds = ["name", "modified", "status", "version"];
-        const dandiset = await get(dandiset_id, staging ? "staging" : undefined);
+        const elIds = ["name", "modified"];
+
+        const otherElIds = [ 'embargo_status' ]
+
+        const liveId = '000552' // From Huszar
+        const isStaging = false // staging
+        const dandiset = await get(liveId, isStaging ? "staging" : undefined);
+        
+        otherElIds.forEach((str) => handleId(str, dandiset));
         elIds.forEach((str) => handleId(str, dandiset.draft_version));
 
         const info = await dandiset.getInfo({ version: dandiset.draft_version.version });
 
-        const secondElIds = ["description", "url", "doi", "citation"];
+        const secondElIds = ["description", "url"];
         secondElIds.forEach((str) => handleId(str, info));
-    }
+
+        const publicationEl = document.getElementById('publication')
+        const publications = (info.relatedResource ?? []).filter(o => o.relation === 'dcite:IsDescribedBy')
+
+        if (publications.length) publicationEl.append(...await Promise.all(publications.map(async o => {
+            const li = document.createElement('li')
+            const { message } = await fetch(`http://api.crossref.org/works${(new URL(o.identifier)).pathname}`).then(res => res.json())
+            li.innerHTML = `${message.author.map(o => `${o.family}, ${o.given[0]}.`).join(', ')} (${message.created['date-parts'][0][0]}). ${message.title[0]}. <i>${message['container-title']}</i>, <i>${message.volume}</i>(${message.issue}), ${message.page}. doi:${message.DOI}`
+            return li
+        })))
+
+        else publicationEl.innerText = 'N/A'
+    } 
 
     render() {
+        
         const { dandiset_id } = this.info.globalState.upload.info;
-
-        const results = this.info.globalState.conversion;
+        const { results } = this.info.globalState.conversion;
 
         if (!results)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
         return html`
             <div style="text-align: center;">
-                <div style="display: inline-block; width: 100%; max-width: 500px;text-align: left;">
-                    <h2 style="margin: 0;"><span id="name"></span></h2>
+                <div style="display: inline-block; width: 100%; text-align: left;">
+                    <h2 style="margin: 0; margin-bottom: 10px;"><span id="name"></span></h2>
                     <p><span id="description"></span></p>
 
                     <p><b>Identifier:</b> ${dandiset_id}</p>
-                    <p><b>Version:</b> <span id="version"></span></p>
                     <p><b>Upload Time:</b> <span id="modified"></span></p>
-                    <p><b>Status:</b> <span id="status"></span></p>
+                    <p><b>Embargo Status:</b> <span id="embargo_status"></span></p>
 
                     <small><b>URL:</b> <a id="url"></a></small><br />
-                    <small><b>DOI:</b> <a id="doi"></a></small>
 
-                    <h3 style="padding: 0;">Citation</h3>
+                    <h3 style="padding: 0;">Related Publications</h3>
                     <hr />
+                    <ol id="publication">
 
-                    <span id="citation"></span>
+                    </ol>
 
                     <h3 style="padding: 0;">Files Uploaded with this Conversion</h3>
                     <hr />
