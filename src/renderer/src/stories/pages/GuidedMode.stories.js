@@ -2,7 +2,7 @@ import { dashboard } from "../../pages.js";
 import nwbBaseSchema from "../../../../../schemas/base-metadata.schema";
 import exephysExampleSchema from "../../../../../schemas/json/ecephys_metadata_schema_example.json";
 
-const options = Object.keys(dashboard.pagesById).filter((k) => k.includes("guided"));
+const options = Object.keys(dashboard.pagesById).filter((k) => k.includes("conversion"));
 
 export default {
     title: "Pages/Guided Mode",
@@ -74,62 +74,62 @@ const Template = (args = {}) => {
 
 export const Home = Template.bind({});
 Home.args = {
-    activePage: "guided",
+    activePage: "conversion",
 };
 
 export const Start = Template.bind({});
 Start.args = {
-    activePage: "guided/start",
+    activePage: "conversion/start",
 };
 
 export const NewDataset = Template.bind({});
 NewDataset.args = {
-    activePage: "guided/details",
+    activePage: "conversion/details",
 };
 
 export const Structure = Template.bind({});
 Structure.args = {
-    activePage: "guided/structure",
+    activePage: "conversion/structure",
 };
 
 export const Locate = Template.bind({});
 Locate.args = {
-    activePage: "guided/locate",
+    activePage: "conversion/locate",
 };
 
 export const Subjects = Template.bind({});
 Subjects.args = {
-    activePage: "guided/subjects",
+    activePage: "conversion/subjects",
 };
 
 export const SourceData = Template.bind({});
 SourceData.args = {
-    activePage: "guided/sourcedata",
+    activePage: "conversion/sourcedata",
 };
 
 export const Metadata = Template.bind({});
 Metadata.args = {
-    activePage: "guided/metadata",
+    activePage: "conversion/metadata",
 };
 
 export const ConversionOptions = Template.bind({});
 ConversionOptions.args = {
-    activePage: "guided/options",
+    activePage: "conversion/options",
 };
 
 export const StubPreview = Template.bind({});
 StubPreview.args = {
-    activePage: "guided/preview",
+    activePage: "conversion/preview",
 };
 
 export const Upload = Template.bind({});
 Upload.args = {
-    activePage: "guided/upload",
+    activePage: "conversion/upload",
 };
 
 export const Results = Template.bind({});
 Results.args = {
-    activePage: "guided/review",
+    activePage: "conversion/review",
 };
 
 const statefulPages = [

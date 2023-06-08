@@ -84,11 +84,11 @@ style="margin-right: 30px; margin-bottom: -5px"
 
 const pages = {
     "/": new GettingStartedPage({
-        label: "Overview",
+        label: "Home",
         icon: overviewIcon,
     }),
-    guided: new GuidedHomePage({
-        label: "Guided Mode",
+    conversion: new GuidedHomePage({
+        label: "Conversions",
         icon: guidedIcon,
         pages: {
             start: new GuidedStartPage({
