@@ -293,18 +293,20 @@ def convert_to_nwb(info: dict) -> str:
         symlink_source_location = Path(output_folder) / project_name
         symlink_output_location = CONVERSION_SAVE_FOLDER_PATH / project_name
 
-        # If symlink_output_location is not a simlink, delete that location so that we can create a symlink there
-        if not symlink_output_location.is_symlink():
+        # If default symlink_output_location is not a symlink, delete all contents and create a symlink there
+        if symlink_source_location != symlink_output_location and not symlink_output_location.is_symlink():
             rmtree(symlink_output_location)
 
-        # If the location is already a symlink, but points to a different output location, remove the existing symlink before creating a new one
-        # NOTE: This makes the GUIDE only aware of the last conversion that was run with a specific pipeline (i.e. running the conversion five times to different output location would make us blind to the first four)
-        if symlink_output_location.readlink() is not symlink_source_location:
+        # If the location is already a symlink, but points to a different output location
+        # remove the existing symlink before creating a new one
+        # NOTE: This makes the GUIDE only aware of the last conversion that was run with a specific pipeline
+        # (i.e. running the conversion five times to different output location would make us blind to the first four)
+        if symlink_output_location.is_symlink() and symlink_output_location.readlink() is not symlink_source_location:
             symlink_output_location.unlink()
 
         # Create a pointer to the actual conversion outputs
         if not symlink_output_location.exists():
-            os.symlink(Path(output_folder) / project_name, symlink_output_location)
+            os.symlink(symlink_source_location, symlink_output_location)
 
     return dict(preview=str(file), file=str(resolved_output_path))
 
