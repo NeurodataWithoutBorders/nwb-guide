@@ -7,9 +7,9 @@ import "../../Button.js";
 import { InfoBox } from "../../InfoBox.js";
 import { hasEntry, get, save } from "../../../progress.js";
 
-import { electron } from '../../../electron/index.js'
+import { electron } from "../../../electron/index.js";
 
-const { shell } = electron
+const { shell } = electron;
 
 const tutorialPipelineName = "NWB GUIDE Tutorial Data";
 
@@ -46,16 +46,18 @@ export class TutorialPage extends Page {
                       Data has been preloaded into the <b>${tutorialPipelineName}</b> project on the
                       <a @click=${() => this.onTransition("guided")}>Guided Mode</a> conversion list.
 
-                      <br/><br/>
-                      <nwb-button @click=${() => {
-                        if (shell) {
-                            const entry = get(tutorialPipelineName)
-                            shell.showItemInFolder(entry.project.initialized)
-                        }
-                      }}>Open Dataset Location</nwb-button>
+                      <br /><br />
+                      <nwb-button
+                          @click=${() => {
+                              if (shell) {
+                                  const entry = get(tutorialPipelineName);
+                                  shell.showItemInFolder(entry.project.initialized);
+                              }
+                          }}
+                          >Open Dataset Location</nwb-button
+                      >
                   </div>`
                 : html`
-
                         ${new InfoBox({
                             header: "How to download test data",
                             content: html`Please refer to the
@@ -75,17 +77,17 @@ export class TutorialPage extends Page {
                           @click=${async () => {
                               await form.validate(); // Will throw an error in the callback
 
-                              const { output_directory } = await run("generate_dataset", this.state, { title: "Generating tutorial data" }).catch(
-                                  (e) => {
-                                      this.notify(e.message, "error");
-                                      throw e;
-                                  }
-                              );
+                              const { output_directory } = await run("generate_dataset", this.state, {
+                                  title: "Generating tutorial data",
+                              }).catch((e) => {
+                                  this.notify(e.message, "error");
+                                  throw e;
+                              });
 
-                              this.state.output_directory_path = output_directory
+                              this.state.output_directory_path = output_directory;
 
                               this.notify("Tutorial data successfully generated!");
-                              if (shell) shell.showItemInFolder(output_directory)
+                              if (shell) shell.showItemInFolder(output_directory);
 
                               save({
                                   info: {
@@ -121,7 +123,8 @@ export class TutorialPage extends Page {
 
                               this.requestUpdate(); // Re-render
                           }}
-                          >Generate data</nwb-button>
+                          >Generate data</nwb-button
+                      >
                   `}`;
     }
 }

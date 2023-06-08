@@ -324,8 +324,8 @@ def listen_to_neuroconv_events():
 
 def generate_dataset(test_data_directory_path: str):
     base_path = Path(test_data_directory_path)
-    output_directory = TUTORIAL_SAVE_FOLDER_PATH / 'Dataset'
-    
+    output_directory = TUTORIAL_SAVE_FOLDER_PATH / "Dataset"
+
     if TUTORIAL_SAVE_FOLDER_PATH.exists():
         rmtree(TUTORIAL_SAVE_FOLDER_PATH)
 
@@ -363,4 +363,4 @@ def generate_dataset(test_data_directory_path: str):
 
             phy_output_dir.symlink_to(phy_base_directory, True)
 
-    return { 'output_directory': str(output_directory) }
+    return {"output_directory": str(output_directory)}
