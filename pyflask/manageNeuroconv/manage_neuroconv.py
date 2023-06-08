@@ -21,7 +21,7 @@ from sse import MessageAnnouncer
 announcer = MessageAnnouncer()
 
 
-from shutil import rmtree, copytree
+from shutil import copytree
 from pathlib import Path
 import os
 
@@ -325,9 +325,6 @@ def listen_to_neuroconv_events():
 def generate_dataset(test_data_directory_path: str, output_directory_path: str):
     base_path = Path(test_data_directory_path)
     output_directory = Path(output_directory_path)
-
-    if output_directory.exists():
-        rmtree(output_directory)
 
     subjects = ["mouse1", "mouse2"]
 
