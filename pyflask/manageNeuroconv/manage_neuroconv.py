@@ -13,7 +13,7 @@ from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
-from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 from datetime import datetime
 from sse import MessageAnnouncer
@@ -21,7 +21,7 @@ from sse import MessageAnnouncer
 announcer = MessageAnnouncer()
 
 
-from shutil import copytree
+from shutil import rmtree, copytree
 from pathlib import Path
 import os
 
@@ -322,9 +322,12 @@ def listen_to_neuroconv_events():
         yield msg
 
 
-def generate_dataset(test_data_directory_path: str, output_directory_path: str):
+def generate_dataset(test_data_directory_path: str):
     base_path = Path(test_data_directory_path)
-    output_directory = Path(output_directory_path)
+    output_directory = TUTORIAL_SAVE_FOLDER_PATH / 'Dataset'
+    
+    if TUTORIAL_SAVE_FOLDER_PATH.exists():
+        rmtree(TUTORIAL_SAVE_FOLDER_PATH)
 
     subjects = ["mouse1", "mouse2"]
 
@@ -359,3 +362,5 @@ def generate_dataset(test_data_directory_path: str, output_directory_path: str):
                         os.rename(os.path.join(root, file), os.path.join(root, file.replace(base_id, full_id)))
 
             phy_output_dir.symlink_to(phy_base_directory, True)
+
+    return { 'output_directory': str(output_directory) }

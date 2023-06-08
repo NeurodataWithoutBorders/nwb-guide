@@ -5,16 +5,8 @@
         "format": "directory",
         "description": "Enter the path to your local instance of the ephy_testing_data directory",
         "placeholder": "Enter testing directory path"
-      },
-
-      "output_directory_path": {
-        "type": "string",
-        "format": "directory",
-        "description": "Enter the output directory for the tutorial data",
-        "placeholder": "Enter output path"
       }
-
   },
 
-  "required": ["test_data_directory_path", "output_directory_path"]
+  "required": ["test_data_directory_path"]
 }
