@@ -42,7 +42,7 @@ export class GuidedResultsPage extends Page {
         secondElIds.forEach((str) => handleId(str, info));
 
         const publicationEl = document.getElementById("publication");
-        publicationEl.innerHTML = ''
+        publicationEl.innerHTML = "";
         const publications = (info.relatedResource ?? []).filter((o) => o.relation === "dcite:IsDescribedBy");
 
         if (publications.length)
