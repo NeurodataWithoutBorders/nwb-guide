@@ -233,7 +233,7 @@ def convert_to_nwb(info: dict) -> str:
     output_folder = info.get("output_folder")
     project_name = info.get("project_name")
 
-    run_stub_test = info.get("stub_test")
+    run_stub_test = info.get("stub_test", False)
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
@@ -245,6 +245,7 @@ def convert_to_nwb(info: dict) -> str:
         )
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
+
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
@@ -289,10 +290,26 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    if output_folder:
-        os.symlink(
-            Path(output_folder) / project_name, CONVERSION_SAVE_FOLDER_PATH / project_name
-        )  # Have a scoped pointer to the converted project
+    if not run_stub_test and output_folder:
+
+        symlink_source_location = Path(output_folder) / project_name
+        symlink_output_location = CONVERSION_SAVE_FOLDER_PATH / project_name
+
+        # If symlink_output_location is not a simlink, delete that location so that we can create a symlink there
+        if not symlink_output_location.is_symlink():
+            rmtree(symlink_output_location)
+
+        # If the location is already a symlink, but points to a different output location, remove the existing symlink before creating a new one
+        # NOTE: This makes the GUIDE only aware of the last conversion that was run with a specific pipeline (i.e. running the conversion five times to different output location would make us blind to the first four)
+        if symlink_output_location.readlink() is not symlink_source_location:
+            symlink_output_location.unlink()
+
+        # Create a pointer to the actual conversion outputs
+        if not symlink_output_location.exists():
+    
+            os.symlink(
+                Path(output_folder) / project_name, symlink_output_location
+            )
 
     return dict(preview=str(file), file=str(resolved_output_path))
 
