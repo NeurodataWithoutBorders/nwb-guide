@@ -246,7 +246,6 @@ def convert_to_nwb(info: dict) -> str:
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
-
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
     def update_conversion_progress(**kwargs):
@@ -291,7 +290,6 @@ def convert_to_nwb(info: dict) -> str:
     )
 
     if not run_stub_test and output_folder:
-
         symlink_source_location = Path(output_folder) / project_name
         symlink_output_location = CONVERSION_SAVE_FOLDER_PATH / project_name
 
@@ -306,10 +304,7 @@ def convert_to_nwb(info: dict) -> str:
 
         # Create a pointer to the actual conversion outputs
         if not symlink_output_location.exists():
-    
-            os.symlink(
-                Path(output_folder) / project_name, symlink_output_location
-            )
+            os.symlink(Path(output_folder) / project_name, symlink_output_location)
 
     return dict(preview=str(file), file=str(resolved_output_path))
 
