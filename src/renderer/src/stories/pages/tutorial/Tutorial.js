@@ -64,7 +64,7 @@ export class TutorialPage extends Page {
                                     target="_blank"
                                     >example data documentation</a
                                 >
-                                on the Neuroconv documentation site to learn how to download this dataset using Datalad.`,
+                                on the NeuroConv documentation site to learn how to download this dataset using DataLad.`,
                         })}
             
                         <br /><br />
