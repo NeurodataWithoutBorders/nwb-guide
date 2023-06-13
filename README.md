@@ -19,7 +19,7 @@ NWB GUIDE is a desktop app that provides a no-code user interface for converting
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=z-rk2wi5BDc" target="_blank">
-  <img src="docs/assets/guide-video-image.png" alt="Watch the video" width="250" />
+  <img src="docs/assets/guide-video-image.png" alt="Watch the video" width="500" />
   </a>
 </p>
 
