@@ -234,7 +234,6 @@ def convert_to_nwb(info: dict) -> str:
     project_name = info.get("project_name")
     default_output_directory = CONVERSION_SAVE_FOLDER_PATH / project_name
 
-
     run_stub_test = info.get("stub_test", False)
 
     # add a subdirectory to a filepath if stub_test is true
@@ -248,7 +247,11 @@ def convert_to_nwb(info: dict) -> str:
     resolved_output_path = resolved_output_directory / nwbfile_path
 
     # Remove symlink placed at the default_output_directory if this will hold real data
-    if not run_stub_test and resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
+    if (
+        not run_stub_test
+        and resolved_output_directory == default_output_directory
+        and default_output_directory.is_symlink()
+    ):
         default_output_directory.unlink()
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
@@ -298,23 +301,22 @@ def convert_to_nwb(info: dict) -> str:
 
     # Create a symlink between the fake adata and custom data
     if not run_stub_test and not resolved_output_directory == default_output_directory:
-
-
         if default_output_directory.exists():
-
             # If default default_output_directory is not a symlink, delete all contents and create a symlink there
             if not default_output_directory.is_symlink():
                 rmtree(default_output_directory)
 
             # If the location is already a symlink, but points to a different output location
             # remove the existing symlink before creating a new one
-            elif default_output_directory.is_symlink() and default_output_directory.readlink() is not resolved_output_directory:
+            elif (
+                default_output_directory.is_symlink()
+                and default_output_directory.readlink() is not resolved_output_directory
+            ):
                 default_output_directory.unlink()
 
         # Create a pointer to the actual conversion outputs
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
-
 
     return dict(preview=str(file), file=str(resolved_output_path))
 
