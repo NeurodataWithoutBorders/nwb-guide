@@ -230,19 +230,26 @@ def convert_to_nwb(info: dict) -> str:
     """
 
     nwbfile_path = Path(info["nwbfile_path"])
-    output_folder = info.get("output_folder")
+    custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
+    default_output_directory = CONVERSION_SAVE_FOLDER_PATH / project_name
+
 
     run_stub_test = info.get("stub_test", False)
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        resolved_output_path = STUB_SAVE_FOLDER_PATH / nwbfile_path
+        resolved_output_base = STUB_SAVE_FOLDER_PATH
 
     else:
-        resolved_output_path = (
-            (Path(output_folder) if output_folder else CONVERSION_SAVE_FOLDER_PATH) / project_name / nwbfile_path
-        )
+        resolved_output_base = Path(custom_output_directory) if custom_output_directory else CONVERSION_SAVE_FOLDER_PATH
+
+    resolved_output_directory = resolved_output_base / project_name
+    resolved_output_path = resolved_output_directory / nwbfile_path
+
+    # Remove symlink placed at the default_output_directory if this will hold real data
+    if not run_stub_test and resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
+        default_output_directory.unlink()
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
@@ -289,24 +296,25 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    if not run_stub_test and output_folder:
-        symlink_source_location = Path(output_folder) / project_name
-        symlink_output_location = CONVERSION_SAVE_FOLDER_PATH / project_name
+    # Create a symlink between the fake adata and custom data
+    if not run_stub_test and not resolved_output_directory == default_output_directory:
 
-        # If default symlink_output_location is not a symlink, delete all contents and create a symlink there
-        if symlink_source_location != symlink_output_location and not symlink_output_location.is_symlink():
-            rmtree(symlink_output_location)
 
-        # If the location is already a symlink, but points to a different output location
-        # remove the existing symlink before creating a new one
-        # NOTE: This makes the GUIDE only aware of the last conversion that was run with a specific pipeline
-        # (i.e. running the conversion five times to different output location would make us blind to the first four)
-        if symlink_output_location.is_symlink() and symlink_output_location.readlink() is not symlink_source_location:
-            symlink_output_location.unlink()
+        if default_output_directory.exists():
+
+            # If default default_output_directory is not a symlink, delete all contents and create a symlink there
+            if not default_output_directory.is_symlink():
+                rmtree(default_output_directory)
+
+            # If the location is already a symlink, but points to a different output location
+            # remove the existing symlink before creating a new one
+            elif default_output_directory.is_symlink() and default_output_directory.readlink() is not resolved_output_directory:
+                default_output_directory.unlink()
 
         # Create a pointer to the actual conversion outputs
-        if not symlink_output_location.exists():
-            os.symlink(symlink_source_location, symlink_output_location)
+        if not default_output_directory.exists():
+            os.symlink(resolved_output_directory, default_output_directory)
+
 
     return dict(preview=str(file), file=str(resolved_output_path))
 
