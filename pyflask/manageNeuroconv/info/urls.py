@@ -20,5 +20,6 @@ f = path_config.open()
 data = json.load(f)
 STUB_SAVE_FOLDER_PATH = Path(Path.home(), *data["stubs"])
 CONVERSION_SAVE_FOLDER_PATH = Path(Path.home(), *data["conversions"])
+TUTORIAL_SAVE_FOLDER_PATH = Path(Path.home(), *data["tutorial"])
 
 f.close()
