@@ -11,6 +11,7 @@ from manageNeuroconv import (
     validate_metadata,
     upload_to_dandi,
     listen_to_neuroconv_events,
+    generate_dataset,
 )
 
 from errorHandlers import notBadRequestException
@@ -108,6 +109,18 @@ class Upload(Resource):
     def post(self):
         try:
             return upload_to_dandi(**api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
+
+
+@api.route("/generate_dataset")
+class GenerateDataset(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return generate_dataset(**api.payload)
 
         except Exception as e:
             if notBadRequestException(e):

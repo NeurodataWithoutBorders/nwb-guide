@@ -1,5 +1,6 @@
 {
     "progress": ["NWB GUIDE", "Pipelines"],
     "conversions": ["NWB GUIDE", "Conversions"],
-    "stubs": ["NWB GUIDE", "Stubs"]
+    "stubs": ["NWB GUIDE", "Stubs"],
+    "tutorial": ["NWB GUIDE", "Tutorial"]
 }
