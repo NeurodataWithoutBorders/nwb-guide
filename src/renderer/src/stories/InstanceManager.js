@@ -29,6 +29,15 @@ export class InstanceManager extends LitElement {
                 border: 1px solid #c3c3c3;
             }
 
+            #selectedName {
+                font-size: 18px;
+                font-weight: bold;
+                white-space: nowrap; 
+                overflow: hidden; 
+                text-overflow: ellipsis; 
+                padding-right: 10px;
+            }
+
             #add-new-button {
                 box-sizing: border-box;
                 padding: 0px 5px;
@@ -91,7 +100,7 @@ export class InstanceManager extends LitElement {
                 padding: 10px;
                 border-bottom: 1px solid gainsboro;
                 display: flex;
-                justify-content: flex-end;
+                justify-content: space-between;
                 align-items: center;
             }
 
@@ -232,6 +241,11 @@ export class InstanceManager extends LitElement {
 
     #accordions = {};
 
+    #onSelected = () => {
+        const selected = this.shadowRoot.querySelector('#selectedName')
+        selected.innerText = this.#selected
+    }
+
     #render(toRender = this.instances, path = []) {
         let instances = {};
         let categories = [];
@@ -293,6 +307,8 @@ export class InstanceManager extends LitElement {
                             if (el !== item) el.removeAttribute("selected");
                         });
                     }
+
+                    this.#onSelected()
                 };
 
                 return item;
@@ -368,23 +384,24 @@ export class InstanceManager extends LitElement {
                         : ""}
                 </div>
                 <div id="content">
-                    ${this.controls.length
-                        ? html`<div class="controls">
-                              ${this.controls.map((o) => {
-                                  return html`<nwb-button
-                                      size="small"
-                                      icon=${o.icon}
-                                      @click=${function () {
-                                          const el = this.shadowRoot.querySelector(
-                                              "#instance-display > div:not([hidden])"
-                                          );
-                                          o.onClick.call(this, el.getAttribute("data-instance"), el);
-                                      }}
-                                      >${o.name}</nwb-button
-                                  >`;
-                              })}
-                          </div>`
-                        : ``}
+                    <div class="controls">
+                        <span id="selectedName">${this.#selected}</span>
+                        <div>
+                            ${this.controls.map((o) => {
+                                return html`<nwb-button
+                                    size="small"
+                                    icon=${o.icon}
+                                    @click=${function () {
+                                        const el = this.shadowRoot.querySelector(
+                                            "#instance-display > div:not([hidden])"
+                                        );
+                                        o.onClick.call(this, el.getAttribute("data-instance"), el);
+                                    }}
+                                    >${o.name}</nwb-button
+                                >`;
+                            })}
+                        </div>
+                    </div>
 
                     <div id="instance-display">
                         ${this.#items.map((item, i) => {
