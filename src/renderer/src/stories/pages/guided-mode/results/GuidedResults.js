@@ -42,6 +42,7 @@ export class GuidedResultsPage extends Page {
         secondElIds.forEach((str) => handleId(str, info));
 
         const publicationEl = document.getElementById("publication");
+        publicationEl.innerHTML = "";
         const publications = (info.relatedResource ?? []).filter((o) => o.relation === "dcite:IsDescribedBy");
 
         if (publications.length)
@@ -66,7 +67,7 @@ export class GuidedResultsPage extends Page {
 
     render() {
         const { dandiset_id } = this.info.globalState.upload.info;
-        const { results } = this.info.globalState.conversion;
+        const results = this.info.globalState.conversion;
 
         if (!results)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
