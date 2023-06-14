@@ -13,7 +13,7 @@ from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
-from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 from datetime import datetime
 from sse import MessageAnnouncer
@@ -21,6 +21,7 @@ from sse import MessageAnnouncer
 announcer = MessageAnnouncer()
 
 
+from shutil import rmtree, copytree
 from pathlib import Path
 import os
 
@@ -229,19 +230,29 @@ def convert_to_nwb(info: dict) -> str:
     """
 
     nwbfile_path = Path(info["nwbfile_path"])
-    output_folder = info.get("output_folder")
+    custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
+    default_output_directory = CONVERSION_SAVE_FOLDER_PATH / project_name
 
-    run_stub_test = info.get("stub_test")
+    run_stub_test = info.get("stub_test", False)
 
     # add a subdirectory to a filepath if stub_test is true
     if run_stub_test:
-        resolved_output_path = STUB_SAVE_FOLDER_PATH / nwbfile_path
+        resolved_output_base = STUB_SAVE_FOLDER_PATH
 
     else:
-        resolved_output_path = (
-            (Path(output_folder) if output_folder else CONVERSION_SAVE_FOLDER_PATH) / project_name / nwbfile_path
-        )
+        resolved_output_base = Path(custom_output_directory) if custom_output_directory else CONVERSION_SAVE_FOLDER_PATH
+
+    resolved_output_directory = resolved_output_base / project_name
+    resolved_output_path = resolved_output_directory / nwbfile_path
+
+    # Remove symlink placed at the default_output_directory if this will hold real data
+    if (
+        not run_stub_test
+        and resolved_output_directory == default_output_directory
+        and default_output_directory.is_symlink()
+    ):
+        default_output_directory.unlink()
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
@@ -288,10 +299,24 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    if output_folder:
-        os.symlink(
-            Path(output_folder) / project_name, CONVERSION_SAVE_FOLDER_PATH / project_name
-        )  # Have a scoped pointer to the converted project
+    # Create a symlink between the fake adata and custom data
+    if not run_stub_test and not resolved_output_directory == default_output_directory:
+        if default_output_directory.exists():
+            # If default default_output_directory is not a symlink, delete all contents and create a symlink there
+            if not default_output_directory.is_symlink():
+                rmtree(default_output_directory)
+
+            # If the location is already a symlink, but points to a different output location
+            # remove the existing symlink before creating a new one
+            elif (
+                default_output_directory.is_symlink()
+                and default_output_directory.readlink() is not resolved_output_directory
+            ):
+                default_output_directory.unlink()
+
+        # Create a pointer to the actual conversion outputs
+        if not default_output_directory.exists():
+            os.symlink(resolved_output_directory, default_output_directory)
 
     return dict(preview=str(file), file=str(resolved_output_path))
 
@@ -319,3 +344,47 @@ def listen_to_neuroconv_events():
     while True:
         msg = messages.get()  # blocks until a new message arrives
         yield msg
+
+
+def generate_dataset(test_data_directory_path: str):
+    base_path = Path(test_data_directory_path)
+    output_directory = TUTORIAL_SAVE_FOLDER_PATH / "Dataset"
+
+    if TUTORIAL_SAVE_FOLDER_PATH.exists():
+        rmtree(TUTORIAL_SAVE_FOLDER_PATH)
+
+    subjects = ["mouse1", "mouse2"]
+
+    sessions = ["070623", "060623"]
+
+    base_id = "Noise4Sam"
+
+    for subject in subjects:
+        for session in sessions:
+            full_id = f"{subject}_{session}"
+            session_output_directory = output_directory / subject / full_id
+            spikeglx_base_directory = base_path / "spikeglx" / f"{base_id}_g0"
+            phy_base_directory = base_path / "phy" / "phy_example_0"
+
+            # phy_base_directory.symlink_to(session_output_directory / f'{full_id}_phy', True)
+
+            spikeglx_output_dir = session_output_directory / f"{full_id}_g0"
+            phy_output_dir = session_output_directory / f"{full_id}_phy"
+
+            copytree(spikeglx_base_directory, spikeglx_output_dir)
+
+            # Rename directories
+            for root, dirs, files in os.walk(spikeglx_output_dir):
+                for dir in dirs:
+                    if base_id in dir:
+                        os.rename(os.path.join(root, dir), os.path.join(root, dir.replace(base_id, full_id)))
+
+            # Rename files
+            for root, dirs, files in os.walk(spikeglx_output_dir):
+                for file in files:
+                    if base_id in file:
+                        os.rename(os.path.join(root, file), os.path.join(root, file.replace(base_id, full_id)))
+
+            phy_output_dir.symlink_to(phy_base_directory, True)
+
+    return {"output_directory": str(output_directory)}
