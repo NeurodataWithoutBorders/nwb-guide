@@ -148,7 +148,7 @@ export class GuidedHomePage extends Page {
         //Return the user to the last page they exited on
         let pageToReturnTo = global["page-before-exit"];
         if (pageToReturnTo) this.onTransition(pageToReturnTo);
-        else throw new Error("No page to return to");
+        else this.onTransition(1);
     };
 
     async updated() {
