@@ -41,6 +41,11 @@ export class GuidedSubjectsPage extends Page {
         },
     };
 
+    updated() {
+        const add = this.query('#addButton')
+        add.onclick = () => this.table.table.alter('insert_row_below')
+    }
+
     render() {
         let subjects = this.info.globalState.subjects;
         if (!subjects) subjects = this.info.globalState.subjects = {}; // Ensure global subjects tracking
@@ -71,7 +76,12 @@ export class GuidedSubjectsPage extends Page {
             },
         });
 
-        return html` <div style="width: 100%;">${this.table}</div> `;
+        return html`
+            <div style="display: flex; justify-content: center; flex-wrap: wrap;">
+                <div style="width: 100%;">${this.table}</div>
+                <nwb-button id="addButton">Add Subject</nwb-button>
+            </div>
+        `;
     }
 }
 
