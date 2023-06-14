@@ -42,8 +42,8 @@ export class GuidedSubjectsPage extends Page {
     };
 
     updated() {
-        const add = this.query('#addButton')
-        add.onclick = () => this.table.table.alter('insert_row_below')
+        const add = this.query("#addButton");
+        add.onclick = () => this.table.table.alter("insert_row_below");
     }
 
     render() {
