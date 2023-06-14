@@ -32,9 +32,9 @@ export class InstanceManager extends LitElement {
             #selectedName {
                 font-size: 18px;
                 font-weight: bold;
-                white-space: nowrap; 
-                overflow: hidden; 
-                text-overflow: ellipsis; 
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 padding-right: 10px;
             }
 
@@ -242,9 +242,9 @@ export class InstanceManager extends LitElement {
     #accordions = {};
 
     #onSelected = () => {
-        const selected = this.shadowRoot.querySelector('#selectedName')
-        selected.innerText = this.#selected
-    }
+        const selected = this.shadowRoot.querySelector("#selectedName");
+        selected.innerText = this.#selected;
+    };
 
     #render(toRender = this.instances, path = []) {
         let instances = {};
@@ -308,7 +308,7 @@ export class InstanceManager extends LitElement {
                         });
                     }
 
-                    this.#onSelected()
+                    this.#onSelected();
                 };
 
                 return item;
