@@ -1,13 +1,20 @@
 import { html } from "lit";
+import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
+
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import tutorialSchema from "../../../../../../schemas/json/tutorial.schema.json" assert { type: "json" };
+import guideGlobalMetadata from "../../../../../../guideGlobalMetadata.json" assert { type: "json" };
+
 import { run } from "../guided-mode/options/utils.js";
 import "../../Button.js";
 import { InfoBox } from "../../InfoBox.js";
-import { hasEntry, get, save } from "../../../progress.js";
+import { hasEntry, get, save, remove, resume } from "../../../progress.js";
 
 import { electron } from "../../../electron/index.js";
+
+import restartSVG from './restart.svg?raw'
+import folderOpenSVG from './folder_open.svg?raw'
 
 const { shell } = electron;
 
@@ -33,7 +40,37 @@ export class TutorialPage extends Page {
 
         form.style.width = "100%";
 
-        return html` <h1>Tutorial Data Generation</h1>
+        const entryExists = hasEntry(tutorialPipelineName)
+
+        return html` 
+        
+            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
+                <h1 style="margin: 0;">Tutorial Data Generation</h1>
+
+                <div>
+                    ${true ? html`
+                    
+                    <nwb-button
+                        size="xs"
+                        @click=${() => {
+                            if (shell) {
+                                const entry = get(tutorialPipelineName);
+                                shell.showItemInFolder(entry.project.initialized);
+                            }
+                        }}
+                        >${unsafeSVG(folderOpenSVG)}</nwb-button
+                    >
+
+                    <nwb-button
+                        size="xs"
+                        @click=${async () => {
+                            const hasBeenDeleted = await remove(tutorialPipelineName)
+                            if (hasBeenDeleted) this.requestUpdate()
+                        }}
+                        >${unsafeSVG(restartSVG)}</nwb-button
+                    >` : ''}
+                </div>
+            </div>
             <p>
                 This page allows you to generate a dataset with multiple subjects and sessions so you can practice using
                 NWB GUIDE before converting your own datasets.
@@ -43,19 +80,20 @@ export class TutorialPage extends Page {
 
             ${hasEntry(tutorialPipelineName)
                 ? html`<div>
-                      Data has been preloaded into the <b>${tutorialPipelineName}</b> project on the
+                      Data has been preloaded into the <b>${tutorialPipelineName}</b> pipeline, which can be accessed via the
                       <a @click=${() => this.onTransition("guided")}>Guided Mode</a> conversion list.
 
                       <br /><br />
+
                       <nwb-button
+                          primary
+                          size=small
                           @click=${() => {
-                              if (shell) {
-                                  const entry = get(tutorialPipelineName);
-                                  shell.showItemInFolder(entry.project.initialized);
-                              }
+                              resume.call(this, tutorialPipelineName)
                           }}
-                          >Open Dataset Location</nwb-button
+                          >Open Conversion Pipeline</nwb-button
                       >
+
                   </div>`
                 : html`
                       ${new InfoBox({
@@ -97,11 +135,14 @@ export class TutorialPage extends Page {
                                               initialized: output_directory, // Declare where all the data is here
                                           },
 
-                                          interfaces: {
-                                              PhySorting: "PhySortingInterface",
-                                              SpikeGLXRecording: "SpikeGLXRecordingInterface",
-                                          },
+                                          // provide data for all supported interfaces
+                                          interfaces: guideGlobalMetadata.supported_interfaces.reduce((acc, value) => {
+                                            const key = value.replace('Interface', '')
+                                            acc[key] = value
+                                            return acc
+                                          }, {}),
 
+                                          // Manually fill out the structure of supported data interfaces
                                           structure: {
                                               results: {
                                                   PhySorting: {
@@ -123,7 +164,7 @@ export class TutorialPage extends Page {
 
                               this.requestUpdate(); // Re-render
                           }}
-                          >Generate data</nwb-button
+                          >Generate Dataset</nwb-button
                       >
                   `}`;
     }
