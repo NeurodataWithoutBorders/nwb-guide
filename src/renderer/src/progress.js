@@ -97,13 +97,13 @@ export const get = (name) => {
     return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
 };
 
-export function resume (name) {
+export function resume(name) {
     const global = this ? this.load(name) : get(name);
-    
-    const commandToResume = global["page-before-exit"] || 'conversion/start'
-    if (this) this.onTransition(commandToResume)
 
-    return commandToResume
+    const commandToResume = global["page-before-exit"] || "conversion/start";
+    if (this) this.onTransition(commandToResume);
+
+    return commandToResume;
 }
 
 export const remove = async (name) => {
@@ -119,9 +119,8 @@ export const remove = async (name) => {
         cancelButtonText: "Cancel",
         focusCancel: true,
     });
-    
-    if (result.isConfirmed) {
 
+    if (result.isConfirmed) {
         //Get the path of the progress file to delete
         const progressFilePathToDelete = joinPath(guidedProgressFilePath, name + ".json");
 
@@ -129,15 +128,15 @@ export const remove = async (name) => {
         if (fs) fs.unlinkSync(progressFilePathToDelete, (err) => console.log(err));
         else localStorage.removeItem(progressFilePathToDelete);
 
-        return true
+        return true;
     }
 
-    return false
-}
+    return false;
+};
 
 export const deleteProgressCard = async (progressCardDeleteButton) => {
     const progressCard = progressCardDeleteButton.parentElement.parentElement;
     const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent.trim();
-    const hasBeenDeleted = await remove(progressCardNameToDelete)
+    const hasBeenDeleted = await remove(progressCardNameToDelete);
     if (hasBeenDeleted) progressCard.remove(); //remove the progress card from the DOM
 };
