@@ -144,8 +144,7 @@ export class GuidedHomePage extends Page {
         const datasetNameToResume =
             resumeProgressButton.parentNode.parentNode.querySelector(".progress-file-name").innerText;
 
-
-        progress.resume.call(this, datasetNameToResume)
+        progress.resume.call(this, datasetNameToResume);
     };
 
     async updated() {
