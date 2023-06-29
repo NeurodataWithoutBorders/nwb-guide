@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
@@ -13,8 +13,8 @@ import { hasEntry, get, save, remove, resume } from "../../../progress.js";
 
 import { electron } from "../../../electron/index.js";
 
-import restartSVG from './restart.svg?raw'
-import folderOpenSVG from './folder_open.svg?raw'
+import restartSVG from "./restart.svg?raw";
+import folderOpenSVG from "./folder_open.svg?raw";
 
 const { shell } = electron;
 
@@ -40,35 +40,33 @@ export class TutorialPage extends Page {
 
         form.style.width = "100%";
 
-        const entryExists = hasEntry(tutorialPipelineName)
+        const entryExists = hasEntry(tutorialPipelineName);
 
-        return html` 
-        
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
+        return html` <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
                 <h1 style="margin: 0;">Tutorial Data Generation</h1>
 
                 <div>
-                    ${true ? html`
-                    
-                    <nwb-button
-                        size="xs"
-                        @click=${() => {
-                            if (shell) {
-                                const entry = get(tutorialPipelineName);
-                                shell.showItemInFolder(entry.project.initialized);
-                            }
-                        }}
-                        >${unsafeSVG(folderOpenSVG)}</nwb-button
-                    >
+                    ${true
+                        ? html` <nwb-button
+                                  size="xs"
+                                  @click=${() => {
+                                      if (shell) {
+                                          const entry = get(tutorialPipelineName);
+                                          shell.showItemInFolder(entry.project.initialized);
+                                      }
+                                  }}
+                                  >${unsafeSVG(folderOpenSVG)}</nwb-button
+                              >
 
-                    <nwb-button
-                        size="xs"
-                        @click=${async () => {
-                            const hasBeenDeleted = await remove(tutorialPipelineName)
-                            if (hasBeenDeleted) this.requestUpdate()
-                        }}
-                        >${unsafeSVG(restartSVG)}</nwb-button
-                    >` : ''}
+                              <nwb-button
+                                  size="xs"
+                                  @click=${async () => {
+                                      const hasBeenDeleted = await remove(tutorialPipelineName);
+                                      if (hasBeenDeleted) this.requestUpdate();
+                                  }}
+                                  >${unsafeSVG(restartSVG)}</nwb-button
+                              >`
+                        : ""}
                 </div>
             </div>
             <p>
@@ -80,20 +78,19 @@ export class TutorialPage extends Page {
 
             ${hasEntry(tutorialPipelineName)
                 ? html`<div>
-                      Data has been preloaded into the <b>${tutorialPipelineName}</b> pipeline, which can be accessed via the
-                      <a @click=${() => this.onTransition("guided")}>Guided Mode</a> conversion list.
+                      Data has been preloaded into the <b>${tutorialPipelineName}</b> pipeline, which can be accessed
+                      via the <a @click=${() => this.onTransition("guided")}>Guided Mode</a> conversion list.
 
                       <br /><br />
 
                       <nwb-button
                           primary
-                          size=small
+                          size="small"
                           @click=${() => {
-                              resume.call(this, tutorialPipelineName)
+                              resume.call(this, tutorialPipelineName);
                           }}
                           >Open Conversion Pipeline</nwb-button
                       >
-
                   </div>`
                 : html`
                       ${new InfoBox({
@@ -137,9 +134,9 @@ export class TutorialPage extends Page {
 
                                           // provide data for all supported interfaces
                                           interfaces: guideGlobalMetadata.supported_interfaces.reduce((acc, value) => {
-                                            const key = value.replace('Interface', '')
-                                            acc[key] = value
-                                            return acc
+                                              const key = value.replace("Interface", "");
+                                              acc[key] = value;
+                                              return acc;
                                           }, {}),
 
                                           // Manually fill out the structure of supported data interfaces
