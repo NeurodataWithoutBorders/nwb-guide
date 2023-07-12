@@ -1,6 +1,8 @@
 {
     "supported_interfaces": [
         "SpikeGLXRecordingInterface",
-        "PhySortingInterface"
+        "PhySortingInterface",
+        "BlackrockRecordingInterface",
+        "BlackrockSortingInterface"
     ]
 }
