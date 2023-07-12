@@ -26,8 +26,7 @@ export class TutorialPage extends Page {
     }
 
     render() {
-
-        const state = global.data.tutorial = global.data.tutorial ?? {}
+        const state = (global.data.tutorial = global.data.tutorial ?? {});
 
         const form = new JSONSchemaForm({
             schema: tutorialSchema,
@@ -36,8 +35,8 @@ export class TutorialPage extends Page {
             },
             results: state,
             validateOnChange: () => {
-                global.save()
-            }
+                global.save();
+            },
         });
 
         form.style.width = "100%";

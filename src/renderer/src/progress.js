@@ -4,14 +4,12 @@ import { guidedProgressFilePath, reloadPageToHome, isStorybook, appDirectory } f
 import { fs } from "./electron/index.js";
 import { joinPath, runOnLoad } from "./globals.js";
 
-
 class GlobalAppConfig {
-
-    path = `${appDirectory}/config.json`
-    data = {}
+    path = `${appDirectory}/config.json`;
+    data = {};
 
     constructor() {
-        const exists = fs ? fs.existsSync(this.path) : localStorage[this.path]
+        const exists = fs ? fs.existsSync(this.path) : localStorage[this.path];
         if (exists) this.data = JSON.parse(fs ? fs.readFileSync(this.path) : localStorage.getItem(this.path));
     }
 
@@ -21,7 +19,7 @@ class GlobalAppConfig {
     }
 }
 
-export const global = new GlobalAppConfig()
+export const global = new GlobalAppConfig();
 
 export const hasEntry = (name) => {
     const existingProgressNames = getEntries();
@@ -30,25 +28,24 @@ export const hasEntry = (name) => {
 };
 
 export const update = (newDatasetName, previousDatasetName) => {
-        //If updataing the dataset, update the old banner image path with a new one
-        if (previousDatasetName) {
-            if (previousDatasetName === newDatasetName) return "No changes made to dataset name";
+    //If updataing the dataset, update the old banner image path with a new one
+    if (previousDatasetName) {
+        if (previousDatasetName === newDatasetName) return "No changes made to dataset name";
 
-            if (hasEntry(newDatasetName))
-                throw new Error("An existing progress file already exists with that name. Please choose a different name.");
+        if (hasEntry(newDatasetName))
+            throw new Error("An existing progress file already exists with that name. Please choose a different name.");
 
-            // update old progress file with new dataset name
-            const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
-            const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
-            if (fs) fs.renameSync(oldProgressFilePath, newProgressFilePath);
-            else {
-                localStorage.setItem(newProgressFilePath, localStorage.getItem(oldProgressFilePath));
-                localStorage.removeItem(oldProgressFilePath);
-            }
-             
-            return "Dataset name updated";
+        // update old progress file with new dataset name
+        const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
+        const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
+        if (fs) fs.renameSync(oldProgressFilePath, newProgressFilePath);
+        else {
+            localStorage.setItem(newProgressFilePath, localStorage.getItem(oldProgressFilePath));
+            localStorage.removeItem(oldProgressFilePath);
+        }
 
-        } else throw new Error("No previous dataset name provided");
+        return "Dataset name updated";
+    } else throw new Error("No previous dataset name provided");
 };
 
 export const save = (page, overrides = {}) => {
