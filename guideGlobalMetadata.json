@@ -3,6 +3,8 @@
         "SpikeGLXRecordingInterface",
         "PhySortingInterface",
         "BlackrockRecordingInterface",
-        "BlackrockSortingInterface"
+        "BlackrockSortingInterface",
+        "NeuroScopeSortingInterface",
+        "BiocamRecordingInterface"
     ]
 }
