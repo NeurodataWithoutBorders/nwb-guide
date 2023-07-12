@@ -1,6 +1,9 @@
 {
-    "progress": ["NWB GUIDE", "Pipelines"],
-    "conversions": ["NWB GUIDE", "Conversions"],
-    "stubs": ["NWB GUIDE", "Stubs"],
-    "tutorial": ["NWB GUIDE", "Tutorial"]
+    "root": "NWB GUIDE",
+    "subfolders": {
+        "progress": ["Pipelines"],
+        "conversions": ["Conversions"],
+        "stubs": ["Stubs"],
+        "tutorial": ["Tutorial"]
+    }
 }
