@@ -27,6 +27,7 @@ dependencies:
       - PyInstaller == 4.7
       - opencv-python == 4.5.3.56
       - certifi == 2021.10.8
-      - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[ecephys]
+      - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
+      - hdmf >= 3.7.0
       - pytest == 7.2.2
       - flask-cors === 3.0.10
