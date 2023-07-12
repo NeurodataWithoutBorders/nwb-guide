@@ -332,7 +332,7 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-    return dict(preview=str(file), file=str(resolved_output_path))
+    return dict(html=file._repr_html_(), file=str(resolved_output_path))
 
 def upload_to_dandi(
     dandiset_id: str,

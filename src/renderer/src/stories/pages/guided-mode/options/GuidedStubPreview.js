@@ -1,6 +1,9 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
+import { UnsafeComponent } from '../../Unsafe.js'
+
+
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
@@ -26,7 +29,7 @@ export class GuidedStubPreviewPage extends Page {
                     ? this.info.globalState.preview.map(
                           (o) =>
                               html`<h2 class="guided--text-sub-step">${o.file}</h2>
-                                  <pre>${o.preview}</pre>`
+                                  ${new UnsafeComponent(o.html)}`
                       )
                     : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`}
             </div>
