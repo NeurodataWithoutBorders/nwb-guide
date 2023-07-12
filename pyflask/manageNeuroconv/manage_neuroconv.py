@@ -107,9 +107,9 @@ def get_first_recording_interface(converter):
 def is_supported_recording_interface(recording_interface, metadata):
     """
     Temporary conditioned access to functionality still in development on NeuroConv.
-    
+
     Used to determine display of ecephys metadata depending on the environment.
-    
+
     Alpha build release should therefore always return False for this.
     """
     return recording_interface.get_electrode_table_json and all(
