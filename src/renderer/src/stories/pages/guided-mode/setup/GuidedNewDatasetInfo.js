@@ -41,14 +41,13 @@ export class GuidedNewDatasetPage extends Page {
             // Update existing progress file
             if (globalState.initialized) {
                 try {
-                    const res = update(name, globalState.name)
+                    const res = update(name, globalState.name);
                     if (typeof res === "string") this.notify(res);
                     if (res === false) return;
                 } catch (e) {
                     this.notify(e, "error");
                     throw e;
                 }
-     
             } else {
                 const has = await hasEntry(name);
                 if (has) {
