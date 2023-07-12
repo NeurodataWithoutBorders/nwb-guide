@@ -1,8 +1,7 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
-import { UnsafeComponent } from '../../Unsafe.js'
-
+import { UnsafeComponent } from "../../Unsafe.js";
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
