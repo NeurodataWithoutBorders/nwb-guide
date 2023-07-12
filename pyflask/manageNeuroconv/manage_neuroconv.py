@@ -115,6 +115,7 @@ def is_supported_recording_interface(recording_interface, metadata):
     return (
         recording_interface
         and recording_interface.get_electrode_table_json
+        and metadata["Ecephys"].get("Electrodes")
         and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
     )
 
