@@ -3,6 +3,7 @@
         "SpikeGLXRecordingInterface",
         "PhySortingInterface",
         "NeuroScopeSortingInterface",
-        "BiocamRecordingInterface"
+        "BiocamRecordingInterface",
+        "EDFRecordingInterface"
     ]
 }
