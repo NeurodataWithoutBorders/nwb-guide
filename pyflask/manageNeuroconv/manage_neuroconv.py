@@ -112,8 +112,10 @@ def is_supported_recording_interface(recording_interface, metadata):
 
     Alpha build release should therefore always return False for this.
     """
-    return recording_interface and recording_interface.get_electrode_table_json and all(
-        row.get("data_type") for row in metadata["Ecephys"]["Electrodes"]
+    return (
+        recording_interface
+        and recording_interface.get_electrode_table_json
+        and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
     )
 
 
@@ -309,7 +311,7 @@ def convert_to_nwb(info: dict) -> str:
         # Update with the latest metadata for the electrodes
         ecephys_metadata["Electrodes"] = electrode_column_results
 
-    ecephys_metadata.pop('ElectrodeColumns', 'No key found') # Might not exist
+    ecephys_metadata.pop("ElectrodeColumns", "No key found")  # Might not exist
 
     # Actually run the conversion
     converter.run_conversion(
