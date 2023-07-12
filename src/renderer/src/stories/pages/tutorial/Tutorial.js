@@ -9,7 +9,7 @@ import guideGlobalMetadata from "../../../../../../guideGlobalMetadata.json" ass
 import { run } from "../guided-mode/options/utils.js";
 import "../../Button.js";
 import { InfoBox } from "../../InfoBox.js";
-import { hasEntry, get, save, remove, resume } from "../../../progress.js";
+import { hasEntry, get, save, remove, resume, global } from "../../../progress.js";
 
 import { electron } from "../../../electron/index.js";
 
@@ -25,17 +25,19 @@ export class TutorialPage extends Page {
         super(...args);
     }
 
-    state = {};
-
     render() {
-        this.state = {}; // Clear local state on each render
+
+        const state = global.data.tutorial = global.data.tutorial ?? {}
 
         const form = new JSONSchemaForm({
             schema: tutorialSchema,
             dialogOptions: {
                 properties: ["createDirectory"],
             },
-            results: this.state,
+            results: state,
+            validateOnChange: () => {
+                global.save()
+            }
         });
 
         form.style.width = "100%";
@@ -46,7 +48,7 @@ export class TutorialPage extends Page {
                 <h1 style="margin: 0;">Tutorial Data Generation</h1>
 
                 <div>
-                    ${true
+                    ${entryExists
                         ? html` <nwb-button
                                   size="xs"
                                   @click=${() => {
@@ -112,14 +114,14 @@ export class TutorialPage extends Page {
                           @click=${async () => {
                               await form.validate(); // Will throw an error in the callback
 
-                              const { output_directory } = await run("generate_dataset", this.state, {
+                              const { output_directory } = await run("generate_dataset", state, {
                                   title: "Generating tutorial data",
                               }).catch((e) => {
                                   this.notify(e.message, "error");
                                   throw e;
                               });
 
-                              this.state.output_directory_path = output_directory;
+                              state.output_directory_path = output_directory;
 
                               this.notify("Tutorial data successfully generated!");
                               if (shell) shell.showItemInFolder(output_directory);
