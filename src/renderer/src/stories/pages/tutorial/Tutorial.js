@@ -121,8 +121,6 @@ export class TutorialPage extends Page {
                                   throw e;
                               });
 
-                              state.output_directory_path = output_directory;
-
                               this.notify("Tutorial data successfully generated!");
                               if (shell) shell.showItemInFolder(output_directory);
 
