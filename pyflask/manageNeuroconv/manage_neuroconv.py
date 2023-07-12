@@ -103,8 +103,11 @@ def get_first_recording_interface(converter):
         if isinstance(interface, BaseRecordingExtractorInterface):
             return interface
 
+
 def is_supported_recording_interface(recording_interface, metadata):
-    return recording_interface.get_electrode_table_json and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
+    return recording_interface.get_electrode_table_json and all(
+        row.get("data_type") for row in metadata["Ecephys"]["Electrodes"]
+    )
 
 
 def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[str, dict]:
@@ -147,7 +150,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
             ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
             del defs["Electrodes"]
-        
+
         # Delete Ecephys metadata if ElectrodeTable helper function is not available
         else:
             del schema["properties"]["Ecephys"]
@@ -333,6 +336,7 @@ def convert_to_nwb(info: dict) -> str:
             os.symlink(resolved_output_directory, default_output_directory)
 
     return dict(html=file._repr_html_(), file=str(resolved_output_path))
+
 
 def upload_to_dandi(
     dandiset_id: str,
