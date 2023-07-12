@@ -7,6 +7,7 @@ import json
 from neuroconv.utils import NWBMetaDataEncoder
 from neuroconv.tools import LocalPathExpander
 from pynwb.file import NWBFile, Subject
+from pynwb import NWBHDF5IO
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
 from neuroconv.tools.data_transfers import automatic_dandi_upload
@@ -103,6 +104,19 @@ def get_first_recording_interface(converter):
             return interface
 
 
+def is_supported_recording_interface(recording_interface, metadata):
+    """
+    Temporary conditioned access to functionality still in development on NeuroConv.
+
+    Used to determine display of ecephys metadata depending on the environment.
+
+    Alpha build release should therefore always return False for this.
+    """
+    return recording_interface.get_electrode_table_json and all(
+        row.get("data_type") for row in metadata["Ecephys"]["Electrodes"]
+    )
+
+
 def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[str, dict]:
     """
     Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
@@ -113,34 +127,40 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     metadata = converter.get_metadata()
 
     recording_interface = get_first_recording_interface(converter)
+
     if recording_interface:
-        metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
+        if is_supported_recording_interface(recording_interface, metadata):
+            metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
 
-        # Get Electrode metadata
-        ecephys_properties = schema["properties"]["Ecephys"]["properties"]
-        original_electrodes_schema = ecephys_properties["Electrodes"]
+            # Get Electrode metadata
+            ecephys_properties = schema["properties"]["Ecephys"]["properties"]
+            original_electrodes_schema = ecephys_properties["Electrodes"]
 
-        new_electrodes_properties = {
-            properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-            for properties in original_electrodes_schema["default"]
-        }
+            new_electrodes_properties = {
+                properties["name"]: {key: value for key, value in properties.items() if key != "name"}
+                for properties in original_electrodes_schema["default"]
+            }
 
-        ecephys_properties["Electrodes"] = {
-            "type": "array",
-            "minItems": 0,
-            "items": {
-                "type": "object",
-                "properties": new_electrodes_properties,
-                "additionalProperties": True,  # Allow for new columns
-            },
-        }
+            ecephys_properties["Electrodes"] = {
+                "type": "array",
+                "minItems": 0,
+                "items": {
+                    "type": "object",
+                    "properties": new_electrodes_properties,
+                    "additionalProperties": True,  # Allow for new columns
+                },
+            }
 
-        metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
-        defs = ecephys_properties["definitions"]
+            metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
+            defs = ecephys_properties["definitions"]
 
-        ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
-        ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
-        del defs["Electrodes"]
+            ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
+            ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
+            del defs["Electrodes"]
+
+        # Delete Ecephys metadata if ElectrodeTable helper function is not available
+        else:
+            del schema["properties"]["Ecephys"]
 
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
@@ -277,27 +297,31 @@ def convert_to_nwb(info: dict) -> str:
     # Update the first recording interface with Ecephys table data
     recording_interface = get_first_recording_interface(converter)
 
-    if recording_interface:
-        ecephys_metadata = info["metadata"]["Ecephys"]
+    ecephys_metadata = info["metadata"]["Ecephys"]
+
+    if recording_interface and is_supported_recording_interface(recording_interface, info["metadata"]):
         electrode_column_results = ecephys_metadata["ElectrodeColumns"]
         electrode_results = ecephys_metadata["Electrodes"]
-        del ecephys_metadata["ElectrodeColumns"]
-        del ecephys_metadata["Electrodes"]
 
         recording_interface.update_electrode_table(
             electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
         )
 
         # Update with the latest metadata for the electrodes
-        info["metadata"]["Ecephys"]["Electrodes"] = electrode_column_results
+        ecephys_metadata["Electrodes"] = electrode_column_results
+
+    del ecephys_metadata["ElectrodeColumns"]
 
     # Actually run the conversion
-    file = converter.run_conversion(
+    converter.run_conversion(
         metadata=info["metadata"],
         nwbfile_path=resolved_output_path,
         overwrite=info.get("overwrite", False),
         conversion_options=options,
     )
+
+    io = NWBHDF5IO(resolved_output_path, mode="r")
+    file = io.read()
 
     # Create a symlink between the fake adata and custom data
     if not run_stub_test and not resolved_output_directory == default_output_directory:
@@ -318,7 +342,7 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-    return dict(preview=str(file), file=str(resolved_output_path))
+    return dict(html=file._repr_html_(), file=str(resolved_output_path))
 
 
 def upload_to_dandi(
