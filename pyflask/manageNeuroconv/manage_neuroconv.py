@@ -297,7 +297,7 @@ def convert_to_nwb(info: dict) -> str:
     # Update the first recording interface with Ecephys table data
     recording_interface = get_first_recording_interface(converter)
 
-    ecephys_metadata = info["metadata"]["Ecephys"]
+    ecephys_metadata = info["metadata"].get("Ecephys", {})
 
     if recording_interface and is_supported_recording_interface(recording_interface, info["metadata"]):
         electrode_column_results = ecephys_metadata["ElectrodeColumns"]
