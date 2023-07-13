@@ -18,22 +18,29 @@ export class GuidedSourceDataPage extends ManagedPage {
             this.save(); // Save in case the conversion fails
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
-            Swal.fire({
-                title: "Getting metadata for source data",
-                html: "Please wait...",
-                allowEscapeKey: false,
-                allowOutsideClick: false,
-                heightAuto: false,
-                backdrop: "rgba(0,0,0, 0.4)",
-                timerProgressBar: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-            });
-
             // const previousResults = this.info.globalState.metadata.results
 
             this.save(); // Save in case the metadata request fails
+
+            let stillFireSwal = false
+            const fireSwal = () => {
+                Swal.fire({
+                    title: "Getting metadata for source data",
+                    html: "Please wait...",
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    heightAuto: false,
+                    backdrop: "rgba(0,0,0, 0.4)",
+                    timerProgressBar: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+            }
+
+            setTimeout(() => {
+                if (stillFireSwal) fireSwal()
+            })
 
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }) => {
@@ -45,7 +52,13 @@ export class GuidedSourceDataPage extends ManagedPage {
                             source_data: info.source_data,
                             interfaces: this.info.globalState.interfaces,
                         }),
-                    }).then((res) => res.json());
+                    }).then((res) => res.json())
+                    .catch(e => {
+                        Swal.close();
+                        stillFireSwal = false
+                        this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
+                        throw e
+                    });
 
                     Swal.close();
 
