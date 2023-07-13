@@ -332,7 +332,7 @@ export class JSONSchemaForm extends LitElement {
         const path = [...fullPath];
         const name = path.pop();
         const parent = this.#get(path);
-        const element = this.shadowRoot.querySelector(`#${fullPath.join("-")} .guided--input`);
+        const element = this.shadowRoot.querySelector(`#${fullPath.join("-")}`).querySelector('nwb-jsonschema-input').shadowRoot.querySelector('.guided--input');
         const isValid = await this.triggerValidation(name, parent, element, path, false);
         if (!isValid) return true;
     };
@@ -376,9 +376,28 @@ export class JSONSchemaForm extends LitElement {
             path: fullPath,
             value: parent[name],
             form: this,
-            validateOnChange: false,
             required: isRequired,
         });
+
+        interactiveInput.updated = () => {
+            let input = interactiveInput.shadowRoot.querySelector('.schema-input')
+            if (!input) input = interactiveInput.shadowRoot.querySelector("nwb-filesystem-selector")
+
+            if (input) {
+                if (this.validateEmptyValues || (input.value ?? input.checked) !== "") input.dispatchEvent(new Event("change"))
+            }
+        }
+
+        // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
+
+        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-jsonschema-input")).map(input => input.children)
+        // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
+        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-filesystem-selector") ?? []);
+        // const allInputs = [...inputs, ...fileInputs];
+        // const filtered = filter ? allInputs.filter(filter) : allInputs;
+        // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
+
+        // console.log(interactiveInput)
 
         return html`
             <div
@@ -777,17 +796,8 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
-    // NOTE: This ignores the file selector button
-    #checkAllInputs = (filter) => {
-        const inputs = Array.from(this.shadowRoot.querySelectorAll(".schema-input"));
-        const fileInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-filesystem-selector") ?? []);
-        const allInputs = [...inputs, ...fileInputs];
-        const filtered = filter ? allInputs.filter(filter) : allInputs;
-        filtered.forEach((input) => input.dispatchEvent(new Event("change")));
-    };
 
     updated() {
-        this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
         this.checkAllLoaded(); // Throw if no tables
         this.#toggleRendered(); // Toggle internal render state
     }

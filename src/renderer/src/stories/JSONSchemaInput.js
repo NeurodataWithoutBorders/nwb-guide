@@ -87,9 +87,10 @@ export class JSONSchemaInput extends LitElement {
     }
 
     render() {
-        const { validateOnChange, info, parent, path } = this;
+        const { validateOnChange, info, parent, path: fullPath } = this;
 
-        const name = (typeof path === "string" ? path.split("-") : path).slice(-1)[0];
+        const path = (typeof fullPath === "string" ? fullPath.split("-") : [...fullPath])
+        const name = path.splice(-1)[0];
 
         const isArray = info.type === "array"; // Handle string (and related) formats / types
 
@@ -149,7 +150,7 @@ export class JSONSchemaInput extends LitElement {
                     parent[name] = list.items.map((o) => o.value);
                     if (this.required && parent[name].length === 0) delete parent[name]; // Remove if empty and required
 
-                    await this.form.triggerValidation(name, parent, list, path);
+                    validateOnChange && await this.form.triggerValidation(name, parent, list, path);
                 },
             });
 
@@ -220,6 +221,7 @@ export class JSONSchemaInput extends LitElement {
                 ></textarea>`;
             // Handle other string formats
             else {
+
                 const type =
                     info.format === "date-time"
                         ? "datetime-local"
