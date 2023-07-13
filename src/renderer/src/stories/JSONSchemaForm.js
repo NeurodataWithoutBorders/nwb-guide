@@ -111,53 +111,6 @@ const componentCSS = `
       margin: 15px;
     }
 
-
-.guided--input {
-  width: 100%;
-  height: 38px;
-  border-radius: 4px;
-  padding: 10px 12px;
-  font-size: 100%;
-  font-weight: normal;
-  border: 1px solid var(--color-border);
-  transition: border-color 150ms ease-in-out 0s;
-  outline: none;
-  color: rgb(33, 49, 60);
-  background-color: rgb(255, 255, 255);
-}
-
-.guided--input:disabled {
-  color: dimgray;
-  pointer-events: none;
-}
-
-.guided--input::placeholder {
-  opacity: 0.5;
-}
-
-.guided--text-area {
-  height: 5em;
-  resize: none;
-  font-family: unset;
-}
-.guided--text-area-tall {
-  height: 15em;
-}
-.guided--input:hover {
-  box-shadow: rgb(231 238 236) 0px 0px 0px 2px;
-}
-.guided--input:focus {
-  outline: 0;
-  box-shadow: var(--color-light-green) 0px 0px 0px 1px;
-}
-
-.guided--text-input-instructions {
-  font-size: 13px;
-  width: 100%;
-  padding-top: 4px;
-  color: dimgray !important;
-}
-
 hr {
   margin: 1em 0 1.5em 0;
 }
@@ -179,6 +132,14 @@ pre {
 
   .required.conditional label:after {
     color: transparent;
+  }
+
+            
+  .guided--text-input-instructions {
+    font-size: 13px;
+    width: 100%;
+    padding-top: 4px;
+    color: dimgray !important;
   }
 `;
 
