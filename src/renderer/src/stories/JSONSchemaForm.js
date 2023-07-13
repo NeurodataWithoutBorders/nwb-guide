@@ -5,7 +5,7 @@ import { checkStatus } from "../validation";
 import { capitalize, header } from "./forms/utils";
 import { resolve } from "../promises";
 
-import { JSONSchemaInput } from './JSONSchemaInput'
+import { JSONSchemaInput } from "./JSONSchemaInput";
 
 const componentCSS = `
 
@@ -392,7 +392,7 @@ export class JSONSchemaForm extends LitElement {
 
     #renderInteractiveElement = (name, info, parent, required, path = []) => {
         let isRequired = required[name];
- 
+
         const fullPath = [...path, name];
         const isConditional = this.#getLink(fullPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
 
@@ -409,8 +409,6 @@ export class JSONSchemaForm extends LitElement {
                 }
             };
 
-
-
         const interactiveInput = new JSONSchemaInput({
             info,
             parent,
@@ -418,9 +416,9 @@ export class JSONSchemaForm extends LitElement {
             value: parent[name],
             form: this,
             validateOnChange: false,
-            required: isRequired
-        })
-        
+            required: isRequired,
+        });
+
         return html`
             <div
                 id=${fullPath.join("-")}
@@ -432,9 +430,7 @@ export class JSONSchemaForm extends LitElement {
                 ${interactiveInput}
                 ${info.description
                     ? html`<p class="guided--text-input-instructions">
-                          ${capitalize(info.description)}${info.description.slice(-1)[0] === "."
-                              ? ""
-                              : "."}
+                          ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
                       </p>`
                     : ""}
                 <div class="errors"></div>
@@ -575,7 +571,6 @@ export class JSONSchemaForm extends LitElement {
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, parent, element, path = [], checkLinks = true) => {
-
         const valid =
             !this.validateEmptyValues && !(name in parent) ? true : await this.validateOnChange(name, parent, path);
 

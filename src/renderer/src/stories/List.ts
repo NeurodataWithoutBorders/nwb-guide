@@ -17,7 +17,7 @@ export class List extends LitElement {
   static get styles() {
     return css`
 
-      li > div { 
+      li > div {
         display: flex;
         align-items: center;
       }
@@ -31,7 +31,7 @@ export class List extends LitElement {
       }
 
       li > div > div {
-        white-space: nowrap; 
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis
       }
@@ -78,7 +78,7 @@ export class List extends LitElement {
       if (name === 'items') this.onChange()
     }
 
-    add = (item: ListItemType) => {      
+    add = (item: ListItemType) => {
       this.items = [...this.items, item]
     }
 
@@ -106,7 +106,7 @@ export class List extends LitElement {
             i++;
             resolvedKey = `${originalValue}_${i}`;
         }
-        
+
         keyEl.innerText = resolvedKey;
         keyEl.contentEditable = true;
         keyEl.style.cursor = "text";
@@ -168,11 +168,11 @@ export class List extends LitElement {
       this.items = []
     }
 
-    render() {      
+    render() {
 
       this.removeAttribute('keys')
       this.object = {}
-      
+
       return html`
       <ol>
         ${this.items.map(this.#renderListItem)}

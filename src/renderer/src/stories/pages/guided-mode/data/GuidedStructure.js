@@ -15,7 +15,7 @@ export class GuidedStructurePage extends Page {
         // Handle Search Bar Interactions
         this.search.list.style.position = "unset";
         this.search.onSelect = (...args) => {
-            this.list.add(...args)
+            this.list.add(...args);
             this.searchModal.toggle(false);
         };
 
@@ -36,8 +36,8 @@ export class GuidedStructurePage extends Page {
     addButton = new Button();
 
     searchModal = new Modal({
-        width: '100%',
-        height: '100%'
+        width: "100%",
+        height: "100%",
     });
 
     footer = {
@@ -94,15 +94,14 @@ export class GuidedStructurePage extends Page {
                 };
             }
 
-            this.list.add({ ...found, key }) // Add previously selected items
+            this.list.add({ ...found, key }); // Add previously selected items
         }
     }
 
     render() {
-
         // Reset list
         this.list.style.display = "inline-block";
-        this.list.clear()
+        this.list.clear();
         this.addButton.style.display = "block";
 
         return html`

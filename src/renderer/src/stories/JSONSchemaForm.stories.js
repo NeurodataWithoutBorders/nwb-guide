@@ -31,12 +31,12 @@ const defaultSchema = {
             format: "file",
         },
         list: {
-            type: 'array',
+            type: "array",
             items: {
                 type: "string",
-                format: 'file'
-            }
-        }
+                format: "file",
+            },
+        },
     },
     required: ["test"],
 };
@@ -47,8 +47,8 @@ Default.args = {
         test: "false",
         list: ["item"],
     },
-    schema: defaultSchema
-}
+    schema: defaultSchema,
+};
 
 export const Nested = Template.bind({});
 Nested.args = {
