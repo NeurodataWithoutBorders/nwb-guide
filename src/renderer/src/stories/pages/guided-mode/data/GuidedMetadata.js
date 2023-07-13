@@ -159,6 +159,8 @@ export class GuidedMetadataPage extends ManagedPage {
                             header: file,
                             open: true,
                             onClose: () => modal.remove(),
+                            width: '100%',
+                            height: '100%'
                         });
 
                         modal.insertAdjacentHTML("beforeend", `<pre>${preview}</pre>`);

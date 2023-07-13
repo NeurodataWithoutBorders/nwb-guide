@@ -1,11 +1,11 @@
 import { LitElement, css, html } from "lit";
-import { FilesystemSelector } from "./FileSystemSelector";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { BasicTable } from "./BasicTable";
-import { capitalize, header, textToArray } from "./forms/utils";
+import { capitalize, header } from "./forms/utils";
 import { resolve } from "../promises";
+
+import { JSONSchemaInput } from './JSONSchemaInput'
 
 const componentCSS = `
 
@@ -205,7 +205,7 @@ export class JSONSchemaForm extends LitElement {
 
     #base = [];
     #nestedForms = {};
-    #tables = {};
+    tables = {};
     #nErrors = 0;
     #nWarnings = 0;
 
@@ -252,7 +252,7 @@ export class JSONSchemaForm extends LitElement {
 
     getTable = (path) => {
         if (typeof path === "string") path = path.split(".");
-        if (path.length === 1) return this.#tables[path[0]]; // return table if accessible
+        if (path.length === 1) return this.tables[path[0]]; // return table if accessible
 
         const copy = [...path];
         const tableName = copy.pop();
@@ -275,7 +275,7 @@ export class JSONSchemaForm extends LitElement {
         if (changedProperties === "options") this.requestUpdate();
     }
 
-    #updateParent(name, value, parent) {
+    updateParent(name, value, parent) {
         if (!value) delete parent[name];
         else parent[name] = value;
     }
@@ -291,19 +291,21 @@ export class JSONSchemaForm extends LitElement {
     #clearMessages = (fullPath, type) => {
         if (Array.isArray(fullPath)) fullPath = fullPath.join("-"); // Convert array to string
         const container = this.shadowRoot.querySelector(`#${fullPath} .${type}`);
-        const nChildren = container.children.length;
-        container.innerHTML = "";
+        if (container) {
+            const nChildren = container.children.length;
+            container.innerHTML = "";
 
-        // Track errors and warnings
-        if (type === "errors") this.#nErrors -= nChildren;
-        if (type === "warnings") this.#nWarnings -= nChildren;
+            // Track errors and warnings
+            if (type === "errors") this.#nErrors -= nChildren;
+            if (type === "warnings") this.#nWarnings -= nChildren;
+        }
     };
 
     status;
-    #checkStatus = () =>
+    checkStatus = () =>
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
             ...Object.values(this.#nestedForms),
-            ...Object.values(this.#tables),
+            ...Object.values(this.tables),
         ]);
 
     throw = (message) => {
@@ -331,7 +333,7 @@ export class JSONSchemaForm extends LitElement {
 
         for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
         try {
-            for (let key in this.#tables) await this.#tables[key].validate(); // Validate nested tables too
+            for (let key in this.tables) await this.tables[key].validate(); // Validate nested tables too
         } catch (e) {
             this.throw(e.message);
         }
@@ -370,11 +372,11 @@ export class JSONSchemaForm extends LitElement {
         const name = path.pop();
         const parent = this.#get(path);
         const element = this.shadowRoot.querySelector(`#${fullPath.join("-")} .guided--input`);
-        const isValid = await this.#validateOnChange(name, parent, element, path, false);
+        const isValid = await this.triggerValidation(name, parent, element, path, false);
         if (!isValid) return true;
     };
 
-    #getSchema(path, schema = this.schema) {
+    getSchema(path, schema = this.schema) {
         if (typeof path === "string") path = path.split(".");
         if (this.#base.length) {
             const base = this.#base.slice(-1)[0];
@@ -383,21 +385,14 @@ export class JSONSchemaForm extends LitElement {
         }
 
         const resolved = path.reduce((acc, curr) => (acc = acc[curr]), schema);
-        if (resolved["$ref"]) return this.#getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
+        if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
     }
 
     #renderInteractiveElement = (name, info, parent, required, path = []) => {
         let isRequired = required[name];
-
-        const isArray = info.type === "array"; // Handle string (and related) formats / types
-
-        const hasItemsRef = "items" in info && "$ref" in info.items;
-        const isStringArray =
-            isArray &&
-            (info.items?.type === "string" || !("items" in info) || (!("type" in info.items) && !hasItemsRef)); // Default to a string type
-
+ 
         const fullPath = [...path, name];
         const isConditional = this.#getLink(fullPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
 
@@ -414,6 +409,18 @@ export class JSONSchemaForm extends LitElement {
                 }
             };
 
+
+
+        const interactiveInput = new JSONSchemaInput({
+            info,
+            parent,
+            path: fullPath,
+            value: parent[name],
+            form: this,
+            validateOnChange: false,
+            required: isRequired
+        })
+        
         return html`
             <div
                 id=${fullPath.join("-")}
@@ -422,119 +429,12 @@ export class JSONSchemaForm extends LitElement {
                     : ""}"
             >
                 <label class="guided--form-label">${header(name)}</label>
-                ${(() => {
-                    // Basic enumeration of properties on a select element
-                    if (info.enum) {
-                        return html`
-                            <select
-                                class="guided--input schema-input"
-                                @input=${(ev) => this.#updateParent(name, info.enum[ev.target.value], parent)}
-                                @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
-                            >
-                                <option disabled selected value>Select an option</option>
-                                ${info.enum.map(
-                                    (item, i) =>
-                                        html`<option value=${i} ?selected=${parent[name] === item}>${item}</option>`
-                                )}
-                            </select>
-                        `;
-                    } else if (info.type === "boolean") {
-                        return html`<input
-                            type="checkbox"
-                            class="schema-input"
-                            @input=${(ev) => this.#updateParent(name, ev.target.checked, parent)}
-                            ?checked=${parent[name] ?? false}
-                            @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
-                        />`;
-                    } else if (info.type === "string" || (isStringArray && !hasItemsRef) || info.type === "number") {
-                        // Handle file and directory formats
-                        if (this.#filesystemQueries.includes(info.format)) {
-                            const el = new FilesystemSelector({
-                                type: info.format,
-                                value: parent[name],
-                                onSelect: (filePath) => this.#updateParent(name, filePath, parent),
-                                onChange: (filePath) => this.#validateOnChange(name, parent, el, path),
-                                dialogOptions: this.dialogOptions,
-                                dialogType: this.dialogType,
-                            });
-                            return el;
-                        }
-
-                        // Handle long string formats
-                        else if (info.format === "long" || isArray)
-                            return html`<textarea
-                                class="guided--input guided--text-area schema-input"
-                                type="text"
-                                placeholder="${info.placeholder ?? ""}"
-                                style="height: 7.5em; padding-bottom: 20px"
-                                maxlength="255"
-                                .value="${isStringArray
-                                    ? parent[name]
-                                        ? parent[name].join("\n")
-                                        : ""
-                                    : parent[name] ?? ""}"
-                                @input=${(ev) => {
-                                    this.#updateParent(
-                                        name,
-                                        isStringArray ? textToArray(ev.target.value) : ev.target.value,
-                                        parent
-                                    );
-                                }}
-                                @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
-                            ></textarea>`;
-                        // Handle other string formats
-                        else {
-                            const type =
-                                info.format === "date-time"
-                                    ? "datetime-local"
-                                    : info.format ?? (info.type === "string" ? "text" : info.type);
-                            return html`
-                                <input
-                                    class="guided--input schema-input"
-                                    type="${type}"
-                                    placeholder="${info.placeholder ?? ""}"
-                                    .value="${parent[name] ?? ""}"
-                                    @input=${(ev) => this.#updateParent(name, ev.target.value, parent)}
-                                    @change=${(ev) => this.#validateOnChange(name, parent, ev.target, path)}
-                                />
-                            `;
-                        }
-                    }
-
-                    if (info.type === "array") {
-                        const itemSchema = this.#getSchema("items", info);
-                        if (itemSchema.type === "object") {
-                            const tableMetadata = {
-                                schema: itemSchema,
-                                data: parent[name],
-                                validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v),
-                                onStatusChange: () => this.#checkStatus(), // Check status on all elements
-                                validateEmptyCells: this.validateEmptyValues,
-                                deferLoading: this.deferLoading,
-                                onLoaded: () => {
-                                    this.#nLoaded++;
-                                    this.#checkAllLoaded();
-                                },
-                                onThrow: (...args) => this.onThrow(...args),
-                            };
-
-                            return (this.#tables[name] =
-                                this.renderTable(name, tableMetadata, fullPath) || new BasicTable(tableMetadata));
-                        }
-                    }
-
-                    // Print out the immutable default value
-                    return html`<pre>
-${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pre
-                    >`;
-                })()}
+                ${interactiveInput}
                 ${info.description
                     ? html`<p class="guided--text-input-instructions">
                           ${capitalize(info.description)}${info.description.slice(-1)[0] === "."
                               ? ""
-                              : "."}${isStringArray
-                              ? html`<span style="color: #202020;"> Separate on new lines.</span>`
-                              : ""}
+                              : "."}
                       </p>`
                     : ""}
                 <div class="errors"></div>
@@ -544,20 +444,19 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     };
 
     load = () => {
-        if (!this.#loaded) Object.values(this.#tables).forEach((t) => t.load());
+        if (!this.#loaded) Object.values(this.tables).forEach((t) => t.load());
     };
 
     #loaded = false;
-    #nLoaded = 0;
-    #checkAllLoaded = () => {
-        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.#tables)].length;
-        if (this.#nLoaded === expected) {
+    nLoaded = 0;
+
+    checkAllLoaded = () => {
+        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.tables)].length;
+        if (this.nLoaded === expected) {
             this.#loaded = true;
             this.onLoaded();
         }
     };
-
-    #filesystemQueries = ["file", "directory"];
 
     #validateRequirements = async (results, requirements, parent) => {
         let invalid = [];
@@ -675,7 +574,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     };
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    #validateOnChange = async (name, parent, element, path = [], checkLinks = true) => {
+    triggerValidation = async (name, parent, element, path = [], checkLinks = true) => {
+
         const valid =
             !this.validateEmptyValues && !(name in parent) ? true : await this.validateOnChange(name, parent, path);
 
@@ -717,7 +617,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         // Track errors and warnings
         this.#nErrors += errors.length;
         this.#nWarnings += warnings.length;
-        this.#checkStatus();
+        this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
         warnings.forEach((info) => this.#addMessage(fullPath, info.message, "warnings"));
@@ -865,12 +765,12 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusChange: (status) => {
                         accordion.setSectionStatus(headerName, status);
-                        this.#checkStatus();
+                        this.checkStatus();
                     }, // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
-                        this.#nLoaded++;
-                        this.#checkAllLoaded();
+                        this.nLoaded++;
+                        this.checkAllLoaded();
                     },
                     renderTable: (...args) => this.renderTable(...args),
                     base: fullPath,
@@ -932,19 +832,19 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     updated() {
         this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
-        this.#checkAllLoaded(); // Throw if no tables
+        this.checkAllLoaded(); // Throw if no tables
         this.#toggleRendered(); // Toggle internal render state
     }
 
     #resetLoadState() {
         this.#loaded = false;
-        this.#nLoaded = 0;
+        this.nLoaded = 0;
     }
 
     // Check if everything is internally rendered
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
-            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered))
+            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.tables)].map((o) => o.rendered))
         );
         return isRendered;
     }
