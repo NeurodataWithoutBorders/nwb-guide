@@ -11,57 +11,54 @@ import { Modal } from "./Modal";
 const filesystemQueries = ["file", "directory"];
 
 export class JSONSchemaInput extends LitElement {
-
     static get styles() {
         return css`
+            * {
+                box-sizing: border-box;
+            }
 
-        * {
-            box-sizing: border-box;
-        }
-        
-        :host {
-            display: block;
-        }
+            :host {
+                display: block;
+            }
 
-        .guided--input {
-            width: 100%;
-            border-radius: 4px;
-            padding: 10px 12px;
-            font-size: 100%;
-            font-weight: normal;
-            border: 1px solid var(--color-border);
-            transition: border-color 150ms ease-in-out 0s;
-            outline: none;
-            color: rgb(33, 49, 60);
-            background-color: rgb(255, 255, 255);
-          }
-          
-          .guided--input:disabled {
-            color: dimgray;
-            pointer-events: none;
-          }
-          
-          .guided--input::placeholder {
-            opacity: 0.5;
-          }
-          
-          .guided--text-area {
-            height: 5em;
-            resize: none;
-            font-family: unset;
-          }
-          .guided--text-area-tall {
-            height: 15em;
-          }
-          .guided--input:hover {
-            box-shadow: rgb(231 238 236) 0px 0px 0px 2px;
-          }
-          .guided--input:focus {
-            outline: 0;
-            box-shadow: var(--color-light-green) 0px 0px 0px 1px;
-          }
-                  
-        `
+            .guided--input {
+                width: 100%;
+                border-radius: 4px;
+                padding: 10px 12px;
+                font-size: 100%;
+                font-weight: normal;
+                border: 1px solid var(--color-border);
+                transition: border-color 150ms ease-in-out 0s;
+                outline: none;
+                color: rgb(33, 49, 60);
+                background-color: rgb(255, 255, 255);
+            }
+
+            .guided--input:disabled {
+                color: dimgray;
+                pointer-events: none;
+            }
+
+            .guided--input::placeholder {
+                opacity: 0.5;
+            }
+
+            .guided--text-area {
+                height: 5em;
+                resize: none;
+                font-family: unset;
+            }
+            .guided--text-area-tall {
+                height: 15em;
+            }
+            .guided--input:hover {
+                box-shadow: rgb(231 238 236) 0px 0px 0px 2px;
+            }
+            .guided--input:focus {
+                outline: 0;
+                box-shadow: var(--color-light-green) 0px 0px 0px 1px;
+            }
+        `;
     }
     constructor(props) {
         super();

@@ -134,7 +134,7 @@ pre {
     color: transparent;
   }
 
-            
+
   .guided--text-input-instructions {
     font-size: 13px;
     width: 100%;
