@@ -332,7 +332,10 @@ export class JSONSchemaForm extends LitElement {
         const path = [...fullPath];
         const name = path.pop();
         const parent = this.#get(path);
-        const element = this.shadowRoot.querySelector(`#${fullPath.join("-")}`).querySelector('nwb-jsonschema-input').shadowRoot.querySelector('.guided--input');
+        const element = this.shadowRoot
+            .querySelector(`#${fullPath.join("-")}`)
+            .querySelector("nwb-jsonschema-input")
+            .shadowRoot.querySelector(".guided--input");
         const isValid = await this.triggerValidation(name, parent, element, path, false);
         if (!isValid) return true;
     };
@@ -380,13 +383,14 @@ export class JSONSchemaForm extends LitElement {
         });
 
         interactiveInput.updated = () => {
-            let input = interactiveInput.shadowRoot.querySelector('.schema-input')
-            if (!input) input = interactiveInput.shadowRoot.querySelector("nwb-filesystem-selector")
+            let input = interactiveInput.shadowRoot.querySelector(".schema-input");
+            if (!input) input = interactiveInput.shadowRoot.querySelector("nwb-filesystem-selector");
 
             if (input) {
-                if (this.validateEmptyValues || (input.value ?? input.checked) !== "") input.dispatchEvent(new Event("change"))
+                if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
+                    input.dispatchEvent(new Event("change"));
             }
-        }
+        };
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
@@ -795,7 +799,6 @@ export class JSONSchemaForm extends LitElement {
             });
         }
     };
-
 
     updated() {
         this.checkAllLoaded(); // Throw if no tables
