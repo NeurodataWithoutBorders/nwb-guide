@@ -22,7 +22,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             this.save(); // Save in case the metadata request fails
 
-            let stillFireSwal = false
+            let stillFireSwal = false;
             const fireSwal = () => {
                 Swal.fire({
                     title: "Getting metadata for source data",
@@ -36,11 +36,11 @@ export class GuidedSourceDataPage extends ManagedPage {
                         Swal.showLoading();
                     },
                 });
-            }
+            };
 
             setTimeout(() => {
-                if (stillFireSwal) fireSwal()
-            })
+                if (stillFireSwal) fireSwal();
+            });
 
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }) => {
@@ -52,13 +52,14 @@ export class GuidedSourceDataPage extends ManagedPage {
                             source_data: info.source_data,
                             interfaces: this.info.globalState.interfaces,
                         }),
-                    }).then((res) => res.json())
-                    .catch(e => {
-                        Swal.close();
-                        stillFireSwal = false
-                        this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
-                        throw e
-                    });
+                    })
+                        .then((res) => res.json())
+                        .catch((e) => {
+                            Swal.close();
+                            stillFireSwal = false;
+                            this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
+                            throw e;
+                        });
 
                     Swal.close();
 
