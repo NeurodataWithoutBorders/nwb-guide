@@ -160,9 +160,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
         del defs["Electrodes"]
 
-    # Delete Ecephys metadata if ElectrodeTable helper function is not available
+    # Delete Ecephys metadata if ElectrodeTable helper function is not available (temporary solution)
     else:
-        del schema["properties"]["Ecephys"]
+        schema["properties"].pop("Ecephys", {})
 
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
