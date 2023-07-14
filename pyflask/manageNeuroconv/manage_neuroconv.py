@@ -115,6 +115,7 @@ def is_supported_recording_interface(recording_interface, metadata):
     return (
         recording_interface
         and recording_interface.get_electrode_table_json
+        and metadata["Ecephys"].get("Electrodes")
         and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
     )
 
@@ -159,9 +160,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
         del defs["Electrodes"]
 
-    # Delete Ecephys metadata if ElectrodeTable helper function is not available
+    # Delete Ecephys metadata if ElectrodeTable helper function is not available (temporary solution)
     else:
-        del schema["properties"]["Ecephys"]
+        schema["properties"].pop("Ecephys", {})
 
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
