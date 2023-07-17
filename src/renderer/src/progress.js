@@ -47,7 +47,7 @@ export const save = (page, overrides = {}) => {
     if (history.state) history.state.project = guidedProgressFileName;
     window.history.pushState(history.state, null, value);
 
-    //Destination: HOMEDIR/NWB_GUIDE/Guided-Progress
+    //Destination: HOMEDIR/NWB_GUIDE/pipelines
     globalState["last-modified"] = new Date();
     globalState["page-before-exit"] = overrides.id ?? page.info.id;
 
@@ -55,13 +55,13 @@ export const save = (page, overrides = {}) => {
 
     // Save the file through the available mechanisms
     if (fs) {
-        if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create Guided-Progress folder if one does not exist
+        if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create progress folder if one does not exist
         fs.writeFileSync(guidedFilePath, JSON.stringify(globalState, null, 2));
     } else localStorage.setItem(guidedFilePath, JSON.stringify(globalState));
 };
 
 export const getEntries = () => {
-    if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if Guided-Progress folder exists. If not, create it.
+    if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if progress folder exists. If not, create it.
     const progressFiles = fs ? fs.readdirSync(guidedProgressFilePath) : Object.keys(localStorage);
     return progressFiles.filter((path) => path.slice(-5) === ".json");
 };
