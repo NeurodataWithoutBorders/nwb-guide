@@ -2,9 +2,7 @@ name: Build-and-deploy-win
 run-name: ${{ github.actor }} is building a Windows release for NWB GUIDE
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy-on-windows:

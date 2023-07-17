@@ -2,7 +2,7 @@ name: Build-and-deploy-mac
 run-name: ${{ github.actor }} is building a MAC release for NWB GUIDE
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
 
 jobs:
   deploy-on-mac:
