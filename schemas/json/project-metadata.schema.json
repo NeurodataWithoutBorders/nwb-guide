@@ -9,7 +9,7 @@
       "output_folder": {
         "type": "string",
         "format": "directory",
-        "description": "Provide a custom output location for this project. Will default to ~/NWB_GUIDE/Conversions"
+        "description": "Provide a custom output location for this project. Will default to ~/NWB_GUIDE/conversions"
       },
 
       "NWBFile": {
