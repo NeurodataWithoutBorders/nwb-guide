@@ -1,4 +1,4 @@
-import { app, isElectron, path, port } from "../electron/index.js";
+import { app, isElectron, path, port, remote } from "../electron/index.js";
 import { Notyf } from "notyf";
 import checkChromatic from "chromatic/isChromatic";
 
@@ -14,7 +14,8 @@ export const reloadPageToHome = () => {
 
 // Filesystem Management
 export const homeDirectory = app?.getPath("home") ?? "";
-export const guidedProgressFilePath = homeDirectory ? joinPath(homeDirectory, ...paths.progress) : "";
+export const appDirectory = homeDirectory ? joinPath(homeDirectory, paths.root) : "";
+export const guidedProgressFilePath = homeDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
 
 export const isStorybook = window.location.href.includes("iframe.html");
 

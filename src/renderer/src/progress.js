@@ -1,8 +1,25 @@
 import Swal from "sweetalert2";
 
-import { guidedProgressFilePath, reloadPageToHome, isStorybook } from "./dependencies/globals.js";
+import { guidedProgressFilePath, reloadPageToHome, isStorybook, appDirectory } from "./dependencies/globals.js";
 import { fs } from "./electron/index.js";
 import { joinPath, runOnLoad } from "./globals.js";
+
+class GlobalAppConfig {
+    path = `${appDirectory}/config.json`;
+    data = {};
+
+    constructor() {
+        const exists = fs ? fs.existsSync(this.path) : localStorage[this.path];
+        if (exists) this.data = JSON.parse(fs ? fs.readFileSync(this.path) : localStorage.getItem(this.path));
+    }
+
+    save() {
+        if (fs) fs.writeFileSync(this.path, JSON.stringify(this.data, null, 2));
+        else localStorage.setItem(this.path, JSON.stringify(this.data));
+    }
+}
+
+export const global = new GlobalAppConfig();
 
 export const hasEntry = (name) => {
     const existingProgressNames = getEntries();
@@ -11,25 +28,24 @@ export const hasEntry = (name) => {
 };
 
 export const update = (newDatasetName, previousDatasetName) => {
-    return new Promise((resolve, reject) => {
-        //If updataing the dataset, update the old banner image path with a new one
-        if (previousDatasetName) {
-            if (previousDatasetName === newDatasetName) resolve("No changes made to dataset name");
+    //If updataing the dataset, update the old banner image path with a new one
+    if (previousDatasetName) {
+        if (previousDatasetName === newDatasetName) return "No changes made to dataset name";
 
-            if (hasEntry(newDatasetName))
-                reject("An existing progress file already exists with that name. Please choose a different name.");
+        if (hasEntry(newDatasetName))
+            throw new Error("An existing progress file already exists with that name. Please choose a different name.");
 
-            // update old progress file with new dataset name
-            const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
-            const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
-            if (fs) fs.renameSync(oldProgressFilePath, newProgressFilePath);
-            else {
-                localStorage.setItem(newProgressFilePath, localStorage.getItem(oldProgressFilePath));
-                localStorage.removeItem(oldProgressFilePath);
-            }
-            resolve("Dataset name updated");
-        } else reject("No previous dataset name provided");
-    });
+        // update old progress file with new dataset name
+        const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
+        const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
+        if (fs) fs.renameSync(oldProgressFilePath, newProgressFilePath);
+        else {
+            localStorage.setItem(newProgressFilePath, localStorage.getItem(oldProgressFilePath));
+            localStorage.removeItem(oldProgressFilePath);
+        }
+
+        return "Dataset name updated";
+    } else throw new Error("No previous dataset name provided");
 };
 
 export const save = (page, overrides = {}) => {
@@ -97,12 +113,18 @@ export const get = (name) => {
     return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
 };
 
-export const deleteProgressCard = async (progressCardDeleteButton) => {
-    const progressCard = progressCardDeleteButton.parentElement.parentElement;
-    const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent.trim();
+export function resume(name) {
+    const global = this ? this.load(name) : get(name);
 
+    const commandToResume = global["page-before-exit"] || "conversion/start";
+    if (this) this.onTransition(commandToResume);
+
+    return commandToResume;
+}
+
+export const remove = async (name) => {
     const result = await Swal.fire({
-        title: `Are you sure you would like to delete NWB GUIDE progress made on the dataset: ${progressCardNameToDelete}?`,
+        title: `Are you sure you would like to delete NWB GUIDE progress made on the dataset: ${name}?`,
         text: "Your progress file will be deleted permanently, and all existing progress will be lost.",
         icon: "warning",
         heightAuto: false,
@@ -113,15 +135,24 @@ export const deleteProgressCard = async (progressCardDeleteButton) => {
         cancelButtonText: "Cancel",
         focusCancel: true,
     });
+
     if (result.isConfirmed) {
         //Get the path of the progress file to delete
-        const progressFilePathToDelete = joinPath(guidedProgressFilePath, progressCardNameToDelete + ".json");
+        const progressFilePathToDelete = joinPath(guidedProgressFilePath, name + ".json");
 
         //delete the progress file
         if (fs) fs.unlinkSync(progressFilePathToDelete, (err) => console.log(err));
         else localStorage.removeItem(progressFilePathToDelete);
 
-        //remove the progress card from the DOM
-        progressCard.remove();
+        return true;
     }
+
+    return false;
+};
+
+export const deleteProgressCard = async (progressCardDeleteButton) => {
+    const progressCard = progressCardDeleteButton.parentElement.parentElement;
+    const progressCardNameToDelete = progressCard.querySelector(".progress-file-name").textContent.trim();
+    const hasBeenDeleted = await remove(progressCardNameToDelete);
+    if (hasBeenDeleted) progressCard.remove(); //remove the progress card from the DOM
 };
