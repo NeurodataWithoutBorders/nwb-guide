@@ -2,9 +2,8 @@ name: Build-and-deploy-win
 run-name: ${{ github.actor }} is building a Windows release for NWB GUIDE
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
 
 jobs:
   deploy-on-windows:
@@ -39,4 +38,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm run python-onefile-build
+          npm run build
           npm run deploy-win
