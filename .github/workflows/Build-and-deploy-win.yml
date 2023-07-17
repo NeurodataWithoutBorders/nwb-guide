@@ -3,7 +3,6 @@ run-name: ${{ github.actor }} is building a Windows release for NWB GUIDE
 
 on:
   workflow_dispatch:
-  push:
 
 jobs:
   deploy-on-windows:
