@@ -1,7 +1,7 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./out/main/main.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "deploy-mac": "electron-builder build --mac --publish always",
     "deploy-linux": "electron-builder build --linux --publish always",
     "python-onefile-build": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist --add-data='./paths.config.json;.'",
+    "python-onefile-build-mac": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist --add-data './paths.config.json:.' --collect-data jsonschema_specifications --collect-all pynwb --collect-all hdmf --collect-all ci_info",
     "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
     "postinstall": "electron-builder install-app-deps",
     "storybook": "storybook dev -p 6006",
@@ -92,8 +93,7 @@
       "installerIcon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
-      "provider": "github",
-      "repository": "https://github.com/catalystneuro/nwb-guide.git"
+      "provider": "github"
     }
   },
   "keywords": [],
@@ -131,7 +131,7 @@
     "@storybook/web-components-vite": "^7.0.0-beta.62",
     "chromatic": "^6.17.1",
     "electron": "19.0.0",
-    "electron-builder": "22.10.5",
+    "electron-builder": "^24.4.0",
     "electron-packager": "^14.0.6",
     "electron-vite": "^1.0.22",
     "jsdom": "^22.0.0",

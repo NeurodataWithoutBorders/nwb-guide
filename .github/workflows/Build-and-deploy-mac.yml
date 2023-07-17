@@ -36,6 +36,7 @@ jobs:
 
       - uses: apple-actions/import-codesign-certs@v1
         with:
+          # https://developer.apple.com/account/resources/certificates/add
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
@@ -45,5 +46,6 @@ jobs:
           appleId: ${{ secrets.APPLE_ID }}
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
         run: |
+          npm run build
           npm run python-onefile-build
           npm run deploy-mac
