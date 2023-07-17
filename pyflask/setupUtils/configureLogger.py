@@ -4,7 +4,7 @@ import logging.handlers
 
 
 def configureLogger(app):
-    LOG_FOLDER = path.join(path.expanduser("~"), "NWBGUIDE", "logs")
+    LOG_FOLDER = path.join(path.expanduser("~"), "NWB_GUIDE", "logs")
     LOG_FILENAME = "api.log"
     LOG_PATH = path.join(LOG_FOLDER, LOG_FILENAME)
 

@@ -47,7 +47,7 @@ export const save = (page, overrides = {}) => {
     if (history.state) history.state.project = guidedProgressFileName;
     window.history.pushState(history.state, null, value);
 
-    //Destination: HOMEDIR/NWBGUIDE/Guided-Progress
+    //Destination: HOMEDIR/NWB_GUIDE/Guided-Progress
     globalState["last-modified"] = new Date();
     globalState["page-before-exit"] = overrides.id ?? page.info.id;
 
