@@ -58,5 +58,5 @@ jobs:
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
         run: |
           npm run build
-          npm run python-onefile-build-mac
+          npm run python-onefile-build
           npm run deploy-mac
