@@ -50,7 +50,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ matrix.prefix }}
-          key: ${{ matrix.os }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+          key: ${{ matrix.os }}-conda-${{ hashFiles(matrix.label) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
         id: cache
 
       - name: Setup environment

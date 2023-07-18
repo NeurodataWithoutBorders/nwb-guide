@@ -1,4 +1,4 @@
-name: env-electron-python-test
+name: env-electron-python
 channels:
   - conda-forge
   - defaults
