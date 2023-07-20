@@ -57,10 +57,11 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
             miniforge-version: latest
+            mamba-version: "*"
             environment-file: ${{ matrix.label }}
             activate-environment: env-electron-python
             python-version: ${{ matrix.python-version }}
-            use-only-tar-bz2: true
+            # use-only-tar-bz2: true
 
       - name: Install GUIDE
         run: npm ci
