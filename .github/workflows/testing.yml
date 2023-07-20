@@ -47,11 +47,11 @@ jobs:
       - name: Set cache date
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
-      - uses: actions/cache@v2
-        with:
-          path: ${{ matrix.prefix }}
-          key: ${{ matrix.os }}-conda-${{ hashFiles(matrix.label) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
-        id: cache
+      # - uses: actions/cache@v2
+      #   with:
+      #     path: ${{ matrix.prefix }}
+      #     key: ${{ matrix.os }}-conda-${{ hashFiles(matrix.label) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+      #   id: cache
 
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
