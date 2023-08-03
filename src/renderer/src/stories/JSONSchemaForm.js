@@ -854,6 +854,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     schema: info,
                     results: results[name],
                     required: required[name], // Scoped to the sub-schema
+                    ignore: this.ignore,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
