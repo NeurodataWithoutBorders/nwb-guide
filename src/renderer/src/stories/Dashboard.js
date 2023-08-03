@@ -31,6 +31,7 @@ import "../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 import "../../assets/css/guided.css";
 import isElectron from "../electron/check.js";
 import { isStorybook, reloadPageToHome } from "../dependencies/globals.js";
+import Swal from "sweetalert2";
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
@@ -86,7 +87,20 @@ export class Dashboard extends LitElement {
         this.sidebar.onClick = (_, value) => this.setAttribute("activePage", value.info.id);
 
         this.subSidebar = new NavigationSidebar();
-        this.subSidebar.onClick = (id) => this.setAttribute("activePage", id);
+        this.subSidebar.onClick = async (id) => {
+
+            const result = await Swal.fire({
+                title: "You may have unsaved data on this page. Would you like to continue?",
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Keep Editing',
+                cancelButtonText: 'Jump to Selected Page'
+            });
+
+            if (!result.isConfirmed) this.setAttribute("activePage", id);
+        }
 
         this.pages = props.pages ?? {};
         this.name = props.name;
