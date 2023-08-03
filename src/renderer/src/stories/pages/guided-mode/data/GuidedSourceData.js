@@ -88,13 +88,18 @@ export class GuidedSourceDataPage extends ManagedPage {
 
     createForm = ({ subject, session, info }) => {
         const instanceId = `sub-${subject}/ses-${session}`;
+        
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
             schema: this.info.globalState.schema.source_data,
             results: info.source_data,
-            ignore: ["verbose"],
+            ignore: [
+                "verbose", 
+                "es_key", 
+                "stream_id" // NOTE: May be desired for other interfaces
+            ],
             // onlyRequired: true,
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
