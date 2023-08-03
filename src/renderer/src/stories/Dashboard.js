@@ -88,19 +88,18 @@ export class Dashboard extends LitElement {
 
         this.subSidebar = new NavigationSidebar();
         this.subSidebar.onClick = async (id) => {
-
             const result = await Swal.fire({
                 title: "You may have unsaved data on this page. Would you like to continue?",
                 text: "You won't be able to revert this!",
-                icon: 'warning',
+                icon: "warning",
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'Keep Editing',
-                cancelButtonText: 'Jump to Selected Page'
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "Keep Editing",
+                cancelButtonText: "Jump to Selected Page",
             });
 
             if (!result.isConfirmed) this.setAttribute("activePage", id);
-        }
+        };
 
         this.pages = props.pages ?? {};
         this.name = props.name;
