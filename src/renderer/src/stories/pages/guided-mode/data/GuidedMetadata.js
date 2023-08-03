@@ -71,10 +71,7 @@ export class GuidedMetadataPage extends ManagedPage {
             schema,
             results,
 
-            ignore: [
-                'subject_id',
-                'session_id'  
-            ],
+            ignore: ["subject_id", "session_id"],
 
             conditionalRequirements: [
                 {
