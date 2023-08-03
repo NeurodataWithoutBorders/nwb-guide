@@ -160,9 +160,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
         del defs["Electrodes"]
 
-    # Delete Ecephys metadata if ElectrodeTable helper function is not available (temporary solution)
+    # Delete Ecephys metadata if ElectrodeTable helper function is not available
     else:
-        schema["properties"].pop("Ecephys", {})
+        schema["properties"].pop("Ecephys", dict())
 
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
@@ -312,7 +312,7 @@ def convert_to_nwb(info: dict) -> str:
         # Update with the latest metadata for the electrodes
         ecephys_metadata["Electrodes"] = electrode_column_results
 
-    ecephys_metadata.pop("ElectrodeColumns", "No key found")  # Might not exist
+    ecephys_metadata.pop("ElectrodeColumns", dict())
 
     # Actually run the conversion
     converter.run_conversion(
