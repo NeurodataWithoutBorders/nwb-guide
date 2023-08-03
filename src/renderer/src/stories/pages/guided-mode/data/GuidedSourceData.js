@@ -95,9 +95,11 @@ export class GuidedSourceDataPage extends ManagedPage {
             schema: this.info.globalState.schema.source_data,
             results: info.source_data,
             ignore: [
-                "verbose",
-                "es_key",
+                "verbose", 
+                "es_key", 
+                "exclude_shanks",
                 "stream_id", // NOTE: May be desired for other interfaces
+
             ],
             // onlyRequired: true,
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
