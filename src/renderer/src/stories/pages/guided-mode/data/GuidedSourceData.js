@@ -94,11 +94,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             mode: "accordion",
             schema: this.info.globalState.schema.source_data,
             results: info.source_data,
-            ignore: [
-                "verbose", 
-                "es_key", 
-                "exclude_shanks"
-            ],
+            ignore: ["verbose", "es_key", "exclude_shanks"],
             // onlyRequired: true,
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
