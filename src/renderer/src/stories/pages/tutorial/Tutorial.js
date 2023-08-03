@@ -13,8 +13,8 @@ import { hasEntry, get, save, remove, resume, global } from "../../../progress.j
 
 import { electron } from "../../../electron/index.js";
 
-import restartSVG from "./restart.svg?raw";
-import folderOpenSVG from "./folder_open.svg?raw";
+import restartSVG from "../../assets/restart.svg?raw";
+import folderOpenSVG from "../../assets/folder_open.svg?raw";
 
 const { shell } = electron;
 
@@ -49,7 +49,7 @@ export class TutorialPage extends Page {
                 <div>
                     ${entryExists
                         ? html` <nwb-button
-                                  size="xs"
+                                  size="small"
                                   @click=${() => {
                                       if (shell) {
                                           const entry = get(tutorialPipelineName);
@@ -60,7 +60,7 @@ export class TutorialPage extends Page {
                               >
 
                               <nwb-button
-                                  size="xs"
+                                  size="small"
                                   @click=${async () => {
                                       const hasBeenDeleted = await remove(tutorialPipelineName);
                                       if (hasBeenDeleted) this.requestUpdate();
