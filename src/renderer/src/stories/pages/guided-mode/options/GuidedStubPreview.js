@@ -15,9 +15,8 @@ export class GuidedStubPreviewPage extends Page {
 
     header = {
         content: () => {
+            const info = this.info.globalState.preview;
 
-            const info = this.info.globalState.preview
-            
             return html`
                 <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
                     <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -25,15 +24,14 @@ export class GuidedStubPreviewPage extends Page {
                         <small style="color: gray;">${info.file}</small>
                     </div>
                     <div style="padding-left: 25px">
-                        <nwb-button
-                            size="small"
-                            @click=${() => shell ? shell.showItemInFolder(info.file) : ''}
-                        >${unsafeSVG(folderOpenSVG)}</nwb-button>
+                        <nwb-button size="small" @click=${() => (shell ? shell.showItemInFolder(info.file) : "")}
+                            >${unsafeSVG(folderOpenSVG)}</nwb-button
+                        >
                     </div>
                 </div>
-            `
-        }
-    }
+            `;
+        },
+    };
 
     footer = {
         next: "Run Conversion",
@@ -49,8 +47,7 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
-
-        const info = this.info.globalState.preview
+        const info = this.info.globalState.preview;
 
         return html`
             <div>

@@ -108,13 +108,12 @@ export class Main extends LitElement {
                         };
                 }
 
-                if (header === true || !("header" in page) || !('sections' in page.header)) {
+                if (header === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.keys(sections);
 
-                    header = page.header && typeof page.header === 'object' ? page.header : {}
-                    header.sections = sectionNames
-                    header.selected = sectionNames.indexOf(info.section)
-
+                    header = page.header && typeof page.header === "object" ? page.header : {};
+                    header.sections = sectionNames;
+                    header.selected = sectionNames.indexOf(info.section);
                 }
             }
         }
@@ -126,10 +125,10 @@ export class Main extends LitElement {
 
         const title = page.info?.title;
 
-        let customHeaderContent = header?.content
-        if (typeof customHeaderContent === 'function') customHeaderContent = customHeaderContent() // Generate custom header content if required
+        let customHeaderContent = header?.content;
+        if (typeof customHeaderContent === "function") customHeaderContent = customHeaderContent(); // Generate custom header content if required
 
-        const showHeader = customHeaderContent || title
+        const showHeader = customHeaderContent || title;
 
         return html`
             ${headerEl}
@@ -140,8 +139,9 @@ export class Main extends LitElement {
                 <section class="section js-section u-category-windows">
                     ${showHeader
                         ? html`<div>
-                                ${customHeaderContent || html`<h1 class="title" style="margin: 0; padding: 0;">${title}</h1>`}
-                                <hr />
+                              ${customHeaderContent ||
+                              html`<h1 class="title" style="margin: 0; padding: 0;">${title}</h1>`}
+                              <hr />
                           </div>`
                         : ""}
                     <div style="height: 10px;"></div>

@@ -26,10 +26,10 @@ export class GuidedMetadataPage extends ManagedPage {
 
             // Preview a single random conversion
             delete this.info.globalState.preview; // Clear the preview results
-            const [ result ] = await this.runConversions({ stub_test: true }, 1, {
+            const [result] = await this.runConversions({ stub_test: true }, 1, {
                 title: "Testing conversion on a random session",
             });
-            
+
             this.info.globalState.preview = result; // Save the preview results
 
             this.onTransition(1);
@@ -164,11 +164,11 @@ export class GuidedMetadataPage extends ManagedPage {
                             onClose: () => modal.remove(),
                         });
 
-                        const container = document.createElement('div')
-                        container.style.padding = '0px 25px'
-                        container.append(new UnsafeComponent(html))
+                        const container = document.createElement("div");
+                        container.style.padding = "0px 25px";
+                        container.append(new UnsafeComponent(html));
 
-                        modal.append(container)
+                        modal.append(container);
                         document.body.append(modal);
                     },
                 },
