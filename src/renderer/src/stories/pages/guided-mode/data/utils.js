@@ -25,7 +25,7 @@ export function resolveGlobalOverrides(subject, globalState) {
     return overrides
 }
 
-export function resolveProperties(properties = {}, target, globals) {
+export function resolveProperties(properties = {}, target, globals = {}) {
 
     if ('properties' in properties && 'type' in properties) properties = properties.properties // Correct for when a schema is passed instead
     
