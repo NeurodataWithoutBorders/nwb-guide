@@ -21,6 +21,7 @@ const isVisible = function (ele, container) {
 
 export class SimpleTable extends LitElement {
     validateOnChange;
+    onUpdate = () => {}
 
     static get styles() {
         return css`
@@ -168,6 +169,7 @@ export class SimpleTable extends LitElement {
         validateEmptyCells,
         onStatusChange,
         onLoaded,
+        onUpdate,
         onThrow,
         deferLoading,
         maxHeight,
@@ -185,6 +187,7 @@ export class SimpleTable extends LitElement {
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
         if (onThrow) this.onThrow = onThrow;
+        if (onUpdate) this.onUpdate = onUpdate
 
         this.onmousedown = (ev) => {
             this.#clearSelected();
@@ -631,6 +634,8 @@ export class SimpleTable extends LitElement {
             if (value == undefined || value === "") delete target[rowName][header];
             else target[rowName][header] = value;
         }
+
+        if (cell.interacted) this.onUpdate(rowName, header, value)
     };
 
     #createCell = (value, info) => {

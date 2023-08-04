@@ -245,10 +245,12 @@ export class JSONSchemaForm extends LitElement {
         this.conditionalRequirements = props.conditionalRequirements ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
         this.validateEmptyValues = props.validateEmptyValues ?? true;
+
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
         if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
+        if (props.onUpdate) this.onUpdate = props.onUpdate
         if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
@@ -283,6 +285,9 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form
     #update(fullPath, value) {
+
+        this.onUpdate(fullPath, value)
+
         const path = [...fullPath];
         const name = path.pop();
         const resultParent = path.reduce((acc, key) => acc[key], this.results);
@@ -535,6 +540,10 @@ export class JSONSchemaForm extends LitElement {
                                 onStatusChange: () => this.#checkStatus(), // Check status on all elements
                                 validateEmptyCells: this.validateEmptyValues,
                                 deferLoading: this.deferLoading,
+                                onUpdate: (row, col, value) => {
+                                    console.log(fullPath, row, col, value)
+                                    this.onUpdate([...fullPath. row, col], value)
+                                },
                                 onLoaded: () => {
                                     this.#nLoaded++;
                                     this.#checkAllLoaded();
@@ -603,6 +612,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     // Checks missing required properties and throws an error if any are found
     onInvalid = () => {};
     onLoaded = () => {};
+    onUpdate = () => {};
 
     #deleteExtraneousResults = (results, schema) => {
         for (let name in results) {
@@ -860,6 +870,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     schema: info,
                     results: results[name],
                     globals: this.globals?.[name],
+                    onUpdate: (internalPath, value) => this.onUpdate([...fullPath, ...internalPath], value),
 
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,

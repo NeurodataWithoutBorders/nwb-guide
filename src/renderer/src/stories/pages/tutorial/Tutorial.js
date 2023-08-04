@@ -34,9 +34,7 @@ export class TutorialPage extends Page {
                 properties: ["createDirectory"],
             },
             results: state,
-            validateOnChange: () => {
-                global.save();
-            },
+            onUpdate: () => global.save()
         });
 
         form.style.width = "100%";

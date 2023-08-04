@@ -132,6 +132,7 @@ export class TableCell extends LitElement {
     };
 
     setInput(value: any) {
+        this.interacted = true
         this.input.set(value)  // Ensure all operations are undoable
     }
 
@@ -146,6 +147,8 @@ export class TableCell extends LitElement {
 
     #cls: any
 
+    interacted = false
+
     // input = new TableCellBase({ })
 
     input: TableCellBase
@@ -153,6 +156,8 @@ export class TableCell extends LitElement {
     render() {
 
         let cls = TableCellBase
+        
+        this.interacted = false
 
         if (this.schema.type === "array") cls = ArrayCell
         else if (this.schema.format === "date-time") cls =  DateTimeCell
@@ -160,7 +165,10 @@ export class TableCell extends LitElement {
         // Only actually rerender if new class type
         if (cls !== this.#cls) {
             this.input = new cls({
-                onChange: () => this.validate(),
+                onChange: () => {
+                    if (this.input.interacted) this.interacted = true
+                    this.validate()
+                },
                 schema: this.schema
             })
         }

@@ -330,6 +330,8 @@ export class BasicTable extends LitElement {
                 key in this.schema.properties ? (latest[key] = value) : ""
             ); // Only include data from schema
         });
+
+        this.onUpdate(null, null, value) // Update the whole table
     }
 
     // Render Code

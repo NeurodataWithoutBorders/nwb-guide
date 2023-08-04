@@ -64,6 +64,7 @@ export class GuidedUploadPage extends Page {
                 //   { name: 'NWB File', extensions: ['nwb'] }
                 // ]
             },
+            onUpdate: () => this.unsavedUpdates = true,
             onThrow,
         });
 

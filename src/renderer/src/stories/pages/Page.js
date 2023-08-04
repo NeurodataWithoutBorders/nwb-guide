@@ -62,7 +62,10 @@ export class Page extends LitElement {
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
 
-    save = (overrides) => save(this, overrides);
+    save = (overrides) => {
+        save(this, overrides);
+        this.unsavedUpdates = false
+    }
 
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
@@ -164,6 +167,12 @@ export class Page extends LitElement {
         this.info.pages[id] = subpage;
         this.updatePages();
     };
+
+    unsavedUpdates = false // Track unsaved updates
+
+    updated() {
+        this.unsavedUpdates = false
+    }
 
     render() {
         return html`<slot></slot>`;

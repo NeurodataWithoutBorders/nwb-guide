@@ -64,6 +64,7 @@ export class GuidedFormPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...this.info.formOptions,
             results,
+            onUpdate: () => this.unsavedUpdates = true,
             validateOnChange,
             onThrow,
         }));

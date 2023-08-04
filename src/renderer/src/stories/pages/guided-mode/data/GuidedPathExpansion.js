@@ -152,7 +152,11 @@ export class GuidedPathExpansionPage extends Page {
 
         this.optional.requestUpdate();
 
-        const form = (this.form = new JSONSchemaForm({ ...structureGlobalState, onThrow }));
+        const form = (this.form = new JSONSchemaForm({ 
+            ...structureGlobalState, 
+            onThrow ,
+            onUpdate: () => this.unsavedUpdates = true,
+        }));
 
         const pathExpansionInfoBox = new InfoBox({
             header: "How do I use a Python format string for path expansion?",

@@ -5,6 +5,7 @@ import { validateOnChange } from "../../../../validation/index.js";
 import { Table } from "../../../Table.js";
 
 import { updateResultsFromSubjects } from "./utils";
+import { SimpleTable } from "../../../SimpleTable.js";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
@@ -65,12 +66,13 @@ export class GuidedSubjectsPage extends Page {
             subjects[subject].sessions = sessions;
         }
 
-        this.table = new Table({
+        this.table = new SimpleTable({
             schema: subjectSchema,
             data: subjects,
             template: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
             validateEmptyCells: false,
+            onUpdate: () => this.unsavedUpdates = true,
             validateOnChange: (key, parent, v) => {
                 if (key === "sessions") return true;
                 else {

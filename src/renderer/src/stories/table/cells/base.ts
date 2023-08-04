@@ -49,6 +49,8 @@ export class TableCellBase extends LitElement {
 
     schema: any;
 
+    interacted = false
+
     constructor({
         schema,
         onOpen,
@@ -64,6 +66,7 @@ export class TableCellBase extends LitElement {
         if (onClose) this.onClose = onClose
 
         this.#editable.addEventListener('input', (ev: InputEvent) => {
+            this.interacted = true
             if (ev.inputType.includes('history')) this.setText(this.#editable.innerText) // Catch undo / redo}
         })
 
@@ -118,6 +121,7 @@ export class TableCellBase extends LitElement {
     }
 
     set(value: any) {
+
         if (document.execCommand) {
             this.#editable.setAttribute('contenteditable', '')
             this.#editable.focus();
@@ -157,6 +161,8 @@ export class TableCellBase extends LitElement {
     getElementValue = (el: HTMLElement) => el.value || el.innerText
 
     render() {
+
+        this.interacted = false
 
         this.#editable.id = 'editable'
 

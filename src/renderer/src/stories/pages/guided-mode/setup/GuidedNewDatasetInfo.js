@@ -91,6 +91,7 @@ export class GuidedNewDatasetPage extends Page {
                 properties: ["createDirectory"],
             },
             validateOnChange,
+            onUpdate: () => this.unsavedUpdates = true,
             onThrow,
         });
 

@@ -101,6 +101,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.#nLoaded++;
                 this.#checkAllLoaded();
             },
+
+            onUpdate: () => this.unsavedUpdates = true,
+
             validateOnChange,
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
