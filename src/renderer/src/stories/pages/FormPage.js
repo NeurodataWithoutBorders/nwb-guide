@@ -48,7 +48,7 @@ export class GuidedFormPage extends Page {
 
     footer = {
         onNext: async () => {
-            this.save()
+            this.save();
             await this.form.validate();
             this.onTransition(1);
         },

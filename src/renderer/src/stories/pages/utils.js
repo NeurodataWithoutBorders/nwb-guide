@@ -31,7 +31,7 @@ export function merge(path, toMerge = {}, target = this.info.globalState) {
     if (key in target) {
         for (const [k, v] of Object.entries(toMerge)) {
             if (typeof v === "object" && !Array.isArray(v)) {
-                if (!target[key][k]) target[key][k] = {...v}; // Copy objects
+                if (!target[key][k]) target[key][k] = { ...v }; // Copy objects
                 else this.merge(`${k}`, v, target[key]);
             } else target[key][k] = v;
         }

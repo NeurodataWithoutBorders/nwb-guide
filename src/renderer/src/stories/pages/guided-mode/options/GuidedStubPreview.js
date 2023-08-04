@@ -15,9 +15,12 @@ export class GuidedStubPreviewPage extends Page {
 
     header = {
         subtitle: () => this.info.globalState.preview.file,
-        controls: () => html`<nwb-button size="small" @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview.file) : "")}
-            >${unsafeSVG(folderOpenSVG)}</nwb-button
-        >`
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview.file) : "")}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
     };
 
     footer = {
