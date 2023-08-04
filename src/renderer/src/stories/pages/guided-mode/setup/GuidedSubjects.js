@@ -2,14 +2,17 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 import subjectSchema from "../../../../../../../schemas/subject.schema";
 import { validateOnChange } from "../../../../validation/index.js";
-import { SimpleTable } from "../../../SimpleTable.js";
 import { Table } from "../../../Table.js";
 
-import { convertSubjectsToResults } from "./utils";
+import { updateResultsFromSubjects } from "./utils";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
         super(...args);
+    }
+
+    header = {
+        subtitle: "Cross-session metadata applied to the final file metadata"
     }
 
     footer = {
@@ -35,7 +38,8 @@ export class GuidedSubjectsPage extends Page {
                 return acc;
             }, {});
 
-            convertSubjectsToResults(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
+            // Modify the results object to track new subjects / sessions
+            updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
 
             this.onTransition(1);
         },

@@ -5,11 +5,10 @@ import { ManagedPage } from "./ManagedPage.js";
 import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
-import { createResults } from "./utils.js";
+import { resolveGlobalOverrides, resolveResults } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
-import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { UnsafeComponent } from "../../Unsafe.js";
 
 export class GuidedMetadataPage extends ManagedPage {
@@ -37,12 +36,21 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     createForm = ({ subject, session, info }) => {
-        const results = createResults({ subject, info }, this.info.globalState);
+        // const results = createResults({ subject, info }, this.info.globalState);
 
+        const globalState = this.info.globalState
+
+        const results = info.metadata // Edited form info
+
+        // Define the appropriate global metadata to fill empty values in the form        
+        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, this.info.globalState)
+    
+
+        // Define the correct instance identifier
         const instanceId = `sub-${subject}/ses-${session}`;
 
         // Ignore specific metadata in the form by removing their schema value
-        const schema = this.info.globalState.schema.metadata[subject][session];
+        const schema = globalState.schema.metadata[subject][session];
         delete schema.properties.NWBFile.properties.source_script;
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
@@ -67,12 +75,15 @@ export class GuidedMetadataPage extends ManagedPage {
             sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
         }
 
+        resolveResults(subject, session, globalState)
+
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
             schema,
             results,
+            globals: aggregateGlobalMetadata,
 
             conditionalRequirements: [
                 {
@@ -144,6 +155,7 @@ export class GuidedMetadataPage extends ManagedPage {
             controls: [
                 {
                     name: "Preview",
+                    primary: true, 
                     onClick: async (key, el) => {
                         let [subject, session] = key.split("/");
                         if (subject.startsWith("sub-")) subject = subject.slice(4);
@@ -172,6 +184,10 @@ export class GuidedMetadataPage extends ManagedPage {
                         document.body.append(modal);
                     },
                 },
+                {
+                    name: "Save All Sessions",
+                    onClick: this.save
+                }, 
             ],
         });
 

@@ -115,7 +115,7 @@ const pages = {
             }),
 
             subjects: new GuidedSubjectsPage({
-                title: "Subjects",
+                title: "Subject Metadata",
                 label: "Subject details",
                 section: sections[0],
             }),
