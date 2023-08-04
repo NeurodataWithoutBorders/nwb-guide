@@ -72,7 +72,7 @@ export class GuidedSubjectsPage extends Page {
             template: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
             validateEmptyCells: false,
-            onUpdate: () => this.unsavedUpdates = true,
+            onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: (key, parent, v) => {
                 if (key === "sessions") return true;
                 else {

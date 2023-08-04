@@ -96,7 +96,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             results: info.source_data,
             ignore: ["verbose", "es_key", "exclude_shanks"],
             // onlyRequired: true,
-            onUpdate: () => this.unsavedUpdates = true,
+            onUpdate: () => (this.unsavedUpdates = true),
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });

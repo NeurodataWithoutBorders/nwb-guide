@@ -88,19 +88,20 @@ export class Dashboard extends LitElement {
 
         this.subSidebar = new NavigationSidebar();
         this.subSidebar.onClick = async (id) => {
+            const result = this.#active.unsavedUpdates
+                ? await Swal.fire({
+                      title: "You have unsaved data on this page.",
+                      text: "Would you like to save your changes?",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonColor: "#3085d6",
+                      confirmButtonText: "Save and Continue",
+                      cancelButtonText: "Ignore Changes",
+                  })
+                : undefined;
 
-            const result = this.#active.unsavedUpdates ? await Swal.fire({
-                title: "You have unsaved data on this page.",
-                text: "Would you like to save your changes?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                confirmButtonText: "Save and Continue",
-                cancelButtonText: "Ignore Changes",
-            }) : undefined;
+            if (result && result.isConfirmed) this.#active.save();
 
-            if (result && result.isConfirmed) this.#active.save()
-            
             this.setAttribute("activePage", id);
         };
 
@@ -144,7 +145,6 @@ export class Dashboard extends LitElement {
         else if (key === "renderNameInSidebar") this.sidebar.renderName = latest === "true" || latest === true;
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {
-
             // if (this.#active && this.#active.info.parent && this.#active.info.section) this.#active.save(); // Always properly saves the page
 
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page

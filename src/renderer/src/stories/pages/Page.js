@@ -64,8 +64,8 @@ export class Page extends LitElement {
 
     save = (overrides) => {
         save(this, overrides);
-        this.unsavedUpdates = false
-    }
+        this.unsavedUpdates = false;
+    };
 
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
@@ -168,10 +168,10 @@ export class Page extends LitElement {
         this.updatePages();
     };
 
-    unsavedUpdates = false // Track unsaved updates
+    unsavedUpdates = false; // Track unsaved updates
 
     updated() {
-        this.unsavedUpdates = false
+        this.unsavedUpdates = false;
     }
 
     render() {

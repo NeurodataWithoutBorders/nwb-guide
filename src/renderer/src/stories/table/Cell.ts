@@ -156,7 +156,7 @@ export class TableCell extends LitElement {
     render() {
 
         let cls = TableCellBase
-        
+
         this.interacted = false
 
         if (this.schema.type === "array") cls = ArrayCell
