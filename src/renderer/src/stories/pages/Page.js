@@ -120,12 +120,11 @@ export class Page extends LitElement {
 
             const { conversion_output_folder, stub_output_folder, name } = this.info.globalState.project;
 
-
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
                 ...this.info.globalState.results[subject][session],
-                metadata: resolveResults(subject, session, this.info.globalState)
-            }
+                metadata: resolveResults(subject, session, this.info.globalState),
+            };
 
             const result = await runConversion(
                 {

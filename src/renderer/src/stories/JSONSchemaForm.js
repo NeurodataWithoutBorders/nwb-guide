@@ -220,9 +220,7 @@ export class JSONSchemaForm extends LitElement {
               ))
             : this.#rendered;
 
-
-    resolved = {} // Keep track of actual resolved values—not just what the user provides as results
-
+    resolved = {}; // Keep track of actual resolved values—not just what the user provides as results
 
     constructor(props = {}) {
         super();
@@ -283,21 +281,19 @@ export class JSONSchemaForm extends LitElement {
         if (changedProperties === "options") this.requestUpdate();
     }
 
-
     // Track resolved values for the form
     #update(fullPath, value) {
-
-        const path = [...fullPath]
-        const name = path.pop()
-        const resultParent = path.reduce((acc, key) => acc[key], this.results)
-        const resolvedParent = path.reduce((acc, key) => acc[key], this.resolved)
+        const path = [...fullPath];
+        const name = path.pop();
+        const resultParent = path.reduce((acc, key) => acc[key], this.results);
+        const resolvedParent = path.reduce((acc, key) => acc[key], this.resolved);
 
         if (!value) {
             delete resultParent[name];
-            delete resolvedParent[name]
+            delete resolvedParent[name];
         } else {
             resultParent[name] = value;
-            resolvedParent[name] = value
+            resolvedParent[name] = value;
         }
     }
 
@@ -423,13 +419,13 @@ export class JSONSchemaForm extends LitElement {
             (info.items?.type === "string" || !("items" in info) || (!("type" in info.items) && !hasItemsRef)); // Default to a string type
 
         const fullPath = [...path, name];
-        const externalPath = [...this.#base, ...fullPath]
+        const externalPath = [...this.#base, ...fullPath];
 
-        const resolved = path.reduce((acc, key) => acc[key], this.resolved)
-        const value = resolved[name]
+        const resolved = path.reduce((acc, key) => acc[key], this.resolved);
+        const value = resolved[name];
 
         const isConditional = this.#getLink(externalPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
-        
+
         if (isConditional && !isRequired)
             isRequired = required[name] = async () => {
                 const isRequiredAfterChange = await this.#checkRequiredAfterChange(fullPath);
@@ -462,8 +458,7 @@ export class JSONSchemaForm extends LitElement {
                             >
                                 <option disabled selected value>Select an option</option>
                                 ${info.enum.map(
-                                    (item, i) =>
-                                        html`<option value=${i} ?selected=${value === item}>${item}</option>`
+                                    (item, i) => html`<option value=${i} ?selected=${value === item}>${item}</option>`
                                 )}
                             </select>
                         `;
@@ -497,11 +492,7 @@ export class JSONSchemaForm extends LitElement {
                                 placeholder="${info.placeholder ?? ""}"
                                 style="height: 7.5em; padding-bottom: 20px"
                                 maxlength="255"
-                                .value="${isStringArray
-                                    ? value
-                                        ? value.join("\n")
-                                        : ""
-                                    : value ?? ""}"
+                                .value="${isStringArray ? (value ? value.join("\n") : "") : value ?? ""}"
                                 @input=${(ev) => {
                                     this.#update(
                                         fullPath,
@@ -681,12 +672,13 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     #validateOnChange = async (name, parent, element, path = [], checkLinks = true) => {
-
         const valid =
-            !this.validateEmptyValues && !(name in parent) ? true : await this.validateOnChange(name, parent, [...this.#base ?? [], ...path]);
+            !this.validateEmptyValues && !(name in parent)
+                ? true
+                : await this.validateOnChange(name, parent, [...(this.#base ?? []), ...path]);
 
         const fullPath = [...path, name]; // Use basePath to augment the validation
-        const externalPath = [...this.#base, name]
+        const externalPath = [...this.#base, name];
 
         const isRequired = this.#isRequired(fullPath);
         let warnings = Array.isArray(valid)
@@ -699,13 +691,13 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {
             if (checkLinks) {
-                if (!await this.#isLinkResolved(externalPath)) {
+                if (!(await this.#isLinkResolved(externalPath))) {
                     errors.push(...warnings); // Move warnings to errors if the element is linked
                     warnings = [];
 
                     // Clear old errors and warnings on linked properties
                     this.#applyToLinkedProperties((path) => {
-                        const internalPath = path.slice((this.#base ?? []).length)
+                        const internalPath = path.slice((this.#base ?? []).length);
                         this.#clearMessages(internalPath, "errors");
                         this.#clearMessages(internalPath, "warnings");
                     }, externalPath);
@@ -779,8 +771,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         if (renderable.length === 0) return html`<p>No properties to render</p>`;
 
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
-
-            const externalPath = [...this.#base, ...path, name]
+            const externalPath = [...this.#base, ...path, name];
             const link = this.#getLink(externalPath); // Use the base path to find a link
 
             if (link) {
@@ -969,7 +960,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
         const schema = this.schema ?? {};
 
-        this.resolved = merge(undefined, this.results, {}) // Track resolved values as a copy of the user-specified results
+        this.resolved = merge(undefined, this.results, {}); // Track resolved values as a copy of the user-specified results
 
         // Register default properties
         resolveProperties(schema.properties, this.resolved, this.globals);

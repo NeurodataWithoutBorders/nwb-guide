@@ -38,13 +38,12 @@ export class GuidedMetadataPage extends ManagedPage {
     createForm = ({ subject, session, info }) => {
         // const results = createResults({ subject, info }, this.info.globalState);
 
-        const globalState = this.info.globalState
+        const globalState = this.info.globalState;
 
-        const results = info.metadata // Edited form info
+        const results = info.metadata; // Edited form info
 
-        // Define the appropriate global metadata to fill empty values in the form        
-        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, this.info.globalState)
-    
+        // Define the appropriate global metadata to fill empty values in the form
+        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, this.info.globalState);
 
         // Define the correct instance identifier
         const instanceId = `sub-${subject}/ses-${session}`;
@@ -75,7 +74,7 @@ export class GuidedMetadataPage extends ManagedPage {
             sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
         }
 
-        resolveResults(subject, session, globalState)
+        resolveResults(subject, session, globalState);
 
         // Create the form
         const form = new JSONSchemaForm({
@@ -155,7 +154,7 @@ export class GuidedMetadataPage extends ManagedPage {
             controls: [
                 {
                     name: "Preview",
-                    primary: true, 
+                    primary: true,
                     onClick: async (key, el) => {
                         let [subject, session] = key.split("/");
                         if (subject.startsWith("sub-")) subject = subject.slice(4);
@@ -186,8 +185,8 @@ export class GuidedMetadataPage extends ManagedPage {
                 },
                 {
                     name: "Save All Sessions",
-                    onClick: this.save
-                }, 
+                    onClick: this.save,
+                },
             ],
         });
 

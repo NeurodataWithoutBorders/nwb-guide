@@ -12,8 +12,8 @@ export class GuidedSubjectsPage extends Page {
     }
 
     header = {
-        subtitle: "Cross-session metadata applied to the final file metadata"
-    }
+        subtitle: "Cross-session metadata applied to the final file metadata",
+    };
 
     footer = {
         onNext: () => {
