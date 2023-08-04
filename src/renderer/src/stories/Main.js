@@ -108,12 +108,12 @@ export class Main extends LitElement {
                         };
                 }
 
-                if (header === true || !("header" in page)) {
+                if (header === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.keys(sections);
-                    header = {
-                        sections: sectionNames,
-                        selected: sectionNames.indexOf(info.section),
-                    };
+
+                    header = page.header && typeof page.header === "object" ? page.header : {};
+                    header.sections = sectionNames;
+                    header.selected = sectionNames.indexOf(info.section);
                 }
             }
         }
@@ -124,6 +124,12 @@ export class Main extends LitElement {
         const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
 
         const title = page.info?.title;
+
+        let customHeaderContent = header?.content;
+        if (typeof customHeaderContent === "function") customHeaderContent = customHeaderContent(); // Generate custom header content if required
+
+        const showHeader = customHeaderContent || title;
+
         return html`
             ${headerEl}
             ${capsules
@@ -131,9 +137,10 @@ export class Main extends LitElement {
                 : html`<div style="height: 25px;"></div>`}
             <main id="content" class="js-content" style="overflow: hidden; display: flex;">
                 <section class="section js-section u-category-windows">
-                    ${title
+                    ${showHeader
                         ? html`<div>
-                              <h1 class="title">${title}</h1>
+                              ${customHeaderContent ||
+                              html`<h1 class="title" style="margin: 0; padding: 0;">${title}</h1>`}
                               <hr />
                           </div>`
                         : ""}

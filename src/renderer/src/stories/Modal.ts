@@ -146,8 +146,8 @@ export class Modal extends LitElement {
       <nwb-overlay .open=${this.open}>
         <div class="modal-content ${this.open ? 'open' : ''}">
         <div class="modal-header">
-            <span>${this.header}</span>
-            <nwb-button secondary size="extra-small" @click="${this.toggle}">Close</nwb-button>
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.header}</span>
+            <nwb-button style="padding-left: 25px;" secondary size="extra-small" @click="${this.toggle}">Close</nwb-button>
           </div>
           <div class="modal-body">
             <slot>No content</slot>
