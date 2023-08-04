@@ -15,7 +15,7 @@ export class GuidedUploadPage extends Page {
         onNext: async () => {
             delete this.info.globalState.upload.results; // Clear the preview results
 
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
             await this.form.validate(); // Will throw an error in the callback
 
             const info = { ...this.info.globalState.upload.info };
@@ -29,7 +29,7 @@ export class GuidedUploadPage extends Page {
 
             this.info.globalState.upload.results = results; // Save the preview results
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 

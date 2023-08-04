@@ -10,17 +10,30 @@ import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { UnsafeComponent } from "../../Unsafe.js";
+import { merge } from "../../utils.js";
+
+const getInfoFromId = (key) => {
+    let [subject, session] = key.split("/");
+    if (subject.startsWith("sub-")) subject = subject.slice(4);
+    if (session.startsWith("ses-")) session = session.slice(4);
+
+    return { subject, session }
+}
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
     }
 
+    beforeSave  = () => {
+        merge(this.localState, this.info.globalState)
+    }
+
     form;
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // Preview a single random conversion
@@ -31,7 +44,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             this.info.globalState.preview = result; // Save the preview results
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
@@ -143,13 +156,16 @@ export class GuidedMetadataPage extends ManagedPage {
     render() {
         this.#resetLoadState(); // Reset on each render
 
-        this.forms = this.mapSessions(this.createForm);
+        this.localState = {results: merge(this.info.globalState.results, {})}
+
+        this.forms = this.mapSessions(this.createForm, this.localState);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {
             if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
             instances[`sub-${subject}`][`ses-${session}`] = form;
         });
+
 
         this.manager = new InstanceManager({
             header: "Sessions",
@@ -161,9 +177,8 @@ export class GuidedMetadataPage extends ManagedPage {
                     name: "Preview",
                     primary: true,
                     onClick: async (key, el) => {
-                        let [subject, session] = key.split("/");
-                        if (subject.startsWith("sub-")) subject = subject.slice(4);
-                        if (session.startsWith("ses-")) session = session.slice(4);
+
+                        const { subject, session } = getInfoFromId(key)
 
                         const [{ file, html }] = await this.runConversions(
                             { stub_test: true },
@@ -188,9 +203,20 @@ export class GuidedMetadataPage extends ManagedPage {
                         document.body.append(modal);
                     },
                 },
+
+                // Only save the currently selected session
                 {
-                    name: "Save All Sessions",
-                    onClick: this.save,
+                    name: "Save",
+                    onClick: async (id) => {
+                        const ogCallback = this.beforeSave
+                        this.beforeSave = () => {
+                            const { subject, session } = getInfoFromId(id)
+
+                            merge(this.localState.results[subject][session], this.info.globalState.results[subject][session])
+                        }
+                        await this.save()
+                        this.beforeSave = ogCallback
+                    },
                 },
             ],
         });

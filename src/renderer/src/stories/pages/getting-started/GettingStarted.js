@@ -65,7 +65,7 @@ export class GettingStartedPage extends Page {
                     <button
                         id="home-button-guided-mode-link"
                         class="getting-started-btn secondary-plain-button text-base"
-                        @click="${() => this.onTransition("conversion/start")}"
+                        @click="${() => this.to("conversion/start")}"
                     >
                         <p class="getting-started-btn-txt">Convert a new dataset</p>
                         <i class="el-icon icon-animate"

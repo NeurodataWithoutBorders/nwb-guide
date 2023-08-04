@@ -976,7 +976,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
         const schema = this.schema ?? {};
 
-        this.resolved = merge(undefined, this.results, {}); // Track resolved values as a copy of the user-specified results
+        this.resolved = merge(this.results, {}); // Track resolved values as a copy of the user-specified results
 
         // Register default properties
         resolveProperties(schema.properties, this.resolved, this.globals);

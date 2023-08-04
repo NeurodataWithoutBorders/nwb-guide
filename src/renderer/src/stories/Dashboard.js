@@ -31,7 +31,7 @@ import "../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 import "../../assets/css/guided.css";
 import isElectron from "../electron/check.js";
 import { isStorybook, reloadPageToHome } from "../dependencies/globals.js";
-import Swal from "sweetalert2";
+import { getCurrentProjectName, updateAppProgress } from "../progress.js";
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
@@ -89,19 +89,9 @@ export class Dashboard extends LitElement {
         this.subSidebar = new NavigationSidebar();
         this.subSidebar.onClick = async (id) => {
 
-            const result = this.#active.unsavedUpdates ? await Swal.fire({
-                title: "You have unsaved data on this page.",
-                text: "Would you like to save your changes?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                confirmButtonText: "Save and Continue",
-                cancelButtonText: "Ignore Changes",
-            }) : undefined;
-
-            if (result && result.isConfirmed) this.#active.save()
+            this.#active.to(id)
             
-            this.setAttribute("activePage", id);
+            // this.setAttribute("activePage", id);
         };
 
         this.pages = props.pages ?? {};
@@ -145,8 +135,11 @@ export class Dashboard extends LitElement {
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {
 
-            // if (this.#active && this.#active.info.parent && this.#active.info.section) this.#active.save(); // Always properly saves the page
-
+            if (this.#active && this.#active.info.parent && this.#active.info.section) {
+                const currentProject = getCurrentProjectName()
+                updateAppProgress(latest, currentProject)
+            }
+            
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page
 
             this.sidebar.selectItem(latest); // Just highlight the item

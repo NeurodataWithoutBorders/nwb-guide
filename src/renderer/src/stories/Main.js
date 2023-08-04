@@ -71,6 +71,7 @@ export class Main extends LitElement {
     }
 
     render() {
+
         let { page = "", sections = {} } = this.toRender ?? {};
 
         let footer = page?.footer; // Page-specific footer
@@ -78,16 +79,20 @@ export class Main extends LitElement {
         let capsules = page?.capsules; // Page-specific capsules
 
         if (page) {
+
+            this.to = page.to
+
             const info = page.info ?? {};
 
             // Default Footer Behavior
             if (footer === true || (!("footer" in page) && info.parent)) {
+
                 // Go to home screen if there is no next page
                 if (!info.next)
                     footer = {
                         next: "Back to Home Screen",
                         exit: "Exit",
-                        onNext: () => this.onTransition("/"),
+                        onNext: () => this.toRender.page.to("/"),
                     };
                 // Allow navigating laterally if there is a next page
                 else footer = true;

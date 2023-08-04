@@ -62,7 +62,7 @@ export class GuidedNewDatasetPage extends Page {
             globalState.initialized = true;
             Object.assign(globalState, this.state);
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 

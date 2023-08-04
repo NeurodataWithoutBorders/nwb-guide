@@ -6,6 +6,7 @@ import { merge, randomizeElements, mapSessions } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
 import { resolveResults } from "./guided-mode/data/utils.js";
+import Swal from "sweetalert2";
 
 export class Page extends LitElement {
     // static get styles() {
@@ -59,10 +60,39 @@ export class Page extends LitElement {
         this.#notifications.push(note);
     };
 
+    
+    to = async (transition) => {
+
+        // Otherwise note unsaved updates if present
+        if (this.unsavedUpdates) {
+            if (transition === 1) await this.save() // Save before a single forward transition
+            else {
+                Swal.fire({
+                    title: "You have unsaved data on this page.",
+                    text: "Would you like to save your changes?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Save and Continue",
+                    cancelButtonText: "Ignore Changes",
+                }).then(async result => {
+                    if (result && result.isConfirmed) await this.save()
+                    this.onTransition(transition)
+                }) 
+
+                return
+            }
+        }
+
+        this.onTransition(transition)
+    }
+
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
+    beforeSave = () => {} // User-defined function
 
-    save = (overrides) => {
+    save = async (overrides, runBeforeSave = true) => {
+        if (runBeforeSave) await this.beforeSave()
         save(this, overrides);
         this.unsavedUpdates = false
     }
@@ -70,7 +100,6 @@ export class Page extends LitElement {
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
 
-    merge = merge;
 
     addSession({ subject, session, info }) {
         if (!this.info.globalState.results[subject]) this.info.globalState.results[subject] = {};
@@ -86,7 +115,7 @@ export class Page extends LitElement {
         delete this.info.globalState.results[subject][session];
     }
 
-    mapSessions = (callback) => mapSessions(callback, this.info.globalState);
+    mapSessions = (callback, data = this.info.globalState) => mapSessions(callback, data);
 
     async runConversions(conversionOptions = {}, toRun, options = {}) {
         let original = toRun;
@@ -170,6 +199,7 @@ export class Page extends LitElement {
 
     unsavedUpdates = false // Track unsaved updates
 
+    // NOTE: Make sure you call this explicitly if a child class overwrites this AND data is updated
     updated() {
         this.unsavedUpdates = false
     }

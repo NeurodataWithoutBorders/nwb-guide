@@ -10,6 +10,7 @@ import { onThrow } from "../../../../errors";
 
 import pathExpansionSchema from "../../../../../../../schemas/json/path-expansion.schema.json" assert { type: "json" };
 import { InfoBox } from "../../../InfoBox.js";
+import { merge } from "../../utils.js";
 
 export class GuidedPathExpansionPage extends Page {
     constructor(...args) {
@@ -17,8 +18,9 @@ export class GuidedPathExpansionPage extends Page {
     }
 
     footer = {
+        next: 'Populate Subject Details',
         onNext: async () => {
-            this.save(); // Save in case the request fails
+            await this.save(); // Save in case the request fails
 
             const hidden = this.optional.hidden;
             this.info.globalState.structure.state = !hidden;
@@ -89,7 +91,7 @@ export class GuidedPathExpansionPage extends Page {
                 }
 
                 // Save an overall results object organized by subject and session
-                this.merge("results", results);
+                merge(results, this.globalState.results);
 
                 // // NOTE: Current behavior is to ONLY add new results, not remove old ones
                 // // If we'd like, we could label sessions as user-defined so they never clear
@@ -104,7 +106,7 @@ export class GuidedPathExpansionPage extends Page {
                 // }
             }
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 

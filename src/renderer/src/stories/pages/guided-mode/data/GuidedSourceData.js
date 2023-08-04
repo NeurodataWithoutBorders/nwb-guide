@@ -7,20 +7,25 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
+import { merge } from "../../utils.js";
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
     }
 
+    beforeSave  = () => {
+        merge(this.localState, this.info.globalState)
+    }
+
     footer = {
+        next: 'Request Metadata Schema',
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
+
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // const previousResults = this.info.globalState.metadata.results
-
-            this.save(); // Save in case the metadata request fails
 
             let stillFireSwal = false;
             const fireSwal = () => {
@@ -44,6 +49,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }) => {
+
                     // NOTE: This clears all user-defined results
                     const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
                         method: "POST",
@@ -72,7 +78,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     }
 
                     // Merge metadata results with the generated info
-                    this.merge("metadata", result.results, info);
+                    merge(result.results, info.metadata);
 
                     // Mirror structure with metadata schema
                     const schema = this.info.globalState.schema;
@@ -82,7 +88,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 })
             );
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
@@ -109,7 +115,10 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     render() {
-        this.forms = this.mapSessions(this.createForm);
+
+        this.localState = {results: merge(this.info.globalState.results, {})}
+
+        this.forms = this.mapSessions(this.createForm, this.localState);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {
