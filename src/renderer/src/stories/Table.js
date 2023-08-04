@@ -56,7 +56,16 @@ const styleSymbol = Symbol("table-styles");
 export class Table extends LitElement {
     validateOnChange;
 
-    constructor({ schema, data, template, keyColumn, validateOnChange, onUpdate, validateEmptyCells, onStatusChange } = {}) {
+    constructor({
+        schema,
+        data,
+        template,
+        keyColumn,
+        validateOnChange,
+        onUpdate,
+        validateEmptyCells,
+        onStatusChange,
+    } = {}) {
         super();
         this.schema = schema ?? {};
         this.data = data ?? [];
@@ -64,7 +73,7 @@ export class Table extends LitElement {
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
 
-        if (onUpdate) this.onUpdate = onUpdate
+        if (onUpdate) this.onUpdate = onUpdate;
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
 
@@ -135,11 +144,10 @@ export class Table extends LitElement {
 
     status;
     onStatusChange = () => {};
-    onUpdate = () => {}
+    onUpdate = () => {};
 
     updated() {
-
-        let updateComplete = false
+        let updateComplete = false;
 
         const div = (this.shadowRoot ?? this).querySelector("div");
 
@@ -303,8 +311,8 @@ export class Table extends LitElement {
 
         const unresolved = (this.unresolved = {});
 
-        let validated = 0
-        const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0)
+        let validated = 0;
+        const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0);
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
@@ -341,9 +349,9 @@ export class Table extends LitElement {
                 else target[rowName][header] = value;
             }
 
-            validated++
+            validated++;
 
-            if (initialCellsToUpdate < validated) this.onUpdate(rowName, header, value)
+            if (initialCellsToUpdate < validated) this.onUpdate(rowName, header, value);
 
             if (typeof isValid === "function") isValid();
             // }
@@ -377,7 +385,7 @@ export class Table extends LitElement {
         // Trigger validation on all cells
         data.forEach((row, i) => this.#setRow(i, row));
 
-        updateComplete = true
+        updateComplete = true;
     }
 
     #setRow(row, data) {

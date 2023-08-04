@@ -250,7 +250,7 @@ export class JSONSchemaForm extends LitElement {
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
         if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
-        if (props.onUpdate) this.onUpdate = props.onUpdate
+        if (props.onUpdate) this.onUpdate = props.onUpdate;
         if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
@@ -285,8 +285,7 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form
     #update(fullPath, value) {
-
-        this.onUpdate(fullPath, value)
+        this.onUpdate(fullPath, value);
 
         const path = [...fullPath];
         const name = path.pop();
@@ -541,8 +540,8 @@ export class JSONSchemaForm extends LitElement {
                                 validateEmptyCells: this.validateEmptyValues,
                                 deferLoading: this.deferLoading,
                                 onUpdate: (row, col, value) => {
-                                    console.log(fullPath, row, col, value)
-                                    this.onUpdate([...fullPath. row, col], value)
+                                    console.log(fullPath, row, col, value);
+                                    this.onUpdate([...fullPath.row, col], value);
                                 },
                                 onLoaded: () => {
                                     this.#nLoaded++;

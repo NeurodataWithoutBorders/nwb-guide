@@ -48,7 +48,7 @@ export class GuidedConversionOptionsPage extends Page {
             dialogOptions: {
                 properties: ["openDirectory", "createDirectory"],
             },
-            onUpdate: () => this.unsavedUpdates = true,
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

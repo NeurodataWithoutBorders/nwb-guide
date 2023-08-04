@@ -94,8 +94,8 @@ export class Page extends LitElement {
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave()
         save(this, overrides);
-        this.unsavedUpdates = false
-    }
+        this.unsavedUpdates = false;
+    };
 
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
@@ -197,11 +197,11 @@ export class Page extends LitElement {
         this.updatePages();
     };
 
-    unsavedUpdates = false // Track unsaved updates
+    unsavedUpdates = false; // Track unsaved updates
 
     // NOTE: Make sure you call this explicitly if a child class overwrites this AND data is updated
     updated() {
-        this.unsavedUpdates = false
+        this.unsavedUpdates = false;
     }
 
     render() {

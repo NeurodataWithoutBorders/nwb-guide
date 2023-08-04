@@ -88,10 +88,19 @@ export class Dashboard extends LitElement {
 
         this.subSidebar = new NavigationSidebar();
         this.subSidebar.onClick = async (id) => {
+            const result = this.#active.unsavedUpdates
+                ? await Swal.fire({
+                      title: "You have unsaved data on this page.",
+                      text: "Would you like to save your changes?",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonColor: "#3085d6",
+                      confirmButtonText: "Save and Continue",
+                      cancelButtonText: "Ignore Changes",
+                  })
+                : undefined;
 
             this.#active.to(id)
-            
-            // this.setAttribute("activePage", id);
         };
 
         this.pages = props.pages ?? {};

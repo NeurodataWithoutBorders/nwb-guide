@@ -154,10 +154,10 @@ export class GuidedPathExpansionPage extends Page {
 
         this.optional.requestUpdate();
 
-        const form = (this.form = new JSONSchemaForm({ 
-            ...structureGlobalState, 
-            onThrow ,
-            onUpdate: () => this.unsavedUpdates = true,
+        const form = (this.form = new JSONSchemaForm({
+            ...structureGlobalState,
+            onThrow,
+            onUpdate: () => (this.unsavedUpdates = true),
         }));
 
         const pathExpansionInfoBox = new InfoBox({
