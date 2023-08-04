@@ -117,11 +117,11 @@ export class Page extends LitElement {
             const { subject, session } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { output_folder, name } = this.info.globalState.project;
+            const { conversion_output_folder, stub_output_folder, name } = this.info.globalState.project;
 
             const result = await runConversion(
                 {
-                    output_folder,
+                    output_folder: conversionOptions.stub_test ? stub_output_folder : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
