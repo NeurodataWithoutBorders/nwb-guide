@@ -9,6 +9,8 @@ import { createResults } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { UnsafeComponent } from "../../Unsafe.js";
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -22,12 +24,13 @@ export class GuidedMetadataPage extends ManagedPage {
             this.save(); // Save in case the conversion fails
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
-            // Preview a random conversion
+            // Preview a single random conversion
             delete this.info.globalState.preview; // Clear the preview results
-            const results = await this.runConversions({ stub_test: true }, 1, {
+            const [result] = await this.runConversions({ stub_test: true }, 1, {
                 title: "Testing conversion on a random session",
             });
-            this.info.globalState.preview = results; // Save the preview results
+
+            this.info.globalState.preview = result; // Save the preview results
 
             this.onTransition(1);
         },
@@ -146,7 +149,7 @@ export class GuidedMetadataPage extends ManagedPage {
                         if (subject.startsWith("sub-")) subject = subject.slice(4);
                         if (session.startsWith("ses-")) session = session.slice(4);
 
-                        const [{ file, preview }] = await this.runConversions(
+                        const [{ file, html }] = await this.runConversions(
                             { stub_test: true },
                             [{ subject, session }],
                             { title: "Running conversion preview" }
@@ -156,13 +159,17 @@ export class GuidedMetadataPage extends ManagedPage {
                         });
 
                         const modal = new Modal({
-                            header: file,
+                            header: `Conversion Preview: ${key}`,
                             open: true,
                             onClose: () => modal.remove(),
                         });
 
-                        modal.insertAdjacentHTML("beforeend", `<pre>${preview}</pre>`);
-                        document.body.appendChild(modal);
+                        const container = document.createElement("div");
+                        container.style.padding = "0px 25px";
+                        container.append(new UnsafeComponent(html));
+
+                        modal.append(container);
+                        document.body.append(modal);
                     },
                 },
             ],

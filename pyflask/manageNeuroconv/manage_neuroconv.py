@@ -254,17 +254,15 @@ def convert_to_nwb(info: dict) -> str:
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
-    default_output_directory = CONVERSION_SAVE_FOLDER_PATH / project_name
+    run_stub_test = info.get("stub_test", False)
+
+    default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
+    default_output_directory = default_output_base / project_name
 
     run_stub_test = info.get("stub_test", False)
 
     # add a subdirectory to a filepath if stub_test is true
-    if run_stub_test:
-        resolved_output_base = STUB_SAVE_FOLDER_PATH
-
-    else:
-        resolved_output_base = Path(custom_output_directory) if custom_output_directory else CONVERSION_SAVE_FOLDER_PATH
-
+    resolved_output_base = Path(custom_output_directory) if custom_output_directory else default_output_base
     resolved_output_directory = resolved_output_base / project_name
     resolved_output_path = resolved_output_directory / nwbfile_path
 
@@ -324,6 +322,8 @@ def convert_to_nwb(info: dict) -> str:
 
     io = NWBHDF5IO(resolved_output_path, mode="r")
     file = io.read()
+    html = file._repr_html_()
+    io.close()
 
     # Create a symlink between the fake adata and custom data
     if not run_stub_test and not resolved_output_directory == default_output_directory:
@@ -344,7 +344,7 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-    return dict(html=file._repr_html_(), file=str(resolved_output_path))
+    return dict(html=html, file=str(resolved_output_path))
 
 
 def upload_to_dandi(
