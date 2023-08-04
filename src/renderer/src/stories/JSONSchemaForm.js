@@ -471,10 +471,14 @@ export class JSONSchemaForm extends LitElement {
                             @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
                         />`;
                     } else if (info.type === "string" || (isStringArray && !hasItemsRef) || info.type === "number") {
+                        let format = info.format;
+                        const matched = name.match(/(.+_)?(.+)_path/);
+                        if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
+
                         // Handle file and directory formats
-                        if (this.#filesystemQueries.includes(info.format)) {
+                        if (this.#filesystemQueries.includes(format)) {
                             const el = new FilesystemSelector({
-                                type: info.format,
+                                type: format,
                                 value,
                                 onSelect: (filePath) => this.#update(fullPath, filePath),
                                 onChange: (filePath) => this.#validateOnChange(name, resolved, el, path),
@@ -858,6 +862,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     globals: this.globals?.[name],
 
                     required: required[name], // Scoped to the sub-schema
+                    ignore: this.ignore,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,

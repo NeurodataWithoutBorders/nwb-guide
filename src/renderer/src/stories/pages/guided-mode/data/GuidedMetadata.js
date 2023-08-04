@@ -84,6 +84,8 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
+            ignore: ["subject_id", "session_id"],
+
             conditionalRequirements: [
                 {
                     name: "Subject Age",

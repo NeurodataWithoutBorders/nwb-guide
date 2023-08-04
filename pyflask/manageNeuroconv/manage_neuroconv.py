@@ -112,8 +112,11 @@ def is_supported_recording_interface(recording_interface, metadata):
 
     Alpha build release should therefore always return False for this.
     """
-    return recording_interface.get_electrode_table_json and all(
-        row.get("data_type") for row in metadata["Ecephys"]["Electrodes"]
+    return (
+        recording_interface
+        and recording_interface.get_electrode_table_json
+        and metadata["Ecephys"].get("Electrodes")
+        and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
     )
 
 
@@ -128,39 +131,38 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     recording_interface = get_first_recording_interface(converter)
 
-    if recording_interface:
-        if is_supported_recording_interface(recording_interface, metadata):
-            metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
+    if is_supported_recording_interface(recording_interface, metadata):
+        metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
 
-            # Get Electrode metadata
-            ecephys_properties = schema["properties"]["Ecephys"]["properties"]
-            original_electrodes_schema = ecephys_properties["Electrodes"]
+        # Get Electrode metadata
+        ecephys_properties = schema["properties"]["Ecephys"]["properties"]
+        original_electrodes_schema = ecephys_properties["Electrodes"]
 
-            new_electrodes_properties = {
-                properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-                for properties in original_electrodes_schema["default"]
-            }
+        new_electrodes_properties = {
+            properties["name"]: {key: value for key, value in properties.items() if key != "name"}
+            for properties in original_electrodes_schema["default"]
+        }
 
-            ecephys_properties["Electrodes"] = {
-                "type": "array",
-                "minItems": 0,
-                "items": {
-                    "type": "object",
-                    "properties": new_electrodes_properties,
-                    "additionalProperties": True,  # Allow for new columns
-                },
-            }
+        ecephys_properties["Electrodes"] = {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+                "type": "object",
+                "properties": new_electrodes_properties,
+                "additionalProperties": True,  # Allow for new columns
+            },
+        }
 
-            metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
-            defs = ecephys_properties["definitions"]
+        metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
+        defs = ecephys_properties["definitions"]
 
-            ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
-            ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
-            del defs["Electrodes"]
+        ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
+        ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
+        del defs["Electrodes"]
 
-        # Delete Ecephys metadata if ElectrodeTable helper function is not available
-        else:
-            schema["properties"].pop("Ecephys", dict())
+    # Delete Ecephys metadata if ElectrodeTable helper function is not available
+    else:
+        schema["properties"].pop("Ecephys", dict())
 
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
@@ -297,7 +299,7 @@ def convert_to_nwb(info: dict) -> str:
 
     ecephys_metadata = info["metadata"]["Ecephys"]
 
-    if recording_interface and is_supported_recording_interface(recording_interface, info["metadata"]):
+    if is_supported_recording_interface(recording_interface, info["metadata"]):
         electrode_column_results = ecephys_metadata["ElectrodeColumns"]
         electrode_results = ecephys_metadata["Electrodes"]
 
