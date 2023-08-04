@@ -60,12 +60,10 @@ export class Page extends LitElement {
         this.#notifications.push(note);
     };
 
-    
     to = async (transition) => {
-
         // Otherwise note unsaved updates if present
         if (this.unsavedUpdates) {
-            if (transition === 1) await this.save() // Save before a single forward transition
+            if (transition === 1) await this.save(); // Save before a single forward transition
             else {
                 Swal.fire({
                     title: "You have unsaved data on this page.",
@@ -75,31 +73,30 @@ export class Page extends LitElement {
                     confirmButtonColor: "#3085d6",
                     confirmButtonText: "Save and Continue",
                     cancelButtonText: "Ignore Changes",
-                }).then(async result => {
-                    if (result && result.isConfirmed) await this.save()
-                    this.onTransition(transition)
-                }) 
+                }).then(async (result) => {
+                    if (result && result.isConfirmed) await this.save();
+                    this.onTransition(transition);
+                });
 
-                return
+                return;
             }
         }
 
-        this.onTransition(transition)
-    }
+        this.onTransition(transition);
+    };
 
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
-    beforeSave = () => {} // User-defined function
+    beforeSave = () => {}; // User-defined function
 
     save = async (overrides, runBeforeSave = true) => {
-        if (runBeforeSave) await this.beforeSave()
+        if (runBeforeSave) await this.beforeSave();
         save(this, overrides);
         this.unsavedUpdates = false;
     };
 
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
-
 
     addSession({ subject, session, info }) {
         if (!this.info.globalState.results[subject]) this.info.globalState.results[subject] = {};

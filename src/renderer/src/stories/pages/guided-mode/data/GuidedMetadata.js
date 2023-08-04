@@ -17,17 +17,17 @@ const getInfoFromId = (key) => {
     if (subject.startsWith("sub-")) subject = subject.slice(4);
     if (session.startsWith("ses-")) session = session.slice(4);
 
-    return { subject, session }
-}
+    return { subject, session };
+};
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
     }
 
-    beforeSave  = () => {
-        merge(this.localState, this.info.globalState)
-    }
+    beforeSave = () => {
+        merge(this.localState, this.info.globalState);
+    };
 
     form;
     footer = {
@@ -156,7 +156,7 @@ export class GuidedMetadataPage extends ManagedPage {
     render() {
         this.#resetLoadState(); // Reset on each render
 
-        this.localState = {results: merge(this.info.globalState.results, {})}
+        this.localState = { results: merge(this.info.globalState.results, {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState);
 
@@ -165,7 +165,6 @@ export class GuidedMetadataPage extends ManagedPage {
             if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
             instances[`sub-${subject}`][`ses-${session}`] = form;
         });
-
 
         this.manager = new InstanceManager({
             header: "Sessions",
@@ -177,8 +176,7 @@ export class GuidedMetadataPage extends ManagedPage {
                     name: "Preview",
                     primary: true,
                     onClick: async (key, el) => {
-
-                        const { subject, session } = getInfoFromId(key)
+                        const { subject, session } = getInfoFromId(key);
 
                         const [{ file, html }] = await this.runConversions(
                             { stub_test: true },
@@ -208,14 +206,17 @@ export class GuidedMetadataPage extends ManagedPage {
                 {
                     name: "Save",
                     onClick: async (id) => {
-                        const ogCallback = this.beforeSave
+                        const ogCallback = this.beforeSave;
                         this.beforeSave = () => {
-                            const { subject, session } = getInfoFromId(id)
+                            const { subject, session } = getInfoFromId(id);
 
-                            merge(this.localState.results[subject][session], this.info.globalState.results[subject][session])
-                        }
-                        await this.save()
-                        this.beforeSave = ogCallback
+                            merge(
+                                this.localState.results[subject][session],
+                                this.info.globalState.results[subject][session]
+                            );
+                        };
+                        await this.save();
+                        this.beforeSave = ogCallback;
                     },
                 },
             ],

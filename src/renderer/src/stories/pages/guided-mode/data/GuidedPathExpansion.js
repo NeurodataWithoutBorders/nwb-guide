@@ -18,7 +18,7 @@ export class GuidedPathExpansionPage extends Page {
     }
 
     footer = {
-        next: 'Populate Subject Details',
+        next: "Populate Subject Details",
         onNext: async () => {
             await this.save(); // Save in case the request fails
 

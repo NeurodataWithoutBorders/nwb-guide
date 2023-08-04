@@ -18,7 +18,7 @@ export class GuidedSubjectsPage extends Page {
 
     // Only save if the subject structure is valid
     beforeSave = () => {
-        const subjects = merge(this.localState, this.info.globalState.subjects ) // Merge the local and global states
+        const subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
 
         try {
             this.table.validate();
@@ -28,7 +28,7 @@ export class GuidedSubjectsPage extends Page {
         }
 
         const { results } = this.info.globalState;
-        
+
         // Object.keys(subjects).forEach((sub) => {
         //     if (!subjects[sub].sessions?.length) {
         //         delete subjects[sub]
@@ -37,9 +37,11 @@ export class GuidedSubjectsPage extends Page {
 
         const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
         if (noSessions.length) {
-            const error = `${noSessions.length} subject${noSessions.length > 1 ? "s are" : " is"} missing Sessions entries`
+            const error = `${noSessions.length} subject${
+                noSessions.length > 1 ? "s are" : " is"
+            } missing Sessions entries`;
             this.notify(error, "error");
-            throw new Error(error)
+            throw new Error(error);
         }
 
         const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => {
@@ -49,22 +51,20 @@ export class GuidedSubjectsPage extends Page {
 
         // Modify the results object to track new subjects / sessions
         updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
-
-    }
+    };
 
     footer = {
-        next: 'Generate Data Structure'
+        next: "Generate Data Structure",
     };
 
     updated() {
         const add = this.query("#addButton");
         add.onclick = () => this.table.table.alter("insert_row_below");
-        super.updated() // Call if updating data
+        super.updated(); // Call if updating data
     }
 
     render() {
-
-        const subjects = this.localState = merge(this.info.globalState.subjects ?? {}, {})        
+        const subjects = (this.localState = merge(this.info.globalState.subjects ?? {}, {}));
 
         // Ensure all the proper subjects are in the global state
         const toHave = Object.keys(this.info.globalState.results);
@@ -84,7 +84,7 @@ export class GuidedSubjectsPage extends Page {
             keyColumn: "subject_id",
             validateEmptyCells: false,
             onUpdate: () => {
-                this.unsavedUpdates = true
+                this.unsavedUpdates = true;
             },
             validateOnChange: (key, parent, v) => {
                 if (key === "sessions") return true;

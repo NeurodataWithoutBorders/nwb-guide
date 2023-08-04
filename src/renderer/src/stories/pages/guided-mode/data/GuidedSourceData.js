@@ -14,12 +14,12 @@ export class GuidedSourceDataPage extends ManagedPage {
         super(...args);
     }
 
-    beforeSave  = () => {
-        merge(this.localState, this.info.globalState)
-    }
+    beforeSave = () => {
+        merge(this.localState, this.info.globalState);
+    };
 
     footer = {
-        next: 'Request Metadata Schema',
+        next: "Request Metadata Schema",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
@@ -49,7 +49,6 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }) => {
-
                     // NOTE: This clears all user-defined results
                     const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
                         method: "POST",
@@ -115,8 +114,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     render() {
-
-        this.localState = {results: merge(this.info.globalState.results, {})}
+        this.localState = { results: merge(this.info.globalState.results, {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState);
 

@@ -100,7 +100,7 @@ export class Dashboard extends LitElement {
                   })
                 : undefined;
 
-            this.#active.to(id)
+            this.#active.to(id);
         };
 
         this.pages = props.pages ?? {};
@@ -143,12 +143,11 @@ export class Dashboard extends LitElement {
         else if (key === "renderNameInSidebar") this.sidebar.renderName = latest === "true" || latest === true;
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {
-
             if (this.#active && this.#active.info.parent && this.#active.info.section) {
-                const currentProject = getCurrentProjectName()
-                updateAppProgress(latest, currentProject)
+                const currentProject = getCurrentProjectName();
+                updateAppProgress(latest, currentProject);
             }
-            
+
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page
 
             this.sidebar.selectItem(latest); // Just highlight the item

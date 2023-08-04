@@ -52,10 +52,13 @@ export const update = (newDatasetName, previousDatasetName) => {
 export const getCurrentProjectName = () => {
     const params = new URLSearchParams(location.search);
     return params.get("project");
-}
+};
 
-export const updateAppProgress = (pageId, dataOrProjectName = {}, projectName = typeof dataOrProjectName === 'string' ? dataOrProjectName : undefined) => {
- 
+export const updateAppProgress = (
+    pageId,
+    dataOrProjectName = {},
+    projectName = typeof dataOrProjectName === "string" ? dataOrProjectName : undefined
+) => {
     if (projectName) {
         const params = new URLSearchParams(location.search);
         params.set("project", projectName);
@@ -67,15 +70,12 @@ export const updateAppProgress = (pageId, dataOrProjectName = {}, projectName = 
     }
 
     // Is a project name
-    if (dataOrProjectName === projectName) updateFile(dataOrProjectName, (data) => data["page-before-exit"] = pageId)
-
+    if (dataOrProjectName === projectName) updateFile(dataOrProjectName, (data) => (data["page-before-exit"] = pageId));
     // Is a data object
-    else dataOrProjectName["page-before-exit"] = pageId
-        
-}
+    else dataOrProjectName["page-before-exit"] = pageId;
+};
 
 export const save = (page, overrides = {}) => {
-
     const globalState = merge(overrides, page.info.globalState); // Merge the overrides into the actual global state
 
     let guidedProgressFileName = globalState.project?.name;
@@ -84,25 +84,24 @@ export const save = (page, overrides = {}) => {
     if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return;
 
     updateFile(guidedProgressFileName, () => {
-        updateAppProgress(page.info.id, globalState, guidedProgressFileName) // Will automatically set last updated time
-        return globalState
-    })
+        updateAppProgress(page.info.id, globalState, guidedProgressFileName); // Will automatically set last updated time
+        return globalState;
+    });
 };
 
 //Destination: HOMEDIR/NWB_GUIDE/pipelines
 export const updateFile = (projectName, callback) => {
-
-    let data = get(projectName)
+    let data = get(projectName);
 
     if (callback) {
-        const result = callback(data)
-        if (result && typeof result === 'object') data = result
+        const result = callback(data);
+        if (result && typeof result === "object") data = result;
     }
 
     data["last-modified"] = new Date(); // Always update the last modified time
 
-    const copy = merge(data, {})
-    console.error(copy)
+    const copy = merge(data, {});
+    console.error(copy);
 
     var guidedFilePath = joinPath(guidedProgressFilePath, projectName + ".json");
 
@@ -111,8 +110,7 @@ export const updateFile = (projectName, callback) => {
         if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create progress folder if one does not exist
         fs.writeFileSync(guidedFilePath, JSON.stringify(data, null, 2));
     } else localStorage.setItem(guidedFilePath, JSON.stringify(data));
-
-}
+};
 
 export const getEntries = () => {
     if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if progress folder exists. If not, create it.

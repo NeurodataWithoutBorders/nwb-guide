@@ -14,21 +14,19 @@ export const randomizeElements = (array, count) => {
     return result;
 };
 
-
 const isObject = (o) => {
-    return o && typeof o === 'object' && !Array.isArray(o)
-}
+    return o && typeof o === "object" && !Array.isArray(o);
+};
 
 export function merge(toMerge = {}, target = {}) {
-
     // Deep merge objects
     for (const [k, v] of Object.entries(toMerge)) {
-        const targetV = target[k]
-        if (isObject(v) || isObject(targetV)) target[k] = merge(v, target[k])
+        const targetV = target[k];
+        if (isObject(v) || isObject(targetV)) target[k] = merge(v, target[k]);
         else target[k] = v;
     }
 
-    return target
+    return target;
 }
 
 export function mapSessions(callback = (v) => v, globalState) {

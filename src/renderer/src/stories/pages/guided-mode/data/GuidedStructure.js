@@ -82,7 +82,7 @@ export class GuidedStructurePage extends Page {
 
         const deleteListItem = () => {
             li.remove();
-            this.unsavedUpdates = true
+            this.unsavedUpdates = true;
             delete this.#selected[resolvedKey];
         };
 
@@ -98,7 +98,7 @@ export class GuidedStructurePage extends Page {
 
         button.onClick = deleteListItem;
 
-        this.unsavedUpdates = true
+        this.unsavedUpdates = true;
     };
 
     search = new Search({
@@ -115,22 +115,22 @@ export class GuidedStructurePage extends Page {
         const interfaces = { ...this.#selected };
         this.info.globalState.interfaces = interfaces;
 
-        await this.save(undefined, false) // Interrim save, in case the schema request fails
+        await this.save(undefined, false); // Interrim save, in case the schema request fails
 
         const schema =
-        Object.keys(interfaces).length === 0
-            ? {}
-            : await fetch(`${baseUrl}/neuroconv/schema`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(interfaces),
-              }).then((res) => res.json());
+            Object.keys(interfaces).length === 0
+                ? {}
+                : await fetch(`${baseUrl}/neuroconv/schema`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(interfaces),
+                  }).then((res) => res.json());
 
         let schemas = this.info.globalState.schema;
         if (!schemas) schemas = this.info.globalState.schema = {};
 
         schemas.source_data = schema;
-    }
+    };
 
     async updated() {
         const selected = this.info.globalState.interfaces;
@@ -164,7 +164,7 @@ export class GuidedStructurePage extends Page {
             this.#addListItem({ ...found, key }); // Add previously selected items
         }
 
-        super.updated() // Call if updating data
+        super.updated(); // Call if updating data
     }
 
     render() {

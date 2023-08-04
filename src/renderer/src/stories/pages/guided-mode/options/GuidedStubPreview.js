@@ -23,7 +23,6 @@ export class GuidedStubPreviewPage extends Page {
             >`,
     };
 
-
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {
         next: "Run Conversion",

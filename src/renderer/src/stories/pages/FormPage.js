@@ -48,14 +48,15 @@ export class GuidedFormPage extends Page {
     }
 
     beforeSave = () => {
-
         // Merge results before saving
         if (this.info.globalStatePath) {
-            const parent = this.info.globalStatePath.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.info.globalState)
-            parent[this.info.key] = this.localState[this.info.key]
+            const parent = this.info.globalStatePath.reduce(
+                (acc, key) => acc[key] ?? (acc[key] = {}),
+                this.info.globalState
+            );
+            parent[this.info.key] = this.localState[this.info.key];
         }
-
-    }
+    };
 
     footer = {
         onNext: async () => {
@@ -71,7 +72,7 @@ export class GuidedFormPage extends Page {
             ? this.info.globalStatePath.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.info.globalState)
             : {};
 
-        const results = this.localState = merge({ [key]: temp[key] ?? (temp[key] = {}) }, {}); // Keep a local copy of the results
+        const results = (this.localState = merge({ [key]: temp[key] ?? (temp[key] = {}) }, {})); // Keep a local copy of the results
 
         const form = (this.form = new JSONSchemaForm({
             ...this.info.formOptions,
