@@ -14,23 +14,13 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        content: () => {
-            const info = this.info.globalState.preview;
-
-            return html`
-                <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        <h1 class="title" style="margin: 0; padding: 0;">Conversion Preview</h1>
-                        <small style="color: gray;">${info.file}</small>
-                    </div>
-                    <div style="padding-left: 25px">
-                        <nwb-button size="small" @click=${() => (shell ? shell.showItemInFolder(info.file) : "")}
-                            >${unsafeSVG(folderOpenSVG)}</nwb-button
-                        >
-                    </div>
-                </div>
-            `;
-        },
+        subtitle: () => this.info.globalState.preview.file,
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview.file) : "")}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
     };
 
     footer = {

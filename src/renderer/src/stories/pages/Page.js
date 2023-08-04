@@ -5,6 +5,7 @@ import { dismissNotification, notify } from "../../dependencies/globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
+import { resolveResults } from "./guided-mode/data/utils.js";
 
 export class Page extends LitElement {
     // static get styles() {
@@ -119,13 +120,19 @@ export class Page extends LitElement {
 
             const { conversion_output_folder, stub_output_folder, name } = this.info.globalState.project;
 
+            // Resolve the correct session info from all of the metadata for this conversion
+            const sessionInfo = {
+                ...this.info.globalState.results[subject][session],
+                metadata: resolveResults(subject, session, this.info.globalState),
+            };
+
             const result = await runConversion(
                 {
                     output_folder: conversionOptions.stub_test ? stub_output_folder : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-                    ...this.info.globalState.results[subject][session], // source_data and metadata are passed in here
+                    ...sessionInfo, // source_data and metadata are passed in here
                     ...conversionOptions, // Any additional conversion options override the defaults
 
                     interfaces: this.info.globalState.interfaces,

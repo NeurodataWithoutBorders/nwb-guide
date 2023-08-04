@@ -123,12 +123,13 @@ export class Main extends LitElement {
         const capsuleEl = capsules ? new GuidedCapsules(capsules) : "";
         const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
 
-        const title = page.info?.title;
+        const title = header?.title ?? page.info?.title;
 
-        let customHeaderContent = header?.content;
-        if (typeof customHeaderContent === "function") customHeaderContent = customHeaderContent(); // Generate custom header content if required
+        let subtitle = header?.subtitle;
+        if (typeof subtitle === "function") subtitle = subtitle(); // Generate custom header content if required
 
-        const showHeader = customHeaderContent || title;
+        let controls = header?.controls;
+        if (typeof controls === "function") controls = controls(); // Generate custom header content if required
 
         return html`
             ${headerEl}
@@ -137,13 +138,21 @@ export class Main extends LitElement {
                 : html`<div style="height: 25px;"></div>`}
             <main id="content" class="js-content" style="overflow: hidden; display: flex;">
                 <section class="section js-section u-category-windows">
-                    ${showHeader
+                    ${title
                         ? html`<div>
-                              ${customHeaderContent ||
-                              html`<h1 class="title" style="margin: 0; padding: 0;">${title}</h1>`}
+                              <div
+                                  style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
+                              >
+                                  <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                      <h1 class="title" style="margin: 0; padding: 0;">${title}</h1>
+                                      <small style="color: gray;">${subtitle}</small>
+                                  </div>
+                                  <div style="padding-left: 25px">${controls}</div>
+                              </div>
                               <hr />
                           </div>`
                         : ""}
+
                     <div style="height: 10px;"></div>
                     ${page}
                 </section>
