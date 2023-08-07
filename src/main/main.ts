@@ -23,7 +23,9 @@ import splashHTML from './splash-screen.html?asset'
 
 autoUpdater.channel = "latest";
 
-const debugLog: any = {}
+import { homedir}  from 'os'
+const homeDir = homedir(); // See: https://www.npmjs.com/package/os
+const desktopDir = `${homeDir}/Desktop`;
 
 /*************************************************************
  * Python Process
@@ -66,8 +68,6 @@ const getScriptPath = () => {
 const createPyProc = async () => {
   let script = getScriptPath();
 
-  debugLog.script = script
-
   await killAllPreviousProcesses();
 
   const defaultPort = PORT as number
@@ -90,16 +90,12 @@ const createPyProc = async () => {
       if (pyflaskProcess != null) {
         console.log("child process success on port " + port);
 
-        debugLog.errors = []
-
         // Listen for errors from Python process
         pyflaskProcess.stderr.on("data", function (data: any) {
-          debugLog.errors.push(data)
           console.log("[python]:", data.toString());
         });
       } else console.error("child process failed to start on port" + port);
 
-      debugLog.port = selectedPort = port;
     })
     .catch((err: Error) => {
       console.log(err);
@@ -111,31 +107,19 @@ const createPyProc = async () => {
  */
 const exitPyProc = async () => {
 
-  // Windows does not properly shut off the python server process. This ensures it is killed.
-  const killPythonProcess = () => {
-    // kill pyproc with command line
-    const cmd = child_process.spawnSync("taskkill", [
-      "/pid",
-      pyflaskProcess.pid,
-      "/f",
-      "/t",
-    ]);
-  };
-
   await killAllPreviousProcesses();
 
-  // check if the platform is Windows
-  if (process.platform === "win32") {
-    killPythonProcess();
-    pyflaskProcess = null;
-    // PORT = null;
-    return;
-  }
+  // Kill signal to pyproc
+  if (isWindows) child_process.spawnSync("taskkill", [
+    "/pid",
+    pyflaskProcess.pid,
+    "/f",
+    "/t",
+  ])  // Windows does not properly shut off the python server process. This ensures it is killed.
 
-  // kill signal to pyProc
-  pyflaskProcess.kill();
+  else pyflaskProcess.kill()
+
   pyflaskProcess = null;
-  // PORT = null;
 };
 
 const killAllPreviousProcesses = async () => {
@@ -188,12 +172,13 @@ function setReady(state = true) {
 let user_restart_confirmed = false;
 let updatechecked = false;
 
+let hasBeenOpened = false;
+
 function initialize() {
 
   makeSingleInstance();
 
   function createWindow() {
-    mainWindow.webContents.openDevTools();
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url);
@@ -206,7 +191,7 @@ function initialize() {
       }
     });
 
-    mainWindow.on("close", async (e) => {
+    mainWindow.once("close", async (e) => {
       if (!user_restart_confirmed) {
         if (showExitPrompt) {
           e.preventDefault(); // Prevents the window from closing
@@ -219,10 +204,7 @@ function initialize() {
             })
             .then((responseObject) => {
               let { response } = responseObject;
-              if (response === 0) {
-                // Runs the following if 'Yes' is clicked
-                quit_app();
-              }
+              if (response === 0) quit_app()
             });
         }
       } else {
@@ -233,17 +215,13 @@ function initialize() {
   }
 
   const quit_app = () => {
-    console.log("Quit app called");
-    showExitPrompt = false;
+    // showExitPrompt = false;
     mainWindow.close();
-    /// feedback form iframe prevents closing gracefully
-    /// so force close
-    if (!mainWindow.closed) {
-      mainWindow.destroy();
-    }
+    if (!mainWindow.closed) mainWindow.destroy()
   };
 
-  app.on("ready", () => {
+  function onAppReady () {
+
     const promise = createPyProc();
 
     // Listen after first load
@@ -289,7 +267,10 @@ function initialize() {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   else mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
 
-
+    mainWindow.once("closed", () => {
+      isReady = false
+      mainWindow = undefined
+    })
 
     const splash = new BrowserWindow({
       width: 340,
@@ -299,41 +280,36 @@ function initialize() {
       alwaysOnTop: true,
       transparent: true,
     });
-
+    
     splash.loadFile(splashHTML)
-
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
     mainWindow.once("ready-to-show", () => {
+
       setTimeout(function () {
+
+        hasBeenOpened = true
+
         splash.close();
-        //mainWindow.maximize();
         mainWindow.show();
         createWindow();
-        // run_pre_flight_checks();
+
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
 
         setReady() // Ensure window is ready to show before sending anything through it
-        onReady(() => mainWindow.webContents.send('logOnBrowser', debugLog))
 
-      }, 1000);
+      }, hasBeenOpened ? 100 : 1000);
     });
-  });
+  }
 
-  app.on("window-all-closed", async () => {
-    await exitPyProc();
-    app.quit();
-  });
 
-  app.on("will-quit", () => {
-    app.quit();
-  });
-
-  app.on("open-file", onFileOpened)
+  if (app.isReady()) onAppReady()
+  else app.on("ready", onAppReady)
 }
 
 function onFileOpened(_, path: string) {
+    restoreWindow() || initialize(); // Ensure the application is properly visible
     onReady(() => mainWindow.webContents.send('fileOpened', path))
 }
 
@@ -344,29 +320,43 @@ if (isWindows && process.argv.length >= 2) {
 
 // function run_pre_flight_checks() {
 //   console.log("Running pre-checks");
-//   sendToMainWindow("run_pre_flight_checks");
+//   mainWindow.webContents.send("run_pre_flight_checks");
 // }
 
 // Make this app a single instance app.
 const gotTheLock = app.requestSingleInstanceLock();
 
+function restoreWindow(){
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
+
+  return mainWindow
+}
+
 function makeSingleInstance() {
   if (process.mas) return;
 
-  if (!gotTheLock) {
-    app.quit();
-  } else {
-    app.on("second-instance", () => {
-      if (mainWindow) {
-        if (mainWindow.isMinimized()) mainWindow.restore();
-        mainWindow.focus();
-      }
-    });
+  if (!gotTheLock) app.quit();
+  else {
+    app.on("second-instance", () => restoreWindow());
   }
 }
 
-
 initialize();
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) initialize()
+})
+
+app.on("window-all-closed", async () => {
+  await exitPyProc();
+  app.quit();
+});
+
+app.on("will-quit", () => app.quit());
+app.on("open-file", onFileOpened)
 
 ipcMain.on("resize-window", (event, dir) => {
   var x = mainWindow.getSize()[0];
@@ -382,11 +372,11 @@ ipcMain.on("resize-window", (event, dir) => {
 });
 
 autoUpdater.on("update-available", () => {
-  sendToMainWindow("update_available");
+  mainWindow.webContents.send("update_available");
 });
 
 autoUpdater.on("update-downloaded", () => {
-  sendToMainWindow("update_downloaded");
+  mainWindow.webContents.send("update_downloaded");
 });
 
 ipcMain.on("restart_app", async () => {
