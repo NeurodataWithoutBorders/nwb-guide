@@ -24,6 +24,8 @@ export class GuidedUploadPage extends Page {
 
             await this.form.validate(); // Will throw an error in the callback
 
+            const globalUploadInfo = this.info.globalState.upload
+
             const info = { ...globalUploadInfo.info };
             info.project = this.info.globalState.project.name;
             info.staging = globalUploadInfo.info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
