@@ -146,8 +146,8 @@ export class TutorialPage extends Page {
                                           },
 
                                           // provide data for all supported interfaces
-                                          interfaces: Object.keys(dataStructureResults).reduce((acc, value) => {
-                                              acc[key] = value;
+                                          interfaces: Object.keys(dataStructureResults).reduce((acc, key) => {
+                                              acc[key] = `${key}Interface`;
                                               return acc;
                                           }, {}),
 
