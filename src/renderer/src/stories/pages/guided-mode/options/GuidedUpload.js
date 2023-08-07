@@ -13,19 +13,18 @@ export class GuidedUploadPage extends Page {
     form;
 
     beforeSave = () => {
-        merge(this.localState, this.info.globalState.upload) // Merge the local and global states
+        merge(this.localState, this.info.globalState.upload); // Merge the local and global states
         delete globalUploadInfo.results; // Clear the preview results
-    }
+    };
 
     footer = {
         onNext: async () => {
-
             await this.save(); // Save in case the conversion fails
 
             await this.form.validate(); // Will throw an error in the callback
 
-            const globalState = this.info.globalState
-            const globalUploadInfo = globalState.upload
+            const globalState = this.info.globalState;
+            const globalUploadInfo = globalState.upload;
 
             const info = { ...globalUploadInfo.info };
             info.project = globalState.project.name;
@@ -38,16 +37,14 @@ export class GuidedUploadPage extends Page {
 
             globalUploadInfo.results = results; // Save the preview results
 
-            this.unsavedUpdates = true // Ensure that this saves automatically
+            this.unsavedUpdates = true; // Ensure that this saves automatically
 
             this.to(1);
         },
     };
 
     render() {
-
-
-        const state = this.localState = merge(this.info.globalState.upload ?? { info: {}, results: null }, {})
+        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {}, results: null }, {}));
 
         const schema = {
             properties: {

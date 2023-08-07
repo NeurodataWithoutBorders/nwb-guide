@@ -144,8 +144,8 @@ export class Dashboard extends LitElement {
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {
             if (this.#active && this.#active.info.parent && this.#active.info.section) {
-                const currentProject = getCurrentProjectName()
-                if (currentProject) updateAppProgress(latest, currentProject)
+                const currentProject = getCurrentProjectName();
+                if (currentProject) updateAppProgress(latest, currentProject);
             }
 
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page
