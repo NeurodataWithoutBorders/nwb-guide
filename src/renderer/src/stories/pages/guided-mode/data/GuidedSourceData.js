@@ -7,6 +7,7 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
+import getSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
@@ -89,10 +90,12 @@ export class GuidedSourceDataPage extends ManagedPage {
     createForm = ({ subject, session, info }) => {
         const instanceId = `sub-${subject}/ses-${session}`;
 
+        const schema = this.info.globalState.schema.source_data;
+
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema: this.info.globalState.schema.source_data,
+            schema: getSourceDataSchema(schema),
             results: info.source_data,
             ignore: [
                 "verbose",
