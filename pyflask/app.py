@@ -56,8 +56,8 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-    if 1 < len(sys.argv):
-        port = sys.argv[1]
+    port = sys.argv[len(sys.argv) - 1]
+    if port.isdigit():
         api.logger.info(f"Starting server on port {port}")
         app.run(host="127.0.0.1", port=port)
     else:

@@ -9,7 +9,6 @@ module.exports = async function (params) {
         console.log("No notarization needed for current platform. This process is only intended for macOS.");
         return;
     }
-    console.log("afterSign hook triggered", params);
 
     // Same appId in electron-builder.
     let appId = "com.catalystneuro.nwbguide";
