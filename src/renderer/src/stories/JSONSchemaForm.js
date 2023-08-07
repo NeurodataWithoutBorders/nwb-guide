@@ -243,7 +243,7 @@ export class JSONSchemaForm extends LitElement {
     }
 
     // Track resolved values for the form (data only)
-    update(fullPath, value) {
+    updateData(fullPath, value) {
         const path = [...fullPath];
         const name = path.pop();
         const resultParent = path.reduce((acc, key) => acc[key], this.results);
@@ -269,6 +269,7 @@ export class JSONSchemaForm extends LitElement {
     #clearMessages = (fullPath, type) => {
         if (Array.isArray(fullPath)) fullPath = fullPath.join("-"); // Convert array to string
         const container = this.shadowRoot.querySelector(`#${fullPath} .${type}`);
+
         if (container) {
             const nChildren = container.children.length;
             container.innerHTML = "";
@@ -848,7 +849,7 @@ export class JSONSchemaForm extends LitElement {
         return html`
             <div>
                 ${false ? html`<h2>${schema.title}</h2>` : ""} ${false ? html`<p>${schema.description}</p>` : ""}
-                ${this.#render(schema, this.results, this.#requirements)}
+                ${this.#render(schema, this.resolved, this.#requirements)}
             </div>
         `;
     }
