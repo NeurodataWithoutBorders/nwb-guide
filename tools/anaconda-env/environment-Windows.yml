@@ -1,4 +1,4 @@
-name: nwbguide
+name: nwb-guide
 channels:
   - defaults
   - conda-forge
