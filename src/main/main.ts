@@ -28,7 +28,8 @@ autoUpdater.channel = "latest";
  *************************************************************/
 
 // flask setup environment variables
-const PY_FLASK_DIST_FOLDER = path.join('..', '..', "pyflaskdist");
+const PYFLASK_DIST_FOLDER_BASE = path.join('..', '..', 'out', 'python')
+const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
 const PY_FLASK_MODULE = "app";
 let pyflaskProcess: any = null;
@@ -42,26 +43,13 @@ const portRange = 100;
  * The resources path is used for Linux and Mac builds and the app.getAppPath() is used for Windows builds.
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
-const guessPackaged = () => {
+const getPackagedPath = () => {
+.0
+  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
+  const unixPath = path.join(process.resourcesPath, PYFLASK_DIST_FOLDER_BASE, PY_FLASK_MODULE);
 
-  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER);
-  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
-
-  if (process.platform === "darwin" || process.platform === "linux") {
-    if (fs.existsSync(unixPath)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  if (process.platform === "win32") {
-    if (fs.existsSync(windowsPath)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
+  if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
 };
 
 /**
@@ -71,15 +59,7 @@ const guessPackaged = () => {
  * @returns {string} The path to the api server script that needs to be executed to start the Python server
  */
 const getScriptPath = () => {
-  if (!guessPackaged()) {
-    return path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
-  }
-
-  if (process.platform === "win32") {
-    return path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
-  } else {
-    return path.join(process.resourcesPath, PY_FLASK_MODULE); // NOTE: Not sure if this will recognize packaged assets for Mac...
-  }
+  return getPackagedPath() ?? path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
 };
 
 const createPyProc = async () => {
@@ -93,12 +73,12 @@ const createPyProc = async () => {
     .then(([freePort]: string[]) => {
       let port = freePort;
 
-      if (guessPackaged()) {
-        pyflaskProcess = child_process.execFile(script, [port], {
+      if (script.slice(-3) === '.py') {
+        pyflaskProcess = child_process.spawn("python", [script, port], {
           // stdio: "ignore",
         });
       } else {
-        pyflaskProcess = child_process.spawn("python", [script, port], {
+        pyflaskProcess = child_process.execFile(script, [port], {
           // stdio: "ignore",
         });
       }

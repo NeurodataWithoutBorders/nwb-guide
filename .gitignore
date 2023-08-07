@@ -9,8 +9,6 @@ out
 # Ignore node_modules folder
 node_modules
 build/api
-pysodadist
-pyflaskdist
 pyflask/ds
 src/Users
 semantic

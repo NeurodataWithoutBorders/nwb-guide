@@ -11,6 +11,8 @@
     "dev:server": "cd pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
     "build:app": "electron-vite build",
+    "build:mac": "npm run build && npm run build:python-unix && npm run build-mac",
+    "build:win": "npm run build && npm run build:python && npm run build-win",
     "test": "npm run test:app && npm run test:server",
     "test:app": "vitest run",
     "test:server": "pytest pyflask/tests/ -s",
@@ -21,8 +23,8 @@
     "deploy-win": "electron-builder build --win --publish always",
     "deploy-mac": "electron-builder build --mac --publish always",
     "deploy-linux": "electron-builder build --linux --publish always",
-    "python-onefile-build": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist --add-data ./paths.config.json;. --collect-data jsonschema_specifications --collect-all pynwb --collect-all hdmf --collect-all ci_info",
-    "python-onefile-build-mac": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist --add-data ./paths.config.json:. --collect-data jsonschema_specifications --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:python": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./out/python --add-data ./paths.config.json;. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:python-unix": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./out/python --add-data ./paths.config.json:. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
     "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
     "postinstall": "electron-builder install-app-deps",
     "storybook": "storybook dev -p 6006",
@@ -43,6 +45,13 @@
     "appId": "com.catalystneuro.nwbguide",
     "generateUpdatesFilesForAllChannels": true,
     "afterSign": "./notarize.js",
+    "fileAssociations": [
+      {
+        "ext": "nwb",
+        "name": "NWB File",
+        "role": "Editor"
+      }
+    ],
     "files": [
       "**/*",
       "!pysoda/",
@@ -71,7 +80,7 @@
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "extraResources": [
         {
-          "from": "./pyflaskdist/app"
+          "from": "./out/python"
         }
       ]
     },
@@ -81,7 +90,7 @@
       "icon": "src/renderer/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
-          "from": "./pyflaskdist/app"
+          "from": "./out/python"
         }
       ]
     },
