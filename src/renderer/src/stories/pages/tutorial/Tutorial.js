@@ -20,7 +20,6 @@ const { shell } = electron;
 
 const tutorialPipelineName = "NWB GUIDE Tutorial Data";
 
-
 export class TutorialPage extends Page {
     constructor(...args) {
         super(...args);
