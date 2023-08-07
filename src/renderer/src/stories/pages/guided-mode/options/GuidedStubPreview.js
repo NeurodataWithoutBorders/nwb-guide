@@ -2,11 +2,26 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 import { UnsafeComponent } from "../../Unsafe.js";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import folderOpenSVG from "../../../assets/folder_open.svg?raw";
+
+import { electron } from "../../../../electron/index.js";
+const { shell } = electron;
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
     }
+
+    header = {
+        subtitle: () => this.info.globalState.preview.file,
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview.file) : "")}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
+    };
 
     footer = {
         next: "Run Conversion",
@@ -22,14 +37,12 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
+        const info = this.info.globalState.preview;
+
         return html`
             <div>
-                ${this.info.globalState.preview
-                    ? this.info.globalState.preview.map(
-                          (o) =>
-                              html`<h2 class="guided--text-sub-step">${o.file}</h2>
-                                  ${new UnsafeComponent(o.html)}`
-                      )
+                ${info
+                    ? new UnsafeComponent(info.html)
                     : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`}
             </div>
         `;
