@@ -91,7 +91,7 @@ export class GuidedPathExpansionPage extends Page {
                 }
 
                 // Save an overall results object organized by subject and session
-                merge(results, this.globalState.results);
+                merge(results, this.info.globalState.results);
 
                 // // NOTE: Current behavior is to ONLY add new results, not remove old ones
                 // // If we'd like, we could label sessions as user-defined so they never clear
