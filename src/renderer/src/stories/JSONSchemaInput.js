@@ -170,7 +170,7 @@ export class JSONSchemaInput extends LitElement {
             return html`
                 <select
                     class="guided--input schema-input"
-                    @input=${(ev) => this.form.updateParent(name, info.enum[ev.target.value], parent)}
+                    @input=${(ev) => this.form.update(name, info.enum[ev.target.value], parent)}
                     @change=${(ev) => validateOnChange && this.form.triggerValidation(name, parent, ev.target, path)}
                 >
                     <option disabled selected value>Select an option</option>
@@ -183,7 +183,7 @@ export class JSONSchemaInput extends LitElement {
             return html`<input
                 type="checkbox"
                 class="schema-input"
-                @input=${(ev) => this.form.updateParent(name, ev.target.checked, parent)}
+                @input=${(ev) => this.form.update(name, ev.target.checked, parent)}
                 ?checked=${this.value ?? false}
                 @change=${(ev) => validateOnChange && this.form.triggerValidation(name, parent, ev.target, path)}
             />`;
@@ -197,7 +197,7 @@ export class JSONSchemaInput extends LitElement {
                 const el = new FilesystemSelector({
                     type: format,
                     value: this.value,
-                    onSelect: (filePath) => this.form.updateParent(name, filePath, parent),
+                    onSelect: (filePath) => this.form.update(name, filePath, parent),
                     onChange: (filePath) => validateOnChange && this.form.triggerValidation(name, parent, el, path),
                     dialogOptions: this.form.dialogOptions,
                     dialogType: this.form.dialogType,
@@ -215,7 +215,7 @@ export class JSONSchemaInput extends LitElement {
                     maxlength="255"
                     .value="${this.value ?? ""}"
                     @input=${(ev) => {
-                        this.form.updateParent(name, ev.target.value, parent);
+                        this.form.update(name, ev.target.value, parent);
                     }}
                     @change=${(ev) => validateOnChange && this.form.triggerValidation(name, parent, ev.target, path)}
                 ></textarea>`;
@@ -231,7 +231,7 @@ export class JSONSchemaInput extends LitElement {
                         type="${type}"
                         placeholder="${info.placeholder ?? ""}"
                         .value="${this.value ?? ""}"
-                        @input=${(ev) => this.form.updateParent(name, ev.target.value, parent)}
+                        @input=${(ev) => this.form.update(name, ev.target.value, parent)}
                         @change=${(ev) =>
                             validateOnChange && this.form.triggerValidation(name, parent, ev.target, path)}
                     />
