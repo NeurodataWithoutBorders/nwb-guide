@@ -40,6 +40,8 @@ let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
 const portRange = 100;
 
+const isWindows = process.platform === 'win32'
+
 
 /**
  * Determine if the application is running from a packaged version or from a dev version.
@@ -47,15 +49,8 @@ const portRange = 100;
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
 const getPackagedPath = () => {
-
-  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
-  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
-
-  debugLog.unixPath = unixPath
-  debugLog.windowsPath = windowsPath
-
-  if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
-  if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
+  const scriptPath = isWindows ? path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe") : path.join(process.resourcesPath, PY_FLASK_MODULE)
+  if (fs.existsSync(scriptPath)) return path;
 };
 
 /**
@@ -172,7 +167,24 @@ const killAllPreviousProcesses = async () => {
  * Main app window
  *************************************************************/
 
+let isReady = false
 let mainWindow: BrowserWindow;
+let isReadyQueue: Function[] = []
+
+
+function onReady (fn: Function) {
+  if (!isReady) isReadyQueue.push(fn)
+  else fn()
+}
+
+function setReady(state = true) {
+  isReady = state
+  if (isReady) {
+    isReadyQueue.forEach(onReady)
+    isReadyQueue = []
+  }
+}
+
 let user_restart_confirmed = false;
 let updatechecked = false;
 
@@ -302,7 +314,8 @@ function initialize() {
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
 
-        mainWindow.webContents.send('logOnBrowser', debugLog)
+        setReady() // Ensure window is ready to show before sending anything through it
+        onReady(() => mainWindow.webContents.send('logOnBrowser', debugLog))
 
       }, 1000);
     });
@@ -320,16 +333,18 @@ function initialize() {
   app.on("open-file", onFileOpened)
 }
 
-function onFileOpened(...args) {
-    console.log('File opened!', ...args)
-    mainWindow.webContents.send('fileOpened', ...args)
+function onFileOpened(_, path) {
+    onReady(() => mainWindow.webContents.send('fileOpened', path))
 }
 
-if (process.argv[2]) onFileOpened(process.argv[2])
+if (isWindows && process.argv.length >= 2) {
+  const openFilePath = process.argv[1];
+  if (openFilePath !== "") onFileOpened(null, openFilePath)
+}
 
 // function run_pre_flight_checks() {
 //   console.log("Running pre-checks");
-//   mainWindow.webContents.send("run_pre_flight_checks");
+//   sendToMainWindow("run_pre_flight_checks");
 // }
 
 // Make this app a single instance app.
@@ -367,11 +382,11 @@ ipcMain.on("resize-window", (event, dir) => {
 });
 
 autoUpdater.on("update-available", () => {
-  mainWindow.webContents.send("update_available");
+  sendToMainWindow("update_available");
 });
 
 autoUpdater.on("update-downloaded", () => {
-  mainWindow.webContents.send("update_downloaded");
+  sendToMainWindow("update_downloaded");
 });
 
 ipcMain.on("restart_app", async () => {

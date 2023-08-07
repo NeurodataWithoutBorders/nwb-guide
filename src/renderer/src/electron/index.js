@@ -24,7 +24,7 @@ if (isElectron) {
         app = remote.app;
 
         electron.ipcRenderer.on("logOnBrowser", (info, ...args) => {
-            console.log(...args);
+            console.log("From Main Process", ...args);
         });
 
         electron.ipcRenderer.on("fileOpened", (info, ...args) => {
