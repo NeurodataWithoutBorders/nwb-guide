@@ -30,7 +30,7 @@ const debugLog: any = {}
  *************************************************************/
 
 // flask setup environment variables
-const PYFLASK_DIST_FOLDER_BASE = path.join('..', '..', 'out', 'python')
+const PYFLASK_DIST_FOLDER_BASE = path.join('out', 'python')
 const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
 const PY_FLASK_MODULE = "app";
@@ -47,9 +47,12 @@ const portRange = 100;
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
 const getPackagedPath = () => {
-.0
+
   const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
-  const unixPath = path.join(process.resourcesPath, PYFLASK_DIST_FOLDER_BASE, PY_FLASK_MODULE);
+  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
+
+  debugLog.unixPath = unixPath
+  debugLog.windowsPath = windowsPath
 
   if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
   if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
@@ -62,11 +65,13 @@ const getPackagedPath = () => {
  * @returns {string} The path to the api server script that needs to be executed to start the Python server
  */
 const getScriptPath = () => {
-  return getPackagedPath() ?? path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
+  return getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
 };
 
 const createPyProc = async () => {
   let script = getScriptPath();
+
+  debugLog.script = script
 
   await killAllPreviousProcesses();
 
@@ -86,16 +91,20 @@ const createPyProc = async () => {
         });
       }
 
+
       if (pyflaskProcess != null) {
         console.log("child process success on port " + port);
 
+        debugLog.errors = []
+
         // Listen for errors from Python process
         pyflaskProcess.stderr.on("data", function (data: any) {
+          debugLog.errors.push(data)
           console.log("[python]:", data.toString());
         });
       } else console.error("child process failed to start on port" + port);
 
-      selectedPort = port;
+      debugLog.port = selectedPort = port;
     })
     .catch((err: Error) => {
       console.log(err);

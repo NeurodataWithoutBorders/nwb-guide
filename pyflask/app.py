@@ -56,8 +56,11 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-    port = sys.argv[1]
-    api.logger.info(f"Starting server on port {port}")
-    app.run(host="127.0.0.1", port=port)
+    if 1 < len(sys.argv):
+        port = sys.argv[1]
+        api.logger.info(f"Starting server on port {port}")
+        app.run(host="127.0.0.1", port=port)
+    else:
+        api.logger.info("No port provided for the NWB GUIDE backend.")
 
 # app.run(host="127.0.0.1", port='4242')
