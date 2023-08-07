@@ -18,7 +18,7 @@ export class GuidedSubjectsPage extends Page {
 
     // Only save if the subject structure is valid
     beforeSave = () => {
-        const subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
+        const subjects = this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects ) // Merge the local and global states
 
         try {
             this.table.validate();

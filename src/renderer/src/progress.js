@@ -63,17 +63,19 @@ export const updateAppProgress = (
         const params = new URLSearchParams(location.search);
         params.set("project", projectName);
 
-        // Update browser history state
-        const value = `${location.pathname}?${params}`;
-        if (history.state) history.state.project = dataOrProjectName;
-        window.history.pushState(history.state, null, value);
-    }
+            // Update browser history state
+            const value = `${location.pathname}?${params}`;
+            if (history.state) history.state.project = dataOrProjectName;
+            window.history.pushState(history.state, null, value);
+        }
 
-    // Is a project name
-    if (dataOrProjectName === projectName) updateFile(dataOrProjectName, (data) => (data["page-before-exit"] = pageId));
-    // Is a data object
-    else dataOrProjectName["page-before-exit"] = pageId;
-};
+        // Is a project name
+        if (dataOrProjectName === projectName) updateFile(dataOrProjectName, (data) => data["page-before-exit"] = pageId)
+
+        // Is a data object
+        else dataOrProjectName["page-before-exit"] = pageId
+        
+}
 
 export const save = (page, overrides = {}) => {
     const globalState = merge(overrides, page.info.globalState); // Merge the overrides into the actual global state
@@ -99,9 +101,6 @@ export const updateFile = (projectName, callback) => {
     }
 
     data["last-modified"] = new Date(); // Always update the last modified time
-
-    const copy = merge(data, {});
-    console.error(copy);
 
     var guidedFilePath = joinPath(guidedProgressFilePath, projectName + ".json");
 
@@ -146,7 +145,9 @@ export const get = (name) => {
     }
 
     let progressFilePath = joinPath(guidedProgressFilePath, name + ".json");
-    return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
+
+    const exists = fs ? fs.existsSync(progressFilePath) : (localStorage.getItem(progressFilePath) !== null);
+    return exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {};
 };
 
 export function resume(name) {
