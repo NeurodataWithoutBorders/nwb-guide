@@ -307,7 +307,16 @@ function initialize() {
   app.on("will-quit", () => {
     app.quit();
   });
+
+  app.on("open-file", onFileOpened)
 }
+
+function onFileOpened(...args) {
+    console.log('File opened!', ...args)
+    mainWindow.webContents.send('fileOpened', ...args)
+}
+
+if (process.argv[2]) onFileOpened(process.argv[2])
 
 // function run_pre_flight_checks() {
 //   console.log("Running pre-checks");

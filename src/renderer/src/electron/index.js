@@ -27,6 +27,10 @@ if (isElectron) {
             console.log(...args);
         });
 
+        electron.ipcRenderer.on("fileOpened", (info, ...args) => {
+            console.log("File opened!", ...args);
+        });
+
         port = electron.ipcRenderer.sendSync("get-port");
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
