@@ -23,6 +23,8 @@ import splashHTML from './splash-screen.html?asset'
 
 autoUpdater.channel = "latest";
 
+const debugLog: any = {}
+
 /*************************************************************
  * Python Process
  *************************************************************/
@@ -37,6 +39,7 @@ let pyflaskProcess: any = null;
 let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
 const portRange = 100;
+
 
 /**
  * Determine if the application is running from a packaged version or from a dev version.
@@ -169,7 +172,7 @@ function initialize() {
   makeSingleInstance();
 
   function createWindow() {
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url);
@@ -289,6 +292,9 @@ function initialize() {
         // run_pre_flight_checks();
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
+
+        mainWindow.webContents.send('logOnBrowser', debugLog)
+
       }, 1000);
     });
   });

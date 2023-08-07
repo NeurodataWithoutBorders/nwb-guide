@@ -24,6 +24,13 @@ NWB GUIDE is a desktop app that provides a no-code user interface for converting
 </p>
 
 ## Installation
+
+Start by cloning the repository
+
+```
+git clone https://github.com/catalystneuro/nwb-guide
+```
+
 Install the appropriate Python dependencies for your operating system.
 
 ### Windows
