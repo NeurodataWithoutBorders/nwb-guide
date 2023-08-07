@@ -182,6 +182,17 @@ pre {
   .required.conditional label:after {
     color: transparent;
   }
+
+  input[type=number].hideStep::-webkit-outer-spin-button,
+  input[type=number].hideStep::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+    /* Firefox */
+    input[type=number].hideStep {
+        -moz-appearance: textfield;
+    }
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -515,13 +526,19 @@ export class JSONSchemaForm extends LitElement {
                                 info.format === "date-time"
                                     ? "datetime-local"
                                     : info.format ?? (info.type === "string" ? "text" : info.type);
+
                             return html`
                                 <input
-                                    class="guided--input schema-input"
+                                    class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
                                     type="${type}"
+                                    step=${type === "number" && info.step ? info.step : ""}
                                     placeholder="${info.placeholder ?? ""}"
                                     .value="${value ?? ""}"
-                                    @input=${(ev) => this.#update(fullPath, ev.target.value)}
+                                    @input=${(ev) =>
+                                        this.#update(
+                                            fullPath,
+                                            info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
+                                        )}
                                     @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
                                 />
                             `;
