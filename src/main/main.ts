@@ -280,7 +280,7 @@ function initialize() {
       alwaysOnTop: true,
       transparent: true,
     });
-    
+
     splash.loadFile(splashHTML)
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
