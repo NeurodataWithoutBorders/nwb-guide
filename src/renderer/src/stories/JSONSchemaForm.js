@@ -530,7 +530,11 @@ export class JSONSchemaForm extends LitElement {
                                     step=${type === "number" && info.step ? info.step : ""}
                                     placeholder="${info.placeholder ?? ""}"
                                     .value="${value ?? ""}"
-                                    @input=${(ev) => this.#update(fullPath, ev.target.value)}
+                                    @input=${(ev) =>
+                                        this.#update(
+                                            fullPath,
+                                            info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
+                                        )}
                                     @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
                                 />
                             `;
