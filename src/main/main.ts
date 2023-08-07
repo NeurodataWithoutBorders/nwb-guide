@@ -49,7 +49,7 @@ const portRange = 100;
 const getPackagedPath = () => {
 
   const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
-  const unixPath = path.join(process.resourcesPath, "..", PY_FLASK_MODULE);
+  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
 
   debugLog.unixPath = unixPath
   debugLog.windowsPath = windowsPath
