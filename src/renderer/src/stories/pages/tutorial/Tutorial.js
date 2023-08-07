@@ -20,19 +20,6 @@ const { shell } = electron;
 
 const tutorialPipelineName = "NWB GUIDE Tutorial Data";
 
-const dataStructureResults = {
-    PhySorting: {
-        base_directory: output_directory,
-        format_string_path:
-            "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy",
-    },
-    SpikeGLXRecording: {
-        base_directory: output_directory,
-        format_string_path:
-            "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin",
-    },
-}
-
 
 export class TutorialPage extends Page {
     constructor(...args) {
@@ -136,6 +123,20 @@ export class TutorialPage extends Page {
 
                               this.notify("Tutorial data successfully generated!");
                               if (shell) shell.showItemInFolder(output_directory);
+
+                            //   Limit the data structures included in the tutorial
+                              const dataStructureResults = {
+                                PhySorting: {
+                                    base_directory: output_directory,
+                                    format_string_path:
+                                        "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy",
+                                },
+                                SpikeGLXRecording: {
+                                    base_directory: output_directory,
+                                    format_string_path:
+                                        "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin",
+                                },
+                            }
 
                               save({
                                   info: {
