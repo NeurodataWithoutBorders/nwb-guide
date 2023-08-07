@@ -333,7 +333,7 @@ function initialize() {
   app.on("open-file", onFileOpened)
 }
 
-function onFileOpened(_, path) {
+function onFileOpened(_, path: string) {
     onReady(() => mainWindow.webContents.send('fileOpened', path))
 }
 
