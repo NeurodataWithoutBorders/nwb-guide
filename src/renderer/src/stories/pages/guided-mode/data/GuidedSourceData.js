@@ -90,7 +90,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     createForm = ({ subject, session, info }) => {
         const instanceId = `sub-${subject}/ses-${session}`;
 
-        const schema = this.info.globalState.schema.source_data
+        const schema = this.info.globalState.schema.source_data;
 
         const form = new JSONSchemaForm({
             identifier: instanceId,

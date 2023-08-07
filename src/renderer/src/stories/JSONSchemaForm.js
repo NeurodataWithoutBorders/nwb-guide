@@ -525,9 +525,9 @@ export class JSONSchemaForm extends LitElement {
 
                             return html`
                                 <input
-                                    class="guided--input schema-input ${info.step === null ? 'hideStep' : ''}"
+                                    class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
                                     type="${type}"
-                                    step=${(type === 'number' && info.step) ? info.step : ''}
+                                    step=${type === "number" && info.step ? info.step : ""}
                                     placeholder="${info.placeholder ?? ""}"
                                     .value="${value ?? ""}"
                                     @input=${(ev) => this.#update(fullPath, ev.target.value)}
