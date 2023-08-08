@@ -5,8 +5,8 @@
         "NeuroScopeRecordingInterface",
         "NeuroScopeSortingInterface",
         "BiocamRecordingInterface",
-        "IntanRecordingInterface"
+        "IntanRecordingInterface",
         "SpikeGLXLFPInterface",
-        "SpikeGLXNIDQInterface",
+        "SpikeGLXNIDQInterface"
     ]
 }
