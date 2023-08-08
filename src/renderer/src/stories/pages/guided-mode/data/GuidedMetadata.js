@@ -26,7 +26,7 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     beforeSave = () => {
-        merge(this.localState, this.info.globalState);
+        merge( this.localState.results, this.info.globalState.results )
     };
 
     form;
@@ -34,6 +34,7 @@ export class GuidedMetadataPage extends ManagedPage {
         next: "Run Conversion Preview",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
+
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // Preview a single random conversion
@@ -42,7 +43,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 title: "Testing conversion on a random session",
             });
 
-            this.info.globalState.preview = result; // Save the preview results
+            // Save the preview results
+            this.info.globalState.preview = result;
+            this.unsavedUpdates = true
 
             this.to(1);
         },
@@ -178,9 +181,10 @@ export class GuidedMetadataPage extends ManagedPage {
                     onClick: async (key, el) => {
                         const { subject, session } = getInfoFromId(key);
 
+
                         const [{ file, html }] = await this.runConversions(
                             { stub_test: true },
-                            [{ subject, session }],
+                            [{ subject, session, globalState: merge(this.localState, merge(this.info.globalState, {})) }],
                             { title: "Running conversion preview" }
                         ).catch((e) => {
                             this.notify(e.message, "error");

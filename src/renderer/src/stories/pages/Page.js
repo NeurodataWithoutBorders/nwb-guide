@@ -61,6 +61,9 @@ export class Page extends LitElement {
     };
 
     to = async (transition) => {
+
+        this.beforeTransition()
+
         // Otherwise note unsaved updates if present
         if (this.unsavedUpdates) {
             if (transition === 1) await this.save(); // Save before a single forward transition
@@ -88,6 +91,7 @@ export class Page extends LitElement {
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
     beforeSave = () => {}; // User-defined function
+    beforeTransition = () => {}; // User-defined function
 
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave();
@@ -144,16 +148,13 @@ export class Page extends LitElement {
         elements.progress.value = { b: completed, tsize: toRun.length };
 
         for (let info of toRun) {
-            const { subject, session } = info;
+            const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, stub_output_folder, name } = this.info.globalState.project;
+            const { conversion_output_folder, stub_output_folder, name } = globalState.project;
 
             // Resolve the correct session info from all of the metadata for this conversion
-            const sessionInfo = {
-                ...this.info.globalState.results[subject][session],
-                metadata: resolveResults(subject, session, this.info.globalState),
-            };
+            const sessionInfo = { ...globalState.results[subject][session], metadata: resolveResults(subject, session, globalState) };
 
             const result = await runConversion(
                 {
@@ -164,7 +165,7 @@ export class Page extends LitElement {
                     ...sessionInfo, // source_data and metadata are passed in here
                     ...conversionOptions, // Any additional conversion options override the defaults
 
-                    interfaces: this.info.globalState.interfaces,
+                    interfaces: globalState.interfaces,
                 },
                 { swal: popup, ...options }
             ).catch((e) => {

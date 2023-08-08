@@ -147,7 +147,6 @@ export class Table extends LitElement {
     onUpdate = () => {};
 
     updated() {
-        let updateComplete = false;
 
         const div = (this.shadowRoot ?? this).querySelector("div");
 
@@ -239,6 +238,12 @@ export class Table extends LitElement {
 
             const validator = async function (value, callback) {
                 if (!value) {
+                    
+                    if (!ogThis.validateEmptyCells) {
+                        callback(true); // Allow empty value
+                        return true;
+                    }
+
                     if (isRequired) {
                         ogThis.#handleValidationResult(
                             [{ message: `${k} is a required property.`, type: "error" }],
@@ -246,10 +251,6 @@ export class Table extends LitElement {
                             this.col
                         );
                         callback(false);
-                        return true;
-                    }
-                    if (!ogThis.validateEmptyCells) {
-                        callback(true); // Allow empty value
                         return true;
                     }
                 }
@@ -384,8 +385,6 @@ export class Table extends LitElement {
 
         // Trigger validation on all cells
         data.forEach((row, i) => this.#setRow(i, row));
-
-        updateComplete = true;
     }
 
     #setRow(row, data) {

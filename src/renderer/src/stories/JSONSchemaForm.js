@@ -345,7 +345,7 @@ export class JSONSchemaForm extends LitElement {
 
     validate = async () => {
         // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(this.resolved, this.#requirements); // get missing required paths
+        const invalidInputs = await this.#validateRequirements(); // get missing required paths
         const isValid = !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
@@ -423,7 +423,7 @@ export class JSONSchemaForm extends LitElement {
         return resolved;
     }
 
-    #renderInteractiveElement = (name, info, parent, required, path = []) => {
+    #renderInteractiveElement = (name, info, required, path = []) => {
         let isRequired = required[name];
 
         const isArray = info.type === "array"; // Handle string (and related) formats / types
@@ -557,9 +557,10 @@ export class JSONSchemaForm extends LitElement {
                                 validateEmptyCells: this.validateEmptyValues,
                                 deferLoading: this.deferLoading,
                                 onUpdate: (row, col, value) => {
-                                    console.log(fullPath, row, col, value);
-                                    this.onUpdate([...fullPath.row, col], value);
-                                },
+                                    const path = [...fullPath, row, col]
+                                    console.error('Updating JSON Schema Form Table', path, value) // NOTE: Not sure if this works
+                                    this.#update(path, value)
+                               },
                                 onLoaded: () => {
                                     this.#nLoaded++;
                                     this.#checkAllLoaded();
@@ -608,17 +609,18 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
 
     #filesystemQueries = ["file", "directory"];
 
-    #validateRequirements = async (results, requirements, parent) => {
+    #validateRequirements = async (resolved = this.resolved, requirements = this.#requirements, parentPath) => {
         let invalid = [];
 
         for (let name in requirements) {
             let isRequired = requirements[name];
             if (typeof isRequired === "function") isRequired = await isRequired.call(this.resolved);
             if (isRequired) {
-                let path = parent ? `${parent}-${name}` : name;
+                let path = parentPath ? `${parentPath}-${name}` : name;
+
                 if (typeof isRequired === "object" && !Array.isArray(isRequired))
-                    invalid.push(...(await this.#validateRequirements(results[name], isRequired, path)));
-                else if (!results[name]) invalid.push(path);
+                    invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
+                else if (!resolved[name]) invalid.push(path);
             }
         }
 
@@ -862,7 +864,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                 const linkedProperties = info.properties.map((path) => {
                     const pathCopy = [...path].slice((this.#base ?? []).length);
                     const name = pathCopy.pop();
-                    return this.#renderInteractiveElement(name, schema.properties[name], results, required, pathCopy);
+                    return this.#renderInteractiveElement(name, schema.properties[name], required, pathCopy);
                 });
                 return html`
                     <div class="link" data-name="${info.name}">
@@ -872,7 +874,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             }
 
             // Directly render the interactive property element
-            if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path);
+            if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
 
             const hasMany = renderable.length > 1; // How many siblings?
 
@@ -886,7 +888,10 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     schema: info,
                     results: results[name],
                     globals: this.globals?.[name],
-                    onUpdate: (internalPath, value) => this.onUpdate([...fullPath, ...internalPath], value),
+                    onUpdate: (internalPath, value) => {
+                        const path = [...fullPath, ...internalPath]
+                        this.#update(path, value)
+                    },
 
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,

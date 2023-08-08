@@ -13,12 +13,12 @@ export class GuidedSubjectsPage extends Page {
     }
 
     header = {
-        subtitle: "Cross-session metadata applied to the final file metadata",
+        subtitle: "Cross-session metadata applied to the final file metadata"
     };
 
-    // Only save if the subject structure is valid
     beforeSave = () => {
-        const subjects = (this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects)); // Merge the local and global states
+
+        this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
 
         try {
             this.table.validate();
@@ -27,7 +27,14 @@ export class GuidedSubjectsPage extends Page {
             throw e;
         }
 
-        const { results } = this.info.globalState;
+    }
+
+    // Only save if the subject structure is valid
+    beforeTransition = () => {
+
+        this.save() // Save on each transition
+
+        const { results, subjects } = this.info.globalState;
 
         // Object.keys(subjects).forEach((sub) => {
         //     if (!subjects[sub].sessions?.length) {
@@ -54,7 +61,7 @@ export class GuidedSubjectsPage extends Page {
     };
 
     footer = {
-        next: "Generate Data Structure",
+        next: "Generate Data Structure"
     };
 
     updated() {
