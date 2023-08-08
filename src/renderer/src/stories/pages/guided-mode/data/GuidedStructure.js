@@ -111,39 +111,37 @@ export class GuidedStructurePage extends Page {
 
     searchModal = new Modal();
 
-
     getSchema = async () => {
-
         const interfaces = { ...this.#selected };
 
         const schema =
-        Object.keys(interfaces).length === 0
-            ? {}
-            : await fetch(`${baseUrl}/neuroconv/schema`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(interfaces),
-              }).then((res) => res.json());
+            Object.keys(interfaces).length === 0
+                ? {}
+                : await fetch(`${baseUrl}/neuroconv/schema`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(interfaces),
+                  }).then((res) => res.json());
 
         let schemas = this.info.globalState.schema;
         if (!schemas) schemas = this.info.globalState.schema = {};
 
         schemas.source_data = schema;
-        this.unsavedUpdates = true
-    }
+        this.unsavedUpdates = true;
+    };
 
     beforeSave = async () => {
-        this.info.globalState.interfaces = { ...this.#selected };;
+        this.info.globalState.interfaces = { ...this.#selected };
         await this.save(undefined, false); // Interrim save, in case the schema request fails
-        await this.getSchema()
+        await this.getSchema();
     };
 
     footer = {
         onNext: async () => {
-            if (!this.info.globalState.schema) await this.getSchema() // Initialize schema
-            this.to(1)
-        }
-    }
+            if (!this.info.globalState.schema) await this.getSchema(); // Initialize schema
+            this.to(1);
+        },
+    };
 
     async updated() {
         const selected = this.info.globalState.interfaces;
