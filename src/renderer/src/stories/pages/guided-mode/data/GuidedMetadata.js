@@ -26,7 +26,7 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     beforeSave = () => {
-        merge( this.localState.results, this.info.globalState.results )
+        merge(this.localState.results, this.info.globalState.results);
     };
 
     form;
@@ -45,7 +45,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             // Save the preview results
             this.info.globalState.preview = result;
-            this.unsavedUpdates = true
+            this.unsavedUpdates = true;
 
             this.to(1);
         },
@@ -181,10 +181,15 @@ export class GuidedMetadataPage extends ManagedPage {
                     onClick: async (key, el) => {
                         const { subject, session } = getInfoFromId(key);
 
-
                         const [{ file, html }] = await this.runConversions(
                             { stub_test: true },
-                            [{ subject, session, globalState: merge(this.localState, merge(this.info.globalState, {})) }],
+                            [
+                                {
+                                    subject,
+                                    session,
+                                    globalState: merge(this.localState, merge(this.info.globalState, {})),
+                                },
+                            ],
                             { title: "Running conversion preview" }
                         ).catch((e) => {
                             this.notify(e.message, "error");

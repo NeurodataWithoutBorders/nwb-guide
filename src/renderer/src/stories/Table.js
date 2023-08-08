@@ -147,7 +147,6 @@ export class Table extends LitElement {
     onUpdate = () => {};
 
     updated() {
-
         const div = (this.shadowRoot ?? this).querySelector("div");
 
         const entries = { ...this.schema.properties };
@@ -238,7 +237,6 @@ export class Table extends LitElement {
 
             const validator = async function (value, callback) {
                 if (!value) {
-                    
                     if (!ogThis.validateEmptyCells) {
                         callback(true); // Allow empty value
                         return true;

@@ -61,8 +61,7 @@ export class Page extends LitElement {
     };
 
     to = async (transition) => {
-
-        this.beforeTransition()
+        this.beforeTransition();
 
         // Otherwise note unsaved updates if present
         if (this.unsavedUpdates) {
@@ -154,7 +153,10 @@ export class Page extends LitElement {
             const { conversion_output_folder, stub_output_folder, name } = globalState.project;
 
             // Resolve the correct session info from all of the metadata for this conversion
-            const sessionInfo = { ...globalState.results[subject][session], metadata: resolveResults(subject, session, globalState) };
+            const sessionInfo = {
+                ...globalState.results[subject][session],
+                metadata: resolveResults(subject, session, globalState),
+            };
 
             const result = await runConversion(
                 {

@@ -557,10 +557,10 @@ export class JSONSchemaForm extends LitElement {
                                 validateEmptyCells: this.validateEmptyValues,
                                 deferLoading: this.deferLoading,
                                 onUpdate: (row, col, value) => {
-                                    const path = [...fullPath, row, col]
-                                    console.error('Updating JSON Schema Form Table', path, value) // NOTE: Not sure if this works
-                                    this.#update(path, value)
-                               },
+                                    const path = [...fullPath, row, col];
+                                    console.error("Updating JSON Schema Form Table", path, value); // NOTE: Not sure if this works
+                                    this.#update(path, value);
+                                },
                                 onLoaded: () => {
                                     this.#nLoaded++;
                                     this.#checkAllLoaded();
@@ -889,8 +889,8 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     results: results[name],
                     globals: this.globals?.[name],
                     onUpdate: (internalPath, value) => {
-                        const path = [...fullPath, ...internalPath]
-                        this.#update(path, value)
+                        const path = [...fullPath, ...internalPath];
+                        this.#update(path, value);
                     },
 
                     required: required[name], // Scoped to the sub-schema
