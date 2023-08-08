@@ -106,6 +106,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 "verbose",
                 "es_key",
                 "exclude_shanks",
+                "load_sync_channel",
                 "stream_id", // NOTE: May be desired for other interfaces
             ],
             // onlyRequired: true,
