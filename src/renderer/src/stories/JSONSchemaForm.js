@@ -509,10 +509,12 @@ export class JSONSchemaForm extends LitElement {
                                 maxlength="255"
                                 .value="${isStringArray ? (value ? value.join("\n") : "") : value ?? ""}"
                                 @input=${(ev) => {
-                                    this.#update(
-                                        fullPath,
-                                        isStringArray ? textToArray(ev.target.value) : ev.target.value
-                                    );
+                                    if (isStringArray) {
+                                        const array = textToArray(ev.target.value)
+                                        console.log(info.type === "number" ? array.map(parseFloat) : array)
+                                        this.#update(fullPath, info.type === "number" ? array.map(parseFloat) : array)
+                                    }
+                                    else this.#update(fullPath, ev.target.value)
                                 }}
                                 @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
                             ></textarea>`;
@@ -533,7 +535,7 @@ export class JSONSchemaForm extends LitElement {
                                     @input=${(ev) =>
                                         this.#update(
                                             fullPath,
-                                            info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
+                                            type === "number" ? parseFloat(ev.target.value) : ev.target.value
                                         )}
                                     @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
                                 />
