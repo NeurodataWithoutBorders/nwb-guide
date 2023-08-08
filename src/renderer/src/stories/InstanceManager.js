@@ -144,11 +144,11 @@ export class InstanceManager extends LitElement {
         // Carry the status upwards
         const path = id.split("/");
 
-        let target = this.instances
+        let target = this.instances;
         for (let i = 0; i < path.length; i++) {
             const id = path.slice(0, i + 1).join("/");
             const accordion = this.#accordions[id];
-            target = target[path[i]] // Progressively check the deeper nested instances
+            target = target[path[i]]; // Progressively check the deeper nested instances
             if (accordion) accordion.setSectionStatus(id, checkStatus(false, false, [...Object.values(target)]));
         }
     };
