@@ -14,7 +14,7 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
-        merge({ upload: this.localState}, globalState); // Merge the local and global states
+        merge({ upload: this.localState }, globalState); // Merge the local and global states
         delete globalState.upload.results; // Clear the preview results
     };
 
