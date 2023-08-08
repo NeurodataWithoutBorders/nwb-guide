@@ -227,13 +227,17 @@ export class JSONSchemaInput extends LitElement {
                         : info.format ?? (info.type === "string" ? "text" : info.type);
                 return html`
                     <input
-                        class="guided--input schema-input"
+                        class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
                         type="${type}"
+                        step=${type === "number" && info.step ? info.step : ""}
                         placeholder="${info.placeholder ?? ""}"
-                        .value="${this.value ?? ""}"
-                        @input=${(ev) => this.form.updateData(fullPath, ev.target.value, parent)}
-                        @change=${(ev) =>
-                            validateOnChange && this.form.triggerValidation(name, parent, ev.target, path)}
+                        .value="${value ?? ""}"
+                        @input=${(ev) =>
+                            this.form.updateData(
+                                fullPath,
+                                info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
+                            )}
+                        @change=${(ev) => validateOnChange && this.form.triggerValidation(nname, resolved, ev.target, path)}
                     />
                 `;
             }
