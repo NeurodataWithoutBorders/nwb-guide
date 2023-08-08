@@ -28,7 +28,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             // const previousResults = this.info.globalState.metadata.results
 
-            let stillFireSwal = false;
+            let stillFireSwal = true;
             const fireSwal = () => {
                 Swal.fire({
                     title: "Getting metadata for source data",
