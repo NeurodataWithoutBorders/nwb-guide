@@ -7,6 +7,6 @@
         "NeuroScopeLFPInterface",
         "NeuroScopeSortingInterface",
         "BiocamRecordingInterface",
-        "IntanRecordingInterface",
+        "IntanRecordingInterface"
     ]
 }
