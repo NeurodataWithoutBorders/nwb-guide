@@ -510,11 +510,10 @@ export class JSONSchemaForm extends LitElement {
                                 .value="${isStringArray ? (value ? value.join("\n") : "") : value ?? ""}"
                                 @input=${(ev) => {
                                     if (isStringArray) {
-                                        const array = textToArray(ev.target.value)
-                                        console.log(info.type === "number" ? array.map(parseFloat) : array)
-                                        this.#update(fullPath, info.type === "number" ? array.map(parseFloat) : array)
-                                    }
-                                    else this.#update(fullPath, ev.target.value)
+                                        const array = textToArray(ev.target.value);
+                                        console.log(info.type === "number" ? array.map(parseFloat) : array);
+                                        this.#update(fullPath, info.type === "number" ? array.map(parseFloat) : array);
+                                    } else this.#update(fullPath, ev.target.value);
                                 }}
                                 @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
                             ></textarea>`;
