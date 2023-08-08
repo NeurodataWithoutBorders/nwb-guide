@@ -237,7 +237,8 @@ export class JSONSchemaInput extends LitElement {
                                 fullPath,
                                 info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
                             )}
-                        @change=${(ev) => validateOnChange && this.form.triggerValidation(nname, resolved, ev.target, path)}
+                        @change=${(ev) =>
+                            validateOnChange && this.form.triggerValidation(nname, resolved, ev.target, path)}
                     />
                 `;
             }
