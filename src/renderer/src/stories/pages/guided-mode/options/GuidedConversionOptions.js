@@ -19,7 +19,7 @@ export class GuidedConversionOptionsPage extends Page {
             const results = await this.runConversions({ stub_test: true }, 1, {
                 title: "Testing conversion on a random session",
             });
-            this.info.globalState.preview = results; // Save the preview results
+            this.info.globalState.preview = results[0]; // Save the preview results
 
             this.onTransition(1);
         },

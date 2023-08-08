@@ -104,6 +104,11 @@ export class InstanceManager extends LitElement {
                 align-items: center;
             }
 
+            .controls > div {
+                display: flex;
+                gap: 10px;
+            }
+
             #new-info {
                 align-items: unset;
                 width: 100%;
@@ -391,6 +396,7 @@ export class InstanceManager extends LitElement {
                                 return html`<nwb-button
                                     size="small"
                                     icon=${o.icon}
+                                    .primary=${o.primary ?? false}
                                     @click=${function () {
                                         const el = this.shadowRoot.querySelector(
                                             "#instance-display > div:not([hidden])"
