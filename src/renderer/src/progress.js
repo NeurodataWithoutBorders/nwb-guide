@@ -59,11 +59,10 @@ export const updateAppProgress = (
     dataOrProjectName = {},
     projectName = typeof dataOrProjectName === "string" ? dataOrProjectName : undefined
 ) => {
-
-    const transitionOffPipeline = pageId && pageId.split('/')[0] !== 'conversion'
+    const transitionOffPipeline = pageId && pageId.split("/")[0] !== "conversion";
 
     if (transitionOffPipeline) {
-        return // Only save last page if within the conversion workflow
+        return; // Only save last page if within the conversion workflow
     }
 
     if (projectName) {

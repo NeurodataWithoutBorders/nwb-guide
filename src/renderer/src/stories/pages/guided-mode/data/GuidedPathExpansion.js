@@ -17,10 +17,9 @@ export class GuidedPathExpansionPage extends Page {
         super(...args);
     }
 
-     beforeSave = async () => {
-
-        const globalState = this.info.globalState
-        merge({ structure: this.localState }, globalState) // Merge the actual entries into the structure
+    beforeSave = async () => {
+        const globalState = this.info.globalState;
+        merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
         const hidden = this.optional.hidden;
         globalState.structure.state = !hidden;
@@ -96,14 +95,11 @@ export class GuidedPathExpansionPage extends Page {
             //   if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]
             // }
         }
-
-    }
+    };
 
     footer = {
         next: "Populate Subject Details",
         onNext: async () => {
-
-
             await this.save(); // Save in case the request fails
 
             if (!this.optional.toggled) {
@@ -114,7 +110,6 @@ export class GuidedPathExpansionPage extends Page {
                 });
                 throw new Error(message);
             }
-
 
             this.to(1);
         },
@@ -146,16 +141,14 @@ export class GuidedPathExpansionPage extends Page {
     optional = new OptionalSection({
         header: "Would you like to locate data programmatically?",
         description: html`<p>Automatically detect source data for multiple subjects and sessions.</p>`,
-        onChange: () => this.unsavedUpdates = true
+        onChange: () => (this.unsavedUpdates = true),
         // altContent: this.altForm,
     });
 
-    localState = {}
+    localState = {};
 
     render() {
-
-
-        const structureState = this.localState = merge(this.info.globalState.structure, {results: {}})
+        const structureState = (this.localState = merge(this.info.globalState.structure, { results: {} }));
 
         const state = structureState.state;
         if (state !== undefined) this.optional.state = state;
@@ -164,7 +157,7 @@ export class GuidedPathExpansionPage extends Page {
         const generatedSchema = { type: "object", properties: {} };
         for (let key in this.info.globalState.interfaces)
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
-            structureState.schema = generatedSchema;
+        structureState.schema = generatedSchema;
 
         this.optional.requestUpdate();
 

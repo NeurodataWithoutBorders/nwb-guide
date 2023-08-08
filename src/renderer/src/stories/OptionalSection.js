@@ -44,21 +44,21 @@ export class OptionalSection extends LitElement {
         this.altContent = props.altContent ?? "";
         this.state = props.state;
 
-        if (props.onChange) this.onChange = props.onChange
+        if (props.onChange) this.onChange = props.onChange;
     }
 
-    onChange = () => {} // User-defined function
+    onChange = () => {}; // User-defined function
 
     show(state) {
         this.toggled = true;
         const content = this.shadowRoot.querySelector(".optional-section__content");
         const altContent = this.shadowRoot.querySelector("#altContent");
 
-        if (this.changed === undefined) this.changed = false
-        else this.changed = true
+        if (this.changed === undefined) this.changed = false;
+        else this.changed = true;
 
         if (state === undefined) state = !content.classList.contains("hidden");
-        else if (this.changed && this.hidden === state) this.onChange()
+        else if (this.changed && this.hidden === state) this.onChange();
 
         if (state) {
             content.removeAttribute("hidden");
@@ -90,7 +90,7 @@ export class OptionalSection extends LitElement {
     });
 
     updated() {
-        if (this.state === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true
+        if (this.state === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
         else if (this.state) this.yes.onClick();
         else this.no.onClick();
     }
