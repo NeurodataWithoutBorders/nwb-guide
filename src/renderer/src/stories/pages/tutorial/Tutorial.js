@@ -123,6 +123,20 @@ export class TutorialPage extends Page {
                               this.notify("Tutorial data successfully generated!");
                               if (shell) shell.showItemInFolder(output_directory);
 
+                              //   Limit the data structures included in the tutorial
+                              const dataStructureResults = {
+                                  PhySorting: {
+                                      base_directory: output_directory,
+                                      format_string_path:
+                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy",
+                                  },
+                                  SpikeGLXRecording: {
+                                      base_directory: output_directory,
+                                      format_string_path:
+                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin",
+                                  },
+                              };
+
                               save({
                                   info: {
                                       globalState: {
@@ -132,26 +146,14 @@ export class TutorialPage extends Page {
                                           },
 
                                           // provide data for all supported interfaces
-                                          interfaces: guideGlobalMetadata.supported_interfaces.reduce((acc, value) => {
-                                              const key = value.replace("Interface", "");
-                                              acc[key] = value;
+                                          interfaces: Object.keys(dataStructureResults).reduce((acc, key) => {
+                                              acc[key] = `${key}Interface`;
                                               return acc;
                                           }, {}),
 
                                           // Manually fill out the structure of supported data interfaces
                                           structure: {
-                                              results: {
-                                                  PhySorting: {
-                                                      base_directory: output_directory,
-                                                      format_string_path:
-                                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy",
-                                                  },
-                                                  SpikeGLXRecording: {
-                                                      base_directory: output_directory,
-                                                      format_string_path:
-                                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin",
-                                                  },
-                                              },
+                                              results: dataStructureResults,
                                               state: true,
                                           },
                                       },
