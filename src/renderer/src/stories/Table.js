@@ -399,18 +399,32 @@ export class Table extends LitElement {
 
     #root;
 
-    render() {
+
+    // Clean up after the injected stylesheet, which may affect the rendering of other elements (e.g. the main sidebar list items)
+    disconnectedCallback() {
+        super.disconnectedCallback()
+        this.stylesheet[styleSymbol]--
+        if (this.stylesheet[styleSymbol] === 0) this.stylesheet.remove()
+    }
+
+    connectedCallback() {
+
+        super.connectedCallback()
         const root = this.getRootNode().body ?? this.getRootNode();
         this.#root = root;
         const stylesheets = Array.from(root.querySelectorAll("style"));
-        const exists = stylesheets.find((el) => el[styleSymbol]);
+        const exists = this.stylesheet = stylesheets.find((el) => styleSymbol in el);
 
-        if (!exists) {
-            const stylesheet = document.createElement("style");
+        if (exists) exists[styleSymbol]++
+        else {
+            const stylesheet = this.stylesheet = document.createElement("style");
             stylesheet.innerHTML = styles;
-            stylesheet[styleSymbol] = true;
+            stylesheet[styleSymbol] = true //1;
             root.append(stylesheet);
-        }
+        } 
+    }
+
+    render() {
 
         return html`
             <div></div>
