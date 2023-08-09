@@ -297,7 +297,7 @@ export class JSONSchemaForm extends LitElement {
         const path = [...fullPath];
         const name = path.pop();
 
-        const reducer = (acc, key) => key in acc ? acc[key] : (acc[key] = {}) // NOTE: Create nested objects if required to set a new path
+        const reducer = (acc, key) => (key in acc ? acc[key] : (acc[key] = {})); // NOTE: Create nested objects if required to set a new path
 
         const resultParent = path.reduce(reducer, this.results);
         const resolvedParent = path.reduce(reducer, this.resolved);

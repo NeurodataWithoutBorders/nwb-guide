@@ -1,10 +1,9 @@
-
 from pathlib import Path
 import json
 from neuroconv import datainterfaces, NWBConverter
 
-filepath = Path('guideGlobalMetadata.json')
-generatedJSONSchemaPath = Path('schemas', 'json', 'generated')
+filepath = Path("guideGlobalMetadata.json")
+generatedJSONSchemaPath = Path("schemas", "json", "generated")
 generatedJSONSchemaPath.mkdir(exist_ok=True, parents=True)
 
 f = filepath.open()
@@ -29,18 +28,24 @@ for interface in data["supported_interfaces"]:
         outfile.write(json.dumps(schema, indent=4))
 
 
-sourceDataStoryPath = Path('src/renderer/src/stories/pages/guided-mode/SourceData.stories.js')
+sourceDataStoryPath = Path("src/renderer/src/stories/pages/guided-mode/SourceData.stories.js")
 
 importCode = "\n".join(map(lambda arr: f"import {arr[0]}Schema from '../../../../../../{arr[1]}'", paths.items()))
-storyCode = "\n".join(map(lambda arr: f"""export const {arr[0]} = PageTemplate.bind({{}});
+storyCode = "\n".join(
+    map(
+        lambda arr: f"""export const {arr[0]} = PageTemplate.bind({{}});
 const {arr[0]}GlobalCopy = JSON.parse(JSON.stringify(globalState))
 {arr[0]}GlobalCopy.interfaces.interface = {arr[0]}
 {arr[0]}GlobalCopy.schema.source_data.properties.interface = {arr[0]}Schema
 {arr[0]}.args = {{ activePage, globalState: {arr[0]}GlobalCopy }};
-""", paths.items()))
+""",
+        paths.items(),
+    )
+)
 
 with open(sourceDataStoryPath, "w") as outfile:
-    outfile.write(f"""import {{ globalState, PageTemplate }} from "./storyStates";
+    outfile.write(
+        f"""import {{ globalState, PageTemplate }} from "./storyStates";
 {importCode}
 
 export default {{
@@ -57,4 +62,5 @@ export const Example = PageTemplate.bind({{}});
 Example.args = {{ activePage, globalState }};
 
 {storyCode}
-""")
+"""
+    )

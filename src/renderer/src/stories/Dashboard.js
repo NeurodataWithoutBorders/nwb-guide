@@ -136,9 +136,9 @@ export class Dashboard extends LitElement {
             this.sidebar.initialize = false;
             this.#activatePage(latest);
             return;
-        } else if (key.toLowerCase() === 'globalstate' && this.#active) {
-            this.#active.info.globalState = JSON.parse(latest)
-            this.#active.requestUpdate()
+        } else if (key.toLowerCase() === "globalstate" && this.#active) {
+            this.#active.info.globalState = JSON.parse(latest);
+            this.#active.requestUpdate();
         }
     }
 
