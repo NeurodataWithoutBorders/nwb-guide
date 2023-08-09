@@ -296,24 +296,25 @@ def convert_to_nwb(info: dict) -> str:
 
     # Update the first recording interface with Ecephys table data
     # This will be refactored after the ndx-probe-interface integration
-    # recording_interface = get_first_recording_interface(converter)
+    recording_interface = get_first_recording_interface(converter)
 
-    # ecephys_metadata = info["metadata"].get("Ecephys", dict())
-
-    # if is_supported_recording_interface(recording_interface, info["metadata"]):
-    #     electrode_column_results = ecephys_metadata["ElectrodeColumns"]
-    #     electrode_results = ecephys_metadata["Electrodes"]
-
-    #     recording_interface.update_electrode_table(
-    #         electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
-    #     )
-
-    #     # Update with the latest metadata for the electrodes
-    #     ecephys_metadata["Electrodes"] = electrode_column_results
-
-    # ecephys_metadata.pop("ElectrodeColumns", dict())
     if "Ecephys" not in info["metadata"]:
         info["metadata"].update(Ecephys=dict())
+
+    ecephys_metadata = info["metadata"].get("Ecephys", dict())
+
+    if is_supported_recording_interface(recording_interface, info["metadata"]):
+        electrode_column_results = ecephys_metadata["ElectrodeColumns"]
+        electrode_results = ecephys_metadata["Electrodes"]
+
+        recording_interface.update_electrode_table(
+            electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
+        )
+
+        # Update with the latest metadata for the electrodes
+        ecephys_metadata["Electrodes"] = electrode_column_results
+
+    ecephys_metadata.pop("ElectrodeColumns", dict())
 
     # Actually run the conversion
     converter.run_conversion(
