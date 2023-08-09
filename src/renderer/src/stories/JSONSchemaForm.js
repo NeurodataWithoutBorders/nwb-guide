@@ -391,7 +391,7 @@ export class JSONSchemaForm extends LitElement {
         const fullPath = [...path, name];
         const externalPath = [...this.#base, ...fullPath];
 
-        const resolved =  this.#get(path, this.resolved)
+        const resolved = this.#get(path, this.resolved);
         const value = resolved[name];
 
         const isConditional = this.#getLink(externalPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
@@ -561,14 +561,14 @@ export class JSONSchemaForm extends LitElement {
 
     #getLinkElement = (externalPath) => {
         const link = this.#getLink(externalPath);
-        if (!link) return;f
+        if (!link) return;
+        f;
         return this.shadowRoot.querySelector(`[data-name="${link.name}"]`);
     };
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, element, path = [], checkLinks = true) => {
-
-        const parent = this.#get(path, this.resolved)
+        const parent = this.#get(path, this.resolved);
 
         const valid =
             !this.validateEmptyValues && !(name in parent)

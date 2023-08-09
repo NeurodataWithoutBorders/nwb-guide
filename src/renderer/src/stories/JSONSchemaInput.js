@@ -65,22 +65,23 @@ export class JSONSchemaInput extends LitElement {
     // parent,
     // path,
     // form,
-    required = false
-    validateOnChange = true
+    required = false;
+    validateOnChange = true;
 
     constructor(props) {
         super();
-        Object.assign(this, props)
+        Object.assign(this, props);
     }
 
     // onUpdate = () => {}
     // onValidate = () => {}
 
     #updateData = (path, value) => {
-        this.onUpdate ? this.onUpdate(value) : this.form.updateData(path, value)
-    }
+        this.onUpdate ? this.onUpdate(value) : this.form.updateData(path, value);
+    };
 
-    #triggerValidation = (name, el, path) => this.onValidate ? this.onValidate() : this.form.triggerValidation(name, el, path)
+    #triggerValidation = (name, el, path) =>
+        this.onValidate ? this.onValidate() : this.form.triggerValidation(name, el, path);
 
     render() {
         const { validateOnChange, info, parent, path: fullPath } = this;
@@ -126,7 +127,7 @@ export class JSONSchemaInput extends LitElement {
                         validateOnChange: false,
                         path: this.path,
                         form: this.form,
-                        onUpdate: (value) => tempParent[name] = value,
+                        onUpdate: (value) => (tempParent[name] = value),
                     })
                 );
 
@@ -144,7 +145,10 @@ export class JSONSchemaInput extends LitElement {
                       })
                     : [],
                 onChange: async () => {
-                    this.#updateData(fullPath, list.items.map((o) => o.value));
+                    this.#updateData(
+                        fullPath,
+                        list.items.map((o) => o.value)
+                    );
                     if (validateOnChange) await this.#triggerValidation(name, list, path);
                 },
             });
@@ -232,8 +236,7 @@ export class JSONSchemaInput extends LitElement {
                                 fullPath,
                                 info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
                             )}
-                        @change=${(ev) =>
-                            validateOnChange && this.#triggerValidation(name, ev.target, path)}
+                        @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
                     />
                 `;
             }
