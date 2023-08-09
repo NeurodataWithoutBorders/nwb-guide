@@ -25,9 +25,8 @@ parser.add_argument("interfaces", type=str, action="split", help="Interfaces can
 
 @api.errorhandler(Exception)
 def exception_handler(error):
-    exceptiondata = traceback.format_exception(type(error), error, error.__traceback__, limit=1)
-    exceptionarray = exceptiondata[-2:]
-    return { "message": exceptiondata} # ''.join(exceptionarray)}
+    exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
+    return { "message": exceptiondata[-1], "traceback": ''.join(exceptiondata) }
 
 
 @api.route("/")
