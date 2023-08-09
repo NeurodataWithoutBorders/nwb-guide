@@ -230,7 +230,7 @@ export class Table extends LitElement {
                         callback(true); // Allow empty value
                         return true;
                     }
-                    
+
                     if (isRequired) {
                         ogThis.#handleValidationResult(
                             [{ message: `${k} is a required property.`, type: "error" }],
