@@ -23,8 +23,6 @@ import splashHTML from './splash-screen.html?asset'
 
 autoUpdater.channel = "latest";
 
-const debugLog: any = {}
-
 /*************************************************************
  * Python Process
  *************************************************************/
@@ -51,9 +49,6 @@ const getPackagedPath = () => {
   const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
   const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
 
-  debugLog.unixPath = unixPath
-  debugLog.windowsPath = windowsPath
-
   if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
   if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
 };
@@ -70,8 +65,6 @@ const getScriptPath = () => {
 
 const createPyProc = async () => {
   let script = getScriptPath();
-
-  debugLog.script = script
 
   await killAllPreviousProcesses();
 
@@ -95,16 +88,13 @@ const createPyProc = async () => {
       if (pyflaskProcess != null) {
         console.log("child process success on port " + port);
 
-        debugLog.errors = []
 
         // Listen for errors from Python process
         pyflaskProcess.stderr.on("data", function (data: any) {
-          debugLog.errors.push(data)
-          console.log("[python]:", data.toString());
+          mainWindow.webContents.send('logOnBrowser', {error: data.toString()})
+
         });
       } else console.error("child process failed to start on port" + port);
-
-      debugLog.port = selectedPort = port;
     })
     .catch((err: Error) => {
       console.log(err);
@@ -301,9 +291,6 @@ function initialize() {
         // run_pre_flight_checks();
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
-
-        mainWindow.webContents.send('logOnBrowser', debugLog)
-
       }, 1000);
     });
   });

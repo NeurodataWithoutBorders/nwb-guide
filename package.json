@@ -9,7 +9,7 @@
     "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
     "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
-    "build": "npm run build:app && npm run build:python",
+    "build": "npm run build:app",
     "build:app": "electron-vite build",
     "build:mac": "npm run build && npm run build:python-unix && npm run build-mac",
     "build:win": "npm run build && npm run build:python && npm run build-win",
