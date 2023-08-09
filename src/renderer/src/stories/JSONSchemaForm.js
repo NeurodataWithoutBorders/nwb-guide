@@ -353,20 +353,19 @@ export class JSONSchemaForm extends LitElement {
         return true;
     };
 
-    #get = (path) => {
+    #get = (path, object = this.resolved) => {
         // path = path.slice(this.#base.length); // Correct for base path
-        return path.reduce((acc, curr) => (acc = acc[curr]), this.resolved);
+        return path.reduce((acc, curr) => (acc = acc[curr]), object);
     };
 
     #checkRequiredAfterChange = async (fullPath) => {
         const path = [...fullPath];
         const name = path.pop();
-        const parent = this.#get(path);
         const element = this.shadowRoot
             .querySelector(`#${fullPath.join("-")}`)
             .querySelector("nwb-jsonschema-input")
             .shadowRoot.querySelector(".guided--input");
-        const isValid = await this.triggerValidation(name, parent, element, path, false);
+        const isValid = await this.triggerValidation(name, element, path, false);
         if (!isValid) return true;
     };
 
@@ -392,7 +391,7 @@ export class JSONSchemaForm extends LitElement {
         const fullPath = [...path, name];
         const externalPath = [...this.#base, ...fullPath];
 
-        const resolved = path.reduce((acc, key) => acc[key], this.resolved);
+        const resolved =  this.#get(path, this.resolved)
         const value = resolved[name];
 
         const isConditional = this.#getLink(externalPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
@@ -562,12 +561,15 @@ export class JSONSchemaForm extends LitElement {
 
     #getLinkElement = (externalPath) => {
         const link = this.#getLink(externalPath);
-        if (!link) return;
+        if (!link) return;f
         return this.shadowRoot.querySelector(`[data-name="${link.name}"]`);
     };
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    triggerValidation = async (name, parent, element, path = [], checkLinks = true) => {
+    triggerValidation = async (name, element, path = [], checkLinks = true) => {
+
+        const parent = this.#get(path, this.resolved)
+
         const valid =
             !this.validateEmptyValues && !(name in parent)
                 ? true
