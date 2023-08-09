@@ -296,8 +296,11 @@ export class JSONSchemaForm extends LitElement {
     #update(fullPath, value) {
         const path = [...fullPath];
         const name = path.pop();
-        const resultParent = path.reduce((acc, key) => acc[key], this.results);
-        const resolvedParent = path.reduce((acc, key) => acc[key], this.resolved);
+
+        const reducer = (acc, key) => key in acc ? acc[key] : (acc[key] = {}) // NOTE: Create nested objects if required to set a new path
+
+        const resultParent = path.reduce(reducer, this.results);
+        const resolvedParent = path.reduce(reducer, this.resolved);
 
         if (!value) {
             delete resultParent[name];
@@ -917,7 +920,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
             }
 
             // Render properties in the sub-schema
-            const rendered = this.#render(info, results[name], required[name], fullPath);
+            const rendered = this.#render(info, results?.[name], required[name], fullPath);
             return hasMany || path.length > 1
                 ? html`
                       <div style="margin-top: 40px;">

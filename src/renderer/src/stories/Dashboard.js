@@ -65,7 +65,7 @@ export class Dashboard extends LitElement {
             logo: { type: String, reflect: true },
             subtitle: { type: String, reflect: true },
             activePage: { type: String, reflect: true },
-            globalState: { type: Object },
+            globalState: { type: Object, reflect: true },
         };
     }
 
@@ -136,6 +136,9 @@ export class Dashboard extends LitElement {
             this.sidebar.initialize = false;
             this.#activatePage(latest);
             return;
+        } else if (key.toLowerCase() === 'globalstate' && this.#active) {
+            this.#active.info.globalState = JSON.parse(latest)
+            this.#active.requestUpdate()
         }
     }
 

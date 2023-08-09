@@ -1,0 +1,32 @@
+{
+    "required": [],
+    "properties": {
+        "PhySortingInterface": {
+            "required": [
+                "folder_path"
+            ],
+            "properties": {
+                "folder_path": {
+                    "format": "directory",
+                    "type": "string"
+                },
+                "exclude_cluster_groups": {
+                    "type": "array"
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "source.schema.json",
+    "title": "Source data schema",
+    "description": "Schema for the source data, files and directories",
+    "version": "0.1.0"
+}
