@@ -15,7 +15,8 @@ dependencies:
       - configparser == 6.0.0
       - flask == 2.3.2
       - flask_restx == 1.1.0
-      - flask-cors == 4.0.0
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
-      - pytest == 7.4.0
       - hdmf >= 3.7.0
+      - pytest == 7.2.2
+      - pytest-cov == 4.1.0
+      - flask-cors === 3.0.10
