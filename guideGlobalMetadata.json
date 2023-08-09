@@ -1,10 +1,15 @@
 {
     "supported_interfaces": [
         "SpikeGLXRecordingInterface",
+        "SpikeGLXNIDQInterface",
         "PhySortingInterface",
-        "BlackrockRecordingInterface",
-        "BlackrockSortingInterface",
+        "NeuroScopeRecordingInterface",
+        "NeuroScopeLFPInterface",
         "NeuroScopeSortingInterface",
-        "BiocamRecordingInterface"
+        "BiocamRecordingInterface",
+        "IntanRecordingInterface",
+        "OpenEphysRecordingInterface",
+        "BlackrockRecordingInterface",
+        "BlackrockSortingInterface"
     ]
 }
