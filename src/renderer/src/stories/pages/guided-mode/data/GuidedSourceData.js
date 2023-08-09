@@ -103,6 +103,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 "exclude_shanks",
                 "load_sync_channel",
                 "stream_id", // NOTE: May be desired for other interfaces
+                "nsx_override",
             ],
             // onlyRequired: true,
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
