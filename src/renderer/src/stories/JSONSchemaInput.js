@@ -97,17 +97,16 @@ export class JSONSchemaInput extends LitElement {
         if (isArray) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-
             // Catch tables
             const itemSchema = this.form.getSchema("items", info);
-            const isTable = itemSchema.type === "object"
+            const isTable = itemSchema.type === "object";
             if (isTable) {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
                     validateOnChange: (key, parent, v) => {
-                        console.log('VADAINADSG', key, parent, v)
-                        return validateOnChange && this.form.validateOnChange(key, parent, fullPath, v)
+                        console.log("VADAINADSG", key, parent, v);
+                        return validateOnChange && this.form.validateOnChange(key, parent, fullPath, v);
                     },
                     onStatusChange: () => this.form.checkStatus(), // Check status on all elements
                     validateEmptyCells: this.form.validateEmptyValues,
