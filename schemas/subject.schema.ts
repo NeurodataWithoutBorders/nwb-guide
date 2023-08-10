@@ -44,6 +44,7 @@ export default {
       sessions: {
         type: 'array',
         uniqueItems: true,
+        description: 'A comma-separated list of valid session_id values.',
         items: { type: 'string' }
       },
       ...required,
