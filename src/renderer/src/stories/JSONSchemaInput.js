@@ -105,7 +105,6 @@ export class JSONSchemaInput extends LitElement {
                     schema: itemSchema,
                     data: this.value,
                     validateOnChange: (key, parent, v) => {
-                        console.log("VADAINADSG", key, parent, v);
                         return validateOnChange && this.form.validateOnChange(key, parent, fullPath, v);
                     },
                     onStatusChange: () => this.form.checkStatus(), // Check status on all elements
@@ -172,7 +171,7 @@ export class JSONSchemaInput extends LitElement {
                 onChange: async () => {
                     this.#updateData(
                         fullPath,
-                        list.items.map((o) => o.value)
+                        list.items.length ? list.items.map((o) => o.value) : undefined
                     );
                     if (validateOnChange) await this.#triggerValidation(name, list, path);
                 },

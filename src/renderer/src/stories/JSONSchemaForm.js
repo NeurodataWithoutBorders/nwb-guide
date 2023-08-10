@@ -760,7 +760,7 @@ export class JSONSchemaForm extends LitElement {
 
                     onUpdate: (internalPath, value) => {
                         const path = [...fullPath, ...internalPath];
-                        this.#update(path, value);
+                        this.updateData(path, value);
                     },
 
                     required: required[name], // Scoped to the sub-schema
