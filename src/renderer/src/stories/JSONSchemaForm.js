@@ -1,13 +1,13 @@
 import { LitElement, css, html } from "lit";
-import { FilesystemSelector } from "./FileSystemSelector";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { BasicTable } from "./BasicTable";
-import { capitalize, header, textToArray } from "./forms/utils";
+import { capitalize, header } from "./forms/utils";
 import { resolve } from "../promises";
 import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
+
+import { JSONSchemaInput } from "./JSONSchemaInput";
 
 const componentCSS = `
 
@@ -113,53 +113,6 @@ const componentCSS = `
       margin: 15px;
     }
 
-
-.guided--input {
-  width: 100%;
-  height: 38px;
-  border-radius: 4px;
-  padding: 10px 12px;
-  font-size: 100%;
-  font-weight: normal;
-  border: 1px solid var(--color-border);
-  transition: border-color 150ms ease-in-out 0s;
-  outline: none;
-  color: rgb(33, 49, 60);
-  background-color: rgb(255, 255, 255);
-}
-
-.guided--input:disabled {
-  color: dimgray;
-  pointer-events: none;
-}
-
-.guided--input::placeholder {
-  opacity: 0.5;
-}
-
-.guided--text-area {
-  height: 5em;
-  resize: none;
-  font-family: unset;
-}
-.guided--text-area-tall {
-  height: 15em;
-}
-.guided--input:hover {
-  box-shadow: rgb(231 238 236) 0px 0px 0px 2px;
-}
-.guided--input:focus {
-  outline: 0;
-  box-shadow: var(--color-light-green) 0px 0px 0px 1px;
-}
-
-.guided--text-input-instructions {
-  font-size: 13px;
-  width: 100%;
-  padding-top: 4px;
-  color: dimgray !important;
-}
-
 hr {
   margin: 1em 0 1.5em 0;
 }
@@ -181,6 +134,14 @@ pre {
 
   .required.conditional label:after {
     color: transparent;
+  }
+
+
+  .guided--text-input-instructions {
+    font-size: 13px;
+    width: 100%;
+    padding-top: 4px;
+    color: dimgray !important;
   }
 
   input[type=number].hideStep::-webkit-outer-spin-button,
@@ -218,7 +179,7 @@ export class JSONSchemaForm extends LitElement {
 
     #base = [];
     #nestedForms = {};
-    #tables = {};
+    tables = {};
     #nErrors = 0;
     #nWarnings = 0;
 
@@ -263,18 +224,20 @@ export class JSONSchemaForm extends LitElement {
         if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
+        if (props.onUpdate) this.onUpdate = props.onUpdate;
 
         if (props.base) this.#base = props.base;
     }
 
     getTable = (path) => {
         if (typeof path === "string") path = path.split(".");
-        if (path.length === 1) return this.#tables[path[0]]; // return table if accessible
+        if (path.length === 1) return this.tables[path[0]]; // return table if accessible
 
         const copy = [...path];
         const tableName = copy.pop();
+
         if (this.mode === "accordion") return this.getForm(copy).getTable(tableName);
-        else return this.shadowRoot.getElementById(path.join("-")).children[1]; // Get table from UI container
+        else return this.shadowRoot.getElementById(path.join("-")).children[1].shadowRoot.children[0]; // Get table from UI container, then JSONSchemaInput
     };
 
     getForm = (path) => {
@@ -292,8 +255,9 @@ export class JSONSchemaForm extends LitElement {
         if (changedProperties === "options") this.requestUpdate();
     }
 
-    // Track resolved values for the form
-    #update(fullPath, value) {
+    // Track resolved values for the form (data only)
+    updateData(fullPath, value) {
+        this.onUpdate(fullPath, value);
         const path = [...fullPath];
         const name = path.pop();
         const resultParent = path.reduce((acc, key) => acc[key], this.results);
@@ -319,19 +283,22 @@ export class JSONSchemaForm extends LitElement {
     #clearMessages = (fullPath, type) => {
         if (Array.isArray(fullPath)) fullPath = fullPath.join("-"); // Convert array to string
         const container = this.shadowRoot.querySelector(`#${fullPath} .${type}`);
-        const nChildren = container.children.length;
-        container.innerHTML = "";
 
-        // Track errors and warnings
-        if (type === "errors") this.#nErrors -= nChildren;
-        if (type === "warnings") this.#nWarnings -= nChildren;
+        if (container) {
+            const nChildren = container.children.length;
+            container.innerHTML = "";
+
+            // Track errors and warnings
+            if (type === "errors") this.#nErrors -= nChildren;
+            if (type === "warnings") this.#nWarnings -= nChildren;
+        }
     };
 
     status;
-    #checkStatus = () =>
+    checkStatus = () =>
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
             ...Object.values(this.#nestedForms),
-            ...Object.values(this.#tables),
+            ...Object.values(this.tables),
         ]);
 
     throw = (message) => {
@@ -360,7 +327,7 @@ export class JSONSchemaForm extends LitElement {
 
         for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
         try {
-            for (let key in this.#tables) await this.#tables[key].validate(); // Validate nested tables too
+            for (let key in this.tables) await this.tables[key].validate(); // Validate nested tables too
         } catch (e) {
             this.throw(e.message);
         }
@@ -389,21 +356,23 @@ export class JSONSchemaForm extends LitElement {
         return true;
     };
 
-    #get = (path) => {
+    #get = (path, object = this.resolved) => {
         // path = path.slice(this.#base.length); // Correct for base path
-        return path.reduce((acc, curr) => (acc = acc[curr]), this.resolved);
+        return path.reduce((acc, curr) => (acc = acc[curr]), object);
     };
 
     #checkRequiredAfterChange = async (fullPath) => {
         const path = [...fullPath];
         const name = path.pop();
-        const parent = this.#get(path);
-        const element = this.shadowRoot.querySelector(`#${fullPath.join("-")} .guided--input`);
-        const isValid = await this.#validateOnChange(name, parent, element, path, false);
+        const element = this.shadowRoot
+            .querySelector(`#${fullPath.join("-")}`)
+            .querySelector("nwb-jsonschema-input")
+            .shadowRoot.querySelector(".guided--input");
+        const isValid = await this.triggerValidation(name, element, path, false);
         if (!isValid) return true;
     };
 
-    #getSchema(path, schema = this.schema) {
+    getSchema(path, schema = this.schema) {
         if (typeof path === "string") path = path.split(".");
 
         // NOTE: Still must correct for the base here
@@ -414,7 +383,7 @@ export class JSONSchemaForm extends LitElement {
         }
 
         const resolved = path.reduce((acc, curr) => (acc = acc[curr]), schema);
-        if (resolved["$ref"]) return this.#getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
+        if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
     }
@@ -422,17 +391,10 @@ export class JSONSchemaForm extends LitElement {
     #renderInteractiveElement = (name, info, parent, required, path = []) => {
         let isRequired = required[name];
 
-        const isArray = info.type === "array"; // Handle string (and related) formats / types
-
-        const hasItemsRef = "items" in info && "$ref" in info.items;
-        const isStringArray =
-            isArray &&
-            (info.items?.type === "string" || !("items" in info) || (!("type" in info.items) && !hasItemsRef)); // Default to a string type
-
         const fullPath = [...path, name];
         const externalPath = [...this.#base, ...fullPath];
 
-        const resolved = path.reduce((acc, key) => acc[key], this.resolved);
+        const resolved = this.#get(path, this.resolved);
         const value = resolved[name];
 
         const isConditional = this.#getLink(externalPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
@@ -450,6 +412,36 @@ export class JSONSchemaForm extends LitElement {
                 }
             };
 
+        const interactiveInput = new JSONSchemaInput({
+            info,
+            parent,
+            path: fullPath,
+            value: parent[name],
+            form: this,
+            required: isRequired,
+        });
+
+        interactiveInput.updated = () => {
+            let input = interactiveInput.shadowRoot.querySelector(".schema-input");
+            if (!input) input = interactiveInput.shadowRoot.querySelector("nwb-filesystem-selector");
+
+            if (input) {
+                if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
+                    input.dispatchEvent(new Event("change"));
+            }
+        };
+
+        // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
+
+        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-jsonschema-input")).map(input => input.children)
+        // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
+        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-filesystem-selector") ?? []);
+        // const allInputs = [...inputs, ...fileInputs];
+        // const filtered = filter ? allInputs.filter(filter) : allInputs;
+        // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
+
+        // console.log(interactiveInput)
+
         return html`
             <div
                 id=${fullPath.join("-")}
@@ -458,124 +450,10 @@ export class JSONSchemaForm extends LitElement {
                     : ""}"
             >
                 <label class="guided--form-label">${header(name)}</label>
-                ${(() => {
-                    // Basic enumeration of properties on a select element
-                    if (info.enum) {
-                        return html`
-                            <select
-                                class="guided--input schema-input"
-                                @input=${(ev) => this.#update(fullPath, info.enum[ev.target.value])}
-                                @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
-                            >
-                                <option disabled selected value>Select an option</option>
-                                ${info.enum.map(
-                                    (item, i) => html`<option value=${i} ?selected=${value === item}>${item}</option>`
-                                )}
-                            </select>
-                        `;
-                    } else if (info.type === "boolean") {
-                        return html`<input
-                            type="checkbox"
-                            class="schema-input"
-                            @input=${(ev) => this.#update(fullPath, ev.target.checked)}
-                            ?checked=${value ?? false}
-                            @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
-                        />`;
-                    } else if (info.type === "string" || (isStringArray && !hasItemsRef) || info.type === "number") {
-                        let format = info.format;
-                        const matched = name.match(/(.+_)?(.+)_path/);
-                        if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
-
-                        // Handle file and directory formats
-                        if (this.#filesystemQueries.includes(format)) {
-                            const el = new FilesystemSelector({
-                                type: format,
-                                value,
-                                onSelect: (filePath) => this.#update(fullPath, filePath),
-                                onChange: (filePath) => this.#validateOnChange(name, resolved, el, path),
-                                dialogOptions: this.dialogOptions,
-                                dialogType: this.dialogType,
-                            });
-                            return el;
-                        }
-
-                        // Handle long string formats
-                        else if (info.format === "long" || isArray)
-                            return html`<textarea
-                                class="guided--input guided--text-area schema-input"
-                                type="text"
-                                placeholder="${info.placeholder ?? ""}"
-                                style="height: 7.5em; padding-bottom: 20px"
-                                maxlength="255"
-                                .value="${isStringArray ? (value ? value.join("\n") : "") : value ?? ""}"
-                                @input=${(ev) => {
-                                    this.#update(
-                                        fullPath,
-                                        isStringArray ? textToArray(ev.target.value) : ev.target.value
-                                    );
-                                }}
-                                @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
-                            ></textarea>`;
-                        // Handle other string formats
-                        else {
-                            const type =
-                                info.format === "date-time"
-                                    ? "datetime-local"
-                                    : info.format ?? (info.type === "string" ? "text" : info.type);
-
-                            return html`
-                                <input
-                                    class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
-                                    type="${type}"
-                                    step=${type === "number" && info.step ? info.step : ""}
-                                    placeholder="${info.placeholder ?? ""}"
-                                    .value="${value ?? ""}"
-                                    @input=${(ev) =>
-                                        this.#update(
-                                            fullPath,
-                                            info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
-                                        )}
-                                    @change=${(ev) => this.#validateOnChange(name, resolved, ev.target, path)}
-                                />
-                            `;
-                        }
-                    }
-
-                    if (info.type === "array") {
-                        const itemSchema = this.#getSchema("items", info);
-                        if (itemSchema.type === "object") {
-                            const tableMetadata = {
-                                schema: itemSchema,
-                                data: value,
-                                globals: this.globals[name],
-                                validateOnChange: (key, parent, v) => this.validateOnChange(key, parent, fullPath, v), // NOTE: Check whether this parent is accurate
-                                onStatusChange: () => this.#checkStatus(), // Check status on all elements
-                                validateEmptyCells: this.validateEmptyValues,
-                                deferLoading: this.deferLoading,
-                                onLoaded: () => {
-                                    this.#nLoaded++;
-                                    this.#checkAllLoaded();
-                                },
-                                onThrow: (...args) => this.onThrow(...args),
-                            };
-
-                            return (this.#tables[name] =
-                                this.renderTable(name, tableMetadata, fullPath) || new BasicTable(tableMetadata));
-                        }
-                    }
-
-                    // Print out the immutable default value
-                    return html`<pre>
-${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pre
-                    >`;
-                })()}
+                ${interactiveInput}
                 ${info.description
                     ? html`<p class="guided--text-input-instructions">
-                          ${capitalize(info.description)}${info.description.slice(-1)[0] === "."
-                              ? ""
-                              : "."}${isStringArray
-                              ? html`<span style="color: #202020;"> Separate on new lines.</span>`
-                              : ""}
+                          ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
                       </p>`
                     : ""}
                 <div class="errors"></div>
@@ -585,20 +463,19 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     };
 
     load = () => {
-        if (!this.#loaded) Object.values(this.#tables).forEach((t) => t.load());
+        if (!this.#loaded) Object.values(this.tables).forEach((t) => t.load());
     };
 
     #loaded = false;
-    #nLoaded = 0;
-    #checkAllLoaded = () => {
-        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.#tables)].length;
-        if (this.#nLoaded === expected) {
+    nLoaded = 0;
+
+    checkAllLoaded = () => {
+        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.tables)].length;
+        if (this.nLoaded === expected) {
             this.#loaded = true;
             this.onLoaded();
         }
     };
-
-    #filesystemQueries = ["file", "directory"];
 
     #validateRequirements = async (results, requirements, parent) => {
         let invalid = [];
@@ -647,6 +524,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     onStatusChange = () => {};
     onThrow = () => {};
     renderTable = () => {};
+    onUpdate = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -692,7 +570,9 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
     };
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    #validateOnChange = async (name, parent, element, path = [], checkLinks = true) => {
+    triggerValidation = async (name, element, path = [], checkLinks = true) => {
+        const parent = this.#get(path, this.resolved);
+
         const valid =
             !this.validateEmptyValues && !(name in parent)
                 ? true
@@ -738,7 +618,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         // Track errors and warnings
         this.#nErrors += errors.length;
         this.#nWarnings += warnings.length;
-        this.#checkStatus();
+        this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
         warnings.forEach((info) => this.#addMessage(fullPath, info.message, "warnings"));
@@ -878,6 +758,11 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     results: results[name],
                     globals: this.globals?.[name],
 
+                    onUpdate: (internalPath, value) => {
+                        const path = [...fullPath, ...internalPath];
+                        this.updateData(path, value);
+                    },
+
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,
                     dialogOptions: this.dialogOptions,
@@ -891,12 +776,12 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusChange: (status) => {
                         accordion.setSectionStatus(headerName, status);
-                        this.#checkStatus();
+                        this.checkStatus();
                     }, // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
-                        this.#nLoaded++;
-                        this.#checkAllLoaded();
+                        this.nLoaded++;
+                        this.checkAllLoaded();
                     },
                     renderTable: (...args) => this.renderTable(...args),
                     base: fullPath,
@@ -947,30 +832,20 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         }
     };
 
-    // NOTE: This ignores the file selector button
-    #checkAllInputs = (filter) => {
-        const inputs = Array.from(this.shadowRoot.querySelectorAll(".schema-input"));
-        const fileInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-filesystem-selector") ?? []);
-        const allInputs = [...inputs, ...fileInputs];
-        const filtered = filter ? allInputs.filter(filter) : allInputs;
-        filtered.forEach((input) => input.dispatchEvent(new Event("change")));
-    };
-
     updated() {
-        this.#checkAllInputs(this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""); // Check all inputs with non-empty values on render
-        this.#checkAllLoaded(); // Throw if no tables
+        this.checkAllLoaded(); // Throw if no tables
         this.#toggleRendered(); // Toggle internal render state
     }
 
     #resetLoadState() {
         this.#loaded = false;
-        this.#nLoaded = 0;
+        this.nLoaded = 0;
     }
 
     // Check if everything is internally rendered
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
-            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.#tables)].map((o) => o.rendered))
+            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.tables)].map((o) => o.rendered))
         );
         return isRendered;
     }
@@ -995,7 +870,7 @@ ${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pr
         return html`
             <div>
                 ${false ? html`<h2>${schema.title}</h2>` : ""} ${false ? html`<p>${schema.description}</p>` : ""}
-                ${this.#render(schema, this.results, this.#requirements)}
+                ${this.#render(schema, this.resolved, this.#requirements)}
             </div>
         `;
     }

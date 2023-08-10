@@ -4,6 +4,8 @@
 dist
 out
 
+coverage
+
 *.log
 
 # Ignore node_modules folder
