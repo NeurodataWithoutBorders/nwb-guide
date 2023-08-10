@@ -234,8 +234,9 @@ export class JSONSchemaForm extends LitElement {
 
         const copy = [...path];
         const tableName = copy.pop();
+
         if (this.mode === "accordion") return this.getForm(copy).getTable(tableName);
-        else return this.shadowRoot.getElementById(path.join("-")).children[1]; // Get table from UI container
+        else return this.shadowRoot.getElementById(path.join("-")).children[1].shadowRoot.children[0]; // Get table from UI container, then JSONSchemaInput
     };
 
     getForm = (path) => {

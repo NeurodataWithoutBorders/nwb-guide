@@ -97,6 +97,32 @@ export class JSONSchemaInput extends LitElement {
         if (isArray) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
+
+            // Catch tables
+            const itemSchema = this.form.getSchema("items", info);
+            const isTable = itemSchema.type === "object"
+            if (isTable) {
+                const tableMetadata = {
+                    schema: itemSchema,
+                    data: this.value,
+                    validateOnChange: (key, parent, v) => {
+                        console.log('VADAINADSG', key, parent, v)
+                        return validateOnChange && this.form.validateOnChange(key, parent, fullPath, v)
+                    },
+                    onStatusChange: () => this.form.checkStatus(), // Check status on all elements
+                    validateEmptyCells: this.form.validateEmptyValues,
+                    deferLoading: this.form.deferLoading,
+                    onLoaded: () => {
+                        this.form.nLoaded++;
+                        this.form.checkAllLoaded();
+                    },
+                    onThrow: (...args) => this.form.onThrow(...args),
+                };
+
+                return (this.form.tables[name] =
+                    this.form.renderTable(name, tableMetadata, fullPath) || new BasicTable(tableMetadata));
+            }
+
             const headerText = document.createElement("span");
             headerText.innerText = header(name);
 
@@ -239,29 +265,6 @@ export class JSONSchemaInput extends LitElement {
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
                     />
                 `;
-            }
-        }
-
-        if (info.type === "array") {
-            const itemSchema = this.form.getSchema("items", info);
-            if (itemSchema.type === "object") {
-                const tableMetadata = {
-                    schema: itemSchema,
-                    data: this.value,
-                    validateOnChange: (key, parent, v) =>
-                        validateOnChange && this.form.validateOnChange(key, parent, fullPath, v),
-                    onStatusChange: () => this.form.checkStatus(), // Check status on all elements
-                    validateEmptyCells: this.form.validateEmptyValues,
-                    deferLoading: this.form.deferLoading,
-                    onLoaded: () => {
-                        this.form.nLoaded++;
-                        this.form.checkAllLoaded();
-                    },
-                    onThrow: (...args) => this.form.onThrow(...args),
-                };
-
-                return (this.form.tables[name] =
-                    this.form.renderTable(name, tableMetadata, fullPath) || new BasicTable(tableMetadata));
             }
         }
 
