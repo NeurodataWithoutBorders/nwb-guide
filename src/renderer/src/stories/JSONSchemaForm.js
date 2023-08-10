@@ -224,6 +224,7 @@ export class JSONSchemaForm extends LitElement {
         if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
+        if (props.onUpdate) this.onUpdate = props.onUpdate;
 
         if (props.base) this.#base = props.base;
     }
@@ -256,6 +257,7 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form (data only)
     updateData(fullPath, value) {
+        this.onUpdate(fullPath, value);
         const path = [...fullPath];
         const name = path.pop();
         const resultParent = path.reduce((acc, key) => acc[key], this.results);
@@ -522,6 +524,7 @@ export class JSONSchemaForm extends LitElement {
     onStatusChange = () => {};
     onThrow = () => {};
     renderTable = () => {};
+    onUpdate = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -754,6 +757,11 @@ export class JSONSchemaForm extends LitElement {
                     schema: info,
                     results: results[name],
                     globals: this.globals?.[name],
+
+                    onUpdate: (internalPath, value) => {
+                        const path = [...fullPath, ...internalPath];
+                        this.#update(path, value);
+                    },
 
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,
