@@ -562,7 +562,6 @@ export class JSONSchemaForm extends LitElement {
     #getLinkElement = (externalPath) => {
         const link = this.#getLink(externalPath);
         if (!link) return;
-        f;
         return this.shadowRoot.querySelector(`[data-name="${link.name}"]`);
     };
 
