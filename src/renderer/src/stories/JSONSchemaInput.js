@@ -169,10 +169,7 @@ export class JSONSchemaInput extends LitElement {
                       })
                     : [],
                 onChange: async () => {
-                    this.#updateData(
-                        fullPath,
-                        list.items.length ? list.items.map((o) => o.value) : undefined
-                    );
+                    this.#updateData(fullPath, list.items.length ? list.items.map((o) => o.value) : undefined);
                     if (validateOnChange) await this.#triggerValidation(name, list, path);
                 },
             });
