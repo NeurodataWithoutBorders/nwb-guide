@@ -8,7 +8,7 @@ import { createMockGlobalState } from './utils'
 
 import { Validator, validate } from 'jsonschema'
 import { textToArray } from '../src/renderer/src/stories/forms/utils'
-import { convertSubjectsToResults } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
+import { updateResultsFromSubjects } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
 import { JSONSchemaForm } from '../src/renderer/src/stories/JSONSchemaForm'
 
 import { validateOnChange } from "../src/renderer/src/validation/index.js";
@@ -44,7 +44,7 @@ test('removing all existing sessions will maintain the related subject entry on 
 
     const subjects = { subject: { sessions: ['renamed'] } }
 
-    convertSubjectsToResults(results, subjects)
+    updateResultsFromSubjects(results, subjects)
     expect(Object.keys(results)).toEqual(Object.keys(copy))
 })
 
