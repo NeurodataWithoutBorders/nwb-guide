@@ -58,7 +58,7 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support() # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
+    multiprocessing.freeze_support()  # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 
     port = sys.argv[len(sys.argv) - 1]
     if port.isdigit():

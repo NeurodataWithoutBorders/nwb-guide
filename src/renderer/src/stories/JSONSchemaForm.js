@@ -340,7 +340,6 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async () => {
-
         // Check if any required inputs are missing
         const invalidInputs = await this.#validateRequirements(this.resolved, this.#requirements); // get missing required paths
         const isValid = !invalidInputs.length;

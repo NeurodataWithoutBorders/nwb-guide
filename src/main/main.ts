@@ -72,10 +72,10 @@ const createPyProc = async () => {
 
         // Listen for errors from Python process
         pyflaskProcess.stderr.on("data", (data: string) => console.error(`[${processId}]: ${data}`));
-  
+
         pyflaskProcess.stdout.on('data', (data: string) => console.error(`[${processId}]: ${data}`));
 
-        pyflaskProcess.on('close', (code: number) => console.error(`[nwb-guide:python] exit code ${code}`));    
+        pyflaskProcess.on('close', (code: number) => console.error(`[nwb-guide:python] exit code ${code}`));
 
       }
     })
