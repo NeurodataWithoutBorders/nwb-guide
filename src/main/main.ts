@@ -46,55 +46,38 @@ const portRange = 100;
  */
 const getPackagedPath = () => {
 
-  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
-  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
+  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE, PY_FLASK_MODULE + ".exe");
+  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE, PY_FLASK_MODULE);
 
   if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
   if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
 };
 
-/**
- * Get the system path to the api server script.
- * The script is located in the resources folder for packaged Linux and Mac builds and in the app.getAppPath() for Windows builds.
- * It is relative to the main.js file directory when in dev mode.
- * @returns {string} The path to the api server script that needs to be executed to start the Python server
- */
-const getScriptPath = () => {
-  return getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
-};
-
 const createPyProc = async () => {
-  let script = getScriptPath();
-
+  let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
   await killAllPreviousProcesses();
 
   const defaultPort = PORT as number
 
+
   fp(defaultPort, defaultPort + portRange)
     .then(([freePort]: string[]) => {
-      let port = freePort;
+      selectedPort = freePort;
 
-      if (script.slice(-3) === '.py') {
-        pyflaskProcess = child_process.spawn("python", [script, port], {
-          // stdio: "ignore",
-        });
-      } else {
-        pyflaskProcess = child_process.execFile(script, [port], {
-          // stdio: "ignore",
-        });
-      }
+      const processId = `nwb-guide:${selectedPort}`
 
+      pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
 
       if (pyflaskProcess != null) {
-        console.log("child process success on port " + port);
-
 
         // Listen for errors from Python process
-        pyflaskProcess.stderr.on("data", function (data: any) {
-          mainWindow.webContents.send('logOnBrowser', {error: data.toString()})
+        pyflaskProcess.stderr.on("data", (data: string) => console.error(`[${processId}]: ${data}`));
+  
+        pyflaskProcess.stdout.on('data', (data: string) => console.error(`[${processId}]: ${data}`));
 
-        });
-      } else console.error("child process failed to start on port" + port);
+        pyflaskProcess.on('close', (code: number) => console.error(`[nwb-guide:python] exit code ${code}`));    
+
+      }
     })
     .catch((err: Error) => {
       console.log(err);
@@ -222,6 +205,7 @@ function initialize() {
   };
 
   app.on("ready", () => {
+
     const promise = createPyProc();
 
     // Listen after first load

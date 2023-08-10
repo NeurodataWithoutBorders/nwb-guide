@@ -9,6 +9,8 @@ from namespaces import configure_namespaces
 from flask_restx import Resource
 import sys
 
+import multiprocessing
+
 configure_namespaces()
 
 from setupUtils import configureLogger, configureRouteHandlers, configureAPI
@@ -56,6 +58,8 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support() # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
+
     port = sys.argv[len(sys.argv) - 1]
     if port.isdigit():
         api.logger.info(f"Starting server on port {port}")
