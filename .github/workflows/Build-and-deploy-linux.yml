@@ -36,5 +36,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm run build:linux
-          npm run deploy:electron:linux
+          npm run deploy:linux
