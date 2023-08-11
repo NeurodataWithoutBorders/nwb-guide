@@ -18,8 +18,6 @@ if (isElectron) {
         fs = require("fs-extra"); // File System
         os = require("os");
 
-        log = require("electron-log");
-
         remote = require("@electron/remote");
         app = remote.app;
 
