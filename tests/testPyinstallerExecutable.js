@@ -1,12 +1,16 @@
+const path = require("path");
+
 const port = 1234;
-// const script = '/Users/garrettflynn/Desktop/GUIDE/out/app'
-// const script = '/Users/garrettflynn/Documents/Github/nwb-guide/out/python/app'
-const script = "/Users/garrettflynn/Documents/Github/nwb-guide/out/python with spaces/app/app";
+
+const script = path.resolve(process.argv[2]);
+console.log(script);
+// const script = path.resolve('../out/python/app/app.exe') // Windows
+// const script = path.resolve('../out/python/app/app') // Mac / Linux
 
 const child_process = require("child_process");
 const fs = require("fs");
 
-console.log(fs.existsSync(script));
+console.log("Found file", fs.existsSync(script));
 
 // const proc = child_process.execFile(script, [port]);
 // handleProcess(proc, 'execFile')

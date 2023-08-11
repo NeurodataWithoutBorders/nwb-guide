@@ -28,10 +28,11 @@ autoUpdater.channel = "latest";
  *************************************************************/
 
 // flask setup environment variables
-const PYFLASK_DIST_FOLDER_BASE = path.join('out', 'python')
+const PYFLASK_DIST_FOLDER_BASE = path.join('build', 'flask')
 const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
-const PY_FLASK_MODULE = "app";
+const PYINSTALLER_NAME = "nwb-guide"
+
 let pyflaskProcess: any = null;
 
 let PORT: number | string | null = 4242;
@@ -46,15 +47,15 @@ const portRange = 100;
  */
 const getPackagedPath = () => {
 
-  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE, PY_FLASK_MODULE + ".exe");
-  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE, PY_FLASK_MODULE);
+  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, "flask", `${PYINSTALLER_NAME}.exe`);
+  const unixPath = path.join(process.resourcesPath, "flask", PYINSTALLER_NAME);
 
   if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
   if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
 };
 
 const createPyProc = async () => {
-  let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
+  let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
   await killAllPreviousProcesses();
 
   const defaultPort = PORT as number
@@ -75,7 +76,7 @@ const createPyProc = async () => {
 
         pyflaskProcess.stdout.on('data', (data: string) => console.error(`[${processId}]: ${data}`));
 
-        pyflaskProcess.on('close', (code: number) => console.error(`[nwb-guide:python] exit code ${code}`));
+        pyflaskProcess.on('close', (code: number) => console.error(`[nwb-guide:flask] exit code ${code}`));
 
       }
     })
@@ -154,7 +155,6 @@ function initialize() {
   makeSingleInstance();
 
   function createWindow() {
-    mainWindow.webContents.openDevTools();
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url);
