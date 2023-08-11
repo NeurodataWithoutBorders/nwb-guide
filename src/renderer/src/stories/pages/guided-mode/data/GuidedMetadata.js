@@ -175,6 +175,8 @@ export class GuidedMetadataPage extends ManagedPage {
                             header: `Conversion Preview: ${key}`,
                             open: true,
                             onClose: () => modal.remove(),
+                            width: "100%",
+                            height: "100%",
                         });
 
                         const container = document.createElement("div");

@@ -74,6 +74,11 @@ jobs:
           mamba env update -n env-electron-python -f ${{ matrix.label }}
         if: steps.cache.outputs.cache-hit != 'true'
 
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Install GUIDE
         run: npm ci
 
