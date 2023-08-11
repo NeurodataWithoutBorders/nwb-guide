@@ -57,6 +57,5 @@ jobs:
           appleId: ${{ secrets.APPLE_ID }}  # currently this is set to Ryan's Apple ID and password
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
         run: |
-          npm run build
-          npm run python-onefile-build-mac
-          npm run deploy-mac
+          npm run build:mac
+          npm run deploy:mac
