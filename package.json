@@ -15,7 +15,7 @@
     "build:win": "npm run build && npm run build:python && npm run build-win",
     "build:linux": "npm run build && npm run build:python && npm run build-linux",
     "build:python": "python -m PyInstaller --onedir --clean --noconfirm ./pyflask/app.py --distpath ./out/python --add-data ./paths.config.json;. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
-    "build:python:linux": "python -m PyInstaller --onedir --clean --noconfirm ./pyflask/app.py --distpath ./out/python --add-data ./paths.config.json:. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:python:linux": "python -m PyInstaller --onedir --clean --noconfirm ./pyflask/app.py --distpath ./out/python --add-data='./paths.config.json;.' --collect-all pynwb --collect-all hdmf --collect-all ci_info",
     "build-win": "electron-builder build --win --publish never",
     "build-mac": "electron-builder build --mac --publish never",
     "build-linux": "electron-builder build --linux --publish never",
