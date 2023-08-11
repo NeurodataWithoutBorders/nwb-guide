@@ -22,7 +22,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: nwb-guide
-          mamba-version: "*"
+          #mamba-version: "*"
           environment-file: tools/anaconda-env/environment-MAC.yml
           auto-activate-base: false
 
