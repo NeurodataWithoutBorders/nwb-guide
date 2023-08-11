@@ -21,7 +21,7 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: env-electron-python
+          activate-environment: nwb-guide
           environment-file: tools/anaconda-env/environment-Windows.yml
           auto-activate-base: false
 
@@ -36,6 +36,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm run build
-          npm run python-onefile-build
-          npm run deploy-win
+          npm run build:win
+          npm run deploy:win
