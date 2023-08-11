@@ -3,18 +3,18 @@
   "productName": "NWB GUIDE",
   "version": "0.0.3",
   "description": "",
-  "main": "./out/main/main.js",
+  "main": "./build/main/main.js",
   "scripts": {
     "start": "electron-vite dev",
     "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
     "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
-    "build:app": "electron-vite build",
+    "build:app": "electron-vite build --outDir build",
     "build:mac": "npm run build && npm run build:flask:unix && npm run build:electron:mac",
     "build:win": "npm run build && npm run build:flask:win && npm run build:electron:win",
-    "build:flask:win": "python -m PyInstaller --onedir --clean --noconfirm ./pyflask/app.py --distpath ./out/python --add-data ./paths.config.json;. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
-    "build:flask:unix": "python -m PyInstaller --onedir --clean --noconfirm ./pyflask/app.py --distpath ./out/python --add-data ./paths.config.json:. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:flask:win": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --workpath ./build/flask/temp --add-data ./paths.config.json;. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:flask:unix": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --workpath ./build/flask/temp --add-data ./paths.config.json:. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
     "build:electron:win": "electron-builder build --win --publish never",
     "build:electron:mac": "electron-builder build --mac --publish never",
     "build:electron:linux": "electron-builder build --linux --publish never",
@@ -48,13 +48,10 @@
     "generateUpdatesFilesForAllChannels": true,
     "afterSign": "./notarize.js",
     "files": [
-      "**/*",
-      "!pysoda/",
-      "!build/",
-      "!api.spec",
-      "!Users/",
-      "!pyflask/",
-      "!docs/"
+      "src",
+      "schemas",
+      "build",
+      "*.json"
     ],
     "win": {
       "asar": false,
@@ -75,7 +72,8 @@
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "extraResources": [
         {
-          "from": "./out/python"
+          "from": "./build/flask/nwb-guide",
+          "to": "flask"
         }
       ]
     },
@@ -85,7 +83,8 @@
       "icon": "src/renderer/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
-          "from": "./out/python"
+          "from": "./build/flask/nwb-guide",
+          "to": "flask"
         }
       ]
     },
