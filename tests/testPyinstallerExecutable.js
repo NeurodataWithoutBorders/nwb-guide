@@ -1,19 +1,10 @@
 const path = require("path");
-
-const port = 1234;
-
-const script = path.resolve(process.argv[2]);
-console.log(script);
-// const script = path.resolve('../out/python/app/app.exe') // Windows
-// const script = path.resolve('../out/python/app/app') // Mac / Linux
-
 const child_process = require("child_process");
 const fs = require("fs");
 
+const port = 1234;
+const script = path.resolve(__dirname, `../build/flask/nwb-guide/nwb-guide${process.platform === 'win32' ? '.exe' : ''}`);
 console.log("Found file", fs.existsSync(script));
-
-// const proc = child_process.execFile(script, [port]);
-// handleProcess(proc, 'execFile')
 
 const proc2 = child_process.spawn(`${script}`, [port + 1]);
 handleProcess(proc2, "spawn");
