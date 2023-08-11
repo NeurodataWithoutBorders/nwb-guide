@@ -1,12 +1,11 @@
-const path = require("path")
+const path = require("path");
 
 const port = 1234;
 
-const script = path.resolve(process.argv[2])
-console.log(script)
+const script = path.resolve(process.argv[2]);
+console.log(script);
 // const script = path.resolve('../out/python/app/app.exe') // Windows
 // const script = path.resolve('../out/python/app/app') // Mac / Linux
-
 
 const child_process = require("child_process");
 const fs = require("fs");
