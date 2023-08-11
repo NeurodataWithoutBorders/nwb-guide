@@ -13,8 +13,8 @@
     "build:app": "electron-vite build --outDir build",
     "build:mac": "npm run build && npm run build:flask:unix && npm run build:electron:mac",
     "build:win": "npm run build && npm run build:flask:win && npm run build:electron:win",
-    "build:flask:win": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --workpath ./build/flask/temp --add-data ./paths.config.json;. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
-    "build:flask:unix": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --workpath ./build/flask/temp --add-data ./paths.config.json:. --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:flask:win": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --workpath ./build/flask/temp --add-data ./paths.config.json;. --collect-all neuroconv--collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:flask:unix": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --workpath ./build/flask/temp --add-data ./paths.config.json:. --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ci_info",
     "build:electron:win": "electron-builder build --win --publish never",
     "build:electron:mac": "electron-builder build --mac --publish never",
     "build:electron:linux": "electron-builder build --linux --publish never",
@@ -51,7 +51,9 @@
       "src",
       "schemas",
       "build",
-      "*.json"
+      "*.json",
+      "!**/*.ts",
+      "!src/**/*.js"
     ],
     "win": {
       "asar": false,
@@ -113,7 +115,6 @@
     "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
     "dandi": "^0.0.2",
-    "electron-log": "^4.3.5",
     "electron-notarize": "^1.2.1",
     "electron-updater": "4.3.9",
     "find-free-port": "^2.0.0",
