@@ -14,7 +14,7 @@
     "build:win": "npm run build && npm run build:flask:win && npm run build:electron:win",
     "build:mac": "npm run build && npm run build:flask:unix && npm run build:electron:mac",
     "build:linux": "npm run build && npm run build:flask:unix && npm run build:electron:linux",
-    "build:flask:base": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:flask:base": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ci_info --hidden-import scipy._distributor_init --hidden-import scipy._lib.messagestream --hidden-import scipy._lib._ccallback --hidden-import scipy._lib._testutils your_script.py",
     "build:flask:win": "npm run build:flask:base -- --add-data ./paths.config.json;.",
     "build:flask:unix": "npm run build:flask:base -- --add-data ./paths.config.json:.",
     "build:electron:win": "electron-builder build --win --publish never",
