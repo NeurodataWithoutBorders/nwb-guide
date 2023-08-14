@@ -20,6 +20,7 @@ function handleProcess(proc, id = "process") {
         // Listen for errors from Python process
         proc.stderr.on("data", function (data) {
             console.error(`[${id}]: ${data}`);
+            throw new Error("The distributable pyflask failed to run!");
         });
 
         proc.stdout.on("data", function (data) {
@@ -28,6 +29,7 @@ function handleProcess(proc, id = "process") {
                 console.log(`Time to Start: ${(started - now).toFixed(2)}ms`);
             }
             console.error(`[${id}]: ${data}`);
+            throw new Error("The distributable pyflask failed to run!");
         });
 
         proc.on("error", (error) => {
@@ -37,6 +39,7 @@ function handleProcess(proc, id = "process") {
 
         proc.on("close", (code) => {
             console.error(`[${id}] exit: ${code}`);
+            throw new Error("The distributable pyflask failed to run!");
         });
     } else console.error("child process failed to start on port" + port);
 }
