@@ -3,6 +3,7 @@ import { docu_lottie } from "../../../../assets/lotties/documentation-lotties.js
 import { Page } from "../Page.js";
 
 import { startLottie } from "../../../dependencies/globals.js";
+import { port } from "../../../electron/index.js";
 
 export class DocumentationPage extends Page {
     constructor(...args) {
@@ -44,6 +45,20 @@ export class DocumentationPage extends Page {
                                             }}"
                                         >
                                             View the Documentation
+                                        </button>
+
+
+                                        <button
+                                            id="doc-btn"
+                                            class="view_doc_button sodaVideo-button"
+                                            style="margin-top: 1rem"
+                                            @click="${() => {
+                                                window.open(
+                                                    "http://localhost:" + port
+                                                );
+                                            }}"
+                                        >
+                                            Swagger API Reference
                                         </button>
                                     </div>
                                 </div>
