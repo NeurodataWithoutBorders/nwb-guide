@@ -47,15 +47,12 @@ export class DocumentationPage extends Page {
                                             View the Documentation
                                         </button>
 
-
                                         <button
                                             id="doc-btn"
                                             class="view_doc_button sodaVideo-button"
                                             style="margin-top: 1rem"
                                             @click="${() => {
-                                                window.open(
-                                                    "http://localhost:" + port
-                                                );
+                                                window.open("http://localhost:" + port);
                                             }}"
                                         >
                                             Swagger API Reference
