@@ -34,7 +34,7 @@ jobs:
 
       - name: Test PyInstaller build (Windows only)
         run: |
-          npm run build:flask:windows
+          npm run build:flask:win
           node tests/testPyinstallerExecutable.js
 
       - name: Build and deploy on Windows
