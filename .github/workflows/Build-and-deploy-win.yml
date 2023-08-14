@@ -29,13 +29,13 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Install package.json modules and their dependencies
-        run: npm install --ignore-scripts
-
       - name: Test PyInstaller build (Windows only)
         run: |
           npm run build:flask:win
           node tests/testPyinstallerExecutable.js
+
+      - name: Install package.json modules and their dependencies
+        run: npm install --ignore-scripts
 
       - name: Build and deploy on Windows
         env:
