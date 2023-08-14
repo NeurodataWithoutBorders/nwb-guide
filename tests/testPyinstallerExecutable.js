@@ -32,6 +32,7 @@ function handleProcess(proc, id = "process") {
 
         proc.on("error", (error) => {
             console.error(`[${id}] error: ${error.message}`);
+            throw new Error("The distributable pyflask failed to run!");
         });
 
         proc.on("close", (code) => {
