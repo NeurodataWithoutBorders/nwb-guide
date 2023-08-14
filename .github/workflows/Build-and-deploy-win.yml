@@ -36,4 +36,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          python -c "from PyInstaller.utils.hooks import collect_submodules; hiddenimports = collect_submodules('scipy')"
           npm run deploy:win
