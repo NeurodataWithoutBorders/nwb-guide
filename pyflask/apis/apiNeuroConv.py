@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, reqparse
 from flask import Response
 import traceback
+import subprocess
 
 from namespaces import get_namespace, NamespaceEnum
 from manageNeuroconv import (
@@ -28,6 +29,17 @@ parser.add_argument("interfaces", type=str, action="split", help="Interfaces can
 def exception_handler(error):
     exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
     return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
+
+
+@api.route("/test-custom-install")
+class TestCustomInstall(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return subprocess.run(["pip", "install", api.payload])  # expecting the api.payload to be the string name of the package as pip expects it
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
 
 
 @api.route("/")
