@@ -36,7 +36,9 @@ class TestCustomInstall(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return subprocess.run(["pip", "install", api.payload])  # expecting the api.payload to be the string name of the package as pip expects it
+            return subprocess.run(
+                ["pip", "install", api.payload]
+            )  # expecting the api.payload to be the string name of the package as pip expects it
         except Exception as e:
             if notBadRequestException(e):
                 api.abort(500, str(e))
