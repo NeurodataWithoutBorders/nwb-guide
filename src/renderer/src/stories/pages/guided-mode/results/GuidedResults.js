@@ -19,7 +19,7 @@ export class GuidedResultsPage extends Page {
             if (el.tagName === "A") {
                 if (str === "doi") value = `http://doi.org/${value}`;
                 el.href = value;
-                el.target = "__blank";
+                el.target = "_blank";
             }
         };
 
