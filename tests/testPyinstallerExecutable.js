@@ -3,11 +3,9 @@ const child_process = require("child_process");
 const fs = require("fs");
 
 const port = 1234;
-const script = process.argv[2] || path.resolve(
-    __dirname,
-    `../build/flask/nwb-guide/nwb-guide${process.platform === "win32" ? ".exe" : ""}`
-);
-
+const script =
+    process.argv[2] ||
+    path.resolve(__dirname, `../build/flask/nwb-guide/nwb-guide${process.platform === "win32" ? ".exe" : ""}`);
 
 console.log("Found file", fs.existsSync(script));
 
