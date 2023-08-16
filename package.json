@@ -1,29 +1,37 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
-  "main": "./out/main/main.js",
+  "main": "./build/main/main.js",
   "scripts": {
     "start": "electron-vite dev",
     "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
     "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
-    "build:app": "electron-vite build",
+    "build:app": "electron-vite build --outDir build",
+    "build:win": "npm run build && npm run build:flask:win && npm run build:electron:win",
+    "build:mac": "npm run build && npm run build:flask:unix && npm run build:electron:mac",
+    "build:linux": "npm run build && npm run build:flask:unix && npm run build:electron:linux",
+    "build:flask:base": "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "build:flask:win": "npm run build:flask:base -- --add-data ./paths.config.json;.",
+    "build:flask:unix": "npm run build:flask:base -- --add-data ./paths.config.json:.",
+    "build:electron:win": "electron-builder build --win --publish never",
+    "build:electron:mac": "electron-builder build --mac --publish never",
+    "build:electron:linux": "electron-builder build --linux --publish never",
     "test": "npm run test:app && npm run test:server",
     "test:app": "vitest run",
     "test:server": "pytest pyflask/tests/ -s",
     "test:coverage": "npm run coverage:app && npm run coverage:server",
     "coverage:app": "vitest run --coverage",
     "coverage:server": "pytest pyflask/tests/ -s --cov=pyflask --cov-report=xml",
-    "build-win": "electron-builder build --win --publish never",
-    "build-mac": "electron-builder build --mac --publish never",
-    "build-linux": "electron-builder build --linux --publish never",
-    "deploy-win": "electron-builder build --win --publish always",
-    "deploy-mac": "electron-builder build --mac --publish always",
-    "deploy-linux": "electron-builder build --linux --publish always",
-    "python-onefile-build": "python -m PyInstaller --onefile --clean ./pyflask/app.py --distpath ./pyflaskdist --add-data ./paths.config.json;. --collect-data jsonschema_specifications --collect-all pynwb --collect-all hdmf --collect-all ci_info",
+    "deploy:win": "npm run build && npm run build:flask:win && npm run deploy:electron:win",
+    "deploy:mac": "npm run build && npm run build:flask:unix && npm run deploy:electron:mac",
+    "deploy:linux": "npm run build && npm run build:flask:unix && npm run deploy:electron:linux",
+    "deploy:electron:win": "electron-builder build --win --publish always",
+    "deploy:electron:mac": "electron-builder build --mac --publish always",
+    "deploy:electron:linux": "electron-builder build --linux --publish always",
     "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
     "postinstall": "electron-builder install-app-deps",
     "storybook": "storybook dev -p 6006",
@@ -45,13 +53,12 @@
     "generateUpdatesFilesForAllChannels": true,
     "afterSign": "./notarize.js",
     "files": [
-      "**/*",
-      "!pysoda/",
-      "!build/",
-      "!api.spec",
-      "!Users/",
-      "!pyflask/",
-      "!docs/"
+      "src",
+      "schemas",
+      "build",
+      "*.json",
+      "!**/*.ts",
+      "!src/**/*.js"
     ],
     "win": {
       "asar": false,
@@ -72,7 +79,8 @@
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "extraResources": [
         {
-          "from": "./pyflaskdist/app"
+          "from": "./build/flask/nwb-guide",
+          "to": "flask"
         }
       ]
     },
@@ -82,7 +90,8 @@
       "icon": "src/renderer/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
-          "from": "./pyflaskdist/app"
+          "from": "./build/flask/nwb-guide",
+          "to": "flask"
         }
       ]
     },
@@ -94,8 +103,7 @@
       "installerIcon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
-      "provider": "github",
-      "repository": "https://github.com/catalystneuro/nwb-guide.git"
+      "provider": "github"
     }
   },
   "keywords": [],
@@ -112,7 +120,6 @@
     "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
     "dandi": "^0.0.2",
-    "electron-log": "^4.3.5",
     "electron-notarize": "^1.2.1",
     "electron-updater": "4.3.9",
     "find-free-port": "^2.0.0",
@@ -134,7 +141,7 @@
     "@vitest/coverage-v8": "^0.34.1",
     "chromatic": "^6.17.1",
     "electron": "19.0.0",
-    "electron-builder": "22.10.5",
+    "electron-builder": "^24.4.0",
     "electron-packager": "^14.0.6",
     "electron-vite": "^1.0.22",
     "jsdom": "^22.0.0",

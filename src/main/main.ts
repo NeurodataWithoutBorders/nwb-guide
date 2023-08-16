@@ -28,91 +28,57 @@ autoUpdater.channel = "latest";
  *************************************************************/
 
 // flask setup environment variables
-const PY_FLASK_DIST_FOLDER = path.join('..', '..', "pyflaskdist");
+const PYFLASK_DIST_FOLDER_BASE = path.join('build', 'flask')
+const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
-const PY_FLASK_MODULE = "app";
+const PYINSTALLER_NAME = "nwb-guide"
+
 let pyflaskProcess: any = null;
 
 let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
 const portRange = 100;
 
+
 /**
  * Determine if the application is running from a packaged version or from a dev version.
  * The resources path is used for Linux and Mac builds and the app.getAppPath() is used for Windows builds.
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
-const guessPackaged = () => {
+const getPackagedPath = () => {
 
-  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER);
-  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
+  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, "flask", `${PYINSTALLER_NAME}.exe`);
+  const unixPath = path.join(process.resourcesPath, "flask", PYINSTALLER_NAME);
 
-  if (process.platform === "darwin" || process.platform === "linux") {
-    if (fs.existsSync(unixPath)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  if (process.platform === "win32") {
-    if (fs.existsSync(windowsPath)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-};
-
-/**
- * Get the system path to the api server script.
- * The script is located in the resources folder for packaged Linux and Mac builds and in the app.getAppPath() for Windows builds.
- * It is relative to the main.js file directory when in dev mode.
- * @returns {string} The path to the api server script that needs to be executed to start the Python server
- */
-const getScriptPath = () => {
-  if (!guessPackaged()) {
-    return path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
-  }
-
-  if (process.platform === "win32") {
-    return path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
-  } else {
-    return path.join(process.resourcesPath, PY_FLASK_MODULE); // NOTE: Not sure if this will recognize packaged assets for Mac...
-  }
+  if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
+  if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
 };
 
 const createPyProc = async () => {
-  let script = getScriptPath();
-
+  let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
   await killAllPreviousProcesses();
 
   const defaultPort = PORT as number
 
+
   fp(defaultPort, defaultPort + portRange)
     .then(([freePort]: string[]) => {
-      let port = freePort;
+      selectedPort = freePort;
 
-      if (guessPackaged()) {
-        pyflaskProcess = child_process.execFile(script, [port], {
-          // stdio: "ignore",
-        });
-      } else {
-        pyflaskProcess = child_process.spawn("python", [script, port], {
-          // stdio: "ignore",
-        });
-      }
+      const processId = `nwb-guide:${selectedPort}`
+
+      pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
 
       if (pyflaskProcess != null) {
-        console.log("child process success on port " + port);
 
         // Listen for errors from Python process
-        pyflaskProcess.stderr.on("data", function (data: any) {
-          console.log("[python]:", data.toString());
-        });
-      } else console.error("child process failed to start on port" + port);
+        pyflaskProcess.stderr.on("data", (data: string) => console.error(`[${processId}]: ${data}`));
 
-      selectedPort = port;
+        pyflaskProcess.stdout.on('data', (data: string) => console.error(`[${processId}]: ${data}`));
+
+        pyflaskProcess.on('close', (code: number) => console.error(`[nwb-guide:flask] exit code ${code}`));
+
+      }
     })
     .catch((err: Error) => {
       console.log(err);
@@ -189,7 +155,6 @@ function initialize() {
   makeSingleInstance();
 
   function createWindow() {
-    // mainWindow.webContents.openDevTools();
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url);
@@ -240,6 +205,7 @@ function initialize() {
   };
 
   app.on("ready", () => {
+
     const promise = createPyProc();
 
     // Listen after first load

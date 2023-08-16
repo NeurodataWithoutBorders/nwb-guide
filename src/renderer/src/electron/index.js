@@ -18,10 +18,12 @@ if (isElectron) {
         fs = require("fs-extra"); // File System
         os = require("os");
 
-        log = require("electron-log");
-
         remote = require("@electron/remote");
         app = remote.app;
+
+        electron.ipcRenderer.on("logOnBrowser", (info, ...args) => {
+            console.log(...args);
+        });
 
         port = electron.ipcRenderer.sendSync("get-port");
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
