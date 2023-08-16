@@ -25,7 +25,9 @@ if (isElectron) {
             console.log(...args);
         });
 
-        port = electron.ipcRenderer.sendSync("get-port");
+        const pythonUrl = new URL(globalThis.commoners.services.flask.url)
+
+        port = pythonUrl.port
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
         path = require("path");

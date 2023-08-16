@@ -4,6 +4,10 @@ const buildFlaskUnix = `${buildFlaskBase} --add-data ./paths.config.json:.`
 
 export default {
 
+    plugins: {
+        autoupdate: true
+    },
+
     services: {
         flask: {
             src: './pyflask/app.py',
@@ -35,7 +39,7 @@ export default {
             center: true,
             show: false,
             webPreferences: {
-                // nodeIntegration: true,
+                nodeIntegration: true,
                 enableRemoteModule: true,
                 contextIsolation: false,
                 sandbox: false,
