@@ -1,30 +1,26 @@
+import os
+import json
 from typing import List, Dict, Optional, Union
+from shutil import rmtree, copytree
+from pathlib import Path
+from datetime import datetime
+
 from neuroconv.datainterfaces import interface_list  # , SpikeGLXRecordingInterface, PhySortingInterface
 from neuroconv import datainterfaces, NWBConverter
 from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-
-import json
 from neuroconv.utils import NWBMetaDataEncoder
 from neuroconv.tools import LocalPathExpander
 from pynwb.file import NWBFile, Subject
 from pynwb import NWBHDF5IO
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
-from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
 from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
-
-from datetime import datetime
-from sse import MessageAnnouncer
+from ..sse import MessageAnnouncer
 
 announcer = MessageAnnouncer()
-
-
-from shutil import rmtree, copytree
-from pathlib import Path
-import os
 
 
 def locate_data(info: dict) -> dict:
@@ -359,6 +355,8 @@ def upload_to_dandi(
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
 ):
+    from neuroconv.tools.data_transfers import automatic_dandi_upload
+
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 
     return automatic_dandi_upload(
