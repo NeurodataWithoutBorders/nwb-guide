@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>NWB GUIDE</title>
+
+    <link rel="preload" href="./src/renderer/assets/img/logo-guide-draft-transparent-tight.png" as="image" />
+
+    <style>
+      #version {
+        white-space: nowrap;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+
+      [contenteditable] {
+        text-decoration: underline;
+        cursor: text;
+      }
+
+      [contenteditable]:focus {
+        text-decoration: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nwb-dashboard></nwb-dashboard>
+
+    <script type="module" src="./src/renderer/src/index"></script>
+  </body>
+</html>

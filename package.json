@@ -3,7 +3,7 @@
   "productName": "NWB GUIDE",
   "version": "0.0.3",
   "description": "",
-  "main": "./build/main/main.js",
+  "main": "./dist/.commoners/main/index.js",
   "scripts": {
     "start": "electron-vite dev",
     "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
