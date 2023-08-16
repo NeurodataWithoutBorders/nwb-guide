@@ -17,17 +17,27 @@ export class Sidebar extends LitElement {
             pages: { type: Object, reflect: false },
             name: { type: String, reflect: true },
             logo: { type: String, reflect: true },
-            subtitle: { type: String, reflect: true },
 
             renderName: { type: Boolean, reflect: true },
         };
+    }
+
+    // Custom Getter / Setter for Subtitle
+    #subtitle
+    set subtitle (v) {
+        this.#subtitle = v
+        this.requestUpdate()
+    }
+
+    get subtitle () {
+        return this.#subtitle
     }
 
     initialize = true;
 
     constructor(props = {}) {
         super();
-        this.pages = props.pages;
+        this.pages = props.pages ?? {};
         this.name = props.name ?? "";
         this.logo = props.logo;
         this.subtitle = props.subtitle ?? "0.0.1";

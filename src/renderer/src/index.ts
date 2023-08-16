@@ -13,10 +13,25 @@ import { baseUrl } from './globals.js'
 
 import Swal from 'sweetalert2'
 
+import { StatusBar } from "./stories/status/StatusBar.js";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import pythonSVG from "./stories/assets/python.svg?raw";
+import webAssetSVG from "./stories/assets/web_asset.svg?raw";
+import wifiSVG from "./stories/assets/wifi.svg?raw";
+
 // Set the sidebar subtitle to the current app version
 const dashboard = document.querySelector('nwb-dashboard') as Dashboard
 const appVersion = app?.getVersion();
-dashboard.subtitle = appVersion ?? 'Web Version';
+
+const statusBar = new StatusBar({
+  items: [
+    { label: unsafeSVG(webAssetSVG), value: appVersion ?? 'Web' },
+    { label: unsafeSVG(wifiSVG) },
+    { label: unsafeSVG(pythonSVG) }
+  ]
+})
+
+dashboard.subtitle = statusBar
 
 
 //////////////////////////////////
@@ -48,6 +63,8 @@ const startupServerAndApiCheck = async () => {
     await wait(2000);
   }
 
+  statusBar.items[2].status = status
+
   if (!status) {
     //two minutes pass then handle connection error
     // SWAL that the server needs to be restarted for the app to work
@@ -67,28 +84,27 @@ const startupServerAndApiCheck = async () => {
       // Restart the app
       app.relaunch();
       app.exit();
+
+      Swal.close();
     } else console.warn('Python server was not found in development mode.')
+
   } else {
     console.log("Connected to Python back-end successfully");
   }
 
-  // dismiss the Swal
-  Swal.close();
 };
 
 // Run a set of functions that will check all the core systems to verify that a user can upload datasets with no issues.
-async function run_pre_flight_checks(check_update = true) {
-  // log.info("Running pre flight checks");
-  return new Promise(async (resolve) => {
-    let connection_response: any = "";
+async function checkInternetConnection() {
 
     // Check the internet connection and if available check the rest.
-    connection_response = await check_internet_connection();
+    await wait(800);
+    const hasInternet = statusBar.items[1].status = navigator.onLine;
 
-    if (!connection_response) {
+    if (!hasInternet) {
       await Swal.fire({
         title: "No Internet Connection",
-        icon: "success",
+        icon: "warning",
         text: "It appears that your computer is not connected to the internet. You may continue, but you will not be able to use features of NWB GUIDE related to uploading data to DANDI.",
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
@@ -100,14 +116,11 @@ async function run_pre_flight_checks(check_update = true) {
         hideClass: {
           popup: "animate__animated animate__zoomOut animate__faster",
         },
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          // Do nothing
-        }
-      });
-      return resolve(false);
+      })
+
     }
-  });
+
+    return hasInternet
 };
 
 // Check if the Pysoda server is live
@@ -121,42 +134,6 @@ const serverIsLiveStartup = async () => {
   }
 
   return echoResponse === "server ready" ? true : false;
-};
-
-async function check_internet_connection(show_notification = true) {
-  let notification = null;
-  if (show_notification) {
-    notification = notyf.open({
-      type: "loading_internet",
-      message: "Checking Internet status...",
-    });
-  }
-
-  await wait(800);
-
-  if ( navigator.onLine) {
-    console.log("Connected to the internet");
-
-      if (show_notification) {
-        notyf.dismiss(notification);
-        notyf.open({
-          type: "success",
-          message: "Connected to the internet",
-        });
-      }
-  } else {
-      console.error("No internet connection");
-      // if (electronImports.ipcRenderer) electronImports.ipcRenderer.send("warning-no-internet-connection"); // NOTE: Proposed syntax t continue accessing the ipcRenderer
-      if (show_notification) {
-        notyf.dismiss(notification);
-        notyf.open({
-          type: "error",
-          message: "Not connected to internet",
-        });
-      }
-    }
-
-    return navigator.onLine;
 };
 
 // Check for update and show the pop up box
@@ -201,4 +178,4 @@ const restartApp = async () => {
 startupServerAndApiCheck();
 
 // check integrity of all the core systems
-run_pre_flight_checks()
+checkInternetConnection()
