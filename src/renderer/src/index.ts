@@ -58,7 +58,7 @@ const startupServerAndApiCheck = async () => {
       status = false;
     }
     if (status) break;
-    if (new Date() - time_start > waitTime) break; 
+    if (new Date() - time_start > waitTime) break;
     await wait(2000); // Check server every two seconds
   }
 

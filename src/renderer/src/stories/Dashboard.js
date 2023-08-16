@@ -72,16 +72,16 @@ export class Dashboard extends LitElement {
     sidebar;
     subSidebar;
 
-     // Custom Getter / Setter for Subtitle
-     #subtitle
-     set subtitle (v) {
-         this.#subtitle = v
-         this.sidebar.subtitle = v
-     }
- 
-     get subtitle () {
-         return this.#subtitle
-     }
+    // Custom Getter / Setter for Subtitle
+    #subtitle;
+    set subtitle(v) {
+        this.#subtitle = v;
+        this.sidebar.subtitle = v;
+    }
+
+    get subtitle() {
+        return this.#subtitle;
+    }
 
     pagesById = {};
     #active;

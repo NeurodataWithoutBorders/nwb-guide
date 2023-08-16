@@ -61,7 +61,7 @@ export class StatusIndicator extends LitElement {
 
     declare label: StatusIndicatorProps['label']
     declare value: StatusIndicatorProps['value']
-    declare status: StatusIndicatorProps['status'] 
+    declare status: StatusIndicatorProps['status']
 
     static get properties() {
         return {

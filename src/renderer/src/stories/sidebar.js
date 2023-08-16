@@ -23,14 +23,14 @@ export class Sidebar extends LitElement {
     }
 
     // Custom Getter / Setter for Subtitle
-    #subtitle
-    set subtitle (v) {
-        this.#subtitle = v
-        this.requestUpdate()
+    #subtitle;
+    set subtitle(v) {
+        this.#subtitle = v;
+        this.requestUpdate();
     }
 
-    get subtitle () {
-        return this.#subtitle
+    get subtitle() {
+        return this.#subtitle;
     }
 
     initialize = true;

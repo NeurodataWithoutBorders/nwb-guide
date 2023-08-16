@@ -13,11 +13,11 @@ const Template = (args) => new StatusBar(args);
 export const Default = Template.bind({});
 Default.args = {
     items: [
-        { label: unsafeSVG(webAssetSVG), value: '0.0.3' },
+        { label: unsafeSVG(webAssetSVG), value: "0.0.3" },
         { label: unsafeSVG(wifiSVG) },
         { label: unsafeSVG(pythonSVG), status: true },
-        { label: 'Other', status: false },
-    ]
+        { label: "Other", status: false },
+    ],
 };
 
 // {
