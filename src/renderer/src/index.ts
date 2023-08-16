@@ -43,11 +43,10 @@ let update_downloaded_notification = "";
 // utility function for async style set timeout
 const wait = async (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
-// check that the client connected to the server using exponential backoff
-// verify the api versions match
+// check that the client connected to the server
 const startupServerAndApiCheck = async () => {
 
-  const waitTime = 1000*60*(isElectron ? 2 : 0.1); // Wait 2 seconds if in electron context
+  const waitTime = 1000*60*(isElectron ? 5 : 0.1); //break after five minutes (electron context)
   let status = false;
   let time_start = new Date();
   let error = "";
@@ -59,8 +58,8 @@ const startupServerAndApiCheck = async () => {
       status = false;
     }
     if (status) break;
-    if (new Date() - time_start > waitTime) break; //break after two minutes
-    await wait(2000);
+    if (new Date() - time_start > waitTime) break; 
+    await wait(2000); // Check server every two seconds
   }
 
   statusBar.items[2].status = status
