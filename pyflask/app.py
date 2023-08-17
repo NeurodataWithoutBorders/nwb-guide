@@ -14,7 +14,7 @@ from namespaces import configure_namespaces
 configure_namespaces()  # Must be called before other setupUtils
 
 from setupUtils import configureLogger, configureRouteHandlers
-from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 app = Flask(__name__)
 
@@ -24,7 +24,7 @@ app.config["CORS_HEADERS"] = "Content-Type"
 
 configureLogger(app)
 
-package_json_file_path = Path(__file__).parent.parent / "package.json"
+package_json_file_path = resource_path("package.json")
 with open(file=package_json_file_path) as fp:
     package_json = json.load(fp=fp)
 
