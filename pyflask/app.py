@@ -10,7 +10,7 @@ from flask_restx import Api, Resource
 
 from apis import startup_api, neuroconv_api
 from setupUtils import configureLogger
-from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 app = Flask(__name__)
 
