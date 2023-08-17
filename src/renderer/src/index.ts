@@ -13,10 +13,25 @@ import { baseUrl } from './globals.js'
 
 import Swal from 'sweetalert2'
 
+import { StatusBar } from "./stories/status/StatusBar.js";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import pythonSVG from "./stories/assets/python.svg?raw";
+import webAssetSVG from "./stories/assets/web_asset.svg?raw";
+import wifiSVG from "./stories/assets/wifi.svg?raw";
+
 // Set the sidebar subtitle to the current app version
 const dashboard = document.querySelector('nwb-dashboard') as Dashboard
 const appVersion = app?.getVersion();
-dashboard.subtitle = appVersion ?? 'Web Version';
+
+const statusBar = new StatusBar({
+  items: [
+    { label: unsafeSVG(webAssetSVG), value: appVersion ?? 'Web' },
+    { label: unsafeSVG(wifiSVG) },
+    { label: unsafeSVG(pythonSVG) }
+  ]
+})
+
+dashboard.subtitle = statusBar
 
 
 //////////////////////////////////
@@ -28,11 +43,10 @@ let update_downloaded_notification = "";
 // utility function for async style set timeout
 const wait = async (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
-// check that the client connected to the server using exponential backoff
-// verify the api versions match
+// check that the client connected to the server
 const startupServerAndApiCheck = async () => {
 
-  const waitTime = 1000*60*(isElectron ? 2 : 0.1); // Wait 2 seconds if in electron context
+  const waitTime = 1000*60*(isElectron ? 5 : 0.1); //break after five minutes (electron context)
   let status = false;
   let time_start = new Date();
   let error = "";
@@ -44,9 +58,11 @@ const startupServerAndApiCheck = async () => {
       status = false;
     }
     if (status) break;
-    if (new Date() - time_start > waitTime) break; //break after two minutes
-    await wait(2000);
+    if (new Date() - time_start > waitTime) break;
+    await wait(2000); // Check server every two seconds
   }
+
+  statusBar.items[2].status = status
 
   if (!status) {
     //two minutes pass then handle connection error
@@ -56,7 +72,7 @@ const startupServerAndApiCheck = async () => {
     if (isElectron) {
       await Swal.fire({
         icon: "error",
-        html: `Something went wrong while initializing the application's background services. Please restart NWB GUIDE and try again. If this issue occurs multiple times, please open an issue on the <a href='https://github.com/catalystneuro/nwb-guide/issues'>NWB GUIDE Issue Tracker</a>.`,
+        html: `Something went wrong while initializing the application's background services. Please restart NWB GUIDE and try again. If this issue occurs multiple times, please open an issue on the <a href='https://github.com/catalystneuro/nwb-guide/issues' target='_blank'>NWB GUIDE Issue Tracker</a>.`,
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
         confirmButtonText: "Restart now",
@@ -67,28 +83,27 @@ const startupServerAndApiCheck = async () => {
       // Restart the app
       app.relaunch();
       app.exit();
+
+      Swal.close();
     } else console.warn('Python server was not found in development mode.')
+
   } else {
     console.log("Connected to Python back-end successfully");
   }
 
-  // dismiss the Swal
-  Swal.close();
 };
 
 // Run a set of functions that will check all the core systems to verify that a user can upload datasets with no issues.
-async function run_pre_flight_checks(check_update = true) {
-  // log.info("Running pre flight checks");
-  return new Promise(async (resolve) => {
-    let connection_response: any = "";
+async function checkInternetConnection() {
 
     // Check the internet connection and if available check the rest.
-    connection_response = await check_internet_connection();
+    await wait(800);
+    const hasInternet = statusBar.items[1].status = navigator.onLine;
 
-    if (!connection_response) {
+    if (!hasInternet) {
       await Swal.fire({
         title: "No Internet Connection",
-        icon: "success",
+        icon: "warning",
         text: "It appears that your computer is not connected to the internet. You may continue, but you will not be able to use features of NWB GUIDE related to uploading data to DANDI.",
         heightAuto: false,
         backdrop: "rgba(0,0,0, 0.4)",
@@ -100,14 +115,11 @@ async function run_pre_flight_checks(check_update = true) {
         hideClass: {
           popup: "animate__animated animate__zoomOut animate__faster",
         },
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          // Do nothing
-        }
-      });
-      return resolve(false);
+      })
+
     }
-  });
+
+    return hasInternet
 };
 
 // Check if the Pysoda server is live
@@ -121,42 +133,6 @@ const serverIsLiveStartup = async () => {
   }
 
   return echoResponse === "server ready" ? true : false;
-};
-
-async function check_internet_connection(show_notification = true) {
-  let notification = null;
-  if (show_notification) {
-    notification = notyf.open({
-      type: "loading_internet",
-      message: "Checking Internet status...",
-    });
-  }
-
-  await wait(800);
-
-  if ( navigator.onLine) {
-    console.log("Connected to the internet");
-
-      if (show_notification) {
-        notyf.dismiss(notification);
-        notyf.open({
-          type: "success",
-          message: "Connected to the internet",
-        });
-      }
-  } else {
-      console.error("No internet connection");
-      // if (electronImports.ipcRenderer) electronImports.ipcRenderer.send("warning-no-internet-connection"); // NOTE: Proposed syntax t continue accessing the ipcRenderer
-      if (show_notification) {
-        notyf.dismiss(notification);
-        notyf.open({
-          type: "error",
-          message: "Not connected to internet",
-        });
-      }
-    }
-
-    return navigator.onLine;
 };
 
 // Check for update and show the pop up box
@@ -201,4 +177,4 @@ const restartApp = async () => {
 startupServerAndApiCheck();
 
 // check integrity of all the core systems
-run_pre_flight_checks()
+checkInternetConnection()
