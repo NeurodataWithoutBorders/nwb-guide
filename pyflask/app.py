@@ -1,50 +1,38 @@
-from __future__ import print_function
+"""The primary Flask server for the Python backend."""
+import sys
+import json
+import multiprocessing
+from pathlib import Path
 
-# import config
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
+from flask_restx import Api, Resource
 
-# from flask_cors import CORS
 from namespaces import configure_namespaces
-from flask_restx import Resource, Namespace
-import sys
 
-import multiprocessing
+# TODO: clean this namespace stuff up in follow-up
+configure_namespaces()  # Must be called before other setupUtils
 
-configure_namespaces()
-
-from setupUtils import configureLogger, configureRouteHandlers, configureAPI
-from apis.apiNeuroConv import api as neuroconv_api
-
-# get urls to serve files
+from setupUtils import configureLogger, configureRouteHandlers
 from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
-from errorHandlers import notBadRequestException
-
 
 app = Flask(__name__)
 
-# Always enable CORS
+# Always enable CORS to allow distinct processes to handle frontend vs. backend
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
 
 configureLogger(app)
 
-api = configureAPI()
+package_json_file_path = Path(__file__).parent.parent / "package.json"
+with open(file=package_json_file_path) as fp:
+    package_json = json.load(fp=fp)
 
-
-@neuroconv_api.route("/upload")
-class Upload(Resource):
-    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        try:
-            from manageNeuroconv import upload_to_dandi
-
-            return upload_to_dandi(**neuroconv_api.payload)
-
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
-
+api = Api(
+    version=package_json["version"],
+    title="NWB GUIDE API",
+    description="The REST API for the NWB GUIDE provided by the Python Flask Server.",
+)
 
 configureRouteHandlers(api)
 
@@ -75,7 +63,8 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()  # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
+    # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
+    multiprocessing.freeze_support()
 
     port = sys.argv[len(sys.argv) - 1]
     if port.isdigit():
@@ -83,5 +72,3 @@ if __name__ == "__main__":
         app.run(host="127.0.0.1", port=port)
     else:
         raise Exception("No port provided for the NWB GUIDE backend.")
-
-# app.run(host="127.0.0.1", port='4242')
