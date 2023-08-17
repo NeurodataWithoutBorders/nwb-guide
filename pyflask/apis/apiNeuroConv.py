@@ -1,8 +1,10 @@
-from flask_restx import Namespace, Resource, reqparse
-from flask import Response
+"""API endpoint definitions for interacting with NeuroConv."""
 import traceback
 
-from namespaces import get_namespace, NamespaceEnum
+from flask_restx import Namespace, Resource, reqparse
+from flask import Response
+
+# from namespaces import get_namespace, NamespaceEnum
 from manageNeuroconv import (
     get_all_interface_info,
     locate_data,
@@ -16,8 +18,7 @@ from manageNeuroconv import (
 
 from errorHandlers import notBadRequestException
 
-api = Namespace("neuroconv", description="Neuroconv API for NWB GUIDE")
-api = get_namespace(NamespaceEnum.NEUROCONV)
+api = Namespace("neuroconv", description="Neuroconv API for the NWB GUIDE.")
 
 parser = reqparse.RequestParser()
 parser.add_argument("interfaces", type=str, action="split", help="Interfaces cannot be converted")

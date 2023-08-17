@@ -1,8 +1,8 @@
+"""API endpoint definitions for startup operations."""
 from startup import get_api_version
-from flask_restx import Resource
-from namespaces import get_namespace, NamespaceEnum
+from flask_restx import Namespace, Resource
 
-api = get_namespace(NamespaceEnum.STARTUP)
+api = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
 
 parser = api.parser()
 parser.add_argument(
