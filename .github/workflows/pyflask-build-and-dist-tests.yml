@@ -3,7 +3,6 @@ on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
   pull_request:
-  push:
   workflow_dispatch:
 
 # Cancel previous workflows on the same pull request
