@@ -20,7 +20,7 @@ app.config["CORS_HEADERS"] = "Content-Type"
 
 configureLogger(app)
 
-package_json_file_path = Path(__file__).parent.parent / "package.json"
+package_json_file_path = resource_path("package.json")
 with open(file=package_json_file_path) as fp:
     package_json = json.load(fp=fp)
 
