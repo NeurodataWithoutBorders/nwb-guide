@@ -6,7 +6,7 @@ from flask_cors import CORS
 
 # from flask_cors import CORS
 from namespaces import configure_namespaces
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 import sys
 
 import multiprocessing
@@ -14,9 +14,11 @@ import multiprocessing
 configure_namespaces()
 
 from setupUtils import configureLogger, configureRouteHandlers, configureAPI
+from apis.apiNeuroConv import api as neuroconv_api
 
 # get urls to serve files
 from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from errorHandlers import notBadRequestException
 
 
 app = Flask(__name__)
@@ -28,6 +30,21 @@ app.config["CORS_HEADERS"] = "Content-Type"
 configureLogger(app)
 
 api = configureAPI()
+
+
+@neuroconv_api.route("/upload")
+class Upload(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            from manageNeuroconv import upload_to_dandi
+
+            return upload_to_dandi(**neuroconv_api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
 
 configureRouteHandlers(api)
 
