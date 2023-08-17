@@ -2,6 +2,8 @@
 import sys
 import json
 import multiprocessing
+from logging import Formatter, DEBUG
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from flask import Flask, request, send_from_directory
@@ -9,7 +11,6 @@ from flask_cors import CORS
 from flask_restx import Api, Resource
 
 from apis import startup_api, neuroconv_api
-from setupUtils import configureLogger
 from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 app = Flask(__name__)
@@ -18,8 +19,22 @@ app = Flask(__name__)
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
 
-configureLogger(app)
+# Configure logger
+LOG_FILE_PATH = Path.home() / "NWB_GUIDE" / "logs" / "api.log"
+LOG_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+log_handler = RotatingFileHandler(LOG_FILE_PATH, maxBytes=5 * 1024 * 1024, backupCount=3)
+log_formatter = Formatter(
+    fmt="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+log_handler.setFormatter(log_formatter)
+
+app.logger.addHandler(log_handler)
+app.logger.setLevel(DEBUG)
+
+
+# Initialize API
 package_json_file_path = Path(__file__).parent.parent / "package.json"
 with open(file=package_json_file_path) as fp:
     package_json = json.load(fp=fp)
@@ -29,10 +44,8 @@ api = Api(
     title="NWB GUIDE API",
     description="The REST API for the NWB GUIDE provided by the Python Flask Server.",
 )
-
 api.add_namespace(startup_api)
 api.add_namespace(neuroconv_api)
-
 api.init_app(app)
 
 

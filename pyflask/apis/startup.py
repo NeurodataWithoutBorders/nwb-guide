@@ -1,5 +1,4 @@
 """API endpoint definitions for startup operations."""
-from startup import get_api_version
 from flask_restx import Namespace, Resource
 
 startup_api = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
@@ -20,9 +19,3 @@ class Echo(Resource):
     def get(self):
         args = parser.parse_args()
         return args["arg"]
-
-
-@startup_api.route("/minimum_api_version")
-class MinimumApiVersion(Resource):
-    def get(self):
-        return get_api_version()
