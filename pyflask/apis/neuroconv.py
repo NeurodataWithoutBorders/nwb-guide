@@ -146,3 +146,31 @@ class Events(Resource):
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
+
+
+@neuroconv_api.route("/test-custom-install/<string:package_name>")
+class TestCustomInstall(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self, package_name: str):
+        try:
+            import os
+
+            return os.system(f"pip install {package_name}")
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
+
+@neuroconv_api.route("/test-dynamic-import/<string:package_name>")
+class TestDynamicImport(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self, package_name: str):
+        try:
+            from importlib import import_module
+
+            remfile = import_module(name=package_name)
+
+            return 0
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
