@@ -399,6 +399,6 @@ ipcMain.on("get-port", (event) => {
 ipcMain.on("python.status", (event) => {
   if (globals.python.sent) {
     if (globals.python.status) pythonIsOpen()
-    else pythonIsClosed() 
+    else pythonIsClosed()
   }
 });

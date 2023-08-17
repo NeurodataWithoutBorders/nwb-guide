@@ -183,8 +183,8 @@ if (isElectron) {
       ipcRenderer.send("restart_app");
     };
 
-  } 
-  
+  }
+
   else pythonServerOpened() // Will fail if the request doesn't go through
 
 // check integrity of all the core systems
