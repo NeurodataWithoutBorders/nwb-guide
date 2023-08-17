@@ -32,8 +32,6 @@
     "deploy:electron:win": "electron-builder build --win --publish always",
     "deploy:electron:mac": "electron-builder build --mac --publish always",
     "deploy:electron:linux": "electron-builder build --linux --publish always",
-    "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
-    "postinstall": "electron-builder install-app-deps",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "chromatic": "npx chromatic"
