@@ -39,6 +39,50 @@ let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
 const portRange = 100;
 
+let mainWindowReady = false
+let readyQueue: Function[] = []
+
+let globals =  {
+
+  python: {
+    status: false,
+    sent: false,
+    latestError: ''
+  },
+
+  // Reactive ready variable
+  get mainWindowReady() {
+    return mainWindowReady
+  },
+
+  set mainWindowReady(v) {
+    mainWindowReady = v
+    if (v) readyQueue.forEach(f => onWindowReady(f))
+    readyQueue = []
+  }
+
+}
+
+const onWindowReady = (f: Function) => {
+  if (mainWindowReady) f(mainWindow)
+  else readyQueue.push(f)
+}
+
+const pythonIsOpen = () => {
+  onWindowReady(win => {
+    win.webContents.send("python.open")
+    globals.python.sent = true
+  })
+
+  globals.python.status = true
+}
+const pythonIsClosed = (err = globals.python.latestError) => {
+  onWindowReady(win => {
+    win.webContents.send("python.closed", err)
+    globals.python.sent = true
+  })
+  globals.python.status = false
+}
 
 /**
  * Determine if the application is running from a packaged version or from a dev version.
@@ -72,11 +116,20 @@ const createPyProc = async () => {
       if (pyflaskProcess != null) {
 
         // Listen for errors from Python process
-        pyflaskProcess.stderr.on("data", (data: string) => console.error(`[${processId}]: ${data}`));
+        pyflaskProcess.stderr.on("data", (data: string) => {
+          console.error(`[${processId} error]: ${data}`)
+          globals.python.latestError = data.toString()
+        });
 
-        pyflaskProcess.stdout.on('data', (data: string) => console.error(`[${processId}]: ${data}`));
+        pyflaskProcess.stdout.on('data', (data: string) => {
+          pythonIsOpen();
+          console.log(`[${processId}]: ${data}`)
+        });
 
-        pyflaskProcess.on('close', (code: number) => console.error(`[nwb-guide:flask] exit code ${code}`));
+        pyflaskProcess.on('close', (code: number) => {
+          console.error(`[nwb-guide:flask] exit code ${code}`)
+          pythonIsClosed()
+        });
 
       }
     })
@@ -187,6 +240,7 @@ function initialize() {
             });
         }
       } else {
+        globals.mainWindowReady = false
         await exitPyProc();
         app.exit();
       }
@@ -275,6 +329,7 @@ function initialize() {
         // run_pre_flight_checks();
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
+        globals.mainWindowReady = true
       }, 1000);
     });
   });
@@ -288,11 +343,6 @@ function initialize() {
     app.quit();
   });
 }
-
-// function run_pre_flight_checks() {
-//   console.log("Running pre-checks");
-//   mainWindow.webContents.send("run_pre_flight_checks");
-// }
 
 // Make this app a single instance app.
 const gotTheLock = app.requestSingleInstanceLock();
@@ -329,11 +379,11 @@ ipcMain.on("resize-window", (event, dir) => {
 });
 
 autoUpdater.on("update-available", () => {
-  mainWindow.webContents.send("update_available");
+  onWindowReady(win => win.webContents.send("update_available"));
 });
 
 autoUpdater.on("update-downloaded", () => {
-  mainWindow.webContents.send("update_downloaded");
+  onWindowReady(win => win.webContents.send("update_downloaded"));
 });
 
 ipcMain.on("restart_app", async () => {
@@ -343,4 +393,12 @@ ipcMain.on("restart_app", async () => {
 
 ipcMain.on("get-port", (event) => {
   event.returnValue = selectedPort;
+});
+
+// Allow the browser to request status if already sent once
+ipcMain.on("python.status", (event) => {
+  if (globals.python.sent) {
+    if (globals.python.status) pythonIsOpen()
+    else pythonIsClosed() 
+  }
 });
