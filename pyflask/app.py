@@ -8,7 +8,7 @@ from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource
 
-from apis import startup_resource, neuroconv_resource
+from apis import startup_api, neuroconv_api
 from setupUtils import configureLogger
 from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
@@ -30,8 +30,8 @@ api = Api(
     description="The REST API for the NWB GUIDE provided by the Python Flask Server.",
 )
 
-api.add_namespace(startup_resource)
-api.add_namespace(neuroconv_resource)
+api.add_namespace(startup_api)
+api.add_namespace(neuroconv_api)
 
 api.init_app(app)
 
