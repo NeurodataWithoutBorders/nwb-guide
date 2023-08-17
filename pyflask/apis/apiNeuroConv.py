@@ -121,6 +121,20 @@ class GenerateDataset(Resource):
                 api.abort(500, str(e))
 
 
+@api.route("/upload")
+class Upload(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            from manageNeuroconv import upload_to_dandi
+
+            return upload_to_dandi(**api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                api.abort(500, str(e))
+
+
 # Create an events endpoint
 # announcer.announce('test', 'publish')
 @api.route("/events", methods=["GET"])
