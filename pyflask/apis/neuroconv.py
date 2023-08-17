@@ -168,7 +168,7 @@ class TestDynamicImport(Resource):
         try:
             from importlib import import_module
 
-            remfile = import_module(name=package_name)
+            module = import_module(name=package_name)
 
             return 0
         except Exception as e:
