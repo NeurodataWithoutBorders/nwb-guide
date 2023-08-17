@@ -6,6 +6,7 @@
   "main": "./build/main/main.js",
   "scripts": {
     "start": "electron-vite dev --outDir build",
+    "postinstall": "electron-builder install-app-deps",
     "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
     "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
