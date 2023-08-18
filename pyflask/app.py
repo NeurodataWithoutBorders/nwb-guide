@@ -6,6 +6,10 @@ from logging import Formatter, DEBUG
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+# https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
+multiprocessing.freeze_support()
+
+
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource
@@ -73,9 +77,6 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-    # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
-    multiprocessing.freeze_support()
-
     port = sys.argv[len(sys.argv) - 1]
     if port.isdigit():
         api.logger.info(f"Starting server on port {port}")
