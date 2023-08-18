@@ -10,7 +10,6 @@ from manageNeuroconv import (
     get_metadata_schema,
     convert_to_nwb,
     validate_metadata,
-    upload_to_dandi,
     listen_to_neuroconv_events,
     generate_dataset,
 )
@@ -115,6 +114,8 @@ class Upload(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
+            from manageNeuroconv import upload_to_dandi
+
             return upload_to_dandi(**api.payload)
 
         except Exception as e:
