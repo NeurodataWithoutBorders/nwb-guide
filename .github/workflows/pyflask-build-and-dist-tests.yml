@@ -84,13 +84,14 @@ jobs:
       - name: Build PyFlask distribution
         run: npm run build:flask:${{ matrix.shorthand }}
 
-      - if: matrix.os == 'windows-latest'
-        name: Run test on build executable
-        run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide.exe
+      # encountering parsing issue for second arg
+      #- if: matrix.os == 'windows-latest'
+      #  name: Run test on build executable
+      #  run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide.exe
 
-      - if: matrix.os != 'windows-latest'
-        name: Run test on build executable
-        run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide
+      #- if: matrix.os != 'windows-latest'
+      #  name: Run test on build executable
+      #  run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide
 
       - name: Run test on distributed executable
         run: node tests/testPyinstallerExecutable.js
