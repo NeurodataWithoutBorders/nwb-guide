@@ -236,7 +236,6 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
 
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
-    from pynwb import NWBHDF5IO
 
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
@@ -311,11 +310,6 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    io = NWBHDF5IO(resolved_output_path, mode="r")
-    file = io.read()
-    html = file._repr_html_()
-    io.close()
-
     # Create a symlink between the fake adata and custom data
     if not run_stub_test and not resolved_output_directory == default_output_directory:
         if default_output_directory.exists():
@@ -335,7 +329,7 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-    return dict(html=html, file=str(resolved_output_path))
+    return str(resolved_output_path)
 
 
 def upload_to_dandi(

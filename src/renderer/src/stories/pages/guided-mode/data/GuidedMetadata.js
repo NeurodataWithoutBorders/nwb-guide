@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { UnsafeComponent } from "../../Unsafe.js";
+import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -158,11 +159,14 @@ export class GuidedMetadataPage extends ManagedPage {
                     name: "Preview",
                     primary: true,
                     onClick: async (key, el) => {
+                        
+                        const { project } = this.info.globalState
+
                         let [subject, session] = key.split("/");
                         if (subject.startsWith("sub-")) subject = subject.slice(4);
                         if (session.startsWith("ses-")) session = session.slice(4);
 
-                        const [{ file, html }] = await this.runConversions(
+                        const [file] = await this.runConversions(
                             { stub_test: true },
                             [{ subject, session }],
                             { title: "Running conversion preview" }
@@ -179,11 +183,7 @@ export class GuidedMetadataPage extends ManagedPage {
                             height: "100%",
                         });
 
-                        const container = document.createElement("div");
-                        container.style.padding = "0px 25px";
-                        container.append(new UnsafeComponent(html));
-
-                        modal.append(container);
+                        modal.append(new Neurosift({ url: getURLFromFilePath(file, project.name)}));
                         document.body.append(modal);
                     },
                 },
