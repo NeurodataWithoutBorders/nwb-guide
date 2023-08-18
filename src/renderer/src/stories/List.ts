@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { Button } from './Button'
+import { empty } from 'handsontable/helpers/dom';
 
 type ListItemType = {
   key: string,
@@ -10,12 +11,18 @@ type ListItemType = {
 export interface ListProps {
   onChange?: () => void;
   items?: ListItemType[]
+  emptyMessage?: string
 }
 
 export class List extends LitElement {
 
   static get styles() {
     return css`
+
+      #empty {
+        padding: 20px 10px;
+        color: gray;
+      }
 
       li > div {
         display: flex;
@@ -65,10 +72,13 @@ export class List extends LitElement {
 
     declare items: ListItemType[]
 
+    declare emptyMessage: string
+
     constructor(props: ListProps = {}) {
       super();
 
       this.items = props.items ?? []
+      this.emptyMessage = props.emptyMessage ?? ''
       if (props.onChange) this.onChange = props.onChange
 
     }
@@ -173,11 +183,12 @@ export class List extends LitElement {
       this.removeAttribute('keys')
       this.object = {}
 
-      return html`
+      const { items, emptyMessage} = this
+
+      return items.length || !emptyMessage ? html`
       <ol>
-        ${this.items.map(this.#renderListItem)}
-      </ol>
-    `
+        ${items.map(this.#renderListItem)}
+      </ol>` : html`<div id="empty">${emptyMessage}</div>`
     }
   }
 
