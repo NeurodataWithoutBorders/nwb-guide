@@ -10,7 +10,6 @@ from pynwb.file import NWBFile, Subject
 from pynwb import NWBHDF5IO
 from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
-from neuroconv.tools.data_transfers import automatic_dandi_upload
 from nwbinspector.register_checks import InspectorMessage, Importance
 from nwbinspector.nwbinspector import configure_checks, load_config
 
@@ -359,6 +358,8 @@ def upload_to_dandi(
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
 ):
+    from neuroconv.tools.data_transfers import automatic_dandi_upload
+
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 
     return automatic_dandi_upload(

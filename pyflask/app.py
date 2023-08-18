@@ -1,33 +1,38 @@
-from __future__ import print_function
+"""The primary Flask server for the Python backend."""
+import sys
+import json
+import multiprocessing
+from pathlib import Path
 
-# import config
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
+from flask_restx import Api, Resource
 
-# from flask_cors import CORS
 from namespaces import configure_namespaces
-from flask_restx import Resource
-import sys
 
-import multiprocessing
+# TODO: clean this namespace stuff up in follow-up
+configure_namespaces()  # Must be called before other setupUtils
 
-configure_namespaces()
-
-from setupUtils import configureLogger, configureRouteHandlers, configureAPI
-
-# get urls to serve files
-from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
-
+from setupUtils import configureLogger, configureRouteHandlers
+from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 app = Flask(__name__)
 
-# Always enable CORS
+# Always enable CORS to allow distinct processes to handle frontend vs. backend
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
 
 configureLogger(app)
 
-api = configureAPI()
+package_json_file_path = resource_path("package.json")
+with open(file=package_json_file_path) as fp:
+    package_json = json.load(fp=fp)
+
+api = Api(
+    version=package_json["version"],
+    title="NWB GUIDE API",
+    description="The REST API for the NWB GUIDE provided by the Python Flask Server.",
+)
 
 configureRouteHandlers(api)
 
@@ -58,7 +63,8 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()  # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
+    # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
+    multiprocessing.freeze_support()
 
     port = sys.argv[len(sys.argv) - 1]
     if port.isdigit():
@@ -66,5 +72,3 @@ if __name__ == "__main__":
         app.run(host="127.0.0.1", port=port)
     else:
         raise Exception("No port provided for the NWB GUIDE backend.")
-
-# app.run(host="127.0.0.1", port='4242')
