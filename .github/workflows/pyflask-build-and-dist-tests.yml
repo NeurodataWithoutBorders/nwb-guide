@@ -74,7 +74,7 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Update environment
-        run: mamba env update -n env-electron-python -f ${{ matrix.label }}
+        run: mamba env update -n nwb-guide -f ${{ matrix.label }}
 
       - name: Setup Node
         uses: actions/setup-node@v3
