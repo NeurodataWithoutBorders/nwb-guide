@@ -1,33 +1,20 @@
-from typing import List, Dict, Optional, Union
-from neuroconv.datainterfaces import interface_list  # , SpikeGLXRecordingInterface, PhySortingInterface
-from neuroconv import datainterfaces, NWBConverter
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-
+"""Collection of utility functions used by the NeuroConv Flask API."""
+import os
 import json
-from neuroconv.utils import NWBMetaDataEncoder
-from neuroconv.tools import LocalPathExpander
-from pynwb.file import NWBFile, Subject
-from pynwb import NWBHDF5IO
-from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
-from nwbinspector.register_checks import InspectorMessage, Importance
-from nwbinspector.nwbinspector import configure_checks, load_config
+from datetime import datetime
+from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
+from shutil import rmtree, copytree
+from pathlib import Path
 
 from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
-
-from datetime import datetime
-from sse import MessageAnnouncer
+from ..sse import MessageAnnouncer
 
 announcer = MessageAnnouncer()
 
 
-from shutil import rmtree, copytree
-from pathlib import Path
-import os
-
-
 def locate_data(info: dict) -> dict:
     """Locate data from the specifies directories using fstrings."""
+    from neuroconv.tools import LocalPathExpander
 
     expander = LocalPathExpander()
 
@@ -56,6 +43,7 @@ def locate_data(info: dict) -> dict:
 
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
+    from neuroconv.datainterfaces import interface_list
 
     # Hard coded for now - eventual goal will be to import this from NeuroConv
     interfaces_to_load = {
@@ -65,7 +53,8 @@ def get_all_interface_info() -> dict:
     return {
         interface.__name__: {
             "keywords": interface.keywords,
-            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves have a label property
+            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves
+            # have a label property
             "label": format_name
             # Can also add a description here if we want to provide more information about the interface
         }
@@ -74,7 +63,9 @@ def get_all_interface_info() -> dict:
 
 
 # Combine Multiple Interfaces
-def get_custom_converter(interface_class_dict: dict) -> NWBConverter:
+def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
+    from neuroconv import datainterfaces, NWBConverter
+
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
             custom_name: getattr(datainterfaces, interface_name)
@@ -84,20 +75,20 @@ def get_custom_converter(interface_class_dict: dict) -> NWBConverter:
     return CustomNWBConverter
 
 
-def instantiate_custom_converter(source_data, interface_class_dict) -> NWBConverter:
+def instantiate_custom_converter(source_data, interface_class_dict):  # -> NWBConverter:
     CustomNWBConverter = get_custom_converter(interface_class_dict)
     return CustomNWBConverter(source_data)
 
 
 def get_source_schema(interface_class_dict: dict) -> dict:
-    """
-    Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
-    """
+    """Function used to get schema from a CustomNWBConverter that can handle multiple interfaces."""
     CustomNWBConverter = get_custom_converter(interface_class_dict)
     return CustomNWBConverter.get_source_schema()
 
 
 def get_first_recording_interface(converter):
+    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
+
     for interface in converter.data_interface_objects.values():
         if isinstance(interface, BaseRecordingExtractorInterface):
             return interface
@@ -120,9 +111,8 @@ def is_supported_recording_interface(recording_interface, metadata):
 
 
 def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[str, dict]:
-    """
-    Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
-    """
+    """Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data."""
+    from neuroconv.utils import NWBMetaDataEncoder
 
     converter = instantiate_custom_converter(source_data, interfaces)
     schema = converter.get_metadata_schema()
@@ -168,9 +158,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
 
 def get_check_function(check_function_name: str) -> callable:
-    """
-    Function used to fetch an arbitrary NWB Inspector function
-    """
+    """Function used to fetch an arbitrary NWB Inspector function."""
+    from nwbinspector.nwbinspector import configure_checks, load_config
+
     dandi_check_list = configure_checks(config=load_config(filepath_or_keyword="dandi"))
     dandi_check_registry = {check.__name__: check for check in dandi_check_list}
 
@@ -182,9 +172,8 @@ def get_check_function(check_function_name: str) -> callable:
 
 
 def run_check_function(check_function: callable, arg: dict) -> dict:
-    """
-    Function used to run an arbitrary NWB Inspector function
-    """
+    """.Function used to run an arbitrary NWB Inspector function."""
+    from nwbinspector.register_checks import InspectorMessage, Importance
 
     output = check_function(arg)
     if isinstance(output, InspectorMessage):
@@ -199,10 +188,9 @@ def run_check_function(check_function: callable, arg: dict) -> dict:
 
 def validate_subject_metadata(
     subject_metadata: dict, check_function_name: str
-) -> Union[None, InspectorMessage, List[InspectorMessage]]:
-    """
-    Function used to validate subject metadata
-    """
+):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
+    """Function used to validate subject metadata."""
+    from pynwb.file import Subject
 
     check_function = get_check_function(check_function_name)
 
@@ -214,10 +202,9 @@ def validate_subject_metadata(
 
 def validate_nwbfile_metadata(
     nwbfile_metadata: dict, check_function_name: str
-) -> Union[None, InspectorMessage, List[InspectorMessage]]:
-    """
-    Function used to validate NWBFile metadata
-    """
+):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
+    """Function used to validate NWBFile metadata."""
+    from pynwb.testing.mock.file import mock_NWBFile
 
     check_function = get_check_function(check_function_name)
 
@@ -228,9 +215,9 @@ def validate_nwbfile_metadata(
 
 
 def validate_metadata(metadata: dict, check_function_name: str) -> dict:
-    """
-    Function used to validate data using an arbitrary NWB Inspector function
-    """
+    """Function used to validate data using an arbitrary NWB Inspector function."""
+    from pynwb.file import NWBFile, Subject
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     check_function = get_check_function(check_function_name)
 
@@ -240,16 +227,16 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
         result = validate_nwbfile_metadata(metadata, check_function_name)
     else:
         raise ValueError(
-            f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} is not supported by this function"
+            f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} "
+            "is not supported by this function!"
         )
 
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
 
 def convert_to_nwb(info: dict) -> str:
-    """
-    Function used to convert the source data to NWB format using the specified metadata.
-    """
+    """Function used to convert the source data to NWB format using the specified metadata."""
+    from pynwb import NWBHDF5IO
 
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
