@@ -32,7 +32,7 @@ export class GuidedStructurePage extends Page {
     });
 
     list = new List({
-        emptyMessage: 'No interfaces selected'
+        emptyMessage: "No interfaces selected",
     });
 
     addButton = new Button();
@@ -54,7 +54,7 @@ export class GuidedStructurePage extends Page {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(interfaces),
-            }).then((res) => res.json())
+            }).then((res) => res.json());
 
             let schemas = this.info.globalState.schema;
             if (!schemas) schemas = this.info.globalState.schema = {};

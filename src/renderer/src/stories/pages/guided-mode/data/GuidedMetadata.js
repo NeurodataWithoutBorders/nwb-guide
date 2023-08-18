@@ -159,18 +159,15 @@ export class GuidedMetadataPage extends ManagedPage {
                     name: "Preview",
                     primary: true,
                     onClick: async (key, el) => {
-                        
-                        const { project } = this.info.globalState
+                        const { project } = this.info.globalState;
 
                         let [subject, session] = key.split("/");
                         if (subject.startsWith("sub-")) subject = subject.slice(4);
                         if (session.startsWith("ses-")) session = session.slice(4);
 
-                        const [file] = await this.runConversions(
-                            { stub_test: true },
-                            [{ subject, session }],
-                            { title: "Running conversion preview" }
-                        ).catch((e) => {
+                        const [file] = await this.runConversions({ stub_test: true }, [{ subject, session }], {
+                            title: "Running conversion preview",
+                        }).catch((e) => {
                             this.notify(e.message, "error");
                             throw e;
                         });
@@ -183,7 +180,7 @@ export class GuidedMetadataPage extends ManagedPage {
                             height: "100%",
                         });
 
-                        modal.append(new Neurosift({ url: getURLFromFilePath(file, project.name)}));
+                        modal.append(new Neurosift({ url: getURLFromFilePath(file, project.name) }));
                         document.body.append(modal);
                     },
                 },

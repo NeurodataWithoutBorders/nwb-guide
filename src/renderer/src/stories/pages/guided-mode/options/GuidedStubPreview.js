@@ -38,8 +38,10 @@ export class GuidedStubPreviewPage extends Page {
 
     render() {
         const { project, preview } = this.info.globalState;
-        
-        return preview ? new Neurosift({ url: getURLFromFilePath(preview, project.name)}) : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
+
+        return preview
+            ? new Neurosift({ url: getURLFromFilePath(preview, project.name) })
+            : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
 
