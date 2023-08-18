@@ -69,7 +69,7 @@ jobs:
           key:
             conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
         env:
-          CACHE_NUMBER: ${{ CACHE_NUMBER }}
+          CACHE_NUMBER: ${{ env.CACHE_NUMBER }}
         id: cache
 
       - if: steps.cache.outputs.cache-hit != 'true'
