@@ -6,8 +6,8 @@ from typing import Dict, Optional  # , List, Union # TODO: figure way to add the
 from shutil import rmtree, copytree
 from pathlib import Path
 
+from sse import MessageAnnouncer
 from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
-from ..sse import MessageAnnouncer
 
 announcer = MessageAnnouncer()
 
