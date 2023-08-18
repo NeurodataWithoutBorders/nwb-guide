@@ -12,8 +12,7 @@ console.log("Found file", fs.existsSync(script));
 const proc2 = child_process.spawn(`${script}`, [port + 1]);
 handleProcess(proc2, "spawn");
 
-let now = Date.now(),
-    started;
+let now = Date.now()
 
 function handleProcess(proc, id = "process") {
     if (proc != null) {
@@ -23,11 +22,8 @@ function handleProcess(proc, id = "process") {
         });
 
         proc.stdout.on("data", function (data) {
-            if (!started) {
-                started = Date.now();
-                console.log(`Time to Start: ${(started - now).toFixed(2)}ms`);
-            }
-            console.error(`[${id}]: ${data}`);
+                console.log(`Time to Start: ${(Date.now() - now).toFixed(2)}ms`);
+                process.exit( );
         });
 
         proc.on("error", (error) => {
