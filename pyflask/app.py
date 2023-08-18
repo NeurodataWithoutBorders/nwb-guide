@@ -11,7 +11,7 @@ from flask_cors import CORS
 from flask_restx import Api, Resource
 
 from apis import startup_api, neuroconv_api
-from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 app = Flask(__name__)
 
@@ -35,7 +35,7 @@ app.logger.setLevel(DEBUG)
 
 
 # Initialize API
-package_json_file_path = Path(__file__).parent.parent / "package.json"
+package_json_file_path = resource_path("package.json")
 with open(file=package_json_file_path) as fp:
     package_json = json.load(fp=fp)
 
