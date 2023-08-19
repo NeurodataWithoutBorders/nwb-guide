@@ -23,6 +23,7 @@ import splashHTML from './splash-screen.html?asset'
 
 autoUpdater.channel = "latest";
 
+
 /*************************************************************
  * Python Process
  *************************************************************/
@@ -60,28 +61,48 @@ let globals =  {
     if (v) readyQueue.forEach(f => onWindowReady(f))
     readyQueue = []
   }
-
 }
 
-const onWindowReady = (f: Function) => {
-  if (mainWindowReady) f(mainWindow)
-  else readyQueue.push(f)
+function send(this: BrowserWindow, ...args: any[]) {
+  return this.webContents.send(...args)
 }
 
-const pythonIsOpen = () => {
-  onWindowReady(win => {
-    win.webContents.send("python.open")
-    globals.python.sent = true
-  })
+const onWindowReady = (f: Function) => (mainWindowReady) ? f(mainWindow) : readyQueue.push(f)
+
+
+// Pass all important log functions to the application
+const ogConsoleMethods: any = {};
+['log', 'warn', 'error'].forEach(method => {
+  const ogMethod = ogConsoleMethods[method] = console[method]
+  console[method] = (...args) => {
+    onWindowReady(win => send.call(win, `console.${method}`, ...args))
+    ogMethod(...args)
+  }
+})
+
+
+// The open message can only be sent once, but close can happen at any time
+const pythonIsOpen = (force = false) => {
+
+  if (!globals.python.sent || force) {
+    onWindowReady(win => {
+      send.call(win, "python.open")
+      globals.python.sent = true
+    })
+  }
 
   globals.python.status = true
 }
+
+
 const pythonIsClosed = (err = globals.python.latestError) => {
-  onWindowReady(win => {
-    win.webContents.send("python.closed", err)
-    globals.python.sent = true
-  })
-  globals.python.status = false
+
+    onWindowReady(win => {
+      send.call(win, "python.closed", err)
+      globals.python.sent = true
+    })
+
+    globals.python.status = false
 }
 
 /**
@@ -109,25 +130,23 @@ const createPyProc = async () => {
     .then(([freePort]: string[]) => {
       selectedPort = freePort;
 
-      const processId = `nwb-guide:${selectedPort}`
-
       pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
 
       if (pyflaskProcess != null) {
 
         // Listen for errors from Python process
         pyflaskProcess.stderr.on("data", (data: string) => {
-          console.error(`[${processId} error]: ${data}`)
+          console.error(`${data}`)
           globals.python.latestError = data.toString()
         });
 
         pyflaskProcess.stdout.on('data', (data: string) => {
           pythonIsOpen();
-          console.log(`[${processId}]: ${data}`)
+          console.log(`${data}`)
         });
 
         pyflaskProcess.on('close', (code: number) => {
-          console.error(`[nwb-guide:flask] exit code ${code}`)
+          console.error(`exit code ${code}`)
           pythonIsClosed()
         });
 
@@ -221,6 +240,9 @@ function initialize() {
     });
 
     mainWindow.on("close", async (e) => {
+
+      globals.mainWindowReady = false
+
       if (!user_restart_confirmed) {
         if (showExitPrompt) {
           e.preventDefault(); // Prevents the window from closing
@@ -233,14 +255,11 @@ function initialize() {
             })
             .then((responseObject) => {
               let { response } = responseObject;
-              if (response === 0) {
-                // Runs the following if 'Yes' is clicked
-                quit_app();
-              }
+              if (response === 0) quit_app()
+              else globals.mainWindowReady = true
             });
         }
       } else {
-        globals.mainWindowReady = false
         await exitPyProc();
         app.exit();
       }
@@ -249,7 +268,6 @@ function initialize() {
 
   const quit_app = () => {
     console.log("Quit app called");
-    showExitPrompt = false;
     mainWindow.close();
     /// feedback form iframe prevents closing gracefully
     /// so force close
@@ -379,11 +397,11 @@ ipcMain.on("resize-window", (event, dir) => {
 });
 
 autoUpdater.on("update-available", () => {
-  onWindowReady(win => win.webContents.send("update_available"));
+  onWindowReady(win => send.call(win, "update_available"));
 });
 
 autoUpdater.on("update-downloaded", () => {
-  onWindowReady(win => win.webContents.send("update_downloaded"));
+  onWindowReady(win => send.call(win, "update_downloaded"));
 });
 
 ipcMain.on("restart_app", async () => {
@@ -397,8 +415,5 @@ ipcMain.on("get-port", (event) => {
 
 // Allow the browser to request status if already sent once
 ipcMain.on("python.status", (event) => {
-  if (globals.python.sent) {
-    if (globals.python.status) pythonIsOpen()
-    else pythonIsClosed()
-  }
+  if (globals.python.sent) ((globals.python.status) ? pythonIsOpen : pythonIsClosed)(true); // Force send
 });
