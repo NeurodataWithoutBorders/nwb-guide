@@ -21,9 +21,8 @@ if (isElectron) {
         remote = require("@electron/remote");
         app = remote.app;
 
-        electron.ipcRenderer.on("logOnBrowser", (info, ...args) => {
-            console.log(...args);
-        });
+        ['log', 'warn', 'error'].forEach(method => electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args)));
+
 
         port = electron.ipcRenderer.sendSync("get-port");
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
