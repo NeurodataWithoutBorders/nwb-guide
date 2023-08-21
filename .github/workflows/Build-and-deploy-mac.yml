@@ -23,7 +23,7 @@ jobs:
         with:
           activate-environment: nwb-guide
           #mamba-version: "*"
-          environment-file: tools/anaconda-env/environment-MAC.yml
+          environment-file: environments/environment-MAC.yml
           auto-activate-base: false
 
       - uses: actions/setup-node@v3
