@@ -24,6 +24,7 @@
     "test": "npm run test:app && npm run test:server",
     "test:app": "vitest run",
     "test:server": "pytest pyflask/tests/ -s",
+    "test:executable": "pytest pyflask/tests/ -s --executable",
     "test:coverage": "npm run coverage:app && npm run coverage:server",
     "coverage:app": "vitest run --coverage",
     "coverage:server": "pytest pyflask/tests/ -s --cov=pyflask --cov-report=xml",
