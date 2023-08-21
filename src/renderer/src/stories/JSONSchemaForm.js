@@ -260,8 +260,8 @@ export class JSONSchemaForm extends LitElement {
         this.onUpdate(fullPath, value);
         const path = [...fullPath];
         const name = path.pop();
-        const resultParent = path.reduce((acc, key) => acc[key], this.results);
-        const resolvedParent = path.reduce((acc, key) => acc[key], this.resolved);
+        const resultParent = path.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.results);
+        const resolvedParent = path.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.resolved);
 
         if (!value) {
             delete resultParent[name];
