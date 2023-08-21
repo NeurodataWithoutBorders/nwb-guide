@@ -11,8 +11,6 @@ coverage
 # Ignore node_modules folder
 node_modules
 build/api
-pysodadist
-pyflaskdist
 pyflask/ds
 src/Users
 semantic
@@ -21,7 +19,7 @@ semantic.json
 build/
 yarn.lock
 
-app.spec
+*.spec
 
 *.pyc
 src/.DS_Store

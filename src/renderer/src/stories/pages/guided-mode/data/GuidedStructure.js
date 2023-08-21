@@ -31,7 +31,9 @@ export class GuidedStructurePage extends Page {
         showAllWhenEmpty: true,
     });
 
-    list = new List();
+    list = new List({
+        emptyMessage: "No interfaces selected",
+    });
 
     addButton = new Button();
 
@@ -46,14 +48,13 @@ export class GuidedStructurePage extends Page {
 
             const interfaces = { ...this.list.object };
 
-            const schema =
-                Object.keys(interfaces).length === 0
-                    ? {}
-                    : await fetch(`${baseUrl}/neuroconv/schema`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(interfaces),
-                      }).then((res) => res.json());
+            // if (Object.keys(interfaces).length === 0) throw new Error('No interfaces selected.')
+
+            const schema = await fetch(`${baseUrl}/neuroconv/schema`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(interfaces),
+            }).then((res) => res.json());
 
             let schemas = this.info.globalState.schema;
             if (!schemas) schemas = this.info.globalState.schema = {};

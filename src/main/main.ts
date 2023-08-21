@@ -23,96 +23,134 @@ import splashHTML from './splash-screen.html?asset'
 
 autoUpdater.channel = "latest";
 
+
 /*************************************************************
  * Python Process
  *************************************************************/
 
 // flask setup environment variables
-const PY_FLASK_DIST_FOLDER = path.join('..', '..', "pyflaskdist");
+const PYFLASK_DIST_FOLDER_BASE = path.join('build', 'flask')
+const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
-const PY_FLASK_MODULE = "app";
+const PYINSTALLER_NAME = "nwb-guide"
+
 let pyflaskProcess: any = null;
 
 let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
 const portRange = 100;
 
+let mainWindowReady = false
+let readyQueue: Function[] = []
+
+let globals =  {
+
+  python: {
+    status: false,
+    sent: false,
+    latestError: ''
+  },
+
+  // Reactive ready variable
+  get mainWindowReady() {
+    return mainWindowReady
+  },
+
+  set mainWindowReady(v) {
+    mainWindowReady = v
+    if (v) readyQueue.forEach(f => onWindowReady(f))
+    readyQueue = []
+  }
+}
+
+function send(this: BrowserWindow, ...args: any[]) {
+  return this.webContents.send(...args)
+}
+
+const onWindowReady = (f: Function) => (mainWindowReady) ? f(mainWindow) : readyQueue.push(f)
+
+
+// Pass all important log functions to the application
+const ogConsoleMethods: any = {};
+['log', 'warn', 'error'].forEach(method => {
+  const ogMethod = ogConsoleMethods[method] = console[method]
+  console[method] = (...args) => {
+    onWindowReady(win => send.call(win, `console.${method}`, ...args))
+    ogMethod(...args)
+  }
+})
+
+
+// The open message can only be sent once, but close can happen at any time
+const pythonIsOpen = (force = false) => {
+
+  if (!globals.python.sent || force) {
+    onWindowReady(win => {
+      send.call(win, "python.open")
+      globals.python.sent = true
+    })
+  }
+
+  globals.python.status = true
+}
+
+
+const pythonIsClosed = (err = globals.python.latestError) => {
+
+    onWindowReady(win => {
+      send.call(win, "python.closed", err)
+      globals.python.sent = true
+    })
+
+    globals.python.status = false
+}
+
 /**
  * Determine if the application is running from a packaged version or from a dev version.
  * The resources path is used for Linux and Mac builds and the app.getAppPath() is used for Windows builds.
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
-const guessPackaged = () => {
+const getPackagedPath = () => {
 
-  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER);
-  const unixPath = path.join(process.resourcesPath, PY_FLASK_MODULE);
+  const windowsPath = path.join(__dirname, PY_FLASK_DIST_FOLDER, "flask", `${PYINSTALLER_NAME}.exe`);
+  const unixPath = path.join(process.resourcesPath, "flask", PYINSTALLER_NAME);
 
-  if (process.platform === "darwin" || process.platform === "linux") {
-    if (fs.existsSync(unixPath)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  if (process.platform === "win32") {
-    if (fs.existsSync(windowsPath)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-};
-
-/**
- * Get the system path to the api server script.
- * The script is located in the resources folder for packaged Linux and Mac builds and in the app.getAppPath() for Windows builds.
- * It is relative to the main.js file directory when in dev mode.
- * @returns {string} The path to the api server script that needs to be executed to start the Python server
- */
-const getScriptPath = () => {
-  if (!guessPackaged()) {
-    return path.join(__dirname, PY_FLASK_FOLDER, PY_FLASK_MODULE + ".py");
-  }
-
-  if (process.platform === "win32") {
-    return path.join(__dirname, PY_FLASK_DIST_FOLDER, PY_FLASK_MODULE + ".exe");
-  } else {
-    return path.join(process.resourcesPath, PY_FLASK_MODULE); // NOTE: Not sure if this will recognize packaged assets for Mac...
-  }
+  if ((process.platform === "darwin" || process.platform === "linux") && fs.existsSync(unixPath)) return unixPath;
+  if (process.platform === "win32" && fs.existsSync(windowsPath)) return windowsPath;
 };
 
 const createPyProc = async () => {
-  let script = getScriptPath();
-
+  let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
   await killAllPreviousProcesses();
 
   const defaultPort = PORT as number
 
+
   fp(defaultPort, defaultPort + portRange)
     .then(([freePort]: string[]) => {
-      let port = freePort;
+      selectedPort = freePort;
 
-      if (guessPackaged()) {
-        pyflaskProcess = child_process.execFile(script, [port], {
-          // stdio: "ignore",
-        });
-      } else {
-        pyflaskProcess = child_process.spawn("python", [script, port], {
-          // stdio: "ignore",
-        });
-      }
+      pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
 
       if (pyflaskProcess != null) {
-        console.log("child process success on port " + port);
 
         // Listen for errors from Python process
-        pyflaskProcess.stderr.on("data", function (data: any) {
-          console.log("[python]:", data.toString());
+        pyflaskProcess.stderr.on("data", (data: string) => {
+          console.error(`${data}`)
+          globals.python.latestError = data.toString()
         });
-      } else console.error("child process failed to start on port" + port);
 
-      selectedPort = port;
+        pyflaskProcess.stdout.on('data', (data: string) => {
+          pythonIsOpen();
+          console.log(`${data}`)
+        });
+
+        pyflaskProcess.on('close', (code: number) => {
+          console.error(`exit code ${code}`)
+          pythonIsClosed()
+        });
+
+      }
     })
     .catch((err: Error) => {
       console.log(err);
@@ -189,7 +227,6 @@ function initialize() {
   makeSingleInstance();
 
   function createWindow() {
-    // mainWindow.webContents.openDevTools();
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url);
@@ -203,6 +240,9 @@ function initialize() {
     });
 
     mainWindow.on("close", async (e) => {
+
+      globals.mainWindowReady = false
+
       if (!user_restart_confirmed) {
         if (showExitPrompt) {
           e.preventDefault(); // Prevents the window from closing
@@ -215,10 +255,8 @@ function initialize() {
             })
             .then((responseObject) => {
               let { response } = responseObject;
-              if (response === 0) {
-                // Runs the following if 'Yes' is clicked
-                quit_app();
-              }
+              if (response === 0) quit_app()
+              else globals.mainWindowReady = true
             });
         }
       } else {
@@ -230,7 +268,6 @@ function initialize() {
 
   const quit_app = () => {
     console.log("Quit app called");
-    showExitPrompt = false;
     mainWindow.close();
     /// feedback form iframe prevents closing gracefully
     /// so force close
@@ -240,6 +277,7 @@ function initialize() {
   };
 
   app.on("ready", () => {
+
     const promise = createPyProc();
 
     // Listen after first load
@@ -309,6 +347,7 @@ function initialize() {
         // run_pre_flight_checks();
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
+        globals.mainWindowReady = true
       }, 1000);
     });
   });
@@ -322,11 +361,6 @@ function initialize() {
     app.quit();
   });
 }
-
-// function run_pre_flight_checks() {
-//   console.log("Running pre-checks");
-//   mainWindow.webContents.send("run_pre_flight_checks");
-// }
 
 // Make this app a single instance app.
 const gotTheLock = app.requestSingleInstanceLock();
@@ -363,11 +397,11 @@ ipcMain.on("resize-window", (event, dir) => {
 });
 
 autoUpdater.on("update-available", () => {
-  mainWindow.webContents.send("update_available");
+  onWindowReady(win => send.call(win, "update_available"));
 });
 
 autoUpdater.on("update-downloaded", () => {
-  mainWindow.webContents.send("update_downloaded");
+  onWindowReady(win => send.call(win, "update_downloaded"));
 });
 
 ipcMain.on("restart_app", async () => {
@@ -377,4 +411,9 @@ ipcMain.on("restart_app", async () => {
 
 ipcMain.on("get-port", (event) => {
   event.returnValue = selectedPort;
+});
+
+// Allow the browser to request status if already sent once
+ipcMain.on("python.status", (event) => {
+  if (globals.python.sent) ((globals.python.status) ? pythonIsOpen : pythonIsClosed)(true); // Force send
 });
