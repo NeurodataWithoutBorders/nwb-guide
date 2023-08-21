@@ -14,11 +14,11 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        subtitle: () => this.info.globalState.preview,
+        subtitle: () => this.info.globalState.stubs[0],
         controls: () =>
             html`<nwb-button
                 size="small"
-                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview) : "")}
+                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.stubs[0]) : "")}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
     };
@@ -37,10 +37,10 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
-        const { project, preview } = this.info.globalState;
+        const { project, stubs } = this.info.globalState;
 
-        return preview
-            ? new Neurosift({ url: getURLFromFilePath(preview, project.name) })
+        return stubs
+            ? new Neurosift({ url: getURLFromFilePath(stubs[0], project.name) })
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
