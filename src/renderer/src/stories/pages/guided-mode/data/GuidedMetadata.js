@@ -9,8 +9,8 @@ import { resolveGlobalOverrides, resolveResults } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
-import { UnsafeComponent } from "../../Unsafe.js";
 import { merge } from "../../utils.js";
+import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
 
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
@@ -19,6 +19,7 @@ const getInfoFromId = (key) => {
 
     return { subject, session };
 };
+
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -200,13 +201,11 @@ export class GuidedMetadataPage extends ManagedPage {
                             header: `Conversion Preview: ${key}`,
                             open: true,
                             onClose: () => modal.remove(),
+                            width: "100%",
+                            height: "100%",
                         });
 
-                        const container = document.createElement("div");
-                        container.style.padding = "0px 25px";
-                        container.append(new UnsafeComponent(html));
-
-                        modal.append(container);
+                        modal.append(new Neurosift({ url: getURLFromFilePath(file, project.name) }));
                         document.body.append(modal);
                     },
                 },

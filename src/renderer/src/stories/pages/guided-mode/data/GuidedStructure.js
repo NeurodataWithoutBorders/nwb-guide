@@ -6,6 +6,7 @@ import { Button } from "../../../Button.js";
 import { baseUrl, supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
+import { List } from "../../../List";
 
 export class GuidedStructurePage extends Page {
     constructor(...args) {
@@ -14,7 +15,7 @@ export class GuidedStructurePage extends Page {
         // Handle Search Bar Interactions
         this.search.list.style.position = "unset";
         this.search.onSelect = (...args) => {
-            this.#addListItem(...args);
+            this.list.add(...args);
             this.searchModal.toggle(false);
         };
 
@@ -26,90 +27,20 @@ export class GuidedStructurePage extends Page {
         this.searchModal.appendChild(this.search);
     }
 
-    #selected = {};
-
-    #addListItem = (listValue) => {
-        const { key, label, value } = listValue;
-        const li = document.createElement("li");
-        const keyEl = document.createElement("span");
-
-        let resolvedKey = key;
-        const originalValue = resolvedKey;
-
-        // Ensure no duplicate keys
-        let i = 0;
-        while (resolvedKey in this.#selected) {
-            i++;
-            resolvedKey = `${originalValue}_${i}`;
-        }
-
-        keyEl.innerText = resolvedKey;
-        keyEl.contentEditable = true;
-        keyEl.style.cursor = "text";
-
-        li.style.display = "flex";
-        li.style.alignItems = "center";
-
-        li.appendChild(keyEl);
-
-        const sepEl = document.createElement("span");
-        sepEl.innerHTML = "&nbsp;-&nbsp;";
-        li.appendChild(sepEl);
-
-        const valueEl = document.createElement("span");
-        valueEl.innerText = label;
-        li.appendChild(valueEl);
-        this.list.appendChild(li);
-
-        const button = new Button({
-            label: "Delete",
-            size: "small",
-        });
-
-        button.style.marginLeft = "1rem";
-
-        li.appendChild(button);
-
-        this.#selected[resolvedKey] = value;
-
-        // Stop enter key from creating new line
-        keyEl.addEventListener("keydown", function (e) {
-            if (e.keyCode === 13) {
-                keyEl.blur();
-                return false;
-            }
-        });
-
-        const deleteListItem = () => {
-            li.remove();
-            this.unsavedUpdates = true;
-            delete this.#selected[resolvedKey];
-        };
-
-        keyEl.addEventListener("blur", () => {
-            const newKey = keyEl.innerText;
-            if (newKey === "") keyEl.innerText = resolvedKey; // Reset to original value
-            else {
-                delete this.#selected[resolvedKey];
-                resolvedKey = newKey;
-                this.#selected[resolvedKey] = value;
-            }
-        });
-
-        button.onClick = deleteListItem;
-
-        this.unsavedUpdates = true;
-    };
-
     search = new Search({
         showAllWhenEmpty: true,
     });
 
-    list = document.createElement("ul");
+    list = new List({
+        emptyMessage: "No interfaces selected",
+    });
 
     addButton = new Button();
 
-    searchModal = new Modal();
+    searchModal = new Modal({
+        width: "100%",
+        height: "100%",
+    });
 
     getSchema = async () => {
         const interfaces = { ...this.#selected };
@@ -172,7 +103,7 @@ export class GuidedStructurePage extends Page {
                 };
             }
 
-            this.#addListItem({ ...found, key }); // Add previously selected items
+            this.list.add({ ...found, key }); // Add previously selected items
         }
 
         super.updated(); // Call if updating data
@@ -180,10 +111,8 @@ export class GuidedStructurePage extends Page {
 
     render() {
         // Reset list
-        this.#selected = {};
-        this.list.remove();
-        this.list = document.createElement("ul");
         this.list.style.display = "inline-block";
+        this.list.clear();
         this.addButton.style.display = "block";
 
         return html`

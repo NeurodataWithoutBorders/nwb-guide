@@ -107,7 +107,7 @@ export class Table extends LitElement {
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
                     this.template[col] ??
-                    this.schema.properties[col].default ??
+                    // this.schema.properties[col].default ??
                     "";
             return value;
         });
