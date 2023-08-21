@@ -4,6 +4,8 @@
 dist
 out
 
+coverage
+
 *.log
 
 # Ignore node_modules folder
@@ -17,7 +19,7 @@ semantic.json
 build/
 yarn.lock
 
-app.spec
+*.spec
 
 *.pyc
 src/.DS_Store

@@ -1,34 +1,20 @@
-from typing import List, Dict, Optional, Union
-from neuroconv.datainterfaces import interface_list  # , SpikeGLXRecordingInterface, PhySortingInterface
-from neuroconv import datainterfaces, NWBConverter
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-
+"""Collection of utility functions used by the NeuroConv Flask API."""
+import os
 import json
-from neuroconv.utils import NWBMetaDataEncoder
-from neuroconv.tools import LocalPathExpander
-from pynwb.file import NWBFile, Subject
-from pynwb import NWBHDF5IO
-from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-from pynwb.testing.mock.file import mock_NWBFile  # also mock_Subject
-from neuroconv.tools.data_transfers import automatic_dandi_upload
-from nwbinspector.register_checks import InspectorMessage, Importance
-from nwbinspector.nwbinspector import configure_checks, load_config
-
-from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
-
 from datetime import datetime
+from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
+from shutil import rmtree, copytree
+from pathlib import Path
+
 from sse import MessageAnnouncer
+from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
 
 
-from shutil import rmtree, copytree
-from pathlib import Path
-import os
-
-
 def locate_data(info: dict) -> dict:
     """Locate data from the specifies directories using fstrings."""
+    from neuroconv.tools import LocalPathExpander
 
     expander = LocalPathExpander()
 
@@ -57,6 +43,7 @@ def locate_data(info: dict) -> dict:
 
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
+    from neuroconv.datainterfaces import interface_list
 
     # Hard coded for now - eventual goal will be to import this from NeuroConv
     interfaces_to_load = {
@@ -66,7 +53,8 @@ def get_all_interface_info() -> dict:
     return {
         interface.__name__: {
             "keywords": interface.keywords,
-            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves have a label property
+            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves
+            # have a label property
             "label": format_name
             # Can also add a description here if we want to provide more information about the interface
         }
@@ -75,7 +63,9 @@ def get_all_interface_info() -> dict:
 
 
 # Combine Multiple Interfaces
-def get_custom_converter(interface_class_dict: dict) -> NWBConverter:
+def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
+    from neuroconv import datainterfaces, NWBConverter
+
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
             custom_name: getattr(datainterfaces, interface_name)
@@ -85,20 +75,20 @@ def get_custom_converter(interface_class_dict: dict) -> NWBConverter:
     return CustomNWBConverter
 
 
-def instantiate_custom_converter(source_data, interface_class_dict) -> NWBConverter:
+def instantiate_custom_converter(source_data, interface_class_dict):  # -> NWBConverter:
     CustomNWBConverter = get_custom_converter(interface_class_dict)
     return CustomNWBConverter(source_data)
 
 
 def get_source_schema(interface_class_dict: dict) -> dict:
-    """
-    Function used to get schema from a CustomNWBConverter that can handle multiple interfaces
-    """
+    """Function used to get schema from a CustomNWBConverter that can handle multiple interfaces."""
     CustomNWBConverter = get_custom_converter(interface_class_dict)
     return CustomNWBConverter.get_source_schema()
 
 
 def get_first_recording_interface(converter):
+    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
+
     for interface in converter.data_interface_objects.values():
         if isinstance(interface, BaseRecordingExtractorInterface):
             return interface
@@ -121,56 +111,56 @@ def is_supported_recording_interface(recording_interface, metadata):
 
 
 def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[str, dict]:
-    """
-    Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data.
-    """
+    """Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data."""
+    from neuroconv.utils import NWBMetaDataEncoder
 
     converter = instantiate_custom_converter(source_data, interfaces)
     schema = converter.get_metadata_schema()
     metadata = converter.get_metadata()
 
-    recording_interface = get_first_recording_interface(converter)
+    # recording_interface = get_first_recording_interface(converter)
 
-    if is_supported_recording_interface(recording_interface, metadata):
-        metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
+    # if is_supported_recording_interface(recording_interface, metadata):
+    #     metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
 
-        # Get Electrode metadata
-        ecephys_properties = schema["properties"]["Ecephys"]["properties"]
-        original_electrodes_schema = ecephys_properties["Electrodes"]
+    #     # Get Electrode metadata
+    #     ecephys_properties = schema["properties"]["Ecephys"]["properties"]
+    #     original_electrodes_schema = ecephys_properties["Electrodes"]
 
-        new_electrodes_properties = {
-            properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-            for properties in original_electrodes_schema["default"]
-        }
+    #     new_electrodes_properties = {
+    #         properties["name"]: {key: value for key, value in properties.items() if key != "name"}
+    #         for properties in original_electrodes_schema["default"]
+    #     }
 
-        ecephys_properties["Electrodes"] = {
-            "type": "array",
-            "minItems": 0,
-            "items": {
-                "type": "object",
-                "properties": new_electrodes_properties,
-                "additionalProperties": True,  # Allow for new columns
-            },
-        }
+    #     ecephys_properties["Electrodes"] = {
+    #         "type": "array",
+    #         "minItems": 0,
+    #         "items": {
+    #             "type": "object",
+    #             "properties": new_electrodes_properties,
+    #             "additionalProperties": True,  # Allow for new columns
+    #         },
+    #     }
 
-        metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
-        defs = ecephys_properties["definitions"]
+    #     metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
+    #     defs = ecephys_properties["definitions"]
 
-        ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
-        ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
-        del defs["Electrodes"]
+    #     ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
+    #     ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
+    #     del defs["Electrodes"]
 
-    # Delete Ecephys metadata if ElectrodeTable helper function is not available
-    else:
+    # # Delete Ecephys metadata if ElectrodeTable helper function is not available
+    # else:
+    if "Ecephys" in schema["properties"]:
         schema["properties"].pop("Ecephys", dict())
 
     return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
 
 
 def get_check_function(check_function_name: str) -> callable:
-    """
-    Function used to fetch an arbitrary NWB Inspector function
-    """
+    """Function used to fetch an arbitrary NWB Inspector function."""
+    from nwbinspector.nwbinspector import configure_checks, load_config
+
     dandi_check_list = configure_checks(config=load_config(filepath_or_keyword="dandi"))
     dandi_check_registry = {check.__name__: check for check in dandi_check_list}
 
@@ -182,9 +172,8 @@ def get_check_function(check_function_name: str) -> callable:
 
 
 def run_check_function(check_function: callable, arg: dict) -> dict:
-    """
-    Function used to run an arbitrary NWB Inspector function
-    """
+    """.Function used to run an arbitrary NWB Inspector function."""
+    from nwbinspector.register_checks import InspectorMessage, Importance
 
     output = check_function(arg)
     if isinstance(output, InspectorMessage):
@@ -199,10 +188,9 @@ def run_check_function(check_function: callable, arg: dict) -> dict:
 
 def validate_subject_metadata(
     subject_metadata: dict, check_function_name: str
-) -> Union[None, InspectorMessage, List[InspectorMessage]]:
-    """
-    Function used to validate subject metadata
-    """
+):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
+    """Function used to validate subject metadata."""
+    from pynwb.file import Subject
 
     check_function = get_check_function(check_function_name)
 
@@ -214,10 +202,9 @@ def validate_subject_metadata(
 
 def validate_nwbfile_metadata(
     nwbfile_metadata: dict, check_function_name: str
-) -> Union[None, InspectorMessage, List[InspectorMessage]]:
-    """
-    Function used to validate NWBFile metadata
-    """
+):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
+    """Function used to validate NWBFile metadata."""
+    from pynwb.testing.mock.file import mock_NWBFile
 
     check_function = get_check_function(check_function_name)
 
@@ -228,9 +215,9 @@ def validate_nwbfile_metadata(
 
 
 def validate_metadata(metadata: dict, check_function_name: str) -> dict:
-    """
-    Function used to validate data using an arbitrary NWB Inspector function
-    """
+    """Function used to validate data using an arbitrary NWB Inspector function."""
+    from pynwb.file import NWBFile, Subject
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     check_function = get_check_function(check_function_name)
 
@@ -240,16 +227,15 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
         result = validate_nwbfile_metadata(metadata, check_function_name)
     else:
         raise ValueError(
-            f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} is not supported by this function"
+            f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} "
+            "is not supported by this function!"
         )
 
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
 
 def convert_to_nwb(info: dict) -> str:
-    """
-    Function used to convert the source data to NWB format using the specified metadata.
-    """
+    """Function used to convert the source data to NWB format using the specified metadata."""
 
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
@@ -295,22 +281,26 @@ def convert_to_nwb(info: dict) -> str:
     )
 
     # Update the first recording interface with Ecephys table data
-    recording_interface = get_first_recording_interface(converter)
+    # This will be refactored after the ndx-probe-interface integration
+    # recording_interface = get_first_recording_interface(converter)
 
-    ecephys_metadata = info["metadata"]["Ecephys"]
+    if "Ecephys" not in info["metadata"]:
+        info["metadata"].update(Ecephys=dict())
 
-    if is_supported_recording_interface(recording_interface, info["metadata"]):
-        electrode_column_results = ecephys_metadata["ElectrodeColumns"]
-        electrode_results = ecephys_metadata["Electrodes"]
+    # ecephys_metadata = info["metadata"].get("Ecephys", dict())
 
-        recording_interface.update_electrode_table(
-            electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
-        )
+    # if is_supported_recording_interface(recording_interface, info["metadata"]):
+    #     electrode_column_results = ecephys_metadata["ElectrodeColumns"]
+    #     electrode_results = ecephys_metadata["Electrodes"]
 
-        # Update with the latest metadata for the electrodes
-        ecephys_metadata["Electrodes"] = electrode_column_results
+    #     recording_interface.update_electrode_table(
+    #         electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
+    #     )
 
-    ecephys_metadata.pop("ElectrodeColumns", dict())
+    #     # Update with the latest metadata for the electrodes
+    #     ecephys_metadata["Electrodes"] = electrode_column_results
+
+    # ecephys_metadata.pop("ElectrodeColumns", dict())
 
     # Actually run the conversion
     converter.run_conversion(
@@ -319,11 +309,6 @@ def convert_to_nwb(info: dict) -> str:
         overwrite=info.get("overwrite", False),
         conversion_options=options,
     )
-
-    io = NWBHDF5IO(resolved_output_path, mode="r")
-    file = io.read()
-    html = file._repr_html_()
-    io.close()
 
     # Create a symlink between the fake adata and custom data
     if not run_stub_test and not resolved_output_directory == default_output_directory:
@@ -344,7 +329,7 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-    return dict(html=html, file=str(resolved_output_path))
+    return str(resolved_output_path)
 
 
 def upload_to_dandi(
@@ -354,6 +339,8 @@ def upload_to_dandi(
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
 ):
+    from neuroconv.tools.data_transfers import automatic_dandi_upload
+
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 
     return automatic_dandi_upload(
