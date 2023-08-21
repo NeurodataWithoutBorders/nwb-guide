@@ -95,3 +95,6 @@ jobs:
 
       - name: Run test on distributed executable
         run: node tests/testPyinstallerExecutable.js
+
+      - name: Run Python tests on distributed executable
+        run: npm run test:executable
