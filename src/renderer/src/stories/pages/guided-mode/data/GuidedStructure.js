@@ -43,7 +43,7 @@ export class GuidedStructurePage extends Page {
     });
 
     getSchema = async () => {
-        const interfaces = { ...this.#selected };
+        const interfaces = { ...this.list.object };
 
         const schema =
             Object.keys(interfaces).length === 0
@@ -62,7 +62,7 @@ export class GuidedStructurePage extends Page {
     };
 
     beforeSave = async () => {
-        this.info.globalState.interfaces = { ...this.#selected };
+        this.info.globalState.interfaces = { ...this.list.object };
         await this.save(undefined, false); // Interrim save, in case the schema request fails
         await this.getSchema();
     };

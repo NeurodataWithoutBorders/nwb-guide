@@ -761,10 +761,6 @@ export class JSONSchemaForm extends LitElement {
                     schema: info,
                     results: results[name],
                     globals: this.globals?.[name],
-                    onUpdate: (internalPath, value) => {
-                        const path = [...fullPath, ...internalPath];
-                        this.#update(path, value);
-                    },
 
                     onUpdate: (internalPath, value) => {
                         const path = [...fullPath, ...internalPath];
