@@ -266,7 +266,6 @@ export class JSONSchemaForm extends LitElement {
 
         if (resolvedParent[name] !== value) this.onUpdate(fullPath, value); // Ensure the value has actually changed
 
-
         if (!value) {
             delete resultParent[name];
             delete resolvedParent[name];

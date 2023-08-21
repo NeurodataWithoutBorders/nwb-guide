@@ -45,7 +45,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             // Save the preview results
             this.info.globalState.preview = result;
-            
+
             this.unsavedUpdates = true;
 
             this.to(1);
@@ -121,7 +121,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             onUpdate: (...args) => {
                 console.log(...args);
-                (this.unsavedUpdates = true)
+                this.unsavedUpdates = true;
             },
 
             validateOnChange,
