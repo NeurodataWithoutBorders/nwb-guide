@@ -419,7 +419,7 @@ export class JSONSchemaForm extends LitElement {
             info,
             parent,
             path: fullPath,
-            value: parent[name],
+            value,
             form: this,
             required: isRequired,
         });
