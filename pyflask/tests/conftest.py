@@ -14,8 +14,11 @@ use_executable = executable_flag in sys.argv
 is_windows = os.name == "nt"
 
 exe_path = Path("build/flask/nwb-guide", "nwb-guide.exe" if is_windows else "nwb-guide")
+
+
 def runExecutable(port):
     subprocess.run([exe_path, str(port)])
+
 
 def pytest_addoption(parser):
     parser.addoption("--executable", action="store_true", help="Run the executable instead of the standard Flask app")
@@ -26,7 +29,6 @@ def client(request):
     if use_executable and exe_path.is_file():
         if not is_windows:
             mp.set_start_method("fork")
-
 
         exe_process = Process(target=runExecutable, args=(PORT,))
         exe_process.start()
