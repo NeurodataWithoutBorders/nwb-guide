@@ -259,11 +259,13 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form (data only)
     updateData(fullPath, value) {
-        this.onUpdate(fullPath, value);
         const path = [...fullPath];
         const name = path.pop();
         const resultParent = path.reduce((acc, key) => acc[key], this.results);
         const resolvedParent = path.reduce((acc, key) => acc[key], this.resolved);
+
+        if (resolvedParent[name] !== value) this.onUpdate(fullPath, value); // Ensure the value has actually changed
+
 
         if (!value) {
             delete resultParent[name];
