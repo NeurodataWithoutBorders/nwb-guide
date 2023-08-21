@@ -20,7 +20,6 @@ const getInfoFromId = (key) => {
     return { subject, session };
 };
 
-
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
