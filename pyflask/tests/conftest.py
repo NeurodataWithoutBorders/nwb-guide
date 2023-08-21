@@ -8,32 +8,33 @@ import multiprocessing as mp
 import os
 import time
 
-executable_flag = '--executable'
+executable_flag = "--executable"
 use_executable = executable_flag in sys.argv
-is_windows = os.name == 'nt'
+is_windows = os.name == "nt"
 
 args = list(sys.argv)
 
 PORT = 1234
 exe_process = None
 
+
 def pytest_addoption(parser):
-    parser.addoption("--executable", action="store_true", help='Run the executable instead of the standard Flask app')
+    parser.addoption("--executable", action="store_true", help="Run the executable instead of the standard Flask app")
+
 
 @pytest.fixture(scope="session")
 def client(request):
-    exe_path = Path("build/flask/nwb-guide", 'nwb-guide.exe' if is_windows else 'nwb-guide' ) 
-    if (use_executable and exe_path.is_file()):
-
-        if (not is_windows):
-            mp.set_start_method('fork')
+    exe_path = Path("build/flask/nwb-guide", "nwb-guide.exe" if is_windows else "nwb-guide")
+    if use_executable and exe_path.is_file():
+        if not is_windows:
+            mp.set_start_method("fork")
 
         def runExecutable(port):
             subprocess.run([exe_path, str(port)])
 
         exe_process = Process(target=runExecutable, args=(PORT,))
         exe_process.start()
-        time.sleep(1) # Give time to start
+        time.sleep(1)  # Give time to start
 
         def stop():
             exe_process.kill()
@@ -42,9 +43,8 @@ def client(request):
 
         return PORT
 
-
-    else: 
-        if (use_executable):
+    else:
+        if use_executable:
             print("The executable could not be found. Using the standard Flask test server instead...")
 
         app = flask.app
@@ -55,6 +55,7 @@ def client(request):
         )
 
         return app.test_client()
+
 
 @pytest.fixture()
 def runner(app):

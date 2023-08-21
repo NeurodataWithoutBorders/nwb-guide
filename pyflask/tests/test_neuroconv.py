@@ -1,11 +1,12 @@
 from jsonschema import validate
 from utils import get, post, get_converter_output_schema
 
+
 # --------------------- Tests ---------------------
 # Accesses the dictionary of all interfaces and their metadata
 def test_get_all_interfaces(client):
     validate(
-        get('neuroconv', client),
+        get("neuroconv", client),
         schema={
             "type": "object",
             "patternProperties": {
@@ -25,7 +26,7 @@ def test_get_all_interfaces(client):
 # Test single interface schema request
 def test_single_schema_request(client):
     interfaces = {"myname": "SpikeGLXRecordingInterface"}
-    validate(post('neuroconv/schema', interfaces, client), schema=get_converter_output_schema(interfaces))
+    validate(post("neuroconv/schema", interfaces, client), schema=get_converter_output_schema(interfaces))
 
 
 # Uses the NWBConverter Class to combine multiple interfaces
