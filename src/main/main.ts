@@ -358,7 +358,6 @@ if (isWindows && process.argv.length >= 2) {
 }
 
 // Make this app a single instance app.
-const gotTheLock = app.requestSingleInstanceLock();
 
 function restoreWindow(){
   if (globals.mainWindow) {
@@ -372,7 +371,7 @@ function restoreWindow(){
 function makeSingleInstance() {
   if (process.mas) return;
 
-  if (!gotTheLock) app.quit();
+  if (!app.requestSingleInstanceLock()) app.quit();
   else app.on("second-instance", () => restoreWindow());
 }
 
