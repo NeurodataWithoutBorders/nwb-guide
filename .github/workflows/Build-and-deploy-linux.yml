@@ -22,7 +22,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: nwb-guide
-          environment-file: tools/anaconda-env/environment-Linux.yml
+          environment-file: environments/environment-Linux.yml
           auto-activate-base: false
 
       - uses: actions/setup-node@v3
