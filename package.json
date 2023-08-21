@@ -51,6 +51,13 @@
     "appId": "com.catalystneuro.nwbguide",
     "generateUpdatesFilesForAllChannels": true,
     "afterSign": "./notarize.js",
+    "fileAssociations": [
+      {
+        "ext": "nwb",
+        "name": "NWB File",
+        "role": "Editor"
+      }
+    ],
     "files": [
       "src",
       "schemas",
