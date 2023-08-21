@@ -24,7 +24,7 @@ if (isElectron) {
         electron.ipcRenderer.on("fileOpened", (info, ...args) => {
             console.log("File opened!", ...args);
         });
-        
+
         ["log", "warn", "error"].forEach((method) =>
             electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args))
         );
