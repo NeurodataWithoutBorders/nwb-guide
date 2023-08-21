@@ -67,7 +67,7 @@ export class GuidedStructurePage extends Page {
     async updated() {
         const selected = this.info.globalState.interfaces;
 
-        if (Object.keys(selected).length > 0) this.list.emptyMessage = 'Loading valid interfaces...'
+        if (Object.keys(selected).length > 0) this.list.emptyMessage = "Loading valid interfaces...";
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
@@ -98,8 +98,7 @@ export class GuidedStructurePage extends Page {
             this.list.add({ ...found, key }); // Add previously selected items
         }
 
-        this.addButton.removeAttribute('hidden')
-
+        this.addButton.removeAttribute("hidden");
     }
 
     render() {
@@ -107,7 +106,7 @@ export class GuidedStructurePage extends Page {
         this.list.style.display = "inline-block";
         this.list.clear();
         this.addButton.style.display = "block";
-        this.addButton.setAttribute('hidden', '')
+        this.addButton.setAttribute("hidden", "");
 
         return html`
             <div style="width: 100%; text-align: center;">${this.list} ${this.addButton}</div>
