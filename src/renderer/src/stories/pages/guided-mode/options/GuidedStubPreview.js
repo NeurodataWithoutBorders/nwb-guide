@@ -1,11 +1,11 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
-import { UnsafeComponent } from "../../Unsafe.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
+import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
 const { shell } = electron;
 
 export class GuidedStubPreviewPage extends Page {
@@ -14,15 +14,13 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        subtitle: () => this.info.globalState.preview?.file,
-        controls: () => {
-            const { preview } = this.info.globalState;
-            preview
-                ? html`<nwb-button size="small" @click=${() => (shell ? shell.showItemInFolder(preview.file) : "")}
-                      >${unsafeSVG(folderOpenSVG)}</nwb-button
-                  >`
-                : "";
-        },
+        subtitle: () => this.info.globalState.preview,
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview) : "")}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
     };
 
     footer = {
@@ -39,15 +37,11 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
-        const info = this.info.globalState.preview;
+        const { project, preview } = this.info.globalState;
 
-        return html`
-            <div>
-                ${info
-                    ? new UnsafeComponent(info.html)
-                    : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`}
-            </div>
-        `;
+        return preview
+            ? new Neurosift({ url: getURLFromFilePath(preview, project.name) })
+            : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
 

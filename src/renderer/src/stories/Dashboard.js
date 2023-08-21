@@ -63,7 +63,6 @@ export class Dashboard extends LitElement {
             renderNameInSidebar: { type: Boolean, reflect: true },
             name: { type: String, reflect: true },
             logo: { type: String, reflect: true },
-            subtitle: { type: String, reflect: true },
             activePage: { type: String, reflect: true },
             globalState: { type: Object, reflect: true },
         };
@@ -72,6 +71,17 @@ export class Dashboard extends LitElement {
     main;
     sidebar;
     subSidebar;
+
+    // Custom Getter / Setter for Subtitle
+    #subtitle;
+    set subtitle(v) {
+        this.#subtitle = v;
+        this.sidebar.subtitle = v;
+    }
+
+    get subtitle() {
+        return this.#subtitle;
+    }
 
     pagesById = {};
     #active;
@@ -124,7 +134,7 @@ export class Dashboard extends LitElement {
 
     attributeChangedCallback(key, _, latest) {
         super.attributeChangedCallback(...arguments);
-        if (this.sidebar && (key === "name" || key === "logo" || key === "subtitle")) this.sidebar[key] = latest;
+        if (this.sidebar && (key === "name" || key === "logo")) this.sidebar[key] = latest;
         else if (key === "renderNameInSidebar") this.sidebar.renderName = latest === "true" || latest === true;
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {

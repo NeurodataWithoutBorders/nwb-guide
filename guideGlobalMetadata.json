@@ -10,6 +10,8 @@
         "IntanRecordingInterface",
         "OpenEphysRecordingInterface",
         "BlackrockRecordingInterface",
-        "BlackrockSortingInterface"
+        "BlackrockSortingInterface",
+        "CellExplorerSortingInterface",
+        "KiloSortSortingInterface"
     ]
 }

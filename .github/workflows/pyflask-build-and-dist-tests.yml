@@ -1,10 +1,12 @@
-name: Back-end Tests
+name: PyFlask build and distributable tests
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
   pull_request:
+  workflow_dispatch:
 
-concurrency:  # Cancel previous workflows on the same pull request
+# Cancel previous workflows on the same pull request
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
@@ -13,7 +15,7 @@ env:
 
 jobs:
   testing:
-    name: Back-end tests on ${{ matrix.os }}
+    name: PyFlask build and distributable tests on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -27,18 +29,20 @@ jobs:
           - python-version: "3.9"
             os: ubuntu-latest
             label: environments/environment-Linux.yml
-            prefix: /usr/share/miniconda3/envs/env-electron-python
+            prefix: /usr/share/miniconda3/envs/nwb-guide
+            shorthand: unix
 
           - python-version: "3.10"
             os: macos-latest
             label: environments/environment-Mac.yml
-            prefix: /Users/runner/miniconda3/envs/env-electron-python
+            prefix: /Users/runner/miniconda3/envs/nwb-guide
+            shorthand: unix
 
-          - python-version: "3.9"
+          - python-version: "3.10"
             os: windows-latest
             label: environments/environment-Windows.yml
-            prefix: C:\Miniconda3\envs\env-electron-python
-
+            prefix: C:\Miniconda3\envs\nwb-guide
+            shorthand: win
 
     steps:
       - uses: actions/checkout@v3
@@ -50,7 +54,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          activate-environment: env-electron-python
+          activate-environment: nwb-guide
           use-mamba: true
 
       - name: Set cache date
@@ -58,36 +62,36 @@ jobs:
         run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Cache Conda env
+      - name: Cache Mamba env
         uses: actions/cache@v2
         with:
           path: ${{ env.CONDA }}/envs
           key:
             conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
         env:
-          # Increase this value to reset cache if environment file has not changed
-          CACHE_NUMBER: 0
+          CACHE_NUMBER: ${{ env.CACHE_NUMBER }}
         id: cache
 
-      - name: Update environment
-        run:
-          mamba env update -n env-electron-python -f ${{ matrix.label }}
-        if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Update environment
+        run: mamba env update -f ${{ matrix.label }}
 
-      - name: Use Node.js 18
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: "18"
 
-      - name: Install GUIDE
-        run: npm ci
+      - name: Build PyFlask distribution
+        run: npm run build:flask:${{ matrix.shorthand }}
 
-      - name: Run tests
-        run: npm run test:coverage
+      # encountering parsing issue for second arg
+      #- if: matrix.os == 'windows-latest'
+      #  name: Run test on build executable
+      #  run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide.exe
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          fail_ci_if_error: true
+      #- if: matrix.os != 'windows-latest'
+      #  name: Run test on build executable
+      #  run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide
+
+      - name: Run test on distributed executable
+        run: node tests/testPyinstallerExecutable.js

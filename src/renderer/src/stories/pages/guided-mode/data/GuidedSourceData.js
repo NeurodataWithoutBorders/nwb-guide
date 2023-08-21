@@ -67,7 +67,15 @@ export class GuidedSourceDataPage extends ManagedPage {
                     if (isStorybook) return;
 
                     if (result.message) {
-                        const message = "Failed to get metadata with current source data. Please try again.";
+                        const [
+                            type,
+                            text = `<small><pre>${result.traceback
+                                .trim()
+                                .split("\n")
+                                .slice(-2)[0]
+                                .trim()}</pre></small>`,
+                        ] = result.message.split(":");
+                        const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
                         this.notify(message, "error");
                         throw result;
                     }
