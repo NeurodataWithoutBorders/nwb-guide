@@ -1,4 +1,4 @@
-name: env-electron-python
+name: nwb-guide
 channels:
   - defaults
   - conda-forge
