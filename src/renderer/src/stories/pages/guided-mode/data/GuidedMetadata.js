@@ -26,7 +26,9 @@ export class GuidedMetadataPage extends ManagedPage {
 
             // Preview a single random conversion
             delete this.info.globalState.stubs; // Clear the preview results
-            const results = await this.runConversions({ stub_test: true }, undefined, { title: "Running stub conversion on all sessions..." });
+            const results = await this.runConversions({ stub_test: true }, undefined, {
+                title: "Running stub conversion on all sessions...",
+            });
 
             this.info.globalState.stubs = results; // Save the preview results
 
