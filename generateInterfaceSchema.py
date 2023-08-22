@@ -43,6 +43,16 @@ const {arr[0]}GlobalCopy = JSON.parse(JSON.stringify(globalState))
     )
 )
 
+
+allInterfaceCode = "\n".join(map(lambda arr: f"globalStateCopy.schema.source_data.properties.{arr[0]} = {arr[0]}Schema.properties.{arr[0]}", paths.items()))
+
+setDummyPathCode = f"""
+const results = globalStateCopy.results
+for (let sub in results){{
+    for (let ses in results[sub]) results[sub][ses].source_data = {{{list(paths.keys())[1]}: {{file_path: '/dummy/file/path'}}}}
+}}
+"""
+
 with open(sourceDataStoryPath, "w") as outfile:
     outfile.write(
         f"""import {{ globalState, PageTemplate }} from "./storyStates";
@@ -58,8 +68,12 @@ export default {{
 const activePage = "conversion/sourcedata"
 
 
-export const Example = PageTemplate.bind({{}});
-Example.args = {{ activePage, globalState }};
+const globalStateCopy = JSON.parse(JSON.stringify(globalState))
+{allInterfaceCode}
+{setDummyPathCode}
+
+export const All = PageTemplate.bind({{}});
+All.args = {{ activePage, globalState: globalStateCopy }};
 
 {storyCode}
 """
