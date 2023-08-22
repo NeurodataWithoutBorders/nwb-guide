@@ -332,11 +332,9 @@ def convert_to_nwb(info: dict) -> str:
 
 def upload_to_dandi(
     dandiset_id: str,
-
     # Can specify one or the other
     project: Optional[str],
     nwb_folder_path: Optional[str],
-
     api_key: str,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
@@ -347,7 +345,9 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path= Path(nwb_folder_path) if nwb_folder_path else CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
+        nwb_folder_path=Path(nwb_folder_path)
+        if nwb_folder_path
+        else CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )

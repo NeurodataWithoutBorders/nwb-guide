@@ -69,14 +69,14 @@ export class Button extends LitElement {
             onClick: { type: Function },
             label: { type: String },
             icon: { type: String },
-            disabled: { type: Boolean }
+            disabled: { type: Boolean },
         };
     }
 
     render() {
         const mode = this.primary ? "storybook-button--primary" : "storybook-button--secondary";
 
-        console.log
+        console.log;
         return html`
             <button
                 type="button"

@@ -5,7 +5,7 @@ import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
-import dandiUploadSchema from '../../../../../../../schemas/json/dandi_upload_schema.json'
+import dandiUploadSchema from "../../../../../../../schemas/json/dandi_upload_schema.json";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -16,7 +16,7 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
-        const isNewDandiset = globalState.upload.dandiset_id !== this.localState.dandiset_id
+        const isNewDandiset = globalState.upload.dandiset_id !== this.localState.dandiset_id;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
         if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
     };
@@ -31,7 +31,7 @@ export class GuidedUploadPage extends Page {
             const globalUploadInfo = globalState.upload;
 
             // Catch if dandiset is already uploaded
-            if ('results' in globalUploadInfo) {
+            if ("results" in globalUploadInfo) {
                 const result = await Swal.fire({
                     title: "This pipeline has already uploaded to DANDI",
                     html: "Would you like to reupload the lastest files?",
