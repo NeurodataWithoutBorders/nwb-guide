@@ -60,6 +60,7 @@ let globals: {
   python: {
     status: false,
     sent: false,
+    restart: false,
     latestError: ''
   },
 
@@ -110,7 +111,7 @@ const pythonIsOpen = (force = false) => {
 const pythonIsClosed = (err = globals.python.latestError) => {
 
     onWindowReady(win => {
-      send.call(win, "python.closed", err)
+      send.call(win, globals.python.restart ? "python.restart" : "python.closed", err)
       globals.python.sent = true
     })
 
@@ -128,41 +129,49 @@ const getPackagedPath = () => {
 };
 
 const createPyProc = async () => {
-  let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
-  await killAllPreviousProcesses();
 
-  const defaultPort = PORT as number
+  return new Promise(async (resolve, reject) => {
+
+    let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
+    await killAllPreviousProcesses();
+
+    const defaultPort = PORT as number
 
 
-  fp(defaultPort, defaultPort + portRange)
-    .then(([freePort]: string[]) => {
-      selectedPort = freePort;
+    fp(defaultPort, defaultPort + portRange)
+      .then(([freePort]: string[]) => {
+        selectedPort = freePort;
 
-      pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
+        pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
 
-      if (pyflaskProcess != null) {
+        if (pyflaskProcess != null) {
 
-        // Listen for errors from Python process
-        pyflaskProcess.stderr.on("data", (data: string) => {
-          console.error(`${data}`)
-          globals.python.latestError = data.toString()
-        });
+          // Listen for errors from Python process
+          pyflaskProcess.stderr.on("data", (data: string) => {
+            console.error(`${data}`)
+            globals.python.latestError = data.toString()
+          });
 
-        pyflaskProcess.stdout.on('data', (data: string) => {
-          pythonIsOpen();
-          console.log(`${data}`)
-        });
+          pyflaskProcess.stdout.on('data', (data: string) => {
+            const isRestarting = globals.python.restart
+            setTimeout(() => pythonIsOpen(isRestarting), 100); // Wait just a bit to give the server some time to come online
+            console.log(`${data}`)
+            resolve(true)
+          });
 
-        pyflaskProcess.on('close', (code: number) => {
-          console.error(`exit code ${code}`)
-          pythonIsClosed()
-        });
+          pyflaskProcess.on('close', (code: number) => {
+            console.error(`exit code ${code}`)
+            pythonIsClosed()
+            reject()
+          });
 
-      }
+        }
+      })
+      .catch((err: Error) => {
+        console.log(err);
+        reject(err)
+      });
     })
-    .catch((err: Error) => {
-      console.log(err);
-    });
 };
 
 /**
@@ -267,16 +276,15 @@ function initialize() {
     // Listen after first load
     promise.then(() => {
       const chokidar = require('chokidar');
-      let done = true
       chokidar.watch(path.join(__dirname, "../../pyflask"), {
         ignored:  ['**/__pycache__/**']
       }).on('all', async (event: string) => {
-        if (event === 'change' && done) {
-          done = false
+        if (event === 'change' && !globals.python.restart) {
+          globals.python.restart = true
           await exitPyProc();
           setTimeout(async () => {
             await createPyProc();
-            done = true
+            globals.python.restart = false
           }, 1000)
         }
       });
