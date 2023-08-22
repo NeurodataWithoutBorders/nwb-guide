@@ -34,9 +34,7 @@ export class TutorialPage extends Page {
                 properties: ["createDirectory"],
             },
             results: state,
-            validateOnChange: () => {
-                global.save();
-            },
+            onUpdate: () => global.save(),
         });
 
         form.style.width = "100%";
@@ -80,7 +78,7 @@ export class TutorialPage extends Page {
             ${hasEntry(tutorialPipelineName)
                 ? html`<div>
                       Data has been preloaded into the <b>${tutorialPipelineName}</b> pipeline, which can be accessed
-                      via the <a @click=${() => this.onTransition("guided")}>Guided Mode</a> conversion list.
+                      via the <a @click=${() => this.to("guided")}>Guided Mode</a> conversion list.
 
                       <br /><br />
 
