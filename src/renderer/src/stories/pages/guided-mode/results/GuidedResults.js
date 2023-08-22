@@ -23,7 +23,7 @@ export class GuidedResultsPage extends Page {
             }
         };
 
-        const { dandiset_id, staging } = this.info.globalState.upload.info;
+        const { dandiset_id, staging } = this.info.globalState.upload?.info ?? {};
 
         const elIds = ["name", "modified"];
 
@@ -66,11 +66,12 @@ export class GuidedResultsPage extends Page {
     }
 
     render() {
-        const { dandiset_id } = this.info.globalState.upload.info;
         const results = this.info.globalState.conversion;
 
         if (!results)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
+
+        const { dandiset_id } = this.info.globalState.upload?.info ?? {};
 
         return html`
             <div style="text-align: center;">
