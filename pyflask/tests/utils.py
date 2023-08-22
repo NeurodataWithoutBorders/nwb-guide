@@ -3,7 +3,7 @@ import requests
 
 def get(path, client):
     return (
-        (requests.get(f"http://localhost:{client}/{path}")).json()
+        (requests.get(f"http://localhost:{client}/{path}", allow_redirects=True)).json()
         if isinstance(client, int)
         else client.get(f"/{path}", follow_redirects=True).json
     )
@@ -11,7 +11,7 @@ def get(path, client):
 
 def post(path, json, client):
     return (
-        (requests.post(f"http://localhost:{client}/{path}", json=json)).json()
+        (requests.post(f"http://localhost:{client}/{path}", json=json, allow_redirects=True)).json()
         if isinstance(client, int)
         else client.post(path, json=json, follow_redirects=True).json
     )
