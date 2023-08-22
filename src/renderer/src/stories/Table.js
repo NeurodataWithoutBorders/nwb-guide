@@ -56,7 +56,16 @@ const styleSymbol = Symbol("table-styles");
 export class Table extends LitElement {
     validateOnChange;
 
-    constructor({ schema, data, template, keyColumn, validateOnChange, validateEmptyCells, onStatusChange } = {}) {
+    constructor({
+        schema,
+        data,
+        template,
+        keyColumn,
+        validateOnChange,
+        onUpdate,
+        validateEmptyCells,
+        onStatusChange,
+    } = {}) {
         super();
         this.schema = schema ?? {};
         this.data = data ?? [];
@@ -64,6 +73,7 @@ export class Table extends LitElement {
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
 
+        if (onUpdate) this.onUpdate = onUpdate;
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
 
@@ -134,6 +144,7 @@ export class Table extends LitElement {
 
     status;
     onStatusChange = () => {};
+    onUpdate = () => {};
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -299,6 +310,9 @@ export class Table extends LitElement {
 
         const unresolved = (this.unresolved = {});
 
+        let validated = 0;
+        const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0);
+
         table.addHook("afterValidate", (isValid, value, row, prop) => {
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
             let rowName = this.keyColumn ? rowHeaders[row] : row;
@@ -333,6 +347,10 @@ export class Table extends LitElement {
                 if (value == undefined || value === "") delete target[rowName][header];
                 else target[rowName][header] = value;
             }
+
+            validated++;
+
+            if (initialCellsToUpdate < validated) this.onUpdate(rowName, header, value);
 
             if (typeof isValid === "function") isValid();
             // }
@@ -400,19 +418,30 @@ export class Table extends LitElement {
 
     #root;
 
-    render() {
+    // Clean up after the injected stylesheet, which may affect the rendering of other elements (e.g. the main sidebar list items)
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.stylesheet[styleSymbol]--;
+        if (this.stylesheet[styleSymbol] === 0) this.stylesheet.remove();
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
         const root = this.getRootNode().body ?? this.getRootNode();
         this.#root = root;
         const stylesheets = Array.from(root.querySelectorAll("style"));
-        const exists = stylesheets.find((el) => el[styleSymbol]);
+        const exists = (this.stylesheet = stylesheets.find((el) => styleSymbol in el));
 
-        if (!exists) {
-            const stylesheet = document.createElement("style");
+        if (exists) exists[styleSymbol]++;
+        else {
+            const stylesheet = (this.stylesheet = document.createElement("style"));
             stylesheet.innerHTML = styles;
-            stylesheet[styleSymbol] = true;
+            stylesheet[styleSymbol] = true; //1;
             root.append(stylesheet);
         }
+    }
 
+    render() {
         return html`
             <div></div>
             <p style="width: 100%; margin: 10px 0px">

@@ -21,6 +21,10 @@ if (isElectron) {
         remote = require("@electron/remote");
         app = remote.app;
 
+        electron.ipcRenderer.on("fileOpened", (info, ...args) => {
+            console.log("File opened!", ...args);
+        });
+
         ["log", "warn", "error"].forEach((method) =>
             electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args))
         );
