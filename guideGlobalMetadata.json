@@ -5,6 +5,5 @@
         "NeuroScopeSortingInterface",
         "BiocamRecordingInterface",
         "Spike2RecordingInterface",
-        "CEDRecordingInterface"
     ]
 }
