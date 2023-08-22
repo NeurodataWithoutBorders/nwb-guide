@@ -11,7 +11,7 @@ import traceback
 PORT = 1234
 executable_flag = "--executable"
 use_executable = executable_flag in sys.argv
-is_windows = os.name == "nt"
+is_windows = sys.platform.startswith("win32")
 
 exe_path = Path("build/flask/nwb-guide", "nwb-guide.exe" if is_windows else "nwb-guide")
 
