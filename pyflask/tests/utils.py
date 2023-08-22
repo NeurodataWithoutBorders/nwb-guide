@@ -2,8 +2,8 @@ import requests
 
 
 def get(path, client):
-    if isinstance(client,int):
-        r = (requests.get(f"http://localhost:{client}/{path}", allow_redirects=True))
+    if isinstance(client, int):
+        r = requests.get(f"http://localhost:{client}/{path}", allow_redirects=True)
         r.raise_for_status()
         return r.json()
     else:
@@ -11,7 +11,7 @@ def get(path, client):
 
 
 def post(path, json, client):
-    if isinstance(client,int):
+    if isinstance(client, int):
         r = requests.post(f"http://localhost:{client}/{path}", json=json, allow_redirects=True)
         r.raise_for_status()
         return r.json()
