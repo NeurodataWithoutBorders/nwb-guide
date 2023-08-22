@@ -1,17 +1,14 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "CellExplorerSortingInterface": {
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
+                "file_path": {
+                    "format": "file",
                     "type": "string"
-                },
-                "exclude_cluster_groups": {
-                    "type": "array"
                 },
                 "verbose": {
                     "type": "boolean",

@@ -1,7 +1,7 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "KiloSortSortingInterface": {
             "required": [
                 "folder_path"
             ],
@@ -10,8 +10,9 @@
                     "format": "directory",
                     "type": "string"
                 },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "keep_good_only": {
+                    "type": "boolean",
+                    "default": false
                 },
                 "verbose": {
                     "type": "boolean",

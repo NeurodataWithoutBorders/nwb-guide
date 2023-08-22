@@ -1,17 +1,18 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "BlackrockSortingInterface": {
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
-                    "type": "string"
+                "file_path": {
+                    "format": "file",
+                    "type": "string",
+                    "description": "Path to Blackrock file."
                 },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "sampling_frequency": {
+                    "type": "number"
                 },
                 "verbose": {
                     "type": "boolean",
@@ -19,7 +20,7 @@
                 }
             },
             "type": "object",
-            "additionalProperties": false
+            "additionalProperties": true
         }
     },
     "type": "object",

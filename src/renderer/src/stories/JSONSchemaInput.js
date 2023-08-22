@@ -58,6 +58,18 @@ export class JSONSchemaInput extends LitElement {
                 outline: 0;
                 box-shadow: var(--color-light-green) 0px 0px 0px 1px;
             }
+
+
+            input[type=number].hideStep::-webkit-outer-spin-button,
+            input[type=number].hideStep::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            /* Firefox */
+            input[type=number].hideStep {
+                -moz-appearance: textfield;
+            }
         `;
     }
 

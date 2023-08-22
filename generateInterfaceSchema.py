@@ -36,7 +36,7 @@ storyCode = "\n".join(
         lambda arr: f"""export const {arr[0]} = PageTemplate.bind({{}});
 const {arr[0]}GlobalCopy = JSON.parse(JSON.stringify(globalState))
 {arr[0]}GlobalCopy.interfaces.interface = {arr[0]}
-{arr[0]}GlobalCopy.schema.source_data.properties.interface = {arr[0]}Schema
+{arr[0]}GlobalCopy.schema.source_data = {arr[0]}Schema
 {arr[0]}.args = {{ activePage, globalState: {arr[0]}GlobalCopy }};
 """,
         paths.items(),

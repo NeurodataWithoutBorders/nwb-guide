@@ -143,17 +143,6 @@ pre {
     padding-top: 4px;
     color: dimgray !important;
   }
-
-  input[type=number].hideStep::-webkit-outer-spin-button,
-  input[type=number].hideStep::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-    /* Firefox */
-    input[type=number].hideStep {
-        -moz-appearance: textfield;
-    }
 `;
 
 document.addEventListener("dragover", (e) => {

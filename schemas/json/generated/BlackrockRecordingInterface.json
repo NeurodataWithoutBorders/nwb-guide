@@ -1,21 +1,27 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "BlackrockRecordingInterface": {
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
-                    "type": "string"
+                "file_path": {
+                    "format": "file",
+                    "type": "string",
+                    "description": "Path to Blackrock file."
                 },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "nsx_override": {
+                    "format": "file",
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",
                     "default": true
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",
