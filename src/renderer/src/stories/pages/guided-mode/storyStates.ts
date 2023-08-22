@@ -1,5 +1,5 @@
 import nwbBaseSchema from "../../../../../../schemas/base-metadata.schema";
-import exephysExampleSchema from "../../../../../../schemas/json/ecephys_metadata_schema_example.json";
+// import exephysExampleSchema from "../../../../../../schemas/json/ecephys_metadata_schema_example.json";
 
 import { dashboard } from "../../../pages.js";
 export const PageTemplate = (args = {}) => {
@@ -8,7 +8,7 @@ export const PageTemplate = (args = {}) => {
 };
 
 
-nwbBaseSchema.properties.Ecephys = exephysExampleSchema;
+// nwbBaseSchema.properties.Ecephys = exephysExampleSchema;
 
 export const globalState = {
     project: {
