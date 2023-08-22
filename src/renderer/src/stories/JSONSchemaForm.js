@@ -252,9 +252,9 @@ export class JSONSchemaForm extends LitElement {
 
     getInput = (path) => {
         if (typeof path === "string") path = path.split(".");
-        const container = this.shadowRoot.querySelector(`#${path.join('-')}`)
-        if (!container) return
-        return container.querySelector('jsonschema-input')
+        const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
+        if (!container) return;
+        return container.querySelector("jsonschema-input");
     };
 
     #requirements = {};
