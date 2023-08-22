@@ -14,30 +14,19 @@ export const randomizeElements = (array, count) => {
     return result;
 };
 
-export function merge(path, toMerge = {}, target = this.info.globalState) {
-    // Provide a temporary data structure to merge into
-    const isTemp = !path || path.length === 0;
-    if (isTemp) {
-        path = ["temp"];
-        target = { temp: target };
+const isObject = (o) => {
+    return o && typeof o === "object" && !Array.isArray(o);
+};
+
+export function merge(toMerge = {}, target = {}) {
+    // Deep merge objects
+    for (const [k, v] of Object.entries(toMerge)) {
+        const targetV = target[k];
+        if (isObject(v) || isObject(targetV)) target[k] = merge(v, target[k]);
+        else target[k] = v;
     }
 
-    if (!Array.isArray(path)) path = path.split(".");
-
-    const key = path.pop(); // Focus on the last key in the path
-    path.forEach((key) => (target = target[key]));
-
-    // Deep merge objects
-    if (key in target) {
-        for (const [k, v] of Object.entries(toMerge)) {
-            if (typeof v === "object" && !Array.isArray(v)) {
-                if (!target[key][k]) target[key][k] = v;
-                else this.merge(`${k}`, v, target[key]);
-            } else target[key][k] = v;
-        }
-    } else target[key] = toMerge;
-
-    return isTemp ? target.temp : target;
+    return target;
 }
 
 export function mapSessions(callback = (v) => v, globalState) {

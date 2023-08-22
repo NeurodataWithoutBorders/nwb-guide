@@ -78,6 +78,8 @@ export class Main extends LitElement {
         let capsules = page?.capsules; // Page-specific capsules
 
         if (page) {
+            this.to = page.to;
+
             const info = page.info ?? {};
 
             // Default Footer Behavior
@@ -87,7 +89,7 @@ export class Main extends LitElement {
                     footer = {
                         next: "Back to Home Screen",
                         exit: "Exit",
-                        onNext: () => this.onTransition("/"),
+                        onNext: () => this.toRender.page.to("/"),
                     };
                 // Allow navigating laterally if there is a next page
                 else footer = true;
@@ -108,12 +110,12 @@ export class Main extends LitElement {
                         };
                 }
 
-                if (header === true || !("header" in page)) {
+                if (header === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.keys(sections);
-                    header = {
-                        sections: sectionNames,
-                        selected: sectionNames.indexOf(info.section),
-                    };
+
+                    header = page.header && typeof page.header === "object" ? page.header : {};
+                    header.sections = sectionNames;
+                    header.selected = sectionNames.indexOf(info.section);
                 }
             }
         }
@@ -123,7 +125,14 @@ export class Main extends LitElement {
         const capsuleEl = capsules ? new GuidedCapsules(capsules) : "";
         const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
 
-        const title = page.info?.title;
+        const title = header?.title ?? page.info?.title;
+
+        let subtitle = header?.subtitle;
+        if (typeof subtitle === "function") subtitle = subtitle(); // Generate custom header content if required
+
+        let controls = header?.controls;
+        if (typeof controls === "function") controls = controls(); // Generate custom header content if required
+
         return html`
             ${headerEl}
             ${capsules
@@ -133,10 +142,19 @@ export class Main extends LitElement {
                 <section class="section js-section u-category-windows">
                     ${title
                         ? html`<div>
-                              <h1 class="title">${title}</h1>
+                              <div
+                                  style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
+                              >
+                                  <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                      <h1 class="title" style="margin: 0; padding: 0;">${title}</h1>
+                                      <small style="color: gray;">${subtitle}</small>
+                                  </div>
+                                  <div style="padding-left: 25px">${controls}</div>
+                              </div>
                               <hr />
                           </div>`
                         : ""}
+
                     <div style="height: 10px;"></div>
                     ${page}
                 </section>

@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import { guidedProgressFilePath, reloadPageToHome, isStorybook, appDirectory } from "./dependencies/globals.js";
 import { fs } from "./electron/index.js";
 import { joinPath, runOnLoad } from "./globals.js";
+import { merge } from "./stories/pages/utils.js";
 
 class GlobalAppConfig {
     path = `${appDirectory}/config.json`;
@@ -48,36 +49,74 @@ export const update = (newDatasetName, previousDatasetName) => {
     } else throw new Error("No previous dataset name provided");
 };
 
+export const getCurrentProjectName = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get("project");
+};
+
+export const updateAppProgress = (
+    pageId,
+    dataOrProjectName = {},
+    projectName = typeof dataOrProjectName === "string" ? dataOrProjectName : undefined
+) => {
+    const transitionOffPipeline = pageId && pageId.split("/")[0] !== "conversion";
+
+    if (transitionOffPipeline) {
+        return; // Only save last page if within the conversion workflow
+    }
+
+    if (projectName) {
+        const params = new URLSearchParams(location.search);
+        params.set("project", projectName);
+
+        // Update browser history state
+        const value = `${location.pathname}?${params}`;
+        if (history.state) history.state.project = dataOrProjectName;
+        window.history.pushState(history.state, null, value);
+    }
+
+    // Is a project name
+    if (dataOrProjectName === projectName) updateFile(dataOrProjectName, (data) => (data["page-before-exit"] = pageId));
+    // Is a data object
+    else dataOrProjectName["page-before-exit"] = pageId;
+};
+
 export const save = (page, overrides = {}) => {
-    const globalState = page.info.globalState;
-    let guidedProgressFileName = overrides.globalState?.project?.name ?? globalState.project?.name;
+    const globalState = merge(overrides, page.info.globalState); // Merge the overrides into the actual global state
+
+    let guidedProgressFileName = globalState.project?.name;
 
     //return if guidedProgressFileName is not a string greater than 0
     if (typeof guidedProgressFileName !== "string" || guidedProgressFileName.length === 0) return;
-    const params = new URLSearchParams(location.search);
 
-    params.set("project", guidedProgressFileName);
+    updateFile(guidedProgressFileName, () => {
+        updateAppProgress(page.info.id, globalState, guidedProgressFileName); // Will automatically set last updated time
+        return globalState;
+    });
+};
 
-    // Update browser history state
-    const value = `${location.pathname}?${params}`;
-    if (history.state) history.state.project = guidedProgressFileName;
-    window.history.pushState(history.state, null, value);
+//Destination: HOMEDIR/NWB_GUIDE/pipelines
+export const updateFile = (projectName, callback) => {
+    let data = get(projectName);
 
-    //Destination: HOMEDIR/NWBGUIDE/Guided-Progress
-    globalState["last-modified"] = new Date();
-    globalState["page-before-exit"] = overrides.id ?? page.info.id;
+    if (callback) {
+        const result = callback(data);
+        if (result && typeof result === "object") data = result;
+    }
 
-    var guidedFilePath = joinPath(guidedProgressFilePath, guidedProgressFileName + ".json");
+    data["last-modified"] = new Date(); // Always update the last modified time
+
+    var guidedFilePath = joinPath(guidedProgressFilePath, projectName + ".json");
 
     // Save the file through the available mechanisms
     if (fs) {
-        if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create Guided-Progress folder if one does not exist
-        fs.writeFileSync(guidedFilePath, JSON.stringify(globalState, null, 2));
-    } else localStorage.setItem(guidedFilePath, JSON.stringify(globalState));
+        if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create progress folder if one does not exist
+        fs.writeFileSync(guidedFilePath, JSON.stringify(data, null, 2));
+    } else localStorage.setItem(guidedFilePath, JSON.stringify(data));
 };
 
 export const getEntries = () => {
-    if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if Guided-Progress folder exists. If not, create it.
+    if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if progress folder exists. If not, create it.
     const progressFiles = fs ? fs.readdirSync(guidedProgressFilePath) : Object.keys(localStorage);
     return progressFiles.filter((path) => path.slice(-5) === ".json");
 };
@@ -110,7 +149,9 @@ export const get = (name) => {
     }
 
     let progressFilePath = joinPath(guidedProgressFilePath, name + ".json");
-    return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
+
+    const exists = fs ? fs.existsSync(progressFilePath) : localStorage.getItem(progressFilePath) !== null;
+    return exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {};
 };
 
 export function resume(name) {

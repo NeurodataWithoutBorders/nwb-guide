@@ -3,6 +3,7 @@ import "./Button";
 import { notify } from "../dependencies/globals";
 import { Accordion } from "./Accordion";
 import { InstanceListItem } from "./instances/item";
+import { checkStatus } from "../validation";
 
 export class InstanceManager extends LitElement {
     static get styles() {
@@ -104,6 +105,11 @@ export class InstanceManager extends LitElement {
                 align-items: center;
             }
 
+            .controls > div {
+                display: flex;
+                gap: 10px;
+            }
+
             #new-info {
                 align-items: unset;
                 width: 100%;
@@ -132,14 +138,18 @@ export class InstanceManager extends LitElement {
 
     updateState = (id, state) => {
         const item = this.#items.find((i) => i.id === id);
+
         item.status = state;
 
         // Carry the status upwards
         const path = id.split("/");
+
+        let target = this.instances;
         for (let i = 0; i < path.length; i++) {
             const id = path.slice(0, i + 1).join("/");
             const accordion = this.#accordions[id];
-            if (accordion) accordion.setSectionStatus(id, state);
+            target = target[path[i]]; // Progressively check the deeper nested instances
+            if (accordion) accordion.setSectionStatus(id, checkStatus(false, false, [...Object.values(target)]));
         }
     };
 
@@ -391,6 +401,7 @@ export class InstanceManager extends LitElement {
                                 return html`<nwb-button
                                     size="small"
                                     icon=${o.icon}
+                                    .primary=${o.primary ?? false}
                                     @click=${function () {
                                         const el = this.shadowRoot.querySelector(
                                             "#instance-display > div:not([hidden])"

@@ -1,5 +1,5 @@
 
-export const convertSubjectsToResults = (results: any, subjects: any, sourceDataObject = {}) => {
+export const updateResultsFromSubjects = (results: any, subjects: any, sourceDataObject = {}) => {
 
     const toRemove = Object.keys(results).filter((sub) => !Object.keys(subjects).includes(sub));
     for (let sub of toRemove) delete results[sub]; // Delete extra subjects from results

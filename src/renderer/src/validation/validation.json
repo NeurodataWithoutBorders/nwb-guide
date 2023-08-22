@@ -2,7 +2,8 @@
     "*": "check_{*}",
 
     "name": false,
-    "output_folder": false,
+    "conversion_output_folder": false,
+    "stub_output_folder": false,
 
     "NWBFile": {
         "identifier": false,
@@ -34,6 +35,8 @@
         },
         "ElectrodeColumns": { }
     },
+
+    "Behavior": false,
 
     "Subject": {
         "description": false,

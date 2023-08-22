@@ -2,9 +2,7 @@ name: Build-and-deploy-win
 run-name: ${{ github.actor }} is building a Windows release for NWB GUIDE
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy-on-windows:
@@ -19,17 +17,17 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: env-electron-python
-          environment-file: tools/anaconda-env/environment-Windows.yml
+          activate-environment: nwb-guide
+          environment-file: environments/environment-Windows.yml
           auto-activate-base: false
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "18"
 
       - name: Install package.json modules and their dependencies
         run: npm install --ignore-scripts
@@ -37,6 +35,4 @@ jobs:
       - name: Build and deploy on Windows
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm run python-onefile-build
-          npm run deploy-win
+        run: npm run deploy:win
