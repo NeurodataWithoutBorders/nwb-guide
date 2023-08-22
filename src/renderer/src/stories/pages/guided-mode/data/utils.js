@@ -18,8 +18,8 @@ export function resolveGlobalOverrides(subject, globalState) {
     const subjectMetadataCopy = { ...globalState.subjects[subject] };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata
 
-    const overrides = merge(undefined, globalState.project, {}); // Copy project-wide metadata
-    merge("Subject", subjectMetadataCopy, overrides);
+    const overrides = merge(globalState.project, {}); // Copy project-wide metadata
+    merge(subjectMetadataCopy, overrides.Subject);
 
     return overrides;
 }
@@ -49,16 +49,17 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 export function resolveResults(subject, session, globalState) {
     const overrides = resolveGlobalOverrides(subject, globalState); // Unique per-subject (but not sessions)
     const metadata = globalState.results[subject][session].metadata;
-    const results = merge(undefined, metadata, {}); // Copy the metadata results from the form
+    const results = merge(metadata, {}); // Copy the metadata results from the form
     const schema = globalState.schema.metadata[subject][session];
     resolveProperties(schema, results, overrides);
     return results;
 }
 
+// NOTE: Remove this...
 export function createResults({ subject, info }, globalState) {
     const results = populateWithProjectMetadata(info.metadata, globalState);
     const metadataCopy = { ...globalState.subjects[subject] };
     delete metadataCopy.sessions; // Remove extra key from metadata
-    merge("Subject", metadataCopy, results);
+    merge(metadataCopy, results.Subject);
     return results;
 }

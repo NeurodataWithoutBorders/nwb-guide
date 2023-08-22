@@ -217,10 +217,12 @@ export class JSONSchemaForm extends LitElement {
         this.conditionalRequirements = props.conditionalRequirements ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
         this.validateEmptyValues = props.validateEmptyValues ?? true;
+
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
         if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
+        if (props.onUpdate) this.onUpdate = props.onUpdate;
         if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
@@ -257,11 +259,12 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form (data only)
     updateData(fullPath, value) {
-        this.onUpdate(fullPath, value);
         const path = [...fullPath];
         const name = path.pop();
         const resultParent = path.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.results);
         const resolvedParent = path.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.resolved);
+
+        if (resolvedParent[name] !== value) this.onUpdate(fullPath, value); // Ensure the value has actually changed
 
         if (!value) {
             delete resultParent[name];
@@ -308,7 +311,7 @@ export class JSONSchemaForm extends LitElement {
 
     validate = async () => {
         // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(this.resolved, this.#requirements); // get missing required paths
+        const invalidInputs = await this.#validateRequirements(); // get missing required paths
         const isValid = !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
@@ -388,7 +391,7 @@ export class JSONSchemaForm extends LitElement {
         return resolved;
     }
 
-    #renderInteractiveElement = (name, info, parent, required, path = []) => {
+    #renderInteractiveElement = (name, info, required, path = []) => {
         let isRequired = required[name];
 
         const fullPath = [...path, name];
@@ -416,7 +419,7 @@ export class JSONSchemaForm extends LitElement {
             info,
             parent,
             path: fullPath,
-            value: parent[name],
+            value,
             form: this,
             required: isRequired,
         });
@@ -477,17 +480,18 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
-    #validateRequirements = async (results, requirements, parent) => {
+    #validateRequirements = async (resolved = this.resolved, requirements = this.#requirements, parentPath) => {
         let invalid = [];
 
         for (let name in requirements) {
             let isRequired = requirements[name];
             if (typeof isRequired === "function") isRequired = await isRequired.call(this.resolved);
             if (isRequired) {
-                let path = parent ? `${parent}-${name}` : name;
+                let path = parentPath ? `${parentPath}-${name}` : name;
+
                 if (typeof isRequired === "object" && !Array.isArray(isRequired))
-                    invalid.push(...(await this.#validateRequirements(results[name], isRequired, path)));
-                else if (!results[name]) invalid.push(path);
+                    invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
+                else if (!resolved[name]) invalid.push(path);
             }
         }
 
@@ -497,6 +501,7 @@ export class JSONSchemaForm extends LitElement {
     // Checks missing required properties and throws an error if any are found
     onInvalid = () => {};
     onLoaded = () => {};
+    onUpdate = () => {};
 
     #deleteExtraneousResults = (results, schema) => {
         for (let name in results) {
@@ -733,7 +738,7 @@ export class JSONSchemaForm extends LitElement {
                 const linkedProperties = info.properties.map((path) => {
                     const pathCopy = [...path].slice((this.#base ?? []).length);
                     const name = pathCopy.pop();
-                    return this.#renderInteractiveElement(name, schema.properties[name], results, required, pathCopy);
+                    return this.#renderInteractiveElement(name, schema.properties[name], required, pathCopy);
                 });
                 return html`
                     <div class="link" data-name="${info.name}">
@@ -743,7 +748,7 @@ export class JSONSchemaForm extends LitElement {
             }
 
             // Directly render the interactive property element
-            if (!info.properties) return this.#renderInteractiveElement(name, info, results, required, path);
+            if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
 
             const hasMany = renderable.length > 1; // How many siblings?
 
@@ -857,7 +862,7 @@ export class JSONSchemaForm extends LitElement {
 
         const schema = this.schema ?? {};
 
-        this.resolved = merge(undefined, this.results, {}); // Track resolved values as a copy of the user-specified results
+        this.resolved = merge(this.results, {}); // Track resolved values as a copy of the user-specified results
 
         // Register default properties
         resolveProperties(schema.properties, this.resolved, this.globals);

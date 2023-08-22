@@ -11,7 +11,7 @@ export class GuidedConversionOptionsPage extends Page {
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
             await this.form.validate(); // Will throw an error in the callback
 
             // Preview a random conversion
@@ -21,7 +21,7 @@ export class GuidedConversionOptionsPage extends Page {
             });
             this.info.globalState.preview = results[0]; // Save the preview results
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
@@ -48,6 +48,7 @@ export class GuidedConversionOptionsPage extends Page {
             dialogOptions: {
                 properties: ["openDirectory", "createDirectory"],
             },
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 
