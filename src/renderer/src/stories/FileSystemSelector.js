@@ -137,4 +137,4 @@ export class FilesystemSelector extends LitElement {
     }
 }
 
-customElements.get("nwb-filesystem-selector") || customElements.define("nwb-filesystem-selector", FilesystemSelector);
+customElements.get("filesystem-selector") || customElements.define("filesystem-selector", FilesystemSelector);

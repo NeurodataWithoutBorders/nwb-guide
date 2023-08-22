@@ -3,6 +3,7 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
+import { merge } from "../../utils.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -11,29 +12,41 @@ export class GuidedUploadPage extends Page {
 
     form;
 
+    beforeSave = () => {
+        const globalState = this.info.globalState;
+        merge({ upload: this.localState }, globalState); // Merge the local and global states
+        delete globalState.upload.results; // Clear the preview results
+    };
+
     footer = {
         onNext: async () => {
-            delete this.info.globalState.upload.results; // Clear the preview results
+            await this.save(); // Save in case the conversion fails
 
-            this.save(); // Save in case the conversion fails
             await this.form.validate(); // Will throw an error in the callback
 
-            const info = { ...this.info.globalState.upload.info };
-            info.project = this.info.globalState.project.name;
-            info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
+            const globalState = this.info.globalState;
+            const globalUploadInfo = globalState.upload;
+
+            const info = { ...globalUploadInfo.info };
+            info.project = globalState.project.name;
+            info.staging = globalUploadInfo.info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
 
             const results = await run("upload", info, { title: "Uploading to DANDI" }).catch((e) => {
                 this.notify(e.message, "error");
                 throw e;
             });
 
-            this.info.globalState.upload.results = results; // Save the preview results
+            globalUploadInfo.results = results; // Save the preview results
 
-            this.onTransition(1);
+            this.unsavedUpdates = true; // Ensure that this saves automatically
+
+            this.to(1);
         },
     };
 
     render() {
+        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {}, results: null }, {}));
+
         const schema = {
             properties: {
                 api_key: {
@@ -51,12 +64,9 @@ export class GuidedUploadPage extends Page {
             required: ["api_key", "dandiset_id"],
         };
 
-        let uploadGlobalState = this.info.globalState.upload;
-        if (!uploadGlobalState) uploadGlobalState = this.info.globalState.upload = { info: {}, results: null };
-
         this.form = new JSONSchemaForm({
             schema,
-            results: uploadGlobalState.info,
+            results: state.info,
             // dialogType: 'showSaveDialog',
             dialogOptions: {
                 properties: ["createDirectory"],
@@ -64,6 +74,7 @@ export class GuidedUploadPage extends Page {
                 //   { name: 'NWB File', extensions: ['nwb'] }
                 // ]
             },
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

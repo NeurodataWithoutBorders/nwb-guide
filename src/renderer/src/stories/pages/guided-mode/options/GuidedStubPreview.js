@@ -23,16 +23,16 @@ export class GuidedStubPreviewPage extends Page {
             >`,
     };
 
+    // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {
         next: "Run Conversion",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
-
+            await this.save(); // Save in case the conversion fails
             delete this.info.globalState.conversion;
             this.info.globalState.conversion = await this.runConversions({}, true, {
                 title: "Running all conversions",
             });
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
