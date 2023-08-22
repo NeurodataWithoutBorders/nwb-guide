@@ -36,6 +36,8 @@
         "ElectrodeColumns": { }
     },
 
+    "Behavior": false,
+
     "Subject": {
         "description": false,
         "genotype": false,
