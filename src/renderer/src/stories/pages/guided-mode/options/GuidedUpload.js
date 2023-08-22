@@ -4,6 +4,7 @@ import { Page } from "../../Page.js";
 import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
+import Swal from "sweetalert2";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -14,8 +15,9 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
+        const isNewDandiset = globalState.upload.dandiset_id !== this.localState.dandiset_id
         merge({ upload: this.localState }, globalState); // Merge the local and global states
-        delete globalState.upload.results; // Clear the preview results
+        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
     };
 
     footer = {
@@ -26,6 +28,21 @@ export class GuidedUploadPage extends Page {
 
             const globalState = this.info.globalState;
             const globalUploadInfo = globalState.upload;
+
+            // Catch if dandiset is already uploaded
+            if ('results' in globalUploadInfo) {
+                const result = await Swal.fire({
+                    title: "This pipeline has already uploaded to DANDI",
+                    html: "Would you like to reupload the lastest files?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Continue with Reupload",
+                    cancelButtonText: "Skip Upload",
+                });
+
+                if (!result || !result.isConfirmed) return this.to(1);
+            }
 
             const info = { ...globalUploadInfo.info };
             info.project = globalState.project.name;
