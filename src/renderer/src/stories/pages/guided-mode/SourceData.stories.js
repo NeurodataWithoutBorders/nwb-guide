@@ -22,26 +22,39 @@ export default {
 
 const activePage = "conversion/sourcedata";
 
-const globalStateCopy = JSON.parse(JSON.stringify(globalState))
-globalStateCopy.schema.source_data.properties.SpikeGLXRecordingInterface = SpikeGLXRecordingInterfaceSchema.properties.SpikeGLXRecordingInterface
-globalStateCopy.schema.source_data.properties.SpikeGLXNIDQInterface = SpikeGLXNIDQInterfaceSchema.properties.SpikeGLXNIDQInterface
-globalStateCopy.schema.source_data.properties.PhySortingInterface = PhySortingInterfaceSchema.properties.PhySortingInterface
-globalStateCopy.schema.source_data.properties.NeuroScopeRecordingInterface = NeuroScopeRecordingInterfaceSchema.properties.NeuroScopeRecordingInterface
-globalStateCopy.schema.source_data.properties.NeuroScopeLFPInterface = NeuroScopeLFPInterfaceSchema.properties.NeuroScopeLFPInterface
-globalStateCopy.schema.source_data.properties.NeuroScopeSortingInterface = NeuroScopeSortingInterfaceSchema.properties.NeuroScopeSortingInterface
-globalStateCopy.schema.source_data.properties.BiocamRecordingInterface = BiocamRecordingInterfaceSchema.properties.BiocamRecordingInterface
-globalStateCopy.schema.source_data.properties.IntanRecordingInterface = IntanRecordingInterfaceSchema.properties.IntanRecordingInterface
-globalStateCopy.schema.source_data.properties.OpenEphysRecordingInterface = OpenEphysRecordingInterfaceSchema.properties.OpenEphysRecordingInterface
-globalStateCopy.schema.source_data.properties.BlackrockRecordingInterface = BlackrockRecordingInterfaceSchema.properties.BlackrockRecordingInterface
-globalStateCopy.schema.source_data.properties.BlackrockSortingInterface = BlackrockSortingInterfaceSchema.properties.BlackrockSortingInterface
-globalStateCopy.schema.source_data.properties.CellExplorerSortingInterface = CellExplorerSortingInterfaceSchema.properties.CellExplorerSortingInterface
-globalStateCopy.schema.source_data.properties.KiloSortSortingInterface = KiloSortSortingInterfaceSchema.properties.KiloSortSortingInterface
+const globalStateCopy = JSON.parse(JSON.stringify(globalState));
+globalStateCopy.schema.source_data.properties.SpikeGLXRecordingInterface =
+    SpikeGLXRecordingInterfaceSchema.properties.SpikeGLXRecordingInterface;
+globalStateCopy.schema.source_data.properties.SpikeGLXNIDQInterface =
+    SpikeGLXNIDQInterfaceSchema.properties.SpikeGLXNIDQInterface;
+globalStateCopy.schema.source_data.properties.PhySortingInterface =
+    PhySortingInterfaceSchema.properties.PhySortingInterface;
+globalStateCopy.schema.source_data.properties.NeuroScopeRecordingInterface =
+    NeuroScopeRecordingInterfaceSchema.properties.NeuroScopeRecordingInterface;
+globalStateCopy.schema.source_data.properties.NeuroScopeLFPInterface =
+    NeuroScopeLFPInterfaceSchema.properties.NeuroScopeLFPInterface;
+globalStateCopy.schema.source_data.properties.NeuroScopeSortingInterface =
+    NeuroScopeSortingInterfaceSchema.properties.NeuroScopeSortingInterface;
+globalStateCopy.schema.source_data.properties.BiocamRecordingInterface =
+    BiocamRecordingInterfaceSchema.properties.BiocamRecordingInterface;
+globalStateCopy.schema.source_data.properties.IntanRecordingInterface =
+    IntanRecordingInterfaceSchema.properties.IntanRecordingInterface;
+globalStateCopy.schema.source_data.properties.OpenEphysRecordingInterface =
+    OpenEphysRecordingInterfaceSchema.properties.OpenEphysRecordingInterface;
+globalStateCopy.schema.source_data.properties.BlackrockRecordingInterface =
+    BlackrockRecordingInterfaceSchema.properties.BlackrockRecordingInterface;
+globalStateCopy.schema.source_data.properties.BlackrockSortingInterface =
+    BlackrockSortingInterfaceSchema.properties.BlackrockSortingInterface;
+globalStateCopy.schema.source_data.properties.CellExplorerSortingInterface =
+    CellExplorerSortingInterfaceSchema.properties.CellExplorerSortingInterface;
+globalStateCopy.schema.source_data.properties.KiloSortSortingInterface =
+    KiloSortSortingInterfaceSchema.properties.KiloSortSortingInterface;
 
-const results = globalStateCopy.results
-for (let sub in results){
-    for (let ses in results[sub]) results[sub][ses].source_data = {SpikeGLXNIDQInterface: {file_path: '/dummy/file/path'}}
+const results = globalStateCopy.results;
+for (let sub in results) {
+    for (let ses in results[sub])
+        results[sub][ses].source_data = { SpikeGLXNIDQInterface: { file_path: "/dummy/file/path" } };
 }
-
 
 export const All = PageTemplate.bind({});
 All.args = { activePage, globalState: globalStateCopy };

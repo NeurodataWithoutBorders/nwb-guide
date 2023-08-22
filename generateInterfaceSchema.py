@@ -44,7 +44,12 @@ const {arr[0]}GlobalCopy = JSON.parse(JSON.stringify(globalState))
 )
 
 
-allInterfaceCode = "\n".join(map(lambda arr: f"globalStateCopy.schema.source_data.properties.{arr[0]} = {arr[0]}Schema.properties.{arr[0]}", paths.items()))
+allInterfaceCode = "\n".join(
+    map(
+        lambda arr: f"globalStateCopy.schema.source_data.properties.{arr[0]} = {arr[0]}Schema.properties.{arr[0]}",
+        paths.items(),
+    )
+)
 
 setDummyPathCode = f"""
 const results = globalStateCopy.results
