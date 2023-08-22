@@ -143,17 +143,6 @@ pre {
     padding-top: 4px;
     color: dimgray !important;
   }
-
-  input[type=number].hideStep::-webkit-outer-spin-button,
-  input[type=number].hideStep::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-    /* Firefox */
-    input[type=number].hideStep {
-        -moz-appearance: textfield;
-    }
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -268,8 +257,11 @@ export class JSONSchemaForm extends LitElement {
     updateData(fullPath, value) {
         const path = [...fullPath];
         const name = path.pop();
-        const resultParent = path.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.results);
-        const resolvedParent = path.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.resolved);
+
+        const reducer = (acc, key) => (key in acc ? acc[key] : (acc[key] = {})); // NOTE: Create nested objects if required to set a new path
+
+        const resultParent = path.reduce(reducer, this.results);
+        const resolvedParent = path.reduce(reducer, this.resolved);
 
         if (resolvedParent[name] !== value) this.onUpdate(fullPath, value); // Ensure the value has actually changed
 
@@ -814,7 +806,7 @@ export class JSONSchemaForm extends LitElement {
             }
 
             // Render properties in the sub-schema
-            const rendered = this.#render(info, results[name], required[name], fullPath);
+            const rendered = this.#render(info, results?.[name], required[name], fullPath);
             return hasMany || path.length > 1
                 ? html`
                       <div style="margin-top: 40px;">

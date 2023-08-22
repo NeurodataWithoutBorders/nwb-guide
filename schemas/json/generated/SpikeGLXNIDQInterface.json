@@ -1,0 +1,38 @@
+{
+    "required": [],
+    "properties": {
+        "SpikeGLXNIDQInterface": {
+            "required": [
+                "file_path"
+            ],
+            "properties": {
+                "file_path": {
+                    "format": "file",
+                    "type": "string",
+                    "description": "Path to SpikeGLX .nidq file."
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "load_sync_channel": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeriesNIDQ"
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "source.schema.json",
+    "title": "Source data schema",
+    "description": "Schema for the source data, files and directories",
+    "version": "0.1.0"
+}
