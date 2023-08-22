@@ -287,8 +287,6 @@ def convert_to_nwb(info: dict) -> str:
     if "Ecephys" not in info["metadata"]:
         info["metadata"].update(Ecephys=dict())
 
-    # ecephys_metadata = info["metadata"].get("Ecephys", dict())
-
     # if is_supported_recording_interface(recording_interface, info["metadata"]):
     #     electrode_column_results = ecephys_metadata["ElectrodeColumns"]
     #     electrode_results = ecephys_metadata["Electrodes"]
