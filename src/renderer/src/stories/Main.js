@@ -78,6 +78,8 @@ export class Main extends LitElement {
         let capsules = page?.capsules; // Page-specific capsules
 
         if (page) {
+            this.to = page.to;
+
             const info = page.info ?? {};
 
             // Default Footer Behavior
@@ -87,7 +89,7 @@ export class Main extends LitElement {
                     footer = {
                         next: "Back to Home Screen",
                         exit: "Exit",
-                        onNext: () => this.onTransition("/"),
+                        onNext: () => this.toRender.page.to("/"),
                     };
                 // Allow navigating laterally if there is a next page
                 else footer = true;
