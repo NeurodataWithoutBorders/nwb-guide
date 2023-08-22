@@ -20,6 +20,10 @@ export const globalState = {
             species: "Mus musculus",
         },
     },
+    structure: {
+        results: {},
+        state: true
+    },
     subjects: {
         subject_id: {},
     },
