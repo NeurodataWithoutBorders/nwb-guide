@@ -126,7 +126,68 @@ test('inter-table updates are triggered', async () => {
         else cell.value = baseRow[i].value // Otherwise carry over info
     })
 
-    // Valalidate that the new structure is correct
+    // Validate that the new structure is correct
+    await form.validate().then(res => errors = false).catch(e => errors = true)
+    expect(errors).toBe(false) // Is valid
+})
+
+
+// TODO: Convert an integration
+test('changes are resolved correctly', async () => {
+
+    const results = {}
+
+    const schema = {
+        properties: {
+            v0: {
+                type: 'string'
+            },
+            l1: {
+                type: "object",
+                properties: {
+                    l2: {
+                        type: "object",
+                        properties: {
+                            v2: {
+                                type: 'string'
+                            }
+                        },
+                        required: ['v2']
+                    },
+                    v1: {
+                        type: 'string'
+                    }
+                },
+                required: ['v1']
+            }
+        },
+        required: ['v0']
+    }
+
+    // Create the form
+    const form = new JSONSchemaForm({
+        schema,
+        results
+    })
+
+    document.body.append(form)
+
+    await form.rendered
+
+    // Validate that the results are incorrect
+    let errors = false
+    await form.validate().catch(e => errors = true)
+    expect(errors).toBe(true) // Is invalid
+
+    const input1 = form.getInput(['v0'])
+    const input2 = form.getInput(['l1', 'v1'])
+    const input3 = form.getInput(['l1', 'l2', 'v2'])
+
+    input1.updateData('test')
+    input2.updateData('test')
+    input3.updateData('test')
+
+    // Validate that the new structure is correct
     await form.validate().then(res => errors = false).catch(e => errors = true)
     expect(errors).toBe(false) // Is valid
 })
