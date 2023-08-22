@@ -76,6 +76,21 @@ export class JSONSchemaInput extends LitElement {
     // onUpdate = () => {}
     // onValidate = () => {}
 
+    getElement = () => {
+        const el = this.shadowRoot.querySelector("input, select, textarea");
+        if (el) return el;
+        return this.shadowRoot.querySelector("filesystem-selector");
+    };
+
+    updateData = (value) => {
+        const { path: fullPath } = this;
+        const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
+        const name = path.splice(-1)[0];
+        this.#triggerValidation(name, this.getElement(), path);
+        this.#updateData(fullPath, value);
+        return true;
+    };
+
     #updateData = (path, value) => {
         this.onUpdate ? this.onUpdate(value) : this.form.updateData(path, value);
     };
@@ -268,4 +283,4 @@ export class JSONSchemaInput extends LitElement {
     }
 }
 
-customElements.get("nwb-jsonschema-input") || customElements.define("nwb-jsonschema-input", JSONSchemaInput);
+customElements.get("jsonschema-input") || customElements.define("jsonschema-input", JSONSchemaInput);
