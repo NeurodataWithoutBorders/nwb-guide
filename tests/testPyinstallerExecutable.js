@@ -4,14 +4,14 @@ const fs = require("fs");
 
 const cmds = {
     port: 1234,
-    script: path.resolve(__dirname, `../build/flask/nwb-guide/nwb-guide${process.platform === "win32" ? ".exe" : ""}`)
-}
+    script: path.resolve(__dirname, `../build/flask/nwb-guide/nwb-guide${process.platform === "win32" ? ".exe" : ""}`),
+};
 
 process.argv.forEach((v, i) => {
-    if (v === '--script') cmds.script = process.argv[i + 1]
-    if (v === '--port') cmds.port = parseInt(process.argv[i + 1])
-    if (v === '--forever') cmds.forever = true
-})
+    if (v === "--script") cmds.script = process.argv[i + 1];
+    if (v === "--port") cmds.port = parseInt(process.argv[i + 1]);
+    if (v === "--forever") cmds.forever = true;
+});
 
 console.log("Found file", fs.existsSync(cmds.script));
 

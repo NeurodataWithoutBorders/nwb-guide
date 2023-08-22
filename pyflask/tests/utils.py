@@ -3,7 +3,7 @@ import requests
 
 def get(path, client):
     if isinstance(client, str):
-        r = (requests.get(f"{client}/{path}", allow_redirects=True))
+        r = requests.get(f"{client}/{path}", allow_redirects=True)
         r.raise_for_status()
         return r.json()
     else:

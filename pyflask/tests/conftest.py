@@ -1,8 +1,10 @@
 import pytest
 import app as flask
 
+
 def pytest_addoption(parser):
     parser.addoption("--target", action="store", help="Run the executable instead of the standard Flask app")
+
 
 @pytest.fixture(scope="session")
 def client(request):
