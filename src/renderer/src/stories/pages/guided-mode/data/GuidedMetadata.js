@@ -184,7 +184,6 @@ export class GuidedMetadataPage extends ManagedPage {
                     onClick: async (key, el) => {
                         const { subject, session } = getInfoFromId(key);
 
-
                         const results = await this.runConversions(
                             { stub_test: true },
                             [
@@ -200,10 +199,10 @@ export class GuidedMetadataPage extends ManagedPage {
                             throw e;
                         });
 
-                        const firstSubject = Object.values(results)[0]
-                        const file = Object.values(firstSubject)[0] // Get the information from the first subject
+                        const firstSubject = Object.values(results)[0];
+                        const file = Object.values(firstSubject)[0]; // Get the information from the first subject
 
-                        console.log(firstSubject, file, results)
+                        console.log(firstSubject, file, results);
 
                         const modal = new Modal({
                             header: `Conversion Preview: ${key}`,
@@ -213,7 +212,9 @@ export class GuidedMetadataPage extends ManagedPage {
                             height: "100%",
                         });
 
-                        modal.append(new Neurosift({ url: getURLFromFilePath(file, this.info.globalState.project.name) }));
+                        modal.append(
+                            new Neurosift({ url: getURLFromFilePath(file, this.info.globalState.project.name) })
+                        );
                         document.body.append(modal);
                     },
                 },

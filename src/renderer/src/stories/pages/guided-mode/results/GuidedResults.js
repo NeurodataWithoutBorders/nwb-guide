@@ -92,7 +92,9 @@ export class GuidedResultsPage extends Page {
                     <h3 style="padding: 0;">Files Uploaded with this Conversion</h3>
                     <hr />
                     <ol>
-                        ${Object.values(results).flat(v => Object.values(v)).map((o) => html`<li>${o.file}</li>`)}
+                        ${Object.values(results)
+                            .flat((v) => Object.values(v))
+                            .map((o) => html`<li>${o.file}</li>`)}
                     </ol>
                 </div>
             </div>

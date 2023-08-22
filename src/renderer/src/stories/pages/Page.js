@@ -182,8 +182,8 @@ export class Page extends LitElement {
                 elements.progress.value = progressInfo;
             }
 
-            const subRef = results[subject] ?? (results[subject] = {})
-            subRef[session] = result
+            const subRef = results[subject] ?? (results[subject] = {});
+            subRef[session] = result;
         }
 
         popup.close();

@@ -38,17 +38,15 @@ export class GuidedStubPreviewPage extends Page {
         },
     };
 
-
     createInstance = ({ subject, session, info }) => {
-
         const { project, stubs } = this.info.globalState;
 
         return {
             subject,
             session,
-            display: new Neurosift({ url: getURLFromFilePath(stubs[subject][session], project.name) })
-        }
-    }
+            display: new Neurosift({ url: getURLFromFilePath(stubs[subject][session], project.name) }),
+        };
+    };
 
     render() {
         const { stubs } = this.info.globalState;
@@ -58,16 +56,15 @@ export class GuidedStubPreviewPage extends Page {
         const instances = _instances.reduce((acc, { subject, session, display }) => {
             if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
             acc[`sub-${subject}`][`ses-${session}`] = display;
-            return acc
+            return acc;
         }, {});
 
-
         return stubs
-            ? this.manager = new InstanceManager({
-                header: "Sessions",
-                instanceType: "Session",
-                instances,
-            })
+            ? (this.manager = new InstanceManager({
+                  header: "Sessions",
+                  instanceType: "Session",
+                  instances,
+              }))
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
