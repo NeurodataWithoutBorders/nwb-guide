@@ -239,6 +239,13 @@ export class JSONSchemaForm extends LitElement {
         return form.getForm(path.slice(1));
     };
 
+    getInput = (path) => {
+        if (typeof path === "string") path = path.split(".");
+        const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
+        if (!container) return;
+        return container.querySelector("jsonschema-input");
+    };
+
     #requirements = {};
 
     attributeChangedCallback(changedProperties, oldValue, newValue) {
@@ -418,7 +425,7 @@ export class JSONSchemaForm extends LitElement {
 
         interactiveInput.updated = () => {
             let input = interactiveInput.shadowRoot.querySelector(".schema-input");
-            if (!input) input = interactiveInput.shadowRoot.querySelector("nwb-filesystem-selector");
+            if (!input) input = interactiveInput.shadowRoot.querySelector("filesystem-selector");
 
             if (input) {
                 if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
@@ -430,7 +437,7 @@ export class JSONSchemaForm extends LitElement {
 
         // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-jsonschema-input")).map(input => input.children)
         // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
-        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-filesystem-selector") ?? []);
+        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("filesystem-selector") ?? []);
         // const allInputs = [...inputs, ...fileInputs];
         // const filtered = filter ? allInputs.filter(filter) : allInputs;
         // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
