@@ -81,6 +81,8 @@ jobs:
         with:
           node-version: "18"
 
+      - run: npm ci
+
       - name: Build PyFlask distribution
         run: npm run build:flask:${{ matrix.shorthand }}
 
