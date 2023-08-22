@@ -1,38 +1,47 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
-import { UnsafeComponent } from "../../Unsafe.js";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import folderOpenSVG from "../../../assets/folder_open.svg?raw";
+
+import { electron } from "../../../../electron/index.js";
+import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
+const { shell } = electron;
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
     }
 
+    header = {
+        subtitle: () => this.info.globalState.preview,
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview) : "")}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
+    };
+
+    // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {
         next: "Run Conversion",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
-
+            await this.save(); // Save in case the conversion fails
             delete this.info.globalState.conversion;
             this.info.globalState.conversion = await this.runConversions({}, true, {
                 title: "Running all conversions",
             });
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
     render() {
-        return html`
-            <div>
-                ${this.info.globalState.preview
-                    ? this.info.globalState.preview.map(
-                          (o) =>
-                              html`<h2 class="guided--text-sub-step">${o.file}</h2>
-                                  ${new UnsafeComponent(o.html)}`
-                      )
-                    : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`}
-            </div>
-        `;
+        const { project, preview } = this.info.globalState;
+
+        return preview
+            ? new Neurosift({ url: getURLFromFilePath(preview, project.name) })
+            : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
 

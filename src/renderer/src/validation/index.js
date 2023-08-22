@@ -90,6 +90,7 @@ export function checkStatus(warnings, errors, items = []) {
     else if (errors) newStatus = "error";
     else if (nestedStatus.includes("warning")) newStatus = "warning";
     else if (warnings) newStatus = "warning";
-
-    if (newStatus !== this.status) this.onStatusChange((this.status = newStatus));
+    if (this && this.onStatusChange && "status" in this && newStatus !== this.status)
+        this.onStatusChange((this.status = newStatus)); // Automatically run callbacks if supported by the context
+    return newStatus;
 }

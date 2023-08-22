@@ -13,8 +13,8 @@ import { hasEntry, get, save, remove, resume, global } from "../../../progress.j
 
 import { electron } from "../../../electron/index.js";
 
-import restartSVG from "./restart.svg?raw";
-import folderOpenSVG from "./folder_open.svg?raw";
+import restartSVG from "../../assets/restart.svg?raw";
+import folderOpenSVG from "../../assets/folder_open.svg?raw";
 
 const { shell } = electron;
 
@@ -34,9 +34,7 @@ export class TutorialPage extends Page {
                 properties: ["createDirectory"],
             },
             results: state,
-            validateOnChange: () => {
-                global.save();
-            },
+            onUpdate: () => global.save(),
         });
 
         form.style.width = "100%";
@@ -49,7 +47,7 @@ export class TutorialPage extends Page {
                 <div>
                     ${entryExists
                         ? html` <nwb-button
-                                  size="xs"
+                                  size="small"
                                   @click=${() => {
                                       if (shell) {
                                           const entry = get(tutorialPipelineName);
@@ -60,7 +58,7 @@ export class TutorialPage extends Page {
                               >
 
                               <nwb-button
-                                  size="xs"
+                                  size="small"
                                   @click=${async () => {
                                       const hasBeenDeleted = await remove(tutorialPipelineName);
                                       if (hasBeenDeleted) this.requestUpdate();
@@ -80,7 +78,7 @@ export class TutorialPage extends Page {
             ${hasEntry(tutorialPipelineName)
                 ? html`<div>
                       Data has been preloaded into the <b>${tutorialPipelineName}</b> pipeline, which can be accessed
-                      via the <a @click=${() => this.onTransition("guided")}>Guided Mode</a> conversion list.
+                      via the <a @click=${() => this.to("guided")}>Guided Mode</a> conversion list.
 
                       <br /><br />
 
@@ -123,6 +121,20 @@ export class TutorialPage extends Page {
                               this.notify("Tutorial data successfully generated!");
                               if (shell) shell.showItemInFolder(output_directory);
 
+                              //   Limit the data structures included in the tutorial
+                              const dataStructureResults = {
+                                  PhySorting: {
+                                      base_directory: output_directory,
+                                      format_string_path:
+                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy",
+                                  },
+                                  SpikeGLXRecording: {
+                                      base_directory: output_directory,
+                                      format_string_path:
+                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin",
+                                  },
+                              };
+
                               save({
                                   info: {
                                       globalState: {
@@ -132,26 +144,14 @@ export class TutorialPage extends Page {
                                           },
 
                                           // provide data for all supported interfaces
-                                          interfaces: guideGlobalMetadata.supported_interfaces.reduce((acc, value) => {
-                                              const key = value.replace("Interface", "");
-                                              acc[key] = value;
+                                          interfaces: Object.keys(dataStructureResults).reduce((acc, key) => {
+                                              acc[key] = `${key}Interface`;
                                               return acc;
                                           }, {}),
 
                                           // Manually fill out the structure of supported data interfaces
                                           structure: {
-                                              results: {
-                                                  PhySorting: {
-                                                      base_directory: output_directory,
-                                                      format_string_path:
-                                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy",
-                                                  },
-                                                  SpikeGLXRecording: {
-                                                      base_directory: output_directory,
-                                                      format_string_path:
-                                                          "{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin",
-                                                  },
-                                              },
+                                              results: dataStructureResults,
                                               state: true,
                                           },
                                       },

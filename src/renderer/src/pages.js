@@ -18,7 +18,7 @@ import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/Guide
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
 import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
-import tutorialIcon from "./stories/pages/tutorial/exploration.svg?raw";
+import tutorialIcon from "./stories/assets/exploration.svg?raw";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -115,7 +115,7 @@ const pages = {
             }),
 
             subjects: new GuidedSubjectsPage({
-                title: "Subjects",
+                title: "Subject Metadata",
                 label: "Subject details",
                 section: sections[0],
             }),

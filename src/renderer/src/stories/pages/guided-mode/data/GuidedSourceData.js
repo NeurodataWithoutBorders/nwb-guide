@@ -7,22 +7,28 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
+import { merge } from "../../utils.js";
+import getSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
     }
 
+    beforeSave = () => {
+        merge(this.localState, this.info.globalState);
+    };
+
     footer = {
+        next: "Request Metadata Schema",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
+
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // const previousResults = this.info.globalState.metadata.results
 
-            this.save(); // Save in case the metadata request fails
-
-            let stillFireSwal = false;
+            let stillFireSwal = true;
             const fireSwal = () => {
                 Swal.fire({
                     title: "Getting metadata for source data",
@@ -66,13 +72,21 @@ export class GuidedSourceDataPage extends ManagedPage {
                     if (isStorybook) return;
 
                     if (result.message) {
-                        const message = "Failed to get metadata with current source data. Please try again.";
+                        const [
+                            type,
+                            text = `<small><pre>${result.traceback
+                                .trim()
+                                .split("\n")
+                                .slice(-2)[0]
+                                .trim()}</pre></small>`,
+                        ] = result.message.split(":");
+                        const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
                         this.notify(message, "error");
                         throw result;
                     }
 
                     // Merge metadata results with the generated info
-                    this.merge("metadata", result.results, info);
+                    merge(result.results, info.metadata);
 
                     // Mirror structure with metadata schema
                     const schema = this.info.globalState.schema;
@@ -82,19 +96,30 @@ export class GuidedSourceDataPage extends ManagedPage {
                 })
             );
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
     createForm = ({ subject, session, info }) => {
         const instanceId = `sub-${subject}/ses-${session}`;
 
+        const schema = this.info.globalState.schema.source_data;
+
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema: this.info.globalState.schema.source_data,
+            schema: getSourceDataSchema(schema),
             results: info.source_data,
-            onlyRequired: true,
+            ignore: [
+                "verbose",
+                "es_key",
+                "exclude_shanks",
+                "load_sync_channel",
+                "stream_id", // NOTE: May be desired for other interfaces
+                "nsx_override",
+            ],
+            // onlyRequired: true,
+            onUpdate: () => (this.unsavedUpdates = true),
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });
@@ -107,7 +132,9 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     render() {
-        this.forms = this.mapSessions(this.createForm);
+        this.localState = { results: merge(this.info.globalState.results, {}) };
+
+        this.forms = this.mapSessions(this.createForm, this.localState);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {

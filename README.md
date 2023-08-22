@@ -24,35 +24,46 @@ NWB GUIDE is a desktop app that provides a no-code user interface for converting
 </p>
 
 ## Installation
+
+Start by cloning the repository
+
+```
+git clone https://github.com/catalystneuro/nwb-guide
+```
+
 Install the appropriate Python dependencies for your operating system.
 
 ### Windows
 ```bash
-conda env create -f ./tools/anaconda-env/environment-Windows.yml
+conda env create -f ./environments/environment-Windows.yml
 ```
 
 ### Mac
 ```bash
-conda env create -f ./tools/anaconda-env/environment-MAC.yml
+conda env create -f ./environments/environment-MAC.yml
+```
+
+### M1 Mac
+```bash
+conda env create -f ./environments/environment-MAC-arm64.yml
 ```
 
 ### Linux
 ```bash
-conda env create -f ./tools/anaconda-env/environment-Linux.yml
-```
-
-
-Next, install all JavaScript dependencies based on the `package-lock.json` file.
-
-```bash
-npm ci
+conda env create -f ./environments/environment-Linux.yml
 ```
 
 ## Getting Started
 Before starting NWB GUIDE, you'll need to ensure that the Python environment is activated.
 
 ```bash
-conda activate env-electron-python
+conda activate nwb-guide
+```
+
+Next, install all JavaScript dependencies based on the `package-lock.json` file.
+
+```bash
+npm ci
 ```
 
 You can now run the following command to start the application using Electron.

@@ -3,6 +3,7 @@ import { JSONSchemaForm } from "../JSONSchemaForm.js";
 import { Page } from "./Page.js";
 import { validateOnChange } from "../../validation/index.js";
 import { onThrow } from "../../errors";
+import { merge } from "./utils.js";
 
 export function schemaToPages(schema, globalStatePath, options, transformationCallback = (info) => info) {
     return Object.entries(schema.properties)
@@ -46,11 +47,22 @@ export class GuidedFormPage extends Page {
         if (!this.info.formOptions.results) this.info.formOptions.results = {};
     }
 
+    beforeSave = () => {
+        // Merge results before saving
+        if (this.info.globalStatePath) {
+            const parent = this.info.globalStatePath.reduce(
+                (acc, key) => acc[key] ?? (acc[key] = {}),
+                this.info.globalState
+            );
+            parent[this.info.key] = this.localState[this.info.key];
+        }
+    };
+
     footer = {
         onNext: async () => {
-            await this.form.validate();
-
-            this.onTransition(1);
+            await this.save(); // Save in case validation fails
+            await this.form.validate(); // Validate the results of the form
+            this.to(1);
         },
     };
 
@@ -59,11 +71,13 @@ export class GuidedFormPage extends Page {
         const temp = this.info.globalStatePath
             ? this.info.globalStatePath.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.info.globalState)
             : {};
-        const results = { [key]: temp[key] ?? (temp[key] = {}) };
+
+        const results = (this.localState = merge({ [key]: temp[key] ?? (temp[key] = {}) }, {})); // Keep a local copy of the results
 
         const form = (this.form = new JSONSchemaForm({
             ...this.info.formOptions,
             results,
+            onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange,
             onThrow,
         }));

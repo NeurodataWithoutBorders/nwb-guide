@@ -2,9 +2,7 @@ name: Build-and-deploy-mac
 run-name: ${{ github.actor }} is building a MAC release for NWB GUIDE
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy-on-mac:
@@ -19,31 +17,44 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: env-electron-python
-          environment-file: tools/anaconda-env/environment-MAC.yml
+          activate-environment: nwb-guide
+          #mamba-version: "*"
+          environment-file: environments/environment-MAC.yml
           auto-activate-base: false
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
 
       - name: Install package.json modules and their dependencies
         run: npm install --ignore-scripts
 
       - uses: apple-actions/import-codesign-certs@v1
         with:
+          # https://developer.apple.com/account/resources/certificates/add
+          # Sign up for an Apple Developer account (annual fee)
+          # Create a new certificate for Mac development at website above (max 1 certificate)
+          # Create a Certificate Signing Request (CSR) on your Mac --
+          # see https://developer.apple.com/help/account/create-certificates/create-a-certificate-signing-request
+          # Keychain Access > Certificate Assistant > Request a Certificate from a Certificate Authority...
+          # Enter email address, common name
+          # Download the new certificate (.cer file)
+          # Double click the .cer file to install in Keychain Access
+          # Use Keychain Access to export the certificate as a .p12
+          # base64 -i cent.p12 -o base64.txt
+          # Open base64.txt and copy the contents to the nwb-guide repository secret for MACOS_CERTIFICATE
+          # Currently this is set up to use Ryan's account and certificate
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
       - name: Build and deploy on MAC
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          appleId: ${{ secrets.APPLE_ID }}
+          appleId: ${{ secrets.APPLE_ID }}  # currently this is set to Ryan's Apple ID and password
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
         run: |
-          npm run python-onefile-build
-          npm run deploy-mac
+          npm run deploy:mac
