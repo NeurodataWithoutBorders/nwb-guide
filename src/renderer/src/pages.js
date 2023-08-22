@@ -19,6 +19,9 @@ import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
 import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
 import tutorialIcon from "./stories/assets/exploration.svg?raw";
+import uploadIcon from "./stories/assets/dandi.svg?raw";
+
+import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -149,6 +152,10 @@ const pages = {
                 section: sections[3],
             }),
         },
+    }),
+    uploads: new UploadsPage({
+        label: "Uploads",
+        icon: uploadIcon,
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",

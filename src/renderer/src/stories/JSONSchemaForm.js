@@ -263,8 +263,7 @@ export class JSONSchemaForm extends LitElement {
         const resultParent = path.reduce(reducer, this.results);
         const resolvedParent = path.reduce(reducer, this.resolved);
 
-        if (resolvedParent[name] !== value) this.onUpdate(fullPath, value); // Ensure the value has actually changed
-
+        const hasUpdate = resolvedParent[name] !== value
         if (!value) {
             delete resultParent[name];
             delete resolvedParent[name];
@@ -272,6 +271,8 @@ export class JSONSchemaForm extends LitElement {
             resultParent[name] = value;
             resolvedParent[name] = value;
         }
+
+        if (hasUpdate) this.onUpdate(fullPath, value); // Ensure the value has actually changed
     }
 
     #addMessage = (name, message, type) => {

@@ -5,6 +5,7 @@ import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
+import dandiUploadSchema from '../../../../../../../schemas/json/dandi_upload_schema.json'
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -64,33 +65,9 @@ export class GuidedUploadPage extends Page {
     render() {
         const state = (this.localState = merge(this.info.globalState.upload ?? { info: {}, results: null }, {}));
 
-        const schema = {
-            properties: {
-                api_key: {
-                    type: "string",
-                    format: "password",
-                },
-                dandiset_id: {
-                    type: "string",
-                },
-                cleanup: {
-                    type: "boolean",
-                    default: false,
-                },
-            },
-            required: ["api_key", "dandiset_id"],
-        };
-
         this.form = new JSONSchemaForm({
-            schema,
+            schema: dandiUploadSchema,
             results: state.info,
-            // dialogType: 'showSaveDialog',
-            dialogOptions: {
-                properties: ["createDirectory"],
-                // filters: [
-                //   { name: 'NWB File', extensions: ['nwb'] }
-                // ]
-            },
             onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });

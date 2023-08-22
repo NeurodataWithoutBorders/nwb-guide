@@ -53,6 +53,11 @@ export class Button extends LitElement {
                 font-size: 16px;
                 padding: 12px 24px;
             }
+
+            [disabled] {
+                opacity: 50%;
+                cursor: default;
+            }
         `;
     }
 
@@ -64,15 +69,18 @@ export class Button extends LitElement {
             onClick: { type: Function },
             label: { type: String },
             icon: { type: String },
+            disabled: { type: Boolean }
         };
     }
 
     render() {
         const mode = this.primary ? "storybook-button--primary" : "storybook-button--secondary";
 
+        console.log
         return html`
             <button
                 type="button"
+                ?disabled=${this.disabled}
                 class=${["storybook-button", `storybook-button--${this.size || "medium"}`, mode].join(" ")}
                 style=${styleMap(
                     this.primary

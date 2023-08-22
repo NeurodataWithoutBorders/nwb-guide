@@ -4,7 +4,6 @@ import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import tutorialSchema from "../../../../../../schemas/json/tutorial.schema.json" assert { type: "json" };
-import guideGlobalMetadata from "../../../../../../guideGlobalMetadata.json" assert { type: "json" };
 
 import { run } from "../guided-mode/options/utils.js";
 import "../../Button.js";

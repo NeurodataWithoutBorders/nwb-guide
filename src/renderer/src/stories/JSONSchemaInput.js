@@ -103,11 +103,11 @@ export class JSONSchemaInput extends LitElement {
     };
 
     #updateData = (path, value) => {
-        this.onUpdate ? this.onUpdate(value) : this.form.updateData(path, value);
+        this.onUpdate ? this.onUpdate(value) : (this.form ? this.form.updateData(path, value) : '');
     };
 
     #triggerValidation = (name, el, path) =>
-        this.onValidate ? this.onValidate() : this.form.triggerValidation(name, el, path);
+        this.onValidate ? this.onValidate() : (this.form ? this.form.triggerValidation(name, el, path) : '');
 
     render() {
         const { validateOnChange, info, parent, path: fullPath } = this;
@@ -219,7 +219,7 @@ export class JSONSchemaInput extends LitElement {
                     @input=${(ev) => this.#updateData(fullPath, info.enum[ev.target.value])}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
                 >
-                    <option disabled selected value>Select an option</option>
+                    <option disabled selected value>${info.placeholder ?? 'Select an option'}</option>
                     ${info.enum.map(
                         (item, i) => html`<option value=${i} ?selected=${this.value === item}>${item}</option>`
                     )}

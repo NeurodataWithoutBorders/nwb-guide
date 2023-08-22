@@ -1,0 +1,16 @@
+{
+    "properties": {
+        "api_key": {
+            "type": "string",
+            "format": "password"
+        },
+        "dandiset_id": {
+            "type": "string"
+        },
+        "cleanup": {
+            "type": "boolean",
+            "default": false
+        }
+    },
+    "required": ["api_key", "dandiset_id"]
+}
