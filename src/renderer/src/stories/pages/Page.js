@@ -126,7 +126,7 @@ export class Page extends LitElement {
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
-        let results = [];
+        const results = {};
 
         const popup = await openProgressSwal({ title: `Running conversion`, ...options });
 
@@ -182,7 +182,8 @@ export class Page extends LitElement {
                 elements.progress.value = progressInfo;
             }
 
-            results.push(result);
+            const subRef = results[subject] ?? (results[subject] = {})
+            subRef[session] = result
         }
 
         popup.close();
