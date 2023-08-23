@@ -78,8 +78,11 @@ export class InspectorListItem extends LitElement {
             }
         `;
     }
+
+
     constructor(props) {
         super();
+        this.ORIGINAL_TYPE = props.type
         Object.assign(this, props);
     }
 
@@ -93,7 +96,7 @@ export class InspectorListItem extends LitElement {
     }
 
     render() {
-        this.type = this.importance === "CRITICAL" ? "error" : "warning";
+        this.type = this.ORIGINAL_TYPE ?? (this.importance === "CRITICAL" ? "error" : "warning");
 
         this.setAttribute("title", this.message);
 

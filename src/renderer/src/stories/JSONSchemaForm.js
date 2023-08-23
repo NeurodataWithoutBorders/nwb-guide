@@ -30,30 +30,6 @@ const componentCSS = `
       background: rgb(255, 229, 228) !important;
     }
 
-    .errors {
-      color: #9d0b0b;
-    }
-
-    .errors > * {
-      padding: 25px;
-      background: #f8d7da;
-      border: 1px solid #f5c2c7;
-      border-radius: 4px;
-      margin: 0 0 1em;
-    }
-
-    .warnings {
-      color: #856404;
-    }
-
-    .warnings > * {
-      padding: 25px;
-      background: #fff3cd;
-      border: 1px solid #ffeeba;
-      border-radius: 4px;
-      margin: 0 0 1em;
-    }
-
     .guided--form-label {
       display: block;
       width: 100%;
@@ -278,7 +254,7 @@ export class JSONSchemaForm extends LitElement {
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
         const container = this.shadowRoot.querySelector(`#${name} .${type}`);
-        const item = new InspectorListItem({ message });
+        const item = new InspectorListItem(message);
         container.appendChild(item);
     };
 
@@ -625,7 +601,7 @@ export class JSONSchemaForm extends LitElement {
         this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
-        warnings.forEach((info) => this.#addMessage(fullPath, info.message, "warnings"));
+        warnings.forEach((info) => this.#addMessage(fullPath, info, "warnings"));
 
         const isFunction = typeof valid === "function";
 
@@ -658,7 +634,7 @@ export class JSONSchemaForm extends LitElement {
                 [...path, name]
             );
 
-            errors.forEach((info) => this.#addMessage(fullPath, info.message, "errors"));
+            errors.forEach((info) => this.#addMessage(fullPath, info, "errors"));
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;
