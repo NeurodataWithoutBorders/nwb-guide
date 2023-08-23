@@ -46,8 +46,10 @@ export class GuidedUploadPage extends Page {
                 if (!result || !result.isConfirmed) return this.to(1);
             }
 
-
-            const results = await uploadToDandi.call(this, { ...globalUploadInfo.info, project: globalState.project.name });
+            const results = await uploadToDandi.call(this, {
+                ...globalUploadInfo.info,
+                project: globalState.project.name,
+            });
 
             globalUploadInfo.results = results; // Save the preview results
 

@@ -369,7 +369,8 @@ export class JSONSchemaForm extends LitElement {
         const name = path.pop();
         const element = this.shadowRoot
             .querySelector(`#${fullPath.join("-")}`)
-            .querySelector("jsonschema-input").getElement()
+            .querySelector("jsonschema-input")
+            .getElement();
         const isValid = await this.triggerValidation(name, element, path, false);
         if (!isValid) return true;
     };

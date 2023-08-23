@@ -24,21 +24,20 @@ export class SettingsPage extends Page {
         this.localState = merge(global.data, {});
 
         const button = new Button({
-            label: 'Save Changes',
+            label: "Save Changes",
             onClick: async () => {
-                if (!this.unsavedUpdates) return
+                if (!this.unsavedUpdates) return;
 
                 // Save the changes, even if invalid on the form
-                merge(this.form.resolved, global.data)
-                global.save()
-                this.unsavedUpdates = false
+                merge(this.form.resolved, global.data);
+                global.save();
+                this.unsavedUpdates = false;
                 notyf.open({
-                    type: 'success', 
-                    message: 'Global settings changes saved'
-                })
+                    type: "success",
+                    message: "Global settings changes saved",
+                });
             },
         });
-
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
@@ -46,11 +45,11 @@ export class SettingsPage extends Page {
             schema: {
                 properties: {
                     output_locations: projectGlobalSchema,
-                    DANDI: dandiGlobalSchema
-                }
+                    DANDI: dandiGlobalSchema,
+                },
             },
-            mode: 'accordion',
-            onUpdate: () => this.unsavedUpdates = true,
+            mode: "accordion",
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

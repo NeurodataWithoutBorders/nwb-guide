@@ -91,16 +91,16 @@ export class JSONSchemaInput extends LitElement {
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
-        const el = this.getElement()
+        const el = this.getElement();
         this.#triggerValidation(name, el, path);
         this.#updateData(fullPath, value);
-        this.value = value // set the actual value
-        this.requestUpdate()
+        this.value = value; // set the actual value
+        this.requestUpdate();
 
         return true;
     };
 
-    getElement = () => this.shadowRoot.querySelector('.schema-input')
+    getElement = () => this.shadowRoot.querySelector(".schema-input");
 
     #updateData = (path, value) => {
         this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(path, value) : "";
@@ -109,10 +109,9 @@ export class JSONSchemaInput extends LitElement {
     #triggerValidation = (name, el, path) =>
         this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
 
-
-    updated(){
-        console.log(this)
-        console.log('HAS BEEN UPDATED', this.getElement())
+    updated() {
+        console.log(this);
+        console.log("HAS BEEN UPDATED", this.getElement());
     }
 
     render() {
@@ -126,7 +125,7 @@ export class JSONSchemaInput extends LitElement {
         const hasItemsRef = "items" in info && "$ref" in info.items;
         if (!("items" in info) || (!("type" in info.items) && !hasItemsRef)) info.items = { type: "string" };
 
-        console.log('Rerenddering', this.value)
+        console.log("Rerenddering", this.value);
 
         if (isArray) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
@@ -256,7 +255,7 @@ export class JSONSchemaInput extends LitElement {
                     dialogOptions: this.form.dialogOptions,
                     dialogType: this.form.dialogType,
                 });
-                el.classList.add('schema-input')
+                el.classList.add("schema-input");
                 return el;
             }
 
