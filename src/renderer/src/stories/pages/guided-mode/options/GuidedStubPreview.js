@@ -6,6 +6,8 @@ import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
 import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
+import { InstanceManager } from "../../../InstanceManager.js";
+
 const { shell } = electron;
 
 export class GuidedStubPreviewPage extends Page {
@@ -36,11 +38,33 @@ export class GuidedStubPreviewPage extends Page {
         },
     };
 
-    render() {
+    createInstance = ({ subject, session, info }) => {
         const { project, stubs } = this.info.globalState;
 
+        return {
+            subject,
+            session,
+            display: new Neurosift({ url: getURLFromFilePath(stubs[subject][session], project.name) }),
+        };
+    };
+
+    render() {
+        const { stubs } = this.info.globalState;
+
+        const _instances = this.mapSessions(this.createInstance);
+
+        const instances = _instances.reduce((acc, { subject, session, display }) => {
+            if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
+            acc[`sub-${subject}`][`ses-${session}`] = display;
+            return acc;
+        }, {});
+
         return stubs
-            ? new Neurosift({ url: getURLFromFilePath(stubs[0], project.name) })
+            ? (this.manager = new InstanceManager({
+                  header: "Sessions",
+                  instanceType: "Session",
+                  instances,
+              }))
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
