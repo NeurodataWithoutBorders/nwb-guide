@@ -56,10 +56,7 @@ export class Neurosift extends LitElement {
 
         return html`
         <div>
-            <div>
-                ${new Loader()}
-                <small>Loading Neurosift view...</small>
-            </div>
+            ${new Loader({ message: 'Loading Neurosift view...' })}
         </div>
         <iframe
             hidden
