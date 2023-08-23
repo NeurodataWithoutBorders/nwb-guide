@@ -10,9 +10,9 @@ import projectNWBFileSchema from "../../../../../../../schemas/json/project/nwbf
 import projectSubjectSchema from "../../../../../../../schemas/json/project/subject.json" assert { type: "json" };
 import { merge } from "../../utils.js";
 
-const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema)
-merge(projectNWBFileSchema, projectMetadataSchema)
-merge(projectSubjectSchema, projectMetadataSchema)
+const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
+merge(projectNWBFileSchema, projectMetadataSchema);
+merge(projectSubjectSchema, projectMetadataSchema);
 
 import { schemaToPages } from "../../FormPage.js";
 

@@ -157,12 +157,11 @@ export class Sidebar extends LitElement {
             <div class="sidebar-body">
                 <!-- Sidebar Links -->
                 ${(() => {
+                    const ul = document.createElement("ul");
+                    ul.classList.add("list-unstyled");
+                    ul.classList.add("components");
 
-                    const ul = document.createElement('ul')
-                    ul.classList.add('list-unstyled')
-                    ul.classList.add('components')
-
-                    const groups = {}
+                    const groups = {};
                     Object.entries(this.pages).forEach(([id, page]) => {
                         const info = page.info ?? {};
                         const label = info.label ?? id;
@@ -171,16 +170,18 @@ export class Sidebar extends LitElement {
                         a.setAttribute("data-id", id);
                         a.href = "#";
                         a.innerHTML = `${icon} ${label} `;
-                        a.onclick = () => this.#onClick(id)
+                        a.onclick = () => this.#onClick(id);
 
-                        const li = document.createElement('li')
-                        li.append(a)
-                        
-                        const parent = info.group ? (groups[info.group] ?? (groups[info.group] = document.createElement('div'))) : ul
-                        parent.append(a)
-                    })
+                        const li = document.createElement("li");
+                        li.append(a);
 
-                    return [ul, ...Object.values(groups)]
+                        const parent = info.group
+                            ? groups[info.group] ?? (groups[info.group] = document.createElement("div"))
+                            : ul;
+                        parent.append(a);
+                    });
+
+                    return [ul, ...Object.values(groups)];
                 })()}
             </div>
             <div>

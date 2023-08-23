@@ -4,7 +4,7 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import dandiUploadSchema from "../../../../../../schemas/json/dandi/upload.json";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
-const dandiSchema = merge(dandiStandaloneSchema, dandiUploadSchema, { arrays: true })
+const dandiSchema = merge(dandiStandaloneSchema, dandiUploadSchema, { arrays: true });
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress.js";
@@ -15,8 +15,7 @@ import { notyf } from "../../../dependencies/globals.js";
 import Swal from "sweetalert2";
 
 export async function uploadToDandi(info) {
-
-    if (!('api_key' in (global.data.DANDI ?? {}))) {
+    if (!("api_key" in (global.data.DANDI ?? {}))) {
         await Swal.fire({
             title: "Your DANDI API key is not configured.",
             html: "Edit your settings to include this value.",
@@ -24,11 +23,11 @@ export async function uploadToDandi(info) {
             confirmButtonText: "Go to Settings",
         });
 
-        return this.to('settings');
+        return this.to("settings");
     }
-    
+
     info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
-    info.api_key = global.data.DANDI.api_key
+    info.api_key = global.data.DANDI.api_key;
 
     return await run("upload", info, { title: "Uploading to DANDI" }).catch((e) => {
         this.notify(e.message, "error");
@@ -53,16 +52,16 @@ export class UploadsPage extends Page {
             label: defaultButtonMessage,
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
-                const results = await uploadToDandi.call(this, { ... global.data.uploads })
-                if (results) notyf.open({
-                    type: 'success',
-                    message: `${info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`
-                })
+                const results = await uploadToDandi.call(this, { ...global.data.uploads });
+                if (results)
+                    notyf.open({
+                        type: "success",
+                        message: `${info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+                    });
             },
         });
 
-
-        const folderPathKey = 'nwb_folder_path'
+        const folderPathKey = "nwb_folder_path";
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
             results: globalState,
@@ -75,7 +74,7 @@ export class UploadsPage extends Page {
                     }
                 }
 
-                global.save()
+                global.save();
             },
             onThrow,
         });
