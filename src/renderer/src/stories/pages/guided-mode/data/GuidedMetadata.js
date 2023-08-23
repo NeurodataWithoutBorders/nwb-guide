@@ -38,13 +38,12 @@ export class GuidedMetadataPage extends ManagedPage {
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // Preview a single random conversion
-            delete this.info.globalState.preview; // Clear the preview results
-            const [result] = await this.runConversions({ stub_test: true }, 1, {
-                title: "Testing conversion on a random session",
+            delete this.info.globalState.stubs; // Clear the preview results
+            const results = await this.runConversions({ stub_test: true }, undefined, {
+                title: "Running stub conversion on all sessions...",
             });
 
-            // Save the preview results
-            this.info.globalState.preview = result;
+            this.info.globalState.stubs = results; // Save the preview results
 
             this.unsavedUpdates = true;
 
