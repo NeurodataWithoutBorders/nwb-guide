@@ -132,13 +132,20 @@ export class InstanceManager extends LitElement {
         this.instances = props.instances ?? {};
         this.header = props.header;
         this.instanceType = props.instanceType ?? "Instance";
-        if (props.renderInstance) this.renderInstance = props.renderInstance;
         if (props.onAdded) this.onAdded = props.onAdded;
         if (props.onRemoved) this.onRemoved = props.onRemoved;
         this.controls = props.controls ?? [];
     }
 
-    renderInstance = (_, value) => value.content ?? value;
+    #dynamicInstances = {}
+
+    getInstanceContent = ({ id, metadata }) => {
+        const content = metadata.content ?? metadata;
+        if (typeof content === 'function') {
+            this.#dynamicInstances[id] = content
+            return ''
+        } else return content
+    }
 
     updateState = (id, state) => {
         const item = this.#items.find((i) => i.id === id);
@@ -211,6 +218,8 @@ export class InstanceManager extends LitElement {
                 el.removeAttribute("selected");
                 this.shadowRoot.querySelector(`div[data-instance="${instance}"]`).setAttribute("hidden", "");
             });
+
+        this.#onSelected()
     };
 
     #isCategory(value) {
@@ -258,6 +267,11 @@ export class InstanceManager extends LitElement {
     #onSelected = () => {
         const selected = this.shadowRoot.querySelector("#selectedName");
         selected.innerText = this.#selected;
+
+        const dynamic = this.#dynamicInstances[this.#selected]
+        if (typeof dynamic === 'function') {
+            this.shadowRoot.querySelector(`div[data-instance="${this.#selected}"]`).append(this.#dynamicInstances[this.#selected] = dynamic())
+        }
     };
 
     #render(toRender = this.instances, path = []) {
@@ -293,7 +307,7 @@ export class InstanceManager extends LitElement {
 
         const list = html`
             ${Object.entries(instances).map(([key, info], i) => {
-                if (info instanceof HTMLElement) info = { content: info };
+                if (info instanceof HTMLElement || typeof info === 'function') info = { content: info };
                 const listItemInfo = {
                     id: key,
                     label: key.split("/").pop(),
@@ -399,7 +413,7 @@ export class InstanceManager extends LitElement {
                 </div>
                 <div id="content">
                     <div class="controls">
-                        <span id="selectedName">${this.#selected}</span>
+                        <span id="selectedName"></span>
                         <div>
                             ${this.controls.map((o) => {
                                 return html`<nwb-button
@@ -422,7 +436,7 @@ export class InstanceManager extends LitElement {
                         ${this.#items.map((item, i) => {
                             return html`
                                 <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id}>
-                                    ${this.renderInstance(item.id, item.metadata)}
+                                    ${this.getInstanceContent(item)}
                                 </div>
                             `;
                         })}

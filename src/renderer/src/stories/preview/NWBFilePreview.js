@@ -69,7 +69,7 @@ export class NWBFilePreview extends LitElement {
         return {
             subject,
             session,
-            display: new NWBPreviewInstance(info, this.project),
+            display: () => new NWBPreviewInstance(info, this.project),
         };
     };
 
@@ -98,13 +98,8 @@ export class NWBFilePreview extends LitElement {
                         }, {});
 
                         return new InstanceManager({
-                            header: "Sessions",
-                            instanceType: "Session",
-                            instances,
-                            // renderInstance: (_, value) => {
-                            //     console.log('RENDERING', value)
-                            //     return value.content ?? value;
-                            // }
+                            header: "Stub Files",
+                            instances
                         });
                     }
                 })()}
