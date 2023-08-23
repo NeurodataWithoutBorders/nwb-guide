@@ -5,7 +5,8 @@ import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
-import dandiUploadSchema from "../../../../../../../schemas/json/dandi_upload_schema.json";
+import dandiUploadSchema from "../../../../../../../schemas/json/dandi/upload.json";
+import { uploadToDandi } from "../../uploads/UploadsPage.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -45,14 +46,8 @@ export class GuidedUploadPage extends Page {
                 if (!result || !result.isConfirmed) return this.to(1);
             }
 
-            const info = { ...globalUploadInfo.info };
-            info.project = globalState.project.name;
-            info.staging = globalUploadInfo.info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
 
-            const results = await run("upload", info, { title: "Uploading to DANDI" }).catch((e) => {
-                this.notify(e.message, "error");
-                throw e;
-            });
+            const results = await uploadToDandi.call(this, { ...globalUploadInfo.info, project: globalState.project.name });
 
             globalUploadInfo.results = results; // Save the preview results
 

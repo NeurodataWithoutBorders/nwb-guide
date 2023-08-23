@@ -1,0 +1,15 @@
+{
+    "properties": {
+        "conversion_output_folder": {
+            "type": "string",
+            "format": "directory",
+            "description": "Provide a custom output location for your NWB files. Will default to ~/NWB_GUIDE/conversions"
+        },
+
+        "stub_output_folder": {
+            "type": "string",
+            "format": "directory",
+            "description": "Provide a custom output location for your NWB stub files. Will default to ~/NWB_GUIDE/stubs"
+        }
+    }
+}
