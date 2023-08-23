@@ -117,9 +117,9 @@ export class Loader extends LitElement {
     }
 
     render() {
-        return html` 
+        return html`
           <div>
-          <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div> 
+          <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
           ${this.message ? html`<span>${this.message}</span>` : ''}
           </div>
       `

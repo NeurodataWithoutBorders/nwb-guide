@@ -55,18 +55,14 @@ export class Neurosift extends LitElement {
     }
 
     render() {
-
-        return html`
-        <div>
-            ${new Loader({ message: 'Loading Neurosift view...' })}
-        </div>
-        <iframe
-            class="iframe-placeholder"
-            src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
-            @load=${function (ev) {
-                ev.target.previousElementSibling.remove()
-            }}
-        ></iframe>`;
+        return html` <div>${new Loader({ message: "Loading Neurosift view..." })}</div>
+            <iframe
+                class="iframe-placeholder"
+                src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
+                @load=${function (ev) {
+                    ev.target.previousElementSibling.remove();
+                }}
+            ></iframe>`;
     }
 }
 
