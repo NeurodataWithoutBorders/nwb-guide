@@ -8,6 +8,9 @@ from .manage_neuroconv import (
     upload_to_dandi,
     listen_to_neuroconv_events,
     generate_dataset,
+    inspect,
+    inspect_nwbfile,
+    nwb_to_html
 )
 
 

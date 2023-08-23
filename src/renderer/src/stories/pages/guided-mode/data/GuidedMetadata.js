@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
-import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
+import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
 
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
@@ -38,13 +38,11 @@ export class GuidedMetadataPage extends ManagedPage {
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // Preview a single random conversion
-            delete this.info.globalState.preview; // Clear the preview results
-            const [result] = await this.runConversions({ stub_test: true }, 1, {
-                title: "Testing conversion on a random session",
-            });
+            delete this.info.globalState.stubs; // Clear the preview results
+            const stubs = await this.runConversions({ stub_test: true }, 1, { title: "Testing conversion on a random session" });
 
             // Save the preview results
-            this.info.globalState.preview = result;
+            this.info.globalState.stubs = stubs;
 
             this.unsavedUpdates = true;
 
@@ -185,7 +183,7 @@ export class GuidedMetadataPage extends ManagedPage {
                     onClick: async (key, el) => {
                         const { subject, session } = getInfoFromId(key);
 
-                        const [{ file, html }] = await this.runConversions(
+                        const [ file ] = await this.runConversions(
                             { stub_test: true },
                             [
                                 {
@@ -208,7 +206,9 @@ export class GuidedMetadataPage extends ManagedPage {
                             height: "100%",
                         });
 
-                        modal.append(new Neurosift({ url: getURLFromFilePath(file, project.name) }));
+                        const { project } = this.info.globalState
+
+                        modal.append(new NWBFilePreview({  project: project.name, files: [file] }));
                         document.body.append(modal);
                     },
                 },

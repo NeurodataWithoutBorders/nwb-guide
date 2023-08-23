@@ -237,10 +237,6 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
-    from pynwb import NWBHDF5IO
-    from nwbinspector import inspect_nwbfile_object
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
@@ -331,13 +327,26 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-    io = NWBHDF5IO(resolved_output_path, mode="r")
+
+    return dict(file=str(resolved_output_path))
+
+def nwb_to_html(nwbfile_path: str):
+    from pynwb import NWBHDF5IO
+    io = NWBHDF5IO(nwbfile_path, mode="r")
     file = io.read()
     html = file._repr_html_()
-    report = json.loads(json.dumps(list(inspect_nwbfile_object(file)), cls=InspectorOutputJSONEncoder))
     io.close()
+    return html
 
-    return dict(file=str(resolved_output_path), report=report, html=html)
+def inspect_nwbfile(**kwargs):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    return json.loads(json.dumps(list(inspect_nwbfile(**kwargs)), cls=InspectorOutputJSONEncoder))
+
+def inspect(**kwargs):
+    from nwbinspector import inspect_all
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    return json.loads(json.dumps(list(inspect_all(**kwargs)), cls=InspectorOutputJSONEncoder))
 
 
 def upload_to_dandi(

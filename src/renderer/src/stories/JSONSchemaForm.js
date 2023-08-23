@@ -8,7 +8,7 @@ import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
 
 import { JSONSchemaInput } from "./JSONSchemaInput";
-import { InspectorListItem } from "./inspector/InspectorList";
+import { InspectorListItem } from "./preview/inspector/InspectorList";
 
 const componentCSS = `
 
