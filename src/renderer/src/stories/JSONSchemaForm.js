@@ -368,7 +368,7 @@ export class JSONSchemaForm extends LitElement {
         const name = path.pop();
         const element = this.shadowRoot
             .querySelector(`#${fullPath.join("-")}`)
-            .querySelector("nwb-jsonschema-input")
+            .querySelector("jsonschema-input")
             .shadowRoot.querySelector(".guided--input");
         const isValid = await this.triggerValidation(name, element, path, false);
         if (!isValid) return true;
@@ -435,7 +435,7 @@ export class JSONSchemaForm extends LitElement {
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
-        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-jsonschema-input")).map(input => input.children)
+        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
         // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
         // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("filesystem-selector") ?? []);
         // const allInputs = [...inputs, ...fileInputs];
