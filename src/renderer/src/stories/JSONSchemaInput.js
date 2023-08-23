@@ -87,15 +87,15 @@ export class JSONSchemaInput extends LitElement {
     // onUpdate = () => {}
     // onValidate = () => {}
 
-    updateData = (value) => {
+    updateData (value) {
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
         const el = this.getElement()
         this.#triggerValidation(name, el, path);
         this.#updateData(fullPath, value);
-        this.value = value // set the actual value
-        this.requestUpdate()
+        if (el.type === 'checkbox') el.checked = value
+        else el.value = value
 
         return true;
     };
@@ -104,16 +104,11 @@ export class JSONSchemaInput extends LitElement {
 
     #updateData = (path, value) => {
         this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(path, value) : "";
+        this.value = value // Update the latest value
     };
 
     #triggerValidation = (name, el, path) =>
         this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
-
-
-    updated(){
-        console.log(this)
-        console.log('HAS BEEN UPDATED', this.getElement())
-    }
 
     render() {
         const { validateOnChange, info, path: fullPath } = this;
@@ -125,8 +120,6 @@ export class JSONSchemaInput extends LitElement {
 
         const hasItemsRef = "items" in info && "$ref" in info.items;
         if (!("items" in info) || (!("type" in info.items) && !hasItemsRef)) info.items = { type: "string" };
-
-        console.log('Rerenddering', this.value)
 
         if (isArray) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]

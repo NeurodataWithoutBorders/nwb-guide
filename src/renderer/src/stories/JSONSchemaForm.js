@@ -420,17 +420,18 @@ export class JSONSchemaForm extends LitElement {
             value,
             form: this,
             required: isRequired,
-        });
 
-        interactiveInput.updated = () => {
-            let input = interactiveInput.shadowRoot.querySelector(".schema-input");
-            if (!input) input = interactiveInput.shadowRoot.querySelector("filesystem-selector");
-
-            if (input) {
-                if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
-                    input.dispatchEvent(new Event("change"));
+            // Override native method
+            updated: function () {
+                let input = interactiveInput.shadowRoot.querySelector(".schema-input");
+                if (!input) input = interactiveInput.shadowRoot.querySelector("filesystem-selector");
+    
+                if (input) {
+                    if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
+                        input.dispatchEvent(new Event("change"));
+                }
             }
-        };
+        });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 

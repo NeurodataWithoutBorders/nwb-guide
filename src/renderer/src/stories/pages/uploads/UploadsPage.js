@@ -67,13 +67,13 @@ export class UploadsPage extends Page {
         this.form = new JSONSchemaForm({
             results: globalState,
             schema: dandiSchema,
-            onUpdate: ([ id ], value) => {
-                // if (id === folderPathKey) {
-                //     for (let key in dandiSchema.properties) {
-                //         const input = this.form.getInput([ key ])
-                //         if (key !== folderPathKey) input.updateData('') // Clear the results of the form
-                //     }
-                // }
+            onUpdate: ([ id ]) => {
+                if (id === folderPathKey) {
+                    for (let key in dandiSchema.properties) {
+                        const input = this.form.getInput([ key ])
+                        if (key !== folderPathKey) input.updateData('') // Clear the results of the form
+                    }
+                }
 
                 global.save()
             },
