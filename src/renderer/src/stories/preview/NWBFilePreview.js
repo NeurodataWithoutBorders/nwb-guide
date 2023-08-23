@@ -38,7 +38,7 @@ class NWBPreviewInstance extends LitElement {
             ? new Neurosift({ url: getURLFromFilePath(this.file, this.project) })
             : until(
                   (async () => {
-                      const htmlRep = await run("html", { nwbfile_path: this.file });
+                      const htmlRep = await run("html", { nwbfile_path: this.file }, {  swal: false });
                       return unsafeHTML(htmlRep);
                   })(),
                   html`<small>Loading HTML representation...</small>`
