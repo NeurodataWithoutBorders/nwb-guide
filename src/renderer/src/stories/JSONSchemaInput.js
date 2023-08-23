@@ -87,24 +87,24 @@ export class JSONSchemaInput extends LitElement {
     // onUpdate = () => {}
     // onValidate = () => {}
 
-    updateData (value) {
+    updateData(value) {
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
         const el = this.getElement();
         this.#triggerValidation(name, el, path);
         this.#updateData(fullPath, value);
-        if (el.type === 'checkbox') el.checked = value
-        else el.value = value
+        if (el.type === "checkbox") el.checked = value;
+        else el.value = value;
 
         return true;
-    };
+    }
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");
 
     #updateData = (path, value) => {
         this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(path, value) : "";
-        this.value = value // Update the latest value
+        this.value = value; // Update the latest value
     };
 
     #triggerValidation = (name, el, path) =>

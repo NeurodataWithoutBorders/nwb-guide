@@ -426,12 +426,12 @@ export class JSONSchemaForm extends LitElement {
             updated: function () {
                 let input = interactiveInput.shadowRoot.querySelector(".schema-input");
                 if (!input) input = interactiveInput.shadowRoot.querySelector("filesystem-selector");
-    
+
                 if (input) {
                     if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
                         input.dispatchEvent(new Event("change"));
                 }
-            }
+            },
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
