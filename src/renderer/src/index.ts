@@ -100,6 +100,7 @@ const serverIsLiveStartup = async () => {
   return echoResponse === "server ready" ? true : false;
 };
 
+let openPythonStatusNotyf: undefined | any;
 
 async function pythonServerOpened() {
 
@@ -109,7 +110,9 @@ async function pythonServerOpened() {
 
   // Update server status and throw a notification
   statusBar.items[2].status = true
-  notyf.open({
+
+  if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
+  openPythonStatusNotyf = notyf.open({
     type: "success",
     message: "Backend services are available",
   });
@@ -145,6 +148,14 @@ if (isElectron) {
     ipcRenderer.on("python.open", pythonServerOpened);
 
     ipcRenderer.on("python.closed", (_, message) => pythonServerClosed(message));
+    ipcRenderer.on("python.restart", () => {
+      statusBar.items[2].status = undefined
+      if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
+      openPythonStatusNotyf = notyf.open({
+        type: "warning",
+        message: "Backend services are restarting...",
+      })
+    });
 
     // Check for update and show the pop up box
     ipcRenderer.on("update_available", () => {

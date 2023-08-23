@@ -42,25 +42,35 @@ export class GuidedStructurePage extends Page {
         height: "100%",
     });
 
+    getSchema = async () => {
+        const interfaces = { ...this.list.object };
+
+        const schema =
+            Object.keys(interfaces).length === 0
+                ? {}
+                : await fetch(`${baseUrl}/neuroconv/schema`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(interfaces),
+                  }).then((res) => res.json());
+
+        let schemas = this.info.globalState.schema;
+        if (!schemas) schemas = this.info.globalState.schema = {};
+
+        schemas.source_data = schema;
+        this.unsavedUpdates = true;
+    };
+
+    beforeSave = async () => {
+        this.info.globalState.interfaces = { ...this.list.object };
+        await this.save(undefined, false); // Interrim save, in case the schema request fails
+        await this.getSchema();
+    };
+
     footer = {
         onNext: async () => {
-            this.save(); // Save in case the schema request fails
-
-            const interfaces = { ...this.list.object };
-
-            const schema = await fetch(`${baseUrl}/neuroconv/schema`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(interfaces),
-            }).then((res) => res.json());
-
-            let schemas = this.info.globalState.schema;
-            if (!schemas) schemas = this.info.globalState.schema = {};
-
-            schemas.source_data = schema;
-            this.info.globalState.interfaces = interfaces;
-
-            this.onTransition(1);
+            if (!this.info.globalState.schema) await this.getSchema(); // Initialize schema
+            this.to(1);
         },
     };
 
@@ -99,6 +109,7 @@ export class GuidedStructurePage extends Page {
         }
 
         this.addButton.removeAttribute("hidden");
+        super.updated(); // Call if updating data
     }
 
     render() {
