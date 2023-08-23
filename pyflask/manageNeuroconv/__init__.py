@@ -10,7 +10,7 @@ from .manage_neuroconv import (
     generate_dataset,
     inspect,
     inspect_nwbfile,
-    nwb_to_html
+    nwb_to_html,
 )
 
 

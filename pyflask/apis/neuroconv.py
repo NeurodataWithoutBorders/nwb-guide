@@ -121,24 +121,28 @@ class Upload(Resource):
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
 
-@neuroconv_api.route('/inspect_nwbfile')
+
+@neuroconv_api.route("/inspect_nwbfile")
 class InspectNWBFile(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
             from manageNeuroconv import inspect_nwbfile
+
             return inspect_nwbfile(**neuroconv_api.payload)
 
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
 
-@neuroconv_api.route('/inspect')
+
+@neuroconv_api.route("/inspect")
 class InspectNWBFiles(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
             from manageNeuroconv import inspect
+
             return inspect(**neuroconv_api.payload)
 
         except Exception as e:
@@ -146,18 +150,18 @@ class InspectNWBFiles(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
-@neuroconv_api.route('/html')
+@neuroconv_api.route("/html")
 class NWBToHTML(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
             from manageNeuroconv import nwb_to_html
+
             return nwb_to_html(**neuroconv_api.payload)
 
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
-
 
 
 @neuroconv_api.route("/generate_dataset")

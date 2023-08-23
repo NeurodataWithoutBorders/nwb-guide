@@ -327,25 +327,30 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-
     return dict(file=str(resolved_output_path))
+
 
 def nwb_to_html(nwbfile_path: str):
     from pynwb import NWBHDF5IO
+
     io = NWBHDF5IO(nwbfile_path, mode="r")
     file = io.read()
     html = file._repr_html_()
     io.close()
     return html
 
+
 def inspect_nwbfile(**kwargs):
     from nwbinspector import inspect_nwbfile
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
     return json.loads(json.dumps(list(inspect_nwbfile(**kwargs)), cls=InspectorOutputJSONEncoder))
+
 
 def inspect(**kwargs):
     from nwbinspector import inspect_all
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
     return json.loads(json.dumps(list(inspect_all(**kwargs)), cls=InspectorOutputJSONEncoder))
 
 
