@@ -40,9 +40,7 @@ export class GuidedStubPreviewPage extends Page {
         const { stubs, project } = this.info.globalState;
 
         return stubs
-            ?
-              new NWBFilePreview({ project: project.name, files: stubs })
-
+            ? new NWBFilePreview({ project: project.name, files: stubs })
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
