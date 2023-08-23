@@ -109,7 +109,7 @@ export class List extends LitElement {
       this.onChange()
       this.requestUpdate('items', oldVal)
     }
-    
+
     get items() { return this.#items }
 
 
