@@ -16,10 +16,6 @@ export class SettingsPage extends Page {
         super(...args);
     }
 
-    getCustomFolderInfo = (folder) => {
-        return { upload: { info: { nwb_folder_path: folder } } };
-    };
-
     render() {
         this.localState = merge(global.data, {});
 

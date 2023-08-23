@@ -39,11 +39,7 @@ export class UploadsPage extends Page {
     constructor(...args) {
         super(...args);
     }
-
-    getCustomFolderInfo = (folder) => {
-        return { upload: { info: { nwb_folder_path: folder } } };
-    };
-
+    
     render() {
         const globalState = (global.data.uploads = global.data.uploads ?? {});
         const defaultButtonMessage = "Upload Files";
