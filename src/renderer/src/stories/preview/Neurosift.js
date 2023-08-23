@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 import { baseUrl } from "../../globals";
 
-import { Loader } from '../Loader'
+import { Loader } from "../Loader";
 
 export function getURLFromFilePath(file, projectName) {
     const regexp = new RegExp(`.+(${projectName}.+)`);
@@ -11,7 +11,6 @@ export function getURLFromFilePath(file, projectName) {
 export class Neurosift extends LitElement {
     static get styles() {
         return css`
-
             :host {
                 width: 100%;
                 height: 100%;
@@ -28,7 +27,7 @@ export class Neurosift extends LitElement {
 
             div {
                 display: flex;
-                align-items: center; 
+                align-items: center;
                 justify-content: center;
             }
 
@@ -51,27 +50,24 @@ export class Neurosift extends LitElement {
         this.url = url;
     }
 
-
     render() {
-
-        return html`
-        <div>
-            <div>
-                ${new Loader()}
-                <small>Loading Neurosift view...</small>
+        return html` <div>
+                <div>
+                    ${new Loader()}
+                    <small>Loading Neurosift view...</small>
+                </div>
             </div>
-        </div>
-        <iframe
-            hidden
-            class="iframe-placeholder"
-            src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
-            @load=${function (ev) {
-                const sibling = ev.target.previousSibling.previousSibling
-                console.log(sibling)
-                sibling.remove()
-                ev.target.removeAttribute('hidden')
-            }}
-        ></iframe>`;
+            <iframe
+                hidden
+                class="iframe-placeholder"
+                src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
+                @load=${function (ev) {
+                    const sibling = ev.target.previousSibling.previousSibling;
+                    console.log(sibling);
+                    sibling.remove();
+                    ev.target.removeAttribute("hidden");
+                }}
+            ></iframe>`;
     }
 }
 

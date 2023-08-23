@@ -137,15 +137,15 @@ export class InstanceManager extends LitElement {
         this.controls = props.controls ?? [];
     }
 
-    #dynamicInstances = {}
+    #dynamicInstances = {};
 
     getInstanceContent = ({ id, metadata }) => {
         const content = metadata.content ?? metadata;
-        if (typeof content === 'function') {
-            this.#dynamicInstances[id] = content
-            return ''
-        } else return content
-    }
+        if (typeof content === "function") {
+            this.#dynamicInstances[id] = content;
+            return "";
+        } else return content;
+    };
 
     updateState = (id, state) => {
         const item = this.#items.find((i) => i.id === id);
@@ -219,7 +219,7 @@ export class InstanceManager extends LitElement {
                 this.shadowRoot.querySelector(`div[data-instance="${instance}"]`).setAttribute("hidden", "");
             });
 
-        this.#onSelected()
+        this.#onSelected();
     };
 
     #isCategory(value) {
@@ -268,9 +268,11 @@ export class InstanceManager extends LitElement {
         const selected = this.shadowRoot.querySelector("#selectedName");
         selected.innerText = this.#selected;
 
-        const dynamic = this.#dynamicInstances[this.#selected]
-        if (typeof dynamic === 'function') {
-            this.shadowRoot.querySelector(`div[data-instance="${this.#selected}"]`).append(this.#dynamicInstances[this.#selected] = dynamic())
+        const dynamic = this.#dynamicInstances[this.#selected];
+        if (typeof dynamic === "function") {
+            this.shadowRoot
+                .querySelector(`div[data-instance="${this.#selected}"]`)
+                .append((this.#dynamicInstances[this.#selected] = dynamic()));
         }
     };
 
@@ -307,7 +309,7 @@ export class InstanceManager extends LitElement {
 
         const list = html`
             ${Object.entries(instances).map(([key, info], i) => {
-                if (info instanceof HTMLElement || typeof info === 'function') info = { content: info };
+                if (info instanceof HTMLElement || typeof info === "function") info = { content: info };
                 const listItemInfo = {
                     id: key,
                     label: key.split("/").pop(),

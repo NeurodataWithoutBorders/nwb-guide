@@ -99,7 +99,7 @@ export class NWBFilePreview extends LitElement {
 
                         return new InstanceManager({
                             header: "Stub Files",
-                            instances
+                            instances,
                         });
                     }
                 })()}
