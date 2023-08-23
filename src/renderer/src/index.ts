@@ -50,7 +50,7 @@ async function isOffline() {
   await Swal.fire({
     title: "No Internet Connection",
     icon: "warning",
-    text: "It appears that your computer is not connected to the internet. You may continue, but you will not be able to use certain features (e.g. uploading data to DANDI, viewing data on Neurosift, etc.).",
+    text: "You may continue, but certain features (e.g. uploading data to DANDI, viewing data on Neurosift, etc.) will be unavailable.",
     heightAuto: false,
     backdrop: "rgba(0,0,0, 0.4)",
     confirmButtonText: "I understand",
