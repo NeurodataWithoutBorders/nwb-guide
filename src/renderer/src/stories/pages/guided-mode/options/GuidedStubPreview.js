@@ -1,29 +1,27 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
-import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import folderOpenSVG from "../../../assets/folder_open.svg?raw";
+// import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+// import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
-import { electron } from "../../../../electron/index.js";
+// import { electron } from "../../../../electron/index.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
-const { shell } = electron;
+// const { shell } = electron;
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
-        window.addEventListener("online", () => this.requestUpdate());
-        window.addEventListener("offline", () => this.requestUpdate());
     }
 
-    header = {
-        subtitle: () => this.info.globalState.stubs?.[0]?.file,
-        controls: () =>
-            html`<nwb-button
-                size="small"
-                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.stubs[0].file) : "")}
-                >${unsafeSVG(folderOpenSVG)}</nwb-button
-            >`,
-    };
+    // header = {
+    //     subtitle: () => this.info.globalState.stubs?.[0]?.file,
+    //     controls: () =>
+    //         html`<nwb-button
+    //             size="small"
+    //             @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.stubs[0].file) : "")}
+    //             >${unsafeSVG(folderOpenSVG)}</nwb-button
+    //         >`,
+    // };
 
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {
@@ -39,10 +37,12 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
-        const { project, stubs } = this.info.globalState;
+        const { stubs, project } = this.info.globalState;
 
         return stubs
-            ? new NWBFilePreview({ project: project.name, files: stubs })
+            ?
+              new NWBFilePreview({ project: project.name, files: stubs })
+
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }

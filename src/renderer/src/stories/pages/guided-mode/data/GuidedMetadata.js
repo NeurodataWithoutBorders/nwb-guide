@@ -39,7 +39,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             // Preview a single random conversion
             delete this.info.globalState.stubs; // Clear the preview results
-            const stubs = await this.runConversions({ stub_test: true }, 1, {
+            const stubs = await this.runConversions({ stub_test: true }, undefined, {
                 title: "Testing conversion on a random session",
             });
 
@@ -185,7 +185,7 @@ export class GuidedMetadataPage extends ManagedPage {
                     onClick: async (key, el) => {
                         const { subject, session } = getInfoFromId(key);
 
-                        const [file] = await this.runConversions(
+                        const results = await this.runConversions(
                             { stub_test: true },
                             [
                                 {
@@ -210,7 +210,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
                         const { project } = this.info.globalState;
 
-                        modal.append(new NWBFilePreview({ project: project.name, files: [file] }));
+                        modal.append(new NWBFilePreview({ project: project.name, files: results }));
                         document.body.append(modal);
                     },
                 },
