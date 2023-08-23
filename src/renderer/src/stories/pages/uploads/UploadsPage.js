@@ -39,7 +39,7 @@ export class UploadsPage extends Page {
     constructor(...args) {
         super(...args);
     }
-    
+
     render() {
         const globalState = (global.data.uploads = global.data.uploads ?? {});
         const defaultButtonMessage = "Upload Files";
