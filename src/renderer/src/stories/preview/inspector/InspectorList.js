@@ -79,10 +79,9 @@ export class InspectorListItem extends LitElement {
         `;
     }
 
-
     constructor(props) {
         super();
-        this.ORIGINAL_TYPE = props.type
+        this.ORIGINAL_TYPE = props.type;
         Object.assign(this, props);
     }
 
