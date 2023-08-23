@@ -55,6 +55,10 @@ export class InspectorListItem extends LitElement {
                 font-weight: bold;
             }
 
+            #filepath {
+                font-size: 10px;
+            }
+
             :host > * {
                 margin: 0px;
             }
@@ -103,6 +107,7 @@ export class InspectorListItem extends LitElement {
         const hasMetadata = hasObjectType && "object_name" in this;
 
         return html`
+            ${this.file_path ? html`<span id="filepath">${this.file_path}</span>` : ''}
             ${hasMetadata ? html`<span id="message">${this.message}</span>` : html`<p>${this.message}</p>`}
             ${hasMetadata
                 ? html`<small>${this.object_name}${hasObjectType ? ` (${this.object_type})` : ""} </small>`
