@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 import { baseUrl } from "../../globals";
 
-import { Loader } from '../Loader'
+import { Loader } from "../Loader";
 
 export function getURLFromFilePath(file, projectName) {
     const regexp = new RegExp(`.+(${projectName}.+)`);
@@ -11,13 +11,13 @@ export function getURLFromFilePath(file, projectName) {
 export class Neurosift extends LitElement {
     static get styles() {
         return css`
-
             :host {
                 width: 100%;
                 height: 100%;
                 display: grid;
                 grid-template-rows: 100%;
                 grid-template-columns: 100%;
+                position: relative;
                 --loader-color: hsl(200, 80%, 50%);
             }
 
@@ -28,8 +28,11 @@ export class Neurosift extends LitElement {
 
             div {
                 display: flex;
-                align-items: center; 
+                align-items: center;
                 justify-content: center;
+                position: absolute;
+                top: 0;
+                left: 0;
             }
 
             span {
@@ -51,7 +54,6 @@ export class Neurosift extends LitElement {
         this.url = url;
     }
 
-
     render() {
 
         return html`
@@ -59,14 +61,10 @@ export class Neurosift extends LitElement {
             ${new Loader({ message: 'Loading Neurosift view...' })}
         </div>
         <iframe
-            hidden
             class="iframe-placeholder"
             src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
             @load=${function (ev) {
-                const sibling = ev.target.previousSibling.previousSibling
-                console.log(sibling)
-                sibling.remove()
-                ev.target.removeAttribute('hidden')
+                ev.target.previousElementSibling.remove()
             }}
         ></iframe>`;
     }
