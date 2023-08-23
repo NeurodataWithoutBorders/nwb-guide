@@ -241,7 +241,6 @@ def convert_to_nwb(info: dict) -> str:
     from nwbinspector import inspect_nwbfile_object
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
-
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
@@ -332,18 +331,13 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-
     io = NWBHDF5IO(resolved_output_path, mode="r")
     file = io.read()
     html = file._repr_html_()
     report = json.loads(json.dumps(list(inspect_nwbfile_object(file)), cls=InspectorOutputJSONEncoder))
     io.close()
 
-    return dict(
-        file = str(resolved_output_path),
-        report = report,
-        html = html
-    )
+    return dict(file=str(resolved_output_path), report=report, html=html)
 
 
 def upload_to_dandi(

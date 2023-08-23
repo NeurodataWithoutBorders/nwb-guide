@@ -57,7 +57,7 @@ export class List extends LitElement {
         margin: 0;
         padding: 0;
       }
-      
+
       :host([unordered]) ol > li {
         width: 100%;
       }
@@ -101,7 +101,7 @@ export class List extends LitElement {
     declare items: ListItemType[]
 
     declare emptyMessage: string
-    
+
     declare editable: boolean
     declare unordered: boolean
 
@@ -138,7 +138,7 @@ export class List extends LitElement {
       const div = document.createElement('div')
       li.append(outerDiv)
       outerDiv.append(div)
-      
+
       const keyEl = document.createElement("span");
 
       let resolvedKey = key;
@@ -172,7 +172,7 @@ export class List extends LitElement {
           div.appendChild(valueEl);
       }
       else li.append(content)
-      
+
 
 
       if (div.innerText) li.title = div.innerText

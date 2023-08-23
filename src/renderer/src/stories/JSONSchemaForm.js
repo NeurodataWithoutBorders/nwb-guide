@@ -278,9 +278,8 @@ export class JSONSchemaForm extends LitElement {
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
         const container = this.shadowRoot.querySelector(`#${name} .${type}`);
-        const item = new InspectorListItem({ message })
+        const item = new InspectorListItem({ message });
         container.appendChild(item);
-
     };
 
     #clearMessages = (fullPath, type) => {

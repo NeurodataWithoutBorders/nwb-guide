@@ -1,53 +1,44 @@
-
 import { LitElement, css, html } from "lit";
 import { List } from "../List";
 
 const sortList = (items) => {
-    return items.sort((a, b) => {
-        const aCritical = a.importance === "CRITICAL"
-        const bCritical = b.importance === "CRITICAL"
-        if (aCritical && bCritical) return 0
-        else if (aCritical) return -1
-        else return 1
-    })
+    return items
         .sort((a, b) => {
-            const aLow = a.severity == "LOW"
-            const bLow = b.severity === "LOW"
-            if (aLow && bLow) return 0
-            else if (aLow) return 1
-            else return -1
+            const aCritical = a.importance === "CRITICAL";
+            const bCritical = b.importance === "CRITICAL";
+            if (aCritical && bCritical) return 0;
+            else if (aCritical) return -1;
+            else return 1;
         })
-}
+        .sort((a, b) => {
+            const aLow = a.severity == "LOW";
+            const bLow = b.severity === "LOW";
+            if (aLow && bLow) return 0;
+            else if (aLow) return 1;
+            else return -1;
+        });
+};
 
 export class InspectorList extends List {
     constructor({ items, listStyles }) {
-
         super({
             editable: false,
             unordered: true,
-            items: sortList(items).map(o => {
-                const item = new InspectorListItem(o)
-                item.style.flexGrow = '1'
-                return { content: item }
+            items: sortList(items).map((o) => {
+                const item = new InspectorListItem(o);
+                item.style.flexGrow = "1";
+                return { content: item };
             }),
-            listStyles
-        })
+            listStyles,
+        });
     }
 }
 
-
-customElements.get("inspector-list") ||
-    customElements.define("inspector-list", InspectorList);
-
-
-
+customElements.get("inspector-list") || customElements.define("inspector-list", InspectorList);
 
 export class InspectorListItem extends LitElement {
-
     static get styles() {
         return css`
-
-    
             :host {
                 display: block;
                 background: gainsboro;
@@ -68,7 +59,7 @@ export class InspectorListItem extends LitElement {
                 margin: 0px;
             }
 
-            :host([type=error]) {
+            :host([type="error"]) {
                 color: #9d0b0b;
                 padding: 25px;
                 background: #f8d7da;
@@ -77,7 +68,7 @@ export class InspectorListItem extends LitElement {
                 margin: 0 0 1em;
             }
 
-            :host([type=warning]) {
+            :host([type="warning"]) {
                 color: #856404;
                 padding: 25px;
                 background: #fff3cd;
@@ -85,38 +76,37 @@ export class InspectorListItem extends LitElement {
                 border-radius: 4px;
                 margin: 0 0 1em;
             }
-        `
+        `;
     }
     constructor(props) {
-        super()
-        Object.assign(this, props)
+        super();
+        Object.assign(this, props);
     }
 
     static get properties() {
         return {
             type: {
                 type: String,
-                reflect: true
-            }
-        }
+                reflect: true,
+            },
+        };
     }
 
     render() {
+        this.type = this.importance === "CRITICAL" ? "error" : "warning";
 
-        this.type = this.importance === "CRITICAL" ? "error" : "warning"
+        this.setAttribute("title", this.message);
 
-        this.setAttribute('title', this.message)
-
-        const hasObjectType = 'object_type' in this
-        const hasMetadata = hasObjectType && 'object_name' in this
+        const hasObjectType = "object_type" in this;
+        const hasMetadata = hasObjectType && "object_name" in this;
 
         return html`
             ${hasMetadata ? html`<span id="message">${this.message}</span>` : html`<p>${this.message}</p>`}
-            ${hasMetadata ? html`<small>${this.object_name}${hasObjectType ? ` (${this.object_type})` : ''} </small>` : ''}
-        `
+            ${hasMetadata
+                ? html`<small>${this.object_name}${hasObjectType ? ` (${this.object_type})` : ""} </small>`
+                : ""}
+        `;
     }
 }
 
-customElements.get("inspector-list-item") ||
-    customElements.define("inspector-list-item", InspectorListItem);
-
+customElements.get("inspector-list-item") || customElements.define("inspector-list-item", InspectorListItem);
