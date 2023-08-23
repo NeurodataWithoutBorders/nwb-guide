@@ -86,6 +86,10 @@ export class List extends LitElement {
         unordered: {
           type: Boolean,
           // reflect: true
+        },
+        emptyMessage: {
+          type: String,
+          reflect: true
         }
       };
     }
