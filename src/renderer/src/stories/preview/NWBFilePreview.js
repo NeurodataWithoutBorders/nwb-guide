@@ -101,6 +101,10 @@ export class NWBFilePreview extends LitElement {
                             header: "Sessions",
                             instanceType: "Session",
                             instances,
+                            // renderInstance: (_, value) => {
+                            //     console.log('RENDERING', value)
+                            //     return value.content ?? value;
+                            // }
                         });
                     }
                 })()}
@@ -111,11 +115,13 @@ export class NWBFilePreview extends LitElement {
                     (async () => {
                         const opts = { ignore: ["check_description"] };
 
+                        const title = 'Inspecting your file'
+
                         const items = onlyFirstFile
-                            ? await run("inspect_nwbfile", { nwbfile_path: fileArr[0].info.file, ...opts }) // Inspect the first file
+                            ? await run("inspect_nwbfile", { nwbfile_path: fileArr[0].info.file, ...opts }, { title }) // Inspect the first file
                             : await (async () => {
                                   const path = sharedPath(fileArr.map((o) => o.info.file));
-                                  return (await run("inspect", { path, ...opts })).map((o) => {
+                                  return (await run("inspect", { path, ...opts }, { title: title + 's' })).map((o) => {
                                       o.file_path = o.file_path.replace(`${path}/`, "");
                                       return o;
                                   });
