@@ -102,7 +102,16 @@ export class List extends LitElement {
       return this.items.map(o => o.value)
     }
 
-    declare items: ListItemType[]
+    #items: ListItemType[] = []
+    set items(value) {
+      const oldVal = this.#items
+      this.#items = value
+      this.onChange()
+      this.requestUpdate('items', oldVal)
+    }
+    
+    get items() { return this.#items }
+
 
     declare emptyMessage: string
 
@@ -123,11 +132,6 @@ export class List extends LitElement {
 
       if (props.onChange) this.onChange = props.onChange
 
-    }
-
-    attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
-      super.attributeChangedCallback(name, _old, value)
-      if (name === 'items') this.onChange()
     }
 
     add = (item: ListItemType) => {
