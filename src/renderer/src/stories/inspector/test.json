@@ -1,0 +1,152 @@
+[
+    {
+        "message": "Description ('No description.') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "KSLabel_repeat",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description ('No description.') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "Amplitude",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description ('No description.') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "original_cluster_id",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description ('No description.') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "ContamPct",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description ('No description.') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "KSLabel",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "Subject",
+        "object_name": "subject",
+        "location": "/general/subject",
+        "file_path": null
+    },
+    {
+        "message": "Description ('no description') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "offset_to_uV",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description ('no description') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "inter_sample_shift",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description ('no description') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "gain_to_uV",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Description ('no description') is a placeholder.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_description",
+        "object_type": "VectorData",
+        "object_name": "channel_name",
+        "location": null,
+        "file_path": null
+    },
+    {
+        "message": "Experimenter is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experimenter_exists",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": null
+    },
+    {
+        "message": "Experiment description is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experiment_description",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": null
+    },
+    {
+        "message": "Metadata /general/institution is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_institution",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": null
+    },
+    {
+        "message": "Metadata /general/keywords is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_keywords",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": null
+    },
+    {
+        "message": "Data may be in the wrong orientation. Time should be in the first dimension, and is usually the longest dimension. Here, another dimension is longer.",
+        "importance": "CRITICAL",
+        "severity": "LOW",
+        "check_function_name": "check_data_orientation",
+        "object_type": "ElectricalSeries",
+        "object_name": "ElectricalSeriesAP",
+        "location": "/acquisition/ElectricalSeriesAP",
+        "file_path": null
+    }
+]

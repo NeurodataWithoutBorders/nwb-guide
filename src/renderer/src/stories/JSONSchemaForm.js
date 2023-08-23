@@ -8,6 +8,7 @@ import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
 
 import { JSONSchemaInput } from "./JSONSchemaInput";
+import { InspectorListItem } from "./inspector/InspectorList";
 
 const componentCSS = `
 
@@ -277,9 +278,9 @@ export class JSONSchemaForm extends LitElement {
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
         const container = this.shadowRoot.querySelector(`#${name} .${type}`);
-        const p = document.createElement("p");
-        p.innerText = message;
-        container.appendChild(p);
+        const item = new InspectorListItem({ message })
+        container.appendChild(item);
+
     };
 
     #clearMessages = (fullPath, type) => {
