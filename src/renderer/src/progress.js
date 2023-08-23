@@ -57,8 +57,8 @@ export const getCurrentProjectName = () => {
 function updateURLParams(paramsToUpdate) {
     const params = new URLSearchParams(location.search);
     for (let key in paramsToUpdate) {
-        const value = paramsToUpdate[key]
-        if (value == undefined) params.remove(key)
+        const value = paramsToUpdate[key];
+        if (value == undefined) params.remove(key);
         else params.set(key, value);
     }
 
@@ -76,11 +76,11 @@ export const updateAppProgress = (
     const transitionOffPipeline = pageId && pageId.split("/")[0] !== "conversion";
 
     if (transitionOffPipeline) {
-        updateURLParams({ project: undefined })
+        updateURLParams({ project: undefined });
         return; // Only save last page if within the conversion workflow
     }
 
-    if (projectName) updateURLParams({ project: projectName })
+    if (projectName) updateURLParams({ project: projectName });
 
     // Is a project name
     if (dataOrProjectName === projectName) updateFile(dataOrProjectName, (data) => (data["page-before-exit"] = pageId));
@@ -165,7 +165,7 @@ export function resume(name) {
     const global = this ? this.load(name) : get(name);
 
     const commandToResume = global["page-before-exit"] || "conversion/start";
-    updateURLParams({ project: name })
+    updateURLParams({ project: name });
 
     if (this) this.onTransition(commandToResume);
 
