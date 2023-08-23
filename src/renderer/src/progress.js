@@ -64,7 +64,7 @@ function updateURLParams(paramsToUpdate) {
 
     // Update browser history state
     const value = `${location.pathname}?${params}`;
-    Object.assign(history.state, paramsToUpdate)
+    Object.assign(history.state, paramsToUpdate);
     window.history.pushState(history.state, null, value);
 }
 
