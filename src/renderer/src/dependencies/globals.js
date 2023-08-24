@@ -1,23 +1,8 @@
-import { app, isElectron, path, port, remote } from "../electron/index.js";
 import { Notyf } from "notyf";
 import checkChromatic from "chromatic/isChromatic";
-
-import paths from "../../../../paths.config.json" assert { type: "json" };
-
 import lottie from "lottie-web";
-import { joinPath } from "../globals.js";
 
-export const reloadPageToHome = () => {
-    if (isStorybook) return;
-    window.location = isElectron ? window.location.pathname : window.location.origin;
-}; // Clear all query params
-
-// Filesystem Management
-export const homeDirectory = app?.getPath("home") ?? "";
-export const appDirectory = homeDirectory ? joinPath(homeDirectory, paths.root) : "";
-export const guidedProgressFilePath = homeDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
-
-export const isStorybook = window.location.href.includes("iframe.html");
+export * from './simple.js'
 
 // ---------- Lottie Helper ----------
 const isChromatic = checkChromatic();
