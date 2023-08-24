@@ -122,14 +122,15 @@ class Upload(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
-@neuroconv_api.route("/inspect_nwbfile")
+@neuroconv_api.route("/inspect_file")
 class InspectNWBFile(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            from manageNeuroconv import inspect_nwbfile
-
-            return inspect_nwbfile(**neuroconv_api.payload)
+            import json
+            from nwbinspector import inspect_nwbfile
+            from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+            return json.loads(json.dumps(list(inspect_nwbfile(**neuroconv_api.payload)), cls=InspectorOutputJSONEncoder))
 
         except Exception as e:
             if notBadRequestException(e):
@@ -144,7 +145,7 @@ class InspectNWBFolder(Resource):
             import json
             from nwbinspector import inspect_all
             from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-            from nwbinspector.inspector_tools import get_report_header, format_messages
+            # from nwbinspector.inspector_tools import get_report_header, format_messages
 
             messages = list(
                 inspect_all(
@@ -152,29 +153,28 @@ class InspectNWBFolder(Resource):
                     **neuroconv_api.payload,
                 )
             )
-            json_report = dict(header=get_report_header(), messages=messages)
-            # If you want to get the full JSON listing of all messages to render/organize yourself
-            # json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder)
-            formatted_messages = format_messages(messages=messages)
 
-            return formatted_messages
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+            # json_report = dict(header=get_report_header(), messages=messages)
+
+            # formatted_messages = format_messages(messages=messages)
+            # return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder)) # Object of type Version is not JSON serializable
+            return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
-
 
 @neuroconv_api.route("/html")
 class NWBToHTML(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            from manageNeuroconv import nwb_to_html
-
-            return nwb_to_html(**neuroconv_api.payload)
+            from pynwb import NWBHDF5IO
+            io = NWBHDF5IO(neuroconv_api.payload.nwbfile_path, mode="r")
+            file = io.read()
+            html = file._repr_html_()
+            io.close()
+            return html
 
         except Exception as e:
             if notBadRequestException(e):
