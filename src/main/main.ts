@@ -179,6 +179,8 @@ const createPyProc = async () => {
  */
 const exitPyProc = async () => {
 
+  console.error('EXIT PY PROCESS')
+
   await killAllPreviousProcesses();
 
   // Kill signal to pyproc
@@ -241,6 +243,8 @@ function initialize() {
 
       globals.mainWindowReady = false
 
+      console.error('MAIN WINDOW CLOSING')
+
       if (!user_restart_confirmed) {
         if (showExitPrompt) {
           e.preventDefault(); // Prevents the window from closing
@@ -265,6 +269,7 @@ function initialize() {
   }
 
   const quit_app = () => {
+    console.error('APP QUITTING')
     globals.mainWindow.close();
     if (!globals.mainWindow.closed) globals.mainWindow.destroy()
   };
@@ -383,7 +388,7 @@ function makeSingleInstance() {
   else app.on("second-instance", () => restoreWindow());
 }
 
-initialize();
+// initialize();
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) initialize()
@@ -396,7 +401,8 @@ app.on("window-all-closed", async () => {
   }
 });
 
-app.on("will-quit", () => app.quit());
+// app.on("will-quit", () => app.quit());
+
 app.on("open-file", onFileOpened)
 
 ipcMain.on("resize-window", (event, dir) => {
