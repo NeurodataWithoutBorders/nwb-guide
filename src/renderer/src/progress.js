@@ -58,7 +58,7 @@ function updateURLParams(paramsToUpdate) {
     const params = new URLSearchParams(location.search);
     for (let key in paramsToUpdate) {
         const value = paramsToUpdate[key];
-        if (value == undefined) params.remove(key);
+        if (value == undefined) params.delete(key);
         else params.set(key, value);
     }
 
