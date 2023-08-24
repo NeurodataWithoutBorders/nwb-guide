@@ -6,7 +6,7 @@ import { joinPath, runOnLoad } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
 import { updateAppProgress, updateFile } from "./update.js";
 
-export * from './update'
+export * from "./update";
 
 class GlobalAppConfig {
     path = `${appDirectory}/config.json`;

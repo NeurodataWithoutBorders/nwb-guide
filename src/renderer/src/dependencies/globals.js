@@ -2,7 +2,7 @@ import { Notyf } from "notyf";
 import checkChromatic from "chromatic/isChromatic";
 import lottie from "lottie-web";
 
-export * from './simple.js'
+export * from "./simple.js";
 
 // ---------- Lottie Helper ----------
 const isChromatic = checkChromatic();
