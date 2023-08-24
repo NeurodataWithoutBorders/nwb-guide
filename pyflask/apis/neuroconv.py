@@ -136,14 +136,31 @@ class InspectNWBFile(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
-@neuroconv_api.route("/inspect")
-class InspectNWBFiles(Resource):
+@neuroconv_api.route("/inspect_folder")
+class InspectNWBFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            from manageNeuroconv import inspect
+            import json
+            from nwbinspector import inspect_all
+            from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+            from nwbinspector.inspector_tools import get_report_header, format_messages
 
-            return inspect(**neuroconv_api.payload)
+            messages = list(
+                inspect_all(
+                    n_jobs=-2,  # uses number of CPU - 1
+                    **neuroconv_api.payload,
+                )
+            )
+            json_report = dict(header=get_report_header(), messages=messages)
+            # If you want to get the full JSON listing of all messages to render/organize yourself
+            # json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder)
+            formatted_messages = format_messages(messages=messages)
+
+            return formatted_messages
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
 
         except Exception as e:
             if notBadRequestException(e):
