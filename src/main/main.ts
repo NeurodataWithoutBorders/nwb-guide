@@ -265,7 +265,6 @@ function initialize() {
   }
 
   const quit_app = () => {
-    console.error('APP QUITTING')
     globals.mainWindow.close();
     if (!globals.mainWindow.closed) globals.mainWindow.destroy()
   };
