@@ -179,8 +179,6 @@ const createPyProc = async () => {
  */
 const exitPyProc = async () => {
 
-  console.error('EXIT PY PROCESS')
-
   await killAllPreviousProcesses();
 
   // Kill signal to pyproc
@@ -242,8 +240,6 @@ function initialize() {
     globals.mainWindow.once("close", async (e) => {
 
       globals.mainWindowReady = false
-
-      console.error('MAIN WINDOW CLOSING')
 
       if (!user_restart_confirmed) {
         if (showExitPrompt) {
@@ -388,7 +384,7 @@ function makeSingleInstance() {
   else app.on("second-instance", () => restoreWindow());
 }
 
-// initialize();
+if (process.platform === 'darwin') initialize();
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) initialize()
