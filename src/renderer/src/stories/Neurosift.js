@@ -23,7 +23,10 @@ export class Neurosift extends LitElement {
     }
 
     render() {
-        return html`<iframe src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"></iframe>`;
+        return html`<iframe
+            class="iframe-placeholder"
+            src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
+        ></iframe>`;
     }
 }
 
