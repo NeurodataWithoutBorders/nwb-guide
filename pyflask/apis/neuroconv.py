@@ -130,7 +130,10 @@ class InspectNWBFile(Resource):
             import json
             from nwbinspector import inspect_nwbfile
             from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-            return json.loads(json.dumps(list(inspect_nwbfile(**neuroconv_api.payload)), cls=InspectorOutputJSONEncoder))
+
+            return json.loads(
+                json.dumps(list(inspect_nwbfile(**neuroconv_api.payload)), cls=InspectorOutputJSONEncoder)
+            )
 
         except Exception as e:
             if notBadRequestException(e):
@@ -145,6 +148,7 @@ class InspectNWBFolder(Resource):
             import json
             from nwbinspector import inspect_all
             from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
             # from nwbinspector.inspector_tools import get_report_header, format_messages
 
             messages = list(
@@ -164,12 +168,14 @@ class InspectNWBFolder(Resource):
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
 
+
 @neuroconv_api.route("/html")
 class NWBToHTML(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
             from pynwb import NWBHDF5IO
+
             io = NWBHDF5IO(neuroconv_api.payload.nwbfile_path, mode="r")
             file = io.read()
             html = file._repr_html_()
