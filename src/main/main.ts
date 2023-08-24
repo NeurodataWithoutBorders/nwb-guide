@@ -383,7 +383,7 @@ function makeSingleInstance() {
   else app.on("second-instance", () => restoreWindow());
 }
 
-initialize();
+if (process.platform === 'darwin') initialize();
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) initialize()
@@ -396,7 +396,8 @@ app.on("window-all-closed", async () => {
   }
 });
 
-app.on("will-quit", () => app.quit());
+// app.on("will-quit", () => app.quit());
+
 app.on("open-file", onFileOpened)
 
 ipcMain.on("resize-window", (event, dir) => {
