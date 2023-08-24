@@ -58,6 +58,10 @@ export class List extends LitElement {
         items: {
             type: Array,
             reflect: true
+          },
+          emptyMessage: {
+            type: String,
+            reflect: true
           }
       };
     }

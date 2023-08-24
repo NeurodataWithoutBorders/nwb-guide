@@ -9,29 +9,45 @@ import { resolveGlobalOverrides, resolveResults } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
-import { UnsafeComponent } from "../../Unsafe.js";
+import { merge } from "../../utils.js";
+import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
+
+const getInfoFromId = (key) => {
+    let [subject, session] = key.split("/");
+    if (subject.startsWith("sub-")) subject = subject.slice(4);
+    if (session.startsWith("ses-")) session = session.slice(4);
+
+    return { subject, session };
+};
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
     }
 
+    beforeSave = () => {
+        merge(this.localState.results, this.info.globalState.results);
+    };
+
     form;
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
+
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // Preview a single random conversion
-            delete this.info.globalState.preview; // Clear the preview results
-            const [result] = await this.runConversions({ stub_test: true }, 1, {
-                title: "Testing conversion on a random session",
+            delete this.info.globalState.stubs; // Clear the preview results
+            const results = await this.runConversions({ stub_test: true }, undefined, {
+                title: "Running stub conversion on all sessions...",
             });
 
-            this.info.globalState.preview = result; // Save the preview results
+            this.info.globalState.stubs = results; // Save the preview results
 
-            this.onTransition(1);
+            this.unsavedUpdates = true;
+
+            this.to(1);
         },
     };
 
@@ -101,6 +117,12 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.#nLoaded++;
                 this.#checkAllLoaded();
             },
+
+            onUpdate: (...args) => {
+                console.log(...args);
+                this.unsavedUpdates = true;
+            },
+
             validateOnChange,
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
@@ -140,7 +162,9 @@ export class GuidedMetadataPage extends ManagedPage {
     render() {
         this.#resetLoadState(); // Reset on each render
 
-        this.forms = this.mapSessions(this.createForm);
+        this.localState = { results: merge(this.info.globalState.results, {}) };
+
+        this.forms = this.mapSessions(this.createForm, this.localState);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {
@@ -158,18 +182,27 @@ export class GuidedMetadataPage extends ManagedPage {
                     name: "Preview",
                     primary: true,
                     onClick: async (key, el) => {
-                        let [subject, session] = key.split("/");
-                        if (subject.startsWith("sub-")) subject = subject.slice(4);
-                        if (session.startsWith("ses-")) session = session.slice(4);
+                        const { subject, session } = getInfoFromId(key);
 
-                        const [{ file, html }] = await this.runConversions(
+                        const results = await this.runConversions(
                             { stub_test: true },
-                            [{ subject, session }],
+                            [
+                                {
+                                    subject,
+                                    session,
+                                    globalState: merge(this.localState, merge(this.info.globalState, {})),
+                                },
+                            ],
                             { title: "Running conversion preview" }
                         ).catch((e) => {
                             this.notify(e.message, "error");
                             throw e;
                         });
+
+                        const firstSubject = Object.values(results)[0];
+                        const file = Object.values(firstSubject)[0]; // Get the information from the first subject
+
+                        console.log(firstSubject, file, results);
 
                         const modal = new Modal({
                             header: `Conversion Preview: ${key}`,
@@ -179,17 +212,29 @@ export class GuidedMetadataPage extends ManagedPage {
                             height: "100%",
                         });
 
-                        const container = document.createElement("div");
-                        container.style.padding = "0px 25px";
-                        container.append(new UnsafeComponent(html));
-
-                        modal.append(container);
+                        modal.append(
+                            new Neurosift({ url: getURLFromFilePath(file, this.info.globalState.project.name) })
+                        );
                         document.body.append(modal);
                     },
                 },
+
+                // Only save the currently selected session
                 {
-                    name: "Save All Sessions",
-                    onClick: this.save,
+                    name: "Save",
+                    onClick: async (id) => {
+                        const ogCallback = this.beforeSave;
+                        this.beforeSave = () => {
+                            const { subject, session } = getInfoFromId(id);
+
+                            merge(
+                                this.localState.results[subject][session],
+                                this.info.globalState.results[subject][session]
+                            );
+                        };
+                        await this.save();
+                        this.beforeSave = ogCallback;
+                    },
                 },
             ],
         });
