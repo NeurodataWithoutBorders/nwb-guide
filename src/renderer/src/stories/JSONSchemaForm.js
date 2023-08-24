@@ -143,17 +143,6 @@ pre {
     padding-top: 4px;
     color: dimgray !important;
   }
-
-  input[type=number].hideStep::-webkit-outer-spin-button,
-  input[type=number].hideStep::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-    /* Firefox */
-    input[type=number].hideStep {
-        -moz-appearance: textfield;
-    }
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -250,6 +239,13 @@ export class JSONSchemaForm extends LitElement {
         return form.getForm(path.slice(1));
     };
 
+    getInput = (path) => {
+        if (typeof path === "string") path = path.split(".");
+        const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
+        if (!container) return;
+        return container.querySelector("jsonschema-input");
+    };
+
     #requirements = {};
 
     attributeChangedCallback(changedProperties, oldValue, newValue) {
@@ -261,8 +257,11 @@ export class JSONSchemaForm extends LitElement {
     updateData(fullPath, value) {
         const path = [...fullPath];
         const name = path.pop();
-        const resultParent = path.reduce((acc, key) => acc[key], this.results);
-        const resolvedParent = path.reduce((acc, key) => acc[key], this.resolved);
+
+        const reducer = (acc, key) => (key in acc ? acc[key] : (acc[key] = {})); // NOTE: Create nested objects if required to set a new path
+
+        const resultParent = path.reduce(reducer, this.results);
+        const resolvedParent = path.reduce(reducer, this.resolved);
 
         if (resolvedParent[name] !== value) this.onUpdate(fullPath, value); // Ensure the value has actually changed
 
@@ -369,7 +368,7 @@ export class JSONSchemaForm extends LitElement {
         const name = path.pop();
         const element = this.shadowRoot
             .querySelector(`#${fullPath.join("-")}`)
-            .querySelector("nwb-jsonschema-input")
+            .querySelector("jsonschema-input")
             .shadowRoot.querySelector(".guided--input");
         const isValid = await this.triggerValidation(name, element, path, false);
         if (!isValid) return true;
@@ -426,7 +425,7 @@ export class JSONSchemaForm extends LitElement {
 
         interactiveInput.updated = () => {
             let input = interactiveInput.shadowRoot.querySelector(".schema-input");
-            if (!input) input = interactiveInput.shadowRoot.querySelector("nwb-filesystem-selector");
+            if (!input) input = interactiveInput.shadowRoot.querySelector("filesystem-selector");
 
             if (input) {
                 if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
@@ -436,9 +435,9 @@ export class JSONSchemaForm extends LitElement {
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
-        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-jsonschema-input")).map(input => input.children)
+        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
         // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
-        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("nwb-filesystem-selector") ?? []);
+        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("filesystem-selector") ?? []);
         // const allInputs = [...inputs, ...fileInputs];
         // const filtered = filter ? allInputs.filter(filter) : allInputs;
         // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
@@ -807,7 +806,7 @@ export class JSONSchemaForm extends LitElement {
             }
 
             // Render properties in the sub-schema
-            const rendered = this.#render(info, results[name], required[name], fullPath);
+            const rendered = this.#render(info, results?.[name], required[name], fullPath);
             return hasMany || path.length > 1
                 ? html`
                       <div style="margin-top: 40px;">

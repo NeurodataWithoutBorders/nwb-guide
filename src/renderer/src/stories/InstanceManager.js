@@ -75,6 +75,10 @@ export class InstanceManager extends LitElement {
                 height: 100%;
             }
 
+            #instance-display > div {
+                height: 100%;
+            }
+
             #content {
                 overflow: hidden;
                 display: flex;

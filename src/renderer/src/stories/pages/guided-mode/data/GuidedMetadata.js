@@ -38,13 +38,12 @@ export class GuidedMetadataPage extends ManagedPage {
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // Preview a single random conversion
-            delete this.info.globalState.preview; // Clear the preview results
-            const [result] = await this.runConversions({ stub_test: true }, 1, {
-                title: "Testing conversion on a random session",
+            delete this.info.globalState.stubs; // Clear the preview results
+            const results = await this.runConversions({ stub_test: true }, undefined, {
+                title: "Running stub conversion on all sessions...",
             });
 
-            // Save the preview results
-            this.info.globalState.preview = result;
+            this.info.globalState.stubs = results; // Save the preview results
 
             this.unsavedUpdates = true;
 
@@ -185,7 +184,7 @@ export class GuidedMetadataPage extends ManagedPage {
                     onClick: async (key, el) => {
                         const { subject, session } = getInfoFromId(key);
 
-                        const [{ file, html }] = await this.runConversions(
+                        const results = await this.runConversions(
                             { stub_test: true },
                             [
                                 {
@@ -200,6 +199,11 @@ export class GuidedMetadataPage extends ManagedPage {
                             throw e;
                         });
 
+                        const firstSubject = Object.values(results)[0];
+                        const file = Object.values(firstSubject)[0]; // Get the information from the first subject
+
+                        console.log(firstSubject, file, results);
+
                         const modal = new Modal({
                             header: `Conversion Preview: ${key}`,
                             open: true,
@@ -208,7 +212,9 @@ export class GuidedMetadataPage extends ManagedPage {
                             height: "100%",
                         });
 
-                        modal.append(new Neurosift({ url: getURLFromFilePath(file, project.name) }));
+                        modal.append(
+                            new Neurosift({ url: getURLFromFilePath(file, this.info.globalState.project.name) })
+                        );
                         document.body.append(modal);
                     },
                 },

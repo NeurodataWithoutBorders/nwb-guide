@@ -6,6 +6,8 @@ import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
 import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
+import { InstanceManager } from "../../../InstanceManager.js";
+
 const { shell } = electron;
 
 export class GuidedStubPreviewPage extends Page {
@@ -14,11 +16,11 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        subtitle: () => this.info.globalState.preview,
+        subtitle: () => this.info.globalState.stubs[0],
         controls: () =>
             html`<nwb-button
                 size="small"
-                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview) : "")}
+                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.stubs[0]) : "")}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
     };
@@ -36,11 +38,33 @@ export class GuidedStubPreviewPage extends Page {
         },
     };
 
-    render() {
-        const { project, preview } = this.info.globalState;
+    createInstance = ({ subject, session, info }) => {
+        const { project, stubs } = this.info.globalState;
 
-        return preview
-            ? new Neurosift({ url: getURLFromFilePath(preview, project.name) })
+        return {
+            subject,
+            session,
+            display: new Neurosift({ url: getURLFromFilePath(stubs[subject][session], project.name) }),
+        };
+    };
+
+    render() {
+        const { stubs } = this.info.globalState;
+
+        const _instances = this.mapSessions(this.createInstance);
+
+        const instances = _instances.reduce((acc, { subject, session, display }) => {
+            if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
+            acc[`sub-${subject}`][`ses-${session}`] = display;
+            return acc;
+        }, {});
+
+        return stubs
+            ? (this.manager = new InstanceManager({
+                  header: "Sessions",
+                  instanceType: "Session",
+                  instances,
+              }))
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
