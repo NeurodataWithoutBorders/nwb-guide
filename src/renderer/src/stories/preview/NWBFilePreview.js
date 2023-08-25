@@ -108,7 +108,7 @@ export class NWBFilePreview extends LitElement {
                 <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
                 ${until(
                     (async () => {
-                        const opts = { ignore: ["check_description"] };
+                        const opts = { }; // NOTE: Currently options are handled on the Python end until exposed to the user
 
                         const title = "Inspecting your file";
 
