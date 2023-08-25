@@ -1,27 +1,29 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
-// import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-// import folderOpenSVG from "../../../assets/folder_open.svg?raw";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
-// import { electron } from "../../../../electron/index.js";
-import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
-// const { shell } = electron;
+import { electron } from "../../../../electron/index.js";
+import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
+const { shell } = electron;
+
+const getStubArray = (stubs) => Object.values(stubs).map(o => Object.values(o)).flat()
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
     }
 
-    // header = {
-    //     subtitle: () => this.info.globalState.stubs?.[0]?.file,
-    //     controls: () =>
-    //         html`<nwb-button
-    //             size="small"
-    //             @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.stubs[0].file) : "")}
-    //             >${unsafeSVG(folderOpenSVG)}</nwb-button
-    //         >`,
-    // };
+    header = {
+        subtitle: () => `${getStubArray(this.info.globalState.stubs).length} Files`,
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => (shell ? shell.showItemInFolder(getSharedPath(getStubArray(this.info.globalState.stubs).map(o => o.file))) : "")}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
+    };
 
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {

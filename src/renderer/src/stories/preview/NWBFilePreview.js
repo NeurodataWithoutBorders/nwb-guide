@@ -6,7 +6,7 @@ import { run } from "../pages/guided-mode/options/utils";
 import { until } from "lit/directives/until.js";
 import { InstanceManager } from "../InstanceManager";
 
-function sharedPath(array) {
+export function getSharedPath(array) {
     const mapped = array.map((str) => str.split("/"));
     let shared = mapped.shift();
     mapped.forEach((arr, i) => {
@@ -120,7 +120,7 @@ export class NWBFilePreview extends LitElement {
                                   return o;
                               }) // Inspect the first file
                             : await (async () => {
-                                  const path = sharedPath(fileArr.map((o) => o.info.file));
+                                  const path = getSharedPath(fileArr.map((o) => o.info.file));
                                   return (await run("inspect_folder", { path, ...opts }, { title: title + "s" })).map(
                                       (o) => {
                                           o.file_path = o.file_path.replace(`${path}/`, "");
