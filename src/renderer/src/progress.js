@@ -54,6 +54,20 @@ export const getCurrentProjectName = () => {
     return params.get("project");
 };
 
+function updateURLParams(paramsToUpdate) {
+    const params = new URLSearchParams(location.search);
+    for (let key in paramsToUpdate) {
+        const value = paramsToUpdate[key];
+        if (value == undefined) params.remove(key);
+        else params.set(key, value);
+    }
+
+    // Update browser history state
+    const value = `${location.pathname}?${params}`;
+    if (history.state) Object.assign(history.state, paramsToUpdate);
+    window.history.pushState(history.state, null, value);
+}
+
 export const updateAppProgress = (
     pageId,
     dataOrProjectName = {},
@@ -62,18 +76,11 @@ export const updateAppProgress = (
     const transitionOffPipeline = pageId && pageId.split("/")[0] !== "conversion";
 
     if (transitionOffPipeline) {
+        updateURLParams({ project: undefined });
         return; // Only save last page if within the conversion workflow
     }
 
-    if (projectName) {
-        const params = new URLSearchParams(location.search);
-        params.set("project", projectName);
-
-        // Update browser history state
-        const value = `${location.pathname}?${params}`;
-        if (history.state) history.state.project = dataOrProjectName;
-        window.history.pushState(history.state, null, value);
-    }
+    if (projectName) updateURLParams({ project: projectName });
 
     // Is a project name
     if (dataOrProjectName === projectName) updateFile(dataOrProjectName, (data) => (data["page-before-exit"] = pageId));
@@ -158,6 +165,8 @@ export function resume(name) {
     const global = this ? this.load(name) : get(name);
 
     const commandToResume = global["page-before-exit"] || "conversion/start";
+    updateURLParams({ project: name });
+
     if (this) this.onTransition(commandToResume);
 
     return commandToResume;
