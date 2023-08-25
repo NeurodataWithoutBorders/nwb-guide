@@ -93,7 +93,8 @@ export class GuidedResultsPage extends Page {
                     <hr />
                     <ol>
                         ${Object.values(results)
-                            .flat((v) => Object.values(v))
+                            .map((v) => Object.values(v))
+                            .flat()
                             .map((o) => html`<li>${o.file}</li>`)}
                     </ol>
                 </div>

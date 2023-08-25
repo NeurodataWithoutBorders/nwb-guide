@@ -15,11 +15,11 @@ export class GuidedConversionOptionsPage extends Page {
             await this.form.validate(); // Will throw an error in the callback
 
             // Preview a random conversion
-            delete this.info.globalState.preview; // Clear the preview results
+            delete this.info.globalState.stubs; // Clear the preview results
             const results = await this.runConversions({ stub_test: true }, 1, {
                 title: "Testing conversion on a random session",
             });
-            this.info.globalState.preview = results[0]; // Save the preview results
+            this.info.globalState.stubs = results; // Save the preview results
 
             this.to(1);
         },
