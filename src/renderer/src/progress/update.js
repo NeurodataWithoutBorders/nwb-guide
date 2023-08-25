@@ -1,6 +1,7 @@
 import { guidedProgressFilePath } from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
 import { joinPath } from "../globals.js";
+import { get } from "./index.js";
 
 export const update = (newDatasetName, previousDatasetName) => {
     //If updataing the dataset, update the old banner image path with a new one
