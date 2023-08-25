@@ -8,7 +8,10 @@ import { electron } from "../../../../electron/index.js";
 import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
 const { shell } = electron;
 
-const getStubArray = (stubs) => Object.values(stubs).map(o => Object.values(o)).flat()
+const getStubArray = (stubs) =>
+    Object.values(stubs)
+        .map((o) => Object.values(o))
+        .flat();
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
@@ -20,7 +23,12 @@ export class GuidedStubPreviewPage extends Page {
         controls: () =>
             html`<nwb-button
                 size="small"
-                @click=${() => (shell ? shell.showItemInFolder(getSharedPath(getStubArray(this.info.globalState.stubs).map(o => o.file))) : "")}
+                @click=${() =>
+                    shell
+                        ? shell.showItemInFolder(
+                              getSharedPath(getStubArray(this.info.globalState.stubs).map((o) => o.file))
+                          )
+                        : ""}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
     };
