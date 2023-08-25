@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python = 3.10.12
+  - python = 3.9.17
   - PyInstaller = 5.13.0
   - nodejs = 18.16.1
   - numcodecs = 0.11.0
