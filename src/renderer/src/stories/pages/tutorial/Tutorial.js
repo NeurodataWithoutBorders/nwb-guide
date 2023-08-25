@@ -4,12 +4,11 @@ import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import tutorialSchema from "../../../../../../schemas/json/tutorial.schema.json" assert { type: "json" };
-import guideGlobalMetadata from "../../../../../../guideGlobalMetadata.json" assert { type: "json" };
 
 import { run } from "../guided-mode/options/utils.js";
 import "../../Button.js";
 import { InfoBox } from "../../InfoBox.js";
-import { hasEntry, get, save, remove, resume, global } from "../../../progress.js";
+import { hasEntry, get, save, remove, resume, global } from "../../../progress/index.js";
 
 import { electron } from "../../../electron/index.js";
 

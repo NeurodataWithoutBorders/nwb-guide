@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
-import { get, save } from "../../progress.js";
+import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
 

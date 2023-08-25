@@ -31,7 +31,7 @@ import "../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 import "../../assets/css/guided.css";
 import isElectron from "../electron/check.js";
 import { isStorybook, reloadPageToHome } from "../dependencies/globals.js";
-import { getCurrentProjectName, updateAppProgress } from "../progress.js";
+import { getCurrentProjectName, updateAppProgress } from "../progress/index.js";
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
