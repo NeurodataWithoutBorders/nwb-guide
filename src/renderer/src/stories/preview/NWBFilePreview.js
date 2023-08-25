@@ -5,8 +5,11 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { run } from "../pages/guided-mode/options/utils";
 import { until } from "lit/directives/until.js";
 import { InstanceManager } from "../InstanceManager";
+import { path } from "../../electron";
 
 export function getSharedPath(array) {
+    array = array.map(str => path.normalize(str))
+    console.log(array)
     const mapped = array.map((str) => str.split("/"));
     let shared = mapped.shift();
     mapped.forEach((arr, i) => {
