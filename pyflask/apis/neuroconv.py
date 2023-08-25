@@ -135,11 +135,14 @@ class InspectNWBFile(Resource):
                 json.dumps(
                     list(
                         inspect_nwbfile(
-                            ignore=["check_description", "check_data_orientation"],  # TODO: remove when metadata control is exposed
+                            ignore=[
+                                "check_description",
+                                "check_data_orientation",
+                            ],  # TODO: remove when metadata control is exposed
                             **neuroconv_api.payload,
                         )
                     ),
-                    cls=InspectorOutputJSONEncoder
+                    cls=InspectorOutputJSONEncoder,
                 )
             )
 
@@ -157,11 +160,13 @@ class InspectNWBFolder(Resource):
             from nwbinspector import inspect_all
             from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
-
             messages = list(
                 inspect_all(
                     n_jobs=-2,  # uses number of CPU - 1
-                    ignore=["check_description", "check_data_orientation"],  # TODO: remove when metadata control is exposed
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
                     **neuroconv_api.payload,
                 )
             )
