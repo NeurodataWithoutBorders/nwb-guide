@@ -23,7 +23,7 @@ export const update = (newDatasetName, previousDatasetName) => {
     } else throw new Error("No previous dataset name provided");
 };
 
-function updateURLParams(paramsToUpdate) {
+export function updateURLParams(paramsToUpdate) {
     const params = new URLSearchParams(location.search);
     for (let key in paramsToUpdate) {
         const value = paramsToUpdate[key];
