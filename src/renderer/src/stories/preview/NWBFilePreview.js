@@ -8,7 +8,7 @@ import { InstanceManager } from "../InstanceManager";
 import { path } from "../../electron";
 
 export function getSharedPath(array) {
-    array = array.map((str) => str.replace(/\\/g, '/')); // Convert to Mac-style path
+    array = array.map((str) => str.replace(/\\/g, "/")); // Convert to Mac-style path
     const mapped = array.map((str) => str.split("/"));
     let shared = mapped.shift();
     mapped.forEach((arr, i) => {
