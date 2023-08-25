@@ -121,13 +121,11 @@ export class NWBFilePreview extends LitElement {
                               }) // Inspect the first file
                             : await (async () => {
                                   const path = getSharedPath(fileArr.map((o) => o.info.file));
-                                  const report = await run("inspect_folder", { path, ...opts }, { title: title + "s" })
-                                  return report.map(
-                                      (o) => {
-                                          o.file_path = o.file_path.replace(`${path}/`, "");
-                                          return o;
-                                      }
-                                  );
+                                  const report = await run("inspect_folder", { path, ...opts }, { title: title + "s" });
+                                  return report.map((o) => {
+                                      o.file_path = o.file_path.replace(`${path}/`, "");
+                                      return o;
+                                  });
                               })();
 
                         const list = new InspectorList({
