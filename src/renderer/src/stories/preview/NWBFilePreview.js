@@ -126,8 +126,8 @@ export class NWBFilePreview extends LitElement {
                                   const report = await run("inspect_folder", { path, ...opts }, { title: title + "s" });
                                   return report.map((o) => {
                                       o.file_path = o.file_path
-                                                        .replace(`${path}/`, "") // Mac
-                                                        .replace(`${path}\\`, ""); // Windows
+                                          .replace(`${path}/`, "") // Mac
+                                          .replace(`${path}\\`, ""); // Windows
                                       return o;
                                   });
                               })();
