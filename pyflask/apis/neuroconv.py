@@ -132,7 +132,15 @@ class InspectNWBFile(Resource):
             from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
             return json.loads(
-                json.dumps(list(inspect_nwbfile(**neuroconv_api.payload)), cls=InspectorOutputJSONEncoder)
+                json.dumps(
+                    list(
+                        inspect_nwbfile(
+                            ignore=["check_description", "check_data_orientation"],  # TODO: remove when metadata control is exposed
+                            **neuroconv_api.payload,
+                        )
+                    ),
+                    cls=InspectorOutputJSONEncoder
+                )
             )
 
         except Exception as e:
@@ -149,19 +157,15 @@ class InspectNWBFolder(Resource):
             from nwbinspector import inspect_all
             from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
-            # from nwbinspector.inspector_tools import get_report_header, format_messages
 
             messages = list(
                 inspect_all(
                     n_jobs=-2,  # uses number of CPU - 1
+                    ignore=["check_description", "check_data_orientation"],  # TODO: remove when metadata control is exposed
                     **neuroconv_api.payload,
                 )
             )
 
-            # json_report = dict(header=get_report_header(), messages=messages)
-
-            # formatted_messages = format_messages(messages=messages)
-            # return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder)) # Object of type Version is not JSON serializable
             return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
         except Exception as e:
