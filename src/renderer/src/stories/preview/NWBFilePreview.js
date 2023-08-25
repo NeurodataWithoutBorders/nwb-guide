@@ -8,8 +8,7 @@ import { InstanceManager } from "../InstanceManager";
 import { path } from "../../electron";
 
 export function getSharedPath(array) {
-    array = array.map((str) => path.normalize(str));
-    console.log(array);
+    array = array.map((str) => str.replace(/\\/g, '/')); // Convert to Mac-style path
     const mapped = array.map((str) => str.split("/"));
     let shared = mapped.shift();
     mapped.forEach((arr, i) => {
@@ -21,7 +20,7 @@ export function getSharedPath(array) {
         }
     });
 
-    return shared.join("/");
+    return path.normalize(shared.join("/")); // Convert back to OS-specific path
 }
 
 class NWBPreviewInstance extends LitElement {
