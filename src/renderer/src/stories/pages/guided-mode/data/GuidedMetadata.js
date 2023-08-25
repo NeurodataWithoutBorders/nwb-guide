@@ -40,7 +40,7 @@ export class GuidedMetadataPage extends ManagedPage {
             // Preview a single random conversion
             delete this.info.globalState.stubs; // Clear the preview results
             const stubs = await this.runConversions({ stub_test: true }, undefined, {
-                title: "Testing conversion on a random session",
+                title: "Running stub conversion on all sessions...",
             });
 
             // Save the preview results
