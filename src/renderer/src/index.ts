@@ -50,7 +50,7 @@ async function isOffline() {
   await Swal.fire({
     title: "No Internet Connection",
     icon: "warning",
-    text: "It appears that your computer is not connected to the internet. You may continue, but you will not be able to use features of NWB GUIDE related to uploading data to DANDI.",
+    text: "You may continue, but certain features (e.g. uploading data to DANDI, viewing data on Neurosift, etc.) will be unavailable.",
     heightAuto: false,
     backdrop: "rgba(0,0,0, 0.4)",
     confirmButtonText: "I understand",
@@ -87,7 +87,7 @@ async function checkInternetConnection() {
     window.addEventListener('online', isOnline);
     window.addEventListener('offline', isOffline);
 
-    let hasInternet = navigator.onLine
+    const hasInternet = navigator.onLine
     if (hasInternet) isOnline()
     else await isOffline()
 

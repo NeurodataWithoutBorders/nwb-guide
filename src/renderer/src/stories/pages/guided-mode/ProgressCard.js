@@ -1,5 +1,5 @@
 import { html, LitElement } from "lit";
-import * as progress from "../../../progress.js";
+import * as progress from "../../../progress/index.js";
 
 export class ProgressCard extends LitElement {
     static get properties() {

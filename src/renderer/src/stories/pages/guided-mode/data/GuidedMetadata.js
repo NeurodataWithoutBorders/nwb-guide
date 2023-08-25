@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
-import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
+import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
 
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
@@ -39,11 +39,12 @@ export class GuidedMetadataPage extends ManagedPage {
 
             // Preview a single random conversion
             delete this.info.globalState.stubs; // Clear the preview results
-            const results = await this.runConversions({ stub_test: true }, undefined, {
+            const stubs = await this.runConversions({ stub_test: true }, undefined, {
                 title: "Running stub conversion on all sessions...",
             });
 
-            this.info.globalState.stubs = results; // Save the preview results
+            // Save the preview results
+            this.info.globalState.stubs = stubs;
 
             this.unsavedUpdates = true;
 
@@ -199,11 +200,6 @@ export class GuidedMetadataPage extends ManagedPage {
                             throw e;
                         });
 
-                        const firstSubject = Object.values(results)[0];
-                        const file = Object.values(firstSubject)[0]; // Get the information from the first subject
-
-                        console.log(firstSubject, file, results);
-
                         const modal = new Modal({
                             header: `Conversion Preview: ${key}`,
                             open: true,
@@ -212,9 +208,9 @@ export class GuidedMetadataPage extends ManagedPage {
                             height: "100%",
                         });
 
-                        modal.append(
-                            new Neurosift({ url: getURLFromFilePath(file, this.info.globalState.project.name) })
-                        );
+                        const { project } = this.info.globalState;
+
+                        modal.append(new NWBFilePreview({ project: project.name, files: results }));
                         document.body.append(modal);
                     },
                 },
