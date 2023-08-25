@@ -176,10 +176,8 @@ class NWBToHTML(Resource):
         try:
             from pynwb import NWBHDF5IO
 
-            io = NWBHDF5IO(neuroconv_api.payload.nwbfile_path, mode="r")
-            file = io.read()
-            html = file._repr_html_()
-            io.close()
+            with NWBHDF5IO(neuroconv_api.payload.nwbfile_path, mode="r") as io:
+                html = io.read()._repr_html_()
             return html
 
         except Exception as e:
