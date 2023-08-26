@@ -20,23 +20,21 @@ const sortList = (items) => {
 };
 
 const aggregateMessages = (items) => {
-    let messages = {}
-    items.forEach(o => {
-        if (!messages[o.message]) messages[o.message] = []
-        messages[o.message].push(o)
-    })
-    return messages
+    let messages = {};
+    items.forEach((o) => {
+        if (!messages[o.message]) messages[o.message] = [];
+        messages[o.message].push(o);
+    });
+    return messages;
 };
 
 export class InspectorList extends List {
     constructor({ items, listStyles }) {
-
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
-            const aggregate = {...items.pop()} // Create a base object for the aggregation
-            aggregate.files = [aggregate.file_path, ...items.map(o => o.file_path)]
-            return aggregate
-        })
-        
+            const aggregate = { ...items.pop() }; // Create a base object for the aggregation
+            aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
+            return aggregate;
+        });
 
         super({
             editable: false,
@@ -128,11 +126,15 @@ export class InspectorListItem extends LitElement {
         const hasMetadata = hasObjectType && "object_name" in this;
 
         return html`
-            ${hasMetadata
-            ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>`
-            : ""}
+            ${hasMetadata ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>` : ""}
             ${hasMetadata ? html`<span id="message">${this.message}</span>` : html`<p>${this.message}</p>`}
-            ${this.file_path ? html`<span id="filepath">${this.files && this.files.length > 1 ? `${this.files[0]} and ${this.files.length - 1} other files` : this.file_path}</span>` : ""}
+            ${this.file_path
+                ? html`<span id="filepath"
+                      >${this.files && this.files.length > 1
+                          ? `${this.files[0]} and ${this.files.length - 1} other files`
+                          : this.file_path}</span
+                  >`
+                : ""}
         `;
     }
 }

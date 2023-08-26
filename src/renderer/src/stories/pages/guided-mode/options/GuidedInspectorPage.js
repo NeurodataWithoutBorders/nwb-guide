@@ -13,14 +13,18 @@ import { InspectorList } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 
-
 const filter = (list, toFilter) => {
-    return list.filter(o => {
-        return Object.entries(toFilter).map(([key, strOrArray]) => {
-            return (Array.isArray(strOrArray)) ? strOrArray.map(str => o[key].includes(str)) : o[key].includes(strOrArray)
-        }).flat().every(Boolean)
-    })
-}
+    return list.filter((o) => {
+        return Object.entries(toFilter)
+            .map(([key, strOrArray]) => {
+                return Array.isArray(strOrArray)
+                    ? strOrArray.map((str) => o[key].includes(str))
+                    : o[key].includes(strOrArray);
+            })
+            .flat()
+            .every(Boolean);
+    });
+};
 
 export class GuidedInspectorPage extends Page {
     constructor(...args) {
@@ -44,75 +48,85 @@ export class GuidedInspectorPage extends Page {
 
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {
-        next: "Preview Files"
+        next: "Preview Files",
     };
 
     render() {
-        const { globalState } = this.info
-        const { stubs, inspector } = globalState.preview
+        const { globalState } = this.info;
+        const { stubs, inspector } = globalState.preview;
 
         const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
 
         const fileArr = Object.entries(stubs)
-        .map(([subject, v]) =>
-            Object.entries(v).map(([session, info]) => {
-                return { subject, session, info };
-            })
-        )
-        .flat();
-        return html`
-                ${until(
-                    (async () => {
+            .map(([subject, v]) =>
+                Object.entries(v).map(([session, info]) => {
+                    return { subject, session, info };
+                })
+            )
+            .flat();
+        return html` ${until(
+            (async () => {
                 if (fileArr.length <= 1) {
-                        const items = inspector ?? removeFilePaths(this.unsavedUpdates = globalState.preview.inspector = await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title }))
-                        return new InspectorList({ items })
-                } 
-
-            const items = await (async () => {
-                const path = getSharedPath(fileArr.map((o) => o.info.file));
-                const report = inspector ?? (this.unsavedUpdates = globalState.preview.inspector = await run("inspect_folder", { path, ...opts }, { title: title + "s" }));
-                return truncateFilePaths(report, path);
-            })();
-
-            const _instances = fileArr.map(({ subject , session, info }) => {
-
-                const display = () => {
-                    const filtered = removeFilePaths(filter(items, { file_path: [`sub-${subject}`, `sub-${subject}_ses-${session}`]}))
-                    return new InspectorList({ items: filtered })
+                    const items =
+                        inspector ??
+                        removeFilePaths(
+                            (this.unsavedUpdates = globalState.preview.inspector =
+                                await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title }))
+                        );
+                    return new InspectorList({ items });
                 }
 
-                return {
-                    subject, 
-                    session, 
-                    display
-                }
-            });
+                const items = await (async () => {
+                    const path = getSharedPath(fileArr.map((o) => o.info.file));
+                    const report =
+                        inspector ??
+                        (this.unsavedUpdates = globalState.preview.inspector =
+                            await run("inspect_folder", { path, ...opts }, { title: title + "s" }));
+                    return truncateFilePaths(report, path);
+                })();
 
-            const instances = _instances.reduce((acc, { subject, session, display }) => {
-                if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
-                acc[`sub-${subject}`][`ses-${session}`] = display;
-                return acc;
-            }, {});
+                const _instances = fileArr.map(({ subject, session, info }) => {
+                    const display = () => {
+                        const filtered = removeFilePaths(
+                            filter(items, { file_path: [`sub-${subject}`, `sub-${subject}_ses-${session}`] })
+                        );
+                        return new InspectorList({ items: filtered });
+                    };
 
-            Object.keys(instances).forEach((subLabel) => {
-                instances[subLabel] = {
-                    ['All Files']: () => {
-                        const subItems = filter(items, { file_path: `${subLabel}/${subLabel}_ses-`})
-                        const path = getSharedPath(subItems.map((o) => o.file_path));
-                        return new InspectorList({ items: truncateFilePaths(subItems, path)})
+                    return {
+                        subject,
+                        session,
+                        display,
+                    };
+                });
+
+                const instances = _instances.reduce((acc, { subject, session, display }) => {
+                    if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
+                    acc[`sub-${subject}`][`ses-${session}`] = display;
+                    return acc;
+                }, {});
+
+                Object.keys(instances).forEach((subLabel) => {
+                    instances[subLabel] = {
+                        ["All Files"]: () => {
+                            const subItems = filter(items, { file_path: `${subLabel}/${subLabel}_ses-` });
+                            const path = getSharedPath(subItems.map((o) => o.file_path));
+                            return new InspectorList({ items: truncateFilePaths(subItems, path) });
+                        },
+                        ...instances[subLabel],
+                    };
+                });
+
+                return new InstanceManager({
+                    instances: {
+                        ["All Files"]: () => new InspectorList({ items }),
+                        ...instances,
                     },
-                    ...instances[subLabel]
-                }
-            })
-
-            return new InstanceManager({ 
-                instances: {
-                    ['All Files']: () => new InspectorList({ items }),
-                    ...instances
-                } 
-            });
-        })(), '')}`
+                });
+            })(),
+            ""
+        )}`;
     }
 }
 

@@ -46,7 +46,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             // Save the preview results
             this.info.globalState.preview = {
-                stubs
+                stubs,
             };
 
             this.unsavedUpdates = true;

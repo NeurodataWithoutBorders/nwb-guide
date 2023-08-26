@@ -151,13 +151,11 @@ export class Main extends LitElement {
                                   </div>
                                   <div style="padding-left: 25px">${controls}</div>
                               </div>
-                              <hr style="margin-bottom: 0;"/>
+                              <hr style="margin-bottom: 0;" />
                           </div>`
                         : ""}
 
-                    <div style="padding-top: 10px; height: 100%; width: 100%;">
-                        ${page}
-                    </div>
+                    <div style="padding-top: 10px; height: 100%; width: 100%;">${page}</div>
                 </section>
             </main>
             ${footerEl}
