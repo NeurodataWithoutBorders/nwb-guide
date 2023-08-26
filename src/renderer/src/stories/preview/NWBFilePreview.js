@@ -23,6 +23,25 @@ export function getSharedPath(array) {
     return path.normalize(shared.join("/")); // Convert back to OS-specific path
 }
 
+export function truncateFilePaths(items, basepath) {
+    return items.map((o) => {
+        o = {...o}
+        o.file_path = o.file_path
+                        .replace(`${basepath}/`, "") // Mac
+                        .replace(`${basepath}\\`, ""); // Windows
+        return o;
+    })
+}
+
+
+export const removeFilePaths = (arr) => {
+    return arr.map((o) => {
+        const copy = {...o}
+        delete copy.file_path;
+        return copy;
+    })
+}
+
 class NWBPreviewInstance extends LitElement {
     constructor({ file }, project) {
         super();
@@ -112,12 +131,12 @@ export class NWBFilePreview extends LitElement {
 
                         const title = "Inspecting your file";
 
-                        const items = (
-                            await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title })
-                        ).map((o) => {
-                            delete o.file_path;
-                            return o;
-                        })
+                        const items = onlyFirstFile
+                            ? removeFilePaths(await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title })) // Inspect the first file
+                            : await (async () => truncateFilePaths(
+                                await run("inspect_folder", { path, ...opts }, { title: title + "s" }), 
+                                getSharedPath(fileArr.map((o) => o.info.file))
+                            ))();
 
                         const list = new InspectorList({
                             items: items,
