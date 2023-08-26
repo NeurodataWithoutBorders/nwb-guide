@@ -5,7 +5,7 @@ import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
-import { getSharedPath } from "../../../preview/NWBFilePreview.js";
+import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../preview/NWBFilePreview.js";
 const { shell } = electron;
 import { until } from "lit/directives/until.js";
 import { run } from "./utils.js";
@@ -13,22 +13,6 @@ import { InspectorList } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 
-const removeFilePaths = (arr) => {
-    return arr.map((o) => {
-        const copy = {...o}
-        delete copy.file_path;
-        return copy;
-    })
-}
-function truncateFilePaths(items, basepath) {
-    return items.map((o) => {
-        o = {...o}
-        o.file_path = o.file_path
-                        .replace(`${basepath}/`, "") // Mac
-                        .replace(`${basepath}\\`, ""); // Windows
-        return o;
-    })
-}
 
 const filter = (list, toFilter) => {
     return list.filter(o => {
