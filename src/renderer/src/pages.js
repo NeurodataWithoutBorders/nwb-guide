@@ -14,6 +14,7 @@ import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUplo
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./stories/Dashboard";
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
+import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedInspectorPage";
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
@@ -132,20 +133,27 @@ const pages = {
                 section: sections[1],
             }),
 
-            preview: new GuidedStubPreviewPage({
-                title: "Conversion Preview",
-                label: "Preview conversion",
+            inspect: new GuidedInspectorPage({
+                title: "Inspector Report",
+                label: "Inspect files",
                 section: sections[2],
             }),
+
+            preview: new GuidedStubPreviewPage({
+                title: "Conversion Preview",
+                label: "Preview files",
+                section: sections[2],
+            }),
+
             upload: new GuidedUploadPage({
                 title: "DANDI Upload Options",
-                label: "DANDI upload",
-                section: sections[2],
+                label: "Upload to DANDI",
+                section: sections[3],
             }),
 
             review: new GuidedResultsPage({
                 title: "Conversion Review",
-                label: "Review results",
+                label: "View conversion report",
                 section: sections[3],
             }),
         },

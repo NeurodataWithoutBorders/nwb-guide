@@ -38,13 +38,16 @@ export class GuidedMetadataPage extends ManagedPage {
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // Preview a single random conversion
-            delete this.info.globalState.stubs; // Clear the preview results
+            delete this.info.globalState.preview; // Clear the preview results
+
             const stubs = await this.runConversions({ stub_test: true }, undefined, {
                 title: "Running stub conversion on all sessions...",
             });
 
             // Save the preview results
-            this.info.globalState.stubs = stubs;
+            this.info.globalState.preview = {
+                stubs
+            };
 
             this.unsavedUpdates = true;
 
@@ -210,7 +213,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
                         const { project } = this.info.globalState;
 
-                        modal.append(new NWBFilePreview({ project: project.name, files: results }));
+                        modal.append(new NWBFilePreview({ project: project.name, files: results, inspect: true }));
                         document.body.append(modal);
                     },
                 },

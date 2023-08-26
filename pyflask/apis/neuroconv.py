@@ -21,7 +21,6 @@ neuroconv_api = Namespace("neuroconv", description="Neuroconv neuroconv_api for 
 parser = reqparse.RequestParser()
 parser.add_argument("interfaces", type=str, action="split", help="Interfaces cannot be converted")
 
-
 @neuroconv_api.errorhandler(Exception)
 def exception_handler(error):
     exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
@@ -170,6 +169,8 @@ class InspectNWBFolder(Resource):
                     **neuroconv_api.payload,
                 )
             )
+
+            # messages = organize_messages(messages, levels=["importance", "message"])
 
             return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
