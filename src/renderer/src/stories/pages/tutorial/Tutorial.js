@@ -8,7 +8,7 @@ import tutorialSchema from "../../../../../../schemas/json/tutorial.schema.json"
 import { run } from "../guided-mode/options/utils.js";
 import "../../Button.js";
 import { InfoBox } from "../../InfoBox.js";
-import { hasEntry, get, save, remove, resume, global } from "../../../progress.js";
+import { hasEntry, get, save, remove, resume, global } from "../../../progress/index.js";
 
 import { electron } from "../../../electron/index.js";
 

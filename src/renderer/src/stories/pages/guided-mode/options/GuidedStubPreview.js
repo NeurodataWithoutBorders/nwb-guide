@@ -5,10 +5,13 @@ import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
-import { Neurosift, getURLFromFilePath } from "../../../Neurosift.js";
-import { InstanceManager } from "../../../InstanceManager.js";
-
+import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
 const { shell } = electron;
+
+const getStubArray = (stubs) =>
+    Object.values(stubs)
+        .map((o) => Object.values(o))
+        .flat();
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
@@ -16,11 +19,16 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        subtitle: () => this.info.globalState.stubs[0],
+        subtitle: () => `${getStubArray(this.info.globalState.stubs).length} Files`,
         controls: () =>
             html`<nwb-button
                 size="small"
-                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.stubs[0]) : "")}
+                @click=${() =>
+                    shell
+                        ? shell.showItemInFolder(
+                              getSharedPath(getStubArray(this.info.globalState.stubs).map((o) => o.file))
+                          )
+                        : ""}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
     };
@@ -38,33 +46,11 @@ export class GuidedStubPreviewPage extends Page {
         },
     };
 
-    createInstance = ({ subject, session, info }) => {
-        const { project, stubs } = this.info.globalState;
-
-        return {
-            subject,
-            session,
-            display: new Neurosift({ url: getURLFromFilePath(stubs[subject][session], project.name) }),
-        };
-    };
-
     render() {
-        const { stubs } = this.info.globalState;
-
-        const _instances = this.mapSessions(this.createInstance);
-
-        const instances = _instances.reduce((acc, { subject, session, display }) => {
-            if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
-            acc[`sub-${subject}`][`ses-${session}`] = display;
-            return acc;
-        }, {});
+        const { stubs, project } = this.info.globalState;
 
         return stubs
-            ? (this.manager = new InstanceManager({
-                  header: "Sessions",
-                  instanceType: "Session",
-                  instances,
-              }))
+            ? new NWBFilePreview({ project: project.name, files: stubs })
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }

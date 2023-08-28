@@ -21,7 +21,7 @@ export const openProgressSwal = (options) => {
 };
 
 export const run = async (url, payload, options = {}) => {
-    const needsSwal = !options.swal;
+    const needsSwal = !options.swal && options.swal !== false;
     if (needsSwal) openProgressSwal(options).then((swal) => (options.onOpen ? options.onOpen(swal) : undefined));
 
     const results = await fetch(`${baseUrl}/neuroconv/${url}`, {

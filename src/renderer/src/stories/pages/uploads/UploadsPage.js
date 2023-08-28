@@ -7,7 +7,7 @@ import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalo
 const dandiSchema = merge(dandiStandaloneSchema, dandiUploadSchema, { arrays: true });
 
 import { Button } from "../../Button.js";
-import { global } from "../../../progress.js";
+import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { run } from "../guided-mode/options/utils.js";

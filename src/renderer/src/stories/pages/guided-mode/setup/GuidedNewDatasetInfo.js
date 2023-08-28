@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { global, hasEntry, update } from "../../../../progress.js";
+import { global, hasEntry, update } from "../../../../progress/index.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { validateOnChange } from "../../../../validation/index.js";

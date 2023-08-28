@@ -122,6 +122,78 @@ class Upload(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
+@neuroconv_api.route("/inspect_file")
+class InspectNWBFile(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            import json
+            from nwbinspector import inspect_nwbfile
+            from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+            return json.loads(
+                json.dumps(
+                    list(
+                        inspect_nwbfile(
+                            ignore=[
+                                "check_description",
+                                "check_data_orientation",
+                            ],  # TODO: remove when metadata control is exposed
+                            **neuroconv_api.payload,
+                        )
+                    ),
+                    cls=InspectorOutputJSONEncoder,
+                )
+            )
+
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
+
+@neuroconv_api.route("/inspect_folder")
+class InspectNWBFolder(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            import json
+            from nwbinspector import inspect_all
+            from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+            messages = list(
+                inspect_all(
+                    n_jobs=-2,  # uses number of CPU - 1
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **neuroconv_api.payload,
+                )
+            )
+
+            return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
+
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
+
+@neuroconv_api.route("/html")
+class NWBToHTML(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            from pynwb import NWBHDF5IO
+
+            with NWBHDF5IO(neuroconv_api.payload.nwbfile_path, mode="r") as io:
+                html = io.read()._repr_html_()
+            return html
+
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
+
 @neuroconv_api.route("/generate_dataset")
 class GenerateDataset(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})

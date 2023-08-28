@@ -1,0 +1,162 @@
+[
+    {
+        "message": "Experimenter is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experimenter_exists",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+    },
+    {
+        "message": "Experiment description is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experiment_description",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+    },
+    {
+        "message": "Metadata /general/institution is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_institution",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+    },
+    {
+        "message": "Metadata /general/keywords is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_keywords",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+    },
+    {
+        "message": "Experimenter is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experimenter_exists",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+    },
+    {
+        "message": "Experiment description is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experiment_description",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+    },
+    {
+        "message": "Metadata /general/institution is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_institution",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+    },
+    {
+        "message": "Metadata /general/keywords is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_keywords",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+    },
+    {
+        "message": "Experimenter is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experimenter_exists",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+    },
+    {
+        "message": "Experiment description is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experiment_description",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+    },
+    {
+        "message": "Metadata /general/institution is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_institution",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+    },
+    {
+        "message": "Metadata /general/keywords is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_keywords",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+    },
+    {
+        "message": "Experimenter is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experimenter_exists",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+    },
+    {
+        "message": "Experiment description is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_experiment_description",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+    },
+    {
+        "message": "Metadata /general/institution is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_institution",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+    },
+    {
+        "message": "Metadata /general/keywords is missing.",
+        "importance": "BEST_PRACTICE_SUGGESTION",
+        "severity": "LOW",
+        "check_function_name": "check_keywords",
+        "object_type": "NWBFile",
+        "object_name": "root",
+        "location": "/",
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+    }
+]

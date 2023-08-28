@@ -6,7 +6,7 @@ import baseMetadataSchema from '../schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
-import { Validator, validate } from 'jsonschema'
+import { Validator } from 'jsonschema'
 import { textToArray } from '../src/renderer/src/stories/forms/utils'
 import { updateResultsFromSubjects } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
 import { JSONSchemaForm } from '../src/renderer/src/stories/JSONSchemaForm'
