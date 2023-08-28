@@ -266,16 +266,14 @@ export class JSONSchemaForm extends LitElement {
         const hasUpdate = resolvedParent[name] !== value;
 
          // NOTE: Forms with nested forms will handle their own state updates
-         if (this.#base.length === 0) {
-            if (!value) {
-                delete resultParent[name];
-                delete resolvedParent[name];
-            } else {
-                resultParent[name] = value;
-                resolvedParent[name] = value;
-            }
+        if (!value) {
+            delete resultParent[name];
+            delete resolvedParent[name];
+        } else {
+            resultParent[name] = value;
+            resolvedParent[name] = value;
         }
-
+        
         if (hasUpdate) this.onUpdate(fullPath, value); // Ensure the value has actually changed
     }
 
@@ -425,17 +423,7 @@ export class JSONSchemaForm extends LitElement {
             value,
             form: this,
             required: isRequired,
-
-            // Override native method
-            updated: function () {
-                let input = interactiveInput.shadowRoot.querySelector(".schema-input");
-                if (!input) input = interactiveInput.shadowRoot.querySelector("filesystem-selector");
-
-                if (input) {
-                    if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
-                        input.dispatchEvent(new Event("change"));
-                }
-            },
+            validateEmptyValue: this.validateEmptyValues
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
@@ -613,6 +601,7 @@ export class JSONSchemaForm extends LitElement {
                 }
             }
         } else {
+
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
                 errors.push({ message: `${name} is a required property.`, type: "error", missing: true }); // Throw at least a basic error if the property is required
@@ -765,7 +754,7 @@ export class JSONSchemaForm extends LitElement {
                 this.#nestedForms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
-                    results: results[name],
+                    results: { ...results[name] },
                     globals: this.globals?.[name],
 
                     onUpdate: (internalPath, value) => {

@@ -17,7 +17,8 @@ export class SettingsPage extends Page {
     }
 
     beforeSave = () => {
-        merge(this.form.resolved, global.data); 
+        merge(this.form.resolved, global.data, { objects: false }); 
+
         global.save(); // Save the changes, even if invalid on the form
         notyf.open({
             type: "success",
