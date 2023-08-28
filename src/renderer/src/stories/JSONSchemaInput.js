@@ -107,16 +107,13 @@ export class JSONSchemaInput extends LitElement {
         this.value = value; // Update the latest value
     };
 
+    #triggerValidation = (name, el, path) =>
+        this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
 
-
-
-    #triggerValidation = (name, el, path) => this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
-
-    updated () {
-        const el = this.getElement()
+    updated() {
+        const el = this.getElement();
         if (el) {
-            if (this.validateEmptyValue || (el.value ?? el.checked) !== "")
-            el.dispatchEvent(new Event("change"));
+            if (this.validateEmptyValue || (el.value ?? el.checked) !== "") el.dispatchEvent(new Event("change"));
         }
     }
 

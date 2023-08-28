@@ -10,7 +10,7 @@ const schema = {
         output_locations: projectGlobalSchema,
         DANDI: dandiGlobalSchema,
     },
-}
+};
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
@@ -20,11 +20,11 @@ import { notyf } from "../../../dependencies/globals.js";
 
 const setUndefinedIfNotDeclared = (schema, resolved) => {
     for (let prop in schema.properties) {
-        const propInfo = schema.properties[prop]
-        if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop])
-        else if (!(prop in resolved)) resolved[prop] = undefined
+        const propInfo = schema.properties[prop];
+        if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
+        else if (!(prop in resolved)) resolved[prop] = undefined;
     }
-}
+};
 
 export class SettingsPage extends Page {
     constructor(...args) {
@@ -32,21 +32,21 @@ export class SettingsPage extends Page {
     }
 
     beforeSave = () => {
-        const { resolved } = this.form
+        const { resolved } = this.form;
         for (let prop in schema.properties) {
-            const propInfo = schema.properties[prop]
-            const res = resolved[prop]
-            if (propInfo) setUndefinedIfNotDeclared(propInfo, res)
+            const propInfo = schema.properties[prop];
+            const res = resolved[prop];
+            if (propInfo) setUndefinedIfNotDeclared(propInfo, res);
         }
-        if (!('api_key' in resolved.DANDI)) resolved.DANDI.api_key = undefined
-        merge(this.form.resolved, global.data); 
+        if (!("api_key" in resolved.DANDI)) resolved.DANDI.api_key = undefined;
+        merge(this.form.resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
         notyf.open({
             type: "success",
             message: "Global settings changes saved",
         });
-    }
+    };
 
     render() {
         this.localState = merge(global.data, {});
@@ -54,8 +54,8 @@ export class SettingsPage extends Page {
         const button = new Button({
             label: "Save Changes",
             onClick: async () => {
-               if (!this.unsavedUpdates) return;
-               this.save()
+                if (!this.unsavedUpdates) return;
+                this.save();
             },
         });
 
@@ -64,7 +64,7 @@ export class SettingsPage extends Page {
             results: this.localState,
             schema,
             mode: "accordion",
-            onUpdate: () => this.unsavedUpdates = true,
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

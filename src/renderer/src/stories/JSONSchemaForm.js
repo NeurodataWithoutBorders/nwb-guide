@@ -242,7 +242,7 @@ export class JSONSchemaForm extends LitElement {
         const resolvedParent = path.reduce(reducer, this.resolved);
         const hasUpdate = resolvedParent[name] !== value;
 
-         // NOTE: Forms with nested forms will handle their own state updates
+        // NOTE: Forms with nested forms will handle their own state updates
         if (!value) {
             delete resultParent[name];
             delete resolvedParent[name];
@@ -250,7 +250,7 @@ export class JSONSchemaForm extends LitElement {
             resultParent[name] = value;
             resolvedParent[name] = value;
         }
-        
+
         if (hasUpdate) this.onUpdate(fullPath, value); // Ensure the value has actually changed
     }
 
@@ -399,7 +399,7 @@ export class JSONSchemaForm extends LitElement {
             value,
             form: this,
             required: isRequired,
-            validateEmptyValue: this.validateEmptyValues
+            validateEmptyValue: this.validateEmptyValues,
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
@@ -577,7 +577,6 @@ export class JSONSchemaForm extends LitElement {
                 }
             }
         } else {
-
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
                 errors.push({ message: `${name} is a required property.`, type: "error", missing: true }); // Throw at least a basic error if the property is required
@@ -696,9 +695,9 @@ export class JSONSchemaForm extends LitElement {
                 if (info2.properties) return -1;
                 else if (info.properties) return 1;
                 else return 0;
-            })
+            });
 
-            const finalSort = this.sort ? sorted.sort(this.sort) : sorted
+        const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
