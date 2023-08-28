@@ -16,22 +16,23 @@ export class SettingsPage extends Page {
         super(...args);
     }
 
+    beforeSave = () => {
+        merge(this.form.resolved, global.data); 
+        global.save(); // Save the changes, even if invalid on the form
+        notyf.open({
+            type: "success",
+            message: "Global settings changes saved",
+        });
+    }
+
     render() {
         this.localState = merge(global.data, {});
 
         const button = new Button({
             label: "Save Changes",
             onClick: async () => {
-                if (!this.unsavedUpdates) return;
-
-                // Save the changes, even if invalid on the form
-                merge(this.form.resolved, global.data);
-                global.save();
-                this.unsavedUpdates = false;
-                notyf.open({
-                    type: "success",
-                    message: "Global settings changes saved",
-                });
+               if (!this.unsavedUpdates) return;
+               this.save()
             },
         });
 
@@ -45,7 +46,7 @@ export class SettingsPage extends Page {
                 },
             },
             mode: "accordion",
-            onUpdate: () => (this.unsavedUpdates = true),
+            onUpdate: () => this.unsavedUpdates = true,
             onThrow,
         });
 

@@ -63,6 +63,8 @@ export class Page extends LitElement {
     to = async (transition) => {
         this.beforeTransition();
 
+        console.log('TO', transition, this.unsavedUpdates)
+
         // Otherwise note unsaved updates if present
         if (this.unsavedUpdates) {
             if (transition === 1) await this.save(); // Save before a single forward transition

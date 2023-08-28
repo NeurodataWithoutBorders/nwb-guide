@@ -94,12 +94,12 @@ export class Dashboard extends LitElement {
         this.main.classList.add("dash-app");
 
         this.sidebar = new Sidebar();
-        this.sidebar.onClick = (_, value) => this.setAttribute("activePage", value.info.id);
+        this.sidebar.onClick = (_, value) =>{
+            this.#active.to(value.info.id);
+        }
 
         this.subSidebar = new NavigationSidebar();
-        this.subSidebar.onClick = async (id) => {
-            this.#active.to(id);
-        };
+        this.subSidebar.onClick = async (id) => this.#active.to(id);
 
         this.pages = props.pages ?? {};
         this.name = props.name;
@@ -258,8 +258,7 @@ export class Dashboard extends LitElement {
                 else if (sign === -1) return this.setAttribute("activePage", (info.previous ?? info.parent).info.id); // Default to back in time
             }
 
-            if (transition in this.pages) this.sidebar.select(transition);
-            else this.setAttribute("activePage", transition);
+            this.setAttribute("activePage", transition);
         };
 
         this.main.updatePages = () => {

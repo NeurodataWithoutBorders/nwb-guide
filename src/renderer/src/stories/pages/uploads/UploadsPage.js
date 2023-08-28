@@ -62,6 +62,9 @@ export class UploadsPage extends Page {
         this.form = new JSONSchemaForm({
             results: globalState,
             schema: dandiSchema,
+            sort: ([ k1 ]) => {
+                if (k1 === 'nwb_folder_path') return -1
+            },
             onUpdate: ([id]) => {
                 if (id === folderPathKey) {
                     for (let key in dandiSchema.properties) {
@@ -72,7 +75,7 @@ export class UploadsPage extends Page {
 
                 global.save();
             },
-            onThrow,
+            onThrow
         });
 
         return html`

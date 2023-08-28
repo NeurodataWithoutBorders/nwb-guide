@@ -208,6 +208,8 @@ export class JSONSchemaForm extends LitElement {
         this.validateEmptyValues = props.validateEmptyValues ?? true;
 
         if (props.onInvalid) this.onInvalid = props.onInvalid;
+        if (props.sort) this.sort = props.sort;
+
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
         if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
@@ -215,7 +217,6 @@ export class JSONSchemaForm extends LitElement {
         if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
-        if (props.onUpdate) this.onUpdate = props.onUpdate;
 
         if (props.base) this.#base = props.base;
     }
@@ -262,14 +263,17 @@ export class JSONSchemaForm extends LitElement {
 
         const resultParent = path.reduce(reducer, this.results);
         const resolvedParent = path.reduce(reducer, this.resolved);
-
         const hasUpdate = resolvedParent[name] !== value;
-        if (!value) {
-            delete resultParent[name];
-            delete resolvedParent[name];
-        } else {
-            resultParent[name] = value;
-            resolvedParent[name] = value;
+
+         // NOTE: Forms with nested forms will handle their own state updates
+         if (this.#base.length === 0) {
+            if (!value) {
+                delete resultParent[name];
+                delete resolvedParent[name];
+            } else {
+                resultParent[name] = value;
+                resolvedParent[name] = value;
+            }
         }
 
         if (hasUpdate) this.onUpdate(fullPath, value); // Ensure the value has actually changed
@@ -529,7 +533,6 @@ export class JSONSchemaForm extends LitElement {
     onStatusChange = () => {};
     onThrow = () => {};
     renderTable = () => {};
-    onUpdate = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -728,9 +731,11 @@ export class JSONSchemaForm extends LitElement {
                 if (info2.properties) return -1;
                 else if (info.properties) return 1;
                 else return 0;
-            });
+            })
 
-        let rendered = sorted.map((entry) => {
+            const finalSort = this.sort ? sorted.sort(this.sort) : sorted
+
+        let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
 
             // Render linked properties
