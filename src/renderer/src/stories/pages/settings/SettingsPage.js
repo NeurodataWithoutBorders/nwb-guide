@@ -13,7 +13,7 @@ const schema = {
 }
 
 import { Button } from "../../Button.js";
-import { global } from "../../../progress.js";
+import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
