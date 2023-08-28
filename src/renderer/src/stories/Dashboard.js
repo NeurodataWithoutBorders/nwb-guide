@@ -95,9 +95,9 @@ export class Dashboard extends LitElement {
 
         this.sidebar = new Sidebar();
         this.sidebar.onClick = (_, value) => {
-            const id = value.info.id
+            const id = value.info.id;
             if (this.#active) this.#active.to(id);
-            else this.setAttribute('activePage', id)
+            else this.setAttribute("activePage", id);
         };
 
         this.subSidebar = new NavigationSidebar();
