@@ -24,7 +24,7 @@ export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
         const targetV = target[k];
         if (mergeOpts.arrays && Array.isArray(v) && Array.isArray(targetV))
             target[k] = [...targetV, ...v]; // Merge array entries together
-        else if (mergeOpts.objects && (isObject(v) || isObject(targetV))) target[k] = merge(v, target[k]);
+        else if (isObject(v) || isObject(targetV)) target[k] = merge(v, target[k]);
         else target[k] = v; // Replace primitive values
     }
 
