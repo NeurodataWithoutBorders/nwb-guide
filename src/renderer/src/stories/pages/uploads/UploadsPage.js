@@ -52,7 +52,7 @@ export class UploadsPage extends Page {
                 if (results)
                     notyf.open({
                         type: "success",
-                        message: `${info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+                        message: `${global.data.uploads.nwb_folder_path} successfully uploaded to Dandiset ${global.data.uploads.dandiset_id}`,
                     });
             },
         });
