@@ -10,7 +10,7 @@ import { path } from "../../electron";
 export function getSharedPath(array) {
     array = array.map((str) => str.replace(/\\/g, "/")); // Convert to Mac-style path
     const mapped = array.map((str) => str.split("/"));
-    const shared = mapped.shift();
+    let shared = mapped.shift();
     mapped.forEach((arr, i) => {
         for (let j in arr) {
             if (arr[j] !== shared[j]) {
