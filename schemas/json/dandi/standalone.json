@@ -1,0 +1,9 @@
+{
+    "properties": {
+        "nwb_folder_path": {
+            "type": "string",
+            "format": "directory"
+        }
+    },
+    "required": ["nwb_folder_path"]
+}

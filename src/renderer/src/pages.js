@@ -20,6 +20,11 @@ import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
 import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
 import tutorialIcon from "./stories/assets/exploration.svg?raw";
+import uploadIcon from "./stories/assets/dandi.svg?raw";
+import settingsIcon from "./stories/assets/settings.svg?raw";
+
+import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
+import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -158,6 +163,10 @@ const pages = {
             }),
         },
     }),
+    uploads: new UploadsPage({
+        label: "Uploads",
+        icon: uploadIcon,
+    }),
     tutorial: new TutorialPage({
         label: "Tutorial",
         icon: tutorialIcon,
@@ -169,6 +178,11 @@ const pages = {
     contact: new ContactPage({
         label: "Contact Us",
         icon: contactIcon,
+    }),
+    settings: new SettingsPage({
+        label: "Settings",
+        icon: settingsIcon,
+        group: "bottom",
     }),
 };
 

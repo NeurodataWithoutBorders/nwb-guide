@@ -4,6 +4,9 @@ import { Page } from "../../Page.js";
 import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
+import Swal from "sweetalert2";
+import dandiUploadSchema from "../../../../../../../schemas/json/dandi/upload.json";
+import { uploadToDandi } from "../../uploads/UploadsPage.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -14,8 +17,9 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
+        const isNewDandiset = globalState.upload.dandiset_id !== this.localState.dandiset_id;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
-        delete globalState.upload.results; // Clear the preview results
+        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
     };
 
     footer = {
@@ -27,13 +31,24 @@ export class GuidedUploadPage extends Page {
             const globalState = this.info.globalState;
             const globalUploadInfo = globalState.upload;
 
-            const info = { ...globalUploadInfo.info };
-            info.project = globalState.project.name;
-            info.staging = globalUploadInfo.info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
+            // Catch if dandiset is already uploaded
+            if ("results" in globalUploadInfo) {
+                const result = await Swal.fire({
+                    title: "This pipeline has already uploaded to DANDI",
+                    html: "Would you like to reupload the lastest files?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Continue with Reupload",
+                    cancelButtonText: "Skip Upload",
+                });
 
-            const results = await run("upload", info, { title: "Uploading to DANDI" }).catch((e) => {
-                this.notify(e.message, "error");
-                throw e;
+                if (!result || !result.isConfirmed) return this.to(1);
+            }
+
+            const results = await uploadToDandi.call(this, {
+                ...globalUploadInfo.info,
+                project: globalState.project.name,
             });
 
             globalUploadInfo.results = results; // Save the preview results
@@ -47,33 +62,9 @@ export class GuidedUploadPage extends Page {
     render() {
         const state = (this.localState = merge(this.info.globalState.upload ?? { info: {}, results: null }, {}));
 
-        const schema = {
-            properties: {
-                api_key: {
-                    type: "string",
-                    format: "password",
-                },
-                dandiset_id: {
-                    type: "string",
-                },
-                cleanup: {
-                    type: "boolean",
-                    default: false,
-                },
-            },
-            required: ["api_key", "dandiset_id"],
-        };
-
         this.form = new JSONSchemaForm({
-            schema,
+            schema: dandiUploadSchema,
             results: state.info,
-            // dialogType: 'showSaveDialog',
-            dialogOptions: {
-                properties: ["createDirectory"],
-                // filters: [
-                //   { name: 'NWB File', extensions: ['nwb'] }
-                // ]
-            },
             onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
