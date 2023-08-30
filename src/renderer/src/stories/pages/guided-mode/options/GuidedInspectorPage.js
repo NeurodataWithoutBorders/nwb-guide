@@ -12,6 +12,7 @@ import { run } from "./utils.js";
 import { InspectorList } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
+import { path as nodePath } from "../../../../electron";
 
 const filter = (list, toFilter) => {
     return list.filter((o) => {
@@ -110,7 +111,7 @@ export class GuidedInspectorPage extends Page {
                 Object.keys(instances).forEach((subLabel) => {
                     instances[subLabel] = {
                         ["All Files"]: () => {
-                            const subItems = filter(items, { file_path: `${subLabel}/${subLabel}_ses-` });
+                            const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
                             const path = getSharedPath(subItems.map((o) => o.file_path));
                             return new InspectorList({ items: truncateFilePaths(subItems, path) });
                         },
