@@ -329,6 +329,7 @@ def convert_to_nwb(info: dict) -> str:
 
     return dict(file=str(resolved_output_path))
 
+
 def upload_folder_to_dandi(
     dandiset_id: str,
     api_key: str,
@@ -346,6 +347,7 @@ def upload_folder_to_dandi(
         staging=staging,
         cleanup=cleanup,
     )
+
 
 def upload_to_dandi(
     dandiset_id: str,
