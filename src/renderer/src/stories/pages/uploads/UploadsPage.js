@@ -29,7 +29,7 @@ export async function uploadToDandi(info) {
     info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
     info.api_key = global.data.DANDI.api_key;
 
-    return await run("upload", info, { title: "Uploading to DANDI" }).catch((e) => {
+    return await run("upload/folder", info, { title: "Uploading to DANDI" }).catch((e) => {
         this.notify(e.message, "error");
         throw e;
     });
@@ -69,7 +69,7 @@ export class UploadsPage extends Page {
                 if (id === folderPathKey) {
                     for (let key in dandiSchema.properties) {
                         const input = this.form.getInput([key]);
-                        if (key !== folderPathKey) input.updateData(""); // Clear the results of the form
+                        if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
                     }
                 }
 

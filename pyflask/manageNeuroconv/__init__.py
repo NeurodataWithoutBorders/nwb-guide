@@ -6,6 +6,7 @@ from .manage_neuroconv import (
     convert_to_nwb,
     validate_metadata,
     upload_to_dandi,
+    upload_folder_to_dandi,
     listen_to_neuroconv_events,
     generate_dataset,
 )

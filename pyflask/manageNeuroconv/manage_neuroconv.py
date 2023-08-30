@@ -329,13 +329,10 @@ def convert_to_nwb(info: dict) -> str:
 
     return dict(file=str(resolved_output_path))
 
-
-def upload_to_dandi(
+def upload_folder_to_dandi(
     dandiset_id: str,
-    # Can specify one or the other
-    project: Optional[str],
-    nwb_folder_path: Optional[str],
     api_key: str,
+    nwb_folder_path: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
 ):
@@ -345,9 +342,25 @@ def upload_to_dandi(
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
-        nwb_folder_path=Path(nwb_folder_path)
-        if nwb_folder_path
-        else CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
+        nwb_folder_path=Path(nwb_folder_path),
+        staging=staging,
+        cleanup=cleanup,
+    )
+
+def upload_to_dandi(
+    dandiset_id: str,
+    api_key: str,
+    project: Optional[str] = None,
+    staging: Optional[bool] = None,  # Override default staging=True
+    cleanup: Optional[bool] = None,
+):
+    from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+    os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+
+    return automatic_dandi_upload(
+        dandiset_id=dandiset_id,
+        nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
     )

@@ -122,6 +122,20 @@ class Upload(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
+@neuroconv_api.route("/upload/folder")
+class Upload(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            from manageNeuroconv import upload_folder_to_dandi
+
+            return upload_folder_to_dandi(**neuroconv_api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
+
 @neuroconv_api.route("/inspect_file")
 class InspectNWBFile(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
