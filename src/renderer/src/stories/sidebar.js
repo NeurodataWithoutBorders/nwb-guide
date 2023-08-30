@@ -84,7 +84,7 @@ export class Sidebar extends LitElement {
         if (this.nav) {
             this.nav.classList.remove("active");
             this.toggle.classList.remove("active");
-            this.style.display = "block";
+            this.style.display = "";
         }
     };
 
@@ -154,22 +154,36 @@ export class Sidebar extends LitElement {
                         : ""
                 }
             </div>
-            <!-- Sidebar Links -->
-            <ul class="list-unstyled components">
-              ${Object.entries(this.pages).map(([id, page]) => {
-                  const info = page.info ?? {};
-                  let label = info.label ?? id;
-                  const icon = info.icon ?? "";
-                  const a = document.createElement("a");
-                  a.setAttribute("data-id", id);
-                  a.href = "#";
-                  a.innerHTML = `
-                  ${icon}
-                  ${label}
-                `;
-                  return html`<li @click="${() => this.#onClick(id)}">${a}</li>`;
-              })}
-            </ul>
+            <div class="sidebar-body">
+                <!-- Sidebar Links -->
+                ${(() => {
+                    const ul = document.createElement("ul");
+                    ul.classList.add("list-unstyled");
+                    ul.classList.add("components");
+
+                    const groups = {};
+                    Object.entries(this.pages).forEach(([id, page]) => {
+                        const info = page.info ?? {};
+                        const label = info.label ?? id;
+                        const icon = info.icon ?? "";
+                        const a = document.createElement("a");
+                        a.setAttribute("data-id", id);
+                        a.href = "#";
+                        a.innerHTML = `${icon} ${label} `;
+                        a.onclick = () => this.#onClick(id);
+
+                        const li = document.createElement("li");
+                        li.append(a);
+
+                        const parent = info.group
+                            ? groups[info.group] ?? (groups[info.group] = document.createElement("div"))
+                            : ul;
+                        parent.append(a);
+                    });
+
+                    return [ul, ...Object.values(groups)];
+                })()}
+            </div>
             <div>
             ${
                 !logoNoName && this.logo

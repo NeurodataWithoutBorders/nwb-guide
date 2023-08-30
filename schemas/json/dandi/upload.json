@@ -1,0 +1,12 @@
+{
+    "properties": {
+        "dandiset_id": {
+            "type": "string"
+        },
+        "cleanup": {
+            "type": "boolean",
+            "default": false
+        }
+    },
+    "required": ["dandiset_id"]
+}

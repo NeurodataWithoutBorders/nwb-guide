@@ -185,6 +185,8 @@ export class JSONSchemaForm extends LitElement {
         this.validateEmptyValues = props.validateEmptyValues ?? true;
 
         if (props.onInvalid) this.onInvalid = props.onInvalid;
+        if (props.sort) this.sort = props.sort;
+
         if (props.validateOnChange) this.validateOnChange = props.validateOnChange;
         if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
@@ -192,7 +194,6 @@ export class JSONSchemaForm extends LitElement {
         if (props.renderTable) this.renderTable = props.renderTable;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
-        if (props.onUpdate) this.onUpdate = props.onUpdate;
 
         if (props.base) this.#base = props.base;
     }
@@ -239,9 +240,9 @@ export class JSONSchemaForm extends LitElement {
 
         const resultParent = path.reduce(reducer, this.results);
         const resolvedParent = path.reduce(reducer, this.resolved);
+        const hasUpdate = resolvedParent[name] !== value;
 
-        if (resolvedParent[name] !== value) this.onUpdate(fullPath, value); // Ensure the value has actually changed
-
+        // NOTE: Forms with nested forms will handle their own state updates
         if (!value) {
             delete resultParent[name];
             delete resolvedParent[name];
@@ -249,6 +250,8 @@ export class JSONSchemaForm extends LitElement {
             resultParent[name] = value;
             resolvedParent[name] = value;
         }
+
+        if (hasUpdate) this.onUpdate(fullPath, value); // Ensure the value has actually changed
     }
 
     #addMessage = (name, message, type) => {
@@ -345,7 +348,7 @@ export class JSONSchemaForm extends LitElement {
         const element = this.shadowRoot
             .querySelector(`#${fullPath.join("-")}`)
             .querySelector("jsonschema-input")
-            .shadowRoot.querySelector(".guided--input");
+            .getElement();
         const isValid = await this.triggerValidation(name, element, path, false);
         if (!isValid) return true;
     };
@@ -392,22 +395,12 @@ export class JSONSchemaForm extends LitElement {
 
         const interactiveInput = new JSONSchemaInput({
             info,
-            parent,
             path: fullPath,
             value,
             form: this,
             required: isRequired,
+            validateEmptyValue: this.validateEmptyValues,
         });
-
-        interactiveInput.updated = () => {
-            let input = interactiveInput.shadowRoot.querySelector(".schema-input");
-            if (!input) input = interactiveInput.shadowRoot.querySelector("filesystem-selector");
-
-            if (input) {
-                if (this.validateEmptyValues || (input.value ?? input.checked) !== "")
-                    input.dispatchEvent(new Event("change"));
-            }
-        };
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
@@ -504,7 +497,6 @@ export class JSONSchemaForm extends LitElement {
     onStatusChange = () => {};
     onThrow = () => {};
     renderTable = () => {};
-    onUpdate = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -705,7 +697,9 @@ export class JSONSchemaForm extends LitElement {
                 else return 0;
             });
 
-        let rendered = sorted.map((entry) => {
+        const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
+
+        let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
 
             // Render linked properties
@@ -735,7 +729,7 @@ export class JSONSchemaForm extends LitElement {
                 this.#nestedForms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
-                    results: results[name],
+                    results: { ...results[name] },
                     globals: this.globals?.[name],
 
                     onUpdate: (internalPath, value) => {

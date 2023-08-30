@@ -14,11 +14,17 @@ import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUplo
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./stories/Dashboard";
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
+import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedInspectorPage";
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
 import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
 import tutorialIcon from "./stories/assets/exploration.svg?raw";
+import uploadIcon from "./stories/assets/dandi.svg?raw";
+import settingsIcon from "./stories/assets/settings.svg?raw";
+
+import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
+import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -132,23 +138,34 @@ const pages = {
                 section: sections[1],
             }),
 
-            preview: new GuidedStubPreviewPage({
-                title: "Conversion Preview",
-                label: "Preview conversion",
+            inspect: new GuidedInspectorPage({
+                title: "Inspector Report",
+                label: "Inspect files",
                 section: sections[2],
             }),
+
+            preview: new GuidedStubPreviewPage({
+                title: "Conversion Preview",
+                label: "Preview files",
+                section: sections[2],
+            }),
+
             upload: new GuidedUploadPage({
                 title: "DANDI Upload Options",
-                label: "DANDI upload",
-                section: sections[2],
+                label: "Upload to DANDI",
+                section: sections[3],
             }),
 
             review: new GuidedResultsPage({
                 title: "Conversion Review",
-                label: "Review results",
+                label: "View conversion report",
                 section: sections[3],
             }),
         },
+    }),
+    uploads: new UploadsPage({
+        label: "Uploads",
+        icon: uploadIcon,
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",
@@ -161,6 +178,11 @@ const pages = {
     contact: new ContactPage({
         label: "Contact Us",
         icon: contactIcon,
+    }),
+    settings: new SettingsPage({
+        label: "Settings",
+        icon: settingsIcon,
+        group: "bottom",
     }),
 };
 
