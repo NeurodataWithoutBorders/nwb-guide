@@ -54,6 +54,10 @@ export class UploadsPage extends Page {
                         type: "success",
                         message: `${global.data.uploads.nwb_folder_path} successfully uploaded to Dandiset ${global.data.uploads.dandiset_id}`,
                     });
+
+                    global.data.uploads = {}
+                    global.save()
+                    this.requestUpdate()
             },
         });
 
