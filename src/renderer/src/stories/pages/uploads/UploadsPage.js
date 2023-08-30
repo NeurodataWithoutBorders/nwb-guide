@@ -15,7 +15,7 @@ import { notyf } from "../../../dependencies/globals.js";
 import Swal from "sweetalert2";
 
 export async function uploadToDandi(info) {
-    if (!("api_key" in (global.data.DANDI ?? {}))) {
+    if (!global.data.DANDI?.api_key) {
         await Swal.fire({
             title: "Your DANDI API key is not configured.",
             html: "Edit your settings to include this value.",
@@ -29,7 +29,7 @@ export async function uploadToDandi(info) {
     info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
     info.api_key = global.data.DANDI.api_key;
 
-    return await run("upload", info, { title: "Uploading to DANDI" }).catch((e) => {
+    return await run("upload/folder", info, { title: "Uploading to DANDI" }).catch((e) => {
         this.notify(e.message, "error");
         throw e;
     });
@@ -52,8 +52,12 @@ export class UploadsPage extends Page {
                 if (results)
                     notyf.open({
                         type: "success",
-                        message: `${info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+                        message: `${global.data.uploads.nwb_folder_path} successfully uploaded to Dandiset ${global.data.uploads.dandiset_id}`,
                     });
+
+                global.data.uploads = {};
+                global.save();
+                this.requestUpdate();
             },
         });
 
@@ -62,11 +66,14 @@ export class UploadsPage extends Page {
         this.form = new JSONSchemaForm({
             results: globalState,
             schema: dandiSchema,
+            sort: ([k1]) => {
+                if (k1 === "nwb_folder_path") return -1;
+            },
             onUpdate: ([id]) => {
                 if (id === folderPathKey) {
                     for (let key in dandiSchema.properties) {
                         const input = this.form.getInput([key]);
-                        if (key !== folderPathKey) input.updateData(""); // Clear the results of the form
+                        if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
                     }
                 }
 

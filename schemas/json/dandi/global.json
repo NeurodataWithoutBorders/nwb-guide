@@ -1,0 +1,9 @@
+{
+    "properties": {
+        "api_key": {
+            "type": "string",
+            "format": "password"
+        }
+    },
+    "required": ["api_key"]
+}

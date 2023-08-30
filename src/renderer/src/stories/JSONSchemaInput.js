@@ -87,30 +87,38 @@ export class JSONSchemaInput extends LitElement {
     // onUpdate = () => {}
     // onValidate = () => {}
 
-    getElement = () => {
-        const el = this.shadowRoot.querySelector("input, select, textarea");
-        if (el) return el;
-        return this.shadowRoot.querySelector("filesystem-selector");
-    };
-
-    updateData = (value) => {
+    updateData(value) {
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
-        this.#triggerValidation(name, this.getElement(), path);
+        const el = this.getElement();
+        this.#triggerValidation(name, el, path);
         this.#updateData(fullPath, value);
+        if (el.type === "checkbox") el.checked = value;
+        else el.value = value;
+
         return true;
-    };
+    }
+
+    getElement = () => this.shadowRoot.querySelector(".schema-input");
 
     #updateData = (path, value) => {
-        this.onUpdate ? this.onUpdate(value) : this.form.updateData(path, value);
+        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(path, value) : "";
+        this.value = value; // Update the latest value
     };
 
     #triggerValidation = (name, el, path) =>
-        this.onValidate ? this.onValidate() : this.form.triggerValidation(name, el, path);
+        this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
+
+    updated() {
+        const el = this.getElement();
+        if (el) {
+            if (this.validateEmptyValue || (el.value ?? el.checked) !== "") el.dispatchEvent(new Event("change"));
+        }
+    }
 
     render() {
-        const { validateOnChange, info, parent, path: fullPath } = this;
+        const { validateOnChange, info, path: fullPath } = this;
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
@@ -219,7 +227,7 @@ export class JSONSchemaInput extends LitElement {
                     @input=${(ev) => this.#updateData(fullPath, info.enum[ev.target.value])}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
                 >
-                    <option disabled selected value>Select an option</option>
+                    <option disabled selected value>${info.placeholder ?? "Select an option"}</option>
                     ${info.enum.map(
                         (item, i) => html`<option value=${i} ?selected=${this.value === item}>${item}</option>`
                     )}
@@ -248,6 +256,7 @@ export class JSONSchemaInput extends LitElement {
                     dialogOptions: this.form.dialogOptions,
                     dialogType: this.form.dialogType,
                 });
+                el.classList.add("schema-input");
                 return el;
             }
 

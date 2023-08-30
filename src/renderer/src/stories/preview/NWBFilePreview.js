@@ -23,6 +23,24 @@ export function getSharedPath(array) {
     return path.normalize(shared.join("/")); // Convert back to OS-specific path
 }
 
+export function truncateFilePaths(items, basepath) {
+    return items.map((o) => {
+        o = { ...o };
+        o.file_path = o.file_path
+            .replace(`${basepath}/`, "") // Mac
+            .replace(`${basepath}\\`, ""); // Windows
+        return o;
+    });
+}
+
+export const removeFilePaths = (arr) => {
+    return arr.map((o) => {
+        const copy = { ...o };
+        delete copy.file_path;
+        return copy;
+    });
+};
+
 class NWBPreviewInstance extends LitElement {
     constructor({ file }, project) {
         super();
@@ -61,10 +79,11 @@ export class NWBFilePreview extends LitElement {
         `;
     }
 
-    constructor({ files = {}, project }) {
+    constructor({ files = {}, project, inspect = false }) {
         super();
         this.project = project;
         this.files = files;
+        this.inspect = inspect;
     }
 
     createInstance = ({ subject, session, info }) => {
@@ -99,49 +118,44 @@ export class NWBFilePreview extends LitElement {
                             return acc;
                         }, {});
 
-                        return new InstanceManager({
-                            header: "Stub Files",
-                            instances,
-                        });
+                        return new InstanceManager({ instances });
                     }
                 })()}
             </div>
-            <div style="padding-left: 20px; display: flex; flex-direction: column;">
-                <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
-                ${until(
-                    (async () => {
-                        const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
+            ${this.inspect
+                ? html`<div style="padding-left: 20px; display: flex; flex-direction: column;">
+                      <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
+                      ${until(
+                          (async () => {
+                              const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
 
-                        const title = "Inspecting your file";
+                              const title = "Inspecting your file";
 
-                        const items = onlyFirstFile
-                            ? (
-                                  await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title })
-                              ).map((o) => {
-                                  delete o.file_path;
-                                  return o;
-                              }) // Inspect the first file
-                            : await (async () => {
-                                  const path = getSharedPath(fileArr.map((o) => o.info.file));
-                                  const report = await run("inspect_folder", { path, ...opts }, { title: title + "s" });
-                                  return report.map((o) => {
-                                      o.file_path = o.file_path
-                                          .replace(`${path}/`, "") // Mac
-                                          .replace(`${path}\\`, ""); // Windows
-                                      return o;
-                                  });
-                              })();
+                              const items = onlyFirstFile
+                                  ? removeFilePaths(
+                                        await run(
+                                            "inspect_file",
+                                            { nwbfile_path: fileArr[0].info.file, ...opts },
+                                            { title }
+                                        )
+                                    ) // Inspect the first file
+                                  : await (async () =>
+                                        truncateFilePaths(
+                                            await run("inspect_folder", { path, ...opts }, { title: title + "s" }),
+                                            getSharedPath(fileArr.map((o) => o.info.file))
+                                        ))();
 
-                        const list = new InspectorList({
-                            items: items,
-                            listStyles: { maxWidth: "350px" },
-                        });
-                        list.style.padding = "10px";
-                        return list;
-                    })(),
-                    html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
-                )}
-            </div>
+                              const list = new InspectorList({
+                                  items: items,
+                                  listStyles: { maxWidth: "350px" },
+                              });
+                              list.style.padding = "10px";
+                              return list;
+                          })(),
+                          html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
+                      )}
+                  </div>`
+                : ""}
         </div>`;
     }
 }
