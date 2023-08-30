@@ -15,7 +15,7 @@ import { notyf } from "../../../dependencies/globals.js";
 import Swal from "sweetalert2";
 
 export async function uploadToDandi(info) {
-    if (!("api_key" in (global.data.DANDI ?? {}))) {
+    if (!global.data.DANDI?.api_key) {
         await Swal.fire({
             title: "Your DANDI API key is not configured.",
             html: "Edit your settings to include this value.",
