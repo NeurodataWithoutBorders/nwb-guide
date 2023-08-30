@@ -55,6 +55,7 @@ export class SettingsPage extends Page {
             label: "Save Changes",
             onClick: async () => {
                 if (!this.unsavedUpdates) return;
+                await this.form.validate()
                 this.save();
             },
         });
