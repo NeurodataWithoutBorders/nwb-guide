@@ -8,7 +8,7 @@ import { electron } from "../../../../electron/index.js";
 import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
 const { shell } = electron;
 
-const getStubArray = (stubs) =>
+export const getStubArray = (stubs) =>
     Object.values(stubs)
         .map((o) => Object.values(o))
         .flat();
@@ -19,14 +19,14 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        subtitle: () => `${getStubArray(this.info.globalState.stubs).length} Files`,
+        subtitle: () => `${getStubArray(this.info.globalState.preview.stubs).length} Files`,
         controls: () =>
             html`<nwb-button
                 size="small"
                 @click=${() =>
                     shell
                         ? shell.showItemInFolder(
-                              getSharedPath(getStubArray(this.info.globalState.stubs).map((o) => o.file))
+                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((o) => o.file))
                           )
                         : ""}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
@@ -47,10 +47,10 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
-        const { stubs, project } = this.info.globalState;
+        const { preview, project } = this.info.globalState;
 
-        return stubs
-            ? new NWBFilePreview({ project: project.name, files: stubs })
+        return preview.stubs
+            ? new NWBFilePreview({ project: project.name, files: preview.stubs })
             : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }

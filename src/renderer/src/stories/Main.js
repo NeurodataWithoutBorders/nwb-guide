@@ -141,7 +141,7 @@ export class Main extends LitElement {
             <main id="content" class="js-content" style="overflow: hidden; display: flex;">
                 <section class="section js-section u-category-windows">
                     ${title
-                        ? html`<div>
+                        ? html`<div style="position: sticky; top: 0; left: 0; background: white; z-index: 1;">
                               <div
                                   style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
                               >
@@ -151,12 +151,11 @@ export class Main extends LitElement {
                                   </div>
                                   <div style="padding-left: 25px">${controls}</div>
                               </div>
-                              <hr />
+                              <hr style="margin-bottom: 0;" />
                           </div>`
                         : ""}
 
-                    <div style="height: 10px;"></div>
-                    ${page}
+                    <div style="padding-top: 10px; height: 100%; width: 100%;">${page}</div>
                 </section>
             </main>
             ${footerEl}

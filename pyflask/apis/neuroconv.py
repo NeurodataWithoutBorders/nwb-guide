@@ -185,6 +185,8 @@ class InspectNWBFolder(Resource):
                 )
             )
 
+            # messages = organize_messages(messages, levels=["importance", "message"])
+
             return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
         except Exception as e:
