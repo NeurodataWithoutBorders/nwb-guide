@@ -29,6 +29,16 @@ const aggregateMessages = (items) => {
 };
 
 export class InspectorList extends List {
+
+    static get styles() {
+
+        return [super.styles, css`
+            :host {
+                display: block;
+            }
+        }`]
+    }
+
     constructor({ items, listStyles }) {
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
@@ -54,6 +64,7 @@ customElements.get("inspector-list") || customElements.define("inspector-list", 
 export class InspectorListItem extends LitElement {
     static get styles() {
         return css`
+        
             :host {
                 display: block;
                 background: gainsboro;
