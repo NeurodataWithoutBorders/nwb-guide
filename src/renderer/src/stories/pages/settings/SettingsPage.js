@@ -18,7 +18,7 @@ import { merge } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
 
-const apiRegex = /^[a-f0-9]{40}$/
+const apiRegex = /^[a-f0-9]{40}$/;
 
 const setUndefinedIfNotDeclared = (schema, resolved) => {
     for (let prop in schema.properties) {
@@ -68,9 +68,9 @@ export class SettingsPage extends Page {
             mode: "accordion",
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: (name, parent) => {
-                const value = parent[name]
-                if (name === 'api_key') return apiRegex.test(value)
-                return true
+                const value = parent[name];
+                if (name === "api_key") return apiRegex.test(value);
+                return true;
             },
             onThrow,
         });

@@ -588,10 +588,14 @@ export class JSONSchemaForm extends LitElement {
         this.#clearMessages(fullPath, "warnings");
 
         const isFunction = typeof valid === "function";
-        const isValid = (valid === true || valid == undefined || isFunction || (Array.isArray(valid) && !valid.find((o) => o.type === "error")))
+        const isValid =
+            valid === true ||
+            valid == undefined ||
+            isFunction ||
+            (Array.isArray(valid) && !valid.find((o) => o.type === "error"));
 
-        if (!isValid && errors.length === 0) errors.push({ type: 'error', message: 'Invalid value detected'})
-        
+        if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
+
         // Track errors and warnings
         this.#nErrors += errors.length;
         this.#nWarnings += warnings.length;
