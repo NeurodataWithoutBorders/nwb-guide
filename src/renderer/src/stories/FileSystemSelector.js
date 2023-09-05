@@ -55,8 +55,8 @@ export class FilesystemSelector extends LitElement {
         super();
         if (props.onSelect) this.onSelect = props.onSelect;
         if (props.onChange) this.onChange = props.onChange;
-        if (props.onThrow) this.onThrow = props.onThrow
-        this.multiple = props.multiple
+        if (props.onThrow) this.onThrow = props.onThrow;
+        this.multiple = props.multiple;
         this.type = props.type ?? "file";
         this.value = props.value ?? "";
         this.dialogOptions = props.dialogOptions ?? {};
@@ -69,10 +69,10 @@ export class FilesystemSelector extends LitElement {
     onSelect = () => {};
     onChange = () => {};
     #onThrow = (title, message) => {
-        message = message ? `<h5 style="margin-bottom: 0;">${title}</h5> <small>${message}</small>` : title
-        if (this.onThrow) this.onThrow(message)
+        message = message ? `<h5 style="margin-bottom: 0;">${title}</h5> <small>${message}</small>` : title;
+        if (this.onThrow) this.onThrow(message);
         throw new Error(message);
-    }
+    };
 
     display = document.createElement("small");
 
@@ -84,8 +84,9 @@ export class FilesystemSelector extends LitElement {
             ...(options.properties ?? []),
         ];
 
-        if (this.multiple && !options.properties.includes('multiSelections')) options.properties.push('multiSelections')
-        
+        if (this.multiple && !options.properties.includes("multiSelections"))
+            options.properties.push("multiSelections");
+
         this.classList.add("active");
         const result = await dialog[this.dialogType](options);
 
@@ -96,27 +97,32 @@ export class FilesystemSelector extends LitElement {
 
     #onCancel = () => {
         this.#onThrow(`No ${this.type} selected`, "The request was cancelled by the user");
-    }
+    };
 
     #checkType = (value) => {
-        const isLikelyFile = value.split('.').length !== 1
-        if ((this.type === 'directory' && isLikelyFile) || (this.type === 'file' && !isLikelyFile)) this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`)
-    }
+        const isLikelyFile = value.split(".").length !== 1;
+        if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
+            this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
+    };
 
     #handleFiles = async (pathOrPaths) => {
-        if (!pathOrPaths) this.#onThrow("No paths detected", `Unable to parse ${this.type} path${this.multiple ? 's' : ''}`);
+        if (!pathOrPaths)
+            this.#onThrow("No paths detected", `Unable to parse ${this.type} path${this.multiple ? "s" : ""}`);
 
-        if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType)
-        else this.#checkType(pathOrPaths)
+        if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
+        else this.#checkType(pathOrPaths);
 
-        let resolvedValue = pathOrPaths
+        let resolvedValue = pathOrPaths;
         if (Array.isArray(resolvedValue) && !this.multiple) {
-            if (resolvedValue.length > 1) this.#onThrow(`Too many ${this.type === 'directory' ? 'directories' : 'files'} detected`, `This selector will only accept one.`);
-            resolvedValue = resolvedValue[0]
+            if (resolvedValue.length > 1)
+                this.#onThrow(
+                    `Too many ${this.type === "directory" ? "directories" : "files"} detected`,
+                    `This selector will only accept one.`
+                );
+            resolvedValue = resolvedValue[0];
         }
 
-
-        if (this.multiple && !Array.isArray(resolvedValue)) resolvedValue = []
+        if (this.multiple && !Array.isArray(resolvedValue)) resolvedValue = [];
 
         this.value = resolvedValue;
         this.onSelect(this.value);
@@ -125,42 +131,39 @@ export class FilesystemSelector extends LitElement {
     };
 
     render() {
-
         let resolved, isUpdated;
 
-        const isArray = Array.isArray(this.value)
-        const len = isArray ? this.value.length : 0
+        const isArray = Array.isArray(this.value);
+        const len = isArray ? this.value.length : 0;
 
         if (isArray) {
-            resolved = this.value.map(str => str.replaceAll("\\", "/"));
-            isUpdated = JSON.stringify(resolved) !== JSON.stringify(this.value)
+            resolved = this.value.map((str) => str.replaceAll("\\", "/"));
+            isUpdated = JSON.stringify(resolved) !== JSON.stringify(this.value);
         } else {
             resolved = this.value.replaceAll("\\", "/");
-            isUpdated = resolved !== this.value
+            isUpdated = resolved !== this.value;
         }
 
         if (isUpdated) {
             this.value = resolved;
             this.#handleFiles(this.value); // Notify of the change to the separators
-            return
+            return;
         }
 
         return html`
             <button
-            title=${isArray ? this.value.map((v, i) => `${i+1}. ${v}`).join('\n') : this.value}
+                title=${isArray ? this.value.map((v, i) => `${i + 1}. ${v}`).join("\n") : this.value}
                 @click=${async () => {
                     if (dialog) {
                         const file = await this.#useElectronDialog(this.type);
                         const path = file.filePath ?? file.filePaths?.[0];
                         this.#handleFiles(path);
                     } else {
-                        let handles =
-                            await (this.type === "directory"
-                                ? window.showDirectoryPicker
-                                : window.showOpenFilePicker)({ multiple: this.multiple }).catch(e => this.#onCancel()); // Call using the same options
-                        
-                        
-                        const result = Array.isArray(handles) ? handles.map(o => o.name) : handles.name
+                        let handles = await (this.type === "directory"
+                            ? window.showDirectoryPicker
+                            : window.showOpenFilePicker)({ multiple: this.multiple }).catch((e) => this.#onCancel()); // Call using the same options
+
+                        const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
                         this.#handleFiles(result);
                     }
                 }}
@@ -180,8 +183,16 @@ export class FilesystemSelector extends LitElement {
                     this.#handleFiles(pathArr);
                 }}
             >
-                ${(isArray ? (len > 1 ? `${this.value[0]} and ${len - 1} other${len > 2 ? 's' : ''}` : this.value[0] ) : this.value) || `Drop a ${this.type} here, or click to choose a ${this.type}`}
-                ${dialog ? "" : html`<br /><small>Cannot get full ${this.type} path${this.multiple ? 's' : ''} on web distribution</small>`}
+                ${(isArray
+                    ? len > 1
+                        ? `${this.value[0]} and ${len - 1} other${len > 2 ? "s" : ""}`
+                        : this.value[0]
+                    : this.value) || `Drop a ${this.type} here, or click to choose a ${this.type}`}
+                ${dialog
+                    ? ""
+                    : html`<br /><small
+                              >Cannot get full ${this.type} path${this.multiple ? "s" : ""} on web distribution</small
+                          >`}
             </button>
         `;
     }
