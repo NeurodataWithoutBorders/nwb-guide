@@ -587,6 +587,11 @@ export class JSONSchemaForm extends LitElement {
         this.#clearMessages(fullPath, "errors");
         this.#clearMessages(fullPath, "warnings");
 
+        const isFunction = typeof valid === "function";
+        const isValid = (valid === true || valid == undefined || isFunction || (Array.isArray(valid) && !valid.find((o) => o.type === "error")))
+
+        if (!isValid && errors.length === 0) errors.push({ type: 'error', message: 'Invalid value detected'})
+        
         // Track errors and warnings
         this.#nErrors += errors.length;
         this.#nWarnings += warnings.length;
@@ -595,12 +600,7 @@ export class JSONSchemaForm extends LitElement {
         // Show aggregated errors and warnings (if any)
         warnings.forEach((info) => this.#addMessage(fullPath, info, "warnings"));
 
-        const isFunction = typeof valid === "function";
-
-        if (
-            (valid === true || valid == undefined || isFunction || !valid.find((o) => o.type === "error")) &&
-            errors.length === 0
-        ) {
+        if (isValid && errors.length === 0) {
             element.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(externalPath);
