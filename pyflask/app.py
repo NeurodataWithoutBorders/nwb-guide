@@ -2,15 +2,18 @@
 import sys
 import json
 import multiprocessing
+from os.path import sep
 from logging import Formatter, DEBUG
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from urllib.parse import unquote
+
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
 
 
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, send_file
 from flask_cors import CORS
 from flask_restx import Api, Resource
 
@@ -52,6 +55,28 @@ api.add_namespace(startup_api)
 api.add_namespace(neuroconv_api)
 api.init_app(app)
 
+registered = {}
+
+@app.route("/files")
+def get_all_files():
+    return list(registered.keys())
+
+@app.route("/files/<path:path>", methods=["GET", "POST"])
+def handle_file_request(path):
+    
+
+    if request.method == 'GET':
+        if registered[path]:
+            return send_file(f"{sep}{unquote(path)}")
+        else:
+            app.abort(404, 'Resource is not accessible.')
+
+    else:
+        if ('.nwb' in path):
+            registered[path] = True
+            return request.base_url
+        else:
+            app.abort(400, str('Path does not point to an NWB file.'))
 
 @app.route("/conversions/<path:path>")
 def send_conversions(path):
