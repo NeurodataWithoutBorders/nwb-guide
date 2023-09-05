@@ -8,7 +8,11 @@ import { Button } from "./Button";
 import { List } from "./List";
 import { Modal } from "./Modal";
 
-const filesystemQueries = ["file", "directory"];
+const isFilesystemSelector = (format) => {
+    const matched = name.match(/(.+_)?(.+)_paths?/);
+    if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
+    return ["file", "directory"].includes(format) ? format : null; // Handle file and directory formats
+}
 
 export class JSONSchemaInput extends LitElement {
     static get styles() {
@@ -127,6 +131,22 @@ export class JSONSchemaInput extends LitElement {
 
         const hasItemsRef = "items" in info && "$ref" in info.items;
         if (!("items" in info) || (!("type" in info.items) && !hasItemsRef)) info.items = { type: "string" };
+        
+        // Handle file and directory formats
+        const createFilesystemSelector = (format) => {
+            const el = new FilesystemSelector({
+                type: format,
+                value: this.value,
+                onSelect: (filePath) => this.#updateData(fullPath, filePath),
+                onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
+                onThrow: (...args) => this.form.onThrow(...args),
+                dialogOptions: this.form.dialogOptions,
+                dialogType: this.form.dialogType,
+                multiple: isArray
+            });
+            el.classList.add("schema-input");
+            return el;
+        }
 
         if (isArray) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
@@ -134,7 +154,10 @@ export class JSONSchemaInput extends LitElement {
             // Catch tables
             const itemSchema = this.form.getSchema("items", info);
             const isTable = itemSchema.type === "object";
-            if (isTable) {
+
+            const fileSystemFormat = isFilesystemSelector(itemSchema.format)
+            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat)
+            else if (isTable) {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
@@ -242,23 +265,9 @@ export class JSONSchemaInput extends LitElement {
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
             />`;
         } else if (info.type === "string" || info.type === "number") {
-            let format = info.format;
-            const matched = name.match(/(.+_)?(.+)_path/);
-            if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
 
-            // Handle file and directory formats
-            if (filesystemQueries.includes(format)) {
-                const el = new FilesystemSelector({
-                    type: format,
-                    value: this.value,
-                    onSelect: (filePath) => this.#updateData(fullPath, filePath),
-                    onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
-                    dialogOptions: this.form.dialogOptions,
-                    dialogType: this.form.dialogType,
-                });
-                el.classList.add("schema-input");
-                return el;
-            }
+            const fileSystemFormat = isFilesystemSelector(info.format)
+            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat)
 
             // Handle long string formats
             else if (info.format === "long" || isArray)
