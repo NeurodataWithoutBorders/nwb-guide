@@ -4,7 +4,7 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import dandiUploadSchema from "../../../../../../schemas/json/dandi/upload.json";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
-const dandiSchema = merge(dandiStandaloneSchema, dandiUploadSchema, { arrays: true });
+const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}), { arrays: true });
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
