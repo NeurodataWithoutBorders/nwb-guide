@@ -2,9 +2,9 @@ import Swal from "sweetalert2";
 
 import { guidedProgressFilePath, reloadPageToHome, isStorybook, appDirectory } from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
-import { joinPath, runOnLoad } from "../globals.js";
+import { joinPath, runOnLoad, updateURLParams } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
-import { updateAppProgress, updateFile, updateURLParams } from "./update.js";
+import { updateAppProgress, updateFile } from "./update.js";
 
 export * from "./update";
 

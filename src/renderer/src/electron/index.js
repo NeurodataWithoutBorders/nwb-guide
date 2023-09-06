@@ -1,3 +1,4 @@
+import { updateURLParams } from "../globals.js";
 import isElectron from "./check.js";
 
 export { isElectron };
@@ -21,8 +22,12 @@ if (isElectron) {
         remote = require("@electron/remote");
         app = remote.app;
 
-        electron.ipcRenderer.on("fileOpened", (info, ...args) => {
-            console.log("File opened!", ...args);
+        electron.ipcRenderer.on("fileOpened", (info, filepath) => {
+            updateURLParams({ file: filepath })
+            const dashboard = document.querySelector("nwb-dashboard");
+            const activePage = dashboard.getAttribute('activePage')
+            if (activePage === 'preview') dashboard.requestUpdate()
+            else dashboard.setAttribute("activePage", 'preview')
         });
 
         ["log", "warn", "error"].forEach((method) =>

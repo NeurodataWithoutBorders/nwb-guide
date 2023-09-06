@@ -15,44 +15,52 @@ export class InspectPage extends Page {
         super(...args);
     }
 
+    showReport = async (value) => {
+        if (!value) {
+            const message = "Please provide a folder to inspect."
+            onThrow(message)
+            throw new Error(message)
+        }
+
+        const items = truncateFilePaths(await run("inspect_folder", { path: value }, { title: "Inspecting your files" }).catch((e) => {
+            this.notify(e.message, "error");
+            throw e;
+        }), value);
+
+        const list = new InspectorList({ items });
+        list.style.padding = "25px";
+
+        const modal = new Modal({
+            header: value
+        })
+        modal.append(list)
+        document.body.append(modal)
+
+        modal.toggle(true)
+    }
+
+    input = new JSONSchemaInput({
+        path: ['folder_path'],
+        info: {
+            type: 'string',
+            format: 'directory'
+        },
+        onThrow,
+    });
+
     render() {
 
         const button = new Button({
             label: "Inspect Files",
-            onClick: async () => {
-                const { value } = this.input
-                if (!value) {
-                    const message = "Please provide a folder to inspect."
-                    onThrow(message)
-                    throw new Error(message)
-                }
-
-                const items = truncateFilePaths(await run("inspect_folder", { path: value }, { title: "Inspecting your files" }).catch((e) => {
-                    this.notify(e.message, "error");
-                    throw e;
-                }), value);
-
-                const list = new InspectorList({ items });
-                list.style.padding = "25px";
-
-                const modal = new Modal({
-                    header: value
-                })
-                modal.append(list)
-                document.body.append(modal)
-
-                modal.toggle(true)
-            },
+            onClick: async () => this.showReport(this.input.value),
         });
 
-        this.input = new JSONSchemaInput({
-            path: ['folder_path'],
-            info: {
-                type: 'string',
-                format: 'directory'
-            },
-            onThrow,
-        });
+        const urlFilePath = new URL(document.location).searchParams.get('file')
+
+        if (urlFilePath) {
+            this.showReport(urlFilePath)
+            this.input.value = urlFilePath
+        }
 
         return html`
             <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">

@@ -56,7 +56,7 @@
       {
         "ext": "nwb",
         "name": "NWB File",
-        "role": "Editor"
+        "role": "Viewer"
       }
     ],
     "files": [

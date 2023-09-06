@@ -1,13 +1,7 @@
 import { html } from "lit";
 import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
-import { Button } from "../../Button.js";
-
-import { run } from "../guided-mode/options/utils.js";
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
-import { Modal } from "../../Modal";
-import { truncateFilePaths } from "../../preview/NWBFilePreview.js";
-import { InspectorList } from "../../preview/inspector/InspectorList.js";
 import { Neurosift } from "../../preview/Neurosift.js";
 import { baseUrl } from "../../../globals.js";
 
@@ -17,24 +11,31 @@ export class PreviewPage extends Page {
         super(...args);
     }
 
+    updatePath = async (path) => {
+        const result = await fetch(`${baseUrl}/files/${path}`, { method: "POST" }).then((res) => res.text());
+        if (result) this.neurosift.url = result
+    }
+
+    neurosift = new Neurosift()
+
+    input = new JSONSchemaInput({
+        path: ['file_path'],
+        info: {
+            type: 'string',
+            format: 'file'
+        },
+        onUpdate: this.updatePath,
+        onThrow,
+    });
+
     render() {
 
-        const neurosift = new Neurosift()
+        const urlFilePath = new URL(document.location).searchParams.get('file')
 
-        this.input = new JSONSchemaInput({
-            path: ['file_path'],
-            info: {
-                type: 'string',
-                format: 'file'
-            },
-            onUpdate: async (path) => {
-
-                const result = await fetch(`${baseUrl}/files/${path}`, { method: "POST" }).then((res) => res.text());
-            
-                if (result) neurosift.url = result
-            },
-            onThrow,
-        });
+        if (urlFilePath) {
+            this.updatePath(urlFilePath)
+            this.input.value = urlFilePath
+        }
 
         return html`
             <div style="display: grid; height: 100%; grid-template-rows: min-content min-content 1fr; gap: 10px;">
@@ -46,7 +47,7 @@ export class PreviewPage extends Page {
                     <hr />
                 </div>
                 ${this.input}
-                ${neurosift}
+                ${this.neurosift}
             </div>
         `;
     }
