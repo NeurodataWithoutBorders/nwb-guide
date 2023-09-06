@@ -22,6 +22,7 @@ class Echo(Resource):
         args = parser.parse_args()
         return args["arg"]
 
+
 @startup_api.route("/preload-imports")
 class PreloadImports(Resource):
     """
@@ -31,6 +32,7 @@ class PreloadImports(Resource):
     even if their namespace is not always exposed to a given scope. This means that later imports
     simply expose the cached namespaces to their scope instead of retriggering the entire import.
     """
+
     @startup_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
         try:
