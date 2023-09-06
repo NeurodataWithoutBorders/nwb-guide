@@ -173,8 +173,8 @@ export class JSONSchemaForm extends LitElement {
 
         this.ignore = props.ignore ?? [];
         this.required = props.required ?? {};
-        this.dialogOptions = props.dialogOptions ?? {};
-        this.dialogType = props.dialogType ?? "showOpenDialog";
+        this.dialogOptions = props.dialogOptions;
+        this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
         this.onlyRequired = props.onlyRequired ?? false;
