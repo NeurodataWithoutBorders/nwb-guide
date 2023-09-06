@@ -253,8 +253,8 @@ export class JSONSchemaInput extends LitElement {
                     value: this.value,
                     onSelect: (filePath) => this.#updateData(fullPath, filePath),
                     onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
-                    dialogOptions: this.form.dialogOptions,
-                    dialogType: this.form.dialogType,
+                    dialogOptions: this.form?.dialogOptions,
+                    dialogType: this.form?.dialogType,
                 });
                 el.classList.add("schema-input");
                 return el;
