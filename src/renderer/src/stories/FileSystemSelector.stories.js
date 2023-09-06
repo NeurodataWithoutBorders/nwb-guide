@@ -11,3 +11,12 @@ export const Folder = Template.bind({});
 Folder.args = {
     type: "directory",
 };
+
+export const FileMultiple = Template.bind({});
+FileMultiple.args = { multiple: true }
+
+export const FolderMultiple = Template.bind({});
+FolderMultiple.args = {
+    type: "directory",
+    multiple: true
+};

@@ -150,6 +150,15 @@ export class FilesystemSelector extends LitElement {
             return;
         }
 
+        const resolvedValueDisplay = (isArray
+            ? len > 1
+                ? `${this.value[0]} and ${len - 1} other${len > 2 ? "s" : ""}`
+                : this.value[0]
+            : this.value)
+
+
+        const objectTypeReference = this.multiple ? this.type === 'directory' ? 'directories' : 'files' : `a ${this.type}`
+
         return html`
             <button
                 title=${isArray ? this.value.map((v, i) => `${i + 1}. ${v}`).join("\n") : this.value}
@@ -183,16 +192,10 @@ export class FilesystemSelector extends LitElement {
                     this.#handleFiles(pathArr);
                 }}
             >
-                ${(isArray
-                    ? len > 1
-                        ? `${this.value[0]} and ${len - 1} other${len > 2 ? "s" : ""}`
-                        : this.value[0]
-                    : this.value) || `Drop a ${this.type} here, or click to choose a ${this.type}`}
-                ${dialog
-                    ? ""
-                    : html`<br /><small
-                              >Cannot get full ${this.type} path${this.multiple ? "s" : ""} on web distribution</small
-                          >`}
+                ${resolvedValueDisplay ? html`
+                    ${resolvedValueDisplay}
+                    ${dialog ? "" : html`<br /><small>Cannot get full ${this.type} path${this.multiple ? "s" : ""} on web distribution</small>`}
+                ` :  html`<span>Drop ${objectTypeReference} here, or click to choose ${objectTypeReference}</span>${this.multiple && this.type === 'directory' ? html`<br /><small>Multiple directory support only available using drag-and-drop.</small>` : ''}`}
             </button>
         `;
     }
