@@ -18,6 +18,8 @@ import { merge } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
 
+const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
+
 const setUndefinedIfNotDeclared = (schema, resolved) => {
     for (let prop in schema.properties) {
         const propInfo = schema.properties[prop];
@@ -65,6 +67,11 @@ export class SettingsPage extends Page {
             schema,
             mode: "accordion",
             onUpdate: () => (this.unsavedUpdates = true),
+            validateOnChange: (name, parent) => {
+                const value = parent[name];
+                if (name === "api_key") return dandiAPITokenRegex.test(value);
+                return true;
+            },
             onThrow,
         });
 
