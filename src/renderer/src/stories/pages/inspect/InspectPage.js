@@ -9,7 +9,6 @@ import { Modal } from "../../Modal";
 import { truncateFilePaths } from "../../preview/NWBFilePreview.js";
 import { InspectorList } from "../../preview/inspector/InspectorList.js";
 
-
 export class InspectPage extends Page {
     constructor(...args) {
         super(...args);
@@ -17,49 +16,51 @@ export class InspectPage extends Page {
 
     showReport = async (value) => {
         if (!value) {
-            const message = "Please provide a folder to inspect."
-            onThrow(message)
-            throw new Error(message)
+            const message = "Please provide a folder to inspect.";
+            onThrow(message);
+            throw new Error(message);
         }
 
-        const items = truncateFilePaths(await run("inspect_folder", { path: value }, { title: "Inspecting your files" }).catch((e) => {
-            this.notify(e.message, "error");
-            throw e;
-        }), value);
+        const items = truncateFilePaths(
+            await run("inspect_folder", { path: value }, { title: "Inspecting your files" }).catch((e) => {
+                this.notify(e.message, "error");
+                throw e;
+            }),
+            value
+        );
 
         const list = new InspectorList({ items });
         list.style.padding = "25px";
 
         const modal = new Modal({
-            header: value
-        })
-        modal.append(list)
-        document.body.append(modal)
+            header: value,
+        });
+        modal.append(list);
+        document.body.append(modal);
 
-        modal.toggle(true)
-    }
+        modal.toggle(true);
+    };
 
     input = new JSONSchemaInput({
-        path: ['folder_path'],
+        path: ["folder_path"],
         info: {
-            type: 'string',
-            format: 'directory'
+            type: "string",
+            format: "directory",
         },
         onThrow,
     });
 
     render() {
-
         const button = new Button({
             label: "Inspect Files",
             onClick: async () => this.showReport(this.input.value),
         });
 
-        const urlFilePath = new URL(document.location).searchParams.get('file')
+        const urlFilePath = new URL(document.location).searchParams.get("file");
 
         if (urlFilePath) {
-            this.showReport(urlFilePath)
-            this.input.value = urlFilePath
+            this.showReport(urlFilePath);
+            this.input.value = urlFilePath;
         }
 
         return html`

@@ -5,7 +5,6 @@ import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { Neurosift } from "../../preview/Neurosift.js";
 import { baseUrl } from "../../../globals.js";
 
-
 export class PreviewPage extends Page {
     constructor(...args) {
         super(...args);
@@ -13,28 +12,27 @@ export class PreviewPage extends Page {
 
     updatePath = async (path) => {
         const result = await fetch(`${baseUrl}/files/${path}`, { method: "POST" }).then((res) => res.text());
-        if (result) this.neurosift.url = result
-    }
+        if (result) this.neurosift.url = result;
+    };
 
-    neurosift = new Neurosift()
+    neurosift = new Neurosift();
 
     input = new JSONSchemaInput({
-        path: ['file_path'],
+        path: ["file_path"],
         info: {
-            type: 'string',
-            format: 'file'
+            type: "string",
+            format: "file",
         },
         onUpdate: this.updatePath,
         onThrow,
     });
 
     render() {
-
-        const urlFilePath = new URL(document.location).searchParams.get('file')
+        const urlFilePath = new URL(document.location).searchParams.get("file");
 
         if (urlFilePath) {
-            this.updatePath(urlFilePath)
-            this.input.value = urlFilePath
+            this.updatePath(urlFilePath);
+            this.input.value = urlFilePath;
         }
 
         return html`
@@ -46,8 +44,7 @@ export class PreviewPage extends Page {
                     <p>Use Neurosift to preview of your NWB file.</p>
                     <hr />
                 </div>
-                ${this.input}
-                ${this.neurosift}
+                ${this.input} ${this.neurosift}
             </div>
         `;
     }

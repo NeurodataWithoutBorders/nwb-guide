@@ -50,9 +50,9 @@ export class Neurosift extends LitElement {
     }
 
     static get properties() {
-        return { 
-            url: {type: String, reflect: true}
-        }
+        return {
+            url: { type: String, reflect: true },
+        };
     }
 
     constructor({ url } = {}) {
@@ -61,14 +61,16 @@ export class Neurosift extends LitElement {
     }
 
     render() {
-        return this.url ? html` <div class="loader-container">${new Loader({ message: "Loading Neurosift view..." })}</div>
-            <iframe
-                class="iframe-placeholder"
-                src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
-                @load=${function (ev) {
-                    ev.target.previousElementSibling.remove();
-                }}
-            ></iframe>` : ``;
+        return this.url
+            ? html` <div class="loader-container">${new Loader({ message: "Loading Neurosift view..." })}</div>
+                  <iframe
+                      class="iframe-placeholder"
+                      src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
+                      @load=${function (ev) {
+                          ev.target.previousElementSibling.remove();
+                      }}
+                  ></iframe>`
+            : ``;
     }
 }
 

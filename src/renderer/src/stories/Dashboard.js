@@ -134,7 +134,7 @@ export class Dashboard extends LitElement {
     }
 
     requestPageUpdate() {
-        if (this.#active) this.#active.requestUpdate()
+        if (this.#active) this.#active.requestUpdate();
     }
 
     createRenderRoot() {

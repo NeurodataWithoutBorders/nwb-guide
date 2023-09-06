@@ -23,11 +23,11 @@ if (isElectron) {
         app = remote.app;
 
         electron.ipcRenderer.on("fileOpened", (info, filepath) => {
-            updateURLParams({ file: filepath })
+            updateURLParams({ file: filepath });
             const dashboard = document.querySelector("nwb-dashboard");
-            const activePage = dashboard.getAttribute('activePage')
-            if (activePage === 'preview') dashboard.requestUpdate()
-            else dashboard.setAttribute("activePage", 'preview')
+            const activePage = dashboard.getAttribute("activePage");
+            if (activePage === "preview") dashboard.requestUpdate();
+            else dashboard.setAttribute("activePage", "preview");
         });
 
         ["log", "warn", "error"].forEach((method) =>

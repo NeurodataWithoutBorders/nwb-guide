@@ -57,26 +57,27 @@ api.init_app(app)
 
 registered = {}
 
+
 @app.route("/files")
 def get_all_files():
     return list(registered.keys())
 
+
 @app.route("/files/<path:path>", methods=["GET", "POST"])
 def handle_file_request(path):
-    
-
-    if request.method == 'GET':
+    if request.method == "GET":
         if registered[path]:
             return send_file(f"{sep}{unquote(path)}")
         else:
-            app.abort(404, 'Resource is not accessible.')
+            app.abort(404, "Resource is not accessible.")
 
     else:
-        if ('.nwb' in path):
+        if ".nwb" in path:
             registered[path] = True
             return request.base_url
         else:
-            app.abort(400, str('Path does not point to an NWB file.'))
+            app.abort(400, str("Path does not point to an NWB file."))
+
 
 @app.route("/conversions/<path:path>")
 def send_conversions(path):
