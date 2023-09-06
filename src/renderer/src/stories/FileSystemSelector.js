@@ -150,14 +150,17 @@ export class FilesystemSelector extends LitElement {
             return;
         }
 
-        const resolvedValueDisplay = (isArray
+        const resolvedValueDisplay = isArray
             ? len > 1
                 ? `${this.value[0]} and ${len - 1} other${len > 2 ? "s" : ""}`
                 : this.value[0]
-            : this.value)
+            : this.value;
 
-
-        const objectTypeReference = this.multiple ? this.type === 'directory' ? 'directories' : 'files' : `a ${this.type}`
+        const objectTypeReference = this.multiple
+            ? this.type === "directory"
+                ? "directories"
+                : "files"
+            : `a ${this.type}`;
 
         return html`
             <button
@@ -192,10 +195,22 @@ export class FilesystemSelector extends LitElement {
                     this.#handleFiles(pathArr);
                 }}
             >
-                ${resolvedValueDisplay ? html`
-                    ${resolvedValueDisplay}
-                    ${dialog ? "" : html`<br /><small>Cannot get full ${this.type} path${this.multiple ? "s" : ""} on web distribution</small>`}
-                ` :  html`<span>Drop ${objectTypeReference} here, or click to choose ${objectTypeReference}</span>${this.multiple && this.type === 'directory' ? html`<br /><small>Multiple directory support only available using drag-and-drop.</small>` : ''}`}
+                ${resolvedValueDisplay
+                    ? html`
+                          ${resolvedValueDisplay}
+                          ${dialog
+                              ? ""
+                              : html`<br /><small
+                                        >Cannot get full ${this.type} path${this.multiple ? "s" : ""} on web
+                                        distribution</small
+                                    >`}
+                      `
+                    : html`<span>Drop ${objectTypeReference} here, or click to choose ${objectTypeReference}</span
+                          >${this.multiple && this.type === "directory"
+                              ? html`<br /><small
+                                        >Multiple directory support only available using drag-and-drop.</small
+                                    >`
+                              : ""}`}
             </button>
         `;
     }

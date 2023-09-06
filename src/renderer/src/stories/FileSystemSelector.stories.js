@@ -13,10 +13,10 @@ Folder.args = {
 };
 
 export const FileMultiple = Template.bind({});
-FileMultiple.args = { multiple: true }
+FileMultiple.args = { multiple: true };
 
 export const FolderMultiple = Template.bind({});
 FolderMultiple.args = {
     type: "directory",
-    multiple: true
+    multiple: true,
 };

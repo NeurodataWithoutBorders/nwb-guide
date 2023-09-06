@@ -267,7 +267,6 @@ export class JSONSchemaInput extends LitElement {
         } else if (info.type === "string" || info.type === "number") {
             const fileSystemFormat = isFilesystemSelector(info.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-            
             // Handle long string formats
             else if (info.format === "long" || isArray)
                 return html`<textarea
