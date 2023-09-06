@@ -43,6 +43,9 @@ export class Modal extends LitElement {
 .modal-header span {
   font-weight: 800;
   font-size: 120%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 
@@ -168,7 +171,7 @@ export class Modal extends LitElement {
       <nwb-overlay .open=${this.open}>
         <div class="modal-content ${this.open ? 'open' : ''}" style="${this.width ? `width: ${this.width};` : ''} ${this.height ? `height: ${this.height};` : ''}">
           <div class="modal-header">
-              <span>${this.header}</span>
+              <span title="${this.header}">${this.header}</span>
               ${this.showCloseButton ? html`<nwb-button secondary size="extra-small" @click="${this.toggle}">Close</nwb-button>` : ''}
             </div>
             <div class="modal-body">

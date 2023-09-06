@@ -21,10 +21,12 @@ import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/Guided
 import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
 import tutorialIcon from "./stories/assets/exploration.svg?raw";
 import uploadIcon from "./stories/assets/dandi.svg?raw";
+import inspectIcon from "./stories/assets/inspect.svg?raw";
 import settingsIcon from "./stories/assets/settings.svg?raw";
 
 import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 import { SettingsPage } from "./stories/pages/settings/SettingsPage";
+import { InspectPage } from "./stories/pages/inspect/InspectPage";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -166,6 +168,10 @@ const pages = {
     uploads: new UploadsPage({
         label: "Uploads",
         icon: uploadIcon,
+    }),
+    inspect: new InspectPage({
+        label: "Inspect",
+        icon: inspectIcon,
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",
