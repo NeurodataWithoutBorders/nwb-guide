@@ -54,10 +54,9 @@ function handleProcess(proc, id = "process") {
         });
 
         process.once("SIGTERM", () => {
-            console.log('GOT SIGTERM!!!!')
+            console.log("GOT SIGTERM!!!!");
             proc.kill(0);
             process.exit(0);
         }); // Exit gracefully if this is caught
-
     } else console.error("child process failed to start on port" + port);
 }
