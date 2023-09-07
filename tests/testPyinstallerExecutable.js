@@ -26,7 +26,6 @@ const regex = /.+Error: .+/;
 
 function handleProcess(proc, id = "process") {
     if (proc != null) {
-
         // Listen for errors from Python process
         proc.stderr.on("data", function (data) {
             const message = data.toString();
