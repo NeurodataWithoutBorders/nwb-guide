@@ -101,10 +101,7 @@ const serverIsLiveStartup = async () => {
 };
 
 // Preload Flask imports for faster on-demand operations
-const preloadFlaskImports = async () => {
-  const result = await fetch(`${baseUrl}/startup/preload-imports`).then(res => res.json()).catch(e => e)
-  return result
-};
+const preloadFlaskImports = async () => await fetch(`${baseUrl}/startup/preload-imports`).then(res => res.json()).catch(e => e)
 
 let openPythonStatusNotyf: undefined | any;
 
@@ -112,7 +109,7 @@ async function pythonServerOpened() {
 
   // Confirm requests are actually received by the server
   const isLive = await serverIsLiveStartup()
-  if (isLive) return preloadFlaskImports() // initiate preload of Flask imports
+  if (isLive) await preloadFlaskImports() // initiate preload of Flask imports
   if (!isLive) return pythonServerClosed()
 
   // Update server status and throw a notification
