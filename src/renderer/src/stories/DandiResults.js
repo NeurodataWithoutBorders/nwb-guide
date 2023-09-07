@@ -4,18 +4,17 @@ import { get } from "dandi";
 import { isStaging } from "./pages/uploads/UploadsPage.js";
 
 export class DandiResults extends LitElement {
-
-    static get styles () {
+    static get styles() {
         return css`
             :host {
-                display:block;
+                display: block;
             }
-        `
+        `;
     }
 
     constructor(props) {
         super();
-        Object.assign(this, props)
+        Object.assign(this, props);
     }
 
     async updated() {
@@ -48,7 +47,7 @@ export class DandiResults extends LitElement {
         const secondElIds = ["description", "url"];
         secondElIds.forEach((str) => handleId(str, info));
 
-        const publicationEl = this.shadowRoot.querySelector(`#publication`);;
+        const publicationEl = this.shadowRoot.querySelector(`#publication`);
         publicationEl.innerHTML = "";
         const publications = (info.relatedResource ?? []).filter((o) => o.relation === "dcite:IsDescribedBy");
 
@@ -73,7 +72,6 @@ export class DandiResults extends LitElement {
     }
 
     render() {
-
         return html`
             <div style="text-align: center;">
                 <div style="display: inline-block; width: 100%; text-align: left;">
@@ -90,20 +88,20 @@ export class DandiResults extends LitElement {
                     <hr />
                     <ol id="publication"></ol>
 
-                    ${this.files ? html`
-                        <h3 style="padding: 0;">Files Uploaded with this Conversion</h3>
-                        <hr />
-                        <ol>
-                            ${Object.values(this.files)
-                                .map((v) => Object.values(v))
-                                .flat()
-                                .map((o) => html`<li>${o.file}</li>`)}
-                        </ol>` : ''}
+                    ${this.files
+                        ? html` <h3 style="padding: 0;">Files Uploaded with this Conversion</h3>
+                              <hr />
+                              <ol>
+                                  ${Object.values(this.files)
+                                      .map((v) => Object.values(v))
+                                      .flat()
+                                      .map((o) => html`<li>${o.file}</li>`)}
+                              </ol>`
+                        : ""}
                 </div>
             </div>
         `;
     }
 }
 
-customElements.get("dandi-results") ||
-    customElements.define("dandi-results", DandiResults);
+customElements.get("dandi-results") || customElements.define("dandi-results", DandiResults);

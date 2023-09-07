@@ -16,7 +16,7 @@ export class GuidedResultsPage extends Page {
 
         const { dandiset_id } = this.info.globalState.upload?.info ?? {};
 
-        return DandiResults({ id: dandiset_id, files: conversion })
+        return DandiResults({ id: dandiset_id, files: conversion });
     }
 }
 

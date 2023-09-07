@@ -16,11 +16,10 @@ import Swal from "sweetalert2";
 import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
 
-export const isStaging = (id) => parseInt(id) >= 100000
+export const isStaging = (id) => parseInt(id) >= 100000;
 
 export async function uploadToDandi(info) {
-
-    const api_key = global.data.DANDI?.api_key
+    const api_key = global.data.DANDI?.api_key;
     if (!api_key) {
         await Swal.fire({
             title: "Your DANDI API key is not configured.",
@@ -32,11 +31,15 @@ export async function uploadToDandi(info) {
         return this.to("settings");
     }
 
-    return await run("upload/folder", {
-        ...info, 
-        staging: isStaging(info.dandiset_id), // Automatically detect staging IDs
-        api_key
-    }, { title: "Uploading to DANDI" }).catch((e) => {
+    return await run(
+        "upload/folder",
+        {
+            ...info,
+            staging: isStaging(info.dandiset_id), // Automatically detect staging IDs
+            api_key,
+        },
+        { title: "Uploading to DANDI" }
+    ).catch((e) => {
         this.notify(e.message, "error");
         throw e;
     });
@@ -66,13 +69,13 @@ export class UploadsPage extends Page {
                 global.data.uploads = {};
                 global.save();
 
-                const modal = new Modal({ open: true })
-                modal.header = "DANDI Upload Summary"
-                const summary = new DandiResults({ id: globalState.dandiset_id })
-                summary.style.padding = '25px'
-                modal.append(summary)
-            
-                document.body.append(modal)
+                const modal = new Modal({ open: true });
+                modal.header = "DANDI Upload Summary";
+                const summary = new DandiResults({ id: globalState.dandiset_id });
+                summary.style.padding = "25px";
+                modal.append(summary);
+
+                document.body.append(modal);
 
                 this.requestUpdate();
             },
