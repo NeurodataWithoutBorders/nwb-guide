@@ -1,4 +1,6 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
@@ -424,7 +426,7 @@ export class JSONSchemaForm extends LitElement {
                 ${interactiveInput}
                 ${info.description
                     ? html`<p class="guided--text-input-instructions">
-                          ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
+                          ${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}
                       </p>`
                     : ""}
                 <div class="errors"></div>
