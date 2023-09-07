@@ -1,6 +1,13 @@
 import Swal from "sweetalert2";
 
-import { guidedProgressFilePath, reloadPageToHome, isStorybook, appDirectory, stubSaveFolderPath, conversionSaveFolderPath } from "../dependencies/simple.js";
+import {
+    guidedProgressFilePath,
+    reloadPageToHome,
+    isStorybook,
+    appDirectory,
+    stubSaveFolderPath,
+    conversionSaveFolderPath,
+} from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
 import { joinPath, runOnLoad } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
@@ -123,13 +130,11 @@ export const remove = async (name) => {
         else localStorage.removeItem(progressFilePathToDelete);
 
         if (fs) {
-
             // delete default stub location
             fs.rmSync(joinPath(stubSaveFolderPath, name), { recursive: true, force: true });
 
             // delete default conversion location
             fs.rmSync(joinPath(conversionSaveFolderPath, name), { recursive: true, force: true });
-
         }
 
         return true;

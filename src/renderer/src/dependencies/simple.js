@@ -12,7 +12,11 @@ export const homeDirectory = app?.getPath("home") ?? "";
 export const appDirectory = homeDirectory ? joinPath(homeDirectory, paths.root) : "";
 export const guidedProgressFilePath = homeDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
 
-export const stubSaveFolderPath = homeDirectory ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.stubs) : "";
-export const conversionSaveFolderPath = homeDirectory ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.conversions) : "";
+export const stubSaveFolderPath = homeDirectory
+    ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.stubs)
+    : "";
+export const conversionSaveFolderPath = homeDirectory
+    ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.conversions)
+    : "";
 
 export const isStorybook = window.location.href.includes("iframe.html");
