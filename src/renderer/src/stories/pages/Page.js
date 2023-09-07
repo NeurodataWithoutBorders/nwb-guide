@@ -63,8 +63,9 @@ export class Page extends LitElement {
     to = async (transition) => {
         this.beforeTransition();
 
+
         // Otherwise note unsaved updates if present
-        if (this.unsavedUpdates) {
+        if (this.unsavedUpdates || this.info.states?.saved) {
             if (transition === 1) await this.save(); // Save before a single forward transition
             else {
                 Swal.fire({
@@ -95,6 +96,7 @@ export class Page extends LitElement {
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave();
         save(this, overrides);
+        this.info.states.saved = true
         this.unsavedUpdates = false;
     };
 

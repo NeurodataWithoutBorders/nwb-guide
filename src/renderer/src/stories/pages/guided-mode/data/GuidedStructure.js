@@ -75,6 +75,8 @@ export class GuidedStructurePage extends Page {
     };
 
     async updated() {
+
+        console.log(this.info)
         const selected = this.info.globalState.interfaces;
 
         if (Object.keys(selected).length > 0) this.list.emptyMessage = "Loading valid interfaces...";
