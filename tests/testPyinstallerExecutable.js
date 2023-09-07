@@ -53,6 +53,5 @@ function handleProcess(proc, id = "process") {
             console.error(`[${id}] Exit: ${code}`);
             error();
         });
-
     } else console.error("child process failed to start on port" + port);
 }
