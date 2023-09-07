@@ -9,8 +9,8 @@ import { List } from "./List";
 import { Modal } from "./Modal";
 
 const isFilesystemSelector = (format) => {
-    if (Array.isArray(format)) return format.map(isFilesystemSelector).every(Boolean) ? format : null
-    
+    if (Array.isArray(format)) return format.map(isFilesystemSelector).every(Boolean) ? format : null;
+
     const matched = name.match(/(.+_)?(.+)_paths?/);
     if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
     return ["file", "directory"].includes(format) ? format : null; // Handle file and directory formats

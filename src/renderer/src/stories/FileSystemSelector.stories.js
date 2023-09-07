@@ -6,7 +6,7 @@ export default {
 
 const Template = (args) => new FilesystemSelector(args);
 
-const types = ['file', 'directory']
+const types = ["file", "directory"];
 
 export const File = Template.bind({});
 export const Folder = Template.bind({});
@@ -33,6 +33,3 @@ BothMultiple.args = {
     type: types,
     multiple: true,
 };
-
-
-

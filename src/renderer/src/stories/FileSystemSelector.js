@@ -3,16 +3,21 @@ import { LitElement, css, html } from "lit";
 import { remote } from "../electron/index";
 const { dialog } = remote;
 
-function getObjectTypeReferenceString(type, multiple, { nested, native} = {}) {
-    if (Array.isArray(type)) return `${multiple ? '' : 'a '}${type.map((type) => getObjectTypeReferenceString(type, multiple, { native, nested: true })).join(' / ')}`
-    
-    const isDir = type === "directory"
-    return multiple && (!isDir || (isDir && !native))
-    ? type === "directory"
-        ? "directories" : "files"
-    : nested ? type : `a ${type}`;
-}
+function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
+    if (Array.isArray(type))
+        return `${multiple ? "" : "a "}${type
+            .map((type) => getObjectTypeReferenceString(type, multiple, { native, nested: true }))
+            .join(" / ")}`;
 
+    const isDir = type === "directory";
+    return multiple && (!isDir || (isDir && !native))
+        ? type === "directory"
+            ? "directories"
+            : "files"
+        : nested
+        ? type
+        : `a ${type}`;
+}
 
 const componentCSS = css`
     * {
@@ -24,7 +29,7 @@ const componentCSS = css`
         width: 100%;
     }
 
-    :host([manytypes=true]) > button {
+    :host([manytypes="true"]) > button {
         cursor: default;
     }
 
@@ -33,7 +38,6 @@ const componentCSS = css`
         display: flex;
         gap: 5px;
     }
-
 
     button {
         background: WhiteSmoke;
@@ -153,7 +157,6 @@ export class FilesystemSelector extends LitElement {
     };
 
     async selectFormat(type = this.type) {
-        
         if (dialog) {
             const file = await this.#useElectronDialog(type);
             const path = file.filePath ?? file.filePaths?.[0];
@@ -161,7 +164,8 @@ export class FilesystemSelector extends LitElement {
         } else {
             let handles = await (type === "directory"
                 ? window.showDirectoryPicker()
-                : window.showOpenFilePicker({ multiple: this.multiple })).catch((e) => this.#onCancel()); // Call using the same options
+                : window.showOpenFilePicker({ multiple: this.multiple })
+            ).catch((e) => this.#onCancel()); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
             this.#handleFiles(result);
@@ -171,8 +175,8 @@ export class FilesystemSelector extends LitElement {
     render() {
         let resolved, isUpdated;
 
-        const isMultipleTypes = Array.isArray(this.type)
-        this.setAttribute('manytypes', isMultipleTypes)
+        const isMultipleTypes = Array.isArray(this.type);
+        this.setAttribute("manytypes", isMultipleTypes);
         const isArray = Array.isArray(this.value);
         const len = isArray ? this.value.length : 0;
 
@@ -196,8 +200,7 @@ export class FilesystemSelector extends LitElement {
                 : this.value[0]
             : this.value;
 
-        const objectTypeReference = getObjectTypeReferenceString(this.type, this.multiple)
-
+        const objectTypeReference = getObjectTypeReferenceString(this.type, this.multiple);
 
         return html`
             <button
@@ -225,18 +228,35 @@ export class FilesystemSelector extends LitElement {
                           ${dialog
                               ? ""
                               : html`<br /><small
-                                        >Cannot get full ${isMultipleTypes ? this.type.join(' / ') : this.type} path${this.multiple ? "s" : ""} on web
-                                        distribution</small
+                                        >Cannot get full ${isMultipleTypes ? this.type.join(" / ") : this.type}
+                                        path${this.multiple ? "s" : ""} on web distribution</small
                                     >`}
                       `
-                    : html`<span>Drop ${objectTypeReference} here${isMultipleTypes ? '' : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, { native: true })}`}</span
-                          >${this.multiple && (this.type === "directory" || (isMultipleTypes && this.type.includes('directory')))
+                    : html`<span
+                              >Drop ${objectTypeReference}
+                              here${isMultipleTypes
+                                  ? ""
+                                  : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
+                                        native: true,
+                                    })}`}</span
+                          >${this.multiple &&
+                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory")))
                               ? html`<br /><small
                                         >Multiple directory support only available using drag-and-drop.</small
                                     >`
                               : ""}`}
             </button>
-            ${isMultipleTypes ? html`<div id="button-div">${this.type.map(type => html`<nwb-button primary @click=${() => this.selectFormat(type)}>Select ${getObjectTypeReferenceString(type, this.multiple, { native: true })}</nwb-button>`)}` : ''} 
+            ${isMultipleTypes
+                ? html`<div id="button-div">
+                      ${this.type.map(
+                          (type) =>
+                              html`<nwb-button primary @click=${() => this.selectFormat(type)}
+                                  >Select
+                                  ${getObjectTypeReferenceString(type, this.multiple, { native: true })}</nwb-button
+                              >`
+                      )}
+                  </div>`
+                : ""}
         `;
     }
 }
