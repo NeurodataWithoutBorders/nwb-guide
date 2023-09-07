@@ -27,12 +27,6 @@ const regex = /.+Error: .+/;
 function handleProcess(proc, id = "process") {
     if (proc != null) {
 
-        process.on("SIGTERM", () => {
-            console.log('GOT SIGTERM!!!!')
-            proc.kill(0);
-            process.exit(0);
-        }); // Exit gracefully if this is caught
-        
         // Listen for errors from Python process
         proc.stderr.on("data", function (data) {
             const message = data.toString();
