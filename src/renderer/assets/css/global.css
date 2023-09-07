@@ -8,6 +8,16 @@
     /* src: local('Source Code Pro'), local('SourceCodePro'), url(fonts/SourceCodePro-Regular.ttf) format('truetype'); */
 }
 
+/*  Notfy */
+.notyf__toast {
+    max-width: clamp(300px, 40vw, 500px) !important;
+}
+
+.notyf__message {
+    word-wrap: break-word;
+}
+
+
 /* Global ---------------------------- */
 
 * {
