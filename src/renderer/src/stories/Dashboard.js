@@ -234,7 +234,7 @@ export class Dashboard extends LitElement {
                         pageTitle: page.info.title,
                     };
 
-                info.states =pageState
+                info.states = pageState;
 
                 state.active = false;
                 pageState.active = false;
