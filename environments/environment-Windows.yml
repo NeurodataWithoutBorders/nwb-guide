@@ -19,5 +19,6 @@ dependencies:
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
+      - hdmf >= 3.7.0
       - pytest == 7.4.0
       - pytest-cov == 4.1.0
