@@ -1,11 +1,11 @@
 name: nwb-guide
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
-  - python = 3.9.17
-  - nodejs = 18.16.1
+  - python = 3.9.18
   - PyInstaller = 5.13.0
+  - nodejs = 18.16.1
   - numcodecs = 0.11.0
   - jsonschema = 4.18.0  # this installs jsonschema-specifications which is needed for validation
   - pydantic[email] = 2.0.2  # email validator is used by dandi
@@ -14,9 +14,8 @@ dependencies:
       - chardet == 5.1.0
       - configparser == 6.0.0
       - flask == 2.3.2
-      - flask-cors === 3.0.10
+      - flask-cors == 4.0.0
       - flask_restx == 1.1.0
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
-      - hdmf >= 3.7.0
-      - pytest == 7.2.2
+      - pytest == 7.4.0
       - pytest-cov == 4.1.0
