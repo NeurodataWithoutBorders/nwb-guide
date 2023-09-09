@@ -7,8 +7,9 @@ dependencies:
   - PyInstaller = 5.13.0
   - nodejs = 18.16.1
   - numcodecs = 0.11.0
-  - jsonschema = 4.18.0  # this installs jsonschema-specifications which is needed for validation
-  - pydantic[email] = 2.0.2  # email validator is used by dandi
+  # install these from conda-forge so that dependent packages get included in the distributable
+  - jsonschema = 4.18.0  # installs jsonschema-specifications
+  - pydantic[email] = 2.0.2  # installs email-validator
   - pip
   - pip:
       - chardet == 5.1.0
