@@ -17,7 +17,7 @@
     "build:linux": "npm run build && npm run build:flask:unix && npm run build:electron:linux",
     "build:flask:base": "python -m PyInstaller --log-level DEBUG --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --collect-data jsonschema_specifications --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ci_info --hidden-import scipy._distributor_init --hidden-import scipy._lib.messagestream --hidden-import scipy._lib._ccallback --hidden-import scipy._lib._testutils",
     "build:flask:win": "npm run build:flask:base -- --add-data ./paths.config.json;. --add-data ./package.json;.",
-    "build:flask:unix": "npm run build:flask:base -- --add-data ./paths.config.json:. --add-data ./package.json:. --add-data /Users/rly/mambaforge/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so:. --collect-all ndx_dandi_icephys",
+    "build:flask:unix": "npm run build:flask:base -- --add-data ./paths.config.json:. --add-data ./package.json:. --add-data /Users/runner/miniconda3/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so:. --collect-all ndx_dandi_icephys",
     "build:electron:win": "electron-builder build --win --publish never",
     "build:electron:mac": "electron-builder build --mac --publish never",
     "build:electron:linux": "electron-builder build --linux --publish never",
