@@ -123,7 +123,6 @@ export class GuidedMetadataPage extends ManagedPage {
             },
 
             onUpdate: (...args) => {
-                console.log(...args);
                 this.unsavedUpdates = true;
             },
 

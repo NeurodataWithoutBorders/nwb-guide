@@ -23,6 +23,7 @@ export class GuidedUploadPage extends Page {
     };
 
     footer = {
+        next: "Upload Project",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
