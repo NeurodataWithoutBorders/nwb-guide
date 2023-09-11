@@ -19,4 +19,4 @@ The resulting files are fully compliant with the best practices expected of the 
    :maxdepth: 2
 
    developer_guide
-   support
+   format_support
