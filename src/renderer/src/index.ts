@@ -94,11 +94,14 @@ async function checkInternetConnection() {
     return hasInternet
 };
 
-// Check if the Pysoda server is live
+// Check if the Flask server is live
 const serverIsLiveStartup = async () => {
   const echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json()).catch(e => e)
   return echoResponse === "server ready" ? true : false;
 };
+
+// Preload Flask imports for faster on-demand operations
+const preloadFlaskImports = async () => await fetch(`${baseUrl}/startup/preload-imports`).then(res => res.json()).catch(e => e)
 
 let openPythonStatusNotyf: undefined | any;
 
@@ -106,6 +109,7 @@ async function pythonServerOpened() {
 
   // Confirm requests are actually received by the server
   const isLive = await serverIsLiveStartup()
+  if (isLive) await preloadFlaskImports() // initiate preload of Flask imports
   if (!isLive) return pythonServerClosed()
 
   // Update server status and throw a notification
