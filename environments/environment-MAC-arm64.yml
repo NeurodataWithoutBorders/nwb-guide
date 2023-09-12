@@ -20,6 +20,6 @@ dependencies:
       - flask == 2.3.2
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
-      - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[ecephys]
+      - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@improve_sonpy_installation_m1#neuroconv[full]
       - pytest == 7.4.0
       - pytest-cov == 4.1.0
