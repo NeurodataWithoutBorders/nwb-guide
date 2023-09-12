@@ -33,7 +33,7 @@ jobs:
       - name: Install package.json modules and their dependencies
         run: npm install --ignore-scripts
 
-      - if: matrix.os == 'macos-latest'
+      - name: Remove bad sonpy file (might make Spike2 format unusable on Mac - should exclude from selection)
         run: rm -f /usr/local/miniconda/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
 
       - uses: apple-actions/import-codesign-certs@v1
