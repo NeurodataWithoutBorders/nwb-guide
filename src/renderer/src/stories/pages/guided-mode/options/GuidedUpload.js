@@ -17,7 +17,7 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
-        const isNewDandiset = globalState.upload.dandiset_id !== this.localState.dandiset_id;
+        const isNewDandiset = globalState.upload?.dandiset_id !== this.localState.dandiset_id;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
         if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
     };
