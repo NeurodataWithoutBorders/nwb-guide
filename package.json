@@ -1,7 +1,7 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "./build/main/main.js",
   "scripts": {
