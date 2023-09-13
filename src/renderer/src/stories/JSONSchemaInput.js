@@ -140,7 +140,7 @@ export class JSONSchemaInput extends LitElement {
                 onSelect: (filePath) => this.#updateData(fullPath, filePath),
                 onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
                 onThrow: (...args) => this.form?.onThrow(...args),
-                dialogOptions:  this.form?.dialogOptions,
+                dialogOptions: this.form?.dialogOptions,
                 dialogType: this.form?.dialogType,
                 multiple: isArray,
             });
@@ -152,7 +152,7 @@ export class JSONSchemaInput extends LitElement {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
             // Catch tables
-            const itemSchema = this.form ? this.form.getSchema("items", info) : info['items'];
+            const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
             const isTable = itemSchema.type === "object";
 
             const fileSystemFormat = isFilesystemSelector(itemSchema.format);
@@ -164,7 +164,7 @@ export class JSONSchemaInput extends LitElement {
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: (key, parent, v) => {
-                        return validateOnChange && this.#triggerValidation(key, this.form.tables[name], path) // this.form.validateOnChange(key, parent, fullPath, v);
+                        return validateOnChange && this.#triggerValidation(key, this.form.tables[name], path); // this.form.validateOnChange(key, parent, fullPath, v);
                     },
 
                     onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
