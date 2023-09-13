@@ -70,7 +70,7 @@ let globals: {
   },
 
   set mainWindowReady(v) {
-    if (globals.mainWindow) throw new Error('Main window cannot be ready. It does not exist...')
+    if (!globals.mainWindow) throw new Error('Main window cannot be ready. It does not exist...')
     mainWindowReady = v
     if (v) readyQueue.forEach(f => onWindowReady(f))
     readyQueue = []
@@ -309,6 +309,7 @@ function initialize() {
     };
 
     globals.mainWindow = new BrowserWindow(windowOptions);
+    console.log('SETTING MAIN WINDOW')
     main.enable(globals.mainWindow.webContents);
 
   // HMR for renderer base on electron-vite cli.
@@ -317,6 +318,7 @@ function initialize() {
   else globals.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
 
     globals.mainWindow.once("closed", () => {
+      console.log('DELETING MAIN WINDOW')
       delete globals.mainWindow
     })
 
