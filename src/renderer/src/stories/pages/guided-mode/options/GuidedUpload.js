@@ -52,10 +52,6 @@ export class GuidedUploadPage extends Page {
                 project: globalState.project.name,
             });
 
-            global.data.uploads = {};
-
-            this.unsavedUpdates = true; // Ensure that this saves automatically
-
             this.to(1);
         },
     };
