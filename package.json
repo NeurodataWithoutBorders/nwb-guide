@@ -25,6 +25,7 @@
     "test": "npm run test:app && npm run test:server",
     "test:app": "vitest run",
     "test:server": "pytest pyflask/tests/ -s",
+    "wait3s": "node -e \"setTimeout(() => process.exit(0),3000)\"",
     "test:executable": "concurrently -n EXE,TEST --kill-others \"node tests/testPyinstallerExecutable.js --port 3434 --forever\" \"pytest pyflask/tests/ -s --target http://localhost:3434\"",
     "test:coverage": "npm run coverage:app && npm run coverage:server",
     "coverage:app": "vitest run --coverage",
@@ -57,7 +58,7 @@
       {
         "ext": "nwb",
         "name": "NWB File",
-        "role": "Editor"
+        "role": "Viewer"
       }
     ],
     "files": [
