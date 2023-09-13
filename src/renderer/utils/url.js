@@ -1,4 +1,3 @@
-
 export function updateURLParams(paramsToUpdate) {
     const params = new URLSearchParams(location.search);
     for (let key in paramsToUpdate) {

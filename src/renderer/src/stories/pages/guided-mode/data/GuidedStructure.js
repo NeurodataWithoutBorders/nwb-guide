@@ -8,7 +8,7 @@ import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 
-const defaultEmptyMessage = "No interfaces selected"
+const defaultEmptyMessage = "No interfaces selected";
 
 export class GuidedStructurePage extends Page {
     constructor(...args) {
@@ -35,7 +35,7 @@ export class GuidedStructurePage extends Page {
 
     list = new List({
         emptyMessage: defaultEmptyMessage,
-        onChange: () => this.unsavedUpdates = true
+        onChange: () => (this.unsavedUpdates = true),
     });
 
     addButton = new Button();
@@ -96,7 +96,7 @@ export class GuidedStructurePage extends Page {
             )
             .catch((e) => console.error(e));
 
-        this.list.emptyMessage = defaultEmptyMessage
+        this.list.emptyMessage = defaultEmptyMessage;
 
         for (const [key, name] of Object.entries(interfaces)) {
             let found = this.search.options?.find((o) => o.value === name);
