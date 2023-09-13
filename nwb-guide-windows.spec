@@ -1,13 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
-import sys
-sys.setrecursionlimit(sys.getrecursionlimit() * 5)
-
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_all
 
 datas = [('./paths.config.json', '.'), ('./package.json', '.')]
 binaries = []
-hiddenimports = ['scipy._distributor_init', 'scipy._lib.messagestream', 'scipy._lib._ccallback', 'scipy._lib._testutils']
+hiddenimports = ['scipy._distributor_init', 'scipy._lib.messagestream', 'scipy._lib._ccallback', 'scipy._lib._testutils', 'email_validator']
 datas += collect_data_files('jsonschema_specifications')
 tmp_ret = collect_all('nwbinspector')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
