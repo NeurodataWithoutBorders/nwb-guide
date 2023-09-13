@@ -13,11 +13,14 @@ import { merge } from "../utils.js";
 import { run } from "../guided-mode/options/utils.js";
 import { notyf } from "../../../dependencies/globals.js";
 import Swal from "sweetalert2";
+import { Modal } from "../../Modal";
+import { DandiResults } from "../../DandiResults.js";
 
-export const isStaging = (id) => parseInt(id) >= 100000; // Automatically detect staging IDs
+export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info, type = 'project' in info ? '' : "folder") {
-    if (!global.data.DANDI?.api_key) {
+export async function uploadToDandi(info) {
+    const api_key = global.data.DANDI?.api_key;
+    if (!api_key) {
         await Swal.fire({
             title: "Your DANDI API key is not configured.",
             html: "Edit your settings to include this value.",
@@ -28,11 +31,19 @@ export async function uploadToDandi(info, type = 'project' in info ? '' : "folde
         return this.to("settings");
     }
 
-    info.staging = isStaging(info.dandiset_id);
-    info.api_key = global.data.DANDI.api_key;
-
-    const result = await run(type ? `upload/${type}` : 'upload', info, { title: "Uploading to DANDI" }).catch((e) => {
-        this.notify(e.message, "error");
+    const result = await run(
+        type ? `upload/${type}` : 'upload',
+        {
+            ...info,
+            staging: isStaging(info.dandiset_id), // Automatically detect staging IDs
+            api_key,
+        },
+        { title: "Uploading to DANDI" }
+    ).catch((e) => {
+        notyf.open({
+            type: "error",
+            message: e.message
+        })
         throw e;
     });
 
@@ -61,6 +72,15 @@ export class UploadsPage extends Page {
                 await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
+
+                const modal = new Modal({ open: true });
+                modal.header = "DANDI Upload Summary";
+                const summary = new DandiResults({ id: globalState.dandiset_id });
+                summary.style.padding = "25px";
+                modal.append(summary);
+
+                document.body.append(modal);
+
                 this.requestUpdate();
             },
         });
