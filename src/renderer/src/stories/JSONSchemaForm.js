@@ -416,11 +416,6 @@ export class JSONSchemaForm extends LitElement {
             >
                 <label class="guided--form-label">${header(name)}</label>
                 ${interactiveInput}
-                ${info.description
-                    ? html`<p class="guided--text-input-instructions">
-                          ${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}
-                      </p>`
-                    : ""}
                 <div class="errors"></div>
                 <div class="warnings"></div>
             </div>
