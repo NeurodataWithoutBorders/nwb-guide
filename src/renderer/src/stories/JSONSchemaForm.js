@@ -4,7 +4,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { capitalize, header } from "./forms/utils";
+import { header } from "./forms/utils";
 import { resolve } from "../promises";
 import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
@@ -113,14 +113,6 @@ pre {
 
   .required.conditional label:after {
     color: transparent;
-  }
-
-
-  .guided--text-input-instructions {
-    font-size: 13px;
-    width: 100%;
-    padding-top: 4px;
-    color: dimgray !important;
   }
 `;
 
