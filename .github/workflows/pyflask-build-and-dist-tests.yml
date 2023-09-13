@@ -83,6 +83,10 @@ jobs:
 
       - run: npm ci
 
+      # fix for macos build
+      - if: matrix.os == 'macos-latest'
+        run: rm -f /Users/runner/miniconda3/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
+
       - name: Build PyFlask distribution
         run: npm run build:flask:${{ matrix.shorthand }}
 
