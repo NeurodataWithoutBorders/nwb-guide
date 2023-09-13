@@ -47,12 +47,12 @@ export class GuidedUploadPage extends Page {
                 if (!result || !result.isConfirmed) return this.to(1);
             }
 
-            const results = await uploadToDandi.call(this, {
+            globalUploadInfo.results = await uploadToDandi.call(this, {
                 ...globalUploadInfo.info,
                 project: globalState.project.name,
             });
 
-            globalUploadInfo.results = results; // Save the preview results
+            global.data.uploads = {};
 
             this.unsavedUpdates = true; // Ensure that this saves automatically
 
@@ -61,7 +61,7 @@ export class GuidedUploadPage extends Page {
     };
 
     render() {
-        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {}, results: null }, {}));
+        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
 
         this.form = new JSONSchemaForm({
             schema: dandiUploadSchema,

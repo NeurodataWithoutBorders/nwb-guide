@@ -14,7 +14,9 @@ import { run } from "../guided-mode/options/utils.js";
 import { notyf } from "../../../dependencies/globals.js";
 import Swal from "sweetalert2";
 
-export async function uploadToDandi(info) {
+export const isStaging = (id) => parseInt(id) >= 100000; // Automatically detect staging IDs
+
+export async function uploadToDandi(info, type = 'project' in info ? '' : "folder") {
     if (!global.data.DANDI?.api_key) {
         await Swal.fire({
             title: "Your DANDI API key is not configured.",
@@ -26,13 +28,21 @@ export async function uploadToDandi(info) {
         return this.to("settings");
     }
 
-    info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
+    info.staging = isStaging(info.dandiset_id);
     info.api_key = global.data.DANDI.api_key;
 
-    return await run("upload/folder", info, { title: "Uploading to DANDI" }).catch((e) => {
+    const result = await run(type ? `upload/${type}` : 'upload', info, { title: "Uploading to DANDI" }).catch((e) => {
         this.notify(e.message, "error");
         throw e;
     });
+
+
+    if (result) notyf.open({
+        type: "success",
+        message: `${info.project ?? info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+    });
+
+    return result
 }
 
 export class UploadsPage extends Page {
@@ -48,13 +58,7 @@ export class UploadsPage extends Page {
             label: defaultButtonMessage,
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
-                const results = await uploadToDandi.call(this, { ...global.data.uploads });
-                if (results)
-                    notyf.open({
-                        type: "success",
-                        message: `${global.data.uploads.nwb_folder_path} successfully uploaded to Dandiset ${global.data.uploads.dandiset_id}`,
-                    });
-
+                await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
                 this.requestUpdate();

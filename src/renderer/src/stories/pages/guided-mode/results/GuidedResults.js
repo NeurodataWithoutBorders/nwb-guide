@@ -2,6 +2,7 @@ import { css, html } from "lit";
 import { Page } from "../../Page.js";
 
 import { get } from "dandi";
+import { isStaging } from "../../uploads/UploadsPage.js";
 
 export class GuidedResultsPage extends Page {
     constructor(...args) {
@@ -23,15 +24,13 @@ export class GuidedResultsPage extends Page {
             }
         };
 
-        const { dandiset_id, staging } = this.info.globalState.upload?.info ?? {};
+        const { dandiset_id } = this.info.globalState.upload?.info ?? {};
 
         const elIds = ["name", "modified"];
 
         const otherElIds = ["embargo_status"];
 
-        const liveId = dandiset_id; // '000552' // From Huszar
-        const isStaging = staging; //false
-        const dandiset = await get(liveId, isStaging ? "staging" : undefined);
+        const dandiset = await get(dandiset_id, isStaging(dandiset_id) ? "staging" : undefined);
 
         otherElIds.forEach((str) => handleId(str, dandiset));
         elIds.forEach((str) => handleId(str, dandiset.draft_version));
