@@ -3,7 +3,7 @@
         "api_key": {
             "type": "string",
             "format": "password",
-            "description": "Log in to DANDI, click on your user initials in the top-right corner, and copy your API key from the resulting pop-up. <br/><small><b>Note:</b> <a href='https://dandiarchive.org' target='_blank'>Production</a> and <a href='https://gui-staging.dandiarchive.org'  target='_blank'>staging</a> servers have different API keys and different logins</small>"
+            "description": "Log in to DANDI, click on your user initials in the top-right corner, and copy your API key from the resulting pop-up. <br/><small><b>Note:</b> <a href='https://dandiarchive.org' target='_blank'>The main archive</a> and <a href='https://gui-staging.dandiarchive.org'  target='_blank'>the staging (testing) server</a> have different API keys.</small>"
         }
     },
     "required": ["api_key"]
