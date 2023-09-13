@@ -355,14 +355,18 @@ function initialize() {
   else app.on("ready", onAppReady)
 }
 
-function onFileOpened(_, path: string) {
+function isValidFile(filepath: string) {
+  return !fs.existsSync(filepath) && path.extname(filepath) === '.nwb'
+}
+
+function onFileOpened(_, filepath: string) {
     restoreWindow() || initialize(); // Ensure the application is properly visible
-    onWindowReady((win) => win.webContents.send('fileOpened', path))
+    onWindowReady((win) => win.webContents.send('fileOpened', filepath))
 }
 
 if (isWindows && process.argv.length >= 2) {
   const openFilePath = process.argv[1];
-  if (openFilePath !== "") onFileOpened(null, openFilePath)
+  if (isValidFile(openFilePath)) onFileOpened(null, openFilePath)
 }
 
 // Make this app a single instance app.

@@ -23,7 +23,6 @@ if (isElectron) {
         app = remote.app;
 
         electron.ipcRenderer.on("fileOpened", (info, filepath) => {
-            if (filepath === '.') return // BUG: Windows throws . when the application is opened (at least dev mode)...
             updateURLParams({ file: filepath });
             const dashboard = document.querySelector("nwb-dashboard");
             const activePage = dashboard.getAttribute("activePage");
