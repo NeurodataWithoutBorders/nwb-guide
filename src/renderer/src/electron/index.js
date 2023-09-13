@@ -1,4 +1,4 @@
-import { updateURLParams } from "../globals.js";
+import { updateURLParams } from "../../utils/url.js";
 import isElectron from "./check.js";
 
 export { isElectron };

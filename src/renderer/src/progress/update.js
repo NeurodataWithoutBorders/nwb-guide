@@ -1,6 +1,7 @@
+import { updateURLParams } from "../../utils/url.js";
 import { guidedProgressFilePath } from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
-import { joinPath, updateURLParams } from "../globals.js";
+import { joinPath } from "../globals.js";
 import { get } from "./index.js";
 
 export const update = (newDatasetName, previousDatasetName) => {

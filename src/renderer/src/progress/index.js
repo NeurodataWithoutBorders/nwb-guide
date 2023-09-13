@@ -9,9 +9,10 @@ import {
     conversionSaveFolderPath,
 } from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
-import { joinPath, runOnLoad, updateURLParams } from "../globals.js";
+import { joinPath, runOnLoad } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
 import { updateAppProgress, updateFile } from "./update.js";
+import { updateURLParams } from "../../utils/url.js";
 
 export * from "./update";
 
