@@ -62,7 +62,7 @@ export class Neurosift extends LitElement {
 
     render() {
         return this.url
-            ? html` <div class="loader-container">${new Loader({ message: "Loading Neurosift view..." })}</div>
+            ? html` <div class="loader-container">${new Loader({ message: `Loading Neurosift view...<br/><small>${this.url}</small>` })}</div>
                   <iframe
                       class="iframe-placeholder"
                       src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"

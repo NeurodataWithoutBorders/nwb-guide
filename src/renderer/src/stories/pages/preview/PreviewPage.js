@@ -22,6 +22,7 @@ export class PreviewPage extends Page {
         info: {
             type: "string",
             format: "file",
+            description: "Please provide a file path that you'd like to visualize using Neurosift. The NWB GUIDE will serve this file and access the appropriate URL automatically."
         },
         onUpdate: this.updatePath,
         onThrow,

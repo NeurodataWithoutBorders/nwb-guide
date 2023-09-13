@@ -1,4 +1,5 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 // From https://loading.io/css/
 
@@ -120,7 +121,7 @@ export class Loader extends LitElement {
         return html`
           <div>
           <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-          ${this.message ? html`<span>${this.message}</span>` : ''}
+          ${this.message ? html`<span>${unsafeHTML(this.message)}</span>` : ''}
           </div>
       `
     }
