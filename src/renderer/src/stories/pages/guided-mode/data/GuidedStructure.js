@@ -75,9 +75,9 @@ export class GuidedStructurePage extends Page {
     };
 
     async updated() {
-        const selected = this.info.globalState.interfaces;
+        const { interfaces = {} } = this.info.globalState;
 
-        if (Object.keys(selected).length > 0) this.list.emptyMessage = "Loading valid interfaces...";
+        if (Object.keys(interfaces).length > 0) this.list.emptyMessage = "Loading valid interfaces...";
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
@@ -93,7 +93,7 @@ export class GuidedStructurePage extends Page {
             )
             .catch((e) => console.error(e));
 
-        for (const [key, name] of Object.entries(selected || {})) {
+        for (const [key, name] of Object.entries(interfaces)) {
             let found = this.search.options?.find((o) => o.value === name);
 
             // If not found, spoof based on the key and names provided previously
