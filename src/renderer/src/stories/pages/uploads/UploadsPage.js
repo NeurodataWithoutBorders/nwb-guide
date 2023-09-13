@@ -32,7 +32,7 @@ export async function uploadToDandi(info, type = 'project' in info ? '' : 'folde
     }
 
     const result = await run(
-        type ? `upload/${type}` : 'upload',
+        type ? `upload/${type}` : "upload",
         {
             ...info,
             staging: isStaging(info.dandiset_id), // Automatically detect staging IDs
@@ -42,18 +42,18 @@ export async function uploadToDandi(info, type = 'project' in info ? '' : 'folde
     ).catch((e) => {
         notyf.open({
             type: "error",
-            message: e.message
-        })
+            message: e.message,
+        });
         throw e;
     });
 
+    if (result)
+        notyf.open({
+            type: "success",
+            message: `${info.project ?? info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+        });
 
-    if (result) notyf.open({
-        type: "success",
-        message: `${info.project ?? info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
-    });
-
-    return result
+    return result;
 }
 
 export class UploadsPage extends Page {
