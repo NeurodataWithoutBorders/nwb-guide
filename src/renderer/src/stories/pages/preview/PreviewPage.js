@@ -39,9 +39,9 @@ export class PreviewPage extends Page {
             <div style="display: grid; height: 100%; grid-template-rows: min-content min-content 1fr; gap: 10px;">
                 <div>
                     <div style="display: flex; align-items: end; justify-content: space-between;">
-                        <h1 style="margin: 0;">NWB File Preview</h1>
+                        <h1 style="margin: 0;">Neurosift File Visualization</h1>
                     </div>
-                    <p>Use Neurosift to preview of your NWB file.</p>
+                    <p>Explore your NWB file using Neurosift</p>
                     <hr />
                 </div>
                 ${this.input} ${this.neurosift}

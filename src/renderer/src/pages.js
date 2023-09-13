@@ -22,7 +22,7 @@ import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
 import tutorialIcon from "./stories/assets/exploration.svg?raw";
 import uploadIcon from "./stories/assets/dandi.svg?raw";
 import inspectIcon from "./stories/assets/inspect.svg?raw";
-import previewIcon from "./stories/assets/preview.svg?raw";
+import neurosiftIcon from "./stories/assets/neurosift-logo.svg?raw";
 
 import settingsIcon from "./stories/assets/settings.svg?raw";
 
@@ -173,8 +173,8 @@ const pages = {
         icon: inspectIcon,
     }),
     preview: new PreviewPage({
-        label: "Preview",
-        icon: previewIcon,
+        label: "Neurosift",
+        icon: neurosiftIcon,
     }),
     uploads: new UploadsPage({
         label: "Uploads",

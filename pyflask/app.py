@@ -67,7 +67,7 @@ def get_all_files():
 def handle_file_request(path):
     if request.method == "GET":
         if registered[path]:
-            return send_file(f"{sep}{unquote(path)}")
+            return send_file(unquote(path))
         else:
             app.abort(404, "Resource is not accessible.")
 
