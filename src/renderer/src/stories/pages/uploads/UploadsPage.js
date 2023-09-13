@@ -18,7 +18,7 @@ import { DandiResults } from "../../DandiResults.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info) {
+export async function uploadToDandi(info, type = 'project' in info ? '' : 'folder') {
     const api_key = global.data.DANDI?.api_key;
     if (!api_key) {
         await Swal.fire({

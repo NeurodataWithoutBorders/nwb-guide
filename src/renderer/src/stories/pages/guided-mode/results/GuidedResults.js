@@ -9,14 +9,14 @@ export class GuidedResultsPage extends Page {
     }
 
     render() {
-        const { conversion } = this.info.globalState.conversion;
+        const { conversion } = this.info.globalState;
 
         if (!conversion)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
         const { dandiset_id } = this.info.globalState.upload?.info ?? {};
 
-        return DandiResults({ id: dandiset_id, files: conversion });
+        return new DandiResults({ id: dandiset_id, files: conversion });
     }
 }
 
