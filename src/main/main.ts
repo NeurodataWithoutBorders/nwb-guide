@@ -383,7 +383,7 @@ function makeSingleInstance() {
   else app.on("second-instance", () => restoreWindow());
 }
 
-if (process.platform === 'darwin') initialize();
+initialize();
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) initialize()
