@@ -77,7 +77,7 @@ export class JSONSchemaInput extends LitElement {
                 width: 100%;
                 padding-top: 4px;
                 color: dimgray !important;
-              }
+            }
         `;
     }
 
@@ -127,10 +127,9 @@ export class JSONSchemaInput extends LitElement {
     }
 
     render() {
-
         const { info } = this;
 
-        const input = this.#render()
+        const input = this.#render();
         return html`
             ${input}
             ${info.description
@@ -138,7 +137,7 @@ export class JSONSchemaInput extends LitElement {
                       ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
                   </p>`
                 : ""}
-        `
+        `;
     }
 
     #render() {
