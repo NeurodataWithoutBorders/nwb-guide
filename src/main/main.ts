@@ -309,7 +309,6 @@ function initialize() {
     };
 
     globals.mainWindow = new BrowserWindow(windowOptions);
-    console.log('SETTING MAIN WINDOW')
     main.enable(globals.mainWindow.webContents);
 
   // HMR for renderer base on electron-vite cli.
@@ -318,7 +317,6 @@ function initialize() {
   else globals.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
 
     globals.mainWindow.once("closed", () => {
-      console.log('DELETING MAIN WINDOW')
       delete globals.mainWindow
     })
 
