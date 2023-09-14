@@ -1,4 +1,5 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
@@ -140,7 +141,7 @@ export class JSONSchemaInput extends LitElement {
             ${input}
             ${info.description
                 ? html`<p class="guided--text-input-instructions">
-                      ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
+                      ${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}
                   </p>`
                 : ""}
         `;
