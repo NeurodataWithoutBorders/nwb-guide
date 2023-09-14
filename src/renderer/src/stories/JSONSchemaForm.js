@@ -115,7 +115,7 @@ pre {
     color: transparent;
   }
 
-  h4 { 
+  h4 {
     margin: 0;
     margin-bottom: 5px;
     padding-bottom: 5px;
@@ -852,7 +852,10 @@ export class JSONSchemaForm extends LitElement {
 
         return html`
             <div>
-                ${schema.description ? html`<h4>Description</h4><p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>` : ""}
+                ${schema.description
+                    ? html`<h4>Description</h4>
+                          <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
+                    : ""}
                 ${this.#render(schema, this.resolved, this.#requirements)}
             </div>
         `;
