@@ -10,7 +10,7 @@ function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
             .join(" / ")}`;
 
     const isDir = type === "directory";
-    return multiple && (!isDir || (isDir && !native))
+    return multiple && (!isDir || (isDir && !native) || dialog)
         ? type === "directory"
             ? "directories"
             : "files"
@@ -122,7 +122,7 @@ export class FilesystemSelector extends LitElement {
     };
 
     #onCancel = () => {
-        this.#onThrow(`No ${this.type} selected`, "The request was cancelled by the user");
+        this.#onThrow(`No ${getObjectTypeReferenceString(this.type, this.multiple, { native: true })} selected`, "The request was cancelled by the user");
     };
 
     #checkType = (value) => {
@@ -133,12 +133,13 @@ export class FilesystemSelector extends LitElement {
 
     #handleFiles = async (pathOrPaths) => {
         if (!pathOrPaths)
-            this.#onThrow("No paths detected", `Unable to parse ${this.type} path${this.multiple ? "s" : ""}`);
+            this.#onThrow("No paths detected", `Unable to parse ${getObjectTypeReferenceString(this.type, false, { native: true })} path${this.multiple ? "s" : ""}`);
 
         if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
         else this.#checkType(pathOrPaths);
 
         let resolvedValue = pathOrPaths;
+
         if (Array.isArray(resolvedValue) && !this.multiple) {
             if (resolvedValue.length > 1)
                 this.#onThrow(
@@ -158,9 +159,9 @@ export class FilesystemSelector extends LitElement {
 
     async selectFormat(type = this.type) {
         if (dialog) {
-            const file = await this.#useElectronDialog(type);
-            const path = file.filePath ?? file.filePaths?.[0];
-            this.#handleFiles(path);
+            const results = await this.#useElectronDialog(type);
+            // const path = file.filePath ?? file.filePaths?.[0];
+            this.#handleFiles(results.filePath ?? results.filePaths);
         } else {
             let handles = await (type === "directory"
                 ? window.showDirectoryPicker()
@@ -168,6 +169,7 @@ export class FilesystemSelector extends LitElement {
             ).catch((e) => this.#onCancel()); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
+            console.log(result, handles)
             this.#handleFiles(result);
         }
     }
@@ -236,11 +238,9 @@ export class FilesystemSelector extends LitElement {
                               >Drop ${objectTypeReference}
                               here${isMultipleTypes
                                   ? ""
-                                  : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
-                                        native: true,
-                                    })}`}</span
+                                  : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, { native: true })}`}</span
                           >${this.multiple &&
-                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory")))
+                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory") && !dialog))
                               ? html`<br /><small
                                         >Multiple directory support only available using drag-and-drop.</small
                                     >`

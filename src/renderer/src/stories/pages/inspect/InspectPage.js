@@ -6,7 +6,7 @@ import { Button } from "../../Button.js";
 import { run } from "../guided-mode/options/utils.js";
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { Modal } from "../../Modal";
-import { truncateFilePaths } from "../../preview/NWBFilePreview.js";
+import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.js";
 import { InspectorList } from "../../preview/inspector/InspectorList.js";
 
 export class InspectPage extends Page {
@@ -15,25 +15,30 @@ export class InspectPage extends Page {
     }
 
     showReport = async (value) => {
+
         if (!value) {
-            const message = "Please provide a folder to inspect.";
+            const message = "Please provide filesystem entries to inspect.";
             onThrow(message);
             throw new Error(message);
         }
 
+        const result = await run("inspect", { paths: value }, { title: "Inspecting selected filesystem entries." }).catch((e) => {
+            this.notify(e.message, "error");
+            throw e;
+        })
+
+        if (!result.length) return this.notify('No messages received from the NWB Inspector')
+
         const items = truncateFilePaths(
-            await run("inspect_folder", { path: value }, { title: "Inspecting your files" }).catch((e) => {
-                this.notify(e.message, "error");
-                throw e;
-            }),
-            value
+            result,
+            getSharedPath(result.map(o => o.file_path))
         );
 
         const list = new InspectorList({ items });
         list.style.padding = "25px";
 
         const modal = new Modal({
-            header: value,
+            header: value.length === 1 ? value : `Selected Filesystem Entries`,
         });
         modal.append(list);
         document.body.append(modal);
@@ -42,17 +47,20 @@ export class InspectPage extends Page {
     };
 
     input = new JSONSchemaInput({
-        path: ["folder_path"],
+        path: ["filesystem_paths"],
         info: {
-            type: "string",
-            format: "directory",
+            type: "array",
+            items: {
+                format: ["file", "directory"],
+                multiple: true
+            }
         },
         onThrow,
     });
 
     render() {
         const button = new Button({
-            label: "Inspect Files",
+            label: "Start Inspection",
             onClick: async () => this.showReport(this.input.value),
         });
 
