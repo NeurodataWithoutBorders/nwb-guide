@@ -36,8 +36,7 @@ export class DandiResults extends LitElement {
 
         const otherElIds = ["embargo_status"];
 
-        const liveId = this.id; // '000552' // From Huszar
-        const dandiset = await get(liveId, isStaging(this.id) ? "staging" : undefined);
+        const dandiset = await get(this.id, isStaging(this.id) ? "staging" : undefined);
 
         otherElIds.forEach((str) => handleId(str, dandiset));
         elIds.forEach((str) => handleId(str, dandiset.draft_version));

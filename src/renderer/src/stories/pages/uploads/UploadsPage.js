@@ -18,7 +18,7 @@ import { DandiResults } from "../../DandiResults.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info) {
+export async function uploadToDandi(info, type = "project" in info ? "" : "folder") {
     const api_key = global.data.DANDI?.api_key;
     if (!api_key) {
         await Swal.fire({
@@ -31,8 +31,8 @@ export async function uploadToDandi(info) {
         return this.to("settings");
     }
 
-    return await run(
-        "upload/folder",
+    const result = await run(
+        type ? `upload/${type}` : "upload",
         {
             ...info,
             staging: isStaging(info.dandiset_id), // Automatically detect staging IDs
@@ -40,9 +40,20 @@ export async function uploadToDandi(info) {
         },
         { title: "Uploading to DANDI" }
     ).catch((e) => {
-        this.notify(e.message, "error");
+        notyf.open({
+            type: "error",
+            message: e.message,
+        });
         throw e;
     });
+
+    if (result)
+        notyf.open({
+            type: "success",
+            message: `${info.project ?? info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+        });
+
+    return result;
 }
 
 export class UploadsPage extends Page {
@@ -58,14 +69,7 @@ export class UploadsPage extends Page {
             label: defaultButtonMessage,
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
-                const results = await uploadToDandi.call(this, { ...globalState });
-
-                if (results)
-                    notyf.open({
-                        type: "success",
-                        message: `${globalState.nwb_folder_path} successfully uploaded to Dandiset ${globalState.dandiset_id}`,
-                    });
-
+                await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
 
