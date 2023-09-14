@@ -76,8 +76,20 @@
     "mac": {
       "asar": true,
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ],
       "icon": "src/renderer/assets/img/logo-guide-draft.png",
       "darkModeSupport": false,

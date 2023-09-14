@@ -50,6 +50,18 @@ jobs:
           # Use Keychain Access to export the certificate as a .p12
           # base64 -i cent.p12 -o base64.txt
           # Open base64.txt and copy the contents to the nwb-guide repository secret for MACOS_CERTIFICATE
+          # For local development, download the appropriate Apple Intermediate Certificate
+          # from https://www.apple.com/certificateauthority/ to make certificate trusted/valid
+          # See https://developer.apple.com/forums/thread/705473
+          # For this, it is Worldwide Developer Relations - G3
+          # Confirm that the certificate now shows up as trusted in Keychain Access
+          # Then go to https://appleid.apple.com/account/manage
+          # and create an App-Specific Password
+          # Use that for local building and in the secrets.APPLE_PASSWORD repository secret
+          # Also review and agree to any pending agreements in
+          # https://appstoreconnect.apple.com/agreements/#/ for Free Apps
+          # and the Apple Developer Program License Agreement, which updates periodically
+
           # Currently this is set up to use Ryan's account and certificate
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
@@ -57,6 +69,6 @@ jobs:
       - name: Build and deploy on MAC
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          appleId: ${{ secrets.APPLE_ID }}  # currently this is set to Ryan's Apple ID and password
+          appleId: ${{ secrets.APPLE_ID }}  # currently this is set to Ryan's Apple ID and app-specific password
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
         run: npm run deploy:mac
