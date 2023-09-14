@@ -1,8 +1,10 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { capitalize, header } from "./forms/utils";
+import { header } from "./forms/utils";
 import { resolve } from "../promises";
 import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
@@ -111,14 +113,6 @@ pre {
 
   .required.conditional label:after {
     color: transparent;
-  }
-
-
-  .guided--text-input-instructions {
-    font-size: 13px;
-    width: 100%;
-    padding-top: 4px;
-    color: dimgray !important;
   }
 `;
 
@@ -422,11 +416,6 @@ export class JSONSchemaForm extends LitElement {
             >
                 <label class="guided--form-label">${header(name)}</label>
                 ${interactiveInput}
-                ${info.description
-                    ? html`<p class="guided--text-input-instructions">
-                          ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
-                      </p>`
-                    : ""}
                 <div class="errors"></div>
                 <div class="warnings"></div>
             </div>

@@ -8,6 +8,8 @@ import { Button } from "./Button";
 import { List } from "./List";
 import { Modal } from "./Modal";
 
+import { capitalize } from "./forms/utils";
+
 const isFilesystemSelector = (format) => {
     if (Array.isArray(format)) return format.map(isFilesystemSelector).every(Boolean) ? format : null;
 
@@ -75,6 +77,15 @@ export class JSONSchemaInput extends LitElement {
             input[type="number"].hideStep {
                 -moz-appearance: textfield;
             }
+
+            .guided--text-input-instructions {
+                font-size: 13px;
+                width: 100%;
+                padding-top: 4px;
+                color: dimgray !important;
+                margin: 0 0 1em;
+                line-height: 1.4285em;
+            }
         `;
     }
 
@@ -124,6 +135,20 @@ export class JSONSchemaInput extends LitElement {
     }
 
     render() {
+        const { info } = this;
+
+        const input = this.#render();
+        return html`
+            ${input}
+            ${info.description
+                ? html`<p class="guided--text-input-instructions">
+                      ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
+                  </p>`
+                : ""}
+        `;
+    }
+
+    #render() {
         const { validateOnChange, info, path: fullPath } = this;
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
@@ -141,9 +166,9 @@ export class JSONSchemaInput extends LitElement {
                 value: this.value,
                 onSelect: (filePath) => this.#updateData(fullPath, filePath),
                 onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
-                onThrow: (...args) => this.form.onThrow(...args),
-                dialogOptions: this.form.dialogOptions,
-                dialogType: this.form.dialogType,
+                onThrow: (...args) => this.form?.onThrow(...args),
+                dialogOptions: this.form?.dialogOptions,
+                dialogType: this.form?.dialogType,
                 multiple: isArray,
             });
             el.classList.add("schema-input");
@@ -154,7 +179,7 @@ export class JSONSchemaInput extends LitElement {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
             // Catch tables
-            const itemSchema = this.form.getSchema("items", info);
+            const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
             const isTable = itemSchema.type === "object";
 
             const fileSystemFormat = isFilesystemSelector(itemSchema.format);
@@ -163,17 +188,22 @@ export class JSONSchemaInput extends LitElement {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
+
+                    // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: (key, parent, v) => {
-                        return validateOnChange && this.form.validateOnChange(key, parent, fullPath, v);
+                        return validateOnChange && this.#triggerValidation(key, this.form.tables[name], path); // this.form.validateOnChange(key, parent, fullPath, v);
                     },
-                    onStatusChange: () => this.form.checkStatus(), // Check status on all elements
-                    validateEmptyCells: this.form.validateEmptyValues,
-                    deferLoading: this.form.deferLoading,
+
+                    onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
+                    validateEmptyCells: this.form?.validateEmptyValues,
+                    deferLoading: this.form?.deferLoading,
                     onLoaded: () => {
-                        this.form.nLoaded++;
-                        this.form.checkAllLoaded();
+                        if (this.form) {
+                            this.form.nLoaded++;
+                            this.form.checkAllLoaded();
+                        }
                     },
-                    onThrow: (...args) => this.form.onThrow(...args),
+                    onThrow: (...args) => this.form?.onThrow(...args),
                 };
 
                 return (this.form.tables[name] =

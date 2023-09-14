@@ -133,6 +133,10 @@ export class Dashboard extends LitElement {
         this.#updated();
     }
 
+    requestPageUpdate() {
+        if (this.#active) this.#active.requestUpdate();
+    }
+
     createRenderRoot() {
         return this;
     }
@@ -229,9 +233,12 @@ export class Dashboard extends LitElement {
                     pageState = state.pages[id] = {
                         visited: false,
                         active: false,
+                        saved: false,
                         pageLabel: page.info.label,
                         pageTitle: page.info.title,
                     };
+
+                info.states = pageState;
 
                 state.active = false;
                 pageState.active = false;
