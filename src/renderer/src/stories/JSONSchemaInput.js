@@ -77,6 +77,8 @@ export class JSONSchemaInput extends LitElement {
                 width: 100%;
                 padding-top: 4px;
                 color: dimgray !important;
+                margin: 0 0 1em;
+                line-height: 1.4285em;
             }
         `;
     }

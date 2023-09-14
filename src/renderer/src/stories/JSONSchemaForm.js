@@ -1,4 +1,6 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
