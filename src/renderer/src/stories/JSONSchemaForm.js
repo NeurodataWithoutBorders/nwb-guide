@@ -114,6 +114,22 @@ pre {
   .required.conditional label:after {
     color: transparent;
   }
+
+  h4 { 
+    margin: 0;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid gainsboro;
+  }
+
+  .guided--text-input-instructions {
+    font-size: 13px;
+    width: 100%;
+    padding-top: 4px;
+    color: dimgray !important;
+    margin: 0 0 1em;
+    line-height: 1.4285em;
+}
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -238,10 +254,10 @@ export class JSONSchemaForm extends LitElement {
 
         // NOTE: Forms with nested forms will handle their own state updates
         if (!value) {
-            delete resultParent[name];
+            if (fullPath.length === 1) delete resultParent[name];
             delete resolvedParent[name];
         } else {
-            resultParent[name] = value;
+            if (fullPath.length === 1) resultParent[name] = value;
             resolvedParent[name] = value;
         }
 
@@ -836,7 +852,7 @@ export class JSONSchemaForm extends LitElement {
 
         return html`
             <div>
-                ${false ? html`<h2>${schema.title}</h2>` : ""} ${false ? html`<p>${schema.description}</p>` : ""}
+                ${schema.description ? html`<h4>Description</h4><p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>` : ""}
                 ${this.#render(schema, this.resolved, this.#requirements)}
             </div>
         `;

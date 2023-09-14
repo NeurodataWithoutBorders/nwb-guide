@@ -17,7 +17,7 @@ export class Page extends LitElement {
     //     );
     // }
 
-    info = { globalState: {} };
+    info = { globalState: {}, states: { saved: false } };
 
     constructor(info = {}) {
         super();
