@@ -8,6 +8,8 @@ import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 
+const defaultEmptyMessage = "No interfaces selected";
+
 export class GuidedStructurePage extends Page {
     constructor(...args) {
         super(...args);
@@ -32,7 +34,8 @@ export class GuidedStructurePage extends Page {
     });
 
     list = new List({
-        emptyMessage: "No interfaces selected",
+        emptyMessage: defaultEmptyMessage,
+        onChange: () => (this.unsavedUpdates = true),
     });
 
     addButton = new Button();
@@ -77,7 +80,7 @@ export class GuidedStructurePage extends Page {
     async updated() {
         const { interfaces = {} } = this.info.globalState;
 
-        if (Object.keys(interfaces).length > 0) this.list.emptyMessage = "Loading valid interfaces...";
+        this.list.emptyMessage = "Loading valid interfaces...";
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
@@ -92,6 +95,8 @@ export class GuidedStructurePage extends Page {
                 })
             )
             .catch((e) => console.error(e));
+
+        this.list.emptyMessage = defaultEmptyMessage;
 
         for (const [key, name] of Object.entries(interfaces)) {
             let found = this.search.options?.find((o) => o.value === name);

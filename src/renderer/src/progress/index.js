@@ -11,7 +11,8 @@ import {
 import { fs } from "../electron/index.js";
 import { joinPath, runOnLoad } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
-import { updateAppProgress, updateFile, updateURLParams } from "./update.js";
+import { updateAppProgress, updateFile } from "./update.js";
+import { updateURLParams } from "../../utils/url.js";
 
 export * from "./update";
 

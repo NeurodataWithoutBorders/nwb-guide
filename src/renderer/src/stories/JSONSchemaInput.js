@@ -8,6 +8,8 @@ import { Button } from "./Button";
 import { List } from "./List";
 import { Modal } from "./Modal";
 
+import { capitalize } from "./forms/utils";
+
 const isFilesystemSelector = (format) => {
     const matched = name.match(/(.+_)?(.+)_paths?/);
     if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
@@ -73,6 +75,15 @@ export class JSONSchemaInput extends LitElement {
             input[type="number"].hideStep {
                 -moz-appearance: textfield;
             }
+
+            .guided--text-input-instructions {
+                font-size: 13px;
+                width: 100%;
+                padding-top: 4px;
+                color: dimgray !important;
+                margin: 0 0 1em;
+                line-height: 1.4285em;
+            }
         `;
     }
 
@@ -122,6 +133,20 @@ export class JSONSchemaInput extends LitElement {
     }
 
     render() {
+        const { info } = this;
+
+        const input = this.#render();
+        return html`
+            ${input}
+            ${info.description
+                ? html`<p class="guided--text-input-instructions">
+                      ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
+                  </p>`
+                : ""}
+        `;
+    }
+
+    #render() {
         const { validateOnChange, info, path: fullPath } = this;
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
