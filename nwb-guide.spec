@@ -1,5 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
+from pathlib import Path
+
 sys.setrecursionlimit(sys.getrecursionlimit() * 5)
 
 from PyInstaller.utils.hooks import collect_data_files
@@ -27,7 +29,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['pyflask\\app.py'],
+    [f"{Path('pyflask') / 'app.py'}"],
     pathex=[],
     binaries=binaries,
     datas=datas,
