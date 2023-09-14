@@ -70,7 +70,7 @@ let globals: {
   },
 
   set mainWindowReady(v) {
-    if (globals.mainWindow) throw new Error('Main window cannot be ready. It does not exist...')
+    if (!globals.mainWindow) throw new Error('Main window cannot be ready. It does not exist...')
     mainWindowReady = v
     if (v) readyQueue.forEach(f => onWindowReady(f))
     readyQueue = []
