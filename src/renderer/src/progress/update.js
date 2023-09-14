@@ -1,3 +1,4 @@
+import { updateURLParams } from "../../utils/url.js";
 import { guidedProgressFilePath } from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
 import { joinPath } from "../globals.js";
@@ -23,21 +24,6 @@ export const update = (newDatasetName, previousDatasetName) => {
         return "Dataset name updated";
     } else throw new Error("No previous dataset name provided");
 };
-
-export function updateURLParams(paramsToUpdate) {
-    const params = new URLSearchParams(location.search);
-    for (let key in paramsToUpdate) {
-        const value = paramsToUpdate[key];
-        if (value == undefined) params.delete(key);
-        else params.set(key, value);
-    }
-
-    // Update browser history state
-    const value = `${location.pathname}?${params}`;
-    if (history.state) Object.assign(history.state, paramsToUpdate);
-    window.history.pushState(history.state, null, value);
-}
-
 export const updateAppProgress = (
     pageId,
     dataOrProjectName = {},

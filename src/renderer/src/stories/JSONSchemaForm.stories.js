@@ -22,6 +22,7 @@ const defaultSchema = {
         test: {
             type: "string",
             default: true,
+            description: "This is a test description",
         },
         warn: {
             type: "string",

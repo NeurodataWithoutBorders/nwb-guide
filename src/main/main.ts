@@ -70,6 +70,7 @@ let globals: {
   },
 
   set mainWindowReady(v) {
+    if (!globals.mainWindow) throw new Error('Main window cannot be ready. It does not exist...')
     mainWindowReady = v
     if (v) readyQueue.forEach(f => onWindowReady(f))
     readyQueue = []
@@ -80,7 +81,7 @@ function send(this: BrowserWindow, ...args: any[]) {
   return this.webContents.send(...args)
 }
 
-const onWindowReady = (f: (win: BrowserWindow) => any) => (mainWindowReady) ? f(globals.mainWindow) : readyQueue.push(f)
+const onWindowReady = (f: (win: BrowserWindow) => any) => (globals.mainWindowReady) ? f(globals.mainWindow) : readyQueue.push(f)
 
 
 // Pass all important log functions to the application
@@ -355,14 +356,18 @@ function initialize() {
   else app.on("ready", onAppReady)
 }
 
-function onFileOpened(_, path: string) {
+function isValidFile(filepath: string) {
+  return !fs.existsSync(filepath) && path.extname(filepath) === '.nwb'
+}
+
+function onFileOpened(_, filepath: string) {
     restoreWindow() || initialize(); // Ensure the application is properly visible
-    onWindowReady((win) => win.webContents.send('fileOpened', path))
+    onWindowReady((win) => send.call(win, 'fileOpened', filepath))
 }
 
 if (isWindows && process.argv.length >= 2) {
   const openFilePath = process.argv[1];
-  if (openFilePath !== "") onFileOpened(null, openFilePath)
+  if (isValidFile(openFilePath)) onFileOpened(null, openFilePath)
 }
 
 // Make this app a single instance app.
