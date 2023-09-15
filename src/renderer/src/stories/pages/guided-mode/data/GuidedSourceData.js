@@ -104,6 +104,7 @@ export class GuidedSourceDataPage extends ManagedPage {
         const instanceId = `sub-${subject}/ses-${session}`;
 
         const schema = this.info.globalState.schema.source_data;
+        delete schema.description;
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
