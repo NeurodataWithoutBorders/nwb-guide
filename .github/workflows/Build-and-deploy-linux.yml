@@ -35,5 +35,4 @@ jobs:
       - name: Build and deploy on Linux
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm run deploy:linux
+        run: npm run deploy:linux
