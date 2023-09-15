@@ -40,7 +40,7 @@ export class SettingsPage extends Page {
             const res = resolved[prop];
             if (propInfo) setUndefinedIfNotDeclared(propInfo, res);
         }
-        if (!("api_key" in resolved.DANDI)) resolved.DANDI.api_key = undefined;
+
         merge(this.form.resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
@@ -69,7 +69,7 @@ export class SettingsPage extends Page {
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: (name, parent) => {
                 const value = parent[name];
-                if (name === "api_key") return dandiAPITokenRegex.test(value);
+                if (name.includes("api_key")) return dandiAPITokenRegex.test(value);
                 return true;
             },
             onThrow,
