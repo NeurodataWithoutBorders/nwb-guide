@@ -420,7 +420,6 @@ def generate_dataset(test_data_directory_path: str):
     return {"output_directory": str(output_directory)}
 
 def inspect_nwb_file(payload):
-    import json
     from nwbinspector import inspect_nwbfile
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
@@ -441,7 +440,6 @@ def inspect_nwb_file(payload):
 
 
 def inspect_nwb_file(payload):
-    import json
     from nwbinspector import inspect_nwbfile
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
@@ -462,7 +460,6 @@ def inspect_nwb_file(payload):
 
 def inspect_nwb_folder(payload):
 
-    import json
     from nwbinspector import inspect_all
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
