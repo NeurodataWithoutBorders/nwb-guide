@@ -17,12 +17,13 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
-        const isNewDandiset = globalState.upload.dandiset_id !== this.localState.dandiset_id;
+        const isNewDandiset = globalState.upload?.dandiset_id !== this.localState.dandiset_id;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
         if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
     };
 
     footer = {
+        next: "Upload Project",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
@@ -46,21 +47,17 @@ export class GuidedUploadPage extends Page {
                 if (!result || !result.isConfirmed) return this.to(1);
             }
 
-            const results = await uploadToDandi.call(this, {
+            globalUploadInfo.results = await uploadToDandi.call(this, {
                 ...globalUploadInfo.info,
                 project: globalState.project.name,
             });
-
-            globalUploadInfo.results = results; // Save the preview results
-
-            this.unsavedUpdates = true; // Ensure that this saves automatically
 
             this.to(1);
         },
     };
 
     render() {
-        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {}, results: null }, {}));
+        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
 
         this.form = new JSONSchemaForm({
             schema: dandiUploadSchema,

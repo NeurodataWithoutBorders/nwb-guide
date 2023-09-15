@@ -17,7 +17,7 @@ export class Page extends LitElement {
     //     );
     // }
 
-    info = { globalState: {} };
+    info = { globalState: {}, states: { saved: false } };
 
     constructor(info = {}) {
         super();
@@ -64,7 +64,7 @@ export class Page extends LitElement {
         this.beforeTransition();
 
         // Otherwise note unsaved updates if present
-        if (this.unsavedUpdates) {
+        if (this.unsavedUpdates || this.info.states?.saved) {
             if (transition === 1) await this.save(); // Save before a single forward transition
             else {
                 Swal.fire({
@@ -95,6 +95,7 @@ export class Page extends LitElement {
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave();
         save(this, overrides);
+        this.info.states.saved = true;
         this.unsavedUpdates = false;
     };
 

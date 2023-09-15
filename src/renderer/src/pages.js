@@ -21,10 +21,15 @@ import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/Guided
 import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
 import tutorialIcon from "./stories/assets/exploration.svg?raw";
 import uploadIcon from "./stories/assets/dandi.svg?raw";
+import inspectIcon from "./stories/assets/inspect.svg?raw";
+import neurosiftIcon from "./stories/assets/neurosift-logo.svg?raw";
+
 import settingsIcon from "./stories/assets/settings.svg?raw";
 
 import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 import { SettingsPage } from "./stories/pages/settings/SettingsPage";
+import { InspectPage } from "./stories/pages/inspect/InspectPage";
+import { PreviewPage } from "./stories/pages/preview/PreviewPage";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -162,6 +167,14 @@ const pages = {
                 section: sections[3],
             }),
         },
+    }),
+    inspect: new InspectPage({
+        label: "Inspect",
+        icon: inspectIcon,
+    }),
+    preview: new PreviewPage({
+        label: "Neurosift",
+        icon: neurosiftIcon,
     }),
     uploads: new UploadsPage({
         label: "Uploads",

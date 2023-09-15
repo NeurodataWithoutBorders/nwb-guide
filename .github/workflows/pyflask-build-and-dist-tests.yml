@@ -30,19 +30,16 @@ jobs:
             os: ubuntu-latest
             label: environments/environment-Linux.yml
             prefix: /usr/share/miniconda3/envs/nwb-guide
-            shorthand: unix
 
-          - python-version: "3.10"
+          - python-version: "3.9"
             os: macos-latest
             label: environments/environment-Mac.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
-            shorthand: unix
 
-          - python-version: "3.10"
+          - python-version: "3.9"
             os: windows-latest
             label: environments/environment-Windows.yml
             prefix: C:\Miniconda3\envs\nwb-guide
-            shorthand: win
 
     steps:
       - uses: actions/checkout@v3
@@ -83,16 +80,12 @@ jobs:
 
       - run: npm ci
 
+      # fix for macos build
+      - if: matrix.os == 'macos-latest'
+        run: rm -f /Users/runner/miniconda3/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
+
       - name: Build PyFlask distribution
-        run: npm run build:flask:${{ matrix.shorthand }}
-
-      #- if: matrix.os == 'windows-latest'
-      #  name: Run test on build executable
-      #  run: node tests/testPyinstallerExecutable.js --script ./build/nwb-guide/nwb-guide.exe
-
-      #- if: matrix.os != 'windows-latest'
-      #  name: Run test on build executable
-      #  run: node tests/testPyinstallerExecutable.js --script ./build/nwb-guide/nwb-guide
+        run: npm run build:flask
 
       - name: Run test on distributed executable
         run: node tests/testPyinstallerExecutable.js

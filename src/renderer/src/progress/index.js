@@ -1,10 +1,18 @@
 import Swal from "sweetalert2";
 
-import { guidedProgressFilePath, reloadPageToHome, isStorybook, appDirectory } from "../dependencies/simple.js";
+import {
+    guidedProgressFilePath,
+    reloadPageToHome,
+    isStorybook,
+    appDirectory,
+    stubSaveFolderPath,
+    conversionSaveFolderPath,
+} from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
 import { joinPath, runOnLoad } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
-import { updateAppProgress, updateFile, updateURLParams } from "./update.js";
+import { updateAppProgress, updateFile } from "./update.js";
+import { updateURLParams } from "../../utils/url.js";
 
 export * from "./update";
 
@@ -102,14 +110,14 @@ export function resume(name) {
 
 export const remove = async (name) => {
     const result = await Swal.fire({
-        title: `Are you sure you would like to delete NWB GUIDE progress made on the dataset: ${name}?`,
-        text: "Your progress file will be deleted permanently, and all existing progress will be lost.",
+        title: `Are you sure you would like to delete this conversion pipeline?`,
+        html: `All related files will be deleted permanently, and existing progress will be lost.`,
         icon: "warning",
         heightAuto: false,
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Delete progress file",
+        confirmButtonText: `Delete ${name}`,
         cancelButtonText: "Cancel",
         focusCancel: true,
     });
@@ -119,8 +127,16 @@ export const remove = async (name) => {
         const progressFilePathToDelete = joinPath(guidedProgressFilePath, name + ".json");
 
         //delete the progress file
-        if (fs) fs.unlinkSync(progressFilePathToDelete, (err) => console.log(err));
+        if (fs) fs.unlinkSync(progressFilePathToDelete);
         else localStorage.removeItem(progressFilePathToDelete);
+
+        if (fs) {
+            // delete default stub location
+            fs.rmSync(joinPath(stubSaveFolderPath, name), { recursive: true, force: true });
+
+            // delete default conversion location
+            fs.rmSync(joinPath(conversionSaveFolderPath, name), { recursive: true, force: true });
+        }
 
         return true;
     }

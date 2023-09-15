@@ -22,7 +22,6 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: nwb-guide
-          #mamba-version: "*"
           environment-file: environments/environment-MAC.yml
           auto-activate-base: false
 
@@ -32,6 +31,9 @@ jobs:
 
       - name: Install package.json modules and their dependencies
         run: npm install --ignore-scripts
+
+      - name: Remove bad sonpy file (might make Spike2 format unusable on Mac - should exclude from selection)
+        run: rm -f /usr/local/miniconda/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
 
       - uses: apple-actions/import-codesign-certs@v1
         with:
@@ -56,5 +58,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           appleId: ${{ secrets.APPLE_ID }}  # currently this is set to Ryan's Apple ID and password
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
-        run: |
-          npm run deploy:mac
+        run: npm run deploy:mac
