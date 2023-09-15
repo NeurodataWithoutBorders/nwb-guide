@@ -19,8 +19,6 @@ semantic.json
 build/
 yarn.lock
 
-*.spec
-
 *.pyc
 src/.DS_Store
 .DS_Store

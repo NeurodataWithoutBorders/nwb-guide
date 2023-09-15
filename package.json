@@ -11,13 +11,14 @@
     "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
+    "echo": "python -c \"print('hello')\"",
     "build:app": "electron-vite build --outDir build",
-    "build:win": "npm run build && npm run build:flask:win && npm run build:electron:win",
-    "build:mac": "npm run build && npm run build:flask:unix && npm run build:electron:mac",
-    "build:linux": "npm run build && npm run build:flask:unix && npm run build:electron:linux",
-    "build:flask:base": "python -m PyInstaller --log-level DEBUG --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --collect-data jsonschema_specifications --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ci_info --collect-all ndx_dandi_icephys --hidden-import scipy._distributor_init --hidden-import scipy._lib.messagestream --hidden-import scipy._lib._ccallback --hidden-import scipy._lib._testutils --hidden-import email_validator",
-    "build:flask:win": "npm run build:flask:base -- --add-data ./paths.config.json;. --add-data ./package.json;.",
-    "build:flask:unix": "npm run build:flask:base -- --add-data ./paths.config.json:. --add-data ./package.json:.",
+    "build:win": "npm run build && npm run build:flask && npm run build:electron:win",
+    "build:mac": "npm run build && npm run build:flask && npm run build:electron:mac",
+    "build:linux": "npm run build && npm run build:flask && npm run build:electron:linux",
+    "build:flask": "python -m PyInstaller nwb-guide.spec --log-level DEBUG --clean --noconfirm --distpath ./build/flask",
+    "build:flask:spec:base": "pyi-makespec --name nwb-guide --onedir --collect-data jsonschema_specifications --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ndx_dandi_icephys --collect-all ci_info --hidden-import scipy._distributor_init --hidden-import scipy._lib.messagestream --hidden-import scipy._lib._ccallback --hidden-import scipy._lib._testutils --hidden-import email_validator ./pyflask/app.py",
+    "build:flask:spec": "npm run build:flask:spec:base && python prepare_pyinstaller_spec.py",
     "build:electron:win": "electron-builder build --win --publish never",
     "build:electron:mac": "electron-builder build --mac --publish never",
     "build:electron:linux": "electron-builder build --linux --publish never",
@@ -57,7 +58,7 @@
       {
         "ext": "nwb",
         "name": "NWB File",
-        "role": "Editor"
+        "role": "Viewer"
       }
     ],
     "files": [

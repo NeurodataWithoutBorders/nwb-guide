@@ -1,4 +1,5 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
@@ -8,7 +9,13 @@ import { Button } from "./Button";
 import { List } from "./List";
 import { Modal } from "./Modal";
 
-const filesystemQueries = ["file", "directory"];
+import { capitalize } from "./forms/utils";
+
+const isFilesystemSelector = (format) => {
+    const matched = name.match(/(.+_)?(.+)_paths?/);
+    if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
+    return ["file", "directory"].includes(format) ? format : null; // Handle file and directory formats
+};
 
 export class JSONSchemaInput extends LitElement {
     static get styles() {
@@ -69,6 +76,15 @@ export class JSONSchemaInput extends LitElement {
             input[type="number"].hideStep {
                 -moz-appearance: textfield;
             }
+
+            .guided--text-input-instructions {
+                font-size: 13px;
+                width: 100%;
+                padding-top: 4px;
+                color: dimgray !important;
+                margin: 0 0 1em;
+                line-height: 1.4285em;
+            }
         `;
     }
 
@@ -118,6 +134,20 @@ export class JSONSchemaInput extends LitElement {
     }
 
     render() {
+        const { info } = this;
+
+        const input = this.#render();
+        return html`
+            ${input}
+            ${info.description
+                ? html`<p class="guided--text-input-instructions">
+                      ${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}
+                  </p>`
+                : ""}
+        `;
+    }
+
+    #render() {
         const { validateOnChange, info, path: fullPath } = this;
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
@@ -128,27 +158,58 @@ export class JSONSchemaInput extends LitElement {
         const hasItemsRef = "items" in info && "$ref" in info.items;
         if (!("items" in info) || (!("type" in info.items) && !hasItemsRef)) info.items = { type: "string" };
 
+        // Handle file and directory formats
+        const createFilesystemSelector = (format) => {
+            const el = new FilesystemSelector({
+                type: format,
+                value: this.value,
+                onSelect: (filePath) => this.#updateData(fullPath, filePath),
+                onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
+                onThrow: (...args) => this.form?.onThrow(...args),
+                dialogOptions: this.form?.dialogOptions,
+                dialogType: this.form?.dialogType,
+                multiple: isArray,
+            });
+            el.classList.add("schema-input");
+            return el;
+        };
+
         if (isArray) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
             // Catch tables
-            const itemSchema = this.form.getSchema("items", info);
+            const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
             const isTable = itemSchema.type === "object";
-            if (isTable) {
+
+            const fileSystemFormat = isFilesystemSelector(itemSchema.format);
+            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
+            else if (isTable) {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
+
+                    // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: (key, parent, v) => {
-                        return validateOnChange && this.form.validateOnChange(key, parent, fullPath, v);
+                        return (
+                            validateOnChange &&
+                            (this.onValidate
+                                ? this.onValidate()
+                                : this.form
+                                ? this.form.validateOnChange(key, parent, fullPath, v)
+                                : "")
+                        );
                     },
-                    onStatusChange: () => this.form.checkStatus(), // Check status on all elements
-                    validateEmptyCells: this.form.validateEmptyValues,
-                    deferLoading: this.form.deferLoading,
+
+                    onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
+                    validateEmptyCells: this.form?.validateEmptyValues,
+                    deferLoading: this.form?.deferLoading,
                     onLoaded: () => {
-                        this.form.nLoaded++;
-                        this.form.checkAllLoaded();
+                        if (this.form) {
+                            this.form.nLoaded++;
+                            this.form.checkAllLoaded();
+                        }
                     },
-                    onThrow: (...args) => this.form.onThrow(...args),
+                    onThrow: (...args) => this.form?.onThrow(...args),
                 };
 
                 return (this.form.tables[name] =
@@ -242,24 +303,8 @@ export class JSONSchemaInput extends LitElement {
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
             />`;
         } else if (info.type === "string" || info.type === "number") {
-            let format = info.format;
-            const matched = name.match(/(.+_)?(.+)_path/);
-            if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
-
-            // Handle file and directory formats
-            if (filesystemQueries.includes(format)) {
-                const el = new FilesystemSelector({
-                    type: format,
-                    value: this.value,
-                    onSelect: (filePath) => this.#updateData(fullPath, filePath),
-                    onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
-                    dialogOptions: this.form?.dialogOptions,
-                    dialogType: this.form?.dialogType,
-                });
-                el.classList.add("schema-input");
-                return el;
-            }
-
+            const fileSystemFormat = isFilesystemSelector(info.format);
+            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
             else if (info.format === "long" || isArray)
                 return html`<textarea

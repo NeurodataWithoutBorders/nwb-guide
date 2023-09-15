@@ -1,8 +1,10 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { capitalize, header } from "./forms/utils";
+import { header } from "./forms/utils";
 import { resolve } from "../promises";
 import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
@@ -113,13 +115,21 @@ pre {
     color: transparent;
   }
 
+  h4 {
+    margin: 0;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid gainsboro;
+  }
 
   .guided--text-input-instructions {
     font-size: 13px;
     width: 100%;
     padding-top: 4px;
     color: dimgray !important;
-  }
+    margin: 0 0 1em;
+    line-height: 1.4285em;
+}
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -244,10 +254,10 @@ export class JSONSchemaForm extends LitElement {
 
         // NOTE: Forms with nested forms will handle their own state updates
         if (!value) {
-            delete resultParent[name];
+            if (fullPath.length === 1) delete resultParent[name];
             delete resolvedParent[name];
         } else {
-            resultParent[name] = value;
+            if (fullPath.length === 1) resultParent[name] = value;
             resolvedParent[name] = value;
         }
 
@@ -422,11 +432,6 @@ export class JSONSchemaForm extends LitElement {
             >
                 <label class="guided--form-label">${header(name)}</label>
                 ${interactiveInput}
-                ${info.description
-                    ? html`<p class="guided--text-input-instructions">
-                          ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
-                      </p>`
-                    : ""}
                 <div class="errors"></div>
                 <div class="warnings"></div>
             </div>
@@ -479,18 +484,39 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
-    #getRenderable = (schema = {}, required, path) => {
+    #getRenderable = (schema = {}, required, path, recursive = false) => {
         const entries = Object.entries(schema.properties ?? {});
 
-        return entries.filter(([key, value]) => {
-            if (!value.properties && key === "definitions") return false; // Skip definitions
-            if (this.ignore.includes(key)) return false;
-            if (this.showLevelOverride >= path.length) return true;
-            if (required[key]) return true;
-            if (this.#getLink([...this.#base, ...path, key])) return true;
-            if (!this.onlyRequired) return true;
-            return false;
-        });
+        const isArrayOfArrays = (arr) => !!arr.find((v) => Array.isArray(v));
+
+        const flattenRecursedValues = (arr) => {
+            const newArr = [];
+            arr.forEach((o) => {
+                if (isArrayOfArrays(o)) newArr.push(...o);
+                else newArr.push(o);
+            });
+
+            return newArr;
+        };
+
+        const isRenderable = (key, value) => {
+            if (recursive && value.properties) return this.#getRenderable(value, required[key], [...path, key], true);
+            else return [key, value];
+        };
+
+        const res = entries
+            .map(([key, value]) => {
+                if (!value.properties && key === "definitions") return false; // Skip definitions
+                if (this.ignore.includes(key)) return false;
+                if (this.showLevelOverride >= path.length) return isRenderable(key, value);
+                if (required[key]) return isRenderable(key, value);
+                if (this.#getLink([...this.#base, ...path, key])) return isRenderable(key, value);
+                if (!this.onlyRequired) return isRenderable(key, value);
+                return false;
+            })
+            .filter((o) => !!o);
+
+        return flattenRecursedValues(res); // Flatten on the last pass
     };
 
     validateOnChange = () => {};
@@ -768,7 +794,7 @@ export class JSONSchemaForm extends LitElement {
                 const accordion = new Accordion({
                     sections: {
                         [headerName]: {
-                            subtitle: `${this.#getRenderable(info, required[name], fullPath).length} fields`,
+                            subtitle: `${this.#getRenderable(info, required[name], fullPath, true).length} fields`,
                             content: this.#nestedForms[name],
                         },
                     },
@@ -847,7 +873,10 @@ export class JSONSchemaForm extends LitElement {
 
         return html`
             <div>
-                ${false ? html`<h2>${schema.title}</h2>` : ""} ${false ? html`<p>${schema.description}</p>` : ""}
+                ${schema.description
+                    ? html`<h4>Description</h4>
+                          <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
+                    : ""}
                 ${this.#render(schema, this.resolved, this.#requirements)}
             </div>
         `;
