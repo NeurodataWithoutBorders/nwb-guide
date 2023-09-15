@@ -2,6 +2,8 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
+
+const folderPathKey = "filesystem_paths";
 import dandiUploadSchema from "../../../../../../schemas/json/dandi/upload.json";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}), { arrays: true });
@@ -18,7 +20,7 @@ import { DandiResults } from "../../DandiResults.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info, type = "project" in info ? "" : "folder") {
+export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const api_key = global.data.DANDI?.api_key;
     if (!api_key) {
         await Swal.fire({
@@ -31,11 +33,13 @@ export async function uploadToDandi(info, type = "project" in info ? "" : "folde
         return this.to("settings");
     }
 
+    const { dandiset_id } = info
+
     const result = await run(
         type ? `upload/${type}` : "upload",
         {
             ...info,
-            staging: isStaging(info.dandiset_id), // Automatically detect staging IDs
+            staging: isStaging(dandiset_id), // Automatically detect staging IDs
             api_key,
         },
         { title: "Uploading to DANDI" }
@@ -50,7 +54,7 @@ export async function uploadToDandi(info, type = "project" in info ? "" : "folde
     if (result)
         notyf.open({
             type: "success",
-            message: `${info.project ?? info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+            message: `${info.project ?? `${info[folderPathKey].length} filesystem entries`} successfully uploaded to Dandiset ${dandiset_id}`,
         });
 
     return result;
@@ -85,13 +89,12 @@ export class UploadsPage extends Page {
             },
         });
 
-        const folderPathKey = "nwb_folder_path";
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
             results: globalState,
             schema: dandiSchema,
             sort: ([k1]) => {
-                if (k1 === "nwb_folder_path") return -1;
+                if (k1 === folderPathKey) return -1;
             },
             onUpdate: ([id]) => {
                 if (id === folderPathKey) {

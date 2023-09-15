@@ -7,6 +7,7 @@ from .manage_neuroconv import (
     validate_metadata,
     upload_to_dandi,
     upload_folder_to_dandi,
+    upload_multiple_filesystem_objects_to_dandi,
     listen_to_neuroconv_events,
     generate_dataset,
     inspect_nwb_file,

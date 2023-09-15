@@ -330,6 +330,15 @@ def convert_to_nwb(info: dict) -> str:
     return dict(file=str(resolved_output_path))
 
 
+def upload_multiple_filesystem_objects_to_dandi(**kwargs):
+   tmp_folder_path  = aggregate_in_temp_directory(kwargs['filesystem_paths'], 'upload')
+   innerKwargs = { **kwargs }
+   del innerKwargs['filesystem_paths']
+   innerKwargs["nwb_folder_path"] = tmp_folder_path
+   result = upload_folder_to_dandi(**innerKwargs)
+   rmtree(tmp_folder_path)
+   return result
+
 def upload_folder_to_dandi(
     dandiset_id: str,
     api_key: str,

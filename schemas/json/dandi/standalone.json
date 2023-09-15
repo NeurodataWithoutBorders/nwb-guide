@@ -1,9 +1,12 @@
 {
     "properties": {
-        "nwb_folder_path": {
-            "type": "string",
-            "format": "directory"
+        "filesystem_paths": {
+            "type": "array",
+            "items":{
+                "type": "string",
+                "format": ["file", "directory"]
+            }
         }
     },
-    "required": ["nwb_folder_path"]
+    "required": ["filesystem_paths"] 
 }
