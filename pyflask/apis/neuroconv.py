@@ -15,7 +15,7 @@ from manageNeuroconv import (
     generate_dataset,
     inspect_nwb_file,
     inspect_nwb_folder,
-    inspect_multiple_filesystem_objects
+    inspect_multiple_filesystem_objects,
 )
 
 from errorHandlers import notBadRequestException
@@ -151,7 +151,6 @@ class InspectNWBFile(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
-    
 @neuroconv_api.route("/inspect_folder")
 class InspectNWBFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -168,21 +167,20 @@ class InspectNWBFolder(Resource):
 class InspectNWBFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-
         from os.path import isfile
 
         try:
             paths = neuroconv_api.payload["paths"]
 
-            if (len(paths) == 1):
-                if (isfile(paths[0])):
-                    return inspect_nwb_file({ "path": paths[0] })
+            if len(paths) == 1:
+                if isfile(paths[0]):
+                    return inspect_nwb_file({"path": paths[0]})
                 else:
-                    return inspect_nwb_folder({ "path": paths[0] })
+                    return inspect_nwb_folder({"path": paths[0]})
 
             else:
                 return inspect_multiple_filesystem_objects(paths)
-       
+
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))

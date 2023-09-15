@@ -148,7 +148,7 @@ export class JSONSchemaInput extends LitElement {
         `;
     }
 
-    #onThrow = (...args) => this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args)
+    #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
 
     #render() {
         const { validateOnChange, info, path: fullPath } = this;
@@ -159,8 +159,8 @@ export class JSONSchemaInput extends LitElement {
         const isArray = info.type === "array"; // Handle string (and related) formats / types
 
         const hasItemsRef = "items" in info && "$ref" in info.items;
-        if (!("items" in info))  info.items = {};
-        if (!("type" in info.items) && !hasItemsRef) info.items.type = "string" ;
+        if (!("items" in info)) info.items = {};
+        if (!("type" in info.items) && !hasItemsRef) info.items.type = "string";
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
@@ -206,7 +206,7 @@ export class JSONSchemaInput extends LitElement {
                             this.form.checkAllLoaded();
                         }
                     },
-                    onThrow: (...args) => this.#onThrow(...args)
+                    onThrow: (...args) => this.#onThrow(...args),
                 };
 
                 return (this.form.tables[name] =

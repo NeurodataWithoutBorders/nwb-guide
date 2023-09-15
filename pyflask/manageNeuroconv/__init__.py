@@ -11,7 +11,7 @@ from .manage_neuroconv import (
     generate_dataset,
     inspect_nwb_file,
     inspect_nwb_folder,
-    inspect_multiple_filesystem_objects
+    inspect_multiple_filesystem_objects,
 )
 
 

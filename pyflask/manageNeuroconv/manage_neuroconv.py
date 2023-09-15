@@ -419,25 +419,6 @@ def generate_dataset(test_data_directory_path: str):
 
     return {"output_directory": str(output_directory)}
 
-def inspect_nwb_file(payload):
-    from nwbinspector import inspect_nwbfile
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
-    return json.loads(
-        json.dumps(
-            list(
-                inspect_nwbfile(
-                    ignore=[
-                        "check_description",
-                        "check_data_orientation",
-                    ],  # TODO: remove when metadata control is exposed
-                    **payload,
-                )
-            ),
-            cls=InspectorOutputJSONEncoder,
-        )
-    )
-
 
 def inspect_nwb_file(payload):
     from nwbinspector import inspect_nwbfile
@@ -457,9 +438,29 @@ def inspect_nwb_file(payload):
             cls=InspectorOutputJSONEncoder,
         )
     )
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    return json.loads(
+        json.dumps(
+            list(
+                inspect_nwbfile(
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **payload,
+                )
+            ),
+            cls=InspectorOutputJSONEncoder,
+        )
+    )
+
 
 def inspect_nwb_folder(payload):
-
     from nwbinspector import inspect_all
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
@@ -479,20 +480,19 @@ def inspect_nwb_folder(payload):
     return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
 
-def aggregate_in_temp_directory(paths, reason = ''):
-
+def aggregate_in_temp_directory(paths, reason=""):
     tmp_folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     tmp_folder_path.mkdir(parents=True)
 
     for path in paths:
-         path = Path(path)
-         (tmp_folder_path / path.name).symlink_to(path, path.is_dir())
+        path = Path(path)
+        (tmp_folder_path / path.name).symlink_to(path, path.is_dir())
 
     return tmp_folder_path
 
 
 def inspect_multiple_filesystem_objects(paths):
-   tmp_folder_path  = aggregate_in_temp_directory(paths, 'inspect')
-   result = inspect_nwb_folder({"path": tmp_folder_path})
-   rmtree(tmp_folder_path)
-   return result
+    tmp_folder_path = aggregate_in_temp_directory(paths, "inspect")
+    result = inspect_nwb_folder({"path": tmp_folder_path})
+    rmtree(tmp_folder_path)
+    return result
