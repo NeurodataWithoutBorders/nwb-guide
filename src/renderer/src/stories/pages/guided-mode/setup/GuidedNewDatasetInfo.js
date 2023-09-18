@@ -29,8 +29,8 @@ export class GuidedNewDatasetPage extends Page {
     #nameNotification;
 
     header = {
-        subtitle: 'Essential metadata for pipeline creation'
-    }
+        subtitle: "Essential metadata for pipeline creation",
+    };
 
     footer = {
         onNext: async () => {
@@ -93,13 +93,13 @@ export class GuidedNewDatasetPage extends Page {
             info.title = `${info.label} Global Metadata`;
             return info;
         });
-        console.log(pages)
+        console.log(pages);
 
         pages.forEach((page) => {
             page.header = {
-                subtitle: `Uniform ${page.info.label} metadata across all sessions`
-            }
-            this.addPage(page.info.label, page)
+                subtitle: `Uniform ${page.info.label} metadata across all sessions`,
+            };
+            this.addPage(page.info.label, page);
         });
 
         this.form = new JSONSchemaForm({

@@ -30,8 +30,8 @@ export class GuidedStructurePage extends Page {
     }
 
     header = {
-        subtitle: 'Required interfaces for this conversion'
-    }
+        subtitle: "Required interfaces for this conversion",
+    };
 
     search = new Search({
         showAllWhenEmpty: true,

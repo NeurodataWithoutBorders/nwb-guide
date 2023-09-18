@@ -20,8 +20,8 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     header = {
-        subtitle: 'Essential information about the source files for this conversion'
-    }
+        subtitle: "Essential information about the source files for this conversion",
+    };
 
     footer = {
         next: "Request Metadata Schema",

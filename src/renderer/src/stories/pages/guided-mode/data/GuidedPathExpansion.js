@@ -18,9 +18,8 @@ export class GuidedPathExpansionPage extends Page {
     }
 
     header = {
-        subtitle: 'Automatic source data detection for multiple subjects / sessions'
-    }
-    
+        subtitle: "Automatic source data detection for multiple subjects / sessions",
+    };
 
     beforeSave = async () => {
         const globalState = this.info.globalState;
@@ -183,7 +182,7 @@ export class GuidedPathExpansionPage extends Page {
         pathExpansionInfoBox.style.margin = "10px 0px";
 
         this.optional.innerHTML = "";
-        this.optional.style.marginTop = '15px'
+        this.optional.style.marginTop = "15px";
         this.optional.append(pathExpansionInfoBox, form);
 
         form.style.width = "100%";

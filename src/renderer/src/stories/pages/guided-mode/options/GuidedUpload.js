@@ -23,8 +23,8 @@ export class GuidedUploadPage extends Page {
     };
 
     header = {
-        subtitle: "Settings to upload your conversion to the DANDI Archive"
-    }
+        subtitle: "Settings to upload your conversion to the DANDI Archive",
+    };
 
     footer = {
         next: "Upload Project",
