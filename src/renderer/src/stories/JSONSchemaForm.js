@@ -252,12 +252,17 @@ export class JSONSchemaForm extends LitElement {
         const resolvedParent = path.reduce(reducer, this.resolved);
         const hasUpdate = resolvedParent[name] !== value;
 
+        const isTop = fullPath.length === 1
+        const hasNested = Object.keys(this.#nestedForms).length
+        const willUpdateResult = !hasNested || isTop
+
         // NOTE: Forms with nested forms will handle their own state updates
+        console.log('Updating', fullPath, this.#nestedForms)
         if (!value) {
-            if (fullPath.length === 1) delete resultParent[name];
+            if (willUpdateResult) delete resultParent[name];
             delete resolvedParent[name];
         } else {
-            if (fullPath.length === 1) resultParent[name] = value;
+            if (willUpdateResult) resultParent[name] = value;
             resolvedParent[name] = value;
         }
 
