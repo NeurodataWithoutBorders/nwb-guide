@@ -302,9 +302,9 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    validate = async () => {
+    validate = async (resolved) => {
         // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(); // get missing required paths
+        const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
@@ -321,9 +321,9 @@ export class JSONSchemaForm extends LitElement {
 
         if (message) this.throw(message);
 
-        for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
+        for (let key in this.#nestedForms) await this.#nestedForms[key].validate(resolved ? resolved[key] : undefined); // Validate nested forms too
         try {
-            for (let key in this.tables) await this.tables[key].validate(); // Validate nested tables too
+            for (let key in this.tables) await this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
         } catch (e) {
             this.throw(e.message);
         }
