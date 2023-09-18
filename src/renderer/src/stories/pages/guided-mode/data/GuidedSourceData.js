@@ -60,7 +60,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                         }),
                     })
                         .then(async (res) => {
-                            return (0, eval)(`(${await res.text()})`)
+                            return (0, eval)(`(${await res.text()})`);
                         })
                         .catch((e) => {
                             Swal.close();
