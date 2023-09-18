@@ -29,6 +29,10 @@ export class GuidedStructurePage extends Page {
         this.searchModal.appendChild(this.search);
     }
 
+    header = {
+        subtitle: 'Required interfaces for this conversion'
+    }
+
     search = new Search({
         showAllWhenEmpty: true,
     });

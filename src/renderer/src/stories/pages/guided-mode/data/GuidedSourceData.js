@@ -19,6 +19,10 @@ export class GuidedSourceDataPage extends ManagedPage {
         merge(this.localState, this.info.globalState);
     };
 
+    header = {
+        subtitle: 'Essential information about the source files for this conversion'
+    }
+
     footer = {
         next: "Request Metadata Schema",
         onNext: async () => {

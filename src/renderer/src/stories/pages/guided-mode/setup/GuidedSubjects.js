@@ -13,7 +13,7 @@ export class GuidedSubjectsPage extends Page {
     }
 
     header = {
-        subtitle: "Cross-session metadata applied to the final file metadata",
+        subtitle: "Uniform metadata for the subjects included in this conversion",
     };
 
     beforeSave = () => {
