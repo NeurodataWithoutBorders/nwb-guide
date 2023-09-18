@@ -13,6 +13,7 @@
         "BlackrockSortingInterface",
         "CellExplorerSortingInterface",
         "KiloSortSortingInterface",
-        "Spike2RecordingInterface"
+        "Spike2RecordingInterface",
+        "BrukerTiffImagingInterface"
     ]
 }
