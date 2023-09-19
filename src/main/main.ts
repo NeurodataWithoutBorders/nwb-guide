@@ -190,7 +190,7 @@ const exitPyProc = async () => {
     "/t",
   ])  // Windows does not properly shut off the python server process. This ensures it is killed.
 
-  else pyflaskProcess.kill()
+  pyflaskProcess.kill() // Try killing twice on Windows
 
   pyflaskProcess = null;
 };
