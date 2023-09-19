@@ -223,6 +223,8 @@ let hasBeenOpened = false;
 
 function initialize() {
 
+  if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
+
   makeSingleInstance();
 
   function createWindow() {
@@ -254,42 +256,39 @@ function initialize() {
             })
             .then((responseObject) => {
               let { response } = responseObject;
-              if (response === 0) quit_app()
+              if (response === 0) app.quit();
               else globals.mainWindowReady = true
             });
         }
       } else {
-        await exitPyProc();
-        app.exit();
+        app.quit();
       }
     });
   }
 
-  const quit_app = () => {
-    globals.mainWindow.close();
-    if (!globals.mainWindow.closed) globals.mainWindow.destroy()
-  };
-
   function onAppReady () {
 
-    const promise = createPyProc();
+    // Only create one python process
+    if (!pyflaskProcess) {
+      const promise = createPyProc();
 
-    // Listen after first load
-    promise.then(() => {
-      const chokidar = require('chokidar');
-      chokidar.watch(path.join(__dirname, "../../pyflask"), {
-        ignored:  ['**/__pycache__/**']
-      }).on('all', async (event: string) => {
-        if (event === 'change' && !globals.python.restart) {
-          globals.python.restart = true
-          await exitPyProc();
-          setTimeout(async () => {
-            await createPyProc();
-            globals.python.restart = false
-          }, 1000)
-        }
-      });
-    })
+      // Listen after first load
+      promise.then(() => {
+        const chokidar = require('chokidar');
+        chokidar.watch(path.join(__dirname, "../../pyflask"), {
+          ignored:  ['**/__pycache__/**']
+        }).on('all', async (event: string) => {
+          if (event === 'change' && !globals.python.restart) {
+            globals.python.restart = true
+            await exitPyProc();
+            setTimeout(async () => {
+              await createPyProc();
+              globals.python.restart = false
+            }, 1000)
+          }
+        });
+      })
+    }
 
     const windowOptions = {
       minWidth: 1121,
@@ -394,11 +393,20 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) initialize()
 })
 
-app.on("window-all-closed", async () => {
-  if (process.platform != 'darwin') {
-    await exitPyProc();
-    app.quit();
+app.on('will-quit', async () => {
+  try {
+    await exitPyProc()
+    if (globals.mainWindow) {
+      globals.mainWindow.close();
+      if (!globals.mainWindow.closed) globals.mainWindow.destroy()
+    }
+  } catch (err) {
+    console.error(err);
   }
+});
+
+app.on("window-all-closed", async () => {
+  if (process.platform != 'darwin') app.quit();
 });
 
 // app.on("will-quit", () => app.quit());
