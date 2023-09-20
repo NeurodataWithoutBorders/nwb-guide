@@ -27,17 +27,14 @@ jobs:
           - python-version: "3.9"
             os: ubuntu-latest
             label: environments/environment-Linux.yml
-            prefix: /usr/share/miniconda3/envs/env-electron-python
 
           - python-version: "3.10"
             os: macos-latest
             label: environments/environment-Mac.yml
-            prefix: /Users/runner/miniconda3/envs/env-electron-python
 
           - python-version: "3.9"
             os: windows-latest
             label: environments/environment-Windows.yml
-            prefix: C:\Miniconda3\envs\env-electron-python
 
 
     steps:
@@ -50,7 +47,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          activate-environment: env-electron-python
+          activate-environment: nwb-guide
           use-mamba: true
 
       - name: Set cache date
@@ -62,11 +59,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.CONDA }}/envs
-          key:
-            conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
-        env:
-          # Increase this value to reset cache if environment file has not changed
-          CACHE_NUMBER: 0
+          key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
         id: cache
 
       - name: Update environment
