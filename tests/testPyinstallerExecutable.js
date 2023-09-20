@@ -28,7 +28,10 @@ function onMessage(data, id) {
     const message = data.toString();
     console.error(`[${id}] ${message}`);
     outputCollection += message;
-    if (regex.test(message)) throw new Error(outputCollection);
+    if (regex.test(message)) {
+        if (cmds.forever) console.error(outputCollection)
+        else throw new Error(outputCollection);
+    }
 }
 
 function handleProcess(proc, id = "process") {
