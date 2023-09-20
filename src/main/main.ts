@@ -125,8 +125,7 @@ const pythonIsClosed = (err = globals.python.latestError) => {
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
 const getPackagedPath = () => {
-  const scriptPath = isWindows ? path.join(__dirname, PY_FLASK_DIST_FOLDER, `${PYINSTALLER_NAME}.exe`) : path.join(process.resourcesPath, PYFLASK_BUILD_SUBFOLDER_NAME, PYINSTALLER_NAME)
-  console.warn('Packaged Script Path', scriptPath)
+  const scriptPath = isWindows ? path.join(__dirname, PY_FLASK_DIST_FOLDER, PYINSTALLER_NAME, `${PYINSTALLER_NAME}.exe`) : path.join(process.resourcesPath, PYFLASK_BUILD_SUBFOLDER_NAME, PYINSTALLER_NAME)
   if (fs.existsSync(scriptPath)) return scriptPath;
 };
 
@@ -135,8 +134,6 @@ const createPyProc = async () => {
   return new Promise(async (resolve, reject) => {
 
     let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
-    console.warn('Resolved Script Path', script)
-
     await killAllPreviousProcesses();
 
     const defaultPort = PORT as number
