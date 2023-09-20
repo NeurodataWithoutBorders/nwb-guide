@@ -1,4 +1,3 @@
-import { html } from "lit";
 
 import Swal from "sweetalert2";
 import { isStorybook } from "../../../../dependencies/globals.js";

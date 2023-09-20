@@ -188,11 +188,7 @@ export class FilesystemSelector extends LitElement {
             isUpdated = resolved !== this.value;
         }
 
-        if (isUpdated) {
-            this.value = resolved;
-            this.#handleFiles(this.value); // Notify of the change to the separators
-            return;
-        }
+        if (isUpdated)  this.#handleFiles(resolved); // Notify of the change to the separators
 
         const resolvedValueDisplay = isArray
             ? len > 1

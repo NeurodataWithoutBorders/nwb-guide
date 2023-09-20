@@ -178,7 +178,7 @@ export class JSONSchemaForm extends LitElement {
         this.identifier = props.identifier;
         this.mode = props.mode ?? "default";
         this.schema = props.schema ?? {};
-        this.results = props.results ?? {};
+        this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
 
         this.ignore = props.ignore ?? [];
@@ -252,17 +252,12 @@ export class JSONSchemaForm extends LitElement {
         const resolvedParent = path.reduce(reducer, this.resolved);
         const hasUpdate = resolvedParent[name] !== value;
 
-        const isTop = fullPath.length === 1;
-        const hasNested = Object.keys(this.#nestedForms).length;
-        const willUpdateResult = !hasNested || isTop;
-
         // NOTE: Forms with nested forms will handle their own state updates
-        console.log("Updating", fullPath, this.#nestedForms);
         if (!value) {
-            if (willUpdateResult) delete resultParent[name];
+            delete resultParent[name];
             delete resolvedParent[name];
         } else {
-            if (willUpdateResult) resultParent[name] = value;
+            resultParent[name] = value;
             resolvedParent[name] = value;
         }
 
