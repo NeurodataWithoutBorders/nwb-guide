@@ -37,25 +37,14 @@ jobs:
 
       - uses: apple-actions/import-codesign-certs@v1
         with:
-          # https://developer.apple.com/account/resources/certificates/add
-          # Sign up for an Apple Developer account (annual fee)
-          # Create a new certificate for Mac development at website above (max 1 certificate)
-          # Create a Certificate Signing Request (CSR) on your Mac --
-          # see https://developer.apple.com/help/account/create-certificates/create-a-certificate-signing-request
-          # Keychain Access > Certificate Assistant > Request a Certificate from a Certificate Authority...
-          # Enter email address, common name
-          # Download the new certificate (.cer file)
-          # Double click the .cer file to install in Keychain Access
-          # Use Keychain Access to export the certificate as a .p12
-          # base64 -i cent.p12 -o base64.txt
-          # Open base64.txt and copy the contents to the nwb-guide repository secret for MACOS_CERTIFICATE
-          # Currently this is set up to use Ryan's account and certificate
+          # Currently this is set to Ryan's Developer ID certificate
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
       - name: Build and deploy on MAC
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          appleId: ${{ secrets.APPLE_ID }}  # currently this is set to Ryan's Apple ID and password
+          # Currently this is set to Ryan's Apple ID and app-specific password
+          appleId: ${{ secrets.APPLE_ID }}
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
         run: npm run deploy:mac
