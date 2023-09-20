@@ -62,10 +62,15 @@ jobs:
           key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
         id: cache
 
-      - name: Update environment
-        run:
-          mamba env update -n env-electron-python -f ${{ matrix.label }}
-        if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Create and activate environment
+        run: |
+          mamba env create -n nwb-guide -f ${{ matrix.label }}
+          mamba activate nwb-guide
+
+      - if: steps.cache.outputs.cache-hit == 'true'
+        name: Activate environment
+        run: mamba activate nwb-guide
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
