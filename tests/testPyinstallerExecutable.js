@@ -30,12 +30,11 @@ function onMessage(data, id) {
 
 function handleProcess(proc, id = "process") {
     if (proc != null) {
-
         // Listen for errors from Python process
         proc.stderr.on("data", (data) => onMessage(data, id));
 
         proc.stdout.on("data", function (data) {
-            if (cmds.forever) onMessage(data, id)
+            if (cmds.forever) onMessage(data, id);
             else {
                 console.log(`Time to Start: ${(Date.now() - now).toFixed(2)}ms`);
                 process.exit();
