@@ -61,7 +61,7 @@ export class GuidedNewDatasetPage extends Page {
                 const has = await hasEntry(name);
                 if (has) {
                     this.notify(
-                        "An existing progress file already exists with that name. Please choose a different name.",
+                        "An existing project already exists with that name. Please choose a different name.",
                         "error"
                     );
                     return;

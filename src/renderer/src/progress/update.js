@@ -2,15 +2,15 @@ import { updateURLParams } from "../../utils/url.js";
 import { guidedProgressFilePath } from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
 import { joinPath } from "../globals.js";
-import { get } from "./index.js";
+import { get, hasEntry } from "./index.js";
 
 export const update = (newDatasetName, previousDatasetName) => {
-    //If updataing the dataset, update the old banner image path with a new one
+    //If updating the dataset, update the old banner image path with a new one
     if (previousDatasetName) {
-        if (previousDatasetName === newDatasetName) return "No changes made to dataset name";
+        if (previousDatasetName === newDatasetName) return;
 
         if (hasEntry(newDatasetName))
-            throw new Error("An existing progress file already exists with that name. Please choose a different name.");
+            throw new Error("An existing project already exists with that name. Please choose a different name.");
 
         // update old progress file with new dataset name
         const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
@@ -20,9 +20,7 @@ export const update = (newDatasetName, previousDatasetName) => {
             localStorage.setItem(newProgressFilePath, localStorage.getItem(oldProgressFilePath));
             localStorage.removeItem(oldProgressFilePath);
         }
-
-        return "Dataset name updated";
-    } else throw new Error("No previous dataset name provided");
+    } else throw new Error("No previous project name provided");
 };
 export const updateAppProgress = (
     pageId,
