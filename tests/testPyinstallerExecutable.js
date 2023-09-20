@@ -20,18 +20,12 @@ handleProcess(proc2, "spawn");
 
 let now = Date.now();
 
-let outputCollection = "";
-
 const regex = /.+Error: .+/i; // Check for error messages (without case sensitivity)
 
 function onMessage(data, id) {
     const message = data.toString();
-    console.error(`[${id}] ${message}`);
-    outputCollection += message;
-    if (regex.test(message)) {
-        if (cmds.forever) console.error(outputCollection)
-        else throw new Error(outputCollection);
-    }
+    if (!cmds.forever && regex.test(message)) throw new Error(message);
+    else console.error(`[${id}] ${message}`);
 }
 
 function handleProcess(proc, id = "process") {
