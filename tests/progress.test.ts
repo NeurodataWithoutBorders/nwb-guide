@@ -25,5 +25,3 @@ test('pipeline renaming works', () => rename(renameName, initialName))
 
 // delete pipeline
 test('pipeline deletion works', () => remove(renameName))
-
-

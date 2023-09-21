@@ -14,7 +14,7 @@ import { merge } from "../stories/pages/utils.js";
 import { updateAppProgress, updateFile } from "./update.js";
 import { updateURLParams } from "../../utils/url.js";
 
-import * as operations from './operations'
+import * as operations from "./operations";
 
 export * from "./update";
 
@@ -124,7 +124,7 @@ export const remove = async (name) => {
         focusCancel: true,
     });
 
-    if (result.isConfirmed) return operations.remove(name)
+    if (result.isConfirmed) return operations.remove(name);
 
     return false;
 };
