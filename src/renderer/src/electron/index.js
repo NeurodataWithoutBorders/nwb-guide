@@ -11,6 +11,7 @@ export let remote = {};
 export let app = null;
 export let path = null;
 export let log = null;
+export let crypto = null
 
 if (isElectron) {
     try {
@@ -18,6 +19,8 @@ if (isElectron) {
         electron = require("electron"); // ipcRenderer, remote, shell, etc.
         fs = require("fs-extra"); // File System
         os = require("os");
+
+        crypto = require("crypto")
 
         remote = require("@electron/remote");
         app = remote.app;
