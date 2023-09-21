@@ -20,44 +20,40 @@ export * from "./update";
 var re = /[0-9A-Fa-f]{6}/g;
 
 function encode(message) {
-    if (!crypto) return message
-    const mykey = crypto.createCipher('aes-128-cbc', homeDirectory);
-    const mystr = mykey.update(message, 'utf8', 'hex')
-    return mystr + mykey.final('hex');
+    if (!crypto) return message;
+    const mykey = crypto.createCipher("aes-128-cbc", homeDirectory);
+    const mystr = mykey.update(message, "utf8", "hex");
+    return mystr + mykey.final("hex");
 }
 
 // Try to decode the value
 function decode(message) {
-    
-    if (!crypto || !/[0-9A-Fa-f]{6}/g.test(message)) return message
-
+    if (!crypto || !/[0-9A-Fa-f]{6}/g.test(message)) return message;
 
     try {
-        const mykey = crypto.createDecipher('aes-128-cbc', homeDirectory);
-        const mystr = mykey.update(message, 'hex', 'utf8')
-        return mystr + mykey.final('utf8');
+        const mykey = crypto.createDecipher("aes-128-cbc", homeDirectory);
+        const mystr = mykey.update(message, "hex", "utf8");
+        return mystr + mykey.final("utf8");
     } catch {
-        return message
+        return message;
     }
 }
 
 function drill(o, callback) {
-    if (o && typeof o === 'object') {
-        const copy = { ...o }
-        for (let k in copy) copy[k] = drill(copy[k], callback)
-        return copy
-    } else return callback(o)
+    if (o && typeof o === "object") {
+        const copy = { ...o };
+        for (let k in copy) copy[k] = drill(copy[k], callback);
+        return copy;
+    } else return callback(o);
 }
 
 function encodeObject(o) {
-    return drill(o, (v) => typeof v === 'string' ?  encode(v) :  v)
+    return drill(o, (v) => (typeof v === "string" ? encode(v) : v));
 }
 
 function decodeObject(o) {
-    return drill(o, (v) => typeof v === 'string' ?  decode(v) :  v)
+    return drill(o, (v) => (typeof v === "string" ? decode(v) : v));
 }
-
-
 
 class GlobalAppConfig {
     path = `${appDirectory}/config.json`;
@@ -67,14 +63,12 @@ class GlobalAppConfig {
         const exists = fs ? fs.existsSync(this.path) : localStorage[this.path];
         if (exists) {
             const data = JSON.parse(fs ? fs.readFileSync(this.path) : localStorage.getItem(this.path));
-            this.data = decodeObject(data)
+            this.data = decodeObject(data);
         }
     }
 
     save() {
-
-        console.log('Saving', this.data, encodeObject(this.data))
-
+        console.log("Saving", this.data, encodeObject(this.data));
 
         if (fs) fs.writeFileSync(this.path, JSON.stringify(this.data, null, 2));
         else localStorage.setItem(this.path, JSON.stringify(this.data));
