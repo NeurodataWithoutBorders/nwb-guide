@@ -4,7 +4,7 @@ import { fs } from "../electron/index.js";
 import { joinPath } from "../globals.js";
 import { get, hasEntry } from "./index.js";
 
-export const update = (newDatasetName, previousDatasetName) => {
+export const rename = (newDatasetName, previousDatasetName) => {
     //If updating the dataset, update the old banner image path with a new one
     if (previousDatasetName) {
         if (previousDatasetName === newDatasetName) return;
@@ -22,6 +22,7 @@ export const update = (newDatasetName, previousDatasetName) => {
         }
     } else throw new Error("No previous project name provided");
 };
+
 export const updateAppProgress = (
     pageId,
     dataOrProjectName = {},
