@@ -20,9 +20,11 @@ data_line_index = lines.index("datas = []\n")
 lines[data_line_index] = "datas = [('./paths.config.json', '.'), ('./package.json', '.')]\n"
 
 # Another platform specific difference is the app.py location
-app_py_line_index = next(index for index, line in enumerate(lines) if "app.py" in line)
-app_py_line = "    [f\"{Path('pyflask') / 'app.py'}\"],\n"
-lines[app_py_line_index] = app_py_line
+app_py_line_index, app_py_line = next((index, line) for index, line in enumerate(lines) if "app.py" in line)
+pyflask_start = app_py_line.find("pyflask")  # Can change on certain systems
+injected_app_py_line_base = app_py_line[: (pyflask_start - 1)]
+injected_app_py_line = injected_app_py_line_base + "f\"{Path('pyflask') / 'app.py'}\"],\n"
+lines[app_py_line_index] = injected_app_py_line
 
 with open(file=Path(__file__).parent / "nwb-guide.spec", mode="w") as io:
     io.writelines(lines)
