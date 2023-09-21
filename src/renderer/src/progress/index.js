@@ -58,8 +58,6 @@ export const save = (page, overrides = {}) => {
 export const getEntries = () => {
     if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if progress folder exists. If not, create it.
     const progressFiles = fs ? fs.readdirSync(guidedProgressFilePath) : Object.keys(localStorage);
-    console.log(progressFiles)
-
     return progressFiles.filter((path) => path.slice(-5) === ".json");
 };
 
