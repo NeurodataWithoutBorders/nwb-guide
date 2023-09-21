@@ -417,7 +417,7 @@ function deleteFoldersWithoutPipelines() {
     const allowedDirectories = getEntries(guidedProgressFilePath, 'isFile').map(name => name.slice(0, -'.json'.length))
     const conversionsToRemove = conversionDirectories.filter(name => !allowedDirectories.includes(name))
     const stubsToRemove = stubDirectories.filter(name => !allowedDirectories.includes(name))
-    
+
     conversionsToRemove.forEach(name => fs.rmSync(path.join(guidedConversionFolderPath, name), { recursive: true }))
     stubsToRemove.forEach(name => fs.rmSync(path.join(guidedStubFolderPath, name), { recursive: true }))
 }
