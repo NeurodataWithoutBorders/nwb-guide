@@ -1,22 +1,14 @@
-const buildFlaskBase = "python -m PyInstaller --name nwb-guide --onedir --clean --noconfirm ./pyflask/app.py --distpath ./build/flask --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ci_info"
-const buildFlaskWin = `${buildFlaskBase} --add-data ./paths.config.json;.`
-const buildFlaskUnix = `${buildFlaskBase} --add-data ./paths.config.json:.`
-
 export default {
 
-    plugins: {
-        autoupdate: true
-    },
+    plugins: [
+        // NOTE: Add the auto-update plugin
+    ],
 
     services: {
         flask: {
             src: './pyflask/app.py',
             port: 4242,
-            buildCommand: {
-                mac: buildFlaskUnix,
-                linux: buildFlaskUnix,
-                windows: buildFlaskWin
-            },
+            buildCommand: "npm run build:flask",
             production: {
                 src: './flask/nwb-guide', // --onedir
                 extraResources: [ 
