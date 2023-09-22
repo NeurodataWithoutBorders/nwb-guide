@@ -1,10 +1,8 @@
 import { LitElement, css, html } from "lit";
 
 export class CodeBlock extends LitElement {
-
     static get styles() {
         return css`
-
             :host {
                 display: block;
                 font-size: 85%;
@@ -21,18 +19,17 @@ export class CodeBlock extends LitElement {
                 user-select: text;
                 margin: 0;
             }
-        `
+        `;
     }
 
-    constructor({ text = '' }){
-        super()
-        this.text = text
+    constructor({ text = "" }) {
+        super();
+        this.text = text;
     }
 
-    render(){
-        return html`<pre>${this.text}</pre>`
+    render() {
+        return html`<pre>${this.text}</pre>`;
     }
 }
 
-customElements.get("code-block") ||
-    customElements.define("code-block", CodeBlock);
+customElements.get("code-block") || customElements.define("code-block", CodeBlock);

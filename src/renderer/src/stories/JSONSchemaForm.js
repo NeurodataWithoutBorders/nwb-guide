@@ -588,9 +588,7 @@ export class JSONSchemaForm extends LitElement {
             ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
             : [];
 
-        const info = Array.isArray(valid)
-            ? valid?.filter((info) => info.type === "info" )
-            : [];
+        const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
 
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {

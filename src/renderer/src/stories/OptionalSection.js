@@ -5,9 +5,8 @@ import { Button } from "./Button";
 export class OptionalSection extends LitElement {
     static get styles() {
         return css`
-
             :host {
-               display: block;
+                display: block;
             }
 
             h2 {
@@ -15,7 +14,8 @@ export class OptionalSection extends LitElement {
             }
 
             .optional-section__toggle {
-                padding-bottom: 20px;            }
+                padding-bottom: 20px;
+            }
 
             .optional-section__content {
                 text-align: left;

@@ -73,7 +73,6 @@ export class InfoBox extends LitElement {
                 margin-bottom: 0px;
                 animation: demo-box-fade-in 0.2s cubic-bezier(0, 0.2, 0.2, 0.96);
             }
-            
         `;
     }
 
@@ -82,7 +81,7 @@ export class InfoBox extends LitElement {
         this.header = header;
         this.content = content;
         this.type = type;
-        this.open = open
+        this.open = open;
     }
 
     updated() {
@@ -94,9 +93,9 @@ export class InfoBox extends LitElement {
         if (this.type === "warning") infoTextElement.insertAdjacentHTML("beforebegin", ` <span class="icon">⚠️</span>`);
 
         const infoContainer = infoDropdown.nextElementSibling;
-        infoDropdown.onclick = () => this.onToggle(!infoContainer.classList.contains("container-open"))
+        infoDropdown.onclick = () => this.onToggle(!infoContainer.classList.contains("container-open"));
 
-        this.onToggle()
+        this.onToggle();
     }
 
     onToggle(open = this.open) {
@@ -112,10 +111,10 @@ export class InfoBox extends LitElement {
             infoContainerChevron.direction = "right";
             infoContainer.classList.remove("container-open");
         }
-}
+    }
 
-render() {
-    return html`
+    render() {
+        return html`
             <div class="guided--info-dropdown">
                 <span id="header"> ${this.header} </span>
                 ${new Chevron({ direction: "right" })}
@@ -124,7 +123,7 @@ render() {
                 <span class="guided--help-text">${this.content}</span>
             </div>
         `;
-}
+    }
 }
 
 customElements.get("nwbguide-info-box") || customElements.define("nwbguide-info-box", InfoBox);
