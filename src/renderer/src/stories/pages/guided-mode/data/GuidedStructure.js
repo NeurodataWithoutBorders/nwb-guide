@@ -8,6 +8,8 @@ import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 
+const defaultEmptyMessage = "No interfaces selected";
+
 export class GuidedStructurePage extends Page {
     constructor(...args) {
         super(...args);
@@ -31,7 +33,10 @@ export class GuidedStructurePage extends Page {
         showAllWhenEmpty: true,
     });
 
-    list = new List();
+    list = new List({
+        emptyMessage: defaultEmptyMessage,
+        onChange: () => (this.unsavedUpdates = true),
+    });
 
     addButton = new Button();
 
@@ -40,33 +45,42 @@ export class GuidedStructurePage extends Page {
         height: "100%",
     });
 
+    getSchema = async () => {
+        const interfaces = { ...this.list.object };
+
+        const schema =
+            Object.keys(interfaces).length === 0
+                ? {}
+                : await fetch(`${baseUrl}/neuroconv/schema`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(interfaces),
+                  }).then((res) => res.json());
+
+        let schemas = this.info.globalState.schema;
+        if (!schemas) schemas = this.info.globalState.schema = {};
+
+        schemas.source_data = schema;
+        this.unsavedUpdates = true;
+    };
+
+    beforeSave = async () => {
+        this.info.globalState.interfaces = { ...this.list.object };
+        await this.save(undefined, false); // Interrim save, in case the schema request fails
+        await this.getSchema();
+    };
+
     footer = {
         onNext: async () => {
-            this.save(); // Save in case the schema request fails
-
-            const interfaces = { ...this.list.object };
-
-            const schema =
-                Object.keys(interfaces).length === 0
-                    ? {}
-                    : await fetch(`${baseUrl}/neuroconv/schema`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(interfaces),
-                      }).then((res) => res.json());
-
-            let schemas = this.info.globalState.schema;
-            if (!schemas) schemas = this.info.globalState.schema = {};
-
-            schemas.source_data = schema;
-            this.info.globalState.interfaces = interfaces;
-
-            this.onTransition(1);
+            if (!this.info.globalState.schema) await this.getSchema(); // Initialize schema
+            this.to(1);
         },
     };
 
     async updated() {
-        const selected = this.info.globalState.interfaces;
+        const { interfaces = {} } = this.info.globalState;
+
+        this.list.emptyMessage = "Loading valid interfaces...";
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
@@ -82,7 +96,9 @@ export class GuidedStructurePage extends Page {
             )
             .catch((e) => console.error(e));
 
-        for (const [key, name] of Object.entries(selected || {})) {
+        this.list.emptyMessage = defaultEmptyMessage;
+
+        for (const [key, name] of Object.entries(interfaces)) {
             let found = this.search.options?.find((o) => o.value === name);
 
             // If not found, spoof based on the key and names provided previously
@@ -96,6 +112,9 @@ export class GuidedStructurePage extends Page {
 
             this.list.add({ ...found, key }); // Add previously selected items
         }
+
+        this.addButton.removeAttribute("hidden");
+        super.updated(); // Call if updating data
     }
 
     render() {
@@ -103,6 +122,7 @@ export class GuidedStructurePage extends Page {
         this.list.style.display = "inline-block";
         this.list.clear();
         this.addButton.style.display = "block";
+        this.addButton.setAttribute("hidden", "");
 
         return html`
             <div style="width: 100%; text-align: center;">${this.list} ${this.addButton}</div>

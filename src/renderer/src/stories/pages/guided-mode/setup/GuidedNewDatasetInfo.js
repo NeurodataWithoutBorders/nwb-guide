@@ -1,10 +1,19 @@
 import { html } from "lit";
-import { hasEntry, update } from "../../../../progress.js";
+import { global, hasEntry, rename } from "../../../../progress/index.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { validateOnChange } from "../../../../validation/index.js";
 
-import projectMetadataSchema from "../../../../../../../schemas/json/project-metadata.schema.json" assert { type: "json" };
+import projectGeneralSchema from "../../../../../../../schemas/json/project/general.json" assert { type: "json" };
+import projectGlobalSchema from "../../../../../../../schemas/json/project/globals.json" assert { type: "json" };
+import projectNWBFileSchema from "../../../../../../../schemas/json/project/nwbfile.json" assert { type: "json" };
+import projectSubjectSchema from "../../../../../../../schemas/json/project/subject.json" assert { type: "json" };
+import { merge } from "../../utils.js";
+
+const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
+merge(projectNWBFileSchema, projectMetadataSchema);
+merge(projectSubjectSchema, projectMetadataSchema);
+
 import { schemaToPages } from "../../FormPage.js";
 
 import { onThrow } from "../../../../errors";
@@ -41,7 +50,7 @@ export class GuidedNewDatasetPage extends Page {
             // Update existing progress file
             if (globalState.initialized) {
                 try {
-                    const res = update(name, globalState.name);
+                    const res = rename(name, globalState.name);
                     if (typeof res === "string") this.notify(res);
                     if (res === false) return;
                 } catch (e) {
@@ -62,7 +71,7 @@ export class GuidedNewDatasetPage extends Page {
             globalState.initialized = true;
             Object.assign(globalState, this.state);
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
@@ -74,7 +83,7 @@ export class GuidedNewDatasetPage extends Page {
         const schema = { ...projectMetadataSchema };
         schema.properties = { ...schema.properties };
 
-        this.state = structuredClone(this.info.globalState.project);
+        this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
         const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
             info.title = `${info.label} Global Metadata`;
@@ -91,6 +100,7 @@ export class GuidedNewDatasetPage extends Page {
                 properties: ["createDirectory"],
             },
             validateOnChange,
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

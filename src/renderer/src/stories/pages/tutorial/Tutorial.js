@@ -4,12 +4,11 @@ import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import tutorialSchema from "../../../../../../schemas/json/tutorial.schema.json" assert { type: "json" };
-import guideGlobalMetadata from "../../../../../../guideGlobalMetadata.json" assert { type: "json" };
 
 import { run } from "../guided-mode/options/utils.js";
 import "../../Button.js";
 import { InfoBox } from "../../InfoBox.js";
-import { hasEntry, get, save, remove, resume, global } from "../../../progress.js";
+import { hasEntry, get, save, remove, resume, global } from "../../../progress/index.js";
 
 import { electron } from "../../../electron/index.js";
 
@@ -34,9 +33,7 @@ export class TutorialPage extends Page {
                 properties: ["createDirectory"],
             },
             results: state,
-            validateOnChange: () => {
-                global.save();
-            },
+            onUpdate: () => global.save(),
         });
 
         form.style.width = "100%";
@@ -80,7 +77,7 @@ export class TutorialPage extends Page {
             ${hasEntry(tutorialPipelineName)
                 ? html`<div>
                       Data has been preloaded into the <b>${tutorialPipelineName}</b> pipeline, which can be accessed
-                      via the <a @click=${() => this.onTransition("guided")}>Guided Mode</a> conversion list.
+                      via the <a @click=${() => this.to("guided")}>Guided Mode</a> conversion list.
 
                       <br /><br />
 

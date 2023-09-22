@@ -1,3 +1,4 @@
+import { updateURLParams } from "../../utils/url.js";
 import isElectron from "./check.js";
 
 export { isElectron };
@@ -21,13 +22,23 @@ if (isElectron) {
         remote = require("@electron/remote");
         app = remote.app;
 
-        electron.ipcRenderer.on("logOnBrowser", (info, ...args) => {
-            console.log(...args);
+        electron.ipcRenderer.on("fileOpened", (info, filepath) => {
+            updateURLParams({ file: filepath });
+            const dashboard = document.querySelector("nwb-dashboard");
+            const activePage = dashboard.getAttribute("activePage");
+            if (activePage === "preview") dashboard.requestUpdate();
+            else dashboard.setAttribute("activePage", "preview");
         });
 
         const pythonUrl = new URL(globalThis.commoners.services.flask.url)
 
         port = pythonUrl.port
+        // port = electron.ipcRenderer.sendSync("get-port");
+
+        ["log", "warn", "error"].forEach((method) =>
+            electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args))
+        );
+
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
         path = require("path");

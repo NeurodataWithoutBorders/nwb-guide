@@ -12,6 +12,7 @@
         "BlackrockRecordingInterface",
         "BlackrockSortingInterface",
         "CellExplorerSortingInterface",
-        "KiloSortSortingInterface"
+        "KiloSortSortingInterface",
+        "Spike2RecordingInterface"
     ]
 }

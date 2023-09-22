@@ -1,27 +1,41 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "",
   "main": "./dist/.commoners/main/index.js",
   "scripts": {
     "start": "commoners start",
     "dev": "commoners dev",
     "build": "commoners build",
+    "postinstall": "electron-builder install-app-deps",
+    "dev:app": "vite src/renderer",
+    "dev:server": "cd pyflask && python -m flask run --port 4242",
+    "echo": "python -c \"print('hello')\"",
+    "build:app": "electron-vite build --outDir build",
+    "build:win": "npm run build && npm run build:flask && npm run build:electron:win",
+    "build:mac": "npm run build && npm run build:flask && npm run build:electron:mac",
+    "build:linux": "npm run build && npm run build:flask && npm run build:electron:linux",
+    "build:flask": "python -m PyInstaller nwb-guide.spec --log-level DEBUG --clean --noconfirm --distpath ./build/flask",
+    "build:flask:spec:base": "pyi-makespec --name nwb-guide --onedir --collect-data jsonschema_specifications --collect-all nwbinspector --collect-all neuroconv --collect-all pynwb --collect-all hdmf --collect-all ndx_dandi_icephys --collect-all ci_info --hidden-import scipy._distributor_init --hidden-import scipy._lib.messagestream --hidden-import scipy._lib._ccallback --hidden-import scipy._lib._testutils --hidden-import email_validator ./pyflask/app.py",
+    "build:flask:spec": "npm run build:flask:spec:base && python prepare_pyinstaller_spec.py",
+    "build:electron:win": "electron-builder build --win --publish never",
+    "build:electron:mac": "electron-builder build --mac --publish never",
+    "build:electron:linux": "electron-builder build --linux --publish never",
     "test": "npm run test:app && npm run test:server",
     "test:app": "vitest run",
     "test:server": "pytest pyflask/tests/ -s",
+    "wait3s": "node -e \"setTimeout(() => process.exit(0),3000)\"",
+    "test:executable": "concurrently -n EXE,TEST --kill-others --success first \"node tests/testPyinstallerExecutable.js --port 3434 --forever\" \"npm run wait3s && pytest pyflask/tests/ -s --target http://localhost:3434\"",
     "test:coverage": "npm run coverage:app && npm run coverage:server",
     "coverage:app": "vitest run --coverage",
     "coverage:server": "pytest pyflask/tests/ -s --cov=pyflask --cov-report=xml",
-    "deploy:win": "npm run build && npm run build:flask:win && npm run deploy:electron:win",
-    "deploy:mac": "npm run build && npm run build:flask:unix && npm run deploy:electron:mac",
-    "deploy:linux": "npm run build && npm run build:flask:unix && npm run deploy:electron:linux",
+    "deploy:win": "npm run build && npm run build:flask && npm run deploy:electron:win",
+    "deploy:mac": "npm run build && npm run build:flask && npm run deploy:electron:mac",
+    "deploy:linux": "npm run build && npm run build:flask && npm run deploy:electron:linux",
     "deploy:electron:win": "electron-builder build --win --publish always",
     "deploy:electron:mac": "electron-builder build --mac --publish always",
     "deploy:electron:linux": "electron-builder build --linux --publish always",
-    "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore \"./**/*.+(html|css|js|md|yml)\" --write",
-    "postinstall": "electron-builder install-app-deps",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "chromatic": "npx chromatic"
@@ -40,6 +54,13 @@
     "appId": "com.catalystneuro.nwbguide",
     "generateUpdatesFilesForAllChannels": true,
     "afterSign": "./notarize.js",
+    "fileAssociations": [
+      {
+        "ext": "nwb",
+        "name": "NWB File",
+        "role": "Viewer"
+      }
+    ],
     "files": [
       "src",
       "schemas",
@@ -56,8 +77,20 @@
     "mac": {
       "asar": true,
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ],
       "icon": "src/renderer/assets/img/logo-guide-draft.png",
       "darkModeSupport": false,

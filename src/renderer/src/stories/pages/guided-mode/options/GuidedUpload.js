@@ -3,6 +3,10 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
+import { merge } from "../../utils.js";
+import Swal from "sweetalert2";
+import dandiUploadSchema from "../../../../../../../schemas/json/dandi/upload.json";
+import { uploadToDandi } from "../../uploads/UploadsPage.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -11,59 +15,54 @@ export class GuidedUploadPage extends Page {
 
     form;
 
-    footer = {
-        onNext: async () => {
-            delete this.info.globalState.upload.results; // Clear the preview results
+    beforeSave = () => {
+        const globalState = this.info.globalState;
+        const isNewDandiset = globalState.upload?.dandiset_id !== this.localState.dandiset_id;
+        merge({ upload: this.localState }, globalState); // Merge the local and global states
+        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
+    };
 
-            this.save(); // Save in case the conversion fails
+    footer = {
+        next: "Upload Project",
+        onNext: async () => {
+            await this.save(); // Save in case the conversion fails
+
             await this.form.validate(); // Will throw an error in the callback
 
-            const info = { ...this.info.globalState.upload.info };
-            info.project = this.info.globalState.project.name;
-            info.staging = parseInt(info.dandiset_id) >= 100000; // Automatically detect staging IDs
+            const globalState = this.info.globalState;
+            const globalUploadInfo = globalState.upload;
 
-            const results = await run("upload", info, { title: "Uploading to DANDI" }).catch((e) => {
-                this.notify(e.message, "error");
-                throw e;
+            // Catch if dandiset is already uploaded
+            if ("results" in globalUploadInfo) {
+                const result = await Swal.fire({
+                    title: "This pipeline has already uploaded to DANDI",
+                    html: "Would you like to reupload the lastest files?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Continue with Reupload",
+                    cancelButtonText: "Skip Upload",
+                });
+
+                if (!result || !result.isConfirmed) return this.to(1);
+            }
+
+            globalUploadInfo.results = await uploadToDandi.call(this, {
+                ...globalUploadInfo.info,
+                project: globalState.project.name,
             });
 
-            this.info.globalState.upload.results = results; // Save the preview results
-
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
     render() {
-        const schema = {
-            properties: {
-                api_key: {
-                    type: "string",
-                    format: "password",
-                },
-                dandiset_id: {
-                    type: "string",
-                },
-                cleanup: {
-                    type: "boolean",
-                    default: false,
-                },
-            },
-            required: ["api_key", "dandiset_id"],
-        };
-
-        let uploadGlobalState = this.info.globalState.upload;
-        if (!uploadGlobalState) uploadGlobalState = this.info.globalState.upload = { info: {}, results: null };
+        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
 
         this.form = new JSONSchemaForm({
-            schema,
-            results: uploadGlobalState.info,
-            // dialogType: 'showSaveDialog',
-            dialogOptions: {
-                properties: ["createDirectory"],
-                // filters: [
-                //   { name: 'NWB File', extensions: ['nwb'] }
-                // ]
-            },
+            schema: dandiUploadSchema,
+            results: state.info,
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

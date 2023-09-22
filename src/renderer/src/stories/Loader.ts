@@ -1,4 +1,5 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 // From https://loading.io/css/
 
@@ -10,6 +11,19 @@ export class Loader extends LitElement {
         :host {
           display: block;
         }
+
+        span {
+          font-size: 90%;
+          padding-left: 10px;
+        }
+
+        :host > div {
+          display: flex;
+          align-items: center;
+          justif-content: center;
+        }
+
+
         .lds-default {
             display: inline-block;
             position: relative;
@@ -96,12 +110,20 @@ export class Loader extends LitElement {
         `
     }
 
-    constructor(){
+    declare message: string
+
+    constructor(props: any){
         super()
+        Object.assign(this, props)
     }
 
     render() {
-        return html` <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div> `
+        return html`
+          <div>
+          <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+          ${this.message ? html`<span>${unsafeHTML(this.message)}</span>` : ''}
+          </div>
+      `
     }
 }
 

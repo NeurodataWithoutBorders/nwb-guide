@@ -1,5 +1,5 @@
 import { html, LitElement } from "lit";
-import * as progress from "../../../progress.js";
+import * as progress from "../../../progress/index.js";
 
 export class ProgressCard extends LitElement {
     static get properties() {
@@ -126,7 +126,7 @@ export class ProgressCard extends LitElement {
                         @click=${(ev) => progress.deleteProgressCard(ev.target)}
                     >
                         <i class="fas fa-trash mr-sm-1"></i>
-                        Delete progress file
+                        Delete pipeline
                     </h2>
                 </div>
             </div>

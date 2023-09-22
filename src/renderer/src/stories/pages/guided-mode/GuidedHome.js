@@ -3,7 +3,7 @@ import { Page } from "../Page.js";
 import { ProgressCard } from "./ProgressCard.js";
 
 import { startLottie } from "../../../dependencies/globals.js";
-import * as progress from "../../../progress.js";
+import * as progress from "../../../progress/index.js";
 import { newDataset } from "../../../../assets/lotties/index.js";
 
 export class GuidedHomePage extends Page {
@@ -193,7 +193,7 @@ export class GuidedHomePage extends Page {
                             class="container--dashed"
                             id="guided-button-start-new-curate"
                             style="width: 320px; margin: 5px; width: 28rem; height: 16.5rem"
-                            @click="${() => this.onTransition(1)}"
+                            @click="${() => this.to(1)}"
                         >
                             <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
                             <h2 class="guided--text-sub-step" style="width: 100%;">Convert a new dataset</h2>

@@ -1,0 +1,33 @@
+{
+    "required": [],
+    "properties": {
+        "BlackrockSortingInterface": {
+            "required": [
+                "file_path"
+            ],
+            "properties": {
+                "file_path": {
+                    "format": "file",
+                    "type": "string",
+                    "description": "Path to Blackrock file."
+                },
+                "sampling_frequency": {
+                    "type": "number"
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "type": "object",
+            "additionalProperties": true
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "source.schema.json",
+    "title": "Source data schema",
+    "description": "Schema for the source data, files and directories",
+    "version": "0.1.0"
+}

@@ -1,37 +1,11 @@
 from jsonschema import validate
+from utils import get, post, get_converter_output_schema
 
 
-def get_converter_output_schema(interfaces: dict):
-    return {
-        "type": "object",
-        "properties": {
-            "title": {"type": "string"},
-            "description": {"type": "string"},
-            "version": {"type": "string"},
-            "properties": {
-                "type": "object",
-                "properties": {
-                    interface: {
-                        "type": "object",
-                        "properties": {
-                            "properties": {"type": "object"},
-                            "required": {"type": "array"},
-                        },
-                    }
-                    for interface in interfaces.keys()
-                },
-                "additionalProperties": False,
-            },
-        },
-    }
-
-
-# --------------------- Tests ---------------------
-# Accesses the dictionary of all interfaces and their metadata
 def test_get_all_interfaces(client):
-    all_interfaces = client.get("/neuroconv", follow_redirects=True).json
+    """Accesses the dictionary of all interfaces and their metadata."""
     validate(
-        all_interfaces,
+        get("neuroconv", client),
         schema={
             "type": "object",
             "patternProperties": {
@@ -48,15 +22,14 @@ def test_get_all_interfaces(client):
     )
 
 
-# Test single interface schema request
 def test_single_schema_request(client):
+    """Test single interface schema request."""
     interfaces = {"myname": "SpikeGLXRecordingInterface"}
-    data = client.post("/neuroconv/schema", json=interfaces, follow_redirects=True).json
-    validate(data, schema=get_converter_output_schema(interfaces))
+    validate(post("neuroconv/schema", interfaces, client), schema=get_converter_output_schema(interfaces))
 
 
-# Uses the NWBConverter Class to combine multiple interfaces
 def test_multiple_schema_request(client):
+    """Uses the NWBConverter Class to combine multiple interfaces."""
     interfaces = {"myname": "SpikeGLXRecordingInterface", "myphyinterface": "PhySortingInterface"}
-    data = client.post("/neuroconv/schema", json=interfaces, follow_redirects=True).json
+    data = post("/neuroconv/schema", interfaces, client)
     validate(data, schema=get_converter_output_schema(interfaces))
