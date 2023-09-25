@@ -70,10 +70,10 @@ class GlobalAppConfig {
     }
 
     save() {
-        console.log("Saving", this.data, encodeObject(this.data));
+        const encoded = encodeObject(this.data)
 
-        if (fs) fs.writeFileSync(this.path, JSON.stringify(this.data, null, 2));
-        else localStorage.setItem(this.path, JSON.stringify(this.data));
+        if (fs) fs.writeFileSync(this.path, JSON.stringify(encoded, null, 2));
+        else localStorage.setItem(this.path, JSON.stringify(encoded));
     }
 }
 
