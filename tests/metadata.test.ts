@@ -136,7 +136,6 @@ test('inter-table updates are triggered', async () => {
 test('changes are resolved correctly', async () => {
 
     const results = {}
-
     const schema = {
         properties: {
             v0: {
@@ -148,11 +147,16 @@ test('changes are resolved correctly', async () => {
                     l2: {
                         type: "object",
                         properties: {
-                            v2: {
-                                type: 'string'
-                            }
+                            l3: {
+                                type: "object",
+                                properties: {
+                                    v2: {
+                                        type: 'string'
+                                    }
+                                },
+                                required: ['v2']
+                            },
                         },
-                        required: ['v2']
                     },
                     v1: {
                         type: 'string'
@@ -181,13 +185,13 @@ test('changes are resolved correctly', async () => {
 
     const input1 = form.getInput(['v0'])
     const input2 = form.getInput(['l1', 'v1'])
-    const input3 = form.getInput(['l1', 'l2', 'v2'])
+    const input3 = form.getInput(['l1', 'l2', 'l3', 'v2'])
 
     input1.updateData('test')
     input2.updateData('test')
     input3.updateData('test')
 
     // Validate that the new structure is correct
-    await form.validate().then(res => errors = false).catch(e => errors = true)
+    await form.validate(form.results).then(res => errors = false).catch(e => errors = true)
     expect(errors).toBe(false) // Is valid
 })
