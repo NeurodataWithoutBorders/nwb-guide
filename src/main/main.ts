@@ -410,7 +410,7 @@ function deleteFoldersWithoutPipelines() {
 }
 
 let forceQuit = false;
-app.on('before-quit', async function() {
+async function beforeQuit() {
   forceQuit = true;
   try {
     globalShortcut.unregisterAll();
@@ -419,8 +419,9 @@ app.on('before-quit', async function() {
   } catch (err) {
     console.error(err);
   } 
+}
 
-});
+app.on('before-quit', beforeQuit);
 
 
 app.on("open-file", onFileOpened)
@@ -447,7 +448,8 @@ autoUpdater.on("update-downloaded", () => {
 });
 
 ipcMain.on("restart_app", async () => {
-  autoUpdater.quitAndInstall();
+  beforeQuit() // Will ensure shutdown functions are run
+  autoUpdater.quitAndInstall(); // Will close the window and trigger the exit command (which is why we need to manually call beforeQuit)
 });
 
 ipcMain.on("get-port", (event) => {
