@@ -141,7 +141,9 @@ const createPyProc = async () => {
 
           pyflaskProcess.stdout.on('data', (data: string) => {
             const isRestarting = globals.python.restart
-            setTimeout(() => pythonIsOpen(isRestarting), 100); // Wait just a bit to give the server some time to come online
+            setTimeout(() => {
+              pythonIsOpen(isRestarting)
+            }, 100); // Wait just a bit to give the server some time to come online
             console.log(`${data}`)
             resolve(true)
           });
@@ -225,8 +227,26 @@ function initialize() {
     });
 
     globals.mainWindow.on("close", async (e) => {
-       willQuit.call(e, forceQuit)
-       forceQuit = false
+
+        if (!forceQuit) {
+        
+          e.preventDefault() // Prevent default behavior on the relevant event
+    
+          const { response } = await dialog
+          .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
+            type: "question",
+            buttons: ["Yes", "No"],
+            title: "Confirm",
+            message: "Any running process will be stopped. Are you sure you want to quit?",
+          })
+    
+          if (response !== 0) return // Skip quitting
+          else globals.mainWindow.destroy()
+      }
+  
+      forceQuit = false
+      if (process.platform != 'darwin') app.exit() // Exit the application not on Mac
+
     });
   }
 
@@ -389,45 +409,17 @@ function deleteFoldersWithoutPipelines() {
     stubsToRemove.forEach(name => fs.rmSync(path.join(guidedStubFolderPath, name), { recursive: true }))
 }
 
-async function willQuit(
-  force = false
-) {
-
-    if (!force) {
-      if (this) this.preventDefault() // Prevent default behavior on the relevant event
-
-      const { response } = await dialog
-      .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
-        type: "question",
-        buttons: ["Yes", "No"],
-        title: "Confirm",
-        message: "Any running process will be stopped. Are you sure you want to quit?",
-      })
-
-      if (response !== 0) return // Skip quitting
-  }
-
+let forceQuit = false;
+app.on('before-quit', async function() {
+  forceQuit = true;
   try {
     globalShortcut.unregisterAll();
     deleteFoldersWithoutPipelines()
     await exitPyProc()
   } catch (err) {
     console.error(err);
-  } finally {
-    app.exit()
-  }
-}
+  } 
 
-
-var forceQuit = false;
-app.on('before-quit', function() {
-  forceQuit = true;
-});
-
-app.on('will-quit', () => willQuit(true));
-
-app.on("window-all-closed", async () => {
-  if (process.platform != 'darwin') willQuit(true);
 });
 
 
