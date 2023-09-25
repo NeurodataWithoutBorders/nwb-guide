@@ -229,9 +229,9 @@ function initialize() {
     globals.mainWindow.on("close", async (e) => {
 
         if (!forceQuit) {
-        
+
           e.preventDefault() // Prevent default behavior on the relevant event
-    
+
           const { response } = await dialog
           .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
             type: "question",
@@ -239,11 +239,11 @@ function initialize() {
             title: "Confirm",
             message: "Any running process will be stopped. Are you sure you want to quit?",
           })
-    
+
           if (response !== 0) return // Skip quitting
           else globals.mainWindow.destroy()
       }
-  
+
       forceQuit = false
       if (process.platform != 'darwin') app.exit() // Exit the application not on Mac
 
@@ -418,7 +418,7 @@ async function beforeQuit() {
     await exitPyProc()
   } catch (err) {
     console.error(err);
-  } 
+  }
 }
 
 app.on('before-quit', beforeQuit);
