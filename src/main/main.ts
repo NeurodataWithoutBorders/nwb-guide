@@ -209,8 +209,6 @@ let hasBeenOpened = false;
 
 function initialize() {
 
-  if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
-
   makeSingleInstance();
 
   function createWindow() {
@@ -225,32 +223,31 @@ function initialize() {
         autoUpdater.checkForUpdatesAndNotify();
       }
     });
-
-    globals.mainWindow.on("close", async (e) => {
-
-        if (!forceQuit) {
-        
-          e.preventDefault() // Prevent default behavior on the relevant event
-    
-          const { response } = await dialog
-          .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
-            type: "question",
-            buttons: ["Yes", "No"],
-            title: "Confirm",
-            message: "Any running process will be stopped. Are you sure you want to quit?",
-          })
-    
-          if (response !== 0) return // Skip quitting
-          else globals.mainWindow.destroy()
-      }
-  
-      forceQuit = false
-      if (process.platform != 'darwin') app.exit() // Exit the application not on Mac
-
-    });
   }
 
   function onAppReady () {
+
+    if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
+    
+    const windowOptions = {
+      minWidth: 1121,
+      minHeight: 735,
+      width: 1121,
+      height: 735,
+      center: true,
+      show: false,
+      icon,
+      webPreferences: {
+        nodeIntegration: true,
+        enableRemoteModule: true,
+        contextIsolation: false,
+        sandbox: false,
+        // preload: path.join(__dirname, "preload.js"),
+      },
+    };
+
+    globals.mainWindow = new BrowserWindow(windowOptions);
+
 
     // Only create one python process
     if (!pyflaskProcess) {
@@ -274,24 +271,6 @@ function initialize() {
       })
     }
 
-    const windowOptions = {
-      minWidth: 1121,
-      minHeight: 735,
-      width: 1121,
-      height: 735,
-      center: true,
-      show: false,
-      icon,
-      webPreferences: {
-        nodeIntegration: true,
-        enableRemoteModule: true,
-        contextIsolation: false,
-        sandbox: false,
-        // preload: path.join(__dirname, "preload.js"),
-      },
-    };
-
-    globals.mainWindow = new BrowserWindow(windowOptions);
     main.enable(globals.mainWindow.webContents);
 
   // HMR for renderer base on electron-vite cli.
@@ -409,20 +388,36 @@ function deleteFoldersWithoutPipelines() {
     stubsToRemove.forEach(name => fs.rmSync(path.join(guidedStubFolderPath, name), { recursive: true }))
 }
 
-let forceQuit = false;
-async function beforeQuit() {
-  forceQuit = true;
+app.on("window-all-closed", () => {
+  if (process.platform != 'darwin') app.quit() // Exit the application not on Mac
+})
+
+app.on("before-quit", async (ev: Event) => {
+
+  ev.preventDefault()
+
+  console.log('AHH', globals.python.status)
+
+  const { response } = await dialog
+  .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
+    type: "question",
+    buttons: ["Yes", "No"],
+    title: "Confirm",
+    message: "Any running process will be stopped. Are you sure you want to quit?",
+  })
+
+  if (response !== 0) return // Skip quitting
+
   try {
     globalShortcut.unregisterAll();
     deleteFoldersWithoutPipelines()
     await exitPyProc()
   } catch (err) {
     console.error(err);
-  } 
-}
-
-app.on('before-quit', beforeQuit);
-
+  } finally {
+    app.exit()
+  }
+})
 
 app.on("open-file", onFileOpened)
 
@@ -448,8 +443,7 @@ autoUpdater.on("update-downloaded", () => {
 });
 
 ipcMain.on("restart_app", async () => {
-  beforeQuit() // Will ensure shutdown functions are run
-  autoUpdater.quitAndInstall(); // Will close the window and trigger the exit command (which is why we need to manually call beforeQuit)
+  autoUpdater.quitAndInstall();
 });
 
 ipcMain.on("get-port", (event) => {
