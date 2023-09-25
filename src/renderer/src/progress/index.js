@@ -14,6 +14,8 @@ import { merge } from "../stories/pages/utils.js";
 import { updateAppProgress, updateFile } from "./update.js";
 import { updateURLParams } from "../../utils/url.js";
 
+import * as operations from "./operations";
+
 export * from "./update";
 
 class GlobalAppConfig {
@@ -122,24 +124,7 @@ export const remove = async (name) => {
         focusCancel: true,
     });
 
-    if (result.isConfirmed) {
-        //Get the path of the progress file to delete
-        const progressFilePathToDelete = joinPath(guidedProgressFilePath, name + ".json");
-
-        //delete the progress file
-        if (fs) fs.unlinkSync(progressFilePathToDelete);
-        else localStorage.removeItem(progressFilePathToDelete);
-
-        if (fs) {
-            // delete default stub location
-            fs.rmSync(joinPath(stubSaveFolderPath, name), { recursive: true, force: true });
-
-            // delete default conversion location
-            fs.rmSync(joinPath(conversionSaveFolderPath, name), { recursive: true, force: true });
-        }
-
-        return true;
-    }
+    if (result.isConfirmed) return operations.remove(name);
 
     return false;
 };
