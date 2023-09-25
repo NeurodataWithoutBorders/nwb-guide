@@ -209,9 +209,7 @@ const killAllPreviousProcesses = async () => {
 
   // create a loop of 100
   for (let currentPort = defaultPort; currentPort <= endRange; currentPort++) {
-    promisesArray.push(
-      axios.get(`http://127.0.0.1:${currentPort}/server_shutdown`, {})
-    );
+    promisesArray.push( fetch(`http://127.0.0.1:${currentPort}/server_shutdown`) );
   }
 
   // wait for all the promises to resolve
