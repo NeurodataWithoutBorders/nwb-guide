@@ -70,7 +70,7 @@ class GlobalAppConfig {
     }
 
     save() {
-        const encoded = encodeObject(this.data)
+        const encoded = encodeObject(this.data);
 
         if (fs) fs.writeFileSync(this.path, JSON.stringify(encoded, null, 2));
         else localStorage.setItem(this.path, JSON.stringify(encoded));
