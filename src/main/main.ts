@@ -1,6 +1,8 @@
 import { app, BrowserWindow, dialog, shell } from 'electron';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
+import paths from '../../paths.config.json'
+
 import main from '@electron/remote/main';
 main.initialize()
 
@@ -393,8 +395,37 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) initialize()
 })
 
+
+const homeDirectory = app.getPath("home");
+const appDirectory = path.join(homeDirectory, paths.root)
+const guidedProgressFilePath = path.join(appDirectory, ...paths.subfolders.progress);
+const guidedConversionFolderPath = path.join(appDirectory, ...paths.subfolders.conversions);
+const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.stubs);
+
+function getEntries(path, type = 'isDirectory') {
+  return fs.readdirSync(path, { withFileTypes: true })
+  .filter(dirent => dirent[type]())
+  .map(dirent => dirent.name)
+}
+
+
+// This function removes all folders that don't have a corresponding pipeline (specifically DANDI temp folders—but also any folders left after a pipeline is deleted)
+function deleteFoldersWithoutPipelines() {
+    const conversionDirectories = getEntries(guidedConversionFolderPath)
+    const stubDirectories = getEntries(guidedStubFolderPath)
+
+    const allowedDirectories = getEntries(guidedProgressFilePath, 'isFile').map(name => name.slice(0, -'.json'.length))
+    const conversionsToRemove = conversionDirectories.filter(name => !allowedDirectories.includes(name))
+    const stubsToRemove = stubDirectories.filter(name => !allowedDirectories.includes(name))
+
+    conversionsToRemove.forEach(name => fs.rmSync(path.join(guidedConversionFolderPath, name), { recursive: true }))
+    stubsToRemove.forEach(name => fs.rmSync(path.join(guidedStubFolderPath, name), { recursive: true }))
+}
+
+
 app.on('will-quit', async () => {
   try {
+    deleteFoldersWithoutPipelines()
     await exitPyProc()
     if (globals.mainWindow) {
       globals.mainWindow.close();
