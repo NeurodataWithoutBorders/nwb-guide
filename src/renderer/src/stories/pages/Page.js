@@ -64,7 +64,7 @@ export class Page extends LitElement {
         this.beforeTransition();
 
         // Otherwise note unsaved updates if present
-        if (this.unsavedUpdates || ('states' in this.info && !this.info.states.saved)) {
+        if (this.unsavedUpdates || ("states" in this.info && !this.info.states.saved)) {
             if (transition === 1) await this.save(); // Save before a single forward transition
             else {
                 Swal.fire({
