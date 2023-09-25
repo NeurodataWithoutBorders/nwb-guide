@@ -228,7 +228,7 @@ function initialize() {
   function onAppReady () {
 
     if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
-    
+
     const windowOptions = {
       minWidth: 1121,
       minHeight: 735,
