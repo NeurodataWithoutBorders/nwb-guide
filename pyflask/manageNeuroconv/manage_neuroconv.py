@@ -2,6 +2,7 @@
 import os
 import json
 import math
+import copy
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
@@ -57,9 +58,6 @@ def resolve_references(schema, root_schema=None):
 
 
 def replace_none_with_nan(json_object, json_schema):
-    import math
-    import copy
-
     """
     Recursively search a JSON object and replace None values with NaN where appropriate.
 
