@@ -33,7 +33,7 @@ export class GuidedInspectorPage extends Page {
     }
 
     header = {
-        subtitle: () => `${getStubArray(this.info.globalState.preview.stubs).length} Files`,
+        subtitle: `The NWB Inspector has scanned your files for adherence to <a target="_blank" href="https://nwbinspector.readthedocs.io/en/dev/best_practices/best_practices_index.html">best practices</a>`,
         controls: () =>
             html`<nwb-button
                 size="small"

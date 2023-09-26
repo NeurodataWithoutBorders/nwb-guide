@@ -1,5 +1,5 @@
 import { joinPath } from "../globals";
-import { conversionSaveFolderPath, guidedProgressFilePath, stubSaveFolderPath } from "../dependencies/simple";
+import { conversionSaveFolderPath, guidedProgressFilePath, previewSaveFolderPath } from "../dependencies/simple";
 import { fs } from "../electron";
 
 export const remove = (name) => {
@@ -11,8 +11,8 @@ export const remove = (name) => {
     else localStorage.removeItem(progressFilePathToDelete);
 
     if (fs) {
-        // delete default stub location
-        fs.rmSync(joinPath(stubSaveFolderPath, name), { recursive: true, force: true });
+        // delete default preview location
+        fs.rmSync(joinPath(previewSaveFolderPath, name), { recursive: true, force: true });
 
         // delete default conversion location
         fs.rmSync(joinPath(conversionSaveFolderPath, name), { recursive: true, force: true });

@@ -1,12 +1,11 @@
-import { app, BrowserWindow, dialog, shell } from 'electron';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { app, BrowserWindow, dialog, shell, globalShortcut } from 'electron';
+import { is } from '@electron-toolkit/utils'
 
 import paths from '../../paths.config.json'
 
 import main from '@electron/remote/main';
 main.initialize()
 
-let showExitPrompt = true;
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import { ipcMain } from 'electron';
@@ -18,7 +17,6 @@ import fs from 'fs';
 import axios from 'axios';
 
 import './application-menu.js';
-import './shortcuts.js';
 
 import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
@@ -44,7 +42,6 @@ const portRange = 100;
 
 const isWindows = process.platform === 'win32'
 
-let mainWindowReady = false
 let readyQueue: Function[] = []
 
 let globals: {
@@ -54,7 +51,6 @@ let globals: {
     sent: boolean,
     latestError: string
   },
-  mainWindowReady: boolean
 } =  {
 
   // mainWindow: undefined,
@@ -64,18 +60,6 @@ let globals: {
     sent: false,
     restart: false,
     latestError: ''
-  },
-
-  // Reactive ready variable
-  get mainWindowReady() {
-    return mainWindowReady
-  },
-
-  set mainWindowReady(v) {
-    if (!globals.mainWindow) throw new Error('Main window cannot be ready. It does not exist...')
-    mainWindowReady = v
-    if (v) readyQueue.forEach(f => onWindowReady(f))
-    readyQueue = []
   }
 }
 
@@ -83,7 +67,7 @@ function send(this: BrowserWindow, ...args: any[]) {
   return this.webContents.send(...args)
 }
 
-const onWindowReady = (f: (win: BrowserWindow) => any) => (globals.mainWindowReady) ? f(globals.mainWindow) : readyQueue.push(f)
+const onWindowReady = (f: (win: BrowserWindow) => any) => (globals.mainWindow?.webContents) ? f(globals.mainWindow) : readyQueue.push(f)
 
 
 // Pass all important log functions to the application
@@ -157,13 +141,14 @@ const createPyProc = async () => {
 
           pyflaskProcess.stdout.on('data', (data: string) => {
             const isRestarting = globals.python.restart
-            setTimeout(() => pythonIsOpen(isRestarting), 100); // Wait just a bit to give the server some time to come online
+            setTimeout(() => {
+              pythonIsOpen(isRestarting)
+            }, 100); // Wait just a bit to give the server some time to come online
             console.log(`${data}`)
             resolve(true)
           });
 
-          pyflaskProcess.on('close', (code: number) => {
-            console.error(`exit code ${code}`)
+          pyflaskProcess.on('close', () => {
             pythonIsClosed()
             reject()
           });
@@ -216,14 +201,11 @@ const killAllPreviousProcesses = async () => {
   await Promise.allSettled(promisesArray);
 };
 
-let user_restart_confirmed = false;
 let updatechecked = false;
 
 let hasBeenOpened = false;
 
 function initialize() {
-
-  if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
 
   makeSingleInstance();
 
@@ -239,34 +221,31 @@ function initialize() {
         autoUpdater.checkForUpdatesAndNotify();
       }
     });
-
-    globals.mainWindow.once("close", async (e) => {
-
-      globals.mainWindowReady = false
-
-      if (!user_restart_confirmed) {
-        if (showExitPrompt) {
-          e.preventDefault(); // Prevents the window from closing
-          dialog
-            .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
-              type: "question",
-              buttons: ["Yes", "No"],
-              title: "Confirm",
-              message: "Any running process will be stopped. Are you sure you want to quit?",
-            })
-            .then((responseObject) => {
-              let { response } = responseObject;
-              if (response === 0) app.quit();
-              else globals.mainWindowReady = true
-            });
-        }
-      } else {
-        app.quit();
-      }
-    });
   }
 
   function onAppReady () {
+
+    if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
+
+    const windowOptions = {
+      minWidth: 1121,
+      minHeight: 735,
+      width: 1121,
+      height: 735,
+      center: true,
+      show: false,
+      icon,
+      webPreferences: {
+        nodeIntegration: true,
+        enableRemoteModule: true,
+        contextIsolation: false,
+        sandbox: false,
+        // preload: path.join(__dirname, "preload.js"),
+      },
+    };
+
+    globals.mainWindow = new BrowserWindow(windowOptions);
+
 
     // Only create one python process
     if (!pyflaskProcess) {
@@ -290,24 +269,6 @@ function initialize() {
       })
     }
 
-    const windowOptions = {
-      minWidth: 1121,
-      minHeight: 735,
-      width: 1121,
-      height: 735,
-      center: true,
-      show: false,
-      icon,
-      webPreferences: {
-        nodeIntegration: true,
-        enableRemoteModule: true,
-        contextIsolation: false,
-        sandbox: false,
-        // preload: path.join(__dirname, "preload.js"),
-      },
-    };
-
-    globals.mainWindow = new BrowserWindow(windowOptions);
     main.enable(globals.mainWindow.webContents);
 
   // HMR for renderer base on electron-vite cli.
@@ -344,7 +305,9 @@ function initialize() {
         autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
 
-        globals.mainWindowReady = true
+        // Clear ready queue
+        readyQueue.forEach(f => onWindowReady(f))
+        readyQueue = []
 
       }, hasBeenOpened ? 100 : 1000);
     });
@@ -383,7 +346,10 @@ function restoreWindow(){
 function makeSingleInstance() {
   if (process.mas) return;
 
-  if (!app.requestSingleInstanceLock()) app.quit();
+  if (!app.requestSingleInstanceLock()){
+    console.error('An instance of this application is already open...')
+    app.exit(); // Skip quit callbacks
+  }
   else app.on("second-instance", () => restoreWindow());
 }
 
@@ -420,25 +386,36 @@ function deleteFoldersWithoutPipelines() {
     stubsToRemove.forEach(name => fs.rmSync(path.join(guidedStubFolderPath, name), { recursive: true }))
 }
 
+app.on("window-all-closed", () => {
+  if (process.platform != 'darwin') app.quit() // Exit the application not on Mac
+})
 
-app.on('will-quit', async () => {
+app.on("before-quit", async (ev: Event) => {
+
+  ev.preventDefault()
+
+  console.log('AHH', globals.python.status)
+
+  const { response } = await dialog
+  .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
+    type: "question",
+    buttons: ["Yes", "No"],
+    title: "Confirm",
+    message: "Any running process will be stopped. Are you sure you want to quit?",
+  })
+
+  if (response !== 0) return // Skip quitting
+
   try {
+    globalShortcut.unregisterAll();
     deleteFoldersWithoutPipelines()
     await exitPyProc()
-    if (globals.mainWindow) {
-      globals.mainWindow.close();
-      if (!globals.mainWindow.closed) globals.mainWindow.destroy()
-    }
   } catch (err) {
     console.error(err);
+  } finally {
+    app.exit()
   }
-});
-
-app.on("window-all-closed", async () => {
-  if (process.platform != 'darwin') app.quit();
-});
-
-// app.on("will-quit", () => app.quit());
+})
 
 app.on("open-file", onFileOpened)
 
@@ -464,7 +441,6 @@ autoUpdater.on("update-downloaded", () => {
 });
 
 ipcMain.on("restart_app", async () => {
-  user_restart_confirmed = true;
   autoUpdater.quitAndInstall();
 });
 

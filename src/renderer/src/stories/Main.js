@@ -4,6 +4,8 @@ import { GuidedFooter } from "./pages/guided-mode/GuidedFooter";
 import { GuidedCapsules } from "./pages/guided-mode/GuidedCapsules.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
 
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 const componentCSS = `
     :host {
         display: grid;
@@ -147,7 +149,7 @@ export class Main extends LitElement {
                               >
                                   <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                       <h1 class="title" style="margin: 0; padding: 0;">${title}</h1>
-                                      <small style="color: gray;">${subtitle}</small>
+                                      <small style="color: gray;">${unsafeHTML(subtitle)}</small>
                                   </div>
                                   <div style="padding-left: 25px">${controls}</div>
                               </div>

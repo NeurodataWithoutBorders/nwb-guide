@@ -3,7 +3,7 @@
 
     "name": false,
     "conversion_output_folder": false,
-    "stub_output_folder": false,
+    "preview_output_folder": false,
 
     "NWBFile": {
         "identifier": false,

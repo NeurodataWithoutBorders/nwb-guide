@@ -5,7 +5,7 @@ import { Loader } from "../Loader";
 
 export function getURLFromFilePath(file, projectName) {
     const regexp = new RegExp(`.+(${projectName}.+)`);
-    return `${baseUrl}/stubs/${file.match(regexp)[1]}`;
+    return `${baseUrl}/preview/${file.match(regexp)[1]}`;
 }
 
 export class Neurosift extends LitElement {
