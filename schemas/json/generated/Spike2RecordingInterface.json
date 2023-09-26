@@ -1,25 +1,27 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "Spike2RecordingInterface": {
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
-                    "type": "string"
-                },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "file_path": {
+                    "format": "file",
+                    "type": "string",
+                    "description": "Path to CED data file."
                 },
                 "verbose": {
                     "type": "boolean",
                     "default": true
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",
-            "additionalProperties": false
+            "additionalProperties": true
         }
     },
     "type": "object",
