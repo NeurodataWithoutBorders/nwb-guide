@@ -2,6 +2,7 @@
 import os
 import json
 import math
+import copy
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
@@ -27,8 +28,6 @@ def replace_nan_with_none(data):
 
 
 def resolve_references(schema, root_schema=None):
-    from jsonschema import RefResolver
-
     """
     Recursively resolve references in a JSON schema based on the root schema.
 
@@ -39,6 +38,7 @@ def resolve_references(schema, root_schema=None):
     Returns:
         dict: The resolved JSON schema.
     """
+    from jsonschema import RefResolver
 
     if root_schema is None:
         root_schema = schema
@@ -58,9 +58,6 @@ def resolve_references(schema, root_schema=None):
 
 
 def replace_none_with_nan(json_object, json_schema):
-    import math
-    import copy
-
     """
     Recursively search a JSON object and replace None values with NaN where appropriate.
 
