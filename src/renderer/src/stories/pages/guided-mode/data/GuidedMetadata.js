@@ -30,6 +30,11 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     form;
+
+    header = {
+        subtitle: "Edit all metadata for this conversion at the session level",
+    };
+
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
