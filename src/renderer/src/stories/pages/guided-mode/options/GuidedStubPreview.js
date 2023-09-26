@@ -19,7 +19,7 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        subtitle: () => `${getStubArray(this.info.globalState.preview.stubs).length} Files`,
+        subtitle: `Preview file contents on truncated files using the Neurosift application`,
         controls: () =>
             html`<nwb-button
                 size="small"

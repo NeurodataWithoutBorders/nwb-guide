@@ -17,6 +17,10 @@ export class GuidedPathExpansionPage extends Page {
         super(...args);
     }
 
+    header = {
+        subtitle: "Automatic source data detection for multiple subjects / sessions",
+    };
+
     beforeSave = async () => {
         const globalState = this.info.globalState;
         merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
@@ -140,7 +144,6 @@ export class GuidedPathExpansionPage extends Page {
 
     optional = new OptionalSection({
         header: "Would you like to locate data programmatically?",
-        description: html`<p>Automatically detect source data for multiple subjects and sessions.</p>`,
         onChange: () => (this.unsavedUpdates = true),
         // altContent: this.altForm,
     });
@@ -179,6 +182,7 @@ export class GuidedPathExpansionPage extends Page {
         pathExpansionInfoBox.style.margin = "10px 0px";
 
         this.optional.innerHTML = "";
+        this.optional.style.marginTop = "15px";
         this.optional.append(pathExpansionInfoBox, form);
 
         form.style.width = "100%";
