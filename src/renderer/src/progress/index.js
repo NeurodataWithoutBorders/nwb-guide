@@ -4,9 +4,7 @@ import {
     guidedProgressFilePath,
     reloadPageToHome,
     isStorybook,
-    appDirectory,
-    stubSaveFolderPath,
-    conversionSaveFolderPath,
+    appDirectory
 } from "../dependencies/simple.js";
 import { fs } from "../electron/index.js";
 import { joinPath, runOnLoad } from "../globals.js";

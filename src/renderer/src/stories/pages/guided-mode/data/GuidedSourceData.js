@@ -20,7 +20,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     header = {
-        subtitle: "Essential information about the source files for this conversion",
+        subtitle: "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
     };
 
     footer = {

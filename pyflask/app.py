@@ -84,8 +84,8 @@ def send_conversions(path):
     return send_from_directory(CONVERSION_SAVE_FOLDER_PATH, path)
 
 
-@app.route("/stubs/<path:path>")
-def send_stubs(path):
+@app.route("/preview/<path:path>")
+def send_preview(path):
     return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
 
 

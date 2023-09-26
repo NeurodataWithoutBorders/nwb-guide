@@ -13,7 +13,7 @@ export class GuidedSubjectsPage extends Page {
     }
 
     header = {
-        subtitle: "Uniform metadata for the subjects included in this conversion",
+        subtitle: "Enter all metadata known about each experiment subject",
     };
 
     beforeSave = () => {

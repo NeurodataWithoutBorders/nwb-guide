@@ -151,7 +151,7 @@ export class Page extends LitElement {
             const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, stub_output_folder, name } = globalState.project;
+            const { conversion_output_folder, preview_output_folder, name } = globalState.project;
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
@@ -161,7 +161,7 @@ export class Page extends LitElement {
 
             const result = await runConversion(
                 {
-                    output_folder: conversionOptions.stub_test ? stub_output_folder : conversion_output_folder,
+                    output_folder: conversionOptions.stub_test ? preview_output_folder : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)

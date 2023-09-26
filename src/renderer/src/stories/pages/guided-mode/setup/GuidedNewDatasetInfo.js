@@ -29,7 +29,7 @@ export class GuidedNewDatasetPage extends Page {
     #nameNotification;
 
     header = {
-        subtitle: "Essential metadata for pipeline creation",
+        subtitle: "Enter a name for this pipeline and specify the base folders to save all outputs to",
     };
 
     footer = {
@@ -97,7 +97,7 @@ export class GuidedNewDatasetPage extends Page {
 
         pages.forEach((page) => {
             page.header = {
-                subtitle: `Uniform ${page.info.label} metadata across all sessions`,
+                subtitle: `Enter any ${page.info.label}-level metadata that can serve as the common default across each experiment session`,
             };
             this.addPage(page.info.label, page);
         });

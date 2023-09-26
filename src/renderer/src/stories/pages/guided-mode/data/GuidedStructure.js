@@ -30,7 +30,7 @@ export class GuidedStructurePage extends Page {
     }
 
     header = {
-        subtitle: "Required interfaces for this conversion",
+        subtitle: "Select all interfaces which apply to this experiment",
     };
 
     search = new Search({
