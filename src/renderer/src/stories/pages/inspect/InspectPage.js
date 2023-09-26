@@ -14,7 +14,6 @@ export class InspectPage extends Page {
         super(...args);
     }
 
-
     showReport = async (value) => {
         if (!value) {
             const message = "Please provide a folder to inspect.";

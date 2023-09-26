@@ -6,7 +6,6 @@ import { Neurosift } from "../../preview/Neurosift.js";
 import { baseUrl } from "../../../globals.js";
 
 export class PreviewPage extends Page {
-
     constructor(...args) {
         super(...args);
     }

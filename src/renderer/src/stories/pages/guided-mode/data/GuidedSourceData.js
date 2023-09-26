@@ -20,7 +20,8 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     header = {
-        subtitle: "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
+        subtitle:
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
     };
 
     footer = {
