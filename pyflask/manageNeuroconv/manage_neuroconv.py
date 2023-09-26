@@ -12,6 +12,7 @@ from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_S
 
 announcer = MessageAnnouncer()
 
+
 def replace_nan_with_none(data):
     if isinstance(data, dict):
         # If it's a dictionary, iterate over its items and replace NaN values with None
@@ -23,10 +24,11 @@ def replace_nan_with_none(data):
         return None  # Replace NaN with None
     else:
         return data
-    
-def resolve_references(schema, root_schema = None):
 
+
+def resolve_references(schema, root_schema=None):
     from jsonschema import RefResolver
+
     """
     Recursively resolve references in a JSON schema based on the root schema.
 
@@ -45,11 +47,10 @@ def resolve_references(schema, root_schema = None):
         resolver = RefResolver.from_schema(root_schema)
         return resolver.resolve(schema["$ref"])[1]
 
-    
     if "properties" in schema:
         for key, prop_schema in schema["properties"].items():
             schema["properties"][key] = resolve_references(prop_schema, root_schema)
-    
+
     if "items" in schema:
         schema["items"] = resolve_references(schema["items"], root_schema)
 
@@ -57,7 +58,6 @@ def resolve_references(schema, root_schema = None):
 
 
 def replace_none_with_nan(json_object, json_schema):
-    
     import math
     import copy
 
@@ -71,6 +71,7 @@ def replace_none_with_nan(json_object, json_schema):
     Returns:
         dict: The modified JSON object with None values replaced by NaN.
     """
+
     def replace_none_recursive(obj, schema):
         if isinstance(obj, dict):
             for key, value in obj.items():
@@ -364,7 +365,9 @@ def convert_to_nwb(info: dict) -> str:
     if "Ecephys" not in info["metadata"]:
         info["metadata"].update(Ecephys=dict())
 
-    resolved_metadata = replace_none_with_nan(info["metadata"], converter.get_metadata_schema()) # Ensure Ophys NaN values are resolved
+    resolved_metadata = replace_none_with_nan(
+        info["metadata"], converter.get_metadata_schema()
+    )  # Ensure Ophys NaN values are resolved
 
     # if is_supported_recording_interface(recording_interface, info["metadata"]):
     #     electrode_column_results = ecephys_metadata["ElectrodeColumns"]
