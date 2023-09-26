@@ -138,7 +138,7 @@ async function pythonServerClosed(message?: string) {
       allowEscapeKey: false,
     });
 
-    if (isElectron) app.exit();
+    if (isElectron) app.quit();
     else location.reload()
 
     Swal.close();
