@@ -364,7 +364,7 @@ const homeDirectory = app.getPath("home");
 const appDirectory = path.join(homeDirectory, paths.root)
 const guidedProgressFilePath = path.join(appDirectory, ...paths.subfolders.progress);
 const guidedConversionFolderPath = path.join(appDirectory, ...paths.subfolders.conversions);
-const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.stubs);
+const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.preview);
 
 function getEntries(path, type = 'isDirectory') {
   return fs.readdirSync(path, { withFileTypes: true })
