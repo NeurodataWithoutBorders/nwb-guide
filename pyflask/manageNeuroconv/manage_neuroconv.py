@@ -27,8 +27,6 @@ def replace_nan_with_none(data):
 
 
 def resolve_references(schema, root_schema=None):
-    from jsonschema import RefResolver
-
     """
     Recursively resolve references in a JSON schema based on the root schema.
 
@@ -39,6 +37,7 @@ def resolve_references(schema, root_schema=None):
     Returns:
         dict: The resolved JSON schema.
     """
+    from jsonschema import RefResolver
 
     if root_schema is None:
         root_schema = schema
