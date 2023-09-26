@@ -17,6 +17,11 @@ export class GuidedSourceDataPage extends ManagedPage {
         merge(this.localState, this.info.globalState);
     };
 
+    header = {
+        subtitle:
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
+    };
+
     footer = {
         next: "Request Metadata Schema",
         onNext: async () => {

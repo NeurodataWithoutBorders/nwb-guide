@@ -5,11 +5,10 @@ import {
     reloadPageToHome,
     isStorybook,
     appDirectory,
-    stubSaveFolderPath,
-    conversionSaveFolderPath,
     homeDirectory,
 } from "../dependencies/simple.js";
 import { fs, crypto } from "../electron/index.js";
+
 import { joinPath, runOnLoad } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
 import { updateAppProgress, updateFile } from "./update.js";
