@@ -100,7 +100,7 @@ export class Page extends LitElement {
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave();
         save(this, overrides);
-        this.info.states.saved = true;
+        if ("states" in this.info) this.info.states.saved = true;
         this.unsavedUpdates = false;
     };
 
