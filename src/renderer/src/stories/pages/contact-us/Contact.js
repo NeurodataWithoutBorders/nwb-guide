@@ -28,13 +28,13 @@ export class ContactPage extends Page {
                                 </div>
                                 <div class="docu-content-container">
                                     <h2 class="document_text">
-                                        If you have any issue or suggestions, please email us at
+                                        If you encounter any issues or have requests for new features, please create a
+                                        new
                                         <a
-                                            style="text-decoration: underline"
                                             target="_blank"
-                                            href="mailto:help@fairdataihub.org"
-                                            >help@fairdataihub.org</a
-                                        >
+                                            href="https://github.com/NeurodataWithoutBorders/nwb-guide/issues/new/choose"
+                                            >ticket on our GitHub page</a
+                                        >.
                                     </h2>
                                 </div>
                             </div>
