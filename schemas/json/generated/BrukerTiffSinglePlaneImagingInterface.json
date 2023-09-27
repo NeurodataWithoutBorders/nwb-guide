@@ -1,14 +1,15 @@
 {
     "required": [],
     "properties": {
-        "OpenEphysRecordingInterface": {
+        "BrukerTiffSinglePlaneImagingInterface": {
             "required": [
                 "folder_path"
             ],
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "The path that points to the folder containing the Bruker TIF image files and configuration files."
                 },
                 "stream_name": {
                     "type": "string"
@@ -16,10 +17,6 @@
                 "verbose": {
                     "type": "boolean",
                     "default": true
-                },
-                "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",
