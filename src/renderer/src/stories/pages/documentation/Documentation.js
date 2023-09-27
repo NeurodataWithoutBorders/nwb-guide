@@ -28,55 +28,44 @@ export class DocumentationPage extends Page {
                                     <div id="documentation-lottie" class="documentation-lottie_style"></div>
                                 </div>
                                 <div class="docu-content-container">
-                                    <h2 class="document_text">
-                                        Documentation for NWB GUIDE is in development.
-                                    </h2>
-                                    <p>Conversion to NWB is powered by
-                                        <a
-                                            target="_blank"
-                                            href="https://neuroconv.readthedocs.io/"
-                                            >NeuroConv</a
-                                        >.
+                                    <h2 class="document_text">Documentation for NWB GUIDE is in development.</h2>
+                                    <p>
+                                        Conversion to NWB is powered by
+                                        <a target="_blank" href="https://neuroconv.readthedocs.io/">NeuroConv</a>.
                                     </p>
-                                    <p>Inspection of NWB files is powered by
-                                        <a
-                                            target="_blank"
-                                            href="https://nwbinspector.readthedocs.io/"
-                                            >NWB Inspector</a
+                                    <p>
+                                        Inspection of NWB files is powered by
+                                        <a target="_blank" href="https://nwbinspector.readthedocs.io/">NWB Inspector</a
                                         >.
                                     </p>
                                     <p>
-                                        <a
-                                            target="_blank"
-                                            href="https://github.com/flatironinstitute/neurosift"
+                                        <a target="_blank" href="https://github.com/flatironinstitute/neurosift"
                                             >Neurosift</a
-                                        > is an interactive data visualization tool created by Jeremy Magland at the Flatiron Institute.
+                                        >
+                                        is an interactive data visualization tool created by Jeremy Magland at the
+                                        Flatiron Institute.
                                     </p>
-                                    <p>For help on creating a Dandiset and uploading to DANDI, please see the
-                                        <a
-                                            target="_blank"
-                                            href="https://www.dandiarchive.org/handbook/13_upload/"
+                                    <p>
+                                        For help on creating a Dandiset and uploading to DANDI, please see the
+                                        <a target="_blank" href="https://www.dandiarchive.org/handbook/13_upload/"
                                             >DANDI Documentation</a
                                         >.
                                     </p>
-                                    <p>To learn more about NWB, please see the
-                                        <a
-                                            target="_blank"
-                                            href="https://nwb-overview.readthedocs.io/"
+                                    <p>
+                                        To learn more about NWB, please see the
+                                        <a target="_blank" href="https://nwb-overview.readthedocs.io/"
                                             >NWB Overview Documentation</a
                                         >.
                                     </p>
 
-                                    <p>NWB GUIDE is an open-source project developed by CatalystNeuro
-                                    (Cody Baker, Garrett Flynn, Ben Dichter) and Lawrence Berkeley National Laboratory
-                                    (Ryan Ly, Oliver Ruebel) and generously supported by
-                                        <a
-                                            target="_blank"
-                                            href="https://www.kavlifoundation.org/"
+                                    <p>
+                                        NWB GUIDE is an open-source project developed by CatalystNeuro (Cody Baker,
+                                        Garrett Flynn, Ben Dichter) and Lawrence Berkeley National Laboratory (Ryan Ly,
+                                        Oliver Ruebel) and generously supported by
+                                        <a target="_blank" href="https://www.kavlifoundation.org/"
                                             >The Kavli Foundation</a
                                         >.
                                     </p>
-
 
                                     <!--
                                     <div class="button_container_contact">
@@ -85,10 +74,8 @@ export class DocumentationPage extends Page {
                                             class="view_doc_button sodaVideo-button"
                                             style="margin-top: 1rem"
                                             @click="${() => {
-                                                window.open(
-                                                    "https://neuroconv.readthedocs.io/en/main/"
-                                                );
-                                            }}"
+                                        window.open("https://neuroconv.readthedocs.io/en/main/");
+                                    }}"
                                         >
                                             View the NeuroConv Documentation
                                         </button>

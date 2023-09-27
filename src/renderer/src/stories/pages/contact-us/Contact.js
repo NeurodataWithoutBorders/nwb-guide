@@ -28,7 +28,8 @@ export class ContactPage extends Page {
                                 </div>
                                 <div class="docu-content-container">
                                     <h2 class="document_text">
-                                        If you encounter any issues or have requests for new features, please create a new
+                                        If you encounter any issues or have requests for new features, please create a
+                                        new
                                         <a
                                             target="_blank"
                                             href="https://github.com/NeurodataWithoutBorders/nwb-guide/issues/new/choose"
