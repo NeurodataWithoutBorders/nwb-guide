@@ -1,17 +1,15 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "MicroManagerTiffImagingInterface": {
             "required": [
                 "folder_path"
             ],
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
-                },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                    "type": "string",
+                    "description": "The path that points to the folder containing the OME-TIF image files."
                 },
                 "verbose": {
                     "type": "boolean",
