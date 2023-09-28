@@ -114,6 +114,22 @@ pre {
   .required.conditional label:after {
     color: transparent;
   }
+
+  h4 {
+    margin: 0;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid gainsboro;
+  }
+
+  .guided--text-input-instructions {
+    font-size: 13px;
+    width: 100%;
+    padding-top: 4px;
+    color: dimgray !important;
+    margin: 0 0 1em;
+    line-height: 1.4285em;
+}
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -162,7 +178,7 @@ export class JSONSchemaForm extends LitElement {
         this.identifier = props.identifier;
         this.mode = props.mode ?? "default";
         this.schema = props.schema ?? {};
-        this.results = props.results ?? {};
+        this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
 
         this.ignore = props.ignore ?? [];
@@ -281,9 +297,9 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    validate = async () => {
+    validate = async (resolved) => {
         // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(); // get missing required paths
+        const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
@@ -300,9 +316,9 @@ export class JSONSchemaForm extends LitElement {
 
         if (message) this.throw(message);
 
-        for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
+        for (let key in this.#nestedForms) await this.#nestedForms[key].validate(resolved ? resolved[key] : undefined); // Validate nested forms too
         try {
-            for (let key in this.tables) await this.tables[key].validate(); // Validate nested tables too
+            for (let key in this.tables) await this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
         } catch (e) {
             this.throw(e.message);
         }
@@ -468,18 +484,39 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
-    #getRenderable = (schema = {}, required, path) => {
+    #getRenderable = (schema = {}, required, path, recursive = false) => {
         const entries = Object.entries(schema.properties ?? {});
 
-        return entries.filter(([key, value]) => {
-            if (!value.properties && key === "definitions") return false; // Skip definitions
-            if (this.ignore.includes(key)) return false;
-            if (this.showLevelOverride >= path.length) return true;
-            if (required[key]) return true;
-            if (this.#getLink([...this.#base, ...path, key])) return true;
-            if (!this.onlyRequired) return true;
-            return false;
-        });
+        const isArrayOfArrays = (arr) => !!arr.find((v) => Array.isArray(v));
+
+        const flattenRecursedValues = (arr) => {
+            const newArr = [];
+            arr.forEach((o) => {
+                if (isArrayOfArrays(o)) newArr.push(...o);
+                else newArr.push(o);
+            });
+
+            return newArr;
+        };
+
+        const isRenderable = (key, value) => {
+            if (recursive && value.properties) return this.#getRenderable(value, required[key], [...path, key], true);
+            else return [key, value];
+        };
+
+        const res = entries
+            .map(([key, value]) => {
+                if (!value.properties && key === "definitions") return false; // Skip definitions
+                if (this.ignore.includes(key)) return false;
+                if (this.showLevelOverride >= path.length) return isRenderable(key, value);
+                if (required[key]) return isRenderable(key, value);
+                if (this.#getLink([...this.#base, ...path, key])) return isRenderable(key, value);
+                if (!this.onlyRequired) return isRenderable(key, value);
+                return false;
+            })
+            .filter((o) => !!o);
+
+        return flattenRecursedValues(res); // Flatten on the last pass
     };
 
     validateOnChange = () => {};
@@ -757,7 +794,7 @@ export class JSONSchemaForm extends LitElement {
                 const accordion = new Accordion({
                     sections: {
                         [headerName]: {
-                            subtitle: `${this.#getRenderable(info, required[name], fullPath).length} fields`,
+                            subtitle: `${this.#getRenderable(info, required[name], fullPath, true).length} fields`,
                             content: this.#nestedForms[name],
                         },
                     },
@@ -836,7 +873,10 @@ export class JSONSchemaForm extends LitElement {
 
         return html`
             <div>
-                ${false ? html`<h2>${schema.title}</h2>` : ""} ${false ? html`<p>${schema.description}</p>` : ""}
+                ${schema.description
+                    ? html`<h4>Description</h4>
+                          <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
+                    : ""}
                 ${this.#render(schema, this.resolved, this.#requirements)}
             </div>
         `;

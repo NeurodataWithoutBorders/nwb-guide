@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
 
       - name: Install package.json modules and their dependencies
         run: npm install --ignore-scripts
@@ -35,5 +35,4 @@ jobs:
       - name: Build and deploy on Linux
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm run deploy:linux
+        run: npm run deploy:linux

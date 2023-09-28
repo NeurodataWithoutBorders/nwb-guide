@@ -20,11 +20,18 @@ import { DandiResults } from "../../DandiResults.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
-    const api_key = global.data.DANDI?.api_key;
+export async function uploadToDandi(info, type = "project" in info ? "" : "folder") {
+
+    const { dandiset_id } = info
+
+    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
+
+    const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
+    const api_key = global.data.DANDI?.api_keys?.[whichAPIKey];
+
     if (!api_key) {
         await Swal.fire({
-            title: "Your DANDI API key is not configured.",
+            title: `Your DANDI API key (${whichAPIKey}) is not configured.`,
             html: "Edit your settings to include this value.",
             icon: "warning",
             confirmButtonText: "Go to Settings",
@@ -33,13 +40,11 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         return this.to("settings");
     }
 
-    const { dandiset_id } = info
-
     const result = await run(
         type ? `upload/${type}` : "upload",
         {
             ...info,
-            staging: isStaging(dandiset_id), // Automatically detect staging IDs
+            staging,
             api_key,
         },
         { title: "Uploading to DANDI" }

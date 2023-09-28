@@ -13,7 +13,7 @@ export class GuidedSubjectsPage extends Page {
     }
 
     header = {
-        subtitle: "Cross-session metadata applied to the final file metadata",
+        subtitle: "Enter all metadata known about each experiment subject",
     };
 
     beforeSave = () => {

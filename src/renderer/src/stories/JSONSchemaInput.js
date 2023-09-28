@@ -1,4 +1,5 @@
 import { LitElement, css, html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
@@ -142,13 +143,13 @@ export class JSONSchemaInput extends LitElement {
             ${input}
             ${info.description
                 ? html`<p class="guided--text-input-instructions">
-                      ${capitalize(info.description)}${info.description.slice(-1)[0] === "." ? "" : "."}
+                      ${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}
                   </p>`
                 : ""}
         `;
     }
 
-    #onThrow = (...args) => this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args)
+    #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
 
     #render() {
         const { validateOnChange, info, path: fullPath } = this;
@@ -159,8 +160,8 @@ export class JSONSchemaInput extends LitElement {
         const isArray = info.type === "array"; // Handle string (and related) formats / types
 
         const hasItemsRef = "items" in info && "$ref" in info.items;
-        if (!("items" in info))  info.items = {};
-        if (!("type" in info.items) && !hasItemsRef) info.items.type = "string" ;
+        if (!("items" in info)) info.items = {};
+        if (!("type" in info.items) && !hasItemsRef) info.items.type = "string";
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
@@ -194,7 +195,14 @@ export class JSONSchemaInput extends LitElement {
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: (key, parent, v) => {
-                        return validateOnChange && this.#triggerValidation(key, this.form.tables[name], path); // this.form.validateOnChange(key, parent, fullPath, v);
+                        return (
+                            validateOnChange &&
+                            (this.onValidate
+                                ? this.onValidate()
+                                : this.form
+                                ? this.form.validateOnChange(key, parent, fullPath, v)
+                                : "")
+                        );
                     },
 
                     onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
@@ -206,7 +214,7 @@ export class JSONSchemaInput extends LitElement {
                             this.form.checkAllLoaded();
                         }
                     },
-                    onThrow: (...args) => this.#onThrow(...args)
+                    onThrow: (...args) => this.#onThrow(...args),
                 };
 
                 return (this.form.tables[name] =

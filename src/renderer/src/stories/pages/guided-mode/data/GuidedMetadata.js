@@ -30,6 +30,11 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     form;
+
+    header = {
+        subtitle: "Edit all metadata for this conversion at the session level",
+    };
+
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
@@ -58,18 +63,19 @@ export class GuidedMetadataPage extends ManagedPage {
     createForm = ({ subject, session, info }) => {
         // const results = createResults({ subject, info }, this.info.globalState);
 
-        const globalState = this.info.globalState;
+        const { globalState } = this.info;
 
         const results = info.metadata; // Edited form info
 
         // Define the appropriate global metadata to fill empty values in the form
-        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, this.info.globalState);
+        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, globalState);
 
         // Define the correct instance identifier
         const instanceId = `sub-${subject}/ses-${session}`;
 
         // Ignore specific metadata in the form by removing their schema value
         const schema = globalState.schema.metadata[subject][session];
+        delete schema.description;
         delete schema.properties.NWBFile.properties.source_script;
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
@@ -104,7 +110,7 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: ["subject_id", "session_id"],
+            ignore: ["Ophys", "subject_id", "session_id"],
 
             conditionalRequirements: [
                 {

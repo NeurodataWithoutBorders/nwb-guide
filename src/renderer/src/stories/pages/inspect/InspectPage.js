@@ -15,24 +15,24 @@ export class InspectPage extends Page {
     }
 
     showReport = async (value) => {
-
         if (!value) {
             const message = "Please provide filesystem entries to inspect.";
             onThrow(message);
             throw new Error(message);
         }
 
-        const result = await run("inspect", { paths: value }, { title: "Inspecting selected filesystem entries." }).catch((e) => {
+        const result = await run(
+            "inspect",
+            { paths: value },
+            { title: "Inspecting selected filesystem entries." }
+        ).catch((e) => {
             this.notify(e.message, "error");
             throw e;
-        })
+        });
 
-        if (!result.length) return this.notify('No messages received from the NWB Inspector')
+        if (!result.length) return this.notify("No messages received from the NWB Inspector");
 
-        const items = truncateFilePaths(
-            result,
-            getSharedPath(result.map(o => o.file_path))
-        );
+        const items = truncateFilePaths(result, getSharedPath(result.map((o) => o.file_path)));
 
         const list = new InspectorList({ items });
         list.style.padding = "25px";
@@ -52,8 +52,8 @@ export class InspectPage extends Page {
             type: "array",
             items: {
                 format: ["file", "directory"],
-                multiple: true
-            }
+                multiple: true,
+            },
         },
         onThrow,
     });

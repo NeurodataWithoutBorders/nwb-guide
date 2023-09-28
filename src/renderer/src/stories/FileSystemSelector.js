@@ -126,7 +126,10 @@ export class FilesystemSelector extends LitElement {
     };
 
     #onCancel = () => {
-        this.#onThrow(`No ${getObjectTypeReferenceString(this.type, this.multiple, { native: true })} selected`, "The request was cancelled by the user");
+        this.#onThrow(
+            `No ${getObjectTypeReferenceString(this.type, this.multiple, { native: true })} selected`,
+            "The request was cancelled by the user"
+        );
     };
 
     #checkType = (value) => {
@@ -137,7 +140,12 @@ export class FilesystemSelector extends LitElement {
 
     #handleFiles = async (pathOrPaths) => {
         if (!pathOrPaths)
-            this.#onThrow("No paths detected", `Unable to parse ${getObjectTypeReferenceString(this.type, false, { native: true })} path${this.multiple ? "s" : ""}`);
+            this.#onThrow(
+                "No paths detected",
+                `Unable to parse ${getObjectTypeReferenceString(this.type, false, { native: true })} path${
+                    this.multiple ? "s" : ""
+                }`
+            );
 
         if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
         else this.#checkType(pathOrPaths);
@@ -173,7 +181,7 @@ export class FilesystemSelector extends LitElement {
             ).catch((e) => this.#onCancel()); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
-            console.log(result, handles)
+            console.log(result, handles);
             this.#handleFiles(result);
         }
     }
@@ -194,11 +202,7 @@ export class FilesystemSelector extends LitElement {
             isUpdated = resolved !== this.value;
         }
 
-        if (isUpdated) {
-            this.value = resolved;
-            this.#handleFiles(this.value); // Notify of the change to the separators
-            return;
-        }
+        if (isUpdated) this.#handleFiles(resolved); // Notify of the change to the separators
 
         const resolvedValueDisplay = isArray
             ? len > 1
@@ -242,7 +246,9 @@ export class FilesystemSelector extends LitElement {
                               >Drop ${objectTypeReference}
                               here${isMultipleTypes
                                   ? ""
-                                  : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, { native: true })}`}</span
+                                  : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
+                                        native: true,
+                                    })}`}</span
                           >${this.multiple &&
                           (this.type === "directory" || (isMultipleTypes && this.type.includes("directory") && !dialog))
                               ? html`<br /><small
