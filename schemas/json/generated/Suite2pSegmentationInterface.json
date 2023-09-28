@@ -1,7 +1,7 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "Suite2pSegmentationInterface": {
             "required": [
                 "folder_path"
             ],
@@ -10,8 +10,13 @@
                     "format": "directory",
                     "type": "string"
                 },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "combined": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "plane_no": {
+                    "type": "number",
+                    "default": 0
                 },
                 "verbose": {
                     "type": "boolean",
