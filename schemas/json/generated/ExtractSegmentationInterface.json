@@ -1,17 +1,21 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "ExtractSegmentationInterface": {
             "required": [
-                "folder_path"
+                "file_path",
+                "sampling_frequency"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
+                "file_path": {
+                    "format": "file",
                     "type": "string"
                 },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "sampling_frequency": {
+                    "type": "number"
+                },
+                "output_struct_name": {
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",
