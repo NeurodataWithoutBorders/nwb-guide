@@ -1,17 +1,18 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "BrukerTiffMultiPlaneImagingInterface": {
             "required": [
                 "folder_path"
             ],
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "The path that points to the folder containing the Bruker volumetric TIF image files and configuration files."
                 },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "stream_name": {
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",
