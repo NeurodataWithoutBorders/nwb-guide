@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { global, hasEntry, update } from "../../../../progress/index.js";
+import { global, hasEntry, rename } from "../../../../progress/index.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { validateOnChange } from "../../../../validation/index.js";
@@ -28,6 +28,10 @@ export class GuidedNewDatasetPage extends Page {
 
     #nameNotification;
 
+    header = {
+        subtitle: "Enter a name for this pipeline and specify the base folders to save all outputs to",
+    };
+
     footer = {
         onNext: async () => {
             const globalState = this.info.globalState.project;
@@ -50,7 +54,7 @@ export class GuidedNewDatasetPage extends Page {
             // Update existing progress file
             if (globalState.initialized) {
                 try {
-                    const res = update(name, globalState.name);
+                    const res = rename(name, globalState.name);
                     if (typeof res === "string") this.notify(res);
                     if (res === false) return;
                 } catch (e) {
@@ -61,7 +65,7 @@ export class GuidedNewDatasetPage extends Page {
                 const has = await hasEntry(name);
                 if (has) {
                     this.notify(
-                        "An existing progress file already exists with that name. Please choose a different name.",
+                        "An existing project already exists with that name. Please choose a different name.",
                         "error"
                     );
                     return;
@@ -89,8 +93,14 @@ export class GuidedNewDatasetPage extends Page {
             info.title = `${info.label} Global Metadata`;
             return info;
         });
+        console.log(pages);
 
-        pages.forEach((page) => this.addPage(page.info.label, page));
+        pages.forEach((page) => {
+            page.header = {
+                subtitle: `Enter any ${page.info.label}-level metadata that can serve as the common default across each experiment session`,
+            };
+            this.addPage(page.info.label, page);
+        });
 
         this.form = new JSONSchemaForm({
             schema,

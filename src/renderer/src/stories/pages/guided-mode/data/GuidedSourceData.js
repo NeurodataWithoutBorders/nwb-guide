@@ -1,5 +1,3 @@
-import { html } from "lit";
-
 import Swal from "sweetalert2";
 import { isStorybook } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
@@ -17,6 +15,11 @@ export class GuidedSourceDataPage extends ManagedPage {
 
     beforeSave = () => {
         merge(this.localState, this.info.globalState);
+    };
+
+    header = {
+        subtitle:
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
     };
 
     footer = {

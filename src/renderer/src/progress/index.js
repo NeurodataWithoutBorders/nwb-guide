@@ -5,16 +5,56 @@ import {
     reloadPageToHome,
     isStorybook,
     appDirectory,
-    stubSaveFolderPath,
-    conversionSaveFolderPath,
+    homeDirectory,
 } from "../dependencies/simple.js";
-import { fs } from "../electron/index.js";
+import { fs, crypto } from "../electron/index.js";
+
 import { joinPath, runOnLoad } from "../globals.js";
 import { merge } from "../stories/pages/utils.js";
 import { updateAppProgress, updateFile } from "./update.js";
 import { updateURLParams } from "../../utils/url.js";
 
+import * as operations from "./operations";
+
 export * from "./update";
+
+var re = /[0-9A-Fa-f]{6}/g;
+
+function encode(message) {
+    if (!crypto) return message;
+    const mykey = crypto.createCipher("aes-128-cbc", homeDirectory);
+    const mystr = mykey.update(message, "utf8", "hex");
+    return mystr + mykey.final("hex");
+}
+
+// Try to decode the value
+function decode(message) {
+    if (!crypto || !/[0-9A-Fa-f]{6}/g.test(message)) return message;
+
+    try {
+        const mykey = crypto.createDecipher("aes-128-cbc", homeDirectory);
+        const mystr = mykey.update(message, "hex", "utf8");
+        return mystr + mykey.final("utf8");
+    } catch {
+        return message;
+    }
+}
+
+function drill(o, callback) {
+    if (o && typeof o === "object") {
+        const copy = { ...o };
+        for (let k in copy) copy[k] = drill(copy[k], callback);
+        return copy;
+    } else return callback(o);
+}
+
+function encodeObject(o) {
+    return drill(o, (v) => (typeof v === "string" ? encode(v) : v));
+}
+
+function decodeObject(o) {
+    return drill(o, (v) => (typeof v === "string" ? decode(v) : v));
+}
 
 class GlobalAppConfig {
     path = `${appDirectory}/config.json`;
@@ -22,12 +62,17 @@ class GlobalAppConfig {
 
     constructor() {
         const exists = fs ? fs.existsSync(this.path) : localStorage[this.path];
-        if (exists) this.data = JSON.parse(fs ? fs.readFileSync(this.path) : localStorage.getItem(this.path));
+        if (exists) {
+            const data = JSON.parse(fs ? fs.readFileSync(this.path) : localStorage.getItem(this.path));
+            this.data = decodeObject(data);
+        }
     }
 
     save() {
-        if (fs) fs.writeFileSync(this.path, JSON.stringify(this.data, null, 2));
-        else localStorage.setItem(this.path, JSON.stringify(this.data));
+        const encoded = encodeObject(this.data);
+
+        if (fs) fs.writeFileSync(this.path, JSON.stringify(encoded, null, 2));
+        else localStorage.setItem(this.path, JSON.stringify(encoded));
     }
 }
 
@@ -122,24 +167,7 @@ export const remove = async (name) => {
         focusCancel: true,
     });
 
-    if (result.isConfirmed) {
-        //Get the path of the progress file to delete
-        const progressFilePathToDelete = joinPath(guidedProgressFilePath, name + ".json");
-
-        //delete the progress file
-        if (fs) fs.unlinkSync(progressFilePathToDelete);
-        else localStorage.removeItem(progressFilePathToDelete);
-
-        if (fs) {
-            // delete default stub location
-            fs.rmSync(joinPath(stubSaveFolderPath, name), { recursive: true, force: true });
-
-            // delete default conversion location
-            fs.rmSync(joinPath(conversionSaveFolderPath, name), { recursive: true, force: true });
-        }
-
-        return true;
-    }
+    if (result.isConfirmed) return operations.remove(name);
 
     return false;
 };

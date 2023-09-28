@@ -1,6 +1,8 @@
 """Collection of utility functions used by the NeuroConv Flask API."""
 import os
 import json
+import math
+import copy
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
@@ -10,6 +12,79 @@ from sse import MessageAnnouncer
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
+
+
+def replace_nan_with_none(data):
+    if isinstance(data, dict):
+        # If it's a dictionary, iterate over its items and replace NaN values with None
+        return {key: replace_nan_with_none(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        # If it's a list, iterate over its elements and replace NaN values with None
+        return [replace_nan_with_none(item) for item in data]
+    elif isinstance(data, (float, int)) and (data != data):
+        return None  # Replace NaN with None
+    else:
+        return data
+
+
+def resolve_references(schema, root_schema=None):
+    """
+    Recursively resolve references in a JSON schema based on the root schema.
+
+    Args:
+        schema (dict): The JSON schema to resolve.
+        root_schema (dict): The root JSON schema.
+
+    Returns:
+        dict: The resolved JSON schema.
+    """
+    from jsonschema import RefResolver
+
+    if root_schema is None:
+        root_schema = schema
+
+    if "$ref" in schema:
+        resolver = RefResolver.from_schema(root_schema)
+        return resolver.resolve(schema["$ref"])[1]
+
+    if "properties" in schema:
+        for key, prop_schema in schema["properties"].items():
+            schema["properties"][key] = resolve_references(prop_schema, root_schema)
+
+    if "items" in schema:
+        schema["items"] = resolve_references(schema["items"], root_schema)
+
+    return schema
+
+
+def replace_none_with_nan(json_object, json_schema):
+    """
+    Recursively search a JSON object and replace None values with NaN where appropriate.
+
+    Args:
+        json_object (dict): The JSON object to search and modify.
+        json_schema (dict): The JSON schema to validate against.
+
+    Returns:
+        dict: The modified JSON object with None values replaced by NaN.
+    """
+
+    def replace_none_recursive(obj, schema):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key in schema.get("properties", {}):
+                    prop_schema = schema["properties"][key]
+                    if prop_schema.get("type") == "number" and value is None:
+                        obj[key] = math.nan
+                    else:
+                        replace_none_recursive(value, prop_schema)
+        elif isinstance(obj, list):
+            for item in obj:
+                replace_none_recursive(item, schema.get("items", {}))
+
+        return obj
+
+    return replace_none_recursive(copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema)))
 
 
 def locate_data(info: dict) -> dict:
@@ -154,7 +229,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     if "Ecephys" in schema["properties"]:
         schema["properties"].pop("Ecephys", dict())
 
-    return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
+    return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
 
 
 def get_check_function(check_function_name: str) -> callable:
@@ -287,6 +362,10 @@ def convert_to_nwb(info: dict) -> str:
     if "Ecephys" not in info["metadata"]:
         info["metadata"].update(Ecephys=dict())
 
+    resolved_metadata = replace_none_with_nan(
+        info["metadata"], converter.get_metadata_schema()
+    )  # Ensure Ophys NaN values are resolved
+
     # if is_supported_recording_interface(recording_interface, info["metadata"]):
     #     electrode_column_results = ecephys_metadata["ElectrodeColumns"]
     #     electrode_results = ecephys_metadata["Electrodes"]
@@ -302,7 +381,7 @@ def convert_to_nwb(info: dict) -> str:
 
     # Actually run the conversion
     converter.run_conversion(
-        metadata=info["metadata"],
+        metadata=resolved_metadata,
         nwbfile_path=resolved_output_path,
         overwrite=info.get("overwrite", False),
         conversion_options=options,

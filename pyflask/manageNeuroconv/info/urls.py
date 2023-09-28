@@ -21,8 +21,8 @@ path_config = resource_path(
 f = path_config.open()
 data = json.load(f)
 GUIDE_ROOT_FOLDER = Path(Path.home(), data["root"])
-STUB_SAVE_FOLDER_PATH = Path(GUIDE_ROOT_FOLDER, *data["subfolders"]["stubs"])
-CONVERSION_SAVE_FOLDER_PATH = Path(GUIDE_ROOT_FOLDER, *data["subfolders"]["conversions"])
-TUTORIAL_SAVE_FOLDER_PATH = Path(GUIDE_ROOT_FOLDER, *data["subfolders"]["tutorial"])
+STUB_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["preview"])
+CONVERSION_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["conversions"])
+TUTORIAL_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["tutorial"])
 
 f.close()

@@ -12,6 +12,8 @@ import BlackrockRecordingInterfaceSchema from "../../../../../../schemas/json/ge
 import BlackrockSortingInterfaceSchema from "../../../../../../schemas/json/generated/BlackrockSortingInterface.json";
 import CellExplorerSortingInterfaceSchema from "../../../../../../schemas/json/generated/CellExplorerSortingInterface.json";
 import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/generated/KiloSortSortingInterface.json";
+import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
+import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -49,6 +51,10 @@ globalStateCopy.schema.source_data.properties.CellExplorerSortingInterface =
     CellExplorerSortingInterfaceSchema.properties.CellExplorerSortingInterface;
 globalStateCopy.schema.source_data.properties.KiloSortSortingInterface =
     KiloSortSortingInterfaceSchema.properties.KiloSortSortingInterface;
+globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
+    Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
+globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
+    BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -136,3 +142,18 @@ const KiloSortSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState
 KiloSortSortingInterfaceGlobalCopy.interfaces.interface = KiloSortSortingInterface;
 KiloSortSortingInterfaceGlobalCopy.schema.source_data = KiloSortSortingInterfaceSchema;
 KiloSortSortingInterface.args = { activePage, globalState: KiloSortSortingInterfaceGlobalCopy };
+
+export const Spike2RecordingInterface = PageTemplate.bind({});
+const Spike2RecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+Spike2RecordingInterfaceGlobalCopy.interfaces.interface = Spike2RecordingInterface;
+Spike2RecordingInterfaceGlobalCopy.schema.source_data = Spike2RecordingInterfaceSchema;
+Spike2RecordingInterface.args = { activePage, globalState: Spike2RecordingInterfaceGlobalCopy };
+
+export const BrukerTiffSinglePlaneImagingInterface = PageTemplate.bind({});
+const BrukerTiffSinglePlaneImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffSinglePlaneImagingInterfaceGlobalCopy.interfaces.interface = BrukerTiffSinglePlaneImagingInterface;
+BrukerTiffSinglePlaneImagingInterfaceGlobalCopy.schema.source_data = BrukerTiffSinglePlaneImagingInterfaceSchema;
+BrukerTiffSinglePlaneImagingInterface.args = {
+    activePage,
+    globalState: BrukerTiffSinglePlaneImagingInterfaceGlobalCopy,
+};
