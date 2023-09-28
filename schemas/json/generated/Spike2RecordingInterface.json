@@ -1,17 +1,15 @@
 {
     "required": [],
     "properties": {
-        "OpenEphysRecordingInterface": {
+        "Spike2RecordingInterface": {
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
-                    "type": "string"
-                },
-                "stream_name": {
-                    "type": "string"
+                "file_path": {
+                    "format": "file",
+                    "type": "string",
+                    "description": "Path to CED data file."
                 },
                 "verbose": {
                     "type": "boolean",
@@ -23,7 +21,7 @@
                 }
             },
             "type": "object",
-            "additionalProperties": false
+            "additionalProperties": true
         }
     },
     "type": "object",

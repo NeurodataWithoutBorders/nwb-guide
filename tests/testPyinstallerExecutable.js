@@ -20,23 +20,25 @@ handleProcess(proc2, "spawn");
 
 let now = Date.now();
 
-let outputCollection = "";
+const regex = /.+Error: .+/i; // Check for error messages (without case sensitivity)
 
-const regex = /.+Error: .+/;
+function onMessage(data, id) {
+    const message = data.toString();
+    if (!cmds.forever && regex.test(message)) throw new Error(message);
+    else console.error(`[${id}] ${message}`);
+}
 
 function handleProcess(proc, id = "process") {
     if (proc != null) {
         // Listen for errors from Python process
-        proc.stderr.on("data", function (data) {
-            const message = data.toString();
-            console.error(`[${id}] Error: ${data}`);
-            outputCollection += message;
-            if (regex.test(message)) throw new Error(outputCollection);
-        });
+        proc.stderr.on("data", (data) => onMessage(data, id));
 
         proc.stdout.on("data", function (data) {
-            console.log(`Time to Start: ${(Date.now() - now).toFixed(2)}ms`);
-            if (!cmds.forever) process.exit();
+            if (cmds.forever) onMessage(data, id);
+            else {
+                console.log(`Time to Start: ${(Date.now() - now).toFixed(2)}ms`);
+                process.exit();
+            }
         });
 
         const error = () => () => {

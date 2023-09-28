@@ -178,7 +178,7 @@ export class JSONSchemaForm extends LitElement {
         this.identifier = props.identifier;
         this.mode = props.mode ?? "default";
         this.schema = props.schema ?? {};
-        this.results = props.results ?? {};
+        this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
 
         this.ignore = props.ignore ?? [];
@@ -254,10 +254,10 @@ export class JSONSchemaForm extends LitElement {
 
         // NOTE: Forms with nested forms will handle their own state updates
         if (!value) {
-            if (fullPath.length === 1) delete resultParent[name];
+            delete resultParent[name];
             delete resolvedParent[name];
         } else {
-            if (fullPath.length === 1) resultParent[name] = value;
+            resultParent[name] = value;
             resolvedParent[name] = value;
         }
 
@@ -297,9 +297,9 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    validate = async () => {
+    validate = async (resolved) => {
         // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(); // get missing required paths
+        const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
@@ -316,9 +316,9 @@ export class JSONSchemaForm extends LitElement {
 
         if (message) this.throw(message);
 
-        for (let key in this.#nestedForms) await this.#nestedForms[key].validate(); // Validate nested forms too
+        for (let key in this.#nestedForms) await this.#nestedForms[key].validate(resolved ? resolved[key] : undefined); // Validate nested forms too
         try {
-            for (let key in this.tables) await this.tables[key].validate(); // Validate nested tables too
+            for (let key in this.tables) await this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
         } catch (e) {
             this.throw(e.message);
         }

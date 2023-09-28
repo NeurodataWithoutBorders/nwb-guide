@@ -29,6 +29,10 @@ export class GuidedStructurePage extends Page {
         this.searchModal.appendChild(this.search);
     }
 
+    header = {
+        subtitle: "Select all interfaces which apply to this experiment",
+    };
+
     search = new Search({
         showAllWhenEmpty: true,
     });

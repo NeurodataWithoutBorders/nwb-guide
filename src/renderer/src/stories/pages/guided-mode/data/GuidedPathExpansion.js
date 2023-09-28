@@ -132,6 +132,10 @@ export class GuidedPathExpansionPage extends Page {
         super(...args);
     }
 
+    header = {
+        subtitle: "Automatic source data detection for multiple subjects / sessions",
+    };
+
     beforeSave = async () => {
         const globalState = this.info.globalState;
         merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure

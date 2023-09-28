@@ -11,6 +11,7 @@ export class OptionalSection extends LitElement {
 
             h2 {
                 margin: 0;
+                margin-bottom: 15px;
             }
 
             .optional-section__toggle {
@@ -43,7 +44,7 @@ export class OptionalSection extends LitElement {
     constructor(props) {
         super();
         this.header = props.header ?? "";
-        this.description = props.description ?? "This is the description of the optional section.";
+        this.description = props.description ?? "";
         this.content = props.content ?? "";
         this.altContent = props.altContent ?? "";
         this.state = props.state;

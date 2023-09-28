@@ -30,6 +30,11 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     form;
+
+    header = {
+        subtitle: "Edit all metadata for this conversion at the session level",
+    };
+
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
@@ -105,7 +110,7 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: ["subject_id", "session_id"],
+            ignore: ["Ophys", "subject_id", "session_id"],
 
             conditionalRequirements: [
                 {
