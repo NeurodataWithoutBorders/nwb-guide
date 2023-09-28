@@ -1,16 +1,29 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "Hdf5ImagingInterface": {
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
+                "file_path": {
+                    "format": "file",
                     "type": "string"
                 },
-                "exclude_cluster_groups": {
+                "mov_field": {
+                    "type": "string",
+                    "default": "mov"
+                },
+                "sampling_frequency": {
+                    "type": "number"
+                },
+                "start_time": {
+                    "type": "number"
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "channel_names": {
                     "type": "array"
                 },
                 "verbose": {
