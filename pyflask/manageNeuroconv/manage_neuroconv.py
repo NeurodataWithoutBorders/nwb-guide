@@ -559,8 +559,8 @@ def inspect_nwb_folder(payload):
     return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
 
-def aggregate_symlinks_in_new_directory(paths, reason="", folder_path = None):
-    if (folder_path is None):
+def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+    if folder_path is None:
         folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
     folder_path.mkdir(parents=True)
@@ -568,8 +568,10 @@ def aggregate_symlinks_in_new_directory(paths, reason="", folder_path = None):
     for path in paths:
         path = Path(path)
         new_path = folder_path / path.name
-        if (path.is_dir()):
-            aggregate_symlinks_in_new_directory(list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path)
+        if path.is_dir():
+            aggregate_symlinks_in_new_directory(
+                list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
+            )
         else:
             new_path.symlink_to(path, path.is_dir())
 

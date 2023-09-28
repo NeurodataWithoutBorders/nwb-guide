@@ -184,7 +184,7 @@ const exitPyProc = async () => {
 const killAllPreviousProcesses = async () => {
 
   const fetch = globalThis.fetch
-  
+
   if (fetch){
     console.log("Killing all previous processes");
 
