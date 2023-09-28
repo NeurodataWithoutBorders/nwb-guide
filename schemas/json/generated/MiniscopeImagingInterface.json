@@ -1,7 +1,7 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "MiniscopeImagingInterface": {
             "required": [
                 "folder_path"
             ],
@@ -9,13 +9,6 @@
                 "folder_path": {
                     "format": "directory",
                     "type": "string"
-                },
-                "exclude_cluster_groups": {
-                    "type": "array"
-                },
-                "verbose": {
-                    "type": "boolean",
-                    "default": true
                 }
             },
             "type": "object",
