@@ -480,19 +480,25 @@ def inspect_nwb_folder(payload):
     return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
 
-def aggregate_in_temp_directory(paths, reason=""):
-    tmp_folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-    tmp_folder_path.mkdir(parents=True)
+def aggregate_symlinks_in_new_directory(paths, reason="", folder_path = None):
+    if (folder_path is None):
+        folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+    folder_path.mkdir(parents=True)
 
     for path in paths:
         path = Path(path)
-        (tmp_folder_path / path.name).symlink_to(path, path.is_dir())
+        new_path = folder_path / path.name
+        if (path.is_dir()):
+            aggregate_symlinks_in_new_directory(list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path)
+        else:
+            new_path.symlink_to(path, path.is_dir())
 
-    return tmp_folder_path
+    return folder_path
 
 
 def inspect_multiple_filesystem_objects(paths):
-    tmp_folder_path = aggregate_in_temp_directory(paths, "inspect")
+    tmp_folder_path = aggregate_symlinks_in_new_directory(paths, "inspect")
     result = inspect_nwb_folder({"path": tmp_folder_path})
     rmtree(tmp_folder_path)
     return result
