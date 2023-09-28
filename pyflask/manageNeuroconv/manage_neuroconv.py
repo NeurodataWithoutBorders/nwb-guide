@@ -83,7 +83,7 @@ def replace_none_with_nan(json_object, json_schema):
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
                         obj[key] = float(
                             value
-                        )  # Turn integer into float if an integer is expected (JavaScript / JSON Schema coerces floats with trailing zeros to integers)
+                        )  # Turn integer into float if a number, the JSON Schema equivalent to float, is expected (JavaScript coerces floats with trailing zeros to integers)
                     else:
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
