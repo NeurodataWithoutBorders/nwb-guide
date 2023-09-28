@@ -69,22 +69,24 @@ def replace_none_with_nan(json_object, json_schema):
         dict: The modified JSON object with None values replaced by NaN.
     """
 
-    def replace_none_recursive(obj, schema):
+    def coerce_schema_compliance_recursive(obj, schema):
         if isinstance(obj, dict):
             for key, value in obj.items():
                 if key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and value is None:
-                        obj[key] = math.nan
+                        obj[key] = math.nan # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
+                    elif prop_schema.get("type") == "number" and isinstance(value, int):
+                        obj[key] = float(value) # Turn integer into float if an integer is expected (JavaScript coerces floats with trailing zeros to integers)
                     else:
-                        replace_none_recursive(value, prop_schema)
+                        coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
             for item in obj:
-                replace_none_recursive(item, schema.get("items", {}))
+                coerce_schema_compliance_recursive(item, schema.get("items", {}))
 
         return obj
 
-    return replace_none_recursive(copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema)))
+    return coerce_schema_compliance_recursive(copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema)))
 
 
 def locate_data(info: dict) -> dict:
@@ -363,7 +365,7 @@ def convert_to_nwb(info: dict) -> str:
         info["metadata"].update(Ecephys=dict())
 
     resolved_metadata = replace_none_with_nan(
-        info["metadata"], converter.get_metadata_schema()
+        info["metadata"], resolve_references(converter.get_metadata_schema())
     )  # Ensure Ophys NaN values are resolved
 
     # if is_supported_recording_interface(recording_interface, info["metadata"]):
