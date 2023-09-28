@@ -62,9 +62,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                             interfaces: this.info.globalState.interfaces,
                         }),
                     })
-                        .then(async (res) => {
-                            return (0, eval)(`(${await res.text()})`);
-                        })
+                        .then((res) => res.json())
                         .catch((e) => {
                             Swal.close();
                             stillFireSwal = false;
