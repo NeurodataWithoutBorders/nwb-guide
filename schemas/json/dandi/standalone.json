@@ -8,5 +8,5 @@
             }
         }
     },
-    "required": ["filesystem_paths"] 
+    "required": ["filesystem_paths"]
 }

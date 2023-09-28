@@ -21,8 +21,7 @@ import { DandiResults } from "../../DandiResults.js";
 export const isStaging = (id) => parseInt(id) >= 100000;
 
 export async function uploadToDandi(info, type = "project" in info ? "" : "folder") {
-
-    const { dandiset_id } = info
+    const { dandiset_id } = info;
 
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
@@ -59,7 +58,9 @@ export async function uploadToDandi(info, type = "project" in info ? "" : "folde
     if (result)
         notyf.open({
             type: "success",
-            message: `${info.project ?? `${info[folderPathKey].length} filesystem entries`} successfully uploaded to Dandiset ${dandiset_id}`,
+            message: `${
+                info.project ?? `${info[folderPathKey].length} filesystem entries`
+            } successfully uploaded to Dandiset ${dandiset_id}`,
         });
 
     return result;
