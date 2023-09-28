@@ -20,7 +20,7 @@ import { DandiResults } from "../../DandiResults.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info, type = "project" in info ? "" : "folder") {
+export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const { dandiset_id } = info;
 
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
