@@ -14,7 +14,6 @@ import 'v8-compile-cache'
 
 import child_process from 'child_process';
 import fs from 'fs';
-import axios from 'axios';
 
 import './application-menu.js';
 
@@ -183,22 +182,25 @@ const exitPyProc = async () => {
 };
 
 const killAllPreviousProcesses = async () => {
-  console.log("Killing all previous processes");
 
-  // kill all previous python processes that could be running.
-  let promisesArray = [];
+  const fetch = globalThis.fetch
+  
+  if (fetch){
+    console.log("Killing all previous processes");
 
-  const defaultPort = PORT as number
+    // kill all previous python processes that could be running.
+    let promisesArray = [];
 
-  let endRange = defaultPort + portRange;
+    const defaultPort = PORT as number
 
-  // create a loop of 100
-  for (let currentPort = defaultPort; currentPort <= endRange; currentPort++) {
-    promisesArray.push( fetch(`http://127.0.0.1:${currentPort}/server_shutdown`) );
-  }
+    let endRange = defaultPort + portRange;
 
-  // wait for all the promises to resolve
-  await Promise.allSettled(promisesArray);
+    // create a loop of 100
+    for (let currentPort = defaultPort; currentPort <= endRange; currentPort++) promisesArray.push( fetch(`http://127.0.0.1:${currentPort}/server_shutdown`) );
+
+    // wait for all the promises to resolve
+    await Promise.allSettled(promisesArray);
+  } else console.error('Cannot kill previous processes because fetch is not defined in this version of Node.js')
 };
 
 let updatechecked = false;
