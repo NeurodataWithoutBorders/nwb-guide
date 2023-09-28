@@ -1,17 +1,18 @@
 {
     "required": [],
     "properties": {
-        "PhySortingInterface": {
+        "ScanImageImagingInterface": {
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "properties": {
-                "folder_path": {
-                    "format": "directory",
-                    "type": "string"
+                "file_path": {
+                    "format": "file",
+                    "type": "string",
+                    "description": "Path to Tiff file."
                 },
-                "exclude_cluster_groups": {
-                    "type": "array"
+                "fallback_sampling_frequency": {
+                    "type": "number"
                 },
                 "verbose": {
                     "type": "boolean",
