@@ -15,7 +15,7 @@
         "KiloSortSortingInterface",
         "Spike2RecordingInterface",
         "BrukerTiffSinglePlaneImagingInterface",
-        "BrukerTiffMultiPlaneImagingInterface"
+        "BrukerTiffMultiPlaneImagingInterface",
         "MicroManagerTiffImagingInterface"
     ]
 }
