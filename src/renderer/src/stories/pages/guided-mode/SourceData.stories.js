@@ -14,6 +14,7 @@ import CellExplorerSortingInterfaceSchema from "../../../../../../schemas/json/g
 import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/generated/KiloSortSortingInterface.json";
 import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
+import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -55,6 +56,8 @@ globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
     BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface =
+    MicroManagerTiffImagingInterfaceSchema.properties.MicroManagerTiffImagingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -157,3 +160,9 @@ BrukerTiffSinglePlaneImagingInterface.args = {
     activePage,
     globalState: BrukerTiffSinglePlaneImagingInterfaceGlobalCopy,
 };
+
+export const MicroManagerTiffImagingInterface = PageTemplate.bind({});
+const MicroManagerTiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MicroManagerTiffImagingInterfaceGlobalCopy.interfaces.interface = MicroManagerTiffImagingInterface;
+MicroManagerTiffImagingInterfaceGlobalCopy.schema.source_data = MicroManagerTiffImagingInterfaceSchema;
+MicroManagerTiffImagingInterface.args = { activePage, globalState: MicroManagerTiffImagingInterfaceGlobalCopy };
