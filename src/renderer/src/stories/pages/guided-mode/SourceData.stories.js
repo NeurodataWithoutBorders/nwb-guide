@@ -164,7 +164,6 @@ BrukerTiffSinglePlaneImagingInterface.args = {
     globalState: BrukerTiffSinglePlaneImagingInterfaceGlobalCopy,
 };
 
-
 export const BrukerTiffMultiPlaneImagingInterface = PageTemplate.bind({});
 const BrukerTiffMultiPlaneImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 BrukerTiffMultiPlaneImagingInterfaceGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneImagingInterface;
@@ -176,4 +175,3 @@ const MicroManagerTiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(glo
 MicroManagerTiffImagingInterfaceGlobalCopy.interfaces.interface = MicroManagerTiffImagingInterface;
 MicroManagerTiffImagingInterfaceGlobalCopy.schema.source_data = MicroManagerTiffImagingInterfaceSchema;
 MicroManagerTiffImagingInterface.args = { activePage, globalState: MicroManagerTiffImagingInterfaceGlobalCopy };
-
