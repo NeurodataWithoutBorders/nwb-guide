@@ -20,6 +20,8 @@
         "ScanImageImagingInterface",
         "TiffImagingInterface",
         "MiniscopeImagingInterface",
-        "SbxImagingInterface"
+        "SbxImagingInterface",
+        "AxonaRecordingInterface",
+        "AxonaLFPDataInterface"
     ]
 }
