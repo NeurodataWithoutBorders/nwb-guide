@@ -75,9 +75,15 @@ def replace_none_with_nan(json_object, json_schema):
                 if key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and value is None:
-                        obj[key] = math.nan # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
+                        obj[
+                            key
+                        ] = (
+                            math.nan
+                        )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
-                        obj[key] = float(value) # Turn integer into float if an integer is expected (JavaScript / JSON Schema coerces floats with trailing zeros to integers)
+                        obj[key] = float(
+                            value
+                        )  # Turn integer into float if a number, the JSON Schema equivalent to float, is expected (JavaScript coerces floats with trailing zeros to integers)
                     else:
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
@@ -86,7 +92,9 @@ def replace_none_with_nan(json_object, json_schema):
 
         return obj
 
-    return coerce_schema_compliance_recursive(copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema)))
+    return coerce_schema_compliance_recursive(
+        copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema))
+    )
 
 
 def locate_data(info: dict) -> dict:
