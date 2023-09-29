@@ -16,6 +16,7 @@ import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/gener
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
 import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json";
 import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
+import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/generated/ScanImageImagingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -61,6 +62,8 @@ globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterfa
     BrukerTiffMultiPlaneImagingInterfaceSchema.properties.BrukerTiffMultiPlaneImagingInterface;
 globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface =
     MicroManagerTiffImagingInterfaceSchema.properties.MicroManagerTiffImagingInterface;
+globalStateCopy.schema.source_data.properties.ScanImageImagingInterface =
+    ScanImageImagingInterfaceSchema.properties.ScanImageImagingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -175,3 +178,9 @@ const MicroManagerTiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(glo
 MicroManagerTiffImagingInterfaceGlobalCopy.interfaces.interface = MicroManagerTiffImagingInterface;
 MicroManagerTiffImagingInterfaceGlobalCopy.schema.source_data = MicroManagerTiffImagingInterfaceSchema;
 MicroManagerTiffImagingInterface.args = { activePage, globalState: MicroManagerTiffImagingInterfaceGlobalCopy };
+
+export const ScanImageImagingInterface = PageTemplate.bind({});
+const ScanImageImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+ScanImageImagingInterfaceGlobalCopy.interfaces.interface = ScanImageImagingInterface;
+ScanImageImagingInterfaceGlobalCopy.schema.source_data = ScanImageImagingInterfaceSchema;
+ScanImageImagingInterface.args = { activePage, globalState: ScanImageImagingInterfaceGlobalCopy };
