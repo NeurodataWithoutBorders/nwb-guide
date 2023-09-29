@@ -88,7 +88,7 @@ def replace_none_with_nan(json_object, json_schema):
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
             for item in obj:
-                coerce_schema_compliance_recursive(item, schema.get("items", {}))
+                coerce_schema_compliance_recursive(item, schema.get("items", schema if 'properties' else {})) # NEUROCONV PATCH
 
         return obj
 

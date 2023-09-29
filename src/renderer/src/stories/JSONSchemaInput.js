@@ -186,6 +186,7 @@ export class JSONSchemaInput extends LitElement {
             const fileSystemFormat = isFilesystemSelector(itemSchema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             else if (isTable) {
+
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
@@ -197,7 +198,7 @@ export class JSONSchemaInput extends LitElement {
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
-                                ? this.form.validateOnChange(key, parent, fullPath, v)
+                                ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
                                 : "")
                         );
                     },
