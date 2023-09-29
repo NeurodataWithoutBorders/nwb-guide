@@ -143,11 +143,12 @@ export class Search extends LitElement {
 
                     this.list.appendChild(li);
 
-                    return option.disabled
-                }).map(o => o.label);
+                    return option.disabled;
+                })
+                .map((o) => o.label);
 
-                console.warn('Supported Interface Count:', this.options.length - unsupported.length)
-                console.warn('Unsupported Interfaces:', unsupported)
+            console.warn("Supported Interface Count:", this.options.length - unsupported.length);
+            console.warn("Unsupported Interfaces:", unsupported);
         }
 
         return html`
