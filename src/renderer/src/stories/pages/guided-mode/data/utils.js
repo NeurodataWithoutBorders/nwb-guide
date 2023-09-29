@@ -31,16 +31,16 @@ export function resolveProperties(properties = {}, target, globals = {}) {
         const info = properties[name];
 
         // NEUROCONV PATCH: Correct for incorrect array schema
-        if (info.properties && info.type === 'array') {
-            info.items = { type: "object", properties: info.properties, required: info.required }
-            delete info.properties
+        if (info.properties && info.type === "array") {
+            info.items = { type: "object", properties: info.properties, required: info.required };
+            delete info.properties;
         }
 
         const props = info.properties;
 
         if (!(name in target)) {
             if (props) target[name] = {}; // Regisiter new interfaces in results
-            if (info.type === 'array') target[name] = [] // Auto-populate arrays
+            if (info.type === "array") target[name] = []; // Auto-populate arrays
 
             // Apply global or default value if empty
             if (name in globals) target[name] = globals[name];

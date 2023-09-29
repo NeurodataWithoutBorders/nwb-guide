@@ -12,8 +12,7 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
-
-const selfRequiredSymbol = Symbol()
+const selfRequiredSymbol = Symbol();
 
 const componentCSS = `
 
@@ -246,7 +245,6 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form (data only)
     updateData(localPath, value) {
-
         const path = [...localPath];
         const name = path.pop();
 
@@ -264,7 +262,7 @@ export class JSONSchemaForm extends LitElement {
             resultParent[name] = value;
             resolvedParent[name] = value;
         }
-        
+
         if (hasUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
     }
 
@@ -377,7 +375,7 @@ export class JSONSchemaForm extends LitElement {
             if (indexOf !== -1) path = path.slice(indexOf + 1);
         }
 
-        const resolved = this.#get(path, schema)
+        const resolved = this.#get(path, schema);
         if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
@@ -465,12 +463,13 @@ export class JSONSchemaForm extends LitElement {
 
             // // NOTE: Uncomment to block checking requirements inside optional properties
             // if (!requirements[name][selfRequiredSymbol] && !resolved[name]) continue; // Do not continue checking requirements if absent and not required
-            
+
             if (typeof isRequired === "function") isRequired = await isRequired.call(this.resolved);
             if (isRequired) {
                 let path = parentPath ? `${parentPath}-${name}` : name;
 
-                if (typeof isRequired === "object" && !Array.isArray(isRequired)) invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
+                if (typeof isRequired === "object" && !Array.isArray(isRequired))
+                    invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
                 else if (!resolved[name]) invalid.push(path);
             }
         }
@@ -481,7 +480,7 @@ export class JSONSchemaForm extends LitElement {
     // Checks missing required properties and throws an error if any are found
     onInvalid = () => {};
     onLoaded = () => {};
-    onUpdate = () => {}
+    onUpdate = () => {};
 
     #deleteExtraneousResults = (results, schema) => {
         for (let name in results) {
@@ -567,8 +566,8 @@ export class JSONSchemaForm extends LitElement {
         // path = path.slice(this.base.length); // Remove base path
         const res = path.reduce((obj, key) => obj && obj[key], this.#requirements);
 
-        if (typeof res === 'object') res = res[selfRequiredSymbol]
-        return res
+        if (typeof res === "object") res = res[selfRequiredSymbol];
+        return res;
     };
 
     #getLinkElement = (externalPath) => {
@@ -579,10 +578,9 @@ export class JSONSchemaForm extends LitElement {
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, element, path = [], checkLinks = true) => {
-        
         const parent = this.#get(path, this.resolved);
 
-        const pathToValidate = [...(this.base ?? []), ...path]
+        const pathToValidate = [...(this.base ?? []), ...path];
 
         const valid =
             !this.validateEmptyValues && !(name in parent)
@@ -844,8 +842,9 @@ export class JSONSchemaForm extends LitElement {
             Object.entries(schema.properties).forEach(([key, value]) => {
                 if (value.properties) {
                     let nextAccumulator = acc[key];
-                    const isNotObject = typeof nextAccumulator !== "object"
-                    if (!nextAccumulator || isNotObject) nextAccumulator = acc[key] = {[selfRequiredSymbol]: !!nextAccumulator};
+                    const isNotObject = typeof nextAccumulator !== "object";
+                    if (!nextAccumulator || isNotObject)
+                        nextAccumulator = acc[key] = { [selfRequiredSymbol]: !!nextAccumulator };
                     this.#registerRequirements(value, requirements[key], nextAccumulator);
                 }
             });

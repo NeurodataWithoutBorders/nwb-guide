@@ -186,7 +186,6 @@ export class JSONSchemaInput extends LitElement {
             const fileSystemFormat = isFilesystemSelector(itemSchema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             else if (isTable) {
-
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,

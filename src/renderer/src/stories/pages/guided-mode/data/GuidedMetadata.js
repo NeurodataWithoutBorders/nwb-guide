@@ -110,11 +110,7 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: [
-                "Ophys",
-                "subject_id", 
-                "session_id"
-            ],
+            ignore: ["Ophys", "subject_id", "session_id"],
 
             conditionalRequirements: [
                 {
