@@ -14,6 +14,12 @@ import CellExplorerSortingInterfaceSchema from "../../../../../../schemas/json/g
 import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/generated/KiloSortSortingInterface.json";
 import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
+import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json";
+import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
+import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/generated/ScanImageImagingInterface.json";
+import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
+import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
+import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -55,6 +61,18 @@ globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
     BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterface =
+    BrukerTiffMultiPlaneImagingInterfaceSchema.properties.BrukerTiffMultiPlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface =
+    MicroManagerTiffImagingInterfaceSchema.properties.MicroManagerTiffImagingInterface;
+globalStateCopy.schema.source_data.properties.ScanImageImagingInterface =
+    ScanImageImagingInterfaceSchema.properties.ScanImageImagingInterface;
+globalStateCopy.schema.source_data.properties.TiffImagingInterface =
+    TiffImagingInterfaceSchema.properties.TiffImagingInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
+    MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
+globalStateCopy.schema.source_data.properties.SbxImagingInterface =
+    SbxImagingInterfaceSchema.properties.SbxImagingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -157,3 +175,39 @@ BrukerTiffSinglePlaneImagingInterface.args = {
     activePage,
     globalState: BrukerTiffSinglePlaneImagingInterfaceGlobalCopy,
 };
+
+export const BrukerTiffMultiPlaneImagingInterface = PageTemplate.bind({});
+const BrukerTiffMultiPlaneImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffMultiPlaneImagingInterfaceGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneImagingInterface;
+BrukerTiffMultiPlaneImagingInterfaceGlobalCopy.schema.source_data = BrukerTiffMultiPlaneImagingInterfaceSchema;
+BrukerTiffMultiPlaneImagingInterface.args = { activePage, globalState: BrukerTiffMultiPlaneImagingInterfaceGlobalCopy };
+
+export const MicroManagerTiffImagingInterface = PageTemplate.bind({});
+const MicroManagerTiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MicroManagerTiffImagingInterfaceGlobalCopy.interfaces.interface = MicroManagerTiffImagingInterface;
+MicroManagerTiffImagingInterfaceGlobalCopy.schema.source_data = MicroManagerTiffImagingInterfaceSchema;
+MicroManagerTiffImagingInterface.args = { activePage, globalState: MicroManagerTiffImagingInterfaceGlobalCopy };
+
+export const ScanImageImagingInterface = PageTemplate.bind({});
+const ScanImageImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+ScanImageImagingInterfaceGlobalCopy.interfaces.interface = ScanImageImagingInterface;
+ScanImageImagingInterfaceGlobalCopy.schema.source_data = ScanImageImagingInterfaceSchema;
+ScanImageImagingInterface.args = { activePage, globalState: ScanImageImagingInterfaceGlobalCopy };
+
+export const TiffImagingInterface = PageTemplate.bind({});
+const TiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+TiffImagingInterfaceGlobalCopy.interfaces.interface = TiffImagingInterface;
+TiffImagingInterfaceGlobalCopy.schema.source_data = TiffImagingInterfaceSchema;
+TiffImagingInterface.args = { activePage, globalState: TiffImagingInterfaceGlobalCopy };
+
+export const MiniscopeImagingInterface = PageTemplate.bind({});
+const MiniscopeImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeImagingInterfaceGlobalCopy.interfaces.interface = MiniscopeImagingInterface;
+MiniscopeImagingInterfaceGlobalCopy.schema.source_data = MiniscopeImagingInterfaceSchema;
+MiniscopeImagingInterface.args = { activePage, globalState: MiniscopeImagingInterfaceGlobalCopy };
+
+export const SbxImagingInterface = PageTemplate.bind({});
+const SbxImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+SbxImagingInterfaceGlobalCopy.interfaces.interface = SbxImagingInterface;
+SbxImagingInterfaceGlobalCopy.schema.source_data = SbxImagingInterfaceSchema;
+SbxImagingInterface.args = { activePage, globalState: SbxImagingInterfaceGlobalCopy };
