@@ -16,5 +16,6 @@
         "Spike2RecordingInterface",
         "BrukerTiffSinglePlaneImagingInterface",
         "BrukerTiffMultiPlaneImagingInterface"
+        "MicroManagerTiffImagingInterface"
     ]
 }

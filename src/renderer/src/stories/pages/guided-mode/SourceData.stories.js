@@ -15,6 +15,7 @@ import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/gener
 import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
 import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json";
+import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -58,6 +59,8 @@ globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterf
     BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterface =
     BrukerTiffMultiPlaneImagingInterfaceSchema.properties.BrukerTiffMultiPlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface =
+    MicroManagerTiffImagingInterfaceSchema.properties.MicroManagerTiffImagingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -161,8 +164,16 @@ BrukerTiffSinglePlaneImagingInterface.args = {
     globalState: BrukerTiffSinglePlaneImagingInterfaceGlobalCopy,
 };
 
+
 export const BrukerTiffMultiPlaneImagingInterface = PageTemplate.bind({});
 const BrukerTiffMultiPlaneImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 BrukerTiffMultiPlaneImagingInterfaceGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneImagingInterface;
 BrukerTiffMultiPlaneImagingInterfaceGlobalCopy.schema.source_data = BrukerTiffMultiPlaneImagingInterfaceSchema;
 BrukerTiffMultiPlaneImagingInterface.args = { activePage, globalState: BrukerTiffMultiPlaneImagingInterfaceGlobalCopy };
+
+export const MicroManagerTiffImagingInterface = PageTemplate.bind({});
+const MicroManagerTiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MicroManagerTiffImagingInterfaceGlobalCopy.interfaces.interface = MicroManagerTiffImagingInterface;
+MicroManagerTiffImagingInterfaceGlobalCopy.schema.source_data = MicroManagerTiffImagingInterfaceSchema;
+MicroManagerTiffImagingInterface.args = { activePage, globalState: MicroManagerTiffImagingInterfaceGlobalCopy };
+
