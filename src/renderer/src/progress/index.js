@@ -42,7 +42,7 @@ function decode(message) {
 
 function drill(o, callback) {
     if (o && typeof o === "object") {
-        const copy = { ...o };
+        const copy = Array.isArray(o) ? [...o] : { ...o } ;
         for (let k in copy) copy[k] = drill(copy[k], callback);
         return copy;
     } else return callback(o);
