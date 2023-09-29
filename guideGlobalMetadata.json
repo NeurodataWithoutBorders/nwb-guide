@@ -21,6 +21,7 @@
         "TiffImagingInterface",
         "MiniscopeImagingInterface",
         "SbxImagingInterface",
+        "MCSRawRecordingInterface",
         "MEArecRecordingInterface"
     ]
 }
