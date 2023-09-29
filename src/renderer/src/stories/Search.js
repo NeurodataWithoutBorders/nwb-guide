@@ -143,11 +143,12 @@ export class Search extends LitElement {
 
                     this.list.appendChild(li);
 
-                    return option.disabled
-                }).map(o => o.value);
+                    return option.disabled;
+                })
+                .map((o) => o.value);
 
-                console.warn(`Enabled: ${this.options.length - unsupported.length}/${this.options.length}`)
-                console.warn('Disabled Options:', unsupported)
+            console.warn(`Enabled: ${this.options.length - unsupported.length}/${this.options.length}`);
+            console.warn("Disabled Options:", unsupported);
         }
 
         return html`

@@ -20,6 +20,7 @@ import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/gene
 import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
 import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
 import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
+import MCSRawRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MCSRawRecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -73,6 +74,8 @@ globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
     MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
 globalStateCopy.schema.source_data.properties.SbxImagingInterface =
     SbxImagingInterfaceSchema.properties.SbxImagingInterface;
+globalStateCopy.schema.source_data.properties.MCSRawRecordingInterface =
+    MCSRawRecordingInterfaceSchema.properties.MCSRawRecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -211,3 +214,9 @@ const SbxImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 SbxImagingInterfaceGlobalCopy.interfaces.interface = SbxImagingInterface;
 SbxImagingInterfaceGlobalCopy.schema.source_data = SbxImagingInterfaceSchema;
 SbxImagingInterface.args = { activePage, globalState: SbxImagingInterfaceGlobalCopy };
+
+export const MCSRawRecordingInterface = PageTemplate.bind({});
+const MCSRawRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MCSRawRecordingInterfaceGlobalCopy.interfaces.interface = MCSRawRecordingInterface;
+MCSRawRecordingInterfaceGlobalCopy.schema.source_data = MCSRawRecordingInterfaceSchema;
+MCSRawRecordingInterface.args = { activePage, globalState: MCSRawRecordingInterfaceGlobalCopy };
