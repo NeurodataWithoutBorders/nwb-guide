@@ -53,7 +53,6 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }) => {
-
                     // NOTE: This clears all user-defined results
                     const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
                         method: "POST",
@@ -110,11 +109,11 @@ export class GuidedSourceDataPage extends ManagedPage {
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
 
-        console.log('Schema', schema, )
+        console.log("Schema", schema);
 
-        const schemaResolved = getSourceDataSchema(schema)
-        
-        console.log('Schema', schemaResolved)
+        const schemaResolved = getSourceDataSchema(schema);
+
+        console.log("Schema", schemaResolved);
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
