@@ -18,6 +18,7 @@
         "BrukerTiffMultiPlaneImagingInterface",
         "MicroManagerTiffImagingInterface",
         "ScanImageImagingInterface",
-        "TiffImagingInterface"
+        "TiffImagingInterface",
+        "MiniscopeImagingInterface"
     ]
 }

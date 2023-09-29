@@ -18,6 +18,7 @@ import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schema
 import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
 import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/generated/ScanImageImagingInterface.json";
 import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
+import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -67,6 +68,8 @@ globalStateCopy.schema.source_data.properties.ScanImageImagingInterface =
     ScanImageImagingInterfaceSchema.properties.ScanImageImagingInterface;
 globalStateCopy.schema.source_data.properties.TiffImagingInterface =
     TiffImagingInterfaceSchema.properties.TiffImagingInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
+    MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -193,3 +196,9 @@ const TiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 TiffImagingInterfaceGlobalCopy.interfaces.interface = TiffImagingInterface;
 TiffImagingInterfaceGlobalCopy.schema.source_data = TiffImagingInterfaceSchema;
 TiffImagingInterface.args = { activePage, globalState: TiffImagingInterfaceGlobalCopy };
+
+export const MiniscopeImagingInterface = PageTemplate.bind({});
+const MiniscopeImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeImagingInterfaceGlobalCopy.interfaces.interface = MiniscopeImagingInterface;
+MiniscopeImagingInterfaceGlobalCopy.schema.source_data = MiniscopeImagingInterfaceSchema;
+MiniscopeImagingInterface.args = { activePage, globalState: MiniscopeImagingInterfaceGlobalCopy };
