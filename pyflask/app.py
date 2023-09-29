@@ -2,7 +2,8 @@
 import sys
 import json
 import multiprocessing
-from os.path import sep
+from os import kill, getpid
+from signal import SIGINT
 from logging import Formatter, DEBUG
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -96,7 +97,7 @@ class Shutdown(Resource):
         api.logger.info("Shutting down server")
 
         if func is None:
-            print("Not running with the Werkzeug Server")
+            kill(getpid(), SIGINT)
             return
 
         func()
