@@ -144,10 +144,10 @@ export class Search extends LitElement {
                     this.list.appendChild(li);
 
                     return option.disabled
-                }).map(o => o.label);
+                }).map(o => o.value);
 
-                console.warn('Supported Interface Count:', this.options.length - unsupported.length)
-                console.warn('Unsupported Interfaces:', unsupported)
+                console.warn(`Enabled: ${this.options.length - unsupported.length}/${this.options.length}`)
+                console.warn('Disabled Options:', unsupported)
         }
 
         return html`
