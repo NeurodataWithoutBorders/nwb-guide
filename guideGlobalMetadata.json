@@ -20,6 +20,7 @@
         "ScanImageImagingInterface",
         "TiffImagingInterface",
         "MiniscopeImagingInterface",
-        "SbxImagingInterface"
+        "SbxImagingInterface",
+        "MEArecRecordingInterface"
     ]
 }
