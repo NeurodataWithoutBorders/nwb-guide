@@ -19,6 +19,7 @@ import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/js
 import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/generated/ScanImageImagingInterface.json";
 import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
 import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
+import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -70,6 +71,8 @@ globalStateCopy.schema.source_data.properties.TiffImagingInterface =
     TiffImagingInterfaceSchema.properties.TiffImagingInterface;
 globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
     MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
+globalStateCopy.schema.source_data.properties.SbxImagingInterface =
+    SbxImagingInterfaceSchema.properties.SbxImagingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -202,3 +205,9 @@ const MiniscopeImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalStat
 MiniscopeImagingInterfaceGlobalCopy.interfaces.interface = MiniscopeImagingInterface;
 MiniscopeImagingInterfaceGlobalCopy.schema.source_data = MiniscopeImagingInterfaceSchema;
 MiniscopeImagingInterface.args = { activePage, globalState: MiniscopeImagingInterfaceGlobalCopy };
+
+export const SbxImagingInterface = PageTemplate.bind({});
+const SbxImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+SbxImagingInterfaceGlobalCopy.interfaces.interface = SbxImagingInterface;
+SbxImagingInterfaceGlobalCopy.schema.source_data = SbxImagingInterfaceSchema;
+SbxImagingInterface.args = { activePage, globalState: SbxImagingInterfaceGlobalCopy };

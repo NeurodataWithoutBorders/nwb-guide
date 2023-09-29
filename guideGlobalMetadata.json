@@ -19,6 +19,7 @@
         "MicroManagerTiffImagingInterface",
         "ScanImageImagingInterface",
         "TiffImagingInterface",
-        "MiniscopeImagingInterface"
+        "MiniscopeImagingInterface",
+        "SbxImagingInterface"
     ]
 }
