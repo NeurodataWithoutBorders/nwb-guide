@@ -111,7 +111,7 @@ export class Search extends LitElement {
         this.list.appendChild(slot);
 
         if (this.options) {
-            this.options
+            const unsupported = this.options
                 .sort((a, b) => {
                     if (a.label < b.label) return -1;
                     if (a.label > b.label) return 1;
@@ -122,7 +122,7 @@ export class Search extends LitElement {
                     else if (a.disabled) return 1;
                     else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
-                .forEach((option) => {
+                .filter((option) => {
                     const li = document.createElement("li");
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
@@ -142,7 +142,13 @@ export class Search extends LitElement {
                     li.appendChild(keywords);
 
                     this.list.appendChild(li);
-                });
+
+                    return option.disabled;
+                })
+                .map((o) => o.value);
+
+            console.warn(`Enabled: ${this.options.length - unsupported.length}/${this.options.length}`);
+            console.warn("Disabled Options:", unsupported);
         }
 
         return html`
