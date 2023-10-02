@@ -16,6 +16,9 @@ from manageNeuroconv import (
     inspect_nwb_file,
     inspect_nwb_folder,
     inspect_multiple_filesystem_objects,
+    upload_to_dandi,
+    upload_folder_to_dandi,
+    upload_multiple_filesystem_objects_to_dandi,
 )
 
 from errorHandlers import notBadRequestException
@@ -112,13 +115,11 @@ class Validate(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
-@neuroconv_api.route("/upload")
+@neuroconv_api.route("/upload/project")
 class Upload(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            from manageNeuroconv import upload_to_dandi
-
             return upload_to_dandi(**neuroconv_api.payload)
 
         except Exception as e:
@@ -131,9 +132,30 @@ class Upload(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            from manageNeuroconv import upload_folder_to_dandi
-
             return upload_folder_to_dandi(**neuroconv_api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
+
+@neuroconv_api.route("/upload")
+class Upload(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        from os.path import isdir
+
+        try:
+            paths = neuroconv_api.payload["filesystem_paths"]
+
+            if len(paths) == 1 and isdir(paths[0]):
+                kwargs = {**neuroconv_api.payload}
+                del kwargs["filesystem_paths"]
+                kwargs["nwb_folder_path"] = paths[0]
+                return upload_folder_to_dandi(**kwargs)
+
+            else:
+                return upload_multiple_filesystem_objects_to_dandi(**neuroconv_api.payload)
 
         except Exception as e:
             if notBadRequestException(e):
