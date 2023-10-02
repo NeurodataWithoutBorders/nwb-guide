@@ -9,7 +9,7 @@ from shutil import rmtree, copytree
 from pathlib import Path
 
 from sse import MessageAnnouncer
-from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
+from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
 
@@ -509,3 +509,89 @@ def generate_dataset(test_data_directory_path: str):
             phy_output_dir.symlink_to(phy_base_directory, True)
 
     return {"output_directory": str(output_directory)}
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    return json.loads(
+        json.dumps(
+            list(
+                inspect_nwbfile(
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **payload,
+                )
+            ),
+            cls=InspectorOutputJSONEncoder,
+        )
+    )
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    return json.loads(
+        json.dumps(
+            list(
+                inspect_nwbfile(
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **payload,
+                )
+            ),
+            cls=InspectorOutputJSONEncoder,
+        )
+    )
+
+
+def inspect_nwb_folder(payload):
+    from nwbinspector import inspect_all
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    messages = list(
+        inspect_all(
+            n_jobs=-2,  # uses number of CPU - 1
+            ignore=[
+                "check_description",
+                "check_data_orientation",
+            ],  # TODO: remove when metadata control is exposed
+            **payload,
+        )
+    )
+
+    # messages = organize_messages(messages, levels=["importance", "message"])
+
+    return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
+
+
+def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+    if folder_path is None:
+        folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+    folder_path.mkdir(parents=True)
+
+    for path in paths:
+        path = Path(path)
+        new_path = folder_path / path.name
+        if path.is_dir():
+            aggregate_symlinks_in_new_directory(
+                list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
+            )
+        else:
+            new_path.symlink_to(path, path.is_dir())
+
+    return folder_path
+
+
+def inspect_multiple_filesystem_objects(paths):
+    tmp_folder_path = aggregate_symlinks_in_new_directory(paths, "inspect")
+    result = inspect_nwb_folder({"path": tmp_folder_path})
+    rmtree(tmp_folder_path)
+    return result
