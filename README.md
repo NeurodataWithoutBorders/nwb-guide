@@ -23,7 +23,41 @@ NWB GUIDE is a desktop app that provides a no-code user interface for converting
   </a>
 </p>
 
-## Installation
+
+
+## Insallation
+
+Begin by downloading the latest release from the [GitHub release page](https://github.com/NeurodataWithoutBorders/nwb-guide/releases).
+
+### Windows
+
+Run the `setup.exe` file and follow all instructions.
+
+### MacOS
+
+Run the `.dmg` file and follow all instructions to move the file into your Applications folder.
+
+### Ubuntu - Graphical Interface
+
+Right-click the `.AppImage` file, navigate to `permissions`, and check any box which mentions 'run as executable'.
+
+### Ubuntu - CLI
+
+From the terminal, simply type
+
+```
+chmod -x nwb-guide-X.Y.Z.AppImage
+```
+
+Where you are using version `X.Y.Z`; then execute by calling
+
+```
+./nwb-guide-X.Y.Z.AppImage
+```
+
+
+
+## Developer Installation
 
 Start by cloning the repository
 
