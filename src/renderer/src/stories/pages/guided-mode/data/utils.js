@@ -40,7 +40,7 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 
         if (!(name in target)) {
             if (props) target[name] = {}; // Regisiter new interfaces in results
-            if (info.type === "array") target[name] = []; // Auto-populate arrays
+            // if (info.type === "array") target[name] = []; // Auto-populate arrays (NOTE: Breaks PyNWB when adding to TwoPhotonSeries field...)
 
             // Apply global or default value if empty
             if (name in globals) target[name] = globals[name];
