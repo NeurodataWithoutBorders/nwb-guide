@@ -9,7 +9,7 @@ from shutil import rmtree, copytree
 from pathlib import Path
 
 from sse import MessageAnnouncer
-from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
+from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
 
@@ -69,22 +69,32 @@ def replace_none_with_nan(json_object, json_schema):
         dict: The modified JSON object with None values replaced by NaN.
     """
 
-    def replace_none_recursive(obj, schema):
+    def coerce_schema_compliance_recursive(obj, schema):
         if isinstance(obj, dict):
             for key, value in obj.items():
                 if key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and value is None:
-                        obj[key] = math.nan
+                        obj[
+                            key
+                        ] = (
+                            math.nan
+                        )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
+                    elif prop_schema.get("type") == "number" and isinstance(value, int):
+                        obj[key] = float(
+                            value
+                        )  # Turn integer into float if a number, the JSON Schema equivalent to float, is expected (JavaScript coerces floats with trailing zeros to integers)
                     else:
-                        replace_none_recursive(value, prop_schema)
+                        coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
             for item in obj:
-                replace_none_recursive(item, schema.get("items", {}))
+                coerce_schema_compliance_recursive(item, schema.get("items", {}))
 
         return obj
 
-    return replace_none_recursive(copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema)))
+    return coerce_schema_compliance_recursive(
+        copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema))
+    )
 
 
 def locate_data(info: dict) -> dict:
@@ -363,7 +373,7 @@ def convert_to_nwb(info: dict) -> str:
         info["metadata"].update(Ecephys=dict())
 
     resolved_metadata = replace_none_with_nan(
-        info["metadata"], converter.get_metadata_schema()
+        info["metadata"], resolve_references(converter.get_metadata_schema())
     )  # Ensure Ophys NaN values are resolved
 
     # if is_supported_recording_interface(recording_interface, info["metadata"]):
@@ -407,6 +417,16 @@ def convert_to_nwb(info: dict) -> str:
             os.symlink(resolved_output_directory, default_output_directory)
 
     return dict(file=str(resolved_output_path))
+
+
+def upload_multiple_filesystem_objects_to_dandi(**kwargs):
+    tmp_folder_path = aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
+    innerKwargs = {**kwargs}
+    del innerKwargs["filesystem_paths"]
+    innerKwargs["nwb_folder_path"] = tmp_folder_path
+    result = upload_folder_to_dandi(**innerKwargs)
+    rmtree(tmp_folder_path)
+    return result
 
 
 def upload_folder_to_dandi(
@@ -497,3 +517,89 @@ def generate_dataset(test_data_directory_path: str):
             phy_output_dir.symlink_to(phy_base_directory, True)
 
     return {"output_directory": str(output_directory)}
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    return json.loads(
+        json.dumps(
+            list(
+                inspect_nwbfile(
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **payload,
+                )
+            ),
+            cls=InspectorOutputJSONEncoder,
+        )
+    )
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    return json.loads(
+        json.dumps(
+            list(
+                inspect_nwbfile(
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **payload,
+                )
+            ),
+            cls=InspectorOutputJSONEncoder,
+        )
+    )
+
+
+def inspect_nwb_folder(payload):
+    from nwbinspector import inspect_all
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    messages = list(
+        inspect_all(
+            n_jobs=-2,  # uses number of CPU - 1
+            ignore=[
+                "check_description",
+                "check_data_orientation",
+            ],  # TODO: remove when metadata control is exposed
+            **payload,
+        )
+    )
+
+    # messages = organize_messages(messages, levels=["importance", "message"])
+
+    return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
+
+
+def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+    if folder_path is None:
+        folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+    folder_path.mkdir(parents=True)
+
+    for path in paths:
+        path = Path(path)
+        new_path = folder_path / path.name
+        if path.is_dir():
+            aggregate_symlinks_in_new_directory(
+                list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
+            )
+        else:
+            new_path.symlink_to(path, path.is_dir())
+
+    return folder_path
+
+
+def inspect_multiple_filesystem_objects(paths):
+    tmp_folder_path = aggregate_symlinks_in_new_directory(paths, "inspect")
+    result = inspect_nwb_folder({"path": tmp_folder_path})
+    rmtree(tmp_folder_path)
+    return result
