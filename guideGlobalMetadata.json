@@ -21,6 +21,8 @@
         "TiffImagingInterface",
         "MiniscopeImagingInterface",
         "SbxImagingInterface",
-        "CaimanSegmentationInterface"
+        "CaimanSegmentationInterface",
+        "MCSRawRecordingInterface",
+        "MEArecRecordingInterface"
     ]
 }

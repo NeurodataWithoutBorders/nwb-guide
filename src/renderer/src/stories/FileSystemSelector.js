@@ -131,12 +131,12 @@ export class FilesystemSelector extends LitElement {
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
     };
 
-    #handleFiles = async (pathOrPaths) => {
+    #handleFiles = async (pathOrPaths, type) => {
         if (!pathOrPaths)
             this.#onThrow("No paths detected", `Unable to parse ${this.type} path${this.multiple ? "s" : ""}`);
 
         if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
-        else this.#checkType(pathOrPaths);
+        else if (!type) this.#checkType(pathOrPaths);
 
         let resolvedValue = pathOrPaths;
         if (Array.isArray(resolvedValue) && !this.multiple) {
@@ -160,7 +160,7 @@ export class FilesystemSelector extends LitElement {
         if (dialog) {
             const file = await this.#useElectronDialog(type);
             const path = file.filePath ?? file.filePaths?.[0];
-            this.#handleFiles(path);
+            this.#handleFiles(path, type);
         } else {
             let handles = await (type === "directory"
                 ? window.showDirectoryPicker()
@@ -168,7 +168,7 @@ export class FilesystemSelector extends LitElement {
             ).catch((e) => this.#onCancel()); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
-            this.#handleFiles(result);
+            this.#handleFiles(result, type);
         }
     }
 

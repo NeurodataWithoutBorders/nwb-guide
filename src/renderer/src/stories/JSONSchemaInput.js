@@ -11,8 +11,8 @@ import { Modal } from "./Modal";
 
 import { capitalize } from "./forms/utils";
 
-const isFilesystemSelector = (format) => {
-    if (Array.isArray(format)) return format.map(isFilesystemSelector).every(Boolean) ? format : null;
+const isFilesystemSelector = (name, format) => {
+    if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
     const matched = name.match(/(.+_)?(.+)_paths?/);
     if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
@@ -183,7 +183,7 @@ export class JSONSchemaInput extends LitElement {
             const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
             const isTable = itemSchema.type === "object";
 
-            const fileSystemFormat = isFilesystemSelector(itemSchema.format);
+            const fileSystemFormat = isFilesystemSelector(name, itemSchema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             else if (isTable) {
                 const tableMetadata = {
@@ -305,7 +305,7 @@ export class JSONSchemaInput extends LitElement {
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
             />`;
         } else if (info.type === "string" || info.type === "number") {
-            const fileSystemFormat = isFilesystemSelector(info.format);
+            const fileSystemFormat = isFilesystemSelector(name, info.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
             else if (info.format === "long" || isArray)
