@@ -22,6 +22,8 @@
         "MiniscopeImagingInterface",
         "SbxImagingInterface",
         "PlexonRecordingInterface",
-        "PlexonSortingInterface"
+        "PlexonSortingInterface",
+        "MCSRawRecordingInterface",
+        "MEArecRecordingInterface"
     ]
 }

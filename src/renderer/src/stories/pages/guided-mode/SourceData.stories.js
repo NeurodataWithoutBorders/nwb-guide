@@ -22,6 +22,8 @@ import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/gene
 import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
 import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
 import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
+import MCSRawRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MCSRawRecordingInterface.json";
+import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MEArecRecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -79,6 +81,10 @@ globalStateCopy.schema.source_data.properties.PlexonRecordingInterface =
     PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface;
 globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
     PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
+globalStateCopy.schema.source_data.properties.MCSRawRecordingInterface =
+    MCSRawRecordingInterfaceSchema.properties.MCSRawRecordingInterface;
+globalStateCopy.schema.source_data.properties.MEArecRecordingInterface =
+    MEArecRecordingInterfaceSchema.properties.MEArecRecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -229,3 +235,14 @@ const PlexonSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState))
 PlexonSortingInterfaceGlobalCopy.interfaces.interface = PlexonSortingInterface;
 PlexonSortingInterfaceGlobalCopy.schema.source_data = PlexonSortingInterfaceSchema;
 PlexonSortingInterface.args = { activePage, globalState: PlexonSortingInterfaceGlobalCopy };
+export const MCSRawRecordingInterface = PageTemplate.bind({});
+const MCSRawRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MCSRawRecordingInterfaceGlobalCopy.interfaces.interface = MCSRawRecordingInterface;
+MCSRawRecordingInterfaceGlobalCopy.schema.source_data = MCSRawRecordingInterfaceSchema;
+MCSRawRecordingInterface.args = { activePage, globalState: MCSRawRecordingInterfaceGlobalCopy };
+
+export const MEArecRecordingInterface = PageTemplate.bind({});
+const MEArecRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MEArecRecordingInterfaceGlobalCopy.interfaces.interface = MEArecRecordingInterface;
+MEArecRecordingInterfaceGlobalCopy.schema.source_data = MEArecRecordingInterfaceSchema;
+MEArecRecordingInterface.args = { activePage, globalState: MEArecRecordingInterfaceGlobalCopy };
