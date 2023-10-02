@@ -98,15 +98,15 @@ hr {
   margin: 1em 0 1.5em 0;
 }
 
-pre {
-  white-space: pre-wrap;       /* Since CSS 2.1 */
-  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-  white-space: -pre-wrap;      /* Opera 4-6 */
-  white-space: -o-pre-wrap;    /* Opera 7 */
-  word-wrap: break-word;       /* Internet Explorer 5.5+ */
-  font-family: unset;
-  color: DimGray;
-}
+    pre {
+        white-space: pre-wrap;       /* Since CSS 2.1 */
+        white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+        white-space: -pre-wrap;      /* Opera 4-6 */
+        white-space: -o-pre-wrap;    /* Opera 7 */
+        word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        font-family: unset;
+        color: DimGray;
+    }
 
   .required label:after {
     content: " *";
@@ -436,6 +436,7 @@ export class JSONSchemaForm extends LitElement {
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
+                <div class="info"></div>
             </div>
         `;
     };
@@ -598,6 +599,8 @@ export class JSONSchemaForm extends LitElement {
             ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
             : [];
 
+        const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
+
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {
             if (checkLinks) {
@@ -621,8 +624,9 @@ export class JSONSchemaForm extends LitElement {
         }
 
         // Clear old errors and warnings
-        this.#clearMessages(localPath, "errors");
-        this.#clearMessages(localPath, "warnings");
+        this.#clearMessages(fullPath, "errors");
+        this.#clearMessages(fullPath, "warnings");
+        this.#clearMessages(fullPath, "info");
 
         const isFunction = typeof valid === "function";
         const isValid =
@@ -639,7 +643,8 @@ export class JSONSchemaForm extends LitElement {
         this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
-        warnings.forEach((info) => this.#addMessage(localPath, info, "warnings"));
+        warnings.forEach((info) => this.#addMessage(fullPath, info, "warnings"));
+        info.forEach((info) => this.#addMessage(fullPath, info, "info"));
 
         if (isValid && errors.length === 0) {
             element.classList.remove("invalid");

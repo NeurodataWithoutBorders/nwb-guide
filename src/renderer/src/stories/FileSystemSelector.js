@@ -39,6 +39,10 @@ const componentCSS = css`
         gap: 5px;
     }
 
+    #button-div > nwb-button {
+        margin-bottom: 10px;
+    }
+
     button {
         background: WhiteSmoke;
         border: 1px solid #c3c3c3;

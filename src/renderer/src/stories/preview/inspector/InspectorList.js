@@ -67,7 +67,7 @@ export class InspectorListItem extends LitElement {
         return css`
             :host {
                 display: block;
-                background: gainsboro;
+                background: WhiteSmoke;
                 border: 1px solid gray;
                 border-radius: 10px;
                 padding: 5px 10px;
