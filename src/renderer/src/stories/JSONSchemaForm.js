@@ -624,9 +624,9 @@ export class JSONSchemaForm extends LitElement {
         }
 
         // Clear old errors and warnings
-        this.#clearMessages(fullPath, "errors");
-        this.#clearMessages(fullPath, "warnings");
-        this.#clearMessages(fullPath, "info");
+        this.#clearMessages(localPath, "errors");
+        this.#clearMessages(localPath, "warnings");
+        this.#clearMessages(localPath, "info");
 
         const isFunction = typeof valid === "function";
         const isValid =
@@ -643,8 +643,8 @@ export class JSONSchemaForm extends LitElement {
         this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
-        warnings.forEach((info) => this.#addMessage(fullPath, info, "warnings"));
-        info.forEach((info) => this.#addMessage(fullPath, info, "info"));
+        warnings.forEach((info) => this.#addMessage(localPath, info, "warnings"));
+        info.forEach((info) => this.#addMessage(localPath, info, "info"));
 
         if (isValid && errors.length === 0) {
             element.classList.remove("invalid");
