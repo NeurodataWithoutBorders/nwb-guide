@@ -15,7 +15,7 @@ import Swal from 'sweetalert2'
 
 import { StatusBar } from "./stories/status/StatusBar.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import pythonSVG from "./stories/assets/python.svg?raw";
+import serverSVG from "./stories/assets/server.svg?raw";
 import webAssetSVG from "./stories/assets/web_asset.svg?raw";
 import wifiSVG from "./stories/assets/wifi.svg?raw";
 
@@ -27,7 +27,7 @@ const statusBar = new StatusBar({
   items: [
     { label: unsafeSVG(webAssetSVG), value: appVersion ?? 'Web' },
     { label: unsafeSVG(wifiSVG) },
-    { label: unsafeSVG(pythonSVG) }
+    { label: unsafeSVG(serverSVG) }
   ]
 })
 

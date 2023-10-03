@@ -200,7 +200,7 @@ export class JSONSchemaInput extends LitElement {
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
-                                ? this.form.validateOnChange(key, parent, fullPath, v)
+                                ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
                                 : "")
                         );
                     },

@@ -88,7 +88,9 @@ def replace_none_with_nan(json_object, json_schema):
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
             for item in obj:
-                coerce_schema_compliance_recursive(item, schema.get("items", {}))
+                coerce_schema_compliance_recursive(
+                    item, schema.get("items", schema if "properties" else {})
+                )  # NEUROCONV PATCH
 
         return obj
 
@@ -130,10 +132,11 @@ def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
-    # Hard coded for now - eventual goal will be to import this from NeuroConv
-    interfaces_to_load = {
-        interface.__name__.replace("Interface", ""): interface for interface in interface_list
-    }  # dict(SpikeGLX=SpikeGLXRecordingInterface, Phy=PhySortingInterface)
+    exclude_interfaces_from_selection = ["SpikeGLXLFP"]  # Should have 'interface' stripped from name
+
+    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
+    for excluded_interface in exclude_interfaces_from_selection:
+        interfaces_to_load.pop(excluded_interface)
 
     return {
         interface.__name__: {

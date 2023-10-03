@@ -20,6 +20,7 @@ import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/gene
 import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
 import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
 import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
+import CaimanSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/CaimanSegmentationInterface.json";
 import MCSRawRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MCSRawRecordingInterface.json";
 import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MEArecRecordingInterface.json";
 
@@ -75,6 +76,8 @@ globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
     MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
 globalStateCopy.schema.source_data.properties.SbxImagingInterface =
     SbxImagingInterfaceSchema.properties.SbxImagingInterface;
+globalStateCopy.schema.source_data.properties.CaimanSegmentationInterface =
+    CaimanSegmentationInterfaceSchema.properties.CaimanSegmentationInterface;
 globalStateCopy.schema.source_data.properties.MCSRawRecordingInterface =
     MCSRawRecordingInterfaceSchema.properties.MCSRawRecordingInterface;
 globalStateCopy.schema.source_data.properties.MEArecRecordingInterface =
@@ -217,6 +220,12 @@ const SbxImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 SbxImagingInterfaceGlobalCopy.interfaces.interface = SbxImagingInterface;
 SbxImagingInterfaceGlobalCopy.schema.source_data = SbxImagingInterfaceSchema;
 SbxImagingInterface.args = { activePage, globalState: SbxImagingInterfaceGlobalCopy };
+
+export const CaimanSegmentationInterface = PageTemplate.bind({});
+const CaimanSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+CaimanSegmentationInterfaceGlobalCopy.interfaces.interface = CaimanSegmentationInterface;
+CaimanSegmentationInterfaceGlobalCopy.schema.source_data = CaimanSegmentationInterfaceSchema;
+CaimanSegmentationInterface.args = { activePage, globalState: CaimanSegmentationInterfaceGlobalCopy };
 
 export const MCSRawRecordingInterface = PageTemplate.bind({});
 const MCSRawRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));

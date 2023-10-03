@@ -7,7 +7,7 @@ import main from '@electron/remote/main';
 main.initialize()
 
 import path from 'path';
-import { autoUpdater } from 'electron-updater';
+// import { autoUpdater } from 'electron-updater';
 import { ipcMain } from 'electron';
 import fp from 'find-free-port';
 import 'v8-compile-cache'
@@ -20,7 +20,7 @@ import './application-menu.js';
 import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
 
-autoUpdater.channel = "latest";
+// autoUpdater.channel = "latest";
 
 /*************************************************************
  * Python Process
@@ -218,11 +218,11 @@ function initialize() {
       return { action: 'deny' };
     });
 
-    globals.mainWindow.webContents.once("dom-ready", () => {
-      if (updatechecked == false) {
-        autoUpdater.checkForUpdatesAndNotify();
-      }
-    });
+    // globals.mainWindow.webContents.once("dom-ready", () => {
+    //   if (updatechecked == false) {
+    //     autoUpdater.checkForUpdatesAndNotify();
+    //   }
+    // });
   }
 
   function onAppReady () {
@@ -304,7 +304,7 @@ function initialize() {
         globals.mainWindow.show();
         createWindow();
 
-        autoUpdater.checkForUpdatesAndNotify();
+        // autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
 
         // Clear ready queue
@@ -396,8 +396,6 @@ app.on("before-quit", async (ev: Event) => {
 
   ev.preventDefault()
 
-  console.log('AHH', globals.python.status)
-
   const { response } = await dialog
   .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
     type: "question",
@@ -434,17 +432,17 @@ ipcMain.on("resize-window", (event, dir) => {
   globals.mainWindow.setSize(x, y);
 });
 
-autoUpdater.on("update-available", () => {
-  onWindowReady(win => send.call(win, "update_available"));
-});
+// autoUpdater.on("update-available", () => {
+//   onWindowReady(win => send.call(win, "update_available"));
+// });
 
-autoUpdater.on("update-downloaded", () => {
-  onWindowReady(win => send.call(win, "update_downloaded"));
-});
+// autoUpdater.on("update-downloaded", () => {
+//   onWindowReady(win => send.call(win, "update_downloaded"));
+// });
 
-ipcMain.on("restart_app", async () => {
-  autoUpdater.quitAndInstall();
-});
+// ipcMain.on("restart_app", async () => {
+//   autoUpdater.quitAndInstall();
+// });
 
 ipcMain.on("get-port", (event) => {
   event.returnValue = selectedPort;
