@@ -117,9 +117,3 @@ npm start
     - `electron` - Contains all the Electron-related code to enable conditional inclusion for development mode
     - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
 2. `/pyflask` - Contains all the source code for the backend
-
-### Development Mode
-Run the application in development mode to enable hot reloading of the JavaScript code by running parallel instances of the Flask server and a Vite development server.
-```bash
-npm run dev
-```
