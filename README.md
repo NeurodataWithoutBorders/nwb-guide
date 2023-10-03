@@ -23,7 +23,41 @@ NWB GUIDE is a desktop app that provides a no-code user interface for converting
   </a>
 </p>
 
+
+
 ## Installation
+
+Begin by downloading the latest release from the [GitHub release page](https://github.com/NeurodataWithoutBorders/nwb-guide/releases).
+
+### Windows
+
+Run the `setup.exe` file and follow all instructions.
+
+### MacOS
+
+Run the `.dmg` file and follow all instructions to move the file into your Applications folder.
+
+### Ubuntu - Graphical Interface
+
+Right-click the `.AppImage` file, navigate to `permissions`, and check any box which mentions 'run as executable'.
+
+### Ubuntu - CLI
+
+From the terminal, simply type
+
+```
+chmod +x nwb-guide-X.Y.Z.AppImage
+```
+
+Where you are using version `X.Y.Z`; then execute by calling
+
+```
+./nwb-guide-X.Y.Z.AppImage
+```
+
+
+
+## Developer Installation
 
 Start by cloning the repository
 
@@ -83,9 +117,3 @@ npm start
     - `electron` - Contains all the Electron-related code to enable conditional inclusion for development mode
     - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
 2. `/pyflask` - Contains all the source code for the backend
-
-### Development Mode
-Run the application in development mode to enable hot reloading of the JavaScript code by running parallel instances of the Flask server and a Vite development server.
-```bash
-npm run dev
-```

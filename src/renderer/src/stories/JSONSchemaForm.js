@@ -565,7 +565,7 @@ export class JSONSchemaForm extends LitElement {
     #isRequired = (path) => {
         if (typeof path === "string") path = path.split("-");
         // path = path.slice(this.base.length); // Remove base path
-        const res = path.reduce((obj, key) => obj && obj[key], this.#requirements);
+        let res = path.reduce((obj, key) => obj && obj[key], this.#requirements);
 
         if (typeof res === "object") res = res[selfRequiredSymbol];
         return res;
