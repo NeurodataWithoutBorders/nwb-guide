@@ -2,10 +2,11 @@ import { LitElement, html, css } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
 export class Search extends LitElement {
-    constructor({ options, showAllWhenEmpty } = {}) {
+    constructor({ options, showAllWhenEmpty, disabledLabel } = {}) {
         super();
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
+        this.disabledLabel = disabledLabel
     }
 
     static get styles() {
@@ -63,8 +64,22 @@ export class Search extends LitElement {
             }
 
             [disabled] {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 pointer-events: none;
                 opacity: 0.4;
+            }
+
+            [disabled]::after {
+                content: var(--disabled-label, "Not available");
+                text-align: left;
+                padding-left: 25px;
+                opacity: 70%;
+                font-size: 90%;
+                white-space: nowrap;
+                min-width: min-content;
+
             }
         `;
     }
@@ -103,9 +118,14 @@ export class Search extends LitElement {
     list = document.createElement("ul");
 
     render() {
+
         // Update list
         this.list.remove();
         this.list = document.createElement("ul");
+
+        if (this.disabledLabel) this.style.setProperty('--disabled-label', `"${this.disabledLabel}"`);
+        else this.style.removeProperty('--disabled-label')
+
 
         const slot = document.createElement("slot");
         this.list.appendChild(slot);
@@ -131,16 +151,19 @@ export class Search extends LitElement {
 
                     if (option.disabled) li.setAttribute("disabled", "");
 
+                    const container = document.createElement('div')
+
                     const label = document.createElement("h4");
                     label.classList.add("label");
                     label.innerText = option.label;
-                    li.appendChild(label);
+                    container.appendChild(label);
 
                     const keywords = document.createElement("small");
                     keywords.classList.add("keywords");
                     keywords.innerText = option.keywords.join(", ");
-                    li.appendChild(keywords);
+                    container.appendChild(keywords);
 
+                    li.append(container)
                     this.list.appendChild(li);
 
                     return option.disabled;
