@@ -13,17 +13,32 @@ import baseMetadataSchema from "../../../../../../../schemas/base-metadata.schem
 
 const changesAcrossSessions = {
     Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
-    NWBFile: ["session_id", "session_start_time", "identifier", "data_collection", "notes", "pharmacolocy", "session_description", "slices", "source_script", "source_script_file_name"]
-}
+    NWBFile: [
+        "session_id",
+        "session_start_time",
+        "identifier",
+        "data_collection",
+        "notes",
+        "pharmacolocy",
+        "session_description",
+        "slices",
+        "source_script",
+        "source_script_file_name",
+    ],
+};
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 
 Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
-    Object.keys(v.properties).filter(prop => !(changesAcrossSessions[globalProp] ?? []).includes(prop)).forEach(prop => {
-        const globalNestedProp = projectMetadataSchema.properties[globalProp] ?? (projectMetadataSchema.properties[globalProp] = { properties: {} })
-        globalNestedProp.properties[prop] = baseMetadataSchema.properties[globalProp].properties[prop]
-    })
-})
+    Object.keys(v.properties)
+        .filter((prop) => !(changesAcrossSessions[globalProp] ?? []).includes(prop))
+        .forEach((prop) => {
+            const globalNestedProp =
+                projectMetadataSchema.properties[globalProp] ??
+                (projectMetadataSchema.properties[globalProp] = { properties: {} });
+            globalNestedProp.properties[prop] = baseMetadataSchema.properties[globalProp].properties[prop];
+        });
+});
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {

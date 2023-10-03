@@ -35,7 +35,7 @@ export class GuidedStructurePage extends Page {
 
     search = new Search({
         showAllWhenEmpty: true,
-        disabledLabel: "Not supported"
+        disabledLabel: "Not supported",
     });
 
     list = new List({

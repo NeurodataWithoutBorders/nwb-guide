@@ -22,7 +22,7 @@ export const startLottie = (lottieElement, animationData) => {
     return thisLottie;
 };
 
-const longDuration = 20000
+const longDuration = 20000;
 
 // ---------- Notification Helper ----------
 export const notyf = new Notyf({
@@ -94,7 +94,7 @@ export const notyf = new Notyf({
                 tagName: "i",
                 color: "white",
             },
-            duration: longDuration
+            duration: longDuration,
         },
         {
             type: "error",
