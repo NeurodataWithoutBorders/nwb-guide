@@ -14,7 +14,7 @@ export class PreviewPage extends Page {
         if (path) {
             const result = await fetch(`${baseUrl}/files/${path}`, { method: "POST" }).then((res) => res.text());
             if (result) this.neurosift.url = result;
-        } else this.neurosift.url = undefined
+        } else this.neurosift.url = undefined;
     };
 
     neurosift = new Neurosift();
