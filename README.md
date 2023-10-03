@@ -46,7 +46,7 @@ Right-click the `.AppImage` file, navigate to `permissions`, and check any box w
 From the terminal, simply type
 
 ```
-chmod -x nwb-guide-X.Y.Z.AppImage
+chmod +x nwb-guide-X.Y.Z.AppImage
 ```
 
 Where you are using version `X.Y.Z`; then execute by calling
