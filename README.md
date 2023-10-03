@@ -25,7 +25,7 @@ NWB GUIDE is a desktop app that provides a no-code user interface for converting
 
 
 
-## Insallation
+## Installation
 
 Begin by downloading the latest release from the [GitHub release page](https://github.com/NeurodataWithoutBorders/nwb-guide/releases).
 
