@@ -56,9 +56,9 @@ export class GuidedStartPage extends Page {
                         <p class="guided--help-text">
                             Guided Mode is divided into four high-level sections. During the first three sections, you
                             will be directed to specify the data formats and files to include in your dataset and
-                            provide information about your dataset. In the final section, NWB GUIDE will automatically
-                            generate a valid NWB file and ask for your review before uploading to DANDI. Note that none
-                            of your local data files will ever be modified or moved.
+                            provide information about your conversion pipeline. In the final section, NWB GUIDE will
+                            automatically generate a valid NWB file and ask for your review before uploading to DANDI.
+                            Note that none of your local data files will ever be modified or moved.
                         </p>
                         ${new InfoBox({
                             header: "Learn more about the conversion process",

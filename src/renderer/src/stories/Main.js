@@ -90,7 +90,7 @@ export class Main extends LitElement {
                 if (!info.next)
                     footer = {
                         next: "Back to Home Screen",
-                        exit: "Exit",
+                        exit: false,
                         onNext: () => this.toRender.page.to("/"),
                     };
                 // Allow navigating laterally if there is a next page
