@@ -10,6 +10,7 @@ const Template = (args) => new Search(args);
 
 export const Default = Template.bind({});
 Default.args = {
+    disabledLabel: "Interface not supported",
     options: [
         {
             label: "SpikeGLXRecording",
