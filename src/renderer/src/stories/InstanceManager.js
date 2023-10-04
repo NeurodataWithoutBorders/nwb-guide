@@ -223,9 +223,7 @@ export class InstanceManager extends LitElement {
         this.#onSelected();
 
         setTimeout(() => {
-            Object.entries(this.#info).forEach(([id, item]) => {
-                const { status } = item
-                console.log('Item', item)
+            Object.entries(this.#info).forEach(([id, { status }]) => {
                 if (status) this.updateState(id, status) 
             })
         }) // NOTE: Why is this not possible without waiting?
