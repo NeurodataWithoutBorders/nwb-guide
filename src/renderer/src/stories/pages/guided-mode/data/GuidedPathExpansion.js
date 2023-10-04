@@ -37,24 +37,6 @@ const exampleFileStructure = `mylab/
 const exampleFormatPath =
     "Subjects/{subject_id}/{session_start_time:%Y-%m-%d}/{session_id}/raw_video_data/leftCamera.raw.{}.mp4";
 
-const exampleMetadata = {
-    source_data: {
-        IBL_video: {
-            file_path:
-                "/mylab/Subjects/NR_0017/2022-03-22/001/raw_video_data/leftCamera.raw.6252a2f0-c10f-4e49-b085-75749ba29c35.mp4",
-        },
-    },
-    metadata: {
-        NWBFile: {
-            session_id: "001",
-            session_start_time: "2022-03-22",
-        },
-        Subject: {
-            subject_id: "NR_0017",
-        },
-    },
-};
-
 const pathExpansionInfoBox = new InfoBox({
     header: "How do I use a Python format string for path expansion?",
     content: html`
@@ -92,15 +74,7 @@ const pathExpansionInfoBox = new InfoBox({
                 editable: false,
             })}
 
-            <p>Additional variables (or blank braces) can be specified to indicate wildcard patterns.</p>
-
-            <p>
-                Consequently, the metadata extracted from the first file found using this approach would be the
-                following:
-            </p>
-            ${new CodeBlock({ text: JSON.stringify(exampleMetadata, null, 2) })}
-
-            <hr />
+            <p>Wildcard patterns are specified by blank braces / non-standard variables.</p>
 
             <small
                 >For complete documentation of the path expansion feature of NeuroConv, visit the

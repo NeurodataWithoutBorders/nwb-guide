@@ -400,7 +400,7 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    # Create a symlink between the fake adata and custom data
+    # Create a symlink between the fake data and custom data
     if not run_stub_test and not resolved_output_directory == default_output_directory:
         if default_output_directory.exists():
             # If default default_output_directory is not a symlink, delete all contents and create a symlink there
@@ -459,6 +459,9 @@ def upload_to_dandi(
     cleanup: Optional[bool] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+
+    # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 

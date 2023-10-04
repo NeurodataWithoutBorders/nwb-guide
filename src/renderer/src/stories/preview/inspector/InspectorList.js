@@ -1,5 +1,6 @@
 import { LitElement, css, html } from "lit";
 import { List } from "../../List";
+import { getMessageType } from "../../../validation";
 
 const sortList = (items) => {
     return items
@@ -40,7 +41,8 @@ export class InspectorList extends List {
         ];
     }
 
-    constructor({ items, listStyles }) {
+    constructor(props) {
+        const { items } = props
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
             aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
@@ -50,12 +52,12 @@ export class InspectorList extends List {
         super({
             editable: false,
             unordered: true,
+            ...props,
             items: sortList(aggregatedItems).map((o) => {
                 const item = new InspectorListItem(o);
                 item.style.flexGrow = "1";
                 return { content: item };
-            }),
-            listStyles,
+            })
         });
     }
 }
@@ -129,7 +131,10 @@ export class InspectorListItem extends LitElement {
     }
 
     render() {
-        this.type = this.ORIGINAL_TYPE ?? (this.importance === "CRITICAL" ? "error" : "warning");
+        this.type = getMessageType({
+            ...this,
+            type: this.ORIGINAL_TYPE
+        })
 
         this.setAttribute("title", this.message);
 

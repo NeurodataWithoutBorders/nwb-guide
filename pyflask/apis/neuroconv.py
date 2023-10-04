@@ -196,7 +196,7 @@ class InspectNWBFolder(Resource):
 
             if len(paths) == 1:
                 if isfile(paths[0]):
-                    return inspect_nwb_file({"path": paths[0]})
+                    return inspect_nwb_file({"nwbfile_path": paths[0]})
                 else:
                     return inspect_nwb_folder({"path": paths[0]})
 
