@@ -1,12 +1,12 @@
 import { LitElement, css, html } from "lit";
 import { List } from "../../List";
-import { getMessageType } from "../../../validation";
+import { getMessageType, isErrorImportance } from "../../../validation";
 
 const sortList = (items) => {
     return items
         .sort((a, b) => {
-            const aCritical = a.importance === "CRITICAL";
-            const bCritical = b.importance === "CRITICAL";
+            const aCritical = isErrorImportance.includes(a.importance);
+            const bCritical = isErrorImportance.includes(a.importance);
             if (aCritical && bCritical) return 0;
             else if (aCritical) return -1;
             else return 1;
