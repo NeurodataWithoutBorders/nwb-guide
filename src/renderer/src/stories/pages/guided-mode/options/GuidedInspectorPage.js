@@ -29,7 +29,7 @@ const filter = (list, toFilter) => {
 };
 
 
-const emptyMessage = 'No issues detected on these files!'
+const emptyMessage = 'No issues detected in these files!'
 
 export class GuidedInspectorPage extends Page {
     constructor(...args) {
