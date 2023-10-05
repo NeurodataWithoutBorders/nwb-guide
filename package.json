@@ -1,12 +1,16 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.5",
+  "version": "0.0.10",
+  "private": true,
   "description": "",
   "main": "./build/main/main.js",
   "engine": {
     "node": ">=18"
   },
+  "workspaces": [
+    "src/renderer"
+  ],
   "scripts": {
     "start": "electron-vite dev --outDir build",
     "postinstall": "electron-builder install-app-deps",
@@ -136,6 +140,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@electron/remote": "^2.0.11",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@sweetalert2/theme-bulma": "^4.0.3",
     "chokidar": "^3.5.3",
@@ -153,7 +158,6 @@
   },
   "devDependencies": {
     "@electron-toolkit/utils": "^2.0.1",
-    "@electron/remote": "^2.0.11",
     "@storybook/addon-essentials": "^7.0.0-beta.62",
     "@storybook/addon-links": "^7.0.0-beta.62",
     "@storybook/blocks": "^7.0.0-beta.62",

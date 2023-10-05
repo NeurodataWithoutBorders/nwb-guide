@@ -7,12 +7,15 @@ export class OptionalSection extends LitElement {
         return css`
             :host {
                 display: block;
-                text-align: center;
             }
 
             h2 {
                 margin: 0;
                 margin-bottom: 15px;
+            }
+
+            .optional-section__toggle {
+                padding-bottom: 20px;
             }
 
             .optional-section__content {
@@ -99,17 +102,15 @@ export class OptionalSection extends LitElement {
 
     render() {
         return html`
-            <div class="optional-section">
-                <div class="optional-section__header">
-                    ${this.header ? html`<h2>${this.header}</h2>` : ""}
-                    <div>${this.description}</div>
-                    <div class="optional-section__toggle">${this.yes} ${this.no}</div>
-                </div>
-                <div class="optional-section__content" hidden>
-                    <slot>${this.content}</slot>
-                </div>
-                <div id="altContent" class="optional-section__content" hidden>${this.altContent}</div>
+            <div class="optional-section__header">
+                ${this.header ? html`<h2>${this.header}</h2>` : ""}
+                <div>${this.description}</div>
+                <div class="optional-section__toggle">${this.yes} ${this.no}</div>
             </div>
+            <div class="optional-section__content" hidden>
+                <slot>${this.content}</slot>
+            </div>
+            <div id="altContent" class="optional-section__content" hidden>${this.altContent}</div>
         `;
     }
 }

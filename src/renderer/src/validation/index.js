@@ -4,6 +4,11 @@ import validationSchema from "./validation";
 
 // NOTE: Only validation missing on NWBFile Metadata is check_subject_exists and check_processing_module_name
 
+export const isErrorImportance = ["PYNWB_VALIDATION", "CRITICAL", "ERROR"]
+export function getMessageType(item) {
+    return item.type ?? (isErrorImportance.includes(item.importance) ? "error" : "warning");
+}
+
 export function validateOnChange(name, parent, path, value) {
     let functions = [];
 
@@ -69,7 +74,7 @@ export function validateOnChange(name, parent, path, value) {
                 .map((o) => {
                     return {
                         message: o.message,
-                        type: o.type ?? o.importance === "CRITICAL" ? "error" : "warning",
+                        type: getMessageType(o),
                         missing: o.missing ?? o.message.includes("is missing"), // Indicates that the field is missing
                     };
                 }); // Some of the requests end in errors

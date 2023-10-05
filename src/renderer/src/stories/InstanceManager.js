@@ -134,6 +134,7 @@ export class InstanceManager extends LitElement {
         this.instanceType = props.instanceType ?? "Instance";
         if (props.onAdded) this.onAdded = props.onAdded;
         if (props.onRemoved) this.onRemoved = props.onRemoved;
+        if (props.onDisplay) this.onDisplay = props.onDisplay;
         this.controls = props.controls ?? [];
     }
 
@@ -220,6 +221,14 @@ export class InstanceManager extends LitElement {
             });
 
         this.#onSelected();
+
+        setTimeout(() => {
+            Object.entries(this.#info).forEach(([id, { status }]) => {
+                if (status) this.updateState(id, status) 
+            })
+        }) // NOTE: Why is this not possible without waiting?
+
+
     };
 
     #isCategory(value) {
@@ -227,6 +236,7 @@ export class InstanceManager extends LitElement {
     }
 
     #items = [];
+    #info = {};
 
     #onRemoved(ev) {
         const parent = ev.target.parentNode;
@@ -262,6 +272,7 @@ export class InstanceManager extends LitElement {
         });
     }
 
+    #ids = {}
     #accordions = {};
 
     #onSelected = () => {
@@ -303,7 +314,7 @@ export class InstanceManager extends LitElement {
                 categories.push(accordion);
             } else {
                 if (!this.#selected) this.#selected = resolvedKey;
-                instances[resolvedKey] = value;
+                this.#info[resolvedKey] = instances[resolvedKey] = value;
             }
         });
 
@@ -348,8 +359,10 @@ export class InstanceManager extends LitElement {
 
         return list;
     }
+    
 
     render() {
+        this.#info = {}
         this.#items = [];
 
         const instances = this.#render();
