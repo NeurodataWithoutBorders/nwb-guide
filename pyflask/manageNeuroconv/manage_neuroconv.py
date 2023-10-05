@@ -460,7 +460,6 @@ def upload_to_dandi(
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
-
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key

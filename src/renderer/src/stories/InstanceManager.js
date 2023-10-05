@@ -224,11 +224,9 @@ export class InstanceManager extends LitElement {
 
         setTimeout(() => {
             Object.entries(this.#info).forEach(([id, { status }]) => {
-                if (status) this.updateState(id, status) 
-            })
-        }) // NOTE: Why is this not possible without waiting?
-
-
+                if (status) this.updateState(id, status);
+            });
+        }); // NOTE: Why is this not possible without waiting?
     };
 
     #isCategory(value) {
@@ -272,7 +270,7 @@ export class InstanceManager extends LitElement {
         });
     }
 
-    #ids = {}
+    #ids = {};
     #accordions = {};
 
     #onSelected = () => {
@@ -359,10 +357,9 @@ export class InstanceManager extends LitElement {
 
         return list;
     }
-    
 
     render() {
-        this.#info = {}
+        this.#info = {};
         this.#items = [];
 
         const instances = this.#render();

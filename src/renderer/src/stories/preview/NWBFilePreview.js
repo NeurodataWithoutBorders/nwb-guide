@@ -20,7 +20,7 @@ export function getSharedPath(array) {
         }
     });
 
-    return shared ? path.normalize(shared.join("/")) : ''; // Convert back to OS-specific path
+    return shared ? path.normalize(shared.join("/")) : ""; // Convert back to OS-specific path
 }
 
 export function truncateFilePaths(items, basepath) {
