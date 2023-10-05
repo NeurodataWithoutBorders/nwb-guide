@@ -88,7 +88,7 @@ export class GuidedSubjectsPage extends Page {
             keyColumn: "subject_id",
             validateEmptyCells: false,
             contextMenu: {
-                ignore: ['row_below']
+                ignore: ["row_below"],
             },
             onUpdate: () => {
                 this.unsavedUpdates = true;

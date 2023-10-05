@@ -28,8 +28,7 @@ const filter = (list, toFilter) => {
     });
 };
 
-
-const emptyMessage = 'No issues detected in these files!'
+const emptyMessage = "No issues detected in these files!";
 
 export class GuidedInspectorPage extends Page {
     constructor(...args) {
@@ -58,11 +57,11 @@ export class GuidedInspectorPage extends Page {
 
     getStatus = (list) => {
         return list.reduce((acc, o) => {
-            const res = getMessageType(o)
-            if (acc === 'error') return acc
-            else return res
-        }, 'valid') 
-    }
+            const res = getMessageType(o);
+            if (acc === "error") return acc;
+            else return res;
+        }, "valid");
+    };
 
     render() {
         const { globalState } = this.info;
@@ -80,8 +79,6 @@ export class GuidedInspectorPage extends Page {
             .flat();
         return html` ${until(
             (async () => {
-
-
                 if (fileArr.length <= 1) {
                     const items =
                         inspector ??
@@ -101,37 +98,34 @@ export class GuidedInspectorPage extends Page {
                     return truncateFilePaths(report, path);
                 })();
 
-    
                 const _instances = fileArr.map(({ subject, session, info }) => {
+                    const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
+                    const filtered = removeFilePaths(filter(items, { file_path }));
 
-                    const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`] 
-                    const filtered = removeFilePaths(filter(items, { file_path }))
-
-                    const display = () => new InspectorList({ items: filtered, emptyMessage })
-                    display.status = this.getStatus(filtered)
+                    const display = () => new InspectorList({ items: filtered, emptyMessage });
+                    display.status = this.getStatus(filtered);
 
                     return {
                         subject,
                         session,
-                        display
+                        display,
                     };
                 });
 
                 const instances = _instances.reduce((acc, { subject, session, display }) => {
-                    const subLabel = `sub-${subject}`
+                    const subLabel = `sub-${subject}`;
                     if (!acc[`sub-${subject}`]) acc[subLabel] = {};
                     acc[subLabel][`ses-${session}`] = display;
                     return acc;
                 }, {});
 
                 Object.keys(instances).forEach((subLabel) => {
-
                     const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
                     const path = getSharedPath(subItems.map((o) => o.file_path));
-                    const filtered = truncateFilePaths(subItems, path)
+                    const filtered = truncateFilePaths(subItems, path);
 
-                    const display = () => new InspectorList({ items: filtered, emptyMessage })
-                    display.status = this.getStatus(filtered)
+                    const display = () => new InspectorList({ items: filtered, emptyMessage });
+                    display.status = this.getStatus(filtered);
 
                     instances[subLabel] = {
                         ["All Files"]: display,
@@ -139,20 +133,19 @@ export class GuidedInspectorPage extends Page {
                     };
                 });
 
-                const allDisplay = () => new InspectorList({ items, emptyMessage })
-                allDisplay.status = this.getStatus(items)
+                const allDisplay = () => new InspectorList({ items, emptyMessage });
+                allDisplay.status = this.getStatus(items);
 
-                
                 const allInstances = {
                     ["All Files"]: allDisplay,
                     ...instances,
-                }
+                };
 
                 const manager = new InstanceManager({
-                    instances:allInstances
+                    instances: allInstances,
                 });
-                
-                return manager
+
+                return manager;
             })(),
             ""
         )}`;

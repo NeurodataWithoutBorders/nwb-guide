@@ -42,7 +42,7 @@ export class InspectorList extends List {
     }
 
     constructor(props) {
-        const { items } = props
+        const { items } = props;
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
             aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
@@ -57,7 +57,7 @@ export class InspectorList extends List {
                 const item = new InspectorListItem(o);
                 item.style.flexGrow = "1";
                 return { content: item };
-            })
+            }),
         });
     }
 }
@@ -133,8 +133,8 @@ export class InspectorListItem extends LitElement {
     render() {
         this.type = getMessageType({
             ...this,
-            type: this.ORIGINAL_TYPE
-        })
+            type: this.ORIGINAL_TYPE,
+        });
 
         this.setAttribute("title", this.message);
 
