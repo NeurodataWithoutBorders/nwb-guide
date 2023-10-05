@@ -1,7 +1,0 @@
-{
-    "name": "nwb-guide-frontend",
-    "type": "module",
-    "dependencies": {
-        "electron": "^26.2.2"
-    }
-}

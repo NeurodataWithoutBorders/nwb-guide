@@ -2,15 +2,11 @@
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
   "version": "0.0.10",
-  "private": true,
   "description": "",
   "main": "./build/main/main.js",
   "engine": {
     "node": ">=18"
   },
-  "workspaces": [
-    "src/renderer"
-  ],
   "scripts": {
     "start": "electron-vite dev --outDir build",
     "postinstall": "electron-builder install-app-deps",

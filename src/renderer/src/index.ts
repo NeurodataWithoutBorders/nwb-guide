@@ -25,7 +25,7 @@ const appVersion = app?.getVersion();
 
 const statusBar = new StatusBar({
   items: [
-    { label: unsafeSVG(webAssetSVG), value: appVersion ?? 'Web' },
+    { label: unsafeSVG(webAssetSVG), value: isElectron ? appVersion ?? 'ERROR' : 'Web' },
     { label: unsafeSVG(wifiSVG) },
     { label: unsafeSVG(serverSVG) }
   ]
