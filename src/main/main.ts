@@ -19,6 +19,7 @@ import './application-menu.js';
 
 import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
+import preloadUrl from './../preload/preload.js?asset'
 
 // autoUpdater.channel = "latest";
 
@@ -242,7 +243,7 @@ function initialize() {
         enableRemoteModule: true,
         contextIsolation: false,
         sandbox: false,
-        // preload: path.join(__dirname, "preload.js"),
+        preload: path.join(preloadUrl),
       },
     };
 
