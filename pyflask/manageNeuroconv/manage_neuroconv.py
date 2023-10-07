@@ -17,7 +17,7 @@ announcer = MessageAnnouncer()
 def replace_nan_with_none(data):
     if isinstance(data, dict):
         # If it's a dictionary, iterate over its items and replace NaN values with None
-        return {key: replace_nan_with_none(value) for key, value in data.items()}
+        return {key: replace_nan_with_none(value) for key, value in data.items()}x
     elif isinstance(data, list):
         # If it's a list, iterate over its elements and replace NaN values with None
         return [replace_nan_with_none(item) for item in data]
@@ -536,6 +536,7 @@ def inspect_nwb_file(payload):
                         "check_description",
                         "check_data_orientation",
                     ],  # TODO: remove when metadata control is exposed
+                    config="dandi",
                     **payload,
                 )
             ),
@@ -556,6 +557,7 @@ def inspect_nwb_file(payload):
                         "check_description",
                         "check_data_orientation",
                     ],  # TODO: remove when metadata control is exposed
+                    config="dandi",
                     **payload,
                 )
             ),
@@ -564,7 +566,7 @@ def inspect_nwb_file(payload):
     )
 
 
-def inspect_nwb_folder(payload):
+def _inspect_nwb_folder(payload):
     from nwbinspector import inspect_all
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
@@ -575,6 +577,7 @@ def inspect_nwb_folder(payload):
                 "check_description",
                 "check_data_orientation",
             ],  # TODO: remove when metadata control is exposed
+            config="dandi",
             **payload,
         )
     )
@@ -584,7 +587,7 @@ def inspect_nwb_folder(payload):
     return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
 
 
-def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
     if folder_path is None:
         folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
@@ -604,7 +607,7 @@ def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
 
 
 def inspect_multiple_filesystem_objects(paths):
-    tmp_folder_path = aggregate_symlinks_in_new_directory(paths, "inspect")
-    result = inspect_nwb_folder({"path": tmp_folder_path})
+    tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
+    result = _inspect_nwb_folder({"path": tmp_folder_path})
     rmtree(tmp_folder_path)
     return result
