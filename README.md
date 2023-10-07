@@ -33,6 +33,8 @@ Begin by downloading the latest release from the [GitHub release page](https://g
 
 Run the `setup.exe` file and follow all instructions.
 
+> **Note:** If you run into any 'PermissionError' issues when performing operations in the NWB GUIDE on Windows, you may need to run the application using Admin mode.
+
 ### MacOS
 
 Run the `.dmg` file and follow all instructions to move the file into your Applications folder.
