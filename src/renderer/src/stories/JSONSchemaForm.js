@@ -349,9 +349,9 @@ export class JSONSchemaForm extends LitElement {
         return true;
     };
 
-    #get = (path, object = this.resolved) => {
+    #get = (path, object = this.resolved, omitted = []) => {
         // path = path.slice(this.base.length); // Correct for base path
-        return path.reduce((acc, curr) => (acc = acc[curr]), object);
+        return path.reduce((acc, curr) => (acc = acc[curr] ?? acc?.[omitted.find(str => acc[str])]?.[curr]), object);
     };
 
     #checkRequiredAfterChange = async (localPath) => {
@@ -375,7 +375,8 @@ export class JSONSchemaForm extends LitElement {
             if (indexOf !== -1) path = path.slice(indexOf + 1);
         }
 
-        const resolved = this.#get(path, schema);
+
+        const resolved = this.#get(path, schema, ["properties"]);
         if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
@@ -619,7 +620,9 @@ export class JSONSchemaForm extends LitElement {
         } else {
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
-                errors.push({ message: `${name} is a required property.`, type: "error", missing: true }); // Throw at least a basic error if the property is required
+                const schema = this.getSchema(localPath)
+                console.log(schema)
+                errors.push({ message: `${schema.title ?? header(name)} is a required property.`, type: "error", missing: true }); // Throw at least a basic error if the property is required
             }
         }
 
