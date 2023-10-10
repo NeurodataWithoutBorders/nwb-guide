@@ -432,7 +432,7 @@ export class JSONSchemaForm extends LitElement {
                     ? "conditional"
                     : ""}"
             >
-                <label class="guided--form-label">${header(name)}</label>
+                <label class="guided--form-label">${info.title ?? header(name)}</label>
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
