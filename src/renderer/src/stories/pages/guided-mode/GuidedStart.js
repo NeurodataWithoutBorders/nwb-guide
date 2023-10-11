@@ -66,12 +66,14 @@ export class GuidedStartPage extends Page {
                             The second section will have you provide your source data files and NWB File metadata on a per-subject basis to populate your files.
                         </p>
                         ${new InspectorListItem({
-                            message: html`<b>Red boxes are error messages.</b> These will block your conversion progress until resolved.`,
-                            type: 'error'
+                            message: html`<b>Red boxes are error messages.</b> These will block your conversion progress
+                                until resolved.`,
+                            type: "error",
                         })}
                         ${new InspectorListItem({
-                            message: html`<b>Yellow boxes are warnings.</b> Fixing them will align your NWB files with best practices.`,
-                            type: 'warning'
+                            message: html`<b>Yellow boxes are warnings.</b> Fixing them will align your NWB files with
+                                best practices.`,
+                            type: "warning",
                         })}
                         <h4>3. Conversion Preview</h4>
                         <p>

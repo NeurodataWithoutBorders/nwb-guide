@@ -143,7 +143,9 @@ export class Main extends LitElement {
             <main id="content" class="js-content" style="overflow: hidden; display: flex;">
                 <section class="section">
                     ${title
-                        ? html`<div style="position: sticky; top: 0; left: 0; background: white; z-index: 1; margin-bottom: 20px;">
+                        ? html`<div
+                              style="position: sticky; top: 0; left: 0; background: white; z-index: 1; margin-bottom: 20px;"
+                          >
                               <div
                                   style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
                               >

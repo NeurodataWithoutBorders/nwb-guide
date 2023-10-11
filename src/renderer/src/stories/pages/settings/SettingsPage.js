@@ -36,9 +36,9 @@ export class SettingsPage extends Page {
     #notification;
 
     #openNotyf = (opts) => {
-        if (this.#notification) notyf.dismiss(this.#notification)
-        return this.#notification = notyf.open(opts)
-    }
+        if (this.#notification) notyf.dismiss(this.#notification);
+        return (this.#notification = notyf.open(opts));
+    };
 
     beforeSave = () => {
         const { resolved } = this.form;
@@ -63,7 +63,8 @@ export class SettingsPage extends Page {
         const button = new Button({
             label: "Save Changes",
             onClick: async () => {
-                if (!this.unsavedUpdates) return this.#openNotyf({  type: "success", message: "All changes were already saved" });
+                if (!this.unsavedUpdates)
+                    return this.#openNotyf({ type: "success", message: "All changes were already saved" });
                 this.save();
             },
         });
@@ -83,18 +84,17 @@ export class SettingsPage extends Page {
         });
 
         return html`
-                <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
-                    <h1 style="margin: 0;">NWB GUIDE Settings</h1>
-                </div>
-                <p>This page allows you to set global settings for the NWB GUIDE.</p>
+            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
+                <h1 style="margin: 0;">NWB GUIDE Settings</h1>
+            </div>
+            <p>This page allows you to set global settings for the NWB GUIDE.</p>
+            <hr />
+
+            <div>
+                ${this.form}
                 <hr />
-
-                <div>
-                    ${this.form}
-                    <hr />
-                    ${button}
-                </div>
-
+                ${button}
+            </div>
         `;
     }
 }

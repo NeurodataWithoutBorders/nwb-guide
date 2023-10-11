@@ -235,7 +235,7 @@ export class GuidedMetadataPage extends ManagedPage {
                                 this.info.globalState.results[subject][session]
                             );
 
-                            this.notify(`Session ${id} metadata saved!`)
+                            this.notify(`Session ${id} metadata saved!`);
                         };
                         await this.save();
                         this.beforeSave = ogCallback;

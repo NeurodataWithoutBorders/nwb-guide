@@ -178,61 +178,56 @@ export class GuidedHomePage extends Page {
 
     render() {
         return html`
-
-        <div class="standalone-section">
-
-            <div style="width: 800px;">
+            <div class="standalone-section">
+                <div style="width: 800px;">
                     <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
                         <h1 style="margin: 0;">Your Conversions</h1>
                     </div>
                     <hr />
-            </div>
-
-            <p class="guided--help-text" style="margin-bottom: 2rem">
-                The NWB GUIDE walks users step-by-step through all the requirements for converting their data to
-                the NWB format and uploading datasets to the DANDI Archive. Each stage is
-                designed to conveniently guide users through the conversion process and include all necessary
-                information such that no prior knowledge of the NWB data standard is required.
-            </p>
-
-            <div class="justify-center" id="curate-new-home" style="align-items: center">
-                <div
-                    class="container--dashed"
-                    id="guided-button-start-new-curate"
-                    style="margin: 5px;"
-                    @click="${() => this.to(1)}"
-                >
-                    <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
-                    <h2 class="guided--text-sub-step" style="width: 100%;">Create a new conversion pipeline</h2>
                 </div>
-            </div>
 
-            <div style="max-width: 800px; width: 100%;">
-                <div
-                    id="continue-curating-existing"
-                    style="margin-top: 20px; width: 100%"
-                >
-                    <h2 class="guided--text-sub-step" id="guided-continue-curation-header"></h2>
+                <p class="guided--help-text" style="margin-bottom: 2rem">
+                    The NWB GUIDE walks users step-by-step through all the requirements for converting their data to the
+                    NWB format and uploading datasets to the DANDI Archive. Each stage is designed to conveniently guide
+                    users through the conversion process and include all necessary information such that no prior
+                    knowledge of the NWB data standard is required.
+                </p>
+
+                <div class="justify-center" id="curate-new-home" style="align-items: center">
                     <div
-                        class="guided--radio-button-container guided--button-tab-container"
-                        hidden
-                        id="guided-div-dataset-cards-radio-buttons"
-                        style="justify-content: space-evenly"
+                        class="container--dashed"
+                        id="guided-button-start-new-curate"
+                        style="margin: 5px;"
+                        @click="${() => this.to(1)}"
                     >
-                        <button
-                            class="ui button guided--radio-button guided--tab-button"
-                            id="guided-button-view-datasets-in-progress"
-                            data-next-element="guided-div-resume-progress-cards"
-                            style="width: 250px"
-                        >
-                            Existing Conversions
-                        </button>
+                        <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
+                        <h2 class="guided--text-sub-step" style="width: 100%;">Create a new conversion pipeline</h2>
                     </div>
                 </div>
-                <div class="guided--section" hidden id="guided-div-resume-progress-cards"></div>
-                <div class="guided--section" hidden id="guided-div-update-uploaded-cards"></div>
+
+                <div style="max-width: 800px; width: 100%;">
+                    <div id="continue-curating-existing" style="margin-top: 20px; width: 100%">
+                        <h2 class="guided--text-sub-step" id="guided-continue-curation-header"></h2>
+                        <div
+                            class="guided--radio-button-container guided--button-tab-container"
+                            hidden
+                            id="guided-div-dataset-cards-radio-buttons"
+                            style="justify-content: space-evenly"
+                        >
+                            <button
+                                class="ui button guided--radio-button guided--tab-button"
+                                id="guided-button-view-datasets-in-progress"
+                                data-next-element="guided-div-resume-progress-cards"
+                                style="width: 250px"
+                            >
+                                Existing Conversions
+                            </button>
+                        </div>
+                    </div>
+                    <div class="guided--section" hidden id="guided-div-resume-progress-cards"></div>
+                    <div class="guided--section" hidden id="guided-div-update-uploaded-cards"></div>
+                </div>
             </div>
-        </div>
         `;
     }
 }

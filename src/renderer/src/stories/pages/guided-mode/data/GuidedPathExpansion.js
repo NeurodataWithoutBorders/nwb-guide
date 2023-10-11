@@ -261,17 +261,16 @@ export class GuidedPathExpansionPage extends Page {
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
                 if (fs) {
-                    if (name === 'base_directory') {
+                    if (name === "base_directory") {
                         // for (const f of getFiles(value)) {
                         //     console.log(f);
                         //   }
                         // const res = getFiles(value);
 
                         const input = form.getInput([...parentPath, "format_string_path"]);
-                        console.log(input)
-                        input.updateData(input.value)
-                    }
-                    else if (name === "format_string_path") {
+                        console.log(input);
+                        input.updateData(input.value);
+                    } else if (name === "format_string_path") {
                         const base_directory = [...parentPath, "base_directory"].reduce(
                             (acc, key) => acc[key],
                             this.form.resolved

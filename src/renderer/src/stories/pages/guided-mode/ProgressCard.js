@@ -89,20 +89,19 @@ export class ProgressCard extends LitElement {
                 </div>
                 <div class="guided--container-dataset-card-center">
                     ${html`
-                              <button
-                                  class="ui positive button guided--button-footer"
-                                  style="
+                        <button
+                            class="ui positive button guided--button-footer"
+                            style="
                           background-color: var(--color-light-green) !important;
                           width: unset !important;
                           margin: 4px;
                           margin-bottom: 15px;
                         "
-                                  @click="${(ev) => this.resume(ev.target)}"
-                              >
-                             Resume Conversion
-                              </button>
-                          `
-                        }
+                            @click="${(ev) => this.resume(ev.target)}"
+                        >
+                            Resume Conversion
+                        </button>
+                    `}
                     <h2
                         class="guided--text-dataset-card"
                         style="width: auto; text-decoration: underline; cursor: pointer;"

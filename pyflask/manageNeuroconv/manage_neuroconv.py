@@ -341,10 +341,7 @@ def convert_to_nwb(info: dict) -> str:
     resolved_output_path = resolved_output_directory / nwbfile_path
 
     # Remove symlink placed at the default_output_directory if this will hold real data
-    if (
-        resolved_output_directory == default_output_directory
-        and default_output_directory.is_symlink()
-    ):
+    if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
         default_output_directory.unlink()
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
