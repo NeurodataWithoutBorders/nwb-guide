@@ -9,7 +9,6 @@ export function getURLFromFilePath(file, projectName) {
     return `${baseUrl}/preview/${file.match(regexp)[1]}`;
 }
 
-
 export class Neurosift extends LitElement {
     static get styles() {
         return css`
@@ -24,7 +23,8 @@ export class Neurosift extends LitElement {
                 --loader-color: hsl(200, 80%, 50%);
             }
 
-            iframe, .loader-container {
+            iframe,
+            .loader-container {
                 width: 100%;
                 height: 100%;
             }
@@ -74,21 +74,20 @@ export class Neurosift extends LitElement {
     constructor({ url, fullscreen = true } = {}) {
         super();
         this.url = url;
-        this.fullscreen = fullscreen
+        this.fullscreen = fullscreen;
     }
-    
 
     render() {
         return this.url
             ? html` <div class="loader-container">
                       ${new Loader({ message: `Loading Neurosift view...<br/><small>${this.url}</small>` })}
                   </div>
-                  ${this.fullscreen ? new FullScreenToggle({ target: this }) : ''}
+                  ${this.fullscreen ? new FullScreenToggle({ target: this }) : ""}
                   <iframe
                       src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
                       @load=${function () {
-                        const loader = this.shadowRoot.querySelector(".loader-container");
-                        loader.remove();
+                          const loader = this.shadowRoot.querySelector(".loader-container");
+                          loader.remove();
                       }}
                   ></iframe>`
             : ``;

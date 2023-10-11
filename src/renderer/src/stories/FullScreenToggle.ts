@@ -21,7 +21,7 @@ export class FullScreenToggle extends LitElement {
                 color: white;
                 background-color: gainsboro;
                 border: 1px solid gray;
-                border-radius: 10px;    
+                border-radius: 10px;
                 cursor: pointer;
                 box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
                 z-index: 1000;
@@ -50,7 +50,7 @@ export class FullScreenToggle extends LitElement {
             const target = (typeof this.target === 'function' ? this.target() : this.target)
 
               target.addEventListener("fullscreenchange", fullscreenchanged);
-              
+
               const fullScreenEl = document.fullscreenElement
               if (!fullScreenEl) target.requestFullscreen()
               else  document.exitFullscreen()
@@ -64,4 +64,3 @@ export class FullScreenToggle extends LitElement {
 }
 
 customElements.get("fullscreen-toggle") || customElements.define("fullscreen-toggle", FullScreenToggle);
-
