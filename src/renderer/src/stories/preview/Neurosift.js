@@ -2,16 +2,19 @@ import { LitElement, css, html } from "lit";
 import { baseUrl } from "../../globals";
 
 import { Loader } from "../Loader";
+import { FullScreenToggle } from "../FullScreenToggle";
 
 export function getURLFromFilePath(file, projectName) {
     const regexp = new RegExp(`.+(${projectName}.+)`);
     return `${baseUrl}/preview/${file.match(regexp)[1]}`;
 }
 
+
 export class Neurosift extends LitElement {
     static get styles() {
         return css`
             :host {
+                background: white;
                 width: 100%;
                 height: 100%;
                 display: grid;
@@ -21,7 +24,7 @@ export class Neurosift extends LitElement {
                 --loader-color: hsl(200, 80%, 50%);
             }
 
-            :host > * {
+            iframe, .loader-container {
                 width: 100%;
                 height: 100%;
             }
@@ -33,6 +36,19 @@ export class Neurosift extends LitElement {
                 position: absolute;
                 top: 0;
                 left: 0;
+            }
+
+            .fullscreen-toggle {
+                display: flex;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 10px;
+                color: white;
+                background-color: gainsboro;
+                border: 1px solid gray;
+                border-radius: 10px;
+                cursor: pointer;
             }
 
             span {
@@ -55,21 +71,24 @@ export class Neurosift extends LitElement {
         };
     }
 
-    constructor({ url } = {}) {
+    constructor({ url, fullscreen = true } = {}) {
         super();
         this.url = url;
+        this.fullscreen = fullscreen
     }
+    
 
     render() {
         return this.url
             ? html` <div class="loader-container">
                       ${new Loader({ message: `Loading Neurosift view...<br/><small>${this.url}</small>` })}
                   </div>
+                  ${this.fullscreen ? new FullScreenToggle({ target: this }) : ''}
                   <iframe
-                      class="iframe-placeholder"
                       src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
-                      @load=${function (ev) {
-                          ev.target.previousElementSibling.remove();
+                      @load=${function () {
+                        const loader = this.shadowRoot.querySelector(".loader-container");
+                        loader.remove();
                       }}
                   ></iframe>`
             : ``;

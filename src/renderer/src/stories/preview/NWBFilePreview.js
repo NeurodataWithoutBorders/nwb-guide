@@ -6,6 +6,7 @@ import { run } from "../pages/guided-mode/options/utils";
 import { until } from "lit/directives/until.js";
 import { InstanceManager } from "../InstanceManager";
 import { path } from "../../electron";
+import { FullScreenToggle } from "../FullScreenToggle";
 
 export function getSharedPath(array) {
     array = array.map((str) => str.replace(/\\/g, "/")); // Convert to Mac-style path
@@ -42,6 +43,7 @@ export const removeFilePaths = (arr) => {
 };
 
 class NWBPreviewInstance extends LitElement {
+
     constructor({ file }, project) {
         super();
         this.file = file;
@@ -55,7 +57,7 @@ class NWBPreviewInstance extends LitElement {
         const isOnline = navigator.onLine;
 
         return isOnline
-            ? new Neurosift({ url: getURLFromFilePath(this.file, this.project) })
+            ? new Neurosift({ url: getURLFromFilePath(this.file, this.project), fullscreen: false })
             : until(
                   (async () => {
                       const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
@@ -71,10 +73,25 @@ customElements.get("nwb-preview-instance") || customElements.define("nwb-preview
 export class NWBFilePreview extends LitElement {
     static get styles() {
         return css`
+            :host {
+                display: block;
+                width: 100%;
+                height: 100%;
+                background: white;
+            }
+
             iframe {
                 width: 100%;
                 height: 100%;
                 border: 0;
+            }
+
+            #inspect {
+                display: flex; 
+                flex-direction: column; 
+                border-left: 1px solid gray;
+                box-shadow: -5px 0 5px -5px rgba(0,0,0,0.5);
+                z-index: 1;
             }
         `;
     }
@@ -105,7 +122,9 @@ export class NWBFilePreview extends LitElement {
 
         const onlyFirstFile = fileArr.length <= 1;
 
-        return html`<div style="display: flex; height: 100%;">
+        return html`
+        ${new FullScreenToggle({ target: this })}
+        <div style="display: flex; height: 100%;">
             <div style="flex-grow: 1;">
                 ${(() => {
                     if (onlyFirstFile) return new NWBPreviewInstance(fileArr[0].info, this.project);
@@ -123,7 +142,7 @@ export class NWBFilePreview extends LitElement {
                 })()}
             </div>
             ${this.inspect
-                ? html`<div style="padding-left: 20px; display: flex; flex-direction: column;">
+                ? html`<div id="inspect">
                       <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
                       ${until(
                           (async () => {
