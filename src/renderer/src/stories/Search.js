@@ -21,6 +21,8 @@ export class Search extends LitElement {
                 background: white;
                 border-radius: 5px;
                 width: 100%;
+                height: 100%;
+                overflow: auto;
             }
 
             .header {
@@ -28,6 +30,7 @@ export class Search extends LitElement {
                 background: white;
                 position: sticky;
                 top: 0;
+                z-index: 1;
             }
 
             input {
@@ -45,7 +48,6 @@ export class Search extends LitElement {
                 position: absolute;
                 left: 0;
                 right: 0;
-                z-index: 1;
                 background: white;
             }
 

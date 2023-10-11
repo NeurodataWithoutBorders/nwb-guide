@@ -72,7 +72,8 @@ export class InspectPage extends Page {
         }
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
+
+            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
                 <h1 style="margin: 0;">NWB Inspector Report</h1>
             </div>
             <p>This page allows you to inspect NWB files using the NWB Inspector.</p>
@@ -83,6 +84,7 @@ export class InspectPage extends Page {
                 <br />
                 ${button}
             </div>
+
         `;
     }
 }

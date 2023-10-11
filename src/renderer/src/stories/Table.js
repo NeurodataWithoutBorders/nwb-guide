@@ -288,7 +288,6 @@ export class Table extends LitElement {
         let contextMenu = ["row_below", "remove_row"];
         if (this.schema.additionalProperties) contextMenu.push("col_right", "remove_col");
 
-        console.log(this.contextMenu);
         contextMenu = contextMenu.filter((k) => !(this.contextMenu.ignore ?? []).includes(k));
 
         const descriptionEl = this.querySelector("#description");

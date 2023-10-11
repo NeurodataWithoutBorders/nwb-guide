@@ -29,7 +29,7 @@ export class GuidedSubjectsPage extends Page {
 
     // Only save if the subject structure is valid
     beforeTransition = () => {
-        this.save(); // Save on each transition
+        // this.save(); // Save on each transition (removed to prevent multiple validation notifications)
 
         const { results, subjects } = this.info.globalState;
 

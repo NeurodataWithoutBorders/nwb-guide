@@ -17,7 +17,6 @@ export class DocumentationPage extends Page {
 
     render() {
         return html`
-            <section id="documentation-section" class="section js-section u-category-menu">
                 <div class="documentation_container">
                     <div class="document_container">
                         <div class="doc_container">
@@ -86,7 +85,6 @@ export class DocumentationPage extends Page {
                         </div>
                     </div>
                 </div>
-            </section>
         `;
     }
 }

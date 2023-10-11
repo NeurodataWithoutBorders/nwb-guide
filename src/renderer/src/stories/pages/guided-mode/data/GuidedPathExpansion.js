@@ -261,14 +261,17 @@ export class GuidedPathExpansionPage extends Page {
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
                 if (fs) {
-                    // if (name === 'base_directory') {
-                    //     for (const f of getFiles(value)) {
-                    //         console.log(f);
-                    //       }
-                    //     const res = getFiles(value);
-                    // }
-                    // else
-                    if (name === "format_string_path") {
+                    if (name === 'base_directory') {
+                        // for (const f of getFiles(value)) {
+                        //     console.log(f);
+                        //   }
+                        // const res = getFiles(value);
+
+                        const input = form.getInput([...parentPath, "format_string_path"]);
+                        console.log(input)
+                        input.updateData(input.value)
+                    }
+                    else if (name === "format_string_path") {
                         const base_directory = [...parentPath, "base_directory"].reduce(
                             (acc, key) => acc[key],
                             this.form.resolved
@@ -301,7 +304,7 @@ export class GuidedPathExpansionPage extends Page {
 
                         return [
                             {
-                                message: html` <h4 style="margin-bottom: 0;">Source Files Found</h4>
+                                message: html` <h4 style="margin: 0;">Source Files Found</h4>
                                     <small><i>Inspect the Developer Console to preview the metadata results</i></small>
                                     <small
                                         >${new List({

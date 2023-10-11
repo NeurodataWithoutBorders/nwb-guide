@@ -139,11 +139,11 @@ export class Main extends LitElement {
             ${headerEl}
             ${capsules
                 ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsuleEl}</div>`
-                : html`<div style="height: 25px;"></div>`}
+                : html`<div style="height: 50px;"></div>`}
             <main id="content" class="js-content" style="overflow: hidden; display: flex;">
-                <section class="section js-section u-category-windows">
+                <section class="section">
                     ${title
-                        ? html`<div style="position: sticky; top: 0; left: 0; background: white; z-index: 1;">
+                        ? html`<div style="position: sticky; top: 0; left: 0; background: white; z-index: 1; margin-bottom: 20px;">
                               <div
                                   style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
                               >
@@ -157,7 +157,7 @@ export class Main extends LitElement {
                           </div>`
                         : ""}
 
-                    <div style="padding-top: 10px; height: 100%; width: 100%;">${page}</div>
+                    <div style="height: 100%; width: 100%;">${page}</div>
                 </section>
             </main>
             ${footerEl}
