@@ -17,7 +17,7 @@ announcer = MessageAnnouncer()
 def replace_nan_with_none(data):
     if isinstance(data, dict):
         # If it's a dictionary, iterate over its items and replace NaN values with None
-        return {key: replace_nan_with_none(value) for key, value in data.items()}x
+        return {key: replace_nan_with_none(value) for key, value in data.items()}
     elif isinstance(data, list):
         # If it's a list, iterate over its elements and replace NaN values with None
         return [replace_nan_with_none(item) for item in data]
