@@ -43,6 +43,7 @@ export const removeFilePaths = (arr) => {
 };
 
 class NWBPreviewInstance extends LitElement {
+
     constructor({ file }, project) {
         super();
         this.file = file;
@@ -77,6 +78,7 @@ export class NWBFilePreview extends LitElement {
                 width: 100%;
                 height: 100%;
                 background: white;
+                position: relative;
             }
 
             iframe {
@@ -86,10 +88,10 @@ export class NWBFilePreview extends LitElement {
             }
 
             #inspect {
-                display: flex;
-                flex-direction: column;
+                display: flex; 
+                flex-direction: column; 
                 border-left: 1px solid gray;
-                box-shadow: -5px 0 5px -5px rgba(0, 0, 0, 0.5);
+                box-shadow: -5px 0 5px -5px rgba(0,0,0,0.5);
                 z-index: 1;
             }
         `;
@@ -121,59 +123,60 @@ export class NWBFilePreview extends LitElement {
 
         const onlyFirstFile = fileArr.length <= 1;
 
-        return html` ${new FullScreenToggle({ target: this })}
-            <div style="display: flex; height: 100%;">
-                <div style="flex-grow: 1;">
-                    ${(() => {
-                        if (onlyFirstFile) return new NWBPreviewInstance(fileArr[0].info, this.project);
-                        else {
-                            const _instances = fileArr.map(this.createInstance);
+        return html`
+        ${new FullScreenToggle({ target: this })}
+        <div style="display: flex; height: 100%;">
+            <div style="flex-grow: 1;">
+                ${(() => {
+                    if (onlyFirstFile) return new NWBPreviewInstance(fileArr[0].info, this.project);
+                    else {
+                        const _instances = fileArr.map(this.createInstance);
 
-                            const instances = _instances.reduce((acc, { subject, session, display }) => {
-                                if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
-                                acc[`sub-${subject}`][`ses-${session}`] = display;
-                                return acc;
-                            }, {});
+                        const instances = _instances.reduce((acc, { subject, session, display }) => {
+                            if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
+                            acc[`sub-${subject}`][`ses-${session}`] = display;
+                            return acc;
+                        }, {});
 
-                            return new InstanceManager({ instances });
-                        }
-                    })()}
-                </div>
-                ${this.inspect
-                    ? html`<div id="inspect">
-                          <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
-                          ${until(
-                              (async () => {
-                                  const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
+                        return new InstanceManager({ instances });
+                    }
+                })()}
+            </div>
+            ${this.inspect
+                ? html`<div id="inspect">
+                      <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
+                      ${until(
+                          (async () => {
+                              const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
 
-                                  const title = "Inspecting your file";
+                              const title = "Inspecting your file";
 
-                                  const items = onlyFirstFile
-                                      ? removeFilePaths(
-                                            await run(
-                                                "inspect_file",
-                                                { nwbfile_path: fileArr[0].info.file, ...opts },
-                                                { title }
-                                            )
-                                        ) // Inspect the first file
-                                      : await (async () =>
-                                            truncateFilePaths(
-                                                await run("inspect_folder", { path, ...opts }, { title: title + "s" }),
-                                                getSharedPath(fileArr.map((o) => o.info.file))
-                                            ))();
+                              const items = onlyFirstFile
+                                  ? removeFilePaths(
+                                        await run(
+                                            "inspect_file",
+                                            { nwbfile_path: fileArr[0].info.file, ...opts },
+                                            { title }
+                                        )
+                                    ) // Inspect the first file
+                                  : await (async () =>
+                                        truncateFilePaths(
+                                            await run("inspect_folder", { path, ...opts }, { title: title + "s" }),
+                                            getSharedPath(fileArr.map((o) => o.info.file))
+                                        ))();
 
-                                  const list = new InspectorList({
-                                      items: items,
-                                      listStyles: { maxWidth: "350px" },
-                                  });
-                                  list.style.padding = "10px";
-                                  return list;
-                              })(),
-                              html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
-                          )}
-                      </div>`
-                    : ""}
-            </div>`;
+                              const list = new InspectorList({
+                                  items: items,
+                                  listStyles: { maxWidth: "350px" },
+                              });
+                              list.style.padding = "10px";
+                              return list;
+                          })(),
+                          html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
+                      )}
+                  </div>`
+                : ""}
+        </div>`;
     }
 }
 

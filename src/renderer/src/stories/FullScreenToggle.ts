@@ -25,6 +25,12 @@ export class FullScreenToggle extends LitElement {
                 cursor: pointer;
                 box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
                 z-index: 1000;
+                opacity: 0.5;
+                transition: opacity 0.5s;
+            }
+
+            :host(:hover) {
+                opacity: 1;
             }
         `;
     }
