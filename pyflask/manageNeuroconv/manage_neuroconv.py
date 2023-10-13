@@ -528,45 +528,21 @@ def inspect_nwb_file(payload):
     from nwbinspector import inspect_nwbfile
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
-    return json.loads(
-        json.dumps(
-            list(
-                inspect_nwbfile(
-                    ignore=[
-                        "check_description",
-                        "check_data_orientation",
-                    ],  # TODO: remove when metadata control is exposed
-                    config="dandi",
-                    **payload,
-                )
-            ),
-            cls=InspectorOutputJSONEncoder,
+    messages = list(
+        inspect_nwbfile(
+            ignore=[
+                "check_description",
+                "check_data_orientation",
+            ],  # TODO: remove when metadata control is exposed
+            config="dandi",
+            **payload,
         )
     )
 
-
-def inspect_nwb_file(payload):
-    from nwbinspector import inspect_nwbfile
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
-    return json.loads(
-        json.dumps(
-            list(
-                inspect_nwbfile(
-                    ignore=[
-                        "check_description",
-                        "check_data_orientation",
-                    ],  # TODO: remove when metadata control is exposed
-                    config="dandi",
-                    **payload,
-                )
-            ),
-            cls=InspectorOutputJSONEncoder,
-        )
-    )
+    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
 
 
-def _inspect_nwb_folder(payload):
+def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
@@ -582,9 +558,7 @@ def _inspect_nwb_folder(payload):
         )
     )
 
-    # messages = organize_messages(messages, levels=["importance", "message"])
-
-    return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
+    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
 
 
 def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
@@ -597,7 +571,7 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
         path = Path(path)
         new_path = folder_path / path.name
         if path.is_dir():
-            aggregate_symlinks_in_new_directory(
+            _aggregate_symlinks_in_new_directory(
                 list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
             )
         else:
@@ -608,6 +582,6 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
 
 def inspect_multiple_filesystem_objects(paths):
     tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
-    result = _inspect_nwb_folder({"path": tmp_folder_path})
+    result = inspect_nwb_folder({"path": tmp_folder_path})
     rmtree(tmp_folder_path)
     return result
