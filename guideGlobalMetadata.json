@@ -21,6 +21,11 @@
         "TiffImagingInterface",
         "MiniscopeImagingInterface",
         "SbxImagingInterface",
+        "CaimanSegmentationInterface",
+        "MCSRawRecordingInterface",
+        "MEArecRecordingInterface",
+        "PlexonRecordingInterface",
+        "PlexonSortingInterface",
         "AxonaRecordingInterface",
         "AxonaLFPDataInterface"
     ]

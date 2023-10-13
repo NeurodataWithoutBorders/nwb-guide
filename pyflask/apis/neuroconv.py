@@ -13,7 +13,14 @@ from manageNeuroconv import (
     validate_metadata,
     listen_to_neuroconv_events,
     generate_dataset,
+    inspect_nwb_file,
+    inspect_nwb_folder,
+    inspect_multiple_filesystem_objects,
+    upload_to_dandi,
+    upload_folder_to_dandi,
+    upload_multiple_filesystem_objects_to_dandi,
 )
+
 from errorHandlers import notBadRequestException
 
 neuroconv_api = Namespace("neuroconv", description="Neuroconv neuroconv_api for the NWB GUIDE.")
@@ -108,13 +115,11 @@ class Validate(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
-@neuroconv_api.route("/upload")
+@neuroconv_api.route("/upload/project")
 class Upload(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            from manageNeuroconv import upload_to_dandi
-
             return upload_to_dandi(**neuroconv_api.payload)
 
         except Exception as e:
@@ -127,9 +132,30 @@ class Upload(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            from manageNeuroconv import upload_folder_to_dandi
-
             return upload_folder_to_dandi(**neuroconv_api.payload)
+
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
+
+
+@neuroconv_api.route("/upload")
+class Upload(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        from os.path import isdir
+
+        try:
+            paths = neuroconv_api.payload["filesystem_paths"]
+
+            if len(paths) == 1 and isdir(paths[0]):
+                kwargs = {**neuroconv_api.payload}
+                del kwargs["filesystem_paths"]
+                kwargs["nwb_folder_path"] = paths[0]
+                return upload_folder_to_dandi(**kwargs)
+
+            else:
+                return upload_multiple_filesystem_objects_to_dandi(**neuroconv_api.payload)
 
         except Exception as e:
             if notBadRequestException(e):
@@ -141,25 +167,7 @@ class InspectNWBFile(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            import json
-            from nwbinspector import inspect_nwbfile
-            from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
-            return json.loads(
-                json.dumps(
-                    list(
-                        inspect_nwbfile(
-                            ignore=[
-                                "check_description",
-                                "check_data_orientation",
-                            ],  # TODO: remove when metadata control is exposed
-                            **neuroconv_api.payload,
-                        )
-                    ),
-                    cls=InspectorOutputJSONEncoder,
-                )
-            )
-
+            return inspect_nwb_file(neuroconv_api.payload)
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
@@ -170,24 +178,30 @@ class InspectNWBFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            import json
-            from nwbinspector import inspect_all
-            from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+            return inspect_nwb_folder(neuroconv_api.payload)
 
-            messages = list(
-                inspect_all(
-                    n_jobs=-2,  # uses number of CPU - 1
-                    ignore=[
-                        "check_description",
-                        "check_data_orientation",
-                    ],  # TODO: remove when metadata control is exposed
-                    **neuroconv_api.payload,
-                )
-            )
+        except Exception as e:
+            if notBadRequestException(e):
+                neuroconv_api.abort(500, str(e))
 
-            # messages = organize_messages(messages, levels=["importance", "message"])
 
-            return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
+@neuroconv_api.route("/inspect")
+class InspectNWBFolder(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        from os.path import isfile
+
+        try:
+            paths = neuroconv_api.payload["paths"]
+
+            if len(paths) == 1:
+                if isfile(paths[0]):
+                    return inspect_nwb_file({"nwbfile_path": paths[0]})
+                else:
+                    return inspect_nwb_folder({"path": paths[0]})
+
+            else:
+                return inspect_multiple_filesystem_objects(paths)
 
         except Exception as e:
             if notBadRequestException(e):

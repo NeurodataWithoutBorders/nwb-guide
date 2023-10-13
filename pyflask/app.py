@@ -3,6 +3,8 @@ import sys
 import json
 import multiprocessing
 from os import kill, getpid
+from os.path import isabs
+
 from signal import SIGINT
 from logging import Formatter, DEBUG
 from logging.handlers import RotatingFileHandler
@@ -68,7 +70,10 @@ def get_all_files():
 def handle_file_request(path):
     if request.method == "GET":
         if registered[path]:
-            return send_file(unquote(path))
+            path = unquote(path)
+            if not isabs(path):
+                path = f"/{path}"
+            return send_file(path)
         else:
             app.abort(404, "Resource is not accessible.")
 

@@ -9,7 +9,7 @@ from shutil import rmtree, copytree
 from pathlib import Path
 
 from sse import MessageAnnouncer
-from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
+from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
 
@@ -88,7 +88,9 @@ def replace_none_with_nan(json_object, json_schema):
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
             for item in obj:
-                coerce_schema_compliance_recursive(item, schema.get("items", {}))
+                coerce_schema_compliance_recursive(
+                    item, schema.get("items", schema if "properties" else {})
+                )  # NEUROCONV PATCH
 
         return obj
 
@@ -130,10 +132,11 @@ def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
-    # Hard coded for now - eventual goal will be to import this from NeuroConv
-    interfaces_to_load = {
-        interface.__name__.replace("Interface", ""): interface for interface in interface_list
-    }  # dict(SpikeGLX=SpikeGLXRecordingInterface, Phy=PhySortingInterface)
+    exclude_interfaces_from_selection = ["SpikeGLXLFP"]  # Should have 'interface' stripped from name
+
+    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
+    for excluded_interface in exclude_interfaces_from_selection:
+        interfaces_to_load.pop(excluded_interface)
 
     return {
         interface.__name__: {
@@ -397,7 +400,7 @@ def convert_to_nwb(info: dict) -> str:
         conversion_options=options,
     )
 
-    # Create a symlink between the fake adata and custom data
+    # Create a symlink between the fake data and custom data
     if not run_stub_test and not resolved_output_directory == default_output_directory:
         if default_output_directory.exists():
             # If default default_output_directory is not a symlink, delete all contents and create a symlink there
@@ -417,6 +420,16 @@ def convert_to_nwb(info: dict) -> str:
             os.symlink(resolved_output_directory, default_output_directory)
 
     return dict(file=str(resolved_output_path))
+
+
+def upload_multiple_filesystem_objects_to_dandi(**kwargs):
+    tmp_folder_path = aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
+    innerKwargs = {**kwargs}
+    del innerKwargs["filesystem_paths"]
+    innerKwargs["nwb_folder_path"] = tmp_folder_path
+    result = upload_folder_to_dandi(**innerKwargs)
+    rmtree(tmp_folder_path)
+    return result
 
 
 def upload_folder_to_dandi(
@@ -446,6 +459,8 @@ def upload_to_dandi(
     cleanup: Optional[bool] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+    # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 
@@ -507,3 +522,89 @@ def generate_dataset(test_data_directory_path: str):
             phy_output_dir.symlink_to(phy_base_directory, True)
 
     return {"output_directory": str(output_directory)}
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    return json.loads(
+        json.dumps(
+            list(
+                inspect_nwbfile(
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **payload,
+                )
+            ),
+            cls=InspectorOutputJSONEncoder,
+        )
+    )
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    return json.loads(
+        json.dumps(
+            list(
+                inspect_nwbfile(
+                    ignore=[
+                        "check_description",
+                        "check_data_orientation",
+                    ],  # TODO: remove when metadata control is exposed
+                    **payload,
+                )
+            ),
+            cls=InspectorOutputJSONEncoder,
+        )
+    )
+
+
+def inspect_nwb_folder(payload):
+    from nwbinspector import inspect_all
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    messages = list(
+        inspect_all(
+            n_jobs=-2,  # uses number of CPU - 1
+            ignore=[
+                "check_description",
+                "check_data_orientation",
+            ],  # TODO: remove when metadata control is exposed
+            **payload,
+        )
+    )
+
+    # messages = organize_messages(messages, levels=["importance", "message"])
+
+    return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
+
+
+def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+    if folder_path is None:
+        folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+    folder_path.mkdir(parents=True)
+
+    for path in paths:
+        path = Path(path)
+        new_path = folder_path / path.name
+        if path.is_dir():
+            aggregate_symlinks_in_new_directory(
+                list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
+            )
+        else:
+            new_path.symlink_to(path, path.is_dir())
+
+    return folder_path
+
+
+def inspect_multiple_filesystem_objects(paths):
+    tmp_folder_path = aggregate_symlinks_in_new_directory(paths, "inspect")
+    result = inspect_nwb_folder({"path": tmp_folder_path})
+    rmtree(tmp_folder_path)
+    return result
