@@ -75,7 +75,8 @@
     "win": {
       "asar": false,
       "target": "nsis",
-      "icon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
+      "icon": "src/renderer/assets/app-icon/logo-guide-draft.ico",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "mac": {
       "asar": true,
