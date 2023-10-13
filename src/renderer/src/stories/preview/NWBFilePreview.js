@@ -163,19 +163,19 @@ export class NWBFilePreview extends LitElement {
                                                 getSharedPath(fileArr.map((o) => o.info.file))
                                             ))();
 
-                              const list = new InspectorList({
-                                  items: items,
-                                  listStyles: { minWidth: "300px", maxWidth: "350px" },
-                                  emptyMessage: "No issues found.",
-                              });
-                              list.style.padding = "10px";
-                              return list;
-                          })(),
-                          html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
-                      )}
-                  </div>`
-                : ""}
-        </div>`;
+                                  const list = new InspectorList({
+                                      items: items,
+                                      listStyles: { minWidth: "300px", maxWidth: "350px" },
+                                      emptyMessage: "No issues found.",
+                                  });
+                                  list.style.padding = "10px";
+                                  return list;
+                              })(),
+                              html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
+                          )}
+                      </div>`
+                    : ""}
+            </div>`;
     }
 }
 
