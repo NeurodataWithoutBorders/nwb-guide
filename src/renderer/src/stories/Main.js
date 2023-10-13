@@ -89,7 +89,6 @@ export class Main extends LitElement {
                 // Go to home screen if there is no next page
                 if (!info.next)
                     footer = {
-                        next: "Back to Home Screen",
                         exit: false,
                         onNext: () => this.toRender.page.to("/"),
                     };
