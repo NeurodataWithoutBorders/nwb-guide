@@ -21,9 +21,10 @@
         "TiffImagingInterface",
         "MiniscopeImagingInterface",
         "SbxImagingInterface",
-        "PlexonRecordingInterface",
-        "PlexonSortingInterface",
+        "CaimanSegmentationInterface",
         "MCSRawRecordingInterface",
-        "MEArecRecordingInterface"
+        "MEArecRecordingInterface",
+        "PlexonRecordingInterface",
+        "PlexonSortingInterface"
     ]
 }

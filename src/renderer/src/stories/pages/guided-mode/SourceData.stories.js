@@ -20,10 +20,12 @@ import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/gene
 import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
 import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
 import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
-import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
-import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
+import CaimanSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/CaimanSegmentationInterface.json";
 import MCSRawRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MCSRawRecordingInterface.json";
 import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MEArecRecordingInterface.json";
+import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
+import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
+
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -77,14 +79,16 @@ globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
     MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
 globalStateCopy.schema.source_data.properties.SbxImagingInterface =
     SbxImagingInterfaceSchema.properties.SbxImagingInterface;
-globalStateCopy.schema.source_data.properties.PlexonRecordingInterface =
-    PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface;
-globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
-    PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
+globalStateCopy.schema.source_data.properties.CaimanSegmentationInterface =
+    CaimanSegmentationInterfaceSchema.properties.CaimanSegmentationInterface;
 globalStateCopy.schema.source_data.properties.MCSRawRecordingInterface =
     MCSRawRecordingInterfaceSchema.properties.MCSRawRecordingInterface;
 globalStateCopy.schema.source_data.properties.MEArecRecordingInterface =
     MEArecRecordingInterfaceSchema.properties.MEArecRecordingInterface;
+globalStateCopy.schema.source_data.properties.PlexonRecordingInterface =
+    PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface;
+globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
+    PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -224,17 +228,12 @@ SbxImagingInterfaceGlobalCopy.interfaces.interface = SbxImagingInterface;
 SbxImagingInterfaceGlobalCopy.schema.source_data = SbxImagingInterfaceSchema;
 SbxImagingInterface.args = { activePage, globalState: SbxImagingInterfaceGlobalCopy };
 
-export const PlexonRecordingInterface = PageTemplate.bind({});
-const PlexonRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
-PlexonRecordingInterfaceGlobalCopy.interfaces.interface = PlexonRecordingInterface;
-PlexonRecordingInterfaceGlobalCopy.schema.source_data = PlexonRecordingInterfaceSchema;
-PlexonRecordingInterface.args = { activePage, globalState: PlexonRecordingInterfaceGlobalCopy };
+export const CaimanSegmentationInterface = PageTemplate.bind({});
+const CaimanSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+CaimanSegmentationInterfaceGlobalCopy.interfaces.interface = CaimanSegmentationInterface;
+CaimanSegmentationInterfaceGlobalCopy.schema.source_data = CaimanSegmentationInterfaceSchema;
+CaimanSegmentationInterface.args = { activePage, globalState: CaimanSegmentationInterfaceGlobalCopy };
 
-export const PlexonSortingInterface = PageTemplate.bind({});
-const PlexonSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
-PlexonSortingInterfaceGlobalCopy.interfaces.interface = PlexonSortingInterface;
-PlexonSortingInterfaceGlobalCopy.schema.source_data = PlexonSortingInterfaceSchema;
-PlexonSortingInterface.args = { activePage, globalState: PlexonSortingInterfaceGlobalCopy };
 export const MCSRawRecordingInterface = PageTemplate.bind({});
 const MCSRawRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 MCSRawRecordingInterfaceGlobalCopy.interfaces.interface = MCSRawRecordingInterface;
@@ -246,3 +245,15 @@ const MEArecRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState
 MEArecRecordingInterfaceGlobalCopy.interfaces.interface = MEArecRecordingInterface;
 MEArecRecordingInterfaceGlobalCopy.schema.source_data = MEArecRecordingInterfaceSchema;
 MEArecRecordingInterface.args = { activePage, globalState: MEArecRecordingInterfaceGlobalCopy };
+
+export const PlexonRecordingInterface = PageTemplate.bind({});
+const PlexonRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+PlexonRecordingInterfaceGlobalCopy.interfaces.interface = PlexonRecordingInterface;
+PlexonRecordingInterfaceGlobalCopy.schema.source_data = PlexonRecordingInterfaceSchema;
+PlexonRecordingInterface.args = { activePage, globalState: PlexonRecordingInterfaceGlobalCopy };
+
+export const PlexonSortingInterface = PageTemplate.bind({});
+const PlexonSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+PlexonSortingInterfaceGlobalCopy.interfaces.interface = PlexonSortingInterface;
+PlexonSortingInterfaceGlobalCopy.schema.source_data = PlexonSortingInterfaceSchema;
+PlexonSortingInterface.args = { activePage, globalState: PlexonSortingInterfaceGlobalCopy };
