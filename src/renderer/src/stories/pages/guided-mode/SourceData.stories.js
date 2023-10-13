@@ -14,6 +14,17 @@ import CellExplorerSortingInterfaceSchema from "../../../../../../schemas/json/g
 import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/generated/KiloSortSortingInterface.json";
 import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
+import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json";
+import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
+import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/generated/ScanImageImagingInterface.json";
+import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
+import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
+import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
+import CaimanSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/CaimanSegmentationInterface.json";
+import MCSRawRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MCSRawRecordingInterface.json";
+import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MEArecRecordingInterface.json";
+import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
+import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
 import SimaSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/SimaSegmentationInterface.json";
 
 export default {
@@ -56,6 +67,28 @@ globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
     BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterface =
+    BrukerTiffMultiPlaneImagingInterfaceSchema.properties.BrukerTiffMultiPlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface =
+    MicroManagerTiffImagingInterfaceSchema.properties.MicroManagerTiffImagingInterface;
+globalStateCopy.schema.source_data.properties.ScanImageImagingInterface =
+    ScanImageImagingInterfaceSchema.properties.ScanImageImagingInterface;
+globalStateCopy.schema.source_data.properties.TiffImagingInterface =
+    TiffImagingInterfaceSchema.properties.TiffImagingInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
+    MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
+globalStateCopy.schema.source_data.properties.SbxImagingInterface =
+    SbxImagingInterfaceSchema.properties.SbxImagingInterface;
+globalStateCopy.schema.source_data.properties.CaimanSegmentationInterface =
+    CaimanSegmentationInterfaceSchema.properties.CaimanSegmentationInterface;
+globalStateCopy.schema.source_data.properties.MCSRawRecordingInterface =
+    MCSRawRecordingInterfaceSchema.properties.MCSRawRecordingInterface;
+globalStateCopy.schema.source_data.properties.MEArecRecordingInterface =
+    MEArecRecordingInterfaceSchema.properties.MEArecRecordingInterface;
+globalStateCopy.schema.source_data.properties.PlexonRecordingInterface =
+    PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface;
+globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
+    PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
 globalStateCopy.schema.source_data.properties.SimaSegmentationInterface =
     SimaSegmentationInterfaceSchema.properties.SimaSegmentationInterface;
 
@@ -160,6 +193,72 @@ BrukerTiffSinglePlaneImagingInterface.args = {
     activePage,
     globalState: BrukerTiffSinglePlaneImagingInterfaceGlobalCopy,
 };
+
+export const BrukerTiffMultiPlaneImagingInterface = PageTemplate.bind({});
+const BrukerTiffMultiPlaneImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffMultiPlaneImagingInterfaceGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneImagingInterface;
+BrukerTiffMultiPlaneImagingInterfaceGlobalCopy.schema.source_data = BrukerTiffMultiPlaneImagingInterfaceSchema;
+BrukerTiffMultiPlaneImagingInterface.args = { activePage, globalState: BrukerTiffMultiPlaneImagingInterfaceGlobalCopy };
+
+export const MicroManagerTiffImagingInterface = PageTemplate.bind({});
+const MicroManagerTiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MicroManagerTiffImagingInterfaceGlobalCopy.interfaces.interface = MicroManagerTiffImagingInterface;
+MicroManagerTiffImagingInterfaceGlobalCopy.schema.source_data = MicroManagerTiffImagingInterfaceSchema;
+MicroManagerTiffImagingInterface.args = { activePage, globalState: MicroManagerTiffImagingInterfaceGlobalCopy };
+
+export const ScanImageImagingInterface = PageTemplate.bind({});
+const ScanImageImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+ScanImageImagingInterfaceGlobalCopy.interfaces.interface = ScanImageImagingInterface;
+ScanImageImagingInterfaceGlobalCopy.schema.source_data = ScanImageImagingInterfaceSchema;
+ScanImageImagingInterface.args = { activePage, globalState: ScanImageImagingInterfaceGlobalCopy };
+
+export const TiffImagingInterface = PageTemplate.bind({});
+const TiffImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+TiffImagingInterfaceGlobalCopy.interfaces.interface = TiffImagingInterface;
+TiffImagingInterfaceGlobalCopy.schema.source_data = TiffImagingInterfaceSchema;
+TiffImagingInterface.args = { activePage, globalState: TiffImagingInterfaceGlobalCopy };
+
+export const MiniscopeImagingInterface = PageTemplate.bind({});
+const MiniscopeImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeImagingInterfaceGlobalCopy.interfaces.interface = MiniscopeImagingInterface;
+MiniscopeImagingInterfaceGlobalCopy.schema.source_data = MiniscopeImagingInterfaceSchema;
+MiniscopeImagingInterface.args = { activePage, globalState: MiniscopeImagingInterfaceGlobalCopy };
+
+export const SbxImagingInterface = PageTemplate.bind({});
+const SbxImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+SbxImagingInterfaceGlobalCopy.interfaces.interface = SbxImagingInterface;
+SbxImagingInterfaceGlobalCopy.schema.source_data = SbxImagingInterfaceSchema;
+SbxImagingInterface.args = { activePage, globalState: SbxImagingInterfaceGlobalCopy };
+
+export const CaimanSegmentationInterface = PageTemplate.bind({});
+const CaimanSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+CaimanSegmentationInterfaceGlobalCopy.interfaces.interface = CaimanSegmentationInterface;
+CaimanSegmentationInterfaceGlobalCopy.schema.source_data = CaimanSegmentationInterfaceSchema;
+CaimanSegmentationInterface.args = { activePage, globalState: CaimanSegmentationInterfaceGlobalCopy };
+
+export const MCSRawRecordingInterface = PageTemplate.bind({});
+const MCSRawRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MCSRawRecordingInterfaceGlobalCopy.interfaces.interface = MCSRawRecordingInterface;
+MCSRawRecordingInterfaceGlobalCopy.schema.source_data = MCSRawRecordingInterfaceSchema;
+MCSRawRecordingInterface.args = { activePage, globalState: MCSRawRecordingInterfaceGlobalCopy };
+
+export const MEArecRecordingInterface = PageTemplate.bind({});
+const MEArecRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MEArecRecordingInterfaceGlobalCopy.interfaces.interface = MEArecRecordingInterface;
+MEArecRecordingInterfaceGlobalCopy.schema.source_data = MEArecRecordingInterfaceSchema;
+MEArecRecordingInterface.args = { activePage, globalState: MEArecRecordingInterfaceGlobalCopy };
+
+export const PlexonRecordingInterface = PageTemplate.bind({});
+const PlexonRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+PlexonRecordingInterfaceGlobalCopy.interfaces.interface = PlexonRecordingInterface;
+PlexonRecordingInterfaceGlobalCopy.schema.source_data = PlexonRecordingInterfaceSchema;
+PlexonRecordingInterface.args = { activePage, globalState: PlexonRecordingInterfaceGlobalCopy };
+
+export const PlexonSortingInterface = PageTemplate.bind({});
+const PlexonSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+PlexonSortingInterfaceGlobalCopy.interfaces.interface = PlexonSortingInterface;
+PlexonSortingInterfaceGlobalCopy.schema.source_data = PlexonSortingInterfaceSchema;
+PlexonSortingInterface.args = { activePage, globalState: PlexonSortingInterfaceGlobalCopy };
 
 export const SimaSegmentationInterface = PageTemplate.bind({});
 const SimaSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));

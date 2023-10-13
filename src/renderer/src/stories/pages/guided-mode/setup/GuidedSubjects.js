@@ -87,6 +87,9 @@ export class GuidedSubjectsPage extends Page {
             template: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
             validateEmptyCells: false,
+            contextMenu: {
+                ignore: ["row_below"],
+            },
             onUpdate: () => {
                 this.unsavedUpdates = true;
             },

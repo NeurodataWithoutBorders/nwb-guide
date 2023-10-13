@@ -65,6 +65,7 @@ export class Table extends LitElement {
         onUpdate,
         validateEmptyCells,
         onStatusChange,
+        contextMenu,
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -72,6 +73,7 @@ export class Table extends LitElement {
         this.keyColumn = keyColumn;
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
+        this.contextMenu = contextMenu ?? {};
 
         if (onUpdate) this.onUpdate = onUpdate;
         if (validateOnChange) this.validateOnChange = validateOnChange;
@@ -283,8 +285,29 @@ export class Table extends LitElement {
 
         let nRows = rowHeaders.length;
 
-        const contextMenu = ["row_below", "remove_row"];
+        let contextMenu = ["row_below", "remove_row"];
         if (this.schema.additionalProperties) contextMenu.push("col_right", "remove_col");
+
+        console.log(this.contextMenu);
+        contextMenu = contextMenu.filter((k) => !(this.contextMenu.ignore ?? []).includes(k));
+
+        const descriptionEl = this.querySelector("#description");
+        const operations = {
+            rows: [],
+            columns: [],
+        };
+
+        if (contextMenu.includes("row_below")) operations.rows.push("add");
+        if (contextMenu.includes("remove_row")) operations.rows.push("remove");
+        if (contextMenu.includes("col_right")) operations.columns.push("add");
+        if (contextMenu.includes("remove_col")) operations.columns.push("remove");
+        const operationSet = new Set(Object.values(operations).flat());
+        const operationOn = Object.keys(operations).filter((k) => operations[k].length);
+
+        if (operationSet.size) {
+            const desc = `Right click to ${Array.from(operationSet).join("/")} ${operationOn.join("and")}.`;
+            descriptionEl.innerText = desc;
+        }
 
         const table = new Handsontable(div, {
             data,
@@ -445,7 +468,7 @@ export class Table extends LitElement {
         return html`
             <div></div>
             <p style="width: 100%; margin: 10px 0px">
-                <small style="color: gray;">Right click to add or remove rows.</small>
+                <small id="description" style="color: gray;"></small>
             </p>
         `;
     }

@@ -6,17 +6,39 @@ import { validateOnChange } from "../../../../validation/index.js";
 
 import projectGeneralSchema from "../../../../../../../schemas/json/project/general.json" assert { type: "json" };
 import projectGlobalSchema from "../../../../../../../schemas/json/project/globals.json" assert { type: "json" };
-import projectNWBFileSchema from "../../../../../../../schemas/json/project/nwbfile.json" assert { type: "json" };
-import projectSubjectSchema from "../../../../../../../schemas/json/project/subject.json" assert { type: "json" };
 import { merge } from "../../utils.js";
+import { schemaToPages } from "../../FormPage.js";
+import { onThrow } from "../../../../errors";
+import baseMetadataSchema from "../../../../../../../schemas/base-metadata.schema";
+
+const changesAcrossSessions = {
+    Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
+    NWBFile: [
+        "session_id",
+        "session_start_time",
+        "identifier",
+        "data_collection",
+        "notes",
+        "pharmacolocy",
+        "session_description",
+        "slices",
+        "source_script",
+        "source_script_file_name",
+    ],
+};
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
-merge(projectNWBFileSchema, projectMetadataSchema);
-merge(projectSubjectSchema, projectMetadataSchema);
 
-import { schemaToPages } from "../../FormPage.js";
-
-import { onThrow } from "../../../../errors";
+Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
+    Object.keys(v.properties)
+        .filter((prop) => !(changesAcrossSessions[globalProp] ?? []).includes(prop))
+        .forEach((prop) => {
+            const globalNestedProp =
+                projectMetadataSchema.properties[globalProp] ??
+                (projectMetadataSchema.properties[globalProp] = { properties: {} });
+            globalNestedProp.properties[prop] = baseMetadataSchema.properties[globalProp].properties[prop];
+        });
+});
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -93,7 +115,6 @@ export class GuidedNewDatasetPage extends Page {
             info.title = `${info.label} Global Metadata`;
             return info;
         });
-        console.log(pages);
 
         pages.forEach((page) => {
             page.header = {

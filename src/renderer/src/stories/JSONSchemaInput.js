@@ -11,8 +11,8 @@ import { Modal } from "./Modal";
 
 import { capitalize } from "./forms/utils";
 
-const isFilesystemSelector = (format) => {
-    if (Array.isArray(format)) return format.map(isFilesystemSelector).every(Boolean) ? format : null;
+const isFilesystemSelector = (name, format) => {
+    if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
     const matched = name.match(/(.+_)?(.+)_paths?/);
     if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
@@ -149,6 +149,8 @@ export class JSONSchemaInput extends LitElement {
         `;
     }
 
+    #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
+
     #render() {
         const { validateOnChange, info, path: fullPath } = this;
 
@@ -158,7 +160,8 @@ export class JSONSchemaInput extends LitElement {
         const isArray = info.type === "array"; // Handle string (and related) formats / types
 
         const hasItemsRef = "items" in info && "$ref" in info.items;
-        if (!("items" in info) || (!("type" in info.items) && !hasItemsRef)) info.items = { type: "string" };
+        if (!("items" in info)) info.items = {};
+        if (!("type" in info.items) && !hasItemsRef) info.items.type = "string";
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
@@ -167,7 +170,7 @@ export class JSONSchemaInput extends LitElement {
                 value: this.value,
                 onSelect: (filePath) => this.#updateData(fullPath, filePath),
                 onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
-                onThrow: (...args) => this.form?.onThrow(...args),
+                onThrow: (...args) => this.#onThrow(...args),
                 dialogOptions: this.form?.dialogOptions,
                 dialogType: this.form?.dialogType,
                 multiple: isArray,
@@ -183,7 +186,7 @@ export class JSONSchemaInput extends LitElement {
             const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
             const isTable = itemSchema.type === "object";
 
-            const fileSystemFormat = isFilesystemSelector(itemSchema.format);
+            const fileSystemFormat = isFilesystemSelector(name, itemSchema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             else if (isTable) {
                 const tableMetadata = {
@@ -197,7 +200,7 @@ export class JSONSchemaInput extends LitElement {
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
-                                ? this.form.validateOnChange(key, parent, fullPath, v)
+                                ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
                                 : "")
                         );
                     },
@@ -211,7 +214,7 @@ export class JSONSchemaInput extends LitElement {
                             this.form.checkAllLoaded();
                         }
                     },
-                    onThrow: (...args) => this.form?.onThrow(...args),
+                    onThrow: (...args) => this.#onThrow(...args),
                 };
 
                 return (this.form.tables[name] =
@@ -305,7 +308,7 @@ export class JSONSchemaInput extends LitElement {
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
             />`;
         } else if (info.type === "string" || info.type === "number") {
-            const fileSystemFormat = isFilesystemSelector(info.format);
+            const fileSystemFormat = isFilesystemSelector(name, info.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
             else if (info.format === "long" || isArray)

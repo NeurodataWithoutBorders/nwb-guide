@@ -2,10 +2,11 @@ import { LitElement, html, css } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
 export class Search extends LitElement {
-    constructor({ options, showAllWhenEmpty } = {}) {
+    constructor({ options, showAllWhenEmpty, disabledLabel } = {}) {
         super();
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
+        this.disabledLabel = disabledLabel;
     }
 
     static get styles() {
@@ -63,8 +64,21 @@ export class Search extends LitElement {
             }
 
             [disabled] {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 pointer-events: none;
                 opacity: 0.4;
+            }
+
+            [disabled]::after {
+                content: var(--disabled-label, "Not available");
+                text-align: left;
+                padding-left: 25px;
+                opacity: 70%;
+                font-size: 90%;
+                white-space: nowrap;
+                min-width: min-content;
             }
         `;
     }
@@ -107,11 +121,14 @@ export class Search extends LitElement {
         this.list.remove();
         this.list = document.createElement("ul");
 
+        if (this.disabledLabel) this.style.setProperty("--disabled-label", `"${this.disabledLabel}"`);
+        else this.style.removeProperty("--disabled-label");
+
         const slot = document.createElement("slot");
         this.list.appendChild(slot);
 
         if (this.options) {
-            this.options
+            const unsupported = this.options
                 .sort((a, b) => {
                     if (a.label < b.label) return -1;
                     if (a.label > b.label) return 1;
@@ -122,7 +139,7 @@ export class Search extends LitElement {
                     else if (a.disabled) return 1;
                     else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
-                .forEach((option) => {
+                .filter((option) => {
                     const li = document.createElement("li");
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
@@ -131,18 +148,27 @@ export class Search extends LitElement {
 
                     if (option.disabled) li.setAttribute("disabled", "");
 
+                    const container = document.createElement("div");
+
                     const label = document.createElement("h4");
                     label.classList.add("label");
                     label.innerText = option.label;
-                    li.appendChild(label);
+                    container.appendChild(label);
 
                     const keywords = document.createElement("small");
                     keywords.classList.add("keywords");
                     keywords.innerText = option.keywords.join(", ");
-                    li.appendChild(keywords);
+                    container.appendChild(keywords);
 
+                    li.append(container);
                     this.list.appendChild(li);
-                });
+
+                    return option.disabled;
+                })
+                .map((o) => o.value);
+
+            console.warn(`Enabled: ${this.options.length - unsupported.length}/${this.options.length}`);
+            console.warn("Disabled Options:", unsupported);
         }
 
         return html`

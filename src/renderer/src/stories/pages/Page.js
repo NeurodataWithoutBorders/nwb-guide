@@ -143,10 +143,14 @@ export class Page extends LitElement {
         popup.hideLoading();
         const element = popup.getHtmlContainer();
         element.innerText = "";
-
+        element.style.textAlign = "left";
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
         element.append(progressBar);
+        element.insertAdjacentHTML(
+            "beforeend",
+            `<small><small><b>Note:</b> This may take a while to complete...</small></small>`
+        );
         // }
 
         let completed = 0;
@@ -193,6 +197,7 @@ export class Page extends LitElement {
         }
 
         popup.close();
+        element.style.textAlign = ""; // Clear style update
 
         return results;
     }
