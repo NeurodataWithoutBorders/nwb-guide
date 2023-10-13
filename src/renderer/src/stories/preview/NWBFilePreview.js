@@ -167,7 +167,8 @@ export class NWBFilePreview extends LitElement {
 
                               const list = new InspectorList({
                                   items: items,
-                                  listStyles: { maxWidth: "350px" },
+                                  listStyles: { minWidth: "300px", maxWidth: "350px" },
+                                  emptyMessage: "No issues found.",
                               });
                               list.style.padding = "10px";
                               return list;
