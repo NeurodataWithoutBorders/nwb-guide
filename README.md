@@ -39,26 +39,7 @@ Run the `.dmg` file and follow all instructions to move the file into your Appli
 
 ### Ubuntu
 
-#### Graphical Interface
-
-Right-click the `.AppImage` file, navigate to `permissions`, and check any box which mentions 'run as executable'.
-
-#### Ubuntu - CLI
-
-From the terminal, simply type
-
-```
-chmod +x nwb-guide-X.Y.Z.AppImage
-```
-
-Where you are using version `X.Y.Z`; then execute by calling
-
-```
-./nwb-guide-X.Y.Z.AppImage
-```
-
-> **Note:** If you're running the `.AppImage` and the app window clears to a white screen within a few seconds of starting, you will need to follow the [Developer Instructions](#developer-installation) on the [linux-fix](https://github.com/neurodatawithoutborders/nwb-guide/tree/linux-fix) branch of the NWB GUIDE.
-
+Please follow the [Developer Instructions](#developer-installation) on the [linux-fix](https://github.com/neurodatawithoutborders/nwb-guide/tree/linux-fix) branch of the NWB GUIDE.
 
 
 
