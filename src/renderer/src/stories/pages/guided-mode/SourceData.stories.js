@@ -26,7 +26,6 @@ import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/gener
 import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
 import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
 
-
 export default {
     title: "Pages/Guided Mode/Source Data",
     parameters: {
