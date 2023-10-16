@@ -1,23 +1,22 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "AlphaOmegaRecordingInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "folder_path"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
-                },
-                "sampling_frequency": {
-                    "type": "number"
+                "folder_path": {
+                    "format": "directory",
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",
                     "default": true
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",
