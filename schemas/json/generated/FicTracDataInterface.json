@@ -1,19 +1,14 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "FicTracDataInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "file_path"
             ],
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
-                },
-                "sampling_frequency": {
-                    "type": "number"
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",
