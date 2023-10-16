@@ -1,23 +1,17 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "AudioInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "file_paths"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
-                },
-                "sampling_frequency": {
-                    "type": "number"
+                "file_paths": {
+                    "type": "array"
                 },
                 "verbose": {
                     "type": "boolean",
-                    "default": true
+                    "default": false
                 }
             },
             "type": "object",

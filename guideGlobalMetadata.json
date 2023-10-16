@@ -26,6 +26,8 @@
         "MEArecRecordingInterface",
         "PlexonRecordingInterface",
         "PlexonSortingInterface",
-        "AxonaRecordingInterface"
+        "AxonaRecordingInterface",
+        "AudioInterface"
+
     ]
 }
