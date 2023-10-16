@@ -1,23 +1,25 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "SLEAPInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "file_path"
             ],
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
+                    "type": "string"
                 },
-                "sampling_frequency": {
-                    "type": "number"
+                "video_file_path": {
+                    "format": "file",
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",
                     "default": true
+                },
+                "frames_per_second": {
+                    "type": "number"
                 }
             },
             "type": "object",
