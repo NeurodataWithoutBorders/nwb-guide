@@ -892,6 +892,7 @@ h1.guided--text-sub-step {
     border: none;
     display: inline-block;
     border-radius: 16px;
+    cursor: pointer;
 }
 
 .guided--capsule.active {

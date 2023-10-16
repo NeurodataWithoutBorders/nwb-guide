@@ -104,11 +104,17 @@ export class Main extends LitElement {
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
                     let pages = Object.values(section.pages);
-                    if (pages.length > 1)
-                        capsules = {
+                    const pageIds = Object.keys(section.pages)
+                    if (pages.length > 1) {
+                        const capsulesProps = {
                             n: pages.length,
                             selected: pages.map((o) => o.pageLabel).indexOf(page.info.label),
                         };
+
+
+                        capsules = new GuidedCapsules(capsulesProps)
+                        capsules.onClick = (i) => this.toRender.page.to(pageIds[i])
+                    }
                 }
 
                 if (header === true || !("header" in page) || !("sections" in page.header)) {
@@ -123,7 +129,6 @@ export class Main extends LitElement {
 
         const headerEl = header ? new GuidedHeader(header) : html`<div></div>`; // Render for grid
 
-        const capsuleEl = capsules ? new GuidedCapsules(capsules) : "";
         const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
 
         const title = header?.title ?? page.info?.title;
@@ -137,7 +142,7 @@ export class Main extends LitElement {
         return html`
             ${headerEl}
             ${capsules
-                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsuleEl}</div>`
+                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
                 : html`<div style="height: 50px;"></div>`}
             <main id="content" class="js-content" style="overflow: hidden; display: flex;">
                 <section class="section">

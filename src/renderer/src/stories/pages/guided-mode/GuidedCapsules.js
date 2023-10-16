@@ -26,15 +26,17 @@ export class GuidedCapsules extends LitElement {
         return this;
     }
 
+    onClick = () => {}
+
     render() {
         if (!this.n) return html``;
 
         return html`
-            <div class="guided--capsule-container">
+            <div class="guided--capsule-container" >
                 <div class="guided--capsule-container-branch">
                     ${Array.from(
                         { length: this.n },
-                        (_, i) => html`<div class="guided--capsule ${i === this.selected ? `active` : ""}"></div>`
+                        (_, i) => html`<div @click=${() => this.onClick(i)} class="guided--capsule ${i === this.selected ? `active` : ""}"></div>`
                     )}
                 </div>
             </div>
