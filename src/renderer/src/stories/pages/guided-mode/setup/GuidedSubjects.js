@@ -16,20 +16,10 @@ export class GuidedSubjectsPage extends Page {
         subtitle: "Enter all metadata known about each experiment subject",
     };
 
+    // Abort save if subject structure is invalid
     beforeSave = () => {
+
         this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
-
-        try {
-            this.table.validate();
-        } catch (e) {
-            this.notify(e.message, "error");
-            throw e;
-        }
-    };
-
-    // Only save if the subject structure is valid
-    beforeTransition = () => {
-        // this.save(); // Save on each transition (removed to prevent multiple validation notifications)
 
         const { results, subjects } = this.info.globalState;
 
@@ -55,6 +45,13 @@ export class GuidedSubjectsPage extends Page {
 
         // Modify the results object to track new subjects / sessions
         updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
+
+        try {
+            this.table.validate();
+        } catch (e) {
+            this.notify(e.message, "error");
+            throw e;
+        }
     };
 
     footer = {
