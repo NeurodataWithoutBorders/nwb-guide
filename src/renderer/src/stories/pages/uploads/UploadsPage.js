@@ -116,7 +116,7 @@ export class UploadsPage extends Page {
         });
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
                 <h1 style="margin: 0;">DANDI Uploads</h1>
             </div>
             <p>This page allows you to upload folders with NWB files to the DANDI Archive.</p>

@@ -75,7 +75,7 @@ This will automatically add the new page to the sidebar. The page itself can be 
         constructor(...args) {
             super(...args);
 
-            console.log(this.info.globalState) // This will print the global state that is currently being passed between subpages (i.e. within guided mode)
+            console.log(this.info.globalState) // This will print the global state that is currently being passed between subpages
         }
 
         render() {
