@@ -1,19 +1,23 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "DeepLabCutInterface": {
             "required": [
                 "file_path",
-                "sampling_frequency"
+                "config_file_path"
             ],
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
+                    "type": "string"
                 },
-                "sampling_frequency": {
-                    "type": "number"
+                "config_file_path": {
+                    "format": "file",
+                    "type": "string"
+                },
+                "subject_name": {
+                    "type": "string",
+                    "default": "ind1"
                 },
                 "verbose": {
                     "type": "boolean",
