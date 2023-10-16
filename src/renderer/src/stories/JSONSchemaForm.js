@@ -116,7 +116,7 @@ hr {
   :host([requirementmode="loose"]) .required label:after {
     color: gray;
   }
-  
+
 
   .required.conditional label:after {
     color: transparent;
@@ -309,7 +309,7 @@ export class JSONSchemaForm extends LitElement {
     validate = async (resolved) => {
         // Check if any required inputs are missing
         const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
-        const isValid = this.requirementMode === 'loose' ? true : !invalidInputs.length;
+        const isValid = this.requirementMode === "loose" ? true : !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
         let message = isValid ? "" : `${invalidInputs.length} required inputs are not specified properly.`;

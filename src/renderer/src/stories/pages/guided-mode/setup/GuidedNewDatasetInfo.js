@@ -30,11 +30,11 @@ const changesAcrossSessions = {
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 
 Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
-    const info = projectMetadataSchema.properties[globalProp] = structuredClone(v)
-    
-    changesAcrossSessions[globalProp]?.forEach(prop => {
-        delete info.properties[prop]
-    })
+    const info = (projectMetadataSchema.properties[globalProp] = structuredClone(v));
+
+    changesAcrossSessions[globalProp]?.forEach((prop) => {
+        delete info.properties[prop];
+    });
 });
 
 export class GuidedNewDatasetPage extends Page {
@@ -108,10 +108,16 @@ export class GuidedNewDatasetPage extends Page {
 
         this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
-        const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false , requirementMode: "loose" }, (info) => {
-            info.title = `${info.label} Global Metadata`;
-            return info;
-        });
+        const pages = schemaToPages.call(
+            this,
+            schema,
+            ["project"],
+            { validateEmptyValues: false, requirementMode: "loose" },
+            (info) => {
+                info.title = `${info.label} Global Metadata`;
+                return info;
+            }
+        );
 
         pages.forEach((page) => {
             page.header = {
