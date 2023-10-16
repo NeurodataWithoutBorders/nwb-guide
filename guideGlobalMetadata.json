@@ -25,6 +25,7 @@
         "MCSRawRecordingInterface",
         "MEArecRecordingInterface",
         "PlexonRecordingInterface",
-        "PlexonSortingInterface"
+        "PlexonSortingInterface",
+        "AxonaRecordingInterface"
     ]
 }

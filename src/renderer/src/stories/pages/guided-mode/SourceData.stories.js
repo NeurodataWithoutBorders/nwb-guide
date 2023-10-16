@@ -25,6 +25,7 @@ import MCSRawRecordingInterfaceSchema from "../../../../../../schemas/json/gener
 import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MEArecRecordingInterface.json";
 import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
 import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
+import AxonaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AxonaRecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -88,6 +89,8 @@ globalStateCopy.schema.source_data.properties.PlexonRecordingInterface =
     PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface;
 globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
     PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
+globalStateCopy.schema.source_data.properties.AxonaRecordingInterface =
+    AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -256,3 +259,9 @@ const PlexonSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState))
 PlexonSortingInterfaceGlobalCopy.interfaces.interface = PlexonSortingInterface;
 PlexonSortingInterfaceGlobalCopy.schema.source_data = PlexonSortingInterfaceSchema;
 PlexonSortingInterface.args = { activePage, globalState: PlexonSortingInterfaceGlobalCopy };
+
+export const AxonaRecordingInterface = PageTemplate.bind({});
+const AxonaRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+AxonaRecordingInterfaceGlobalCopy.interfaces.interface = AxonaRecordingInterface;
+AxonaRecordingInterfaceGlobalCopy.schema.source_data = AxonaRecordingInterfaceSchema;
+AxonaRecordingInterface.args = { activePage, globalState: AxonaRecordingInterfaceGlobalCopy };
