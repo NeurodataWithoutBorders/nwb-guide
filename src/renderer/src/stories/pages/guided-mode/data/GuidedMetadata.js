@@ -111,11 +111,11 @@ export class GuidedMetadataPage extends ManagedPage {
             globals: aggregateGlobalMetadata,
 
             ignore: [
-                "Ophys", // Ignore ophys for now                 
+                "Ophys", // Ignore ophys for now
                 "Icephys", // Ignore icephys for now
                 new RegExp("ndx-.+"), // Ignore all ndx extensions for now
-                "subject_id", 
-                "session_id"
+                "subject_id",
+                "session_id",
             ],
 
             conditionalRequirements: [

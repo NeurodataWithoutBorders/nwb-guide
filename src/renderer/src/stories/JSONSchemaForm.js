@@ -514,10 +514,13 @@ export class JSONSchemaForm extends LitElement {
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore.find((v) => {
-                    if (typeof v === 'string') return v === key;
-                    else return v.test(key);
-                })) return false;
+                if (
+                    this.ignore.find((v) => {
+                        if (typeof v === "string") return v === key;
+                        else return v.test(key);
+                    })
+                )
+                    return false;
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
