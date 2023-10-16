@@ -23,6 +23,8 @@
         "SbxImagingInterface",
         "CaimanSegmentationInterface",
         "MCSRawRecordingInterface",
-        "MEArecRecordingInterface"
+        "MEArecRecordingInterface",
+        "PlexonRecordingInterface",
+        "PlexonSortingInterface"
     ]
 }
