@@ -1,23 +1,25 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "NeuralynxRecordingInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "folder_path"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
+                "folder_path": {
+                    "format": "directory",
+                    "type": "string"
                 },
-                "sampling_frequency": {
-                    "type": "number"
+                "stream_name": {
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",
-                    "default": true
+                    "default": false
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",
