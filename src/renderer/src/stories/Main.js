@@ -104,16 +104,15 @@ export class Main extends LitElement {
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
                     let pages = Object.values(section.pages);
-                    const pageIds = Object.keys(section.pages)
+                    const pageIds = Object.keys(section.pages);
                     if (pages.length > 1) {
                         const capsulesProps = {
                             n: pages.length,
                             selected: pages.map((o) => o.pageLabel).indexOf(page.info.label),
                         };
 
-
-                        capsules = new GuidedCapsules(capsulesProps)
-                        capsules.onClick = (i) => this.toRender.page.to(pageIds[i])
+                        capsules = new GuidedCapsules(capsulesProps);
+                        capsules.onClick = (i) => this.toRender.page.to(pageIds[i]);
                     }
                 }
 
