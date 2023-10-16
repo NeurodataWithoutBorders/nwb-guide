@@ -521,7 +521,7 @@ def generate_dataset(test_data_directory_path: str):
 
 
 def inspect_nwb_file(payload):
-    from nwbinspector import inspect_nwbfile
+    from nwbinspector import inspect_nwbfile, load_config
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     messages = list(
@@ -530,7 +530,7 @@ def inspect_nwb_file(payload):
                 "check_description",
                 "check_data_orientation",
             ],  # TODO: remove when metadata control is exposed
-            config="dandi",
+            config=load_config(filepath_or_keyword="dandi"),
             **payload,
         )
     )
@@ -539,7 +539,7 @@ def inspect_nwb_file(payload):
 
 
 def inspect_nwb_folder(payload):
-    from nwbinspector import inspect_all
+    from nwbinspector import inspect_all, load_config
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     messages = list(
@@ -549,7 +549,7 @@ def inspect_nwb_folder(payload):
                 "check_description",
                 "check_data_orientation",
             ],  # TODO: remove when metadata control is exposed
-            config="dandi",
+            config=load_config(filepath_or_keyword="dandi"),
             **payload,
         )
     )
