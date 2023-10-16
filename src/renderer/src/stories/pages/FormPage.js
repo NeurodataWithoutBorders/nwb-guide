@@ -10,12 +10,12 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
         .filter(([_, value]) => value.properties)
         .map(([key, value]) => {
             const optionsCopy = { ...options };
+
             if (optionsCopy.required && optionsCopy.required[key])
                 optionsCopy.required = {
                     [key]: optionsCopy.required[key],
                 };
-            // Only bring requirements from the current page
-            else delete optionsCopy.required;
+            else delete optionsCopy.required; // Only bring requirements from the current page
 
             const page = new GuidedFormPage(
                 transformationCallback({
