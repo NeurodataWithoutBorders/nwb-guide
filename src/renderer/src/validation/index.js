@@ -16,7 +16,7 @@ export function validateOnChange(name, parent, path, value) {
 
     const copy = { ...parent }; // Validate on a copy of the parent
     if (arguments.length > 3) copy[name] = value; // Update value on copy
-    
+
     let lastResolved;
     functions = fullPath.reduce((acc, key, i) => {
         if (acc && key in acc) return (lastResolved = acc[key]);

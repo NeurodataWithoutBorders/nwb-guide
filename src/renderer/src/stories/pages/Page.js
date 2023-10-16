@@ -61,7 +61,6 @@ export class Page extends LitElement {
     };
 
     to = async (transition) => {
-
         // Otherwise note unsaved updates if present
         if (
             this.unsavedUpdates ||
