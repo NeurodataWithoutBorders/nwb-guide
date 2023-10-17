@@ -1,11 +1,12 @@
 import { LitElement, css, html } from "lit";
 import { List } from "../../List";
+import { getMessageType, isErrorImportance } from "../../../validation";
 
 const sortList = (items) => {
     return items
         .sort((a, b) => {
-            const aCritical = a.importance === "CRITICAL";
-            const bCritical = b.importance === "CRITICAL";
+            const aCritical = isErrorImportance.includes(a.importance);
+            const bCritical = isErrorImportance.includes(a.importance);
             if (aCritical && bCritical) return 0;
             else if (aCritical) return -1;
             else return 1;
@@ -40,7 +41,8 @@ export class InspectorList extends List {
         ];
     }
 
-    constructor({ items, listStyles }) {
+    constructor(props) {
+        const { items } = props;
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
             aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
@@ -50,12 +52,12 @@ export class InspectorList extends List {
         super({
             editable: false,
             unordered: true,
+            ...props,
             items: sortList(aggregatedItems).map((o) => {
                 const item = new InspectorListItem(o);
                 item.style.flexGrow = "1";
                 return { content: item };
             }),
-            listStyles,
         });
     }
 }
@@ -67,12 +69,13 @@ export class InspectorListItem extends LitElement {
         return css`
             :host {
                 display: block;
-                background: gainsboro;
+                background: WhiteSmoke;
                 border: 1px solid gray;
                 border-radius: 10px;
-                padding: 5px 10px;
                 overflow: hidden;
                 text-wrap: wrap;
+                padding: 25px;
+                margin: 0 0 1em;
             }
 
             #message {
@@ -95,20 +98,16 @@ export class InspectorListItem extends LitElement {
 
             :host([type="error"]) {
                 color: #9d0b0b;
-                padding: 25px;
                 background: #f8d7da;
                 border: 1px solid #f5c2c7;
                 border-radius: 4px;
-                margin: 0 0 1em;
             }
 
             :host([type="warning"]) {
                 color: #856404;
-                padding: 25px;
                 background: #fff3cd;
                 border: 1px solid #ffeeba;
                 border-radius: 4px;
-                margin: 0 0 1em;
             }
         `;
     }
@@ -129,7 +128,10 @@ export class InspectorListItem extends LitElement {
     }
 
     render() {
-        this.type = this.ORIGINAL_TYPE ?? (this.importance === "CRITICAL" ? "error" : "warning");
+        this.type = getMessageType({
+            ...this,
+            type: this.ORIGINAL_TYPE,
+        });
 
         this.setAttribute("title", this.message);
 

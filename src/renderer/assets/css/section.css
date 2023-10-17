@@ -1,22 +1,12 @@
 /* Section ------------------ */
 
 .section {
-    /* position: absolute; */
-    top: 0;
-    left: 210px;
-    right: 0;
-    bottom: 0;
     height: 100%;
     width: 100%;
     margin-right: 0;
     padding: 0px 50px 50px 50px;
     display: flex;
     flex-direction: column;
-    /* display: grid;
-    grid-template-rows: min-content auto;
-    grid-template-columns: 1fr; */
-    /* padding-top: 7px;
-  padding-left: 30px; */
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;

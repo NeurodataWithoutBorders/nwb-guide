@@ -4,7 +4,7 @@ import isElectron from "./check.js";
 export { isElectron };
 
 export let port = 4242;
-export let electron = {};
+export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
 export let remote = {};
@@ -15,13 +15,9 @@ export let crypto = null;
 
 if (isElectron) {
     try {
-        // Import Electron API
-        electron = require("electron"); // ipcRenderer, remote, shell, etc.
         fs = require("fs-extra"); // File System
         os = require("os");
-
         crypto = require("crypto");
-
         remote = require("@electron/remote");
         app = remote.app;
 
