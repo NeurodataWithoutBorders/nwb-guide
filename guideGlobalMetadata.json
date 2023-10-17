@@ -16,6 +16,7 @@
         "Spike2RecordingInterface",
         "BrukerTiffSinglePlaneImagingInterface",
         "ExtractSegmentationInterface",
+        "CnmfeSegmentationInterface",
         "BrukerTiffMultiPlaneImagingInterface",
         "MicroManagerTiffImagingInterface",
         "ScanImageImagingInterface",
