@@ -32,6 +32,7 @@ import NeuralynxRecordingInterfaceSchema from "../../../../../../schemas/json/ge
 import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AlphaOmegaRecordingInterface.json";
 import DeepLabCutInterfaceSchema from "../../../../../../schemas/json/generated/DeepLabCutInterface.json";
 import SLEAPInterfaceSchema from "../../../../../../schemas/json/generated/SLEAPInterface.json";
+import FicTracDataInterfaceSchema from "../../../../../../schemas/json/generated/FicTracDataInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -108,6 +109,8 @@ globalStateCopy.schema.source_data.properties.AlphaOmegaRecordingInterface =
 globalStateCopy.schema.source_data.properties.DeepLabCutInterface =
     DeepLabCutInterfaceSchema.properties.DeepLabCutInterface;
 globalStateCopy.schema.source_data.properties.SLEAPInterface = SLEAPInterfaceSchema.properties.SLEAPInterface;
+globalStateCopy.schema.source_data.properties.FicTracDataInterface =
+    FicTracDataInterfaceSchema.properties.FicTracDataInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -318,3 +321,9 @@ const SLEAPInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 SLEAPInterfaceGlobalCopy.interfaces.interface = SLEAPInterface;
 SLEAPInterfaceGlobalCopy.schema.source_data = SLEAPInterfaceSchema;
 SLEAPInterface.args = { activePage, globalState: SLEAPInterfaceGlobalCopy };
+
+export const FicTracDataInterface = PageTemplate.bind({});
+const FicTracDataInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+FicTracDataInterfaceGlobalCopy.interfaces.interface = FicTracDataInterface;
+FicTracDataInterfaceGlobalCopy.schema.source_data = FicTracDataInterfaceSchema;
+FicTracDataInterface.args = { activePage, globalState: FicTracDataInterfaceGlobalCopy };

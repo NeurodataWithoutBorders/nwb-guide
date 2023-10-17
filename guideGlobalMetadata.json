@@ -32,6 +32,7 @@
         "NeuralynxRecordingInterface",
         "AlphaOmegaRecordingInterface",
         "DeepLabCutInterface",
-        "SLEAPInterface"
+        "SLEAPInterface",
+        "FicTracDataInterface"
     ]
 }
