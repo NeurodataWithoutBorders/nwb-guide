@@ -27,7 +27,7 @@ export class GuidedFooter extends LitElement {
     constructor({
         back = "Back",
         next = "Next",
-        exit = "Exit",
+        exit = "Return to Home Screen",
         onBack = () => this.to(-1),
         onNext = () => this.to(1),
         onExit = () => this.to("/"),

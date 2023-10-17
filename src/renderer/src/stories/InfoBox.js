@@ -76,37 +76,40 @@ export class InfoBox extends LitElement {
         `;
     }
 
-    constructor({ header = "Info", content, type = "info" } = {}) {
+    constructor({ header = "Info", content, type = "info", open = false } = {}) {
         super();
         this.header = header;
         this.content = content;
         this.type = type;
+        this.open = open;
     }
 
     updated() {
-        const infoDropdowns = this.shadowRoot.querySelectorAll(".guided--info-dropdown");
-        for (const infoDropdown of Array.from(infoDropdowns)) {
-            const infoTextElement = infoDropdown.querySelector("#header");
+        const infoDropdown = this.shadowRoot.querySelector(".guided--info-dropdown");
+        const infoTextElement = infoDropdown.querySelector("#header");
 
-            // Auto-add icons if they're not there
-            if (this.type === "info") infoTextElement.insertAdjacentHTML("beforebegin", `<span class="icon">ℹ️</span>`);
-            if (this.type === "warning")
-                infoTextElement.insertAdjacentHTML("beforebegin", ` <span class="icon">⚠️</span>`);
+        // Auto-add icons if they're not there
+        if (this.type === "info") infoTextElement.insertAdjacentHTML("beforebegin", `<span class="icon">ℹ️</span>`);
+        if (this.type === "warning") infoTextElement.insertAdjacentHTML("beforebegin", ` <span class="icon">⚠️</span>`);
 
-            infoDropdown.onclick = () => {
-                const infoContainer = infoDropdown.nextElementSibling;
-                const infoContainerChevron = infoDropdown.querySelector("nwb-chevron");
+        const infoContainer = infoDropdown.nextElementSibling;
+        infoDropdown.onclick = () => this.onToggle(!infoContainer.classList.contains("container-open"));
 
-                const infoContainerIsopen = infoContainer.classList.contains("container-open");
+        this.onToggle();
+    }
 
-                if (infoContainerIsopen) {
-                    infoContainerChevron.direction = "right";
-                    infoContainer.classList.remove("container-open");
-                } else {
-                    infoContainerChevron.direction = "bottom";
-                    infoContainer.classList.add("container-open");
-                }
-            };
+    onToggle(open = this.open) {
+        const infoDropdown = this.shadowRoot.querySelector(".guided--info-dropdown");
+
+        const infoContainer = infoDropdown.nextElementSibling;
+        const infoContainerChevron = infoDropdown.querySelector("nwb-chevron");
+
+        if (open) {
+            infoContainerChevron.direction = "bottom";
+            infoContainer.classList.add("container-open");
+        } else {
+            infoContainerChevron.direction = "right";
+            infoContainer.classList.remove("container-open");
         }
     }
 
