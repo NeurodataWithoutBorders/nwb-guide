@@ -110,7 +110,14 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: ["Ophys", "subject_id", "session_id"],
+            ignore: [
+                "Ophys", // Always ignore ophys metadata (for now)
+                "Icephys", // Always ignore icephys metadata (for now)
+                "Behavior", // Always ignore behavior metadata (for now)
+                new RegExp("ndx-.+"), // Ignore all ndx extensions
+                "subject_id",
+                "session_id",
+            ],
 
             conditionalRequirements: [
                 {
