@@ -6,9 +6,8 @@ import { errorHue, warningHue } from "./globals";
 import { checkStatus } from "../validation";
 import { emojiFontFamily } from "./globals";
 
-import tippy from 'tippy.js';
-import 'tippy.js/dist/tippy.css';
-
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
 
 const maxRows = 20;
 
@@ -286,16 +285,16 @@ export class Table extends LitElement {
         const onAfterGetHeader = function (index, TH) {
             const desc = entries[colHeaders[index]].description;
             if (desc) {
-                const rel = TH.querySelector('.relative')
-                let span = rel.querySelector('.info')
+                const rel = TH.querySelector(".relative");
+                let span = rel.querySelector(".info");
                 if (!span) {
-                    span = document.createElement('span')
-                    span.classList.add('info')
-                    span.innerText = 'ℹ️'
-                    rel.append(span)
+                    span = document.createElement("span");
+                    span.classList.add("info");
+                    span.innerText = "ℹ️";
+                    rel.append(span);
                 }
 
-                if (span._tippy) span._tippy.destroy()
+                if (span._tippy) span._tippy.destroy();
                 tippy(span, { content: `${desc}` });
             }
         };
@@ -439,22 +438,20 @@ export class Table extends LitElement {
 
         if (cell) {
             let title = "";
-            let theme = ""
+            let theme = "";
             if (warnings.length) {
-                theme = "warning",
-                title = warnings.map((o) => o.message).join("\n");
+                (theme = "warning"), (title = warnings.map((o) => o.message).join("\n"));
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                theme = "error",
-                title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+                (theme = "error"), (title = errors.map((o) => o.message).join("\n")); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
             if (theme) cell.setAttribute(theme, "");
 
-            if (cell._tippy) cell._tippy.destroy()
+            if (cell._tippy) cell._tippy.destroy();
 
-            if (title) tippy(cell, {  content: title, theme });
+            if (title) tippy(cell, { content: title, theme });
         }
 
         this.#checkStatus(); // Check status after every validation update
