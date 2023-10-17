@@ -1,23 +1,14 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "MiniscopeBehaviorInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "folder_path"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
-                },
-                "sampling_frequency": {
-                    "type": "number"
-                },
-                "verbose": {
-                    "type": "boolean",
-                    "default": true
+                "folder_path": {
+                    "format": "directory",
+                    "type": "string"
                 }
             },
             "type": "object",
