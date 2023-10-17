@@ -166,10 +166,7 @@ export class GuidedPathExpansionPage extends Page {
             const subjects = Object.keys(results);
             if (subjects.length === 0) {
                 const message = "No subjects found with the current configuration. Please try again.";
-                notyf.open({
-                    type: "error",
-                    message,
-                });
+                this.notify(message, "error");
                 throw message;
             }
 
@@ -197,10 +194,7 @@ export class GuidedPathExpansionPage extends Page {
 
             if (!this.optional.toggled) {
                 const message = "Please select a path expansion option.";
-                notyf.open({
-                    type: "error",
-                    message,
-                });
+                this.notify(message, "error");
                 throw new Error(message);
             }
 

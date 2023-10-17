@@ -48,20 +48,17 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         },
         { title: "Uploading to DANDI" }
     ).catch((e) => {
-        notyf.open({
-            type: "error",
-            message: e.message,
-        });
+        this.notify(e.message, "error");
         throw e;
     });
 
     if (result)
-        notyf.open({
-            type: "success",
-            message: `${
+        this.notify(
+            `${
                 info.project ?? `${info[folderPathKey].length} filesystem entries`
             } successfully uploaded to Dandiset ${dandiset_id}`,
-        });
+            "success"
+        );
 
     return result;
 }

@@ -31,6 +31,10 @@
         "AxonaRecordingInterface",
         "NeuralynxRecordingInterface",
         "AlphaOmegaRecordingInterface",
+        "DeepLabCutInterface",
+        "SLEAPInterface",
+        "FicTracDataInterface",
+        "AudioInterface",
         "EDFRecordingInterface"
     ]
 }
