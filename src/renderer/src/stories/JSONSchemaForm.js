@@ -915,11 +915,11 @@ export class JSONSchemaForm extends LitElement {
         this.#registerRequirements(this.schema, this.required);
 
         return html`
-                ${schema.description
-                    ? html`<h4>Description</h4>
-                          <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
-                    : ""}
-                ${this.#render(schema, this.resolved, this.#requirements)}
+            ${schema.description
+                ? html`<h4>Description</h4>
+                      <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
+                : ""}
+            ${this.#render(schema, this.resolved, this.#requirements)}
         `;
     }
 }

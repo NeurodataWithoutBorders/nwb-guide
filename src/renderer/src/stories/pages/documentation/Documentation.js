@@ -5,11 +5,10 @@ import { Page } from "../Page.js";
 import { startLottie } from "../../../dependencies/globals.js";
 
 export class DocumentationPage extends Page {
-
     header = {
         title: "Documentation",
         subtitle: "Learn more about the GUIDE.",
-    }
+    };
 
     constructor(...args) {
         super(...args);

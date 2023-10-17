@@ -62,7 +62,6 @@ export class Main extends LitElement {
     }
 
     updated() {
-        
         this.content = (this.shadowRoot ?? this).querySelector("#content");
         if (this.#queue.length) {
             this.#queue.forEach((content) => this.set(content));
@@ -73,9 +72,8 @@ export class Main extends LitElement {
         this.content.style.height = "100%";
 
         // Reset scroll position on page change
-        const section = this.content.children[0]
-        section.scrollTop = 0
-
+        const section = this.content.children[0];
+        section.scrollTop = 0;
     }
 
     render() {
@@ -107,7 +105,7 @@ export class Main extends LitElement {
 
             // Default Capsules Behavior
             const section = sections[info.section];
-            console.log('Sections',section,sections)
+            console.log("Sections", section, sections);
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
                     let pages = Object.values(section.pages);
@@ -146,31 +144,27 @@ export class Main extends LitElement {
         if (typeof controls === "function") controls = controls(); // Generate custom header content if required
 
         return html`
-        ${headerEl}
-        ${capsules
-            ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
-            : html`<div style="height:50px"</div>`}
-        ${title
-            ? html`<div
-                    style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1;"
-                >
-                    <div
-                        style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
-                    >
-                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:gray;">
-                            <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
-                            <small>${unsafeHTML(subtitle)}</small>
-                        </div>
-                        <div style="padding-left: 25px">${controls}</div>
-                    </div>
-                    <hr style="margin-bottom: 0;" />
-                </div>`
-            : ""}
+            ${headerEl}
+            ${capsules
+                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
+                : html`<div style="height:50px"</div>`}
+            ${title
+                ? html`<div
+                      style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1;"
+                  >
+                      <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
+                          <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:gray;">
+                              <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
+                              <small>${unsafeHTML(subtitle)}</small>
+                          </div>
+                          <div style="padding-left: 25px">${controls}</div>
+                      </div>
+                      <hr style="margin-bottom: 0;" />
+                  </div>`
+                : ""}
 
             <main id="content" class="js-content" style="overflow: hidden;">
-                <section class="section ${capsules ?'nested':''}">
-                    ${page}
-                </section>
+                <section class="section ${capsules ? "nested" : ""}">${page}</section>
             </main>
             ${footerEl}
         `;

@@ -5,11 +5,10 @@ import { Page } from "../Page.js";
 import { startLottie } from "../../../dependencies/globals.js";
 
 export class ContactPage extends Page {
-
     header = {
         title: "Contact Us",
         subtitle: "Let us know your issues and feature requests.",
-    }
+    };
 
     constructor(...args) {
         super(...args);

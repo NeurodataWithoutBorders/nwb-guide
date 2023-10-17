@@ -6,13 +6,10 @@ import { Neurosift } from "../../preview/Neurosift.js";
 import { baseUrl } from "../../../globals.js";
 
 export class PreviewPage extends Page {
-
-
     header = {
         title: "Neurosift File Visualization",
         subtitle: "Explore your NWB file using Neurosift.",
-    }
-
+    };
 
     constructor(...args) {
         super(...args);
@@ -48,9 +45,7 @@ export class PreviewPage extends Page {
         }
 
         return html`
-            <div
-                style="display: grid; width: 100%; height: 100%; grid-template-rows: min-content 1fr; gap: 10px;"
-            >
+            <div style="display: grid; width: 100%; height: 100%; grid-template-rows: min-content 1fr; gap: 10px;">
                 ${this.input} ${this.neurosift}
             </div>
         `;
