@@ -70,7 +70,8 @@ globalStateCopy.schema.source_data.properties.KiloSortSortingInterface =
 globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
-    BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;sd
+    BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
+sd;
 globalStateCopy.schema.source_data.properties.ExtractSegmentationInterface =
     ExtractSegmentationInterfaceSchema.properties.ExtractSegmentationInterface;
 globalStateCopy.schema.source_data.properties.CnmfeSegmentationInterface =
