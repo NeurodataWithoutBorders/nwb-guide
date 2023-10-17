@@ -2,6 +2,8 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
+
+const folderPathKey = "filesystem_paths";
 import dandiUploadSchema from "../../../../../../schemas/json/dandi/upload.json";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}), { arrays: true });
@@ -18,8 +20,10 @@ import { DandiResults } from "../../DandiResults.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info, type = "project" in info ? "" : "folder") {
-    const staging = isStaging(info.dandiset_id); // Automatically detect staging IDs
+export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
+    const { dandiset_id } = info;
+
+    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
     const api_key = global.data.DANDI?.api_keys?.[whichAPIKey];
@@ -54,7 +58,9 @@ export async function uploadToDandi(info, type = "project" in info ? "" : "folde
     if (result)
         notyf.open({
             type: "success",
-            message: `${info.project ?? info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
+            message: `${
+                info.project ?? `${info[folderPathKey].length} filesystem entries`
+            } successfully uploaded to Dandiset ${dandiset_id}`,
         });
 
     return result;
@@ -89,13 +95,12 @@ export class UploadsPage extends Page {
             },
         });
 
-        const folderPathKey = "nwb_folder_path";
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
             results: globalState,
             schema: dandiSchema,
             sort: ([k1]) => {
-                if (k1 === "nwb_folder_path") return -1;
+                if (k1 === folderPathKey) return -1;
             },
             onUpdate: ([id]) => {
                 if (id === folderPathKey) {
@@ -111,7 +116,7 @@ export class UploadsPage extends Page {
         });
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
                 <h1 style="margin: 0;">DANDI Uploads</h1>
             </div>
             <p>This page allows you to upload folders with NWB files to the DANDI Archive.</p>

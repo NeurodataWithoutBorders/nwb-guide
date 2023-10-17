@@ -33,6 +33,13 @@ export class SettingsPage extends Page {
         super(...args);
     }
 
+    #notification;
+
+    #openNotyf = (opts) => {
+        if (this.#notification) notyf.dismiss(this.#notification);
+        return (this.#notification = notyf.open(opts));
+    };
+
     beforeSave = () => {
         const { resolved } = this.form;
         for (let prop in schema.properties) {
@@ -44,7 +51,7 @@ export class SettingsPage extends Page {
         merge(this.form.resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
-        notyf.open({
+        this.#openNotyf({
             type: "success",
             message: "Global settings changes saved",
         });
@@ -56,7 +63,8 @@ export class SettingsPage extends Page {
         const button = new Button({
             label: "Save Changes",
             onClick: async () => {
-                if (!this.unsavedUpdates) return;
+                if (!this.unsavedUpdates)
+                    return this.#openNotyf({ type: "success", message: "All changes were already saved" });
                 this.save();
             },
         });
@@ -76,7 +84,7 @@ export class SettingsPage extends Page {
         });
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
                 <h1 style="margin: 0;">NWB GUIDE Settings</h1>
             </div>
             <p>This page allows you to set global settings for the NWB GUIDE.</p>

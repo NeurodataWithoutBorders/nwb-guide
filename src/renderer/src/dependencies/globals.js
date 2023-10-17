@@ -22,6 +22,8 @@ export const startLottie = (lottieElement, animationData) => {
     return thisLottie;
 };
 
+const longDuration = 20000;
+
 // ---------- Notification Helper ----------
 export const notyf = new Notyf({
     position: { x: "right", y: "bottom" },
@@ -82,7 +84,7 @@ export const notyf = new Notyf({
                 tagName: "i",
                 color: "white",
             },
-            duration: 20000,
+            duration: longDuration,
         },
         {
             type: "app_update_warning",
@@ -92,6 +94,7 @@ export const notyf = new Notyf({
                 tagName: "i",
                 color: "white",
             },
+            duration: longDuration,
         },
         {
             type: "error",
@@ -101,7 +104,7 @@ export const notyf = new Notyf({
                 tagName: "i",
                 color: "white",
             },
-            duration: 20000,
+            duration: longDuration,
         },
     ],
 });

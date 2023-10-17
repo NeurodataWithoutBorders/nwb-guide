@@ -61,8 +61,6 @@ export class Page extends LitElement {
     };
 
     to = async (transition) => {
-        this.beforeTransition();
-
         // Otherwise note unsaved updates if present
         if (
             this.unsavedUpdates ||
@@ -72,7 +70,7 @@ export class Page extends LitElement {
         ) {
             if (transition === 1) await this.save(); // Save before a single forward transition
             else {
-                Swal.fire({
+                await Swal.fire({
                     title: "You have unsaved data on this page.",
                     text: "Would you like to save your changes?",
                     icon: "warning",
@@ -82,10 +80,7 @@ export class Page extends LitElement {
                     cancelButtonText: "Ignore Changes",
                 }).then(async (result) => {
                     if (result && result.isConfirmed) await this.save();
-                    this.onTransition(transition);
                 });
-
-                return;
             }
         }
 
@@ -95,7 +90,6 @@ export class Page extends LitElement {
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
     beforeSave = () => {}; // User-defined function
-    beforeTransition = () => {}; // User-defined function
 
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave();
@@ -143,10 +137,14 @@ export class Page extends LitElement {
         popup.hideLoading();
         const element = popup.getHtmlContainer();
         element.innerText = "";
-
+        element.style.textAlign = "left";
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
         element.append(progressBar);
+        element.insertAdjacentHTML(
+            "beforeend",
+            `<small><small><b>Note:</b> This may take a while to complete...</small></small>`
+        );
         // }
 
         let completed = 0;
@@ -193,6 +191,7 @@ export class Page extends LitElement {
         }
 
         popup.close();
+        element.style.textAlign = ""; // Clear style update
 
         return results;
     }

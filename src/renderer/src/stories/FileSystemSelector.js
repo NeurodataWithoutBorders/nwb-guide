@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit";
 
-import { remote } from "../electron/index";
+import { fs, remote } from "../electron/index";
 const { dialog } = remote;
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
@@ -10,7 +10,7 @@ function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
             .join(" / ")}`;
 
     const isDir = type === "directory";
-    return multiple && (!isDir || (isDir && !native))
+    return multiple && (!isDir || (isDir && !native) || dialog)
         ? type === "directory"
             ? "directories"
             : "files"
@@ -37,6 +37,10 @@ const componentCSS = css`
         margin-top: 10px;
         display: flex;
         gap: 5px;
+    }
+
+    #button-div > nwb-button {
+        margin-bottom: 10px;
     }
 
     button {
@@ -117,32 +121,28 @@ export class FilesystemSelector extends LitElement {
         const result = await dialog[this.dialogType](options);
 
         this.classList.remove("active");
-        if (result.canceled) this.#onCancel();
+        if (result.canceled) return [];
         return result;
     };
 
-    #onCancel = () => {
-        this.#onThrow(`No ${this.type} selected`, "The request was cancelled by the user");
-    };
-
     #checkType = (value) => {
-        const isLikelyFile = value.split(".").length !== 1;
+        const isLikelyFile = fs ? fs.lstatSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
     };
 
-    #handleFiles = async (pathOrPaths) => {
-        if (!pathOrPaths)
-            this.#onThrow("No paths detected", `Unable to parse ${this.type} path${this.multiple ? "s" : ""}`);
+    #handleFiles = async (pathOrPaths, type) => {
+        const resolvedType = type ?? this.type;
 
         if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
-        else this.#checkType(pathOrPaths);
+        else if (!type) this.#checkType(pathOrPaths);
 
         let resolvedValue = pathOrPaths;
+
         if (Array.isArray(resolvedValue) && !this.multiple) {
             if (resolvedValue.length > 1)
                 this.#onThrow(
-                    `Too many ${this.type === "directory" ? "directories" : "files"} detected`,
+                    `Too many ${resolvedType === "directory" ? "directories" : "files"} detected`,
                     `This selector will only accept one.`
                 );
             resolvedValue = resolvedValue[0];
@@ -158,17 +158,17 @@ export class FilesystemSelector extends LitElement {
 
     async selectFormat(type = this.type) {
         if (dialog) {
-            const file = await this.#useElectronDialog(type);
-            const path = file.filePath ?? file.filePaths?.[0];
-            this.#handleFiles(path);
+            const results = await this.#useElectronDialog(type);
+            // const path = file.filePath ?? file.filePaths?.[0];
+            this.#handleFiles(results.filePath ?? results.filePaths, type);
         } else {
             let handles = await (type === "directory"
                 ? window.showDirectoryPicker()
                 : window.showOpenFilePicker({ multiple: this.multiple })
-            ).catch((e) => this.#onCancel()); // Call using the same options
+            ).catch((e) => []); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
-            this.#handleFiles(result);
+            this.#handleFiles(result, type);
         }
     }
 
@@ -184,7 +184,7 @@ export class FilesystemSelector extends LitElement {
             resolved = this.value.map((str) => str.replaceAll("\\", "/"));
             isUpdated = JSON.stringify(resolved) !== JSON.stringify(this.value);
         } else {
-            resolved = this.value.replaceAll("\\", "/");
+            resolved = typeof this.value === "string" ? this.value.replaceAll("\\", "/") : this.value;
             isUpdated = resolved !== this.value;
         }
 
@@ -236,7 +236,7 @@ export class FilesystemSelector extends LitElement {
                                         native: true,
                                     })}`}</span
                           >${this.multiple &&
-                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory")))
+                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory") && !dialog))
                               ? html`<br /><small
                                         >Multiple directory support only available using drag-and-drop.</small
                                     >`

@@ -11,8 +11,10 @@ export class PreviewPage extends Page {
     }
 
     updatePath = async (path) => {
-        const result = await fetch(`${baseUrl}/files/${path}`, { method: "POST" }).then((res) => res.text());
-        if (result) this.neurosift.url = result;
+        if (path) {
+            const result = await fetch(`${baseUrl}/files/${path}`, { method: "POST" }).then((res) => res.text());
+            if (result) this.neurosift.url = result;
+        } else this.neurosift.url = undefined;
     };
 
     neurosift = new Neurosift();
@@ -38,7 +40,9 @@ export class PreviewPage extends Page {
         }
 
         return html`
-            <div style="display: grid; height: 100%; grid-template-rows: min-content min-content 1fr; gap: 10px;">
+            <div
+                style="display: grid; width: 100%; height: 100%; grid-template-rows: min-content min-content 1fr; gap: 10px;"
+            >
                 <div>
                     <div style="display: flex; align-items: end; justify-content: space-between;">
                         <h1 style="margin: 0;">Neurosift File Visualization</h1>
