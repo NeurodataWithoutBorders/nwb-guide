@@ -14,7 +14,7 @@
                     "description": "From the <a href='https://gui-staging.dandiarchive.org' target='_blank'>staging (testing) server</a>"
                 }
             },
-            "required": ["main_api_key", "staging_api_key"]
+            "required": ["main_api_key"]
         }
     }
 }
