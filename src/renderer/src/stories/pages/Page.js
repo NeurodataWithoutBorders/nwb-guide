@@ -55,7 +55,7 @@ export class Page extends LitElement {
     notify = (...args) => {
         const ref = notify(...args);
         this.#notifications.push(ref);
-        return ref
+        return ref;
     };
 
     to = async (transition) => {
