@@ -30,7 +30,7 @@
         "PlexonSortingInterface",
         "AxonaRecordingInterface",
         "NeuralynxRecordingInterface",
-        "AlphaOmegaRecordingInterface"
+        "AlphaOmegaRecordingInterface",
         "DeepLabCutInterface"
     ]
 }
