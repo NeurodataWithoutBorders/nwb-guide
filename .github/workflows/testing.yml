@@ -9,7 +9,7 @@ concurrency:  # Cancel previous workflows on the same pull request
   cancel-in-progress: true
 
 env:
-  CACHE_NUMBER: 1  # increase to reset cache manually
+  CACHE_NUMBER: 2  # increase to reset cache manually
 
 jobs:
   testing:
@@ -22,43 +22,51 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9"]
         os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            label: tools/anaconda-env/environment-Linux.yml
-            prefix: /usr/share/miniconda3/envs/env-electron-python
+            label: environments/environment-Linux.yml
 
           - os: macos-latest
-            label: tools/anaconda-env/environment-Mac.yml
-            prefix: /Users/runner/miniconda3/envs/env-electron-python
+            label: environments/environment-Mac.yml
 
           - os: windows-latest
-            label: tools/anaconda-env/environment-Windows.yml
-            prefix: C:\Miniconda3\envs\env-electron-python
+            label: environments/environment-Windows.yml
 
 
     steps:
       - uses: actions/checkout@v3
       - run: git fetch --prune --unshallow --tags
 
-      - name: Set cache date
-        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-      - uses: actions/cache@v2
-        with:
-          path: ${{ matrix.prefix }}
-          key: ${{ matrix.os }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
-        id: cache
-
-      - name: Setup environment
+      # see https://github.com/conda-incubator/setup-miniconda#caching-environments
+      - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
-            miniforge-version: latest
-            environment-file: ${{ matrix.label }}
-            activate-environment: env-electron-python
-            python-version: ${{ matrix.python-version }}
-            use-only-tar-bz2: true
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: nwb-guide
+          use-mamba: true
+
+      - name: Set cache date
+        id: get-date
+        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache Conda env
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
+        id: cache
+
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Create and activate environment
+        run: mamba env update -n nwb-guide -f ${{ matrix.label }}
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
       - name: Install GUIDE
         run: npm ci

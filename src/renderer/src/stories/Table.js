@@ -56,14 +56,26 @@ const styleSymbol = Symbol("table-styles");
 export class Table extends LitElement {
     validateOnChange;
 
-    constructor({ schema, data, template, keyColumn, validateOnChange, validateEmptyCells, onStatusChange } = {}) {
+    constructor({
+        schema,
+        data,
+        template,
+        keyColumn,
+        validateOnChange,
+        onUpdate,
+        validateEmptyCells,
+        onStatusChange,
+        contextMenu,
+    } = {}) {
         super();
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
+        this.contextMenu = contextMenu ?? {};
 
+        if (onUpdate) this.onUpdate = onUpdate;
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
 
@@ -97,7 +109,7 @@ export class Table extends LitElement {
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
                     this.template[col] ??
-                    this.schema.properties[col].default ??
+                    // this.schema.properties[col].default ??
                     "";
             return value;
         });
@@ -134,6 +146,7 @@ export class Table extends LitElement {
 
     status;
     onStatusChange = () => {};
+    onUpdate = () => {};
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -226,6 +239,16 @@ export class Table extends LitElement {
 
             const validator = async function (value, callback) {
                 if (!value) {
+                    if (!ogThis.validateEmptyCells) {
+                        ogThis.#handleValidationResult(
+                            [], // Clear errors
+                            this.row,
+                            this.col
+                        );
+                        callback(true); // Allow empty value
+                        return true;
+                    }
+
                     if (isRequired) {
                         ogThis.#handleValidationResult(
                             [{ message: `${k} is a required property.`, type: "error" }],
@@ -233,10 +256,6 @@ export class Table extends LitElement {
                             this.col
                         );
                         callback(false);
-                        return true;
-                    }
-                    if (!ogThis.validateEmptyCells) {
-                        callback(true); // Allow empty value
                         return true;
                     }
                 }
@@ -271,8 +290,28 @@ export class Table extends LitElement {
 
         let nRows = rowHeaders.length;
 
-        const contextMenu = ["row_below", "remove_row"];
+        let contextMenu = ["row_below", "remove_row"];
         if (this.schema.additionalProperties) contextMenu.push("col_right", "remove_col");
+
+        contextMenu = contextMenu.filter((k) => !(this.contextMenu.ignore ?? []).includes(k));
+
+        const descriptionEl = this.querySelector("#description");
+        const operations = {
+            rows: [],
+            columns: [],
+        };
+
+        if (contextMenu.includes("row_below")) operations.rows.push("add");
+        if (contextMenu.includes("remove_row")) operations.rows.push("remove");
+        if (contextMenu.includes("col_right")) operations.columns.push("add");
+        if (contextMenu.includes("remove_col")) operations.columns.push("remove");
+        const operationSet = new Set(Object.values(operations).flat());
+        const operationOn = Object.keys(operations).filter((k) => operations[k].length);
+
+        if (operationSet.size) {
+            const desc = `Right click to ${Array.from(operationSet).join("/")} ${operationOn.join("and")}.`;
+            descriptionEl.innerText = desc;
+        }
 
         const table = new Handsontable(div, {
             data,
@@ -297,6 +336,9 @@ export class Table extends LitElement {
         if (menu) this.#root.appendChild(menu); // Move to style root
 
         const unresolved = (this.unresolved = {});
+
+        let validated = 0;
+        const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0);
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
@@ -332,6 +374,10 @@ export class Table extends LitElement {
                 if (value == undefined || value === "") delete target[rowName][header];
                 else target[rowName][header] = value;
             }
+
+            validated++;
+
+            if (initialCellsToUpdate < validated) this.onUpdate(rowName, header, value);
 
             if (typeof isValid === "function") isValid();
             // }
@@ -399,23 +445,34 @@ export class Table extends LitElement {
 
     #root;
 
-    render() {
+    // Clean up after the injected stylesheet, which may affect the rendering of other elements (e.g. the main sidebar list items)
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.stylesheet[styleSymbol]--;
+        if (this.stylesheet[styleSymbol] === 0) this.stylesheet.remove();
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
         const root = this.getRootNode().body ?? this.getRootNode();
         this.#root = root;
         const stylesheets = Array.from(root.querySelectorAll("style"));
-        const exists = stylesheets.find((el) => el[styleSymbol]);
+        const exists = (this.stylesheet = stylesheets.find((el) => styleSymbol in el));
 
-        if (!exists) {
-            const stylesheet = document.createElement("style");
+        if (exists) exists[styleSymbol]++;
+        else {
+            const stylesheet = (this.stylesheet = document.createElement("style"));
             stylesheet.innerHTML = styles;
-            stylesheet[styleSymbol] = true;
+            stylesheet[styleSymbol] = true; //1;
             root.append(stylesheet);
         }
+    }
 
+    render() {
         return html`
             <div></div>
             <p style="width: 100%; margin: 10px 0px">
-                <small style="color: gray;">Right click to add or remove rows.</small>
+                <small id="description" style="color: gray;"></small>
             </p>
         `;
     }

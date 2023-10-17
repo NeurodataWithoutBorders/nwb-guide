@@ -1471,43 +1471,12 @@ details[open] > summary::before {
     box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.getting-started-overview {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    height: 100%;
-    text-align: center;
+.standalone-section {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    /* display: grid;
-  grid-template-rows: 68% 14% 15%; */
-}
-
-.getting-started-header {
-    width: auto;
-    height: 18rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0 auto;
-    margin-top: 3rem;
     align-items: center;
-    margin-bottom: 0rem;
-}
-
-.front-page_logo {
-    margin-top: 0.5rem;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    width: 63rem;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.header-text {
-    font-size: 18px;
-    margin-top: 1rem;
-    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 .overview-card-layout {
@@ -1663,14 +1632,6 @@ details[open] > summary::before {
     .front-page_logo {
         width: 80rem;
     }
-
-    .document-content {
-        height: 55% !important;
-    }
-
-    .docu_divide {
-        margin-bottom: 10rem !important;
-    }
 }
 
 .overview_lottie_header {
@@ -1749,7 +1710,7 @@ details[open] > summary::before {
     align-items: center;
     flex-direction: column;
     width: 100%;
-    height: 57%;
+    height: 40%;
     display: flex;
     justify-content: center;
 }
@@ -1761,6 +1722,7 @@ details[open] > summary::before {
 }
 
 .docu-content-container {
+    padding-top: 1rem;
     margin-bottom: 1rem;
     display: flex;
     flex-direction: column;

@@ -21,10 +21,12 @@ export const openProgressSwal = (options) => {
 };
 
 export const run = async (url, payload, options = {}) => {
-    const needsSwal = !options.swal;
+    const needsSwal = !options.swal && options.swal !== false;
     if (needsSwal) openProgressSwal(options).then((swal) => (options.onOpen ? options.onOpen(swal) : undefined));
 
-    const results = await fetch(`${baseUrl}/neuroconv/${url}`, {
+    if (!("base" in options)) options.base = "/neuroconv";
+
+    const results = await fetch(`${baseUrl}${options.base || ""}/${url}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -31,6 +31,7 @@ import "../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 import "../../assets/css/guided.css";
 import isElectron from "../electron/check.js";
 import { isStorybook, reloadPageToHome } from "../dependencies/globals.js";
+import { getCurrentProjectName, updateAppProgress } from "../progress/index.js";
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
@@ -63,15 +64,25 @@ export class Dashboard extends LitElement {
             renderNameInSidebar: { type: Boolean, reflect: true },
             name: { type: String, reflect: true },
             logo: { type: String, reflect: true },
-            subtitle: { type: String, reflect: true },
             activePage: { type: String, reflect: true },
-            globalState: { type: Object },
+            globalState: { type: Object, reflect: true },
         };
     }
 
     main;
     sidebar;
     subSidebar;
+
+    // Custom Getter / Setter for Subtitle
+    #subtitle;
+    set subtitle(v) {
+        this.#subtitle = v;
+        this.sidebar.subtitle = v;
+    }
+
+    get subtitle() {
+        return this.#subtitle;
+    }
 
     pagesById = {};
     #active;
@@ -83,10 +94,14 @@ export class Dashboard extends LitElement {
         this.main.classList.add("dash-app");
 
         this.sidebar = new Sidebar();
-        this.sidebar.onClick = (_, value) => this.setAttribute("activePage", value.info.id);
+        this.sidebar.onClick = (_, value) => {
+            const id = value.info.id;
+            if (this.#active) this.#active.to(id);
+            else this.setAttribute("activePage", id);
+        };
 
         this.subSidebar = new NavigationSidebar();
-        this.subSidebar.onClick = (id) => this.setAttribute("activePage", id);
+        this.subSidebar.onClick = async (id) => this.#active.to(id);
 
         this.pages = props.pages ?? {};
         this.name = props.name;
@@ -118,17 +133,24 @@ export class Dashboard extends LitElement {
         this.#updated();
     }
 
+    requestPageUpdate() {
+        if (this.#active) this.#active.requestUpdate();
+    }
+
     createRenderRoot() {
         return this;
     }
 
     attributeChangedCallback(key, _, latest) {
         super.attributeChangedCallback(...arguments);
-        if (this.sidebar && (key === "name" || key === "logo" || key === "subtitle")) this.sidebar[key] = latest;
+        if (this.sidebar && (key === "name" || key === "logo")) this.sidebar[key] = latest;
         else if (key === "renderNameInSidebar") this.sidebar.renderName = latest === "true" || latest === true;
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {
-            if (this.#active && this.#active.info.parent && this.#active.info.section) this.#active.save(); // Always properly saves the page
+            if (this.#active && this.#active.info.parent && this.#active.info.section) {
+                const currentProject = getCurrentProjectName();
+                if (currentProject) updateAppProgress(latest, currentProject);
+            }
 
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page
 
@@ -136,6 +158,9 @@ export class Dashboard extends LitElement {
             this.sidebar.initialize = false;
             this.#activatePage(latest);
             return;
+        } else if (key.toLowerCase() === "globalstate" && this.#active) {
+            this.#active.info.globalState = JSON.parse(latest);
+            this.#active.requestUpdate();
         }
     }
 
@@ -208,9 +233,12 @@ export class Dashboard extends LitElement {
                     pageState = state.pages[id] = {
                         visited: false,
                         active: false,
+                        saved: false,
                         pageLabel: page.info.label,
                         pageTitle: page.info.title,
                     };
+
+                info.states = pageState;
 
                 state.active = false;
                 pageState.active = false;
@@ -239,8 +267,7 @@ export class Dashboard extends LitElement {
                 else if (sign === -1) return this.setAttribute("activePage", (info.previous ?? info.parent).info.id); // Default to back in time
             }
 
-            if (transition in this.pages) this.sidebar.select(transition);
-            else this.setAttribute("activePage", transition);
+            this.setAttribute("activePage", transition);
         };
 
         this.main.updatePages = () => {

@@ -3,7 +3,7 @@
 
     "name": false,
     "conversion_output_folder": false,
-    "stub_output_folder": false,
+    "preview_output_folder": false,
 
     "NWBFile": {
         "identifier": false,
@@ -23,6 +23,10 @@
         "session_start_time": ["check_session_start_time_future_date", "check_session_start_time_old_date"]
     },
 
+    "Ophys": {
+        "*": false
+    },
+
     "Ecephys": {
         "*": false,
         "ElectrodeGroup": {
@@ -35,6 +39,8 @@
         },
         "ElectrodeColumns": { }
     },
+
+    "Behavior": false,
 
     "Subject": {
         "description": false,

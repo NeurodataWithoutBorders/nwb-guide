@@ -1,12 +1,36 @@
 {
     "supported_interfaces": [
         "SpikeGLXRecordingInterface",
+        "SpikeGLXNIDQInterface",
         "PhySortingInterface",
         "NeuroScopeRecordingInterface",
+        "NeuroScopeLFPInterface",
         "NeuroScopeSortingInterface",
         "BiocamRecordingInterface",
         "IntanRecordingInterface",
-        "SpikeGLXNIDQInterface",
-        "SpikeGadgetsRecordingInterface"
+        "SpikeGadgetsRecordingInterface",
+        "OpenEphysRecordingInterface",
+        "BlackrockRecordingInterface",
+        "BlackrockSortingInterface",
+        "CellExplorerSortingInterface",
+        "KiloSortSortingInterface",
+        "Spike2RecordingInterface",
+        "BrukerTiffSinglePlaneImagingInterface",
+        "ExtractSegmentationInterface",
+        "CnmfeSegmentationInterface",
+        "BrukerTiffMultiPlaneImagingInterface",
+        "MicroManagerTiffImagingInterface",
+        "ScanImageImagingInterface",
+        "TiffImagingInterface",
+        "MiniscopeImagingInterface",
+        "SbxImagingInterface",
+        "CaimanSegmentationInterface",
+        "MCSRawRecordingInterface",
+        "MEArecRecordingInterface",
+        "PlexonRecordingInterface",
+        "PlexonSortingInterface",
+        "AxonaRecordingInterface",
+        "NeuralynxRecordingInterface",
+        "AlphaOmegaRecordingInterface"
     ]
 }

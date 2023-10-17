@@ -9,6 +9,9 @@ export interface ModalProps {
   onClick?: () => void;
   onClose?: () => void;
   onOpen?: () => void;
+  showCloseButton?: boolean,
+  width?: string
+  height?: string
 }
 
 export class Modal extends LitElement {
@@ -40,11 +43,15 @@ export class Modal extends LitElement {
 .modal-header span {
   font-weight: 800;
   font-size: 120%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 
 /* Modal Body */
 .modal-body {
+  position: relative;
   overflow-y: auto;
   width: 100%;
   flex-grow: 1;
@@ -69,12 +76,14 @@ export class Modal extends LitElement {
   left: 50%;
   transform: translate(-50%, 50%);
 
+  width: 100%;
+  max-width: 80vw;
+  max-height: 80vh;
+
   background-color: #fefefe;
   margin: auto;
   border-radius: 4px;
   padding: 0;
-  width: 80vw;
-  height: 80vh;
   box-shadow: 0 1px 5px 0 rgb(0 0 0 / 20%);
   transition: opacity 0.5s;
   display: flex;
@@ -102,12 +111,24 @@ export class Modal extends LitElement {
         },
          header:  {
           type: Object,
-          reflect: true
+          reflect: false
         },
          footer:  {
+          type: Object,
+          reflect: false
+        },
+        showCloseButton: {
+          type: Boolean,
+          reflect: true
+        },
+        width: {
           type: String,
           reflect: true
         },
+        height: {
+          type: String,
+          reflext: true
+        }
       };
     }
 
@@ -116,6 +137,9 @@ export class Modal extends LitElement {
     declare footer: ModalProps['footer']
     onClose: ModalProps['onClose']
     onOpen: ModalProps['onOpen']
+    declare showCloseButton: ModalProps['showCloseButton']
+    declare width: ModalProps['width']
+    declare height: ModalProps['height']
 
     constructor(props: ModalProps = {}) {
       super();
@@ -124,7 +148,11 @@ export class Modal extends LitElement {
       this.header = props.header ?? ''
       this.footer = props.footer ?? ''
       this.onClose = props.onClose
+      this.onOpen = props.onOpen
+      this.showCloseButton = props.showCloseButton ?? true
 
+      this.width = props.width
+      this.height = props.height
     }
 
     toggle = (force?:boolean) => {
@@ -140,19 +168,17 @@ export class Modal extends LitElement {
 
     render() {
 
-      const span = document.createElement('span')
-      span.innerHTML = this.footer ?? ''
       return html`
       <nwb-overlay .open=${this.open}>
-        <div class="modal-content ${this.open ? 'open' : ''}">
-        <div class="modal-header">
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.header}</span>
-            <nwb-button style="padding-left: 25px;" secondary size="extra-small" @click="${this.toggle}">Close</nwb-button>
-          </div>
-          <div class="modal-body">
-            <slot>No content</slot>
-          </div>
-          ${(this.footer) ? html`<div class="modal-footer">${span}</div>` : ''}
+        <div class="modal-content ${this.open ? 'open' : ''}" style="${this.width ? `width: ${this.width};` : ''} ${this.height ? `height: ${this.height};` : ''}">
+          <div class="modal-header">
+              <span title="${this.header}">${this.header}</span>
+              ${this.showCloseButton ? html`<nwb-button secondary size="extra-small" @click="${this.toggle}">Close</nwb-button>` : ''}
+            </div>
+            <div class="modal-body">
+              <slot>No content</slot>
+            </div>
+            ${this.footer ? html`<div class="modal-footer"><span>${this.footer}</span></div>` : ''}
         </div>
       </nwb-overlay>
     `

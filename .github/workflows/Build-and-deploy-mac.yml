@@ -15,33 +15,36 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: env-electron-python
-          environment-file: tools/anaconda-env/environment-MAC.yml
+          activate-environment: nwb-guide
+          environment-file: environments/environment-MAC.yml
           auto-activate-base: false
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
 
       - name: Install package.json modules and their dependencies
         run: npm install --ignore-scripts
 
-      - uses: apple-actions/import-codesign-certs@v1
+      - name: Remove bad sonpy file (might make Spike2 format unusable on Mac - should exclude from selection)
+        run: rm -f /usr/local/miniconda/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
+
+      - uses: apple-actions/import-codesign-certs@v2
         with:
+          # Currently this is set to Ryan's Developer ID certificate
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
       - name: Build and deploy on MAC
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Currently this is set to Ryan's Apple ID and app-specific password
           appleId: ${{ secrets.APPLE_ID }}
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
-        run: |
-          npm run python-onefile-build
-          npm run deploy-mac
+        run: npm run deploy:mac

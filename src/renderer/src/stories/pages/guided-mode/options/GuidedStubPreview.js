@@ -1,12 +1,17 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
-import { UnsafeComponent } from "../../Unsafe.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
+import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
 const { shell } = electron;
+
+export const getStubArray = (stubs) =>
+    Object.values(stubs)
+        .map((o) => Object.values(o))
+        .flat();
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
@@ -14,38 +19,39 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     header = {
-        subtitle: () => this.info.globalState.preview.file,
+        subtitle: `Preview file contents on truncated files using the Neurosift application`,
         controls: () =>
             html`<nwb-button
                 size="small"
-                @click=${() => (shell ? shell.showItemInFolder(this.info.globalState.preview.file) : "")}
+                @click=${() =>
+                    shell
+                        ? shell.showItemInFolder(
+                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((o) => o.file))
+                          )
+                        : ""}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
     };
 
+    // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {
         next: "Run Conversion",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
-
+            await this.save(); // Save in case the conversion fails
             delete this.info.globalState.conversion;
             this.info.globalState.conversion = await this.runConversions({}, true, {
                 title: "Running all conversions",
             });
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
     render() {
-        const info = this.info.globalState.preview;
+        const { preview, project } = this.info.globalState;
 
-        return html`
-            <div>
-                ${info
-                    ? new UnsafeComponent(info.html)
-                    : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`}
-            </div>
-        `;
+        return preview.stubs
+            ? new NWBFilePreview({ project: project.name, files: preview.stubs })
+            : html`<p style="text-align: center;">Your conversion preview failed. Please try again.</p>`;
     }
 }
 

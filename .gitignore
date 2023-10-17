@@ -4,13 +4,13 @@
 dist
 out
 
+coverage
+
 *.log
 
 # Ignore node_modules folder
 node_modules
 build/api
-pysodadist
-pyflaskdist
 pyflask/ds
 src/Users
 semantic
@@ -18,8 +18,6 @@ semantic.json
 .env
 build/
 yarn.lock
-
-app.spec
 
 *.pyc
 src/.DS_Store

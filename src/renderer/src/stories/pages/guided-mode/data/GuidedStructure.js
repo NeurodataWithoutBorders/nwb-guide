@@ -6,6 +6,9 @@ import { Button } from "../../../Button.js";
 import { baseUrl, supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
+import { List } from "../../../List";
+
+const defaultEmptyMessage = "No interfaces selected";
 
 export class GuidedStructurePage extends Page {
     constructor(...args) {
@@ -14,7 +17,7 @@ export class GuidedStructurePage extends Page {
         // Handle Search Bar Interactions
         this.search.list.style.position = "unset";
         this.search.onSelect = (...args) => {
-            this.#addListItem(...args);
+            this.list.add(...args);
             this.searchModal.toggle(false);
         };
 
@@ -26,115 +29,63 @@ export class GuidedStructurePage extends Page {
         this.searchModal.appendChild(this.search);
     }
 
-    #selected = {};
-
-    #addListItem = (listValue) => {
-        const { key, label, value } = listValue;
-        const li = document.createElement("li");
-        const keyEl = document.createElement("span");
-
-        let resolvedKey = key;
-        const originalValue = resolvedKey;
-
-        // Ensure no duplicate keys
-        let i = 0;
-        while (resolvedKey in this.#selected) {
-            i++;
-            resolvedKey = `${originalValue}_${i}`;
-        }
-
-        keyEl.innerText = resolvedKey;
-        keyEl.contentEditable = true;
-        keyEl.style.cursor = "text";
-
-        li.style.display = "flex";
-        li.style.alignItems = "center";
-
-        li.appendChild(keyEl);
-
-        const sepEl = document.createElement("span");
-        sepEl.innerHTML = "&nbsp;-&nbsp;";
-        li.appendChild(sepEl);
-
-        const valueEl = document.createElement("span");
-        valueEl.innerText = label;
-        li.appendChild(valueEl);
-        this.list.appendChild(li);
-
-        const button = new Button({
-            label: "Delete",
-            size: "small",
-        });
-
-        button.style.marginLeft = "1rem";
-
-        li.appendChild(button);
-
-        this.#selected[resolvedKey] = value;
-
-        // Stop enter key from creating new line
-        keyEl.addEventListener("keydown", function (e) {
-            if (e.keyCode === 13) {
-                keyEl.blur();
-                return false;
-            }
-        });
-
-        const deleteListItem = () => {
-            li.remove();
-            delete this.#selected[resolvedKey];
-        };
-
-        keyEl.addEventListener("blur", () => {
-            const newKey = keyEl.innerText;
-            if (newKey === "") keyEl.innerText = resolvedKey; // Reset to original value
-            else {
-                delete this.#selected[resolvedKey];
-                resolvedKey = newKey;
-                this.#selected[resolvedKey] = value;
-            }
-        });
-
-        button.onClick = deleteListItem;
+    header = {
+        subtitle: "Select all interfaces which apply to this experiment",
     };
 
     search = new Search({
         showAllWhenEmpty: true,
+        disabledLabel: "Not supported",
     });
 
-    list = document.createElement("ul");
+    list = new List({
+        emptyMessage: defaultEmptyMessage,
+        onChange: () => (this.unsavedUpdates = true),
+    });
 
     addButton = new Button();
 
-    searchModal = new Modal();
+    searchModal = new Modal({
+        width: "100%",
+        height: "100%",
+    });
+
+    getSchema = async () => {
+        const interfaces = { ...this.list.object };
+
+        const schema =
+            Object.keys(interfaces).length === 0
+                ? {}
+                : await fetch(`${baseUrl}/neuroconv/schema`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(interfaces),
+                  }).then((res) => res.json());
+
+        let schemas = this.info.globalState.schema;
+        if (!schemas) schemas = this.info.globalState.schema = {};
+
+        schemas.source_data = schema;
+        this.unsavedUpdates = true;
+    };
+
+    beforeSave = async () => {
+        this.info.globalState.interfaces = { ...this.list.object };
+        await this.save(undefined, false); // Interrim save, in case the schema request fails
+        await this.getSchema();
+    };
 
     footer = {
         onNext: async () => {
-            this.save(); // Save in case the schema request fails
-
-            const interfaces = { ...this.#selected };
-
-            const schema =
-                Object.keys(interfaces).length === 0
-                    ? {}
-                    : await fetch(`${baseUrl}/neuroconv/schema`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(interfaces),
-                      }).then((res) => res.json());
-
-            let schemas = this.info.globalState.schema;
-            if (!schemas) schemas = this.info.globalState.schema = {};
-
-            schemas.source_data = schema;
-            this.info.globalState.interfaces = interfaces;
-
-            this.onTransition(1);
+            if (!this.info.globalState.schema) await this.getSchema(); // Initialize schema
+            this.to(1);
         },
     };
 
     async updated() {
-        const selected = this.info.globalState.interfaces;
+        const { interfaces = {} } = this.info.globalState;
+
+        this.list.emptyMessage = "Loading valid interfaces...";
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
@@ -150,7 +101,9 @@ export class GuidedStructurePage extends Page {
             )
             .catch((e) => console.error(e));
 
-        for (const [key, name] of Object.entries(selected || {})) {
+        this.list.emptyMessage = defaultEmptyMessage;
+
+        for (const [key, name] of Object.entries(interfaces)) {
             let found = this.search.options?.find((o) => o.value === name);
 
             // If not found, spoof based on the key and names provided previously
@@ -162,17 +115,19 @@ export class GuidedStructurePage extends Page {
                 };
             }
 
-            this.#addListItem({ ...found, key }); // Add previously selected items
+            this.list.add({ ...found, key }); // Add previously selected items
         }
+
+        this.addButton.removeAttribute("hidden");
+        super.updated(); // Call if updating data
     }
 
     render() {
         // Reset list
-        this.#selected = {};
-        this.list.remove();
-        this.list = document.createElement("ul");
         this.list.style.display = "inline-block";
+        this.list.clear();
         this.addButton.style.display = "block";
+        this.addButton.setAttribute("hidden", "");
 
         return html`
             <div style="width: 100%; text-align: center;">${this.list} ${this.addButton}</div>

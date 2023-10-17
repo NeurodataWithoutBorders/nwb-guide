@@ -22,6 +22,7 @@ const defaultSchema = {
         test: {
             type: "string",
             default: true,
+            description: "This is a test description",
         },
         warn: {
             type: "string",
@@ -30,8 +31,24 @@ const defaultSchema = {
             type: "string",
             format: "file",
         },
+        list: {
+            type: "array",
+            items: {
+                type: "string",
+                format: "file",
+            },
+        },
     },
     required: ["test"],
+};
+
+export const Default = Template.bind({});
+Default.args = {
+    results: {
+        test: "false",
+        list: ["item"],
+    },
+    schema: defaultSchema,
 };
 
 export const Nested = Template.bind({});

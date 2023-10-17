@@ -1,0 +1,94 @@
+name: PyFlask build and distributable tests
+on:
+  schedule:
+    - cron: "0 16 * * *"  # Daily at noon EST
+  pull_request:
+  workflow_dispatch:
+
+# Cancel previous workflows on the same pull request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CACHE_NUMBER: 1  # increase to reset cache manually
+
+jobs:
+  testing:
+    name: PyFlask build and distributable tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - python-version: "3.9"
+            os: ubuntu-latest
+            label: environments/environment-Linux.yml
+            prefix: /usr/share/miniconda3/envs/nwb-guide
+
+          - python-version: "3.9"
+            os: macos-latest
+            label: environments/environment-Mac.yml
+            prefix: /Users/runner/miniconda3/envs/nwb-guide
+
+          - python-version: "3.9"
+            os: windows-latest
+            label: environments/environment-Windows.yml
+            prefix: C:\Miniconda3\envs\nwb-guide
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: git fetch --prune --unshallow --tags
+
+      # see https://github.com/conda-incubator/setup-miniconda#caching-environments
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: nwb-guide
+          use-mamba: true
+
+      - name: Set cache date
+        id: get-date
+        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache Mamba env
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CONDA }}/envs
+          key:
+            conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
+        env:
+          CACHE_NUMBER: ${{ env.CACHE_NUMBER }}
+        id: cache
+
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Update environment
+        run: mamba env update -f ${{ matrix.label }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - run: npm ci
+
+      # fix for macos build
+      - if: matrix.os == 'macos-latest'
+        run: rm -f /Users/runner/miniconda3/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
+
+      - name: Build PyFlask distribution
+        run: npm run build:flask
+
+      - name: Run test on distributed executable
+        run: node tests/testPyinstallerExecutable.js
+
+      - name: Run Python tests on distributed executable
+        run: npm run test:executable

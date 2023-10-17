@@ -1,27 +1,37 @@
+import { updateURLParams } from "../../utils/url.js";
 import isElectron from "./check.js";
 
 export { isElectron };
 
 export let port = 4242;
-export let electron = {};
+export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
 export let remote = {};
 export let app = null;
 export let path = null;
 export let log = null;
+export let crypto = null;
 
 if (isElectron) {
     try {
-        // Import Electron API
-        electron = require("electron"); // ipcRenderer, remote, shell, etc.
         fs = require("fs-extra"); // File System
         os = require("os");
-
-        log = require("electron-log");
-
+        crypto = require("crypto");
         remote = require("@electron/remote");
         app = remote.app;
+
+        electron.ipcRenderer.on("fileOpened", (info, filepath) => {
+            updateURLParams({ file: filepath });
+            const dashboard = document.querySelector("nwb-dashboard");
+            const activePage = dashboard.getAttribute("activePage");
+            if (activePage === "preview") dashboard.requestUpdate();
+            else dashboard.setAttribute("activePage", "preview");
+        });
+
+        ["log", "warn", "error"].forEach((method) =>
+            electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args))
+        );
 
         port = electron.ipcRenderer.sendSync("get-port");
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());

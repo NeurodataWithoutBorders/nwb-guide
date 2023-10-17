@@ -1,13 +1,44 @@
 import { html } from "lit";
-import { hasEntry, update } from "../../../../progress.js";
+import { global, hasEntry, rename } from "../../../../progress/index.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { validateOnChange } from "../../../../validation/index.js";
 
-import projectMetadataSchema from "../../../../../../../schemas/json/project-metadata.schema.json" assert { type: "json" };
+import projectGeneralSchema from "../../../../../../../schemas/json/project/general.json" assert { type: "json" };
+import projectGlobalSchema from "../../../../../../../schemas/json/project/globals.json" assert { type: "json" };
+import { merge } from "../../utils.js";
 import { schemaToPages } from "../../FormPage.js";
-
 import { onThrow } from "../../../../errors";
+import baseMetadataSchema from "../../../../../../../schemas/base-metadata.schema";
+
+const changesAcrossSessions = {
+    Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
+    NWBFile: [
+        "session_id",
+        "session_start_time",
+        "identifier",
+        "data_collection",
+        "notes",
+        "pharmacolocy",
+        "session_description",
+        "slices",
+        "source_script",
+        "source_script_file_name",
+    ],
+};
+
+const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
+
+Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
+    Object.keys(v.properties)
+        .filter((prop) => !(changesAcrossSessions[globalProp] ?? []).includes(prop))
+        .forEach((prop) => {
+            const globalNestedProp =
+                projectMetadataSchema.properties[globalProp] ??
+                (projectMetadataSchema.properties[globalProp] = { properties: {} });
+            globalNestedProp.properties[prop] = baseMetadataSchema.properties[globalProp].properties[prop];
+        });
+});
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -18,6 +49,10 @@ export class GuidedNewDatasetPage extends Page {
     state = {};
 
     #nameNotification;
+
+    header = {
+        subtitle: "Enter a name for this pipeline and specify the base folders to save all outputs to",
+    };
 
     footer = {
         onNext: async () => {
@@ -41,7 +76,7 @@ export class GuidedNewDatasetPage extends Page {
             // Update existing progress file
             if (globalState.initialized) {
                 try {
-                    const res = update(name, globalState.name);
+                    const res = rename(name, globalState.name);
                     if (typeof res === "string") this.notify(res);
                     if (res === false) return;
                 } catch (e) {
@@ -52,7 +87,7 @@ export class GuidedNewDatasetPage extends Page {
                 const has = await hasEntry(name);
                 if (has) {
                     this.notify(
-                        "An existing progress file already exists with that name. Please choose a different name.",
+                        "An existing project already exists with that name. Please choose a different name.",
                         "error"
                     );
                     return;
@@ -62,7 +97,7 @@ export class GuidedNewDatasetPage extends Page {
             globalState.initialized = true;
             Object.assign(globalState, this.state);
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
@@ -74,14 +109,19 @@ export class GuidedNewDatasetPage extends Page {
         const schema = { ...projectMetadataSchema };
         schema.properties = { ...schema.properties };
 
-        this.state = structuredClone(this.info.globalState.project);
+        this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
         const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
             info.title = `${info.label} Global Metadata`;
             return info;
         });
 
-        pages.forEach((page) => this.addPage(page.info.label, page));
+        pages.forEach((page) => {
+            page.header = {
+                subtitle: `Enter any ${page.info.label}-level metadata that can serve as the common default across each experiment session`,
+            };
+            this.addPage(page.info.label, page);
+        });
 
         this.form = new JSONSchemaForm({
             schema,
@@ -91,6 +131,7 @@ export class GuidedNewDatasetPage extends Page {
                 properties: ["createDirectory"],
             },
             validateOnChange,
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

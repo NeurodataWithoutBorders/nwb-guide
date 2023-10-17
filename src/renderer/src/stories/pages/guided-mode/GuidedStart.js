@@ -2,6 +2,7 @@ import { html } from "lit";
 import { Page } from "../Page.js";
 import "./GuidedFooter";
 import { InfoBox } from "../../InfoBox.js";
+import { InspectorListItem } from "../../preview/inspector/InspectorList.js";
 
 export class GuidedStartPage extends Page {
     constructor(...args) {
@@ -47,23 +48,49 @@ export class GuidedStartPage extends Page {
 
     render() {
         return html`
-            <div id="guided-mode-starting-container" class="guided--main-tab" data-parent-tab-name="Dataset Structure">
-                <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
+                <div class="guided--panel" style="flex-grow: 1">
                     <div class="title-border">
-                        <h1 class="guided--text-sub-step">Welcome to Guided Mode!</h1>
+                        <h1 class="guided--text-sub-step">Designing a Conversion Pipeline: A Look Ahead</h1>
                     </div>
-                    <div class="guided--section">
-                        <p class="guided--help-text">
-                            Guided Mode is divided into four high-level sections. During the first three sections, you
-                            will be directed to specify the data formats and files to include in your dataset and
-                            provide information about your dataset. In the final section, NWB GUIDE will automatically
-                            generate a valid NWB file and ask for your review before uploading to DANDI. Note that none
-                            of your local data files will ever be modified or moved.
+                    <div>
+                        <br>
+                        <p>
+                           In the NWB GUIDE, the process of running a conversion pipeline is broken into four high-level sections.
+                        <p>
+                        <h4>1. Project Structure</h4>
+                        <p>
+                            The first section will direct you to specify the high-level structure of your conversion pipeline, including data formats and global metadata.
                         </p>
+                        <h4>2. Data Review</h4>
+                        <p>
+                            The second section will have you provide your source data files and NWB File metadata on a per-subject basis to populate your files.
+                        </p>
+                        ${new InspectorListItem({
+                            message: html`<b>Red boxes are error messages.</b> These will block your conversion progress
+                                until resolved.`,
+                            type: "error",
+                        })}
+                        ${new InspectorListItem({
+                            message: html`<b>Yellow boxes are warnings.</b> Fixing them will align your NWB files with
+                                best practices.`,
+                            type: "warning",
+                        })}
+                        <h4>3. Conversion Preview</h4>
+                        <p>
+                            In the third section, you will preview your conversion before uploading to DANDI.
+                        </p>
+                        <h4>4. Final Review</h4>
+                        <p>
+                            Finally, you will upload your conversion to DANDI and review the resulting dandiset.
+                        </p>
+
+                        <br>
+                        <h4>Additional Resources</h4>
+                        <hr>
                         ${new InfoBox({
-                            header: "Learn more about the conversion process",
+                            header: "Where can I learn more about the conversion process?",
                             content: html`
-                                Although not required to use Guided Mode, you can learn more about the NWB conversion
+                                Although not required to use the GUIDE, you can learn more about the NWB conversion
                                 process in the
                                 <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
                                     >neuroconv documentation page</a
