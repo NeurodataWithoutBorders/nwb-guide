@@ -109,11 +109,7 @@ export class GuidedSourceDataPage extends ManagedPage {
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
 
-        console.log("Schema", schema);
-
         const schemaResolved = getSourceDataSchema(schema);
-
-        console.log("Schema", schemaResolved);
 
         const form = new JSONSchemaForm({
             identifier: instanceId,

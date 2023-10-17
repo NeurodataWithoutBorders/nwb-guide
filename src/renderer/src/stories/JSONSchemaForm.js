@@ -521,7 +521,13 @@ export class JSONSchemaForm extends LitElement {
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore.includes(key)) return false;
+                if (
+                    this.ignore.find((v) => {
+                        if (typeof v === "string") return v === key;
+                        else return v.test(key);
+                    })
+                )
+                    return false;
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
@@ -627,7 +633,6 @@ export class JSONSchemaForm extends LitElement {
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
                 const schema = this.getSchema(localPath);
-                console.log(schema);
                 errors.push({
                     message: `${schema.title ?? header(name)} is a required property.`,
                     type: "error",
