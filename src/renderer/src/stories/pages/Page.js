@@ -56,8 +56,9 @@ export class Page extends LitElement {
     };
 
     notify = (...args) => {
-        const note = notify(...args);
-        this.#notifications.push(note);
+        const ref = notify(...args);
+        this.#notifications.push(ref);
+        return ref;
     };
 
     to = async (transition) => {

@@ -16,6 +16,7 @@
         "Spike2RecordingInterface",
         "BrukerTiffSinglePlaneImagingInterface",
         "ExtractSegmentationInterface",
+        "CnmfeSegmentationInterface",
         "BrukerTiffMultiPlaneImagingInterface",
         "MicroManagerTiffImagingInterface",
         "ScanImageImagingInterface",
@@ -29,6 +30,10 @@
         "PlexonSortingInterface",
         "AxonaRecordingInterface",
         "NeuralynxRecordingInterface",
-        "AlphaOmegaRecordingInterface"
+        "AlphaOmegaRecordingInterface",
+        "DeepLabCutInterface",
+        "SLEAPInterface",
+        "FicTracDataInterface",
+        "AudioInterface"
     ]
 }
