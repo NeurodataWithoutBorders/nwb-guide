@@ -37,7 +37,7 @@ export class SettingsPage extends Page {
 
     #openNotyf = (message, type) => {
         if (this.#notification) notyf.dismiss(this.#notification);
-        return (this.#notification = this.notify(message,type));
+        return (this.#notification = this.notify(message, type));
     };
 
     beforeSave = () => {
@@ -60,8 +60,7 @@ export class SettingsPage extends Page {
         const button = new Button({
             label: "Save Changes",
             onClick: async () => {
-                if (!this.unsavedUpdates)
-                    return this.#openNotyf("All changes were already saved", "success");
+                if (!this.unsavedUpdates) return this.#openNotyf("All changes were already saved", "success");
                 this.save();
             },
         });
