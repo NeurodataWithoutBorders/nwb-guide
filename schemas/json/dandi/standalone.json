@@ -1,0 +1,12 @@
+{
+    "properties": {
+        "filesystem_paths": {
+            "type": "array",
+            "items":{
+                "type": "string",
+                "format": ["file", "directory"]
+            }
+        }
+    },
+    "required": ["filesystem_paths"]
+}

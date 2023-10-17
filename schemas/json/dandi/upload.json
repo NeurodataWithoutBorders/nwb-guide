@@ -1,0 +1,14 @@
+{
+    "properties": {
+        "dandiset_id": {
+            "type": "string",
+            "description": "The unique identifier for your dandiset. Will automatically determine whether to upload to the main DANDI archive or the development staging server."
+        },
+        "cleanup": {
+            "type": "boolean",
+            "title": "Delete Local Files After Upload",
+            "default": false
+        }
+    },
+    "required": ["dandiset_id"]
+}

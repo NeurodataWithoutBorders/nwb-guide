@@ -20,8 +20,14 @@ path_config = resource_path(
 )  # NOTE: Must have pyflask for running the GUIDE as a whole, but errors for just the server
 f = path_config.open()
 data = json.load(f)
-STUB_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["stubs"])
+GUIDE_ROOT_FOLDER = Path(Path.home(), data["root"])
+STUB_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["preview"])
 CONVERSION_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["conversions"])
 TUTORIAL_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["tutorial"])
 
 f.close()
+
+# Create all nested home folders
+STUB_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)
+CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)
+TUTORIAL_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)

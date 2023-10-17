@@ -18,8 +18,8 @@ export function resolveGlobalOverrides(subject, globalState) {
     const subjectMetadataCopy = { ...globalState.subjects[subject] };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata
 
-    const overrides = merge(undefined, globalState.project, {}); // Copy project-wide metadata
-    merge("Subject", subjectMetadataCopy, overrides);
+    const overrides = merge(globalState.project, {}); // Copy project-wide metadata
+    merge(subjectMetadataCopy, overrides.Subject);
 
     return overrides;
 }
@@ -29,10 +29,18 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 
     for (let name in properties) {
         const info = properties[name];
+
+        // NEUROCONV PATCH: Correct for incorrect array schema
+        if (info.properties && info.type === "array") {
+            info.items = { type: "object", properties: info.properties, required: info.required };
+            delete info.properties;
+        }
+
         const props = info.properties;
 
         if (!(name in target)) {
             if (props) target[name] = {}; // Regisiter new interfaces in results
+            // if (info.type === "array") target[name] = []; // Auto-populate arrays (NOTE: Breaks PyNWB when adding to TwoPhotonSeries field...)
 
             // Apply global or default value if empty
             if (name in globals) target[name] = globals[name];
@@ -49,16 +57,17 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 export function resolveResults(subject, session, globalState) {
     const overrides = resolveGlobalOverrides(subject, globalState); // Unique per-subject (but not sessions)
     const metadata = globalState.results[subject][session].metadata;
-    const results = merge(undefined, metadata, {}); // Copy the metadata results from the form
+    const results = merge(metadata, {}); // Copy the metadata results from the form
     const schema = globalState.schema.metadata[subject][session];
     resolveProperties(schema, results, overrides);
     return results;
 }
 
+// NOTE: Remove this...
 export function createResults({ subject, info }, globalState) {
     const results = populateWithProjectMetadata(info.metadata, globalState);
     const metadataCopy = { ...globalState.subjects[subject] };
     delete metadataCopy.sessions; // Remove extra key from metadata
-    merge("Subject", metadataCopy, results);
+    merge(metadataCopy, results.Subject);
     return results;
 }

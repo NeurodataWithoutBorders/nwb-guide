@@ -1,0 +1,10 @@
+{
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Enter the name of your project.",
+        "placeholder": "Enter project name here"
+      }
+    },
+    "required": ["name"]
+  }

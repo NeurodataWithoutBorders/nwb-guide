@@ -11,17 +11,17 @@ export class GuidedConversionOptionsPage extends Page {
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
             await this.form.validate(); // Will throw an error in the callback
 
             // Preview a random conversion
-            delete this.info.globalState.preview; // Clear the preview results
+            delete this.info.globalState.stubs; // Clear the preview results
             const results = await this.runConversions({ stub_test: true }, 1, {
                 title: "Testing conversion on a random session",
             });
-            this.info.globalState.preview = results[0]; // Save the preview results
+            this.info.globalState.stubs = results; // Save the preview results
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
@@ -48,6 +48,7 @@ export class GuidedConversionOptionsPage extends Page {
             dialogOptions: {
                 properties: ["openDirectory", "createDirectory"],
             },
+            onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
         });
 

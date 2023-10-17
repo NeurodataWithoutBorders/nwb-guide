@@ -1,5 +1,3 @@
-import { html } from "lit";
-
 import Swal from "sweetalert2";
 import { isStorybook } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
@@ -7,6 +5,7 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
+import { merge } from "../../utils.js";
 import getSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 export class GuidedSourceDataPage extends ManagedPage {
@@ -14,16 +13,25 @@ export class GuidedSourceDataPage extends ManagedPage {
         super(...args);
     }
 
+    beforeSave = () => {
+        merge(this.localState, this.info.globalState);
+    };
+
+    header = {
+        subtitle:
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
+    };
+
     footer = {
+        next: "Request Metadata Schema",
         onNext: async () => {
-            this.save(); // Save in case the conversion fails
+            await this.save(); // Save in case the conversion fails
+
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
             // const previousResults = this.info.globalState.metadata.results
 
-            this.save(); // Save in case the metadata request fails
-
-            let stillFireSwal = false;
+            let stillFireSwal = true;
             const fireSwal = () => {
                 Swal.fire({
                     title: "Getting metadata for source data",
@@ -81,7 +89,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     }
 
                     // Merge metadata results with the generated info
-                    this.merge("metadata", result.results, info);
+                    merge(result.results, info.metadata);
 
                     // Mirror structure with metadata schema
                     const schema = this.info.globalState.schema;
@@ -91,7 +99,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 })
             );
 
-            this.onTransition(1);
+            this.to(1);
         },
     };
 
@@ -99,11 +107,14 @@ export class GuidedSourceDataPage extends ManagedPage {
         const instanceId = `sub-${subject}/ses-${session}`;
 
         const schema = this.info.globalState.schema.source_data;
+        delete schema.description;
+
+        const schemaResolved = getSourceDataSchema(schema);
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema: getSourceDataSchema(schema),
+            schema: schemaResolved,
             results: info.source_data,
             ignore: [
                 "verbose",
@@ -114,6 +125,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 "nsx_override",
             ],
             // onlyRequired: true,
+            onUpdate: () => (this.unsavedUpdates = true),
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });
@@ -126,7 +138,9 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     render() {
-        this.forms = this.mapSessions(this.createForm);
+        this.localState = { results: merge(this.info.globalState.results, {}) };
+
+        this.forms = this.mapSessions(this.createForm, this.localState);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {

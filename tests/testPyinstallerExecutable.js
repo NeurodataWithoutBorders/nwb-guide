@@ -2,35 +2,43 @@ const path = require("path");
 const child_process = require("child_process");
 const fs = require("fs");
 
-const port = 1234;
-const script =
-    process.argv[2] ||
-    path.resolve(__dirname, `../build/flask/nwb-guide/nwb-guide${process.platform === "win32" ? ".exe" : ""}`);
+const cmds = {
+    port: 1234,
+    script: path.resolve(__dirname, `../build/flask/nwb-guide/nwb-guide${process.platform === "win32" ? ".exe" : ""}`),
+};
 
-console.log("Found file", fs.existsSync(script));
+process.argv.forEach((v, i) => {
+    if (v === "--script") cmds.script = process.argv[i + 1];
+    if (v === "--port") cmds.port = parseInt(process.argv[i + 1]);
+    if (v === "--forever") cmds.forever = true;
+});
 
-const proc2 = child_process.spawn(`${script}`, [port + 1]);
+console.log("Found file", fs.existsSync(cmds.script));
+
+const proc2 = child_process.spawn(`${cmds.script}`, [cmds.port]);
 handleProcess(proc2, "spawn");
 
 let now = Date.now();
 
-let outputCollection = "";
+const regex = /.+Error: .+/i; // Check for error messages (without case sensitivity)
 
-const regex = /.+Error: .+/;
+function onMessage(data, id) {
+    const message = data.toString();
+    if (!cmds.forever && regex.test(message)) throw new Error(message);
+    else console.error(`[${id}] ${message}`);
+}
 
 function handleProcess(proc, id = "process") {
     if (proc != null) {
         // Listen for errors from Python process
-        proc.stderr.on("data", function (data) {
-            const message = data.toString();
-            console.error(`[${id}] Error: ${data}`);
-            outputCollection += message;
-            if (regex.test(message)) throw new Error(outputCollection);
-        });
+        proc.stderr.on("data", (data) => onMessage(data, id));
 
         proc.stdout.on("data", function (data) {
-            console.log(`Time to Start: ${(Date.now() - now).toFixed(2)}ms`);
-            process.exit();
+            if (cmds.forever) onMessage(data, id);
+            else {
+                console.log(`Time to Start: ${(Date.now() - now).toFixed(2)}ms`);
+                process.exit();
+            }
         });
 
         const error = () => () => {

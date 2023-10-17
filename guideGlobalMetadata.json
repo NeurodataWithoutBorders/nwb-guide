@@ -13,6 +13,23 @@
         "BlackrockSortingInterface",
         "CellExplorerSortingInterface",
         "KiloSortSortingInterface",
-        "TdtRecordingInterface"
+        "TdtRecordingInterface",
+        "Spike2RecordingInterface",
+        "BrukerTiffSinglePlaneImagingInterface",
+        "ExtractSegmentationInterface",
+        "BrukerTiffMultiPlaneImagingInterface",
+        "MicroManagerTiffImagingInterface",
+        "ScanImageImagingInterface",
+        "TiffImagingInterface",
+        "MiniscopeImagingInterface",
+        "SbxImagingInterface",
+        "CaimanSegmentationInterface",
+        "MCSRawRecordingInterface",
+        "MEArecRecordingInterface",
+        "PlexonRecordingInterface",
+        "PlexonSortingInterface",
+        "AxonaRecordingInterface",
+        "NeuralynxRecordingInterface",
+        "AlphaOmegaRecordingInterface"
     ]
 }

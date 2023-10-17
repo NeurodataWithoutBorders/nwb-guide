@@ -22,13 +22,8 @@ export class GettingStartedPage extends Page {
 
     render() {
         return html`
-            <section
-                id="getting_started-section"
-                class="getting-started-overview section js-section u-category-windows is-shown fullShown"
-            >
-                <p class="header-text">
-                    Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br />
-                </p>
+            <section class="standalone-section">
+                <h3>Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br /></h3>
 
                 <div class="overview-card-layout grid h-auto w-full grid-cols-3 gap-6">
                     <div id="overview-column-1" class="overview-column">
@@ -65,7 +60,7 @@ export class GettingStartedPage extends Page {
                     <button
                         id="home-button-guided-mode-link"
                         class="getting-started-btn secondary-plain-button text-base"
-                        @click="${() => this.onTransition("conversion/start")}"
+                        @click="${() => this.to("conversion/start")}"
                     >
                         <p class="getting-started-btn-txt">Convert a new dataset</p>
                         <i class="el-icon icon-animate"

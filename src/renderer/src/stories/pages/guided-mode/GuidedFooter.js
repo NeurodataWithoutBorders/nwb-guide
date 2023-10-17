@@ -27,10 +27,10 @@ export class GuidedFooter extends LitElement {
     constructor({
         back = "Back",
         next = "Next",
-        exit = "Exit",
-        onBack = () => this.onTransition(-1),
-        onNext = () => this.onTransition(1),
-        onExit = () => this.onTransition("/"),
+        exit = "Return to Home Screen",
+        onBack = () => this.to(-1),
+        onNext = () => this.to(1),
+        onExit = () => this.to("/"),
     } = {}) {
         super();
         this.back = back;
@@ -48,7 +48,7 @@ export class GuidedFooter extends LitElement {
     }
 
     updated() {
-        this.onTransition = this.parentElement.onTransition;
+        this.to = (transition) => this.parentElement.to(transition);
     }
 
     render() {

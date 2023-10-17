@@ -1,0 +1,36 @@
+{
+    "required": [],
+    "properties": {
+        "OpenEphysRecordingInterface": {
+            "required": [
+                "folder_path"
+            ],
+            "properties": {
+                "folder_path": {
+                    "format": "directory",
+                    "type": "string"
+                },
+                "stream_name": {
+                    "type": "string"
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "source.schema.json",
+    "title": "Source data schema",
+    "description": "Schema for the source data, files and directories",
+    "version": "0.1.0"
+}
