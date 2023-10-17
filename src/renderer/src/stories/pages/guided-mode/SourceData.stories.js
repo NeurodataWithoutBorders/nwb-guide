@@ -28,6 +28,7 @@ import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/gener
 import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
 import AxonaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AxonaRecordingInterface.json";
 import NeuralynxRecordingInterfaceSchema from "../../../../../../schemas/json/generated/NeuralynxRecordingInterface.json";
+import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AlphaOmegaRecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -97,6 +98,8 @@ globalStateCopy.schema.source_data.properties.AxonaRecordingInterface =
     AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface;
 globalStateCopy.schema.source_data.properties.NeuralynxRecordingInterface =
     NeuralynxRecordingInterfaceSchema.properties.NeuralynxRecordingInterface;
+globalStateCopy.schema.source_data.properties.AlphaOmegaRecordingInterface =
+    AlphaOmegaRecordingInterfaceSchema.properties.AlphaOmegaRecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -283,3 +286,9 @@ const NeuralynxRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalSt
 NeuralynxRecordingInterfaceGlobalCopy.interfaces.interface = NeuralynxRecordingInterface;
 NeuralynxRecordingInterfaceGlobalCopy.schema.source_data = NeuralynxRecordingInterfaceSchema;
 NeuralynxRecordingInterface.args = { activePage, globalState: NeuralynxRecordingInterfaceGlobalCopy };
+
+export const AlphaOmegaRecordingInterface = PageTemplate.bind({});
+const AlphaOmegaRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+AlphaOmegaRecordingInterfaceGlobalCopy.interfaces.interface = AlphaOmegaRecordingInterface;
+AlphaOmegaRecordingInterfaceGlobalCopy.schema.source_data = AlphaOmegaRecordingInterfaceSchema;
+AlphaOmegaRecordingInterface.args = { activePage, globalState: AlphaOmegaRecordingInterfaceGlobalCopy };
