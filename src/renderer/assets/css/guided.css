@@ -8,7 +8,7 @@
 
 .guided--nav {
     min-height: 100vh;
-    width: 220px;
+    min-width: 220px;
     margin: 0px !important;
     /* position: fixed; */
     background-color: var(--color-border);

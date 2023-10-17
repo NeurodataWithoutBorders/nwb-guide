@@ -207,6 +207,10 @@ export class Dashboard extends LitElement {
 
         page.set(toPass);
 
+        const projectName = info.globalState?.project?.name
+        this.subSidebar.header = projectName ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>` : projectName
+
+
         // const page = this.getPage(info)
         this.main.set({
             page,
