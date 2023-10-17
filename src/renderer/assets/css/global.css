@@ -10,7 +10,7 @@
 
 /*  Notfy */
 .notyf__toast {
-    max-width: clamp(300px, 40vw, min-content) !important;
+    max-width: 40vw !important;
 }
 
 .notyf__message {
