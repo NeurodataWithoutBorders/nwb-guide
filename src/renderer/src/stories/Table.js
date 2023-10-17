@@ -6,12 +6,17 @@ import { errorHue, warningHue } from "./globals";
 import { checkStatus } from "../validation";
 import { emojiFontFamily } from "./globals";
 
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+
+
 const maxRows = 20;
 
 // Inject scoped stylesheet
 const styles = `
 
         ${css}
+
 
         .handsontable td[error] {
             background: hsl(${errorHue}, 100%, 90%) !important;
@@ -37,11 +42,8 @@ const styles = `
         padding-left: 20px
       }
 
-      [title] .relative::after {
-        content: 'ℹ️';
-        display: inline-block;
+      .relative .info {
         margin: 0px 5px;
-        text-align: center;
         font-size: 80%;
         font-family: ${emojiFontFamily}
       }
@@ -283,7 +285,19 @@ export class Table extends LitElement {
 
         const onAfterGetHeader = function (index, TH) {
             const desc = entries[colHeaders[index]].description;
-            if (desc) TH.setAttribute("title", desc);
+            if (desc) {
+                const rel = TH.querySelector('.relative')
+                let span = rel.querySelector('.info')
+                if (!span) {
+                    span = document.createElement('span')
+                    span.classList.add('info')
+                    span.innerText = 'ℹ️'
+                    rel.append(span)
+                }
+
+                if (span._tippy) span._tippy.destroy()
+                tippy(span, { content: `${desc}` });
+            }
         };
 
         const data = this.#getData();
@@ -425,17 +439,22 @@ export class Table extends LitElement {
 
         if (cell) {
             let title = "";
+            let theme = ""
             if (warnings.length) {
-                cell.setAttribute("warning", "");
+                theme = "warning",
                 title = warnings.map((o) => o.message).join("\n");
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                cell.setAttribute("error", "");
+                theme = "error",
                 title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
-            if (title) cell.title = title;
+            if (theme) cell.setAttribute(theme, "");
+
+            if (cell._tippy) cell._tippy.destroy()
+
+            if (title) tippy(cell, {  content: title, theme });
         }
 
         this.#checkStatus(); // Check status after every validation update

@@ -17,6 +17,15 @@
     word-wrap: break-word;
 }
 
+/* Tippy */
+.tippy-box[data-theme~="error"]{
+    background-color: hsl(0, 100%, 70%);
+}
+
+.tippy-box[data-theme~="warning"]{
+    background-color: hsl(57, 100%, 70%);
+}
+
 /* Global ---------------------------- */
 
 * {
