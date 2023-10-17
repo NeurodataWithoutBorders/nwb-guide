@@ -33,6 +33,7 @@ import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/g
 import DeepLabCutInterfaceSchema from "../../../../../../schemas/json/generated/DeepLabCutInterface.json";
 import SLEAPInterfaceSchema from "../../../../../../schemas/json/generated/SLEAPInterface.json";
 import FicTracDataInterfaceSchema from "../../../../../../schemas/json/generated/FicTracDataInterface.json";
+import AudioInterfaceSchema from "../../../../../../schemas/json/generated/AudioInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -111,6 +112,7 @@ globalStateCopy.schema.source_data.properties.DeepLabCutInterface =
 globalStateCopy.schema.source_data.properties.SLEAPInterface = SLEAPInterfaceSchema.properties.SLEAPInterface;
 globalStateCopy.schema.source_data.properties.FicTracDataInterface =
     FicTracDataInterfaceSchema.properties.FicTracDataInterface;
+globalStateCopy.schema.source_data.properties.AudioInterface = AudioInterfaceSchema.properties.AudioInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -327,3 +329,9 @@ const FicTracDataInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 FicTracDataInterfaceGlobalCopy.interfaces.interface = FicTracDataInterface;
 FicTracDataInterfaceGlobalCopy.schema.source_data = FicTracDataInterfaceSchema;
 FicTracDataInterface.args = { activePage, globalState: FicTracDataInterfaceGlobalCopy };
+
+export const AudioInterface = PageTemplate.bind({});
+const AudioInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+AudioInterfaceGlobalCopy.interfaces.interface = AudioInterface;
+AudioInterfaceGlobalCopy.schema.source_data = AudioInterfaceSchema;
+AudioInterface.args = { activePage, globalState: AudioInterfaceGlobalCopy };
