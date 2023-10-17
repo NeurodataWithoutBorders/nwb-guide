@@ -15,6 +15,7 @@ import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/gener
 import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
 import ExtractSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/ExtractSegmentationInterface.json";
+import CnmfeSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/CnmfeSegmentationInterface.json";
 import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json";
 import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
 import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/generated/ScanImageImagingInterface.json";
@@ -70,8 +71,11 @@ globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
     BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
+sd;
 globalStateCopy.schema.source_data.properties.ExtractSegmentationInterface =
     ExtractSegmentationInterfaceSchema.properties.ExtractSegmentationInterface;
+globalStateCopy.schema.source_data.properties.CnmfeSegmentationInterface =
+    CnmfeSegmentationInterfaceSchema.properties.CnmfeSegmentationInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterface =
     BrukerTiffMultiPlaneImagingInterfaceSchema.properties.BrukerTiffMultiPlaneImagingInterface;
 globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface =
@@ -208,6 +212,12 @@ const ExtractSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalS
 ExtractSegmentationInterfaceGlobalCopy.interfaces.interface = ExtractSegmentationInterface;
 ExtractSegmentationInterfaceGlobalCopy.schema.source_data = ExtractSegmentationInterfaceSchema;
 ExtractSegmentationInterface.args = { activePage, globalState: ExtractSegmentationInterfaceGlobalCopy };
+
+export const CnmfeSegmentationInterface = PageTemplate.bind({});
+const CnmfeSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+CnmfeSegmentationInterfaceGlobalCopy.interfaces.interface = CnmfeSegmentationInterface;
+CnmfeSegmentationInterfaceGlobalCopy.schema.source_data = CnmfeSegmentationInterfaceSchema;
+CnmfeSegmentationInterface.args = { activePage, globalState: CnmfeSegmentationInterfaceGlobalCopy };
 
 export const BrukerTiffMultiPlaneImagingInterface = PageTemplate.bind({});
 const BrukerTiffMultiPlaneImagingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
