@@ -63,13 +63,10 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 }
 
 export class UploadsPage extends Page {
-
-
     header = {
         title: "DANDI Uploads",
         subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
-    }
-
+    };
 
     constructor(...args) {
         super(...args);

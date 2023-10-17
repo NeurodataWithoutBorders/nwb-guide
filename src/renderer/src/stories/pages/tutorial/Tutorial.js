@@ -19,12 +19,11 @@ const { shell } = electron;
 const tutorialPipelineName = "NWB GUIDE Tutorial Data";
 
 export class TutorialPage extends Page {
-
     header = {
         title: "Tutorial Data Generation",
-        subtitle: "This page allows you to generate a dataset with multiple subjects and sessions so you can practice using NWB GUIDE before converting your own datasets.",
-    }
-
+        subtitle:
+            "This page allows you to generate a dataset with multiple subjects and sessions so you can practice using NWB GUIDE before converting your own datasets.",
+    };
 
     constructor(...args) {
         super(...args);

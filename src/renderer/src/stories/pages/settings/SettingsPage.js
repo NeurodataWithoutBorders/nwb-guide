@@ -29,11 +29,10 @@ const setUndefinedIfNotDeclared = (schema, resolved) => {
 };
 
 export class SettingsPage extends Page {
-
     header = {
         title: "App Settings",
         subtitle: "This page allows you to set global settings for the GUIDE.",
-    }
+    };
 
     constructor(...args) {
         super(...args);
@@ -86,9 +85,9 @@ export class SettingsPage extends Page {
         });
 
         return html`
-                ${this.form}
-                <hr />
-                ${button}
+            ${this.form}
+            <hr />
+            ${button}
         `;
     }
 }

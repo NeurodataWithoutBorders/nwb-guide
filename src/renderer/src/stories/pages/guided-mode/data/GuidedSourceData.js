@@ -131,7 +131,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             onThrow,
         });
 
-        form.style.height = '100%'
+        form.style.height = "100%";
 
         return {
             subject,
