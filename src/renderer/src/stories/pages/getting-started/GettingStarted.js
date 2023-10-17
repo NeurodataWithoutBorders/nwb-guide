@@ -22,7 +22,7 @@ export class GettingStartedPage extends Page {
 
     render() {
         return html`
-            <section class="standalone-section">
+            <section class="getting-started">
                 <h3>Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br /></h3>
 
                 <div class="overview-card-layout grid h-auto w-full grid-cols-3 gap-6">

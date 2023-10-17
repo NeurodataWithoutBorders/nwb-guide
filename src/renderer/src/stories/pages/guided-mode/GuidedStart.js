@@ -55,7 +55,7 @@ export class GuidedStartPage extends Page {
                     <div>
                         <br>
                         <p>
-                           In the NWB GUIDE, the process of running a conversion pipeline is broken into four high-level sections.
+                           In the GUIDE, the process of running a conversion pipeline is broken into four high-level sections.
                         <p>
                         <h4>1. Project Structure</h4>
                         <p>

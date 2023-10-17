@@ -5,6 +5,12 @@ import { Page } from "../Page.js";
 import { startLottie } from "../../../dependencies/globals.js";
 
 export class ContactPage extends Page {
+
+    header = {
+        title: "Contact Us",
+        subtitle: "Let us know your issues and feature requests.",
+    }
+
     constructor(...args) {
         super(...args);
     }
@@ -20,8 +26,6 @@ export class ContactPage extends Page {
                 <div class="document_container">
                     <div class="doc_container">
                         <div class="dc_con">
-                            <h1 class="doc_header">Contact Us</h1>
-                            <hr class="docu_divide" />
                             <div class="document-content">
                                 <div id="contact-us-lottie" class="documentation-lottie_style"></div>
                             </div>

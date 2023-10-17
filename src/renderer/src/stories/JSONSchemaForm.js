@@ -25,6 +25,16 @@ const componentCSS = `
       width:100%;
     }
 
+    #empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        color: gray;
+    }
+
+
     p {
       margin: 0 0 1em;
       line-height: 1.4285em;
@@ -188,6 +198,8 @@ export class JSONSchemaForm extends LitElement {
         this.dialogOptions = props.dialogOptions;
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
+
+        this.emptyMessage = props.emptyMessage ?? "No properties to render";
 
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
@@ -698,7 +710,7 @@ export class JSONSchemaForm extends LitElement {
         // // Filter non-required properties (if specified) and render the sub-schema
         // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
-        if (renderable.length === 0) return html`<p>No properties to render</p>`;
+        if (renderable.length === 0) return html`<div id="empty">${this.emptyMessage}</div>`;
 
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
@@ -903,13 +915,11 @@ export class JSONSchemaForm extends LitElement {
         this.#registerRequirements(this.schema, this.required);
 
         return html`
-            <div>
                 ${schema.description
                     ? html`<h4>Description</h4>
                           <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
                     : ""}
                 ${this.#render(schema, this.resolved, this.#requirements)}
-            </div>
         `;
     }
 }

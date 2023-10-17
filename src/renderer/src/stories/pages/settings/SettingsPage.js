@@ -29,6 +29,12 @@ const setUndefinedIfNotDeclared = (schema, resolved) => {
 };
 
 export class SettingsPage extends Page {
+
+    header = {
+        title: "App Settings",
+        subtitle: "This page allows you to set global settings for the GUIDE.",
+    }
+
     constructor(...args) {
         super(...args);
     }
@@ -81,17 +87,9 @@ export class SettingsPage extends Page {
         });
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
-                <h1 style="margin: 0;">NWB GUIDE Settings</h1>
-            </div>
-            <p>This page allows you to set global settings for the NWB GUIDE.</p>
-            <hr />
-
-            <div>
                 ${this.form}
                 <hr />
                 ${button}
-            </div>
         `;
     }
 }
