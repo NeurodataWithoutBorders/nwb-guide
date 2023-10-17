@@ -28,21 +28,18 @@ jobs:
         include:
           - python-version: "3.9"
             os: ubuntu-latest
-            label: tools/anaconda-env/environment-Linux.yml
+            label: environments/environment-Linux.yml
             prefix: /usr/share/miniconda3/envs/nwb-guide
-            shorthand: unix
 
-          - python-version: "3.10"
+          - python-version: "3.9"
             os: macos-latest
-            label: tools/anaconda-env/environment-Mac.yml
+            label: environments/environment-Mac.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
-            shorthand: unix
 
           - python-version: "3.9"
             os: windows-latest
-            label: tools/anaconda-env/environment-Windows.yml
+            label: environments/environment-Windows.yml
             prefix: C:\Miniconda3\envs\nwb-guide
-            shorthand: win
 
     steps:
       - uses: actions/checkout@v3
@@ -79,19 +76,19 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
+
+      - run: npm ci
+
+      # fix for macos build
+      - if: matrix.os == 'macos-latest'
+        run: rm -f /Users/runner/miniconda3/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
 
       - name: Build PyFlask distribution
-        run: npm run build:flask:${{ matrix.shorthand }}
-
-      # encountering parsing issue for second arg
-      #- if: matrix.os == 'windows-latest'
-      #  name: Run test on build executable
-      #  run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide.exe
-
-      #- if: matrix.os != 'windows-latest'
-      #  name: Run test on build executable
-      #  run: node tests/testPyinstallerExecutable.js ./build/nwb-guide/nwb-guide
+        run: npm run build:flask
 
       - name: Run test on distributed executable
         run: node tests/testPyinstallerExecutable.js
+
+      - name: Run Python tests on distributed executable
+        run: npm run test:executable

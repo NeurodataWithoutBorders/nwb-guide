@@ -1,15 +1,102 @@
 """Collection of utility functions used by the NeuroConv Flask API."""
 import os
 import json
+import math
+import copy
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
 from pathlib import Path
 
 from sse import MessageAnnouncer
-from .info import STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
+from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
+
+
+def replace_nan_with_none(data):
+    if isinstance(data, dict):
+        # If it's a dictionary, iterate over its items and replace NaN values with None
+        return {key: replace_nan_with_none(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        # If it's a list, iterate over its elements and replace NaN values with None
+        return [replace_nan_with_none(item) for item in data]
+    elif isinstance(data, (float, int)) and (data != data):
+        return None  # Replace NaN with None
+    else:
+        return data
+
+
+def resolve_references(schema, root_schema=None):
+    """
+    Recursively resolve references in a JSON schema based on the root schema.
+
+    Args:
+        schema (dict): The JSON schema to resolve.
+        root_schema (dict): The root JSON schema.
+
+    Returns:
+        dict: The resolved JSON schema.
+    """
+    from jsonschema import RefResolver
+
+    if root_schema is None:
+        root_schema = schema
+
+    if "$ref" in schema:
+        resolver = RefResolver.from_schema(root_schema)
+        return resolver.resolve(schema["$ref"])[1]
+
+    if "properties" in schema:
+        for key, prop_schema in schema["properties"].items():
+            schema["properties"][key] = resolve_references(prop_schema, root_schema)
+
+    if "items" in schema:
+        schema["items"] = resolve_references(schema["items"], root_schema)
+
+    return schema
+
+
+def replace_none_with_nan(json_object, json_schema):
+    """
+    Recursively search a JSON object and replace None values with NaN where appropriate.
+
+    Args:
+        json_object (dict): The JSON object to search and modify.
+        json_schema (dict): The JSON schema to validate against.
+
+    Returns:
+        dict: The modified JSON object with None values replaced by NaN.
+    """
+
+    def coerce_schema_compliance_recursive(obj, schema):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key in schema.get("properties", {}):
+                    prop_schema = schema["properties"][key]
+                    if prop_schema.get("type") == "number" and value is None:
+                        obj[
+                            key
+                        ] = (
+                            math.nan
+                        )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
+                    elif prop_schema.get("type") == "number" and isinstance(value, int):
+                        obj[key] = float(
+                            value
+                        )  # Turn integer into float if a number, the JSON Schema equivalent to float, is expected (JavaScript coerces floats with trailing zeros to integers)
+                    else:
+                        coerce_schema_compliance_recursive(value, prop_schema)
+        elif isinstance(obj, list):
+            for item in obj:
+                coerce_schema_compliance_recursive(
+                    item, schema.get("items", schema if "properties" else {})
+                )  # NEUROCONV PATCH
+
+        return obj
+
+    return coerce_schema_compliance_recursive(
+        copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema))
+    )
 
 
 def locate_data(info: dict) -> dict:
@@ -45,10 +132,11 @@ def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
-    # Hard coded for now - eventual goal will be to import this from NeuroConv
-    interfaces_to_load = {
-        interface.__name__.replace("Interface", ""): interface for interface in interface_list
-    }  # dict(SpikeGLX=SpikeGLXRecordingInterface, Phy=PhySortingInterface)
+    exclude_interfaces_from_selection = ["SpikeGLXLFP"]  # Should have 'interface' stripped from name
+
+    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
+    for excluded_interface in exclude_interfaces_from_selection:
+        interfaces_to_load.pop(excluded_interface)
 
     return {
         interface.__name__: {
@@ -154,7 +242,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     if "Ecephys" in schema["properties"]:
         schema["properties"].pop("Ecephys", dict())
 
-    return json.loads(json.dumps(dict(results=metadata, schema=schema), cls=NWBMetaDataEncoder))
+    return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
 
 
 def get_check_function(check_function_name: str) -> callable:
@@ -236,7 +324,6 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
 
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
-    from pynwb import NWBHDF5IO
 
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
@@ -254,11 +341,7 @@ def convert_to_nwb(info: dict) -> str:
     resolved_output_path = resolved_output_directory / nwbfile_path
 
     # Remove symlink placed at the default_output_directory if this will hold real data
-    if (
-        not run_stub_test
-        and resolved_output_directory == default_output_directory
-        and default_output_directory.is_symlink()
-    ):
+    if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
         default_output_directory.unlink()
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
@@ -288,7 +371,9 @@ def convert_to_nwb(info: dict) -> str:
     if "Ecephys" not in info["metadata"]:
         info["metadata"].update(Ecephys=dict())
 
-    # ecephys_metadata = info["metadata"].get("Ecephys", dict())
+    resolved_metadata = replace_none_with_nan(
+        info["metadata"], resolve_references(converter.get_metadata_schema())
+    )  # Ensure Ophys NaN values are resolved
 
     # if is_supported_recording_interface(recording_interface, info["metadata"]):
     #     electrode_column_results = ecephys_metadata["ElectrodeColumns"]
@@ -305,19 +390,14 @@ def convert_to_nwb(info: dict) -> str:
 
     # Actually run the conversion
     converter.run_conversion(
-        metadata=info["metadata"],
+        metadata=resolved_metadata,
         nwbfile_path=resolved_output_path,
         overwrite=info.get("overwrite", False),
         conversion_options=options,
     )
 
-    io = NWBHDF5IO(resolved_output_path, mode="r")
-    file = io.read()
-    html = file._repr_html_()
-    io.close()
-
-    # Create a symlink between the fake adata and custom data
-    if not run_stub_test and not resolved_output_directory == default_output_directory:
+    # Create a symlink between the fake data and custom data
+    if not resolved_output_directory == default_output_directory:
         if default_output_directory.exists():
             # If default default_output_directory is not a symlink, delete all contents and create a symlink there
             if not default_output_directory.is_symlink():
@@ -335,17 +415,48 @@ def convert_to_nwb(info: dict) -> str:
         if not default_output_directory.exists():
             os.symlink(resolved_output_directory, default_output_directory)
 
-    return dict(html=html, file=str(resolved_output_path))
+    return dict(file=str(resolved_output_path))
 
 
-def upload_to_dandi(
+def upload_multiple_filesystem_objects_to_dandi(**kwargs):
+    tmp_folder_path = aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
+    innerKwargs = {**kwargs}
+    del innerKwargs["filesystem_paths"]
+    innerKwargs["nwb_folder_path"] = tmp_folder_path
+    result = upload_folder_to_dandi(**innerKwargs)
+    rmtree(tmp_folder_path)
+    return result
+
+
+def upload_folder_to_dandi(
     dandiset_id: str,
-    project: str,
     api_key: str,
+    nwb_folder_path: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+    os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+
+    return automatic_dandi_upload(
+        dandiset_id=dandiset_id,
+        nwb_folder_path=Path(nwb_folder_path),
+        staging=staging,
+        cleanup=cleanup,
+    )
+
+
+def upload_to_dandi(
+    dandiset_id: str,
+    api_key: str,
+    project: Optional[str] = None,
+    staging: Optional[bool] = None,  # Override default staging=True
+    cleanup: Optional[bool] = None,
+):
+    from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+    # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 
@@ -407,3 +518,66 @@ def generate_dataset(test_data_directory_path: str):
             phy_output_dir.symlink_to(phy_base_directory, True)
 
     return {"output_directory": str(output_directory)}
+
+
+def inspect_nwb_file(payload):
+    from nwbinspector import inspect_nwbfile, load_config
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    messages = list(
+        inspect_nwbfile(
+            ignore=[
+                "check_description",
+                "check_data_orientation",
+            ],  # TODO: remove when metadata control is exposed
+            config=load_config(filepath_or_keyword="dandi"),
+            **payload,
+        )
+    )
+
+    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+
+
+def inspect_nwb_folder(payload):
+    from nwbinspector import inspect_all, load_config
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+
+    messages = list(
+        inspect_all(
+            n_jobs=-2,  # uses number of CPU - 1
+            ignore=[
+                "check_description",
+                "check_data_orientation",
+            ],  # TODO: remove when metadata control is exposed
+            config=load_config(filepath_or_keyword="dandi"),
+            **payload,
+        )
+    )
+
+    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+
+
+def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+    if folder_path is None:
+        folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+    folder_path.mkdir(parents=True)
+
+    for path in paths:
+        path = Path(path)
+        new_path = folder_path / path.name
+        if path.is_dir():
+            _aggregate_symlinks_in_new_directory(
+                list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
+            )
+        else:
+            new_path.symlink_to(path, path.is_dir())
+
+    return folder_path
+
+
+def inspect_multiple_filesystem_objects(paths):
+    tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
+    result = inspect_nwb_folder({"path": tmp_folder_path})
+    rmtree(tmp_folder_path)
+    return result

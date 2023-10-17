@@ -75,7 +75,7 @@ This will automatically add the new page to the sidebar. The page itself can be 
         constructor(...args) {
             super(...args);
 
-            console.log(this.info.globalState) // This will print the global state that is currently being passed between subpages (i.e. within guided mode)
+            console.log(this.info.globalState) // This will print the global state that is currently being passed between subpages
         }
 
         render() {
@@ -125,3 +125,49 @@ Pre-Commit
 We use an automated pre-commit bot to enforce these on the main repo, but contributions from external forks would either have to grant bot permissions on their own fork (via :pre-commit-bot:`the pre-commit bot website <>`) or run pre-commit manually.
 
 For instructions to install pre-commit, as well as some other minor coding styles we follow, refer to the :neuroconv-coding-style:`NeuroConv style guide <>`.
+
+Code signing on Mac OS
+---------------------------
+
+1. Sign up for an Apple Developer account (99 USD annual fee).
+
+2. Follow steps in https://developer.apple.com/help/account/create-certificates/create-developer-id-certificates/
+    a. Browse current Certificates at https://developer.apple.com/account/resources/certificates/list.
+    b. Click Certificates in the sidebar. On the top left, click the add button (+).
+    c. Under Software, select Developer ID Application.
+    d. Select Profile Type: G2 Sub-CA (Xcode 11.4.1 or later).
+    e. Create a certificate signing request (CSR) by following the steps in https://developer.apple.com/help/account/create-certificates/create-a-certificate-signing-request
+        i. Open Keychain Access.
+        ii. Choose Keychain Access > Certificate Assistant > Request a Certificate from a Certificate Authority.
+        iii. In the Certificate Assistant dialog, enter an email address in the User Email Address field.
+        iv. In the Common Name field, enter a name for the key (for example, John Doe Dev Key). Ryan entered "Ryan Ly".
+        v. Leave the CA Email Address field empty.
+        vi. Choose “Saved to disk”, and click Continue.
+        vii. Save the certificate request file to disk.
+    f. Select the certificate request file (a file with a .certSigningRequest file extension), then click Choose.
+    g. Click Continue, click Download - The certificate file (.cer file) appears in your Downloads folder.
+    h. To install the certificate in your keychain, double-click the downloaded certificate file.
+    i. The certificate appears in the My Certificates category in Keychain Access, but may not be trusted.
+    j. For local development, download the appropriate Apple Intermediate Certificate.
+    k. from https://www.apple.com/certificateauthority/ to make certificate trusted/valid.
+    l. For this, it is Developer ID - G2 (Expiring 09/17/2031 00:00:00 UTC).
+    m. Double-click the downloaded file.
+    n. Confirm that the certificate now shows up as trusted in Keychain Access.
+
+3. Provide a p12 file for notarizing via GitHub Action.
+    a. Open Keychain Access.
+    b. Select the Developer ID Application certificate.
+    c. Choose Keychain Access > Export Items...
+    d. Export the certificate to a file with a password.
+    e. Get a base64 version of the certificate by running: base64 -i Certificate.p12 -o base64.txt
+    f. Open base64.txt and copy the contents to the nwb-guide repository secret MACOS_CERTIFICATE.
+    g. Set the password for the certificate in the nwb-guide repository secret MACOS_CERTIFICATE_PASSWORD.
+
+4. Create an app-specific password for building locally and via the GitHub Action.
+    a. Go to https://appleid.apple.com/account/manage.
+    b. Follow the steps to create an App-Specific Password.
+    c. Use that for local building and in the secrets.APPLE_PASSWORD repository secret.
+
+5. Review and agree to any pending agreements.
+    a. Go to https://appstoreconnect.apple.com/agreements/#/ and agree to pending agreements for Free Apps.
+    b. Review and agree to the Apple Developer Program License Agreement, which updates periodically.

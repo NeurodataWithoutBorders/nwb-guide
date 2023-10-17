@@ -1,11 +1,12 @@
 import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
-import { get, save } from "../../progress.js";
+import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
 import { merge, randomizeElements, mapSessions } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
 import { resolveResults } from "./guided-mode/data/utils.js";
+import Swal from "sweetalert2";
 
 export class Page extends LitElement {
     // static get styles() {
@@ -59,15 +60,46 @@ export class Page extends LitElement {
         this.#notifications.push(note);
     };
 
+    to = async (transition) => {
+        // Otherwise note unsaved updates if present
+        if (
+            this.unsavedUpdates ||
+            ("states" in this.info &&
+                transition === 1 && // Only ensure save for standard forward progression
+                !this.info.states.saved)
+        ) {
+            if (transition === 1) await this.save(); // Save before a single forward transition
+            else {
+                await Swal.fire({
+                    title: "You have unsaved data on this page.",
+                    text: "Would you like to save your changes?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Save and Continue",
+                    cancelButtonText: "Ignore Changes",
+                }).then(async (result) => {
+                    if (result && result.isConfirmed) await this.save();
+                });
+            }
+        }
+
+        this.onTransition(transition);
+    };
+
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
+    beforeSave = () => {}; // User-defined function
 
-    save = (overrides) => save(this, overrides);
+    save = async (overrides, runBeforeSave = true) => {
+        if (runBeforeSave) await this.beforeSave();
+        save(this, overrides);
+        if ("states" in this.info) this.info.states.saved = true;
+        this.unsavedUpdates = false;
+    };
 
     load = (datasetNameToResume = new URLSearchParams(window.location.search).get("project")) =>
         (this.info.globalState = get(datasetNameToResume));
-
-    merge = merge;
 
     addSession({ subject, session, info }) {
         if (!this.info.globalState.results[subject]) this.info.globalState.results[subject] = {};
@@ -83,7 +115,7 @@ export class Page extends LitElement {
         delete this.info.globalState.results[subject][session];
     }
 
-    mapSessions = (callback) => mapSessions(callback, this.info.globalState);
+    mapSessions = (callback, data = this.info.globalState) => mapSessions(callback, data);
 
     async runConversions(conversionOptions = {}, toRun, options = {}) {
         let original = toRun;
@@ -94,7 +126,7 @@ export class Page extends LitElement {
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
-        let results = [];
+        const results = {};
 
         const popup = await openProgressSwal({ title: `Running conversion`, ...options });
 
@@ -105,37 +137,41 @@ export class Page extends LitElement {
         popup.hideLoading();
         const element = popup.getHtmlContainer();
         element.innerText = "";
-
+        element.style.textAlign = "left";
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
         element.append(progressBar);
+        element.insertAdjacentHTML(
+            "beforeend",
+            `<small><small><b>Note:</b> This may take a while to complete...</small></small>`
+        );
         // }
 
         let completed = 0;
         elements.progress.value = { b: completed, tsize: toRun.length };
 
         for (let info of toRun) {
-            const { subject, session } = info;
+            const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, stub_output_folder, name } = this.info.globalState.project;
+            const { conversion_output_folder, preview_output_folder, name } = globalState.project;
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
-                ...this.info.globalState.results[subject][session],
-                metadata: resolveResults(subject, session, this.info.globalState),
+                ...globalState.results[subject][session],
+                metadata: resolveResults(subject, session, globalState),
             };
 
             const result = await runConversion(
                 {
-                    output_folder: conversionOptions.stub_test ? stub_output_folder : conversion_output_folder,
+                    output_folder: conversionOptions.stub_test ? preview_output_folder : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                     ...sessionInfo, // source_data and metadata are passed in here
                     ...conversionOptions, // Any additional conversion options override the defaults
 
-                    interfaces: this.info.globalState.interfaces,
+                    interfaces: globalState.interfaces,
                 },
                 { swal: popup, ...options }
             ).catch((e) => {
@@ -150,10 +186,12 @@ export class Page extends LitElement {
                 elements.progress.value = progressInfo;
             }
 
-            results.push(result);
+            const subRef = results[subject] ?? (results[subject] = {});
+            subRef[session] = result;
         }
 
         popup.close();
+        element.style.textAlign = ""; // Clear style update
 
         return results;
     }
@@ -164,6 +202,13 @@ export class Page extends LitElement {
         this.info.pages[id] = subpage;
         this.updatePages();
     };
+
+    unsavedUpdates = false; // Track unsaved updates
+
+    // NOTE: Make sure you call this explicitly if a child class overwrites this AND data is updated
+    updated() {
+        this.unsavedUpdates = false;
+    }
 
     render() {
         return html`<slot></slot>`;

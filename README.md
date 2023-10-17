@@ -23,7 +23,27 @@ NWB GUIDE is a desktop app that provides a no-code user interface for converting
   </a>
 </p>
 
+
+
 ## Installation
+
+Begin by downloading the latest release from the [GitHub release page](https://github.com/NeurodataWithoutBorders/nwb-guide/releases).
+
+### Windows
+
+Run the `setup.exe` file and follow all instructions.
+
+### MacOS
+
+Run the `.dmg` file and follow all instructions to move the file into your Applications folder.
+
+### Ubuntu
+
+Please follow the [Developer Instructions](#developer-installation) on the [linux-fix](https://github.com/neurodatawithoutborders/nwb-guide/tree/linux-fix) branch of the NWB GUIDE.
+
+
+
+## Developer Installation
 
 Start by cloning the repository
 
@@ -35,31 +55,35 @@ Install the appropriate Python dependencies for your operating system.
 
 ### Windows
 ```bash
-conda env create -f ./tools/anaconda-env/environment-Windows.yml
+conda env create -f ./environments/environment-Windows.yml
 ```
 
 ### Mac
 ```bash
-conda env create -f ./tools/anaconda-env/environment-MAC.yml
+conda env create -f ./environments/environment-MAC.yml
+```
+
+### M1 Mac
+```bash
+conda env create -f ./environments/environment-MAC-arm64.yml
 ```
 
 ### Linux
 ```bash
-conda env create -f ./tools/anaconda-env/environment-Linux.yml
-```
-
-
-Next, install all JavaScript dependencies based on the `package-lock.json` file.
-
-```bash
-npm ci
+conda env create -f ./environments/environment-Linux.yml
 ```
 
 ## Getting Started
 Before starting NWB GUIDE, you'll need to ensure that the Python environment is activated.
 
 ```bash
-conda activate env-electron-python
+conda activate nwb-guide
+```
+
+Next, install all JavaScript dependencies based on the `package-lock.json` file.
+
+```bash
+npm ci
 ```
 
 You can now run the following command to start the application using Electron.
@@ -79,9 +103,3 @@ npm start
     - `electron` - Contains all the Electron-related code to enable conditional inclusion for development mode
     - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
 2. `/pyflask` - Contains all the source code for the backend
-
-### Development Mode
-Run the application in development mode to enable hot reloading of the JavaScript code by running parallel instances of the Flask server and a Vite development server.
-```bash
-npm run dev
-```

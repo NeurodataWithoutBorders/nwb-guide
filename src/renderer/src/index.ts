@@ -15,7 +15,7 @@ import Swal from 'sweetalert2'
 
 import { StatusBar } from "./stories/status/StatusBar.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import pythonSVG from "./stories/assets/python.svg?raw";
+import serverSVG from "./stories/assets/server.svg?raw";
 import webAssetSVG from "./stories/assets/web_asset.svg?raw";
 import wifiSVG from "./stories/assets/wifi.svg?raw";
 
@@ -25,9 +25,9 @@ const appVersion = app?.getVersion();
 
 const statusBar = new StatusBar({
   items: [
-    { label: unsafeSVG(webAssetSVG), value: appVersion ?? 'Web' },
+    { label: unsafeSVG(webAssetSVG), value: isElectron ? appVersion ?? 'ERROR' : 'Web' },
     { label: unsafeSVG(wifiSVG) },
-    { label: unsafeSVG(pythonSVG) }
+    { label: unsafeSVG(serverSVG) }
   ]
 })
 
@@ -50,7 +50,7 @@ async function isOffline() {
   await Swal.fire({
     title: "No Internet Connection",
     icon: "warning",
-    text: "It appears that your computer is not connected to the internet. You may continue, but you will not be able to use features of NWB GUIDE related to uploading data to DANDI.",
+    text: "You may continue, but certain features (e.g. uploading data to DANDI, viewing data on Neurosift, etc.) will be unavailable.",
     heightAuto: false,
     backdrop: "rgba(0,0,0, 0.4)",
     confirmButtonText: "I understand",
@@ -87,29 +87,36 @@ async function checkInternetConnection() {
     window.addEventListener('online', isOnline);
     window.addEventListener('offline', isOffline);
 
-    let hasInternet = navigator.onLine
+    const hasInternet = navigator.onLine
     if (hasInternet) isOnline()
     else await isOffline()
 
     return hasInternet
 };
 
-// Check if the Pysoda server is live
+// Check if the Flask server is live
 const serverIsLiveStartup = async () => {
   const echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json()).catch(e => e)
   return echoResponse === "server ready" ? true : false;
 };
 
+// Preload Flask imports for faster on-demand operations
+const preloadFlaskImports = async () => await fetch(`${baseUrl}/startup/preload-imports`).then(res => res.json()).catch(e => e)
+
+let openPythonStatusNotyf: undefined | any;
 
 async function pythonServerOpened() {
 
   // Confirm requests are actually received by the server
   const isLive = await serverIsLiveStartup()
+  if (isLive) await preloadFlaskImports() // initiate preload of Flask imports
   if (!isLive) return pythonServerClosed()
 
   // Update server status and throw a notification
   statusBar.items[2].status = true
-  notyf.open({
+
+  if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
+  openPythonStatusNotyf = notyf.open({
     type: "success",
     message: "Backend services are available",
   });
@@ -145,6 +152,14 @@ if (isElectron) {
     ipcRenderer.on("python.open", pythonServerOpened);
 
     ipcRenderer.on("python.closed", (_, message) => pythonServerClosed(message));
+    ipcRenderer.on("python.restart", () => {
+      statusBar.items[2].status = undefined
+      if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
+      openPythonStatusNotyf = notyf.open({
+        type: "warning",
+        message: "Backend services are restarting...",
+      })
+    });
 
     // Check for update and show the pop up box
     ipcRenderer.on("update_available", () => {

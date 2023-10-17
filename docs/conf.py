@@ -22,7 +22,7 @@ extensions = [
 templates_path = ["_templates"]
 master_doc = "index"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-# html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

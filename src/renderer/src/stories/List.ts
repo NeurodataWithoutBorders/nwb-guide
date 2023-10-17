@@ -1,17 +1,20 @@
 import { LitElement, html, css } from 'lit';
 import { Button } from './Button'
-import { empty } from 'handsontable/helpers/dom';
+import { styleMap } from "lit/directives/style-map.js";
 
 type ListItemType = {
   key: string,
-  label: string,
+  content: string,
   value: any,
 }
 
 export interface ListProps {
   onChange?: () => void;
   items?: ListItemType[]
-  emptyMessage?: string
+  emptyMessage?: string,
+  editable?: boolean,
+  unordered?: boolean,
+  listStyles?: any
 }
 
 export class List extends LitElement {
@@ -19,14 +22,14 @@ export class List extends LitElement {
   static get styles() {
     return css`
 
-      #empty {
-        padding: 20px 10px;
-        color: gray;
+      :host {
+        overflow: auto;
       }
 
-      li > div {
-        display: flex;
-        align-items: center;
+      #empty {
+        padding: 20px 10px;
+        margin-left: -40px;
+        color: gray;
       }
 
       li {
@@ -37,19 +40,35 @@ export class List extends LitElement {
         padding-bottom: 0px;
       }
 
+      li > div {
+        display: flex;
+        align-items: center;
+      }
+
       li > div > div {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis
       }
 
-      :host([keys]) ol {
-        list-style-type:none;
+      :host([unordered]) ol {
+        list-style-type: none;
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0;
+        padding: 0;
       }
 
-      :host([keys]) ol > li > div {
-        justify-content: center;
+      :host([unordered]) ol > li {
+        width: 100%;
       }
+
+      :host([unordered]) ol > li {
+        justify-content: center;
+        display: flex;
+        align-items: center;
+      }
+
     `;
   }
 
@@ -57,8 +76,22 @@ export class List extends LitElement {
       return {
         items: {
             type: Array,
-            reflect: true
-          }
+            // reflect: true // NOTE: Cannot reflect items since they could include an element
+        },
+
+        editable: {
+          type: Boolean,
+          reflect: true
+        },
+
+        unordered: {
+          type: Boolean,
+          // reflect: true
+        },
+        emptyMessage: {
+          type: String,
+          reflect: true
+        }
       };
     }
 
@@ -70,22 +103,36 @@ export class List extends LitElement {
       return this.items.map(o => o.value)
     }
 
-    declare items: ListItemType[]
+    #items: ListItemType[] = []
+    set items(value) {
+      const oldVal = this.#items
+      this.#items = value
+      this.onChange()
+      this.requestUpdate('items', oldVal)
+    }
+
+    get items() { return this.#items }
+
 
     declare emptyMessage: string
+
+    declare editable: boolean
+    declare unordered: boolean
+
+    declare listStyles: any
+
 
     constructor(props: ListProps = {}) {
       super();
 
       this.items = props.items ?? []
       this.emptyMessage = props.emptyMessage ?? ''
+      this.editable = props.editable ?? true
+      this.unordered = props.unordered ?? false
+      this.listStyles = props.listStyles ?? {}
+
       if (props.onChange) this.onChange = props.onChange
 
-    }
-
-    attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
-      super.attributeChangedCallback(name, _old, value)
-      if (name === 'items') this.onChange()
     }
 
     add = (item: ListItemType) => {
@@ -93,13 +140,13 @@ export class List extends LitElement {
     }
 
     #renderListItem = (item: ListItemType, i: number) => {
-      const { key, value, label = value } = item;
+      const { key, value, content = value } = item;
       const li = document.createElement("li");
-      const div = document.createElement('div')
-      li.append(div)
 
-      const innerDiv = document.createElement('div')
-      div.append(innerDiv)
+      const outerDiv = document.createElement('div')
+      const div = document.createElement('div')
+      li.append(outerDiv)
+      outerDiv.append(div)
 
       const keyEl = document.createElement("span");
 
@@ -108,7 +155,7 @@ export class List extends LitElement {
 
       if (key) {
 
-        this.setAttribute('keys', '')
+        this.setAttribute('unordered', '')
 
         // Ensure no duplicate keys
         let i = 0;
@@ -120,51 +167,58 @@ export class List extends LitElement {
         keyEl.innerText = resolvedKey;
         keyEl.contentEditable = true;
         keyEl.style.cursor = "text";
-        innerDiv.appendChild(keyEl);
 
         const sepEl = document.createElement("span");
         sepEl.innerHTML = "&nbsp;-&nbsp;";
-        innerDiv.appendChild(sepEl);
+        div.append(keyEl, sepEl);
 
         this.object[resolvedKey] = value;
       } else this.object[i] = value;
 
-      const valueEl = document.createElement("span");
-      valueEl.innerText = label;
-      innerDiv.appendChild(valueEl);
+      if (typeof content === 'string')  {
+        const valueEl = document.createElement("span");
+          valueEl.innerText = content;
+          div.appendChild(valueEl);
+      }
+      else li.append(content)
 
-      const button = new Button({
-          label: "Delete",
-          size: "small",
-      });
 
-      button.style.marginLeft = "1rem";
 
-      div.appendChild(button);
+      if (div.innerText) li.title = div.innerText
 
-      // Stop enter key from creating new line
-      keyEl.addEventListener("keydown", function (e) {
-          if (e.keyCode === 13) {
-              keyEl.blur();
-              return false;
-          }
-      });
 
-      const deleteListItem = () => this.delete(i);
+      if (this.editable) {
+        const button = new Button({
+            label: "Delete",
+            size: "small",
+        });
 
-      keyEl.addEventListener("blur", () => {
-          const newKey = keyEl.innerText;
-          if (newKey === "") keyEl.innerText = resolvedKey; // Reset to original value
-          else {
-              delete this.object[resolvedKey];
-              resolvedKey = newKey;
-              this.object[resolvedKey] = value;
-          }
-      });
+        button.style.marginLeft = "1rem";
 
-      button.onClick = deleteListItem;
+        outerDiv.appendChild(button);
 
-      innerDiv.title = innerDiv.innerText
+        // Stop enter key from creating new line
+        keyEl.addEventListener("keydown", function (e) {
+            if (e.keyCode === 13) {
+                keyEl.blur();
+                return false;
+            }
+        });
+
+        const deleteListItem = () => this.delete(i);
+
+        keyEl.addEventListener("blur", () => {
+            const newKey = keyEl.innerText;
+            if (newKey === "") keyEl.innerText = resolvedKey; // Reset to original value
+            else {
+                delete this.object[resolvedKey];
+                resolvedKey = newKey;
+                this.object[resolvedKey] = value;
+            }
+        });
+
+        button.onClick = deleteListItem;
+      }
 
       return li
   };
@@ -180,15 +234,17 @@ export class List extends LitElement {
 
     render() {
 
-      this.removeAttribute('keys')
+      this.removeAttribute('unordered')
+      if (this.unordered) this.setAttribute('unordered', '')
+
       this.object = {}
 
       const { items, emptyMessage} = this
 
-      return items.length || !emptyMessage ? html`
-      <ol>
-        ${items.map(this.#renderListItem)}
-      </ol>` : html`<div id="empty">${emptyMessage}</div>`
+      return html`
+      <ol style=${styleMap(this.listStyles)}>
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
+      </ol>`
     }
   }
 
