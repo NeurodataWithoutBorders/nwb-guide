@@ -34,6 +34,7 @@ import DeepLabCutInterfaceSchema from "../../../../../../schemas/json/generated/
 import SLEAPInterfaceSchema from "../../../../../../schemas/json/generated/SLEAPInterface.json";
 import FicTracDataInterfaceSchema from "../../../../../../schemas/json/generated/FicTracDataInterface.json";
 import AudioInterfaceSchema from "../../../../../../schemas/json/generated/AudioInterface.json";
+import MiniscopeBehaviorInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeBehaviorInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -113,6 +114,8 @@ globalStateCopy.schema.source_data.properties.SLEAPInterface = SLEAPInterfaceSch
 globalStateCopy.schema.source_data.properties.FicTracDataInterface =
     FicTracDataInterfaceSchema.properties.FicTracDataInterface;
 globalStateCopy.schema.source_data.properties.AudioInterface = AudioInterfaceSchema.properties.AudioInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeBehaviorInterface =
+    MiniscopeBehaviorInterfaceSchema.properties.MiniscopeBehaviorInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -335,3 +338,9 @@ const AudioInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 AudioInterfaceGlobalCopy.interfaces.interface = AudioInterface;
 AudioInterfaceGlobalCopy.schema.source_data = AudioInterfaceSchema;
 AudioInterface.args = { activePage, globalState: AudioInterfaceGlobalCopy };
+
+export const MiniscopeBehaviorInterface = PageTemplate.bind({});
+const MiniscopeBehaviorInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeBehaviorInterfaceGlobalCopy.interfaces.interface = MiniscopeBehaviorInterface;
+MiniscopeBehaviorInterfaceGlobalCopy.schema.source_data = MiniscopeBehaviorInterfaceSchema;
+MiniscopeBehaviorInterface.args = { activePage, globalState: MiniscopeBehaviorInterfaceGlobalCopy };
