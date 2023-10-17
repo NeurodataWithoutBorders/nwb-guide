@@ -8,8 +8,8 @@ const componentCSS = `
 
 function isHTML(str) {
     var doc = new DOMParser().parseFromString(str, "text/html");
-    return Array.from(doc.body.childNodes).some(node => node.nodeType === 1);
-  }
+    return Array.from(doc.body.childNodes).some((node) => node.nodeType === 1);
+}
 
 export class NavigationSidebar extends LitElement {
     static get styles() {
@@ -31,7 +31,7 @@ export class NavigationSidebar extends LitElement {
 
     constructor({ sections = {}, header } = {}) {
         super();
-        if (header) this.header = this.#header = header
+        if (header) this.header = this.#header = header;
         this.sections = sections;
     }
 
@@ -101,13 +101,13 @@ export class NavigationSidebar extends LitElement {
     };
 
     render() {
-
         const header = this.header ?? this.#header;
         return html`
             <nav id="guided-nav" class="guided--nav">
-            ${header ? html`
-                ${isHTML(header) ? unsafeHTML(header) : html`<h4>${header}</h4>`}
-                <hr />` : ''}
+                ${header
+                    ? html` ${isHTML(header) ? unsafeHTML(header) : html`<h4>${header}</h4>`}
+                          <hr />`
+                    : ""}
                 <ul id="guided-nav-items" class="guided--container-nav-items">
                     ${Object.entries(this.sections)
                         .map(([sectionName, info]) => {
