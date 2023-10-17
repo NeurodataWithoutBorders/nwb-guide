@@ -30,6 +30,7 @@ import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generat
 import AxonaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AxonaRecordingInterface.json";
 import NeuralynxRecordingInterfaceSchema from "../../../../../../schemas/json/generated/NeuralynxRecordingInterface.json";
 import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AlphaOmegaRecordingInterface.json";
+import DeepLabCutInterfaceSchema from "../../../../../../schemas/json/generated/DeepLabCutInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -71,7 +72,6 @@ globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
     BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
-sd;
 globalStateCopy.schema.source_data.properties.ExtractSegmentationInterface =
     ExtractSegmentationInterfaceSchema.properties.ExtractSegmentationInterface;
 globalStateCopy.schema.source_data.properties.CnmfeSegmentationInterface =
@@ -104,6 +104,8 @@ globalStateCopy.schema.source_data.properties.NeuralynxRecordingInterface =
     NeuralynxRecordingInterfaceSchema.properties.NeuralynxRecordingInterface;
 globalStateCopy.schema.source_data.properties.AlphaOmegaRecordingInterface =
     AlphaOmegaRecordingInterfaceSchema.properties.AlphaOmegaRecordingInterface;
+globalStateCopy.schema.source_data.properties.DeepLabCutInterface =
+    DeepLabCutInterfaceSchema.properties.DeepLabCutInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -302,3 +304,9 @@ const AlphaOmegaRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalS
 AlphaOmegaRecordingInterfaceGlobalCopy.interfaces.interface = AlphaOmegaRecordingInterface;
 AlphaOmegaRecordingInterfaceGlobalCopy.schema.source_data = AlphaOmegaRecordingInterfaceSchema;
 AlphaOmegaRecordingInterface.args = { activePage, globalState: AlphaOmegaRecordingInterfaceGlobalCopy };
+
+export const DeepLabCutInterface = PageTemplate.bind({});
+const DeepLabCutInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+DeepLabCutInterfaceGlobalCopy.interfaces.interface = DeepLabCutInterface;
+DeepLabCutInterfaceGlobalCopy.schema.source_data = DeepLabCutInterfaceSchema;
+DeepLabCutInterface.args = { activePage, globalState: DeepLabCutInterfaceGlobalCopy };
