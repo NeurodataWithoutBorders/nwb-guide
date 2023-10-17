@@ -33,6 +33,7 @@
         "AlphaOmegaRecordingInterface",
         "DeepLabCutInterface",
         "SLEAPInterface",
+        "FicTracDataInterface",
         "AudioInterface"
     ]
 }
