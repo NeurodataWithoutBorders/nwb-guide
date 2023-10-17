@@ -14,7 +14,7 @@
 }
 
 .notyf__message {
-    word-wrap: break-word;
+    word-break: break-all;
 }
 
 /* Global ---------------------------- */
