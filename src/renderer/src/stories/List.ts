@@ -28,6 +28,7 @@ export class List extends LitElement {
 
       #empty {
         padding: 20px 10px;
+        margin-left: -40px;
         color: gray;
       }
 

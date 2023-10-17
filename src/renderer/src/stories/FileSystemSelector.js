@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit";
 
-import { remote } from "../electron/index";
+import { fs, remote } from "../electron/index";
 const { dialog } = remote;
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
@@ -126,7 +126,7 @@ export class FilesystemSelector extends LitElement {
     };
 
     #checkType = (value) => {
-        const isLikelyFile = value.split(".").length !== 1;
+        const isLikelyFile = fs ? fs.lstatSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
     };
@@ -149,8 +149,6 @@ export class FilesystemSelector extends LitElement {
         }
 
         if (this.multiple && !Array.isArray(resolvedValue)) resolvedValue = [];
-
-        console.log(resolvedValue);
 
         this.value = resolvedValue;
         this.onSelect(this.value);

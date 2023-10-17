@@ -85,41 +85,23 @@ export class ProgressCard extends LitElement {
                             ></i>
                         </h2>
                         <h1 class="guided--text-dataset-card ml-sm-1">${progressFileLastModified}</h1>
-                        ${savedUploadDataProgress
-                            ? html` <span class="badge badge-warning mx-2">Incomplete upload</span> `
-                            : ``}
                     </div>
                 </div>
                 <div class="guided--container-dataset-card-center">
-                    ${this.info["previous-guided-upload-dataset-name"]
-                        ? html`
-                              <button
-                                  class="ui positive button guided--button-footer"
-                                  style="
+                    ${html`
+                        <button
+                            class="ui positive button guided--button-footer"
+                            style="
                           background-color: var(--color-light-green) !important;
-                          width: 160px !important;
+                          width: unset !important;
                           margin: 4px;
                           margin-bottom: 15px;
                         "
-                                  @click="${(ev) => this.resume(ev.target)}"
-                              >
-                                  Edit dataset
-                              </button>
-                          `
-                        : html`
-                              <button
-                                  class="ui positive button guided--button-footer"
-                                  style="
-                          background-color: var(--color-light-green) !important;
-                          width: 160px !important;
-                          margin: 4px;
-                          margin-bottom: 15px;
-                        "
-                                  @click="${(ev) => this.resume(ev.target)}"
-                              >
-                                  ${savedUploadDataProgress ? "Resume upload" : "Continue curating"}
-                              </button>
-                          `}
+                            @click="${(ev) => this.resume(ev.target)}"
+                        >
+                            Resume Conversion
+                        </button>
+                    `}
                     <h2
                         class="guided--text-dataset-card"
                         style="width: auto; text-decoration: underline; cursor: pointer;"
