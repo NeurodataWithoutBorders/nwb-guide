@@ -40,7 +40,9 @@ export class PreviewPage extends Page {
         }
 
         return html`
-            <div style="display: grid; height: 100%; grid-template-rows: min-content min-content 1fr; gap: 10px;">
+            <div
+                style="display: grid; width: 100%; height: 100%; grid-template-rows: min-content min-content 1fr; gap: 10px;"
+            >
                 <div>
                     <div style="display: flex; align-items: end; justify-content: space-between;">
                         <h1 style="margin: 0;">Neurosift File Visualization</h1>

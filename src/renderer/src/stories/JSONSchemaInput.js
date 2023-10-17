@@ -282,7 +282,14 @@ export class JSONSchemaInput extends LitElement {
                 modal.toggle(false);
             });
 
-            return html` <div>${list} ${addButton}</div> `;
+            return html`
+                <div
+                    class="schema-input"
+                    @change=${() => validateOnChange && this.#triggerValidation(name, list, path)}
+                >
+                    ${list} ${addButton}
+                </div>
+            `;
         }
 
         // Basic enumeration of properties on a select element

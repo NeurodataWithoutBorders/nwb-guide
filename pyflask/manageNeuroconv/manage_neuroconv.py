@@ -341,11 +341,7 @@ def convert_to_nwb(info: dict) -> str:
     resolved_output_path = resolved_output_directory / nwbfile_path
 
     # Remove symlink placed at the default_output_directory if this will hold real data
-    if (
-        not run_stub_test
-        and resolved_output_directory == default_output_directory
-        and default_output_directory.is_symlink()
-    ):
+    if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
         default_output_directory.unlink()
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
@@ -401,7 +397,7 @@ def convert_to_nwb(info: dict) -> str:
     )
 
     # Create a symlink between the fake data and custom data
-    if not run_stub_test and not resolved_output_directory == default_output_directory:
+    if not resolved_output_directory == default_output_directory:
         if default_output_directory.exists():
             # If default default_output_directory is not a symlink, delete all contents and create a symlink there
             if not default_output_directory.is_symlink():

@@ -27,6 +27,7 @@
         "PlexonRecordingInterface",
         "PlexonSortingInterface",
         "AxonaRecordingInterface",
+        "NeuralynxRecordingInterface"
         "AlphaOmegaRecordingInterface"
     ]
 }
