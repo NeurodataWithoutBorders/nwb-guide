@@ -15,6 +15,7 @@
         "KiloSortSortingInterface",
         "Spike2RecordingInterface",
         "BrukerTiffSinglePlaneImagingInterface",
+        "ExtractSegmentationInterface",
         "CnmfeSegmentationInterface",
         "BrukerTiffMultiPlaneImagingInterface",
         "MicroManagerTiffImagingInterface",
@@ -28,6 +29,7 @@
         "PlexonRecordingInterface",
         "PlexonSortingInterface",
         "AxonaRecordingInterface",
-        "NeuralynxRecordingInterface"
+        "NeuralynxRecordingInterface",
+        "AlphaOmegaRecordingInterface"
     ]
 }

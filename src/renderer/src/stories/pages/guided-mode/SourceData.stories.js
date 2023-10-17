@@ -14,6 +14,7 @@ import CellExplorerSortingInterfaceSchema from "../../../../../../schemas/json/g
 import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/generated/KiloSortSortingInterface.json";
 import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
+import ExtractSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/ExtractSegmentationInterface.json";
 import CnmfeSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/CnmfeSegmentationInterface.json";
 import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json";
 import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
@@ -28,6 +29,7 @@ import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/gener
 import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
 import AxonaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AxonaRecordingInterface.json";
 import NeuralynxRecordingInterfaceSchema from "../../../../../../schemas/json/generated/NeuralynxRecordingInterface.json";
+import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AlphaOmegaRecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -68,7 +70,9 @@ globalStateCopy.schema.source_data.properties.KiloSortSortingInterface =
 globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
-    BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
+    BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;sd
+globalStateCopy.schema.source_data.properties.ExtractSegmentationInterface =
+    ExtractSegmentationInterfaceSchema.properties.ExtractSegmentationInterface;
 globalStateCopy.schema.source_data.properties.CnmfeSegmentationInterface =
     CnmfeSegmentationInterfaceSchema.properties.CnmfeSegmentationInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterface =
@@ -97,6 +101,8 @@ globalStateCopy.schema.source_data.properties.AxonaRecordingInterface =
     AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface;
 globalStateCopy.schema.source_data.properties.NeuralynxRecordingInterface =
     NeuralynxRecordingInterfaceSchema.properties.NeuralynxRecordingInterface;
+globalStateCopy.schema.source_data.properties.AlphaOmegaRecordingInterface =
+    AlphaOmegaRecordingInterfaceSchema.properties.AlphaOmegaRecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -200,6 +206,12 @@ BrukerTiffSinglePlaneImagingInterface.args = {
     globalState: BrukerTiffSinglePlaneImagingInterfaceGlobalCopy,
 };
 
+export const ExtractSegmentationInterface = PageTemplate.bind({});
+const ExtractSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+ExtractSegmentationInterfaceGlobalCopy.interfaces.interface = ExtractSegmentationInterface;
+ExtractSegmentationInterfaceGlobalCopy.schema.source_data = ExtractSegmentationInterfaceSchema;
+ExtractSegmentationInterface.args = { activePage, globalState: ExtractSegmentationInterfaceGlobalCopy };
+
 export const CnmfeSegmentationInterface = PageTemplate.bind({});
 const CnmfeSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 CnmfeSegmentationInterfaceGlobalCopy.interfaces.interface = CnmfeSegmentationInterface;
@@ -283,3 +295,9 @@ const NeuralynxRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalSt
 NeuralynxRecordingInterfaceGlobalCopy.interfaces.interface = NeuralynxRecordingInterface;
 NeuralynxRecordingInterfaceGlobalCopy.schema.source_data = NeuralynxRecordingInterfaceSchema;
 NeuralynxRecordingInterface.args = { activePage, globalState: NeuralynxRecordingInterfaceGlobalCopy };
+
+export const AlphaOmegaRecordingInterface = PageTemplate.bind({});
+const AlphaOmegaRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+AlphaOmegaRecordingInterfaceGlobalCopy.interfaces.interface = AlphaOmegaRecordingInterface;
+AlphaOmegaRecordingInterfaceGlobalCopy.schema.source_data = AlphaOmegaRecordingInterfaceSchema;
+AlphaOmegaRecordingInterface.args = { activePage, globalState: AlphaOmegaRecordingInterfaceGlobalCopy };
