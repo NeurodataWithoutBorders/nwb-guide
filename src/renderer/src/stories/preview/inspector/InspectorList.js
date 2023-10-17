@@ -72,9 +72,10 @@ export class InspectorListItem extends LitElement {
                 background: WhiteSmoke;
                 border: 1px solid gray;
                 border-radius: 10px;
-                padding: 5px 10px;
                 overflow: hidden;
                 text-wrap: wrap;
+                padding: 25px;
+                margin: 0 0 1em;
             }
 
             #message {
@@ -97,20 +98,16 @@ export class InspectorListItem extends LitElement {
 
             :host([type="error"]) {
                 color: #9d0b0b;
-                padding: 25px;
                 background: #f8d7da;
                 border: 1px solid #f5c2c7;
                 border-radius: 4px;
-                margin: 0 0 1em;
             }
 
             :host([type="warning"]) {
                 color: #856404;
-                padding: 25px;
                 background: #fff3cd;
                 border: 1px solid #ffeeba;
                 border-radius: 4px;
-                margin: 0 0 1em;
             }
         `;
     }

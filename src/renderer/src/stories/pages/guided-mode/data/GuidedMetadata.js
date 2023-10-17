@@ -203,10 +203,9 @@ export class GuidedMetadataPage extends ManagedPage {
                                 },
                             ],
                             { title: "Running conversion preview" }
-                        ).catch((e) => {
-                            this.notify(e.message, "error");
-                            throw e;
-                        });
+                        ).catch(() => {});
+
+                        if (!results) return;
 
                         const modal = new Modal({
                             header: `Conversion Preview: ${key}`,
@@ -235,6 +234,8 @@ export class GuidedMetadataPage extends ManagedPage {
                                 this.localState.results[subject][session],
                                 this.info.globalState.results[subject][session]
                             );
+
+                            this.notify(`Session ${id} metadata saved!`);
                         };
                         await this.save();
                         this.beforeSave = ogCallback;

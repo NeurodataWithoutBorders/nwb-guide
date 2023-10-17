@@ -32,9 +32,7 @@
 .u-category-windows {
     --color-accent: hsl(190, 60%, 36%);
 }
-.u-category-menu {
-    --color-accent: hsl(190, 60%, 36%);
-}
+
 .u-category-native-ui {
     --color-accent: hsl(222, 53%, 50%);
 }
