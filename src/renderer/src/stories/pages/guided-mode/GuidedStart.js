@@ -72,20 +72,20 @@ export class GuidedStartPage extends Page {
                             type: "error",
                         })}
                         ${new InspectorListItem({
-                            message: html`Yellow boxes are <b>Warning</b> messages. Fixing them will align your NWB files with
-                                best practices.`,
+                            message: html`Yellow boxes are <b>Warning</b> messages. Fixing them will align your NWB
+                                files with best practices.`,
                             type: "warning",
                         })}
 
                         <p>
-                            Throughout the forms found in the GUIDE, asterisks (<span style="color:red;">*</span>) represent required properties. 
+                            Throughout the forms found in the GUIDE, asterisks (<span style="color:red;">*</span>) represent required properties.
                             Attempting to move forward will throw an <b>Error</b> until these properties are filled in.
                         </p>
                         <p>
                             Gray asterisks (<span style="color:gray;">*</span>) are sometimes used to represent loose requirements, where missing this property will throw an <b>Error</b>
                             — though you don't need to specify a value at the current stage.
                         </p>
-                        
+
                         <h4>3. Conversion Preview</h4>
                         <p>
                             In the third section, you will preview your conversion before uploading to DANDI.
