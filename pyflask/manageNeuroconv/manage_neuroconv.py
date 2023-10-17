@@ -132,7 +132,27 @@ def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
-    exclude_interfaces_from_selection = ["SpikeGLXLFP"]  # Should have 'interface' stripped from name
+    exclude_interfaces_from_selection = [
+
+        # Deprecated
+        "SpikeGLXLFP",
+
+        # Aliased
+        "CEDRecording",
+        "OpenEphysBinaryRecording",
+        "OpenEphysLegacyRecording",
+
+        # Ignored
+        "AxonaPositionData",
+        "AxonaUnitRecording",
+        "CsvTimeIntervals",
+        "ExcelTimeIntervals",
+        "Hdf5Imaging",
+        "MaxOneRecording",
+        "OpenEphysSorting",
+        "SimaSegmentation"
+
+    ]  # Should have 'interface' stripped from name
 
     interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
     for excluded_interface in exclude_interfaces_from_selection:
