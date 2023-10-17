@@ -620,7 +620,6 @@ export class JSONSchemaForm extends LitElement {
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
                 const schema = this.getSchema(localPath);
-                console.log(schema);
                 errors.push({
                     message: `${schema.title ?? header(name)} is a required property.`,
                     type: "error",
