@@ -519,7 +519,8 @@ export class JSONSchemaForm extends LitElement {
                         if (typeof v === "string") return v === key;
                         else return v.test(key);
                     })
-                ) return false;
+                )
+                    return false;
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
