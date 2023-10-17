@@ -35,9 +35,9 @@ export class SettingsPage extends Page {
 
     #notification;
 
-    #openNotyf = (opts) => {
+    #openNotyf = (message, type) => {
         if (this.#notification) notyf.dismiss(this.#notification);
-        return (this.#notification = notyf.open(opts));
+        return (this.#notification = this.notify(message,type));
     };
 
     beforeSave = () => {
@@ -51,10 +51,7 @@ export class SettingsPage extends Page {
         merge(this.form.resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
-        this.#openNotyf({
-            type: "success",
-            message: "Global settings changes saved",
-        });
+        this.#openNotyf("Global settings changes saved", "success");
     };
 
     render() {
@@ -64,7 +61,7 @@ export class SettingsPage extends Page {
             label: "Save Changes",
             onClick: async () => {
                 if (!this.unsavedUpdates)
-                    return this.#openNotyf({ type: "success", message: "All changes were already saved" });
+                    return this.#openNotyf("All changes were already saved", "success");
                 this.save();
             },
         });
