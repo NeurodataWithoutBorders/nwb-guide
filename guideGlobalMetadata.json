@@ -35,6 +35,7 @@
         "SLEAPInterface",
         "FicTracDataInterface",
         "AudioInterface",
+        "MiniscopeBehaviorInterface",
         "EDFRecordingInterface"
     ]
 }
