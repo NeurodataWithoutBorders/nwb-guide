@@ -191,7 +191,7 @@ def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
-            custom_name: getattr(datainterfaces, interface_name, getattr(converters, interface_name))
+            custom_name: getattr(datainterfaces, interface_name, getattr(converters, interface_name, None))
             for custom_name, interface_name in interface_class_dict.items()
         }
 
