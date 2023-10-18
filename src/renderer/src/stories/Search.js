@@ -54,7 +54,7 @@ export class Search extends LitElement {
                 border-top: 1px solid #f2f2f2;
             }
 
-            .category{
+            .category {
                 padding: 10px 25px;
                 background: #f2f2f2;
                 font-weight: bold;
@@ -130,12 +130,10 @@ export class Search extends LitElement {
 
     list = document.createElement("ul");
 
-    categories = {}
+    categories = {};
 
     render() {
-
-        this.categories = {}
-        
+        this.categories = {};
 
         // Update list
         this.list.remove();
@@ -148,11 +146,12 @@ export class Search extends LitElement {
         this.list.appendChild(slot);
 
         if (this.options) {
-
-            const options = this.options.map(o => { return {
-                label: o.key,
-                ...o,
-            }})
+            const options = this.options.map((o) => {
+                return {
+                    label: o.key,
+                    ...o,
+                };
+            });
 
             const itemEls = options
                 .sort((a, b) => {
@@ -183,18 +182,15 @@ export class Search extends LitElement {
                     const info = document.createElement("span");
 
                     if (option.description) {
-
-                        info.innerText = 'ℹ️';
-                        label.append(info)
+                        info.innerText = "ℹ️";
+                        label.append(info);
 
                         tippy(info, {
                             content: `<p>${option.description}</p>`,
                             allowHTML: true,
                             placement: "right",
-                        })
+                        });
                     }
-
-
 
                     container.appendChild(label);
 
@@ -206,40 +202,38 @@ export class Search extends LitElement {
                     li.append(container);
 
                     if (option.category) {
-                        let category = this.categories[option.category] 
+                        let category = this.categories[option.category];
                         if (!category) {
-                            category = document.createElement("div")
-                            category.innerText = option.category
-                            category.classList.add("category")
+                            category = document.createElement("div");
+                            category.innerText = option.category;
+                            category.classList.add("category");
                             this.categories[option.category] = {
                                 entries: [],
                                 element: category,
-                            }
+                            };
                         }
 
-                        this.categories[option.category].entries.push(li)
-                        return
+                        this.categories[option.category].entries.push(li);
+                        return;
                     }
 
+                    return el;
+                })
+                .filter((el) => el);
 
-                    return el
-
-                }).filter(el => el)
-
-                this.list.append(...itemEls)
+            this.list.append(...itemEls);
         }
-
 
         // Categories sorted alphabetically
         const categories = Object.values(this.categories).sort((a, b) => {
             if (a.element.innerText < b.element.innerText) return -1;
             if (a.element.innerText > b.element.innerText) return 1;
             return 0;
-        })
+        });
 
         categories.forEach(({ entries, element }) => {
-            this.list.append(element, ...entries)
-        })
+            this.list.append(element, ...entries);
+        });
 
         return html`
     <div class="header">
@@ -274,12 +268,10 @@ export class Search extends LitElement {
           });
 
           categories.forEach(({ entries, element }) => {
-            if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length) element.setAttribute("hidden", "")
-            else element.removeAttribute("hidden")
-          })
-
-
-
+              if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length)
+                  element.setAttribute("hidden", "");
+              else element.removeAttribute("hidden");
+          });
       }}></input>
     </div>
     ${this.list}

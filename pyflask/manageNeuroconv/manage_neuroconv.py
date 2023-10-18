@@ -128,7 +128,6 @@ def locate_data(info: dict) -> dict:
     return organized_output
 
 
-
 def module_to_dict(my_module):
     # Create an empty dictionary
     module_dict = {}
@@ -141,17 +140,15 @@ def module_to_dict(my_module):
 
     return module_dict
 
-def get_all_converter_info() -> dict:
 
+def get_all_converter_info() -> dict:
     from neuroconv import converters
 
     return {
-        name: {
-            "keywords": [],
-            "description": f"{converter.__doc__.split('.')[0]}." if converter.__doc__ else ''
-        }
+        name: {"keywords": [], "description": f"{converter.__doc__.split('.')[0]}." if converter.__doc__ else ""}
         for name, converter in module_to_dict(converters).items()
     }
+
 
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
@@ -175,13 +172,13 @@ def get_all_interface_info() -> dict:
         "SimaSegmentationInterface",
     ]
 
-
     return {
         interface.__name__: {
             "keywords": interface.keywords,
-            "description": f"{interface.__doc__.split('.')[0]}." if interface.__doc__ else ''
+            "description": f"{interface.__doc__.split('.')[0]}." if interface.__doc__ else "",
         }
-        for interface in interface_list if not interface.__name__ in exclude_interfaces_from_selection
+        for interface in interface_list
+        if not interface.__name__ in exclude_interfaces_from_selection
     }
 
 
