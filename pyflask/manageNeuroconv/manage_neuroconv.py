@@ -187,11 +187,11 @@ def get_all_interface_info() -> dict:
 
 # Combine Multiple Interfaces
 def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
-    from neuroconv import datainterfaces, NWBConverter
+    from neuroconv import converters, datainterfaces, NWBConverter
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
-            custom_name: getattr(datainterfaces, interface_name)
+            custom_name: getattr(datainterfaces, interface_name, getattr(converters, interface_name))
             for custom_name, interface_name in interface_class_dict.items()
         }
 
