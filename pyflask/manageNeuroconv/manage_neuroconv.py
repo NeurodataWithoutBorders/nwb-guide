@@ -128,41 +128,60 @@ def locate_data(info: dict) -> dict:
     return organized_output
 
 
+
+def module_to_dict(my_module):
+    # Create an empty dictionary
+    module_dict = {}
+
+    # Iterate through the module's attributes
+    for attr_name in dir(my_module):
+        if not attr_name.startswith("__"):  # Exclude special attributes
+            attr_value = getattr(my_module, attr_name)
+            module_dict[attr_name] = attr_value
+
+    return module_dict
+
+def get_all_converter_info() -> dict:
+
+    from neuroconv import converters
+
+    return {
+        name: {
+            "keywords": [],
+            "description": f"{converter.__doc__.split('.')[0]}." if converter.__doc__ else ''
+        }
+        for name, converter in module_to_dict(converters).items()
+    }
+
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
     exclude_interfaces_from_selection = [
         # Deprecated
-        "SpikeGLXLFP",
+        "SpikeGLXLFPInterface",
         # Aliased
-        "CEDRecording",
-        "OpenEphysBinaryRecording",
-        "OpenEphysLegacyRecording",
+        "CEDRecordingInterface",
+        "OpenEphysBinaryRecordingInterface",
+        "OpenEphysLegacyRecordingInterface",
         # Ignored
-        "AxonaPositionData",
-        "AxonaUnitRecording",
-        "CsvTimeIntervals",
-        "ExcelTimeIntervals",
-        "Hdf5Imaging",
-        "MaxOneRecording",
-        "OpenEphysSorting",
-        "SimaSegmentation",
-    ]  # Should have 'interface' stripped from name
+        "AxonaPositionDataInterface",
+        "AxonaUnitRecordingInterface",
+        "CsvTimeIntervalsInterface",
+        "ExcelTimeIntervalsInterface",
+        "Hdf5ImagingInterface",
+        "MaxOneRecordingInterface",
+        "OpenEphysSortingInterface",
+        "SimaSegmentationInterface",
+    ]
 
-    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
-    for excluded_interface in exclude_interfaces_from_selection:
-        interfaces_to_load.pop(excluded_interface)
 
     return {
         interface.__name__: {
             "keywords": interface.keywords,
-            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves
-            # have a label property
-            "label": format_name
-            # Can also add a description here if we want to provide more information about the interface
+            "description": f"{interface.__doc__.split('.')[0]}." if interface.__doc__ else ''
         }
-        for format_name, interface in interfaces_to_load.items()
+        for interface in interface_list if not interface.__name__ in exclude_interfaces_from_selection
     }
 
 
