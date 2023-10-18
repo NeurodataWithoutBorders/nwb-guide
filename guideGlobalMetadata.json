@@ -36,6 +36,7 @@
         "FicTracDataInterface",
         "AudioInterface",
         "MiniscopeBehaviorInterface",
-        "EDFRecordingInterface"
+        "EDFRecordingInterface",
+        "SpikeGLXConverterPipe"
     ]
 }
