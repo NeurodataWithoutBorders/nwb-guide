@@ -80,12 +80,6 @@ export class GettingStartedPage extends Page {
                         </i>
                     </button>
                 </div>
-                <div style="display: flex; justify-content: center">
-                    <div
-                        class="flex w-full items-center justify-center pb-2"
-                        style="justify-content: center; display: flex; align-items: center"
-                    ></div>
-                </div>
             </section>
         `;
     }

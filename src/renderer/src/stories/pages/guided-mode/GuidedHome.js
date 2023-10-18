@@ -183,7 +183,7 @@ export class GuidedHomePage extends Page {
 
     render() {
         return html`
-            <div class="justify-center" id="curate-new-home" style="align-items: center">
+            <div id="curate-new-home" style="display:flex; flex-direction:column; align-items: center">
                 <p>
                     The NWB GUIDE walks users step-by-step through all the requirements for converting their data to the
                     NWB format and uploading datasets to the DANDI Archive. Each stage is designed to conveniently guide
