@@ -391,7 +391,7 @@ def convert_to_nwb(info: dict) -> str:
     options = (
         {
             interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
-            if available_options.get("properties").get(interface).get("properties").get("stub_test")
+            if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
             else {}
             for interface in info["source_data"]
         }
