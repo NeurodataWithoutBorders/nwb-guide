@@ -10,6 +10,17 @@ import { List } from "../../../List";
 
 const defaultEmptyMessage = "No interfaces selected";
 
+const categories = [
+    {
+        test: /.*Interface.*/,
+        value: "Single-Stream Interfaces",
+    },
+    {
+        test: /.*Converter.*/,
+        value: "Multi-Stream Converters",
+    },
+];
+
 export class GuidedStructurePage extends Page {
     constructor(...args) {
         super(...args);
@@ -91,10 +102,13 @@ export class GuidedStructurePage extends Page {
             .then((res) => res.json())
             .then((json) =>
                 Object.entries(json).map(([key, value]) => {
+                    const category = categories.find(({ test }) => test.test(key))?.value;
+
                     return {
                         ...value,
-                        key: key.replace("Interface", ""),
+                        key,
                         value: key,
+                        category,
                         disabled: !supportedInterfaces.includes(key),
                     }; // Has label and keywords property already
                 })
