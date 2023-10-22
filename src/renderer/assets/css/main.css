@@ -1471,12 +1471,11 @@ details[open] > summary::before {
     box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.standalone-section {
+.getting-started {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 20px;
 }
 
 .overview-card-layout {
@@ -1695,7 +1694,6 @@ details[open] > summary::before {
     line-height: 2.25rem;
     padding-bottom: 0.25rem;
     margin: 0;
-    padding-top: 1.25rem;
 }
 
 .docu_divide {
