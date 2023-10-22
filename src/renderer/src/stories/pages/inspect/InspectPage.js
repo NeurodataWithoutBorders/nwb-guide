@@ -14,6 +14,11 @@ export class InspectPage extends Page {
         super(...args);
     }
 
+    header = {
+        title: "NWB Inspector Report",
+        subtitle: "This page allows you to inspect NWB files using the NWB Inspector.",
+    };
+
     showReport = async (value) => {
         if (!value) {
             const message = "Please provide filesystem entries to inspect.";
@@ -72,17 +77,9 @@ export class InspectPage extends Page {
         }
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
-                <h1 style="margin: 0;">NWB Inspector Report</h1>
-            </div>
-            <p>This page allows you to inspect NWB files using the NWB Inspector.</p>
-            <hr />
-
-            <div>
-                ${this.input}
-                <br />
-                ${button}
-            </div>
+            ${this.input}
+            <br />
+            ${button}
         `;
     }
 }
