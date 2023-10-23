@@ -2,7 +2,7 @@ import { Search } from "./Search";
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/web-components/writing-stories/introduction
 export default {
-    title: "Example/Search",
+    title: "Components/Search",
     // tags: ['autodocs'],
 };
 
@@ -18,6 +18,28 @@ Default.args = {
         },
         {
             label: "DeepLabCut",
+            keywords: ["DLC", "tracking", "pose estimation"],
+        },
+    ],
+};
+
+export const Categories = Template.bind({});
+Categories.args = {
+    disabledLabel: "Interface not supported",
+    options: [
+        {
+            label: "SpikeGLXConverter",
+            category: 'Converter',
+            keywords: ["extracellular electrophysiology", "voltage", "recording", "neuropixels"],
+        },
+        {
+            label: "SpikeGLXRecording",
+            category: 'Interface',
+            keywords: ["extracellular electrophysiology", "voltage", "recording", "neuropixels"],
+        },
+        {
+            label: "DeepLabCut",
+            category: 'Interface',
             keywords: ["DLC", "tracking", "pose estimation"],
         },
     ],

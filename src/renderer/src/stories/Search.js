@@ -3,7 +3,7 @@ import { LitElement, html, css } from "lit";
 import tippy from "tippy.js";
 
 export class Search extends LitElement {
-    constructor({ options, showAllWhenEmpty, disabledLabel } = {}) {
+    constructor({ options, showAllWhenEmpty = true, disabledLabel } = {}) {
         super();
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
@@ -220,7 +220,7 @@ export class Search extends LitElement {
                         return;
                     }
 
-                    return el;
+                    return li;
                 })
                 .filter((el) => el);
 
