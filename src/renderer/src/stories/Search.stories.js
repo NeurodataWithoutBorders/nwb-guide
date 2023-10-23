@@ -29,17 +29,17 @@ Categories.args = {
     options: [
         {
             label: "SpikeGLXConverter",
-            category: 'Converter',
+            category: "Converter",
             keywords: ["extracellular electrophysiology", "voltage", "recording", "neuropixels"],
         },
         {
             label: "SpikeGLXRecording",
-            category: 'Interface',
+            category: "Interface",
             keywords: ["extracellular electrophysiology", "voltage", "recording", "neuropixels"],
         },
         {
             label: "DeepLabCut",
-            category: 'Interface',
+            category: "Interface",
             keywords: ["DLC", "tracking", "pose estimation"],
         },
     ],
