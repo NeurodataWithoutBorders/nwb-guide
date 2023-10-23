@@ -56,7 +56,10 @@ export class Search extends LitElement {
 
             .category {
                 padding: 10px 25px;
-                background: #f2f2f2;
+                background: gainsboro;
+                border-top: 1px solid gray;
+                border-bottom: 1px solid gray;
+                font-size: 90%;
                 font-weight: bold;
                 position: sticky;
                 top: 0;
