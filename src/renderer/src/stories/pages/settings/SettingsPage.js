@@ -8,7 +8,7 @@ import projectGlobalSchema from "../../../../../../schemas/json/project/globals.
 const schema = {
     properties: {
         output_locations: projectGlobalSchema,
-        DANDI: dandiGlobalSchema,
+        DANDI: dandiGlobalSchema
     },
 };
 
@@ -17,6 +17,7 @@ import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
+import { header } from "../../forms/utils";
 
 const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
 
@@ -78,7 +79,9 @@ export class SettingsPage extends Page {
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: (name, parent) => {
                 const value = parent[name];
-                if (name.includes("api_key")) return dandiAPITokenRegex.test(value);
+                if (value && name.includes("api_key") && !dandiAPITokenRegex.test(value)) return [
+                    {type: 'error', message: `${header(name)} must be a 40 character hexadecimal string`}
+                ]
                 return true;
             },
             onThrow,
