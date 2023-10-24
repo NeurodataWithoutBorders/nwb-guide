@@ -3,11 +3,11 @@
   "productName": "NWB GUIDE",
   "version": "0.0.5",
   "description": "",
-  "main": "./dist/.commoners/main/index.js",
+  "main": ".commoners/.temp/main.js",
   "scripts": {
-    "start": "commoners start",
-    "dev": "commoners dev",
-    "build": "commoners build", 
+    "start": "commoners --desktop",
+    "dev": "commoners",
+    "build": "commoners build --desktop",
     "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
     "echo": "python -c \"print('hello')\"",
@@ -46,83 +46,6 @@
     "type": "git",
     "url": "git+https://github.com/catalystneuro/nwb-guide.git"
   },
-  "build": {
-    "appId": "com.catalystneuro.nwbguide",
-    "generateUpdatesFilesForAllChannels": true,
-    "afterSign": "./notarize.js",
-    "fileAssociations": [
-      {
-        "ext": "nwb",
-        "name": "NWB File",
-        "role": "Viewer"
-      }
-    ],
-    "files": [
-      "src",
-      "schemas",
-      "build",
-      "*.json",
-      "!**/*.ts",
-      "!src/**/*.js"
-    ],
-    "win": {
-      "asar": false,
-      "target": "nsis",
-      "icon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
-    },
-    "mac": {
-      "asar": true,
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
-      ],
-      "icon": "src/renderer/assets/img/logo-guide-draft.png",
-      "darkModeSupport": false,
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false,
-      "entitlements": "entitlements.mac.inherit.plist",
-      "entitlementsInherit": "entitlements.mac.inherit.plist",
-      "extraResources": [
-        {
-          "from": "./build/flask/nwb-guide",
-          "to": "flask"
-        }
-      ]
-    },
-    "linux": {
-      "asar": true,
-      "target": "AppImage",
-      "icon": "src/renderer/assets/img/logo-guide-draft.png",
-      "extraResources": [
-        {
-          "from": "./build/flask/nwb-guide",
-          "to": "flask"
-        }
-      ]
-    },
-    "nsis": {
-      "createDesktopShortcut": "always",
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
-    },
-    "publish": {
-      "provider": "github"
-    }
-  },
   "keywords": [],
   "author": {
     "name": "CatalystNeuro"
@@ -157,7 +80,7 @@
     "@storybook/web-components-vite": "^7.0.0-beta.62",
     "@vitest/coverage-v8": "^0.34.1",
     "chromatic": "^6.17.1",
-    "commoners": "0.0.5",
+    "commoners": "0.0.30",
     "electron-builder": "^24.4.0",
     "electron-packager": "^14.0.6",
     "electron-vite": "^1.0.22",

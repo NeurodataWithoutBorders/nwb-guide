@@ -21,11 +21,10 @@ import wifiSVG from "./stories/assets/wifi.svg?raw";
 
 // Set the sidebar subtitle to the current app version
 const dashboard = document.querySelector('nwb-dashboard') as Dashboard
-const appVersion = app?.getVersion();
 
 const statusBar = new StatusBar({
   items: [
-    { label: unsafeSVG(webAssetSVG), value: appVersion ?? 'Web' },
+    { label: unsafeSVG(webAssetSVG), value: COMMONERS.VERSION }, // NOTE: Expose version
     { label: unsafeSVG(wifiSVG) },
     { label: unsafeSVG(pythonSVG) }
   ]
@@ -138,6 +137,7 @@ async function pythonServerClosed(message?: string) {
       allowEscapeKey: false,
     });
 
+    console.error('CANNOT CLOSE!')
     if (isElectron) app.quit();
     else location.reload()
 

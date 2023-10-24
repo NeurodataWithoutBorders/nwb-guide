@@ -19,9 +19,10 @@ if (isElectron) {
         fs = require("fs-extra"); // File System
         os = require("os");
 
-        remote = require("@electron/remote");
-        app = remote.app;
+        // remote = require("@electron/remote");
+        // app = remote.app;
 
+        // NOTE: Must reintegrate...
         electron.ipcRenderer.on("fileOpened", (info, filepath) => {
             updateURLParams({ file: filepath });
             const dashboard = document.querySelector("nwb-dashboard");
@@ -30,15 +31,9 @@ if (isElectron) {
             else dashboard.setAttribute("activePage", "preview");
         });
 
-        const pythonUrl = new URL(globalThis.commoners.services.flask.url)
+        const pythonUrl = new URL(COMMONERS.services.flask.url)
 
         port = pythonUrl.port
-        // port = electron.ipcRenderer.sendSync("get-port");
-
-        ["log", "warn", "error"].forEach((method) =>
-            electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args))
-        );
-
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
         path = require("path");

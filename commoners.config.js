@@ -1,22 +1,14 @@
 export default {
 
-    plugins: [
-        // NOTE: Add the auto-update plugin
-    ],
+    plugins: [],
 
     services: {
         flask: {
             src: './pyflask/app.py',
             port: 4242,
-            buildCommand: "npm run build:flask",
-            production: {
-                src: './flask/nwb-guide', // --onedir
-                extraResources: [ 
-                     {
-                        "from": "./build/flask/nwb-guide",
-                        "to": "flask"
-                    }
-                ]
+            publish: {
+                src: './build/flask/nwb-guide/nwb-guide', 
+                build: "npm run build:flask"
             }
         }
     },

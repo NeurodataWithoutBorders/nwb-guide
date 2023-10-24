@@ -1,4 +1,4 @@
-import { app, isElectron } from "../electron/index.js";
+import { isElectron, os } from "../electron/index.js";
 import paths from "../../../../paths.config.json" assert { type: "json" };
 import { joinPath } from "../globals.js";
 
@@ -8,7 +8,7 @@ export const reloadPageToHome = () => {
 }; // Clear all query params
 
 // Filesystem Management
-export const homeDirectory = app?.getPath("home") ?? "";
+export const homeDirectory = os?.homedir() ?? "";
 export const appDirectory = homeDirectory ? joinPath(homeDirectory, paths.root) : "";
 export const guidedProgressFilePath = homeDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
 
