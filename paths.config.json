@@ -3,7 +3,7 @@
     "subfolders": {
         "progress": ["pipelines"],
         "conversions": ["conversions"],
-        "stubs": ["stubs"],
+        "preview": ["preview"],
         "tutorial": ["tutorial"]
     }
 }

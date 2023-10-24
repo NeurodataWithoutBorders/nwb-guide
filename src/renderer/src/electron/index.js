@@ -4,24 +4,23 @@ import isElectron from "./check.js";
 export { isElectron };
 
 export let port = 4242;
-export let electron = {};
+export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
 export let remote = {};
 export let app = null;
 export let path = null;
 export let log = null;
+export let crypto = null;
 
 if (isElectron) {
     try {
-        // Import Electron API
-        electron = require("electron"); // ipcRenderer, remote, shell, etc.
         fs = require("fs-extra"); // File System
         os = require("os");
 
         // remote = require("@electron/remote");
         // app = remote.app;
-
+        crypto = require("crypto");
         // NOTE: Must reintegrate...
         electron.ipcRenderer.on("fileOpened", (info, filepath) => {
             updateURLParams({ file: filepath });

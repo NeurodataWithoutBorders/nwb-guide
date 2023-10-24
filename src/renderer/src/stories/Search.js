@@ -1,11 +1,13 @@
 import { LitElement, html, css } from "lit";
-import { styleMap } from "lit/directives/style-map.js";
+
+import tippy from "tippy.js";
 
 export class Search extends LitElement {
-    constructor({ options, showAllWhenEmpty } = {}) {
+    constructor({ options, showAllWhenEmpty = true, disabledLabel } = {}) {
         super();
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
+        this.disabledLabel = disabledLabel;
     }
 
     static get styles() {
@@ -16,17 +18,18 @@ export class Search extends LitElement {
 
             :host {
                 position: relative;
-                display: block;
+                display: flex;
+                flex-direction: column;
                 background: white;
                 border-radius: 5px;
                 width: 100%;
+                height: 100%;
+                overflow: hidden;
             }
 
             .header {
                 padding: 25px;
                 background: white;
-                position: sticky;
-                top: 0;
             }
 
             input {
@@ -41,16 +44,26 @@ export class Search extends LitElement {
                 list-style: none;
                 padding: 0;
                 margin: 0;
-                position: absolute;
-                left: 0;
-                right: 0;
-                z-index: 1;
+                position: relative;
+                overflow: auto;
                 background: white;
             }
 
             .option {
                 padding: 25px;
                 border-top: 1px solid #f2f2f2;
+            }
+
+            .category {
+                padding: 10px 25px;
+                background: gainsboro;
+                border-top: 1px solid gray;
+                border-bottom: 1px solid gray;
+                font-size: 90%;
+                font-weight: bold;
+                position: sticky;
+                top: 0;
+                z-index: 1;
             }
 
             .option:hover {
@@ -62,9 +75,27 @@ export class Search extends LitElement {
                 margin: 0;
             }
 
-            [disabled] {
+            .label {
+                display: flex;
+                gap: 10px;
+            }
+
+            [disabled]:not([hidden]) {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 pointer-events: none;
                 opacity: 0.4;
+            }
+
+            [disabled]::after {
+                content: var(--disabled-label, "Not available");
+                text-align: left;
+                padding-left: 25px;
+                opacity: 70%;
+                font-size: 90%;
+                white-space: nowrap;
+                min-width: min-content;
             }
         `;
     }
@@ -102,16 +133,30 @@ export class Search extends LitElement {
 
     list = document.createElement("ul");
 
+    categories = {};
+
     render() {
+        this.categories = {};
+
         // Update list
         this.list.remove();
         this.list = document.createElement("ul");
+
+        if (this.disabledLabel) this.style.setProperty("--disabled-label", `"${this.disabledLabel}"`);
+        else this.style.removeProperty("--disabled-label");
 
         const slot = document.createElement("slot");
         this.list.appendChild(slot);
 
         if (this.options) {
-            this.options
+            const options = this.options.map((o) => {
+                return {
+                    label: o.key,
+                    ...o,
+                };
+            });
+
+            const itemEls = options
                 .sort((a, b) => {
                     if (a.label < b.label) return -1;
                     if (a.label > b.label) return 1;
@@ -122,7 +167,7 @@ export class Search extends LitElement {
                     else if (a.disabled) return 1;
                     else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
-                .forEach((option) => {
+                .map((option) => {
                     const li = document.createElement("li");
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
@@ -131,19 +176,67 @@ export class Search extends LitElement {
 
                     if (option.disabled) li.setAttribute("disabled", "");
 
+                    const container = document.createElement("div");
+
                     const label = document.createElement("h4");
                     label.classList.add("label");
                     label.innerText = option.label;
-                    li.appendChild(label);
+
+                    const info = document.createElement("span");
+
+                    if (option.description) {
+                        info.innerText = "ℹ️";
+                        label.append(info);
+
+                        tippy(info, {
+                            content: `<p>${option.description}</p>`,
+                            allowHTML: true,
+                            placement: "right",
+                        });
+                    }
+
+                    container.appendChild(label);
 
                     const keywords = document.createElement("small");
                     keywords.classList.add("keywords");
                     keywords.innerText = option.keywords.join(", ");
-                    li.appendChild(keywords);
+                    container.appendChild(keywords);
 
-                    this.list.appendChild(li);
-                });
+                    li.append(container);
+
+                    if (option.category) {
+                        let category = this.categories[option.category];
+                        if (!category) {
+                            category = document.createElement("div");
+                            category.innerText = option.category;
+                            category.classList.add("category");
+                            this.categories[option.category] = {
+                                entries: [],
+                                element: category,
+                            };
+                        }
+
+                        this.categories[option.category].entries.push(li);
+                        return;
+                    }
+
+                    return li;
+                })
+                .filter((el) => el);
+
+            this.list.append(...itemEls);
         }
+
+        // Categories sorted alphabetically
+        const categories = Object.values(this.categories).sort((a, b) => {
+            if (a.element.innerText < b.element.innerText) return -1;
+            if (a.element.innerText > b.element.innerText) return 1;
+            return 0;
+        });
+
+        categories.forEach(({ entries, element }) => {
+            this.list.append(element, ...entries);
+        });
 
         return html`
     <div class="header">
@@ -175,6 +268,12 @@ export class Search extends LitElement {
               } else {
                   option.setAttribute("hidden", "");
               }
+          });
+
+          categories.forEach(({ entries, element }) => {
+              if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length)
+                  element.setAttribute("hidden", "");
+              else element.removeAttribute("hidden");
           });
       }}></input>
     </div>

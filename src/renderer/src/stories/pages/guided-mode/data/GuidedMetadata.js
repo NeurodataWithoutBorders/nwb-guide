@@ -30,6 +30,11 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     form;
+
+    header = {
+        subtitle: "Edit all metadata for this conversion at the session level",
+    };
+
     footer = {
         next: "Run Conversion Preview",
         onNext: async () => {
@@ -105,7 +110,14 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: ["subject_id", "session_id"],
+            ignore: [
+                "Ophys", // Always ignore ophys metadata (for now)
+                "Icephys", // Always ignore icephys metadata (for now)
+                "Behavior", // Always ignore behavior metadata (for now)
+                new RegExp("ndx-.+"), // Ignore all ndx extensions
+                "subject_id",
+                "session_id",
+            ],
 
             conditionalRequirements: [
                 {
@@ -123,7 +135,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.#checkAllLoaded();
             },
 
-            onUpdate: (...args) => {
+            onUpdate: () => {
                 this.unsavedUpdates = true;
             },
 
@@ -198,10 +210,9 @@ export class GuidedMetadataPage extends ManagedPage {
                                 },
                             ],
                             { title: "Running conversion preview" }
-                        ).catch((e) => {
-                            this.notify(e.message, "error");
-                            throw e;
-                        });
+                        ).catch(() => {});
+
+                        if (!results) return;
 
                         const modal = new Modal({
                             header: `Conversion Preview: ${key}`,
@@ -230,6 +241,8 @@ export class GuidedMetadataPage extends ManagedPage {
                                 this.localState.results[subject][session],
                                 this.info.globalState.results[subject][session]
                             );
+
+                            this.notify(`Session ${id} metadata saved!`);
                         };
                         await this.save();
                         this.beforeSave = ogCallback;

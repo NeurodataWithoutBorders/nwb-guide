@@ -10,6 +10,7 @@ dependencies:
   - lxml = 4.9.3  # pypi build fails due to x64/arm64 mismatch so install from conda-forge
   - pyedflib = 0.1.32  # pypi build fails due to x64/arm64 mismatch so install from conda-forge
   - numpy  # may have x64/arm64 mismatch issues so install from conda-forge
+  - pytables = 3.8 # pypi build fails on arm64 so install from conda-forge (used by neuroconv deps)
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0  # installs jsonschema-specifications
   - pydantic[email] = 1.10.12  # installs email-validator

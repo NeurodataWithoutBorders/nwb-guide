@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
@@ -35,7 +35,7 @@ jobs:
       - name: Remove bad sonpy file (might make Spike2 format unusable on Mac - should exclude from selection)
         run: rm -f /usr/local/miniconda/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
 
-      - uses: apple-actions/import-codesign-certs@v1
+      - uses: apple-actions/import-codesign-certs@v2
         with:
           # Currently this is set to Ryan's Developer ID certificate
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}

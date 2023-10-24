@@ -15,7 +15,7 @@ import Swal from 'sweetalert2'
 
 import { StatusBar } from "./stories/status/StatusBar.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import pythonSVG from "./stories/assets/python.svg?raw";
+import serverSVG from "./stories/assets/server.svg?raw";
 import webAssetSVG from "./stories/assets/web_asset.svg?raw";
 import wifiSVG from "./stories/assets/wifi.svg?raw";
 
@@ -24,9 +24,9 @@ const dashboard = document.querySelector('nwb-dashboard') as Dashboard
 
 const statusBar = new StatusBar({
   items: [
-    { label: unsafeSVG(webAssetSVG), value: COMMONERS.VERSION }, // NOTE: Expose version
+    { label: unsafeSVG(webAssetSVG), value: isElectron ? COMMONERS.VERSION ?? 'ERROR' : 'Web'  }, // NOTE: Expose version
     { label: unsafeSVG(wifiSVG) },
-    { label: unsafeSVG(pythonSVG) }
+    { label: unsafeSVG(serverSVG) }
   ]
 })
 
@@ -138,7 +138,7 @@ async function pythonServerClosed(message?: string) {
     });
 
     console.error('CANNOT CLOSE!')
-    if (isElectron) app.quit();
+    if (isElectron) app.exit();
     else location.reload()
 
     Swal.close();

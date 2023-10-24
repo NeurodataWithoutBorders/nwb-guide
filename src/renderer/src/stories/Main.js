@@ -4,6 +4,8 @@ import { GuidedFooter } from "./pages/guided-mode/GuidedFooter";
 import { GuidedCapsules } from "./pages/guided-mode/GuidedCapsules.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
 
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 const componentCSS = `
     :host {
         display: grid;
@@ -68,6 +70,10 @@ export class Main extends LitElement {
 
         this.style.overflow = "hidden";
         this.content.style.height = "100%";
+
+        // Reset scroll position on page change
+        const section = this.content.children[0];
+        section.scrollTop = 0;
     }
 
     render() {
@@ -87,8 +93,7 @@ export class Main extends LitElement {
                 // Go to home screen if there is no next page
                 if (!info.next)
                     footer = {
-                        next: "Back to Home Screen",
-                        exit: "Exit",
+                        exit: false,
                         onNext: () => this.toRender.page.to("/"),
                     };
                 // Allow navigating laterally if there is a next page
@@ -100,14 +105,20 @@ export class Main extends LitElement {
 
             // Default Capsules Behavior
             const section = sections[info.section];
+            console.log("Sections", section, sections);
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
                     let pages = Object.values(section.pages);
-                    if (pages.length > 1)
-                        capsules = {
+                    const pageIds = Object.keys(section.pages);
+                    if (pages.length > 1) {
+                        const capsulesProps = {
                             n: pages.length,
                             selected: pages.map((o) => o.pageLabel).indexOf(page.info.label),
                         };
+
+                        capsules = new GuidedCapsules(capsulesProps);
+                        capsules.onClick = (i) => this.toRender.page.to(pageIds[i]);
+                    }
                 }
 
                 if (header === true || !("header" in page) || !("sections" in page.header)) {
@@ -122,7 +133,6 @@ export class Main extends LitElement {
 
         const headerEl = header ? new GuidedHeader(header) : html`<div></div>`; // Render for grid
 
-        const capsuleEl = capsules ? new GuidedCapsules(capsules) : "";
         const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
 
         const title = header?.title ?? page.info?.title;
@@ -136,27 +146,25 @@ export class Main extends LitElement {
         return html`
             ${headerEl}
             ${capsules
-                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsuleEl}</div>`
-                : html`<div style="height: 25px;"></div>`}
-            <main id="content" class="js-content" style="overflow: hidden; display: flex;">
-                <section class="section js-section u-category-windows">
-                    ${title
-                        ? html`<div style="position: sticky; top: 0; left: 0; background: white; z-index: 1;">
-                              <div
-                                  style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
-                              >
-                                  <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                      <h1 class="title" style="margin: 0; padding: 0;">${title}</h1>
-                                      <small style="color: gray;">${subtitle}</small>
-                                  </div>
-                                  <div style="padding-left: 25px">${controls}</div>
-                              </div>
-                              <hr style="margin-bottom: 0;" />
-                          </div>`
-                        : ""}
+                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
+                : html`<div style="height:50px"</div>`}
+            ${title
+                ? html`<div
+                      style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1;"
+                  >
+                      <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
+                          <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:gray;">
+                              <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
+                              <small>${unsafeHTML(subtitle)}</small>
+                          </div>
+                          <div style="padding-left: 25px">${controls}</div>
+                      </div>
+                      <hr style="margin-bottom: 0;" />
+                  </div>`
+                : ""}
 
-                    <div style="padding-top: 10px; height: 100%; width: 100%;">${page}</div>
-                </section>
+            <main id="content" class="js-content" style="overflow: hidden;">
+                <section class="section ${capsules ? "nested" : ""}">${page}</section>
             </main>
             ${footerEl}
         `;

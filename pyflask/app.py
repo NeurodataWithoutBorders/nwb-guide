@@ -2,7 +2,10 @@
 import sys
 import json
 import multiprocessing
-from os.path import sep
+from os import kill, getpid
+from os.path import isabs
+
+from signal import SIGINT
 from logging import Formatter, DEBUG
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -67,7 +70,10 @@ def get_all_files():
 def handle_file_request(path):
     if request.method == "GET":
         if registered[path]:
-            return send_file(unquote(path))
+            path = unquote(path)
+            if not isabs(path):
+                path = f"/{path}"
+            return send_file(path)
         else:
             app.abort(404, "Resource is not accessible.")
 
@@ -84,8 +90,8 @@ def send_conversions(path):
     return send_from_directory(CONVERSION_SAVE_FOLDER_PATH, path)
 
 
-@app.route("/stubs/<path:path>")
-def send_stubs(path):
+@app.route("/preview/<path:path>")
+def send_preview(path):
     return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
 
 
@@ -96,7 +102,7 @@ class Shutdown(Resource):
         api.logger.info("Shutting down server")
 
         if func is None:
-            print("Not running with the Werkzeug Server")
+            kill(getpid(), SIGINT)
             return
 
         func()

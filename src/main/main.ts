@@ -1,29 +1,27 @@
-import { app, BrowserWindow, dialog, shell } from 'electron';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { app, BrowserWindow, dialog, shell, globalShortcut } from 'electron';
+import { is } from '@electron-toolkit/utils'
 
 import paths from '../../paths.config.json'
 
 import main from '@electron/remote/main';
 main.initialize()
 
-let showExitPrompt = true;
 import path from 'path';
-import { autoUpdater } from 'electron-updater';
+// import { autoUpdater } from 'electron-updater';
 import { ipcMain } from 'electron';
 import fp from 'find-free-port';
 import 'v8-compile-cache'
 
 import child_process from 'child_process';
 import fs from 'fs';
-import axios from 'axios';
 
 import './application-menu.js';
-import './shortcuts.js';
 
 import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
+import preloadUrl from './../preload/preload.js?asset'
 
-autoUpdater.channel = "latest";
+// autoUpdater.channel = "latest";
 
 /*************************************************************
  * Python Process
@@ -44,7 +42,6 @@ const portRange = 100;
 
 const isWindows = process.platform === 'win32'
 
-let mainWindowReady = false
 let readyQueue: Function[] = []
 
 let globals: {
@@ -54,7 +51,6 @@ let globals: {
     sent: boolean,
     latestError: string
   },
-  mainWindowReady: boolean
 } =  {
 
   // mainWindow: undefined,
@@ -64,18 +60,6 @@ let globals: {
     sent: false,
     restart: false,
     latestError: ''
-  },
-
-  // Reactive ready variable
-  get mainWindowReady() {
-    return mainWindowReady
-  },
-
-  set mainWindowReady(v) {
-    if (!globals.mainWindow) throw new Error('Main window cannot be ready. It does not exist...')
-    mainWindowReady = v
-    if (v) readyQueue.forEach(f => onWindowReady(f))
-    readyQueue = []
   }
 }
 
@@ -83,7 +67,7 @@ function send(this: BrowserWindow, ...args: any[]) {
   return this.webContents.send(...args)
 }
 
-const onWindowReady = (f: (win: BrowserWindow) => any) => (globals.mainWindowReady) ? f(globals.mainWindow) : readyQueue.push(f)
+const onWindowReady = (f: (win: BrowserWindow) => any) => (globals.mainWindow?.webContents) ? f(globals.mainWindow) : readyQueue.push(f)
 
 
 // Pass all important log functions to the application
@@ -157,13 +141,14 @@ const createPyProc = async () => {
 
           pyflaskProcess.stdout.on('data', (data: string) => {
             const isRestarting = globals.python.restart
-            setTimeout(() => pythonIsOpen(isRestarting), 100); // Wait just a bit to give the server some time to come online
+            setTimeout(() => {
+              pythonIsOpen(isRestarting)
+            }, 100); // Wait just a bit to give the server some time to come online
             console.log(`${data}`)
             resolve(true)
           });
 
-          pyflaskProcess.on('close', (code: number) => {
-            console.error(`exit code ${code}`)
+          pyflaskProcess.on('close', () => {
             pythonIsClosed()
             reject()
           });
@@ -198,34 +183,32 @@ const exitPyProc = async () => {
 };
 
 const killAllPreviousProcesses = async () => {
-  console.log("Killing all previous processes");
 
-  // kill all previous python processes that could be running.
-  let promisesArray = [];
+  const fetch = globalThis.fetch
 
-  const defaultPort = PORT as number
+  if (fetch){
+    console.log("Killing all previous processes");
 
-  let endRange = defaultPort + portRange;
+    // kill all previous python processes that could be running.
+    let promisesArray = [];
 
-  // create a loop of 100
-  for (let currentPort = defaultPort; currentPort <= endRange; currentPort++) {
-    promisesArray.push(
-      axios.get(`http://127.0.0.1:${currentPort}/server_shutdown`, {})
-    );
-  }
+    const defaultPort = PORT as number
 
-  // wait for all the promises to resolve
-  await Promise.allSettled(promisesArray);
+    let endRange = defaultPort + portRange;
+
+    // create a loop of 100
+    for (let currentPort = defaultPort; currentPort <= endRange; currentPort++) promisesArray.push( fetch(`http://127.0.0.1:${currentPort}/server_shutdown`) );
+
+    // wait for all the promises to resolve
+    await Promise.allSettled(promisesArray);
+  } else console.error('Cannot kill previous processes because fetch is not defined in this version of Node.js')
 };
 
-let user_restart_confirmed = false;
 let updatechecked = false;
 
 let hasBeenOpened = false;
 
 function initialize() {
-
-  if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
 
   makeSingleInstance();
 
@@ -236,39 +219,36 @@ function initialize() {
       return { action: 'deny' };
     });
 
-    globals.mainWindow.webContents.once("dom-ready", () => {
-      if (updatechecked == false) {
-        autoUpdater.checkForUpdatesAndNotify();
-      }
-    });
-
-    globals.mainWindow.once("close", async (e) => {
-
-      globals.mainWindowReady = false
-
-      if (!user_restart_confirmed) {
-        if (showExitPrompt) {
-          e.preventDefault(); // Prevents the window from closing
-          dialog
-            .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
-              type: "question",
-              buttons: ["Yes", "No"],
-              title: "Confirm",
-              message: "Any running process will be stopped. Are you sure you want to quit?",
-            })
-            .then((responseObject) => {
-              let { response } = responseObject;
-              if (response === 0) app.quit();
-              else globals.mainWindowReady = true
-            });
-        }
-      } else {
-        app.quit();
-      }
-    });
+    // globals.mainWindow.webContents.once("dom-ready", () => {
+    //   if (updatechecked == false) {
+    //     autoUpdater.checkForUpdatesAndNotify();
+    //   }
+    // });
   }
 
   function onAppReady () {
+
+    if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
+
+    const windowOptions = {
+      minWidth: 1121,
+      minHeight: 735,
+      width: 1121,
+      height: 735,
+      center: true,
+      show: false,
+      icon,
+      webPreferences: {
+        nodeIntegration: true,
+        enableRemoteModule: true,
+        contextIsolation: false,
+        sandbox: false,
+        preload: path.join(preloadUrl),
+      },
+    };
+
+    globals.mainWindow = new BrowserWindow(windowOptions);
+
 
     // Only create one python process
     if (!pyflaskProcess) {
@@ -292,24 +272,6 @@ function initialize() {
       })
     }
 
-    const windowOptions = {
-      minWidth: 1121,
-      minHeight: 735,
-      width: 1121,
-      height: 735,
-      center: true,
-      show: false,
-      icon,
-      webPreferences: {
-        nodeIntegration: true,
-        enableRemoteModule: true,
-        contextIsolation: false,
-        sandbox: false,
-        // preload: path.join(__dirname, "preload.js"),
-      },
-    };
-
-    globals.mainWindow = new BrowserWindow(windowOptions);
     main.enable(globals.mainWindow.webContents);
 
   // HMR for renderer base on electron-vite cli.
@@ -343,10 +305,12 @@ function initialize() {
         globals.mainWindow.show();
         createWindow();
 
-        autoUpdater.checkForUpdatesAndNotify();
+        // autoUpdater.checkForUpdatesAndNotify();
         updatechecked = true;
 
-        globals.mainWindowReady = true
+        // Clear ready queue
+        readyQueue.forEach(f => onWindowReady(f))
+        readyQueue = []
 
       }, hasBeenOpened ? 100 : 1000);
     });
@@ -385,7 +349,10 @@ function restoreWindow(){
 function makeSingleInstance() {
   if (process.mas) return;
 
-  if (!app.requestSingleInstanceLock()) app.quit();
+  if (!app.requestSingleInstanceLock()){
+    console.error('An instance of this application is already open...')
+    app.exit(); // Skip quit callbacks
+  }
   else app.on("second-instance", () => restoreWindow());
 }
 
@@ -400,7 +367,7 @@ const homeDirectory = app.getPath("home");
 const appDirectory = path.join(homeDirectory, paths.root)
 const guidedProgressFilePath = path.join(appDirectory, ...paths.subfolders.progress);
 const guidedConversionFolderPath = path.join(appDirectory, ...paths.subfolders.conversions);
-const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.stubs);
+const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.preview);
 
 function getEntries(path, type = 'isDirectory') {
   return fs.readdirSync(path, { withFileTypes: true })
@@ -422,25 +389,34 @@ function deleteFoldersWithoutPipelines() {
     stubsToRemove.forEach(name => fs.rmSync(path.join(guidedStubFolderPath, name), { recursive: true }))
 }
 
+app.on("window-all-closed", () => {
+  if (process.platform != 'darwin') app.quit() // Exit the application not on Mac
+})
 
-app.on('will-quit', async () => {
+app.on("before-quit", async (ev: Event) => {
+
+  ev.preventDefault()
+
+  const { response } = await dialog
+  .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
+    type: "question",
+    buttons: ["Yes", "No"],
+    title: "Confirm",
+    message: "Any running process will be stopped. Are you sure you want to quit?",
+  })
+
+  if (response !== 0) return // Skip quitting
+
   try {
+    globalShortcut.unregisterAll();
     deleteFoldersWithoutPipelines()
     await exitPyProc()
-    if (globals.mainWindow) {
-      globals.mainWindow.close();
-      if (!globals.mainWindow.closed) globals.mainWindow.destroy()
-    }
   } catch (err) {
     console.error(err);
+  } finally {
+    app.exit()
   }
-});
-
-app.on("window-all-closed", async () => {
-  if (process.platform != 'darwin') app.quit();
-});
-
-// app.on("will-quit", () => app.quit());
+})
 
 app.on("open-file", onFileOpened)
 
@@ -457,18 +433,17 @@ ipcMain.on("resize-window", (event, dir) => {
   globals.mainWindow.setSize(x, y);
 });
 
-autoUpdater.on("update-available", () => {
-  onWindowReady(win => send.call(win, "update_available"));
-});
+// autoUpdater.on("update-available", () => {
+//   onWindowReady(win => send.call(win, "update_available"));
+// });
 
-autoUpdater.on("update-downloaded", () => {
-  onWindowReady(win => send.call(win, "update_downloaded"));
-});
+// autoUpdater.on("update-downloaded", () => {
+//   onWindowReady(win => send.call(win, "update_downloaded"));
+// });
 
-ipcMain.on("restart_app", async () => {
-  user_restart_confirmed = true;
-  autoUpdater.quitAndInstall();
-});
+// ipcMain.on("restart_app", async () => {
+//   autoUpdater.quitAndInstall();
+// });
 
 ipcMain.on("get-port", (event) => {
   event.returnValue = selectedPort;

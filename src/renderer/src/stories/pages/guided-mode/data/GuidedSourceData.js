@@ -17,6 +17,11 @@ export class GuidedSourceDataPage extends ManagedPage {
         merge(this.localState, this.info.globalState);
     };
 
+    header = {
+        subtitle:
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
+    };
+
     footer = {
         next: "Request Metadata Schema",
         onNext: async () => {
@@ -104,11 +109,14 @@ export class GuidedSourceDataPage extends ManagedPage {
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
 
+        const schemaResolved = getSourceDataSchema(schema);
+
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema: getSourceDataSchema(schema),
+            schema: schemaResolved,
             results: info.source_data,
+            emptyMessage: "No source data required for this session.",
             ignore: [
                 "verbose",
                 "es_key",
@@ -122,6 +130,8 @@ export class GuidedSourceDataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });
+
+        form.style.height = "100%";
 
         return {
             subject,

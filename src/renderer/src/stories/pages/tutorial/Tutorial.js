@@ -12,14 +12,19 @@ import { hasEntry, get, save, remove, resume, global } from "../../../progress/i
 
 import { electron } from "../../../electron/index.js";
 
-import restartSVG from "../../assets/restart.svg?raw";
-import folderOpenSVG from "../../assets/folder_open.svg?raw";
+import { InspectorListItem } from "../../preview/inspector/InspectorList";
 
 const { shell } = electron;
 
 const tutorialPipelineName = "NWB GUIDE Tutorial Data";
 
 export class TutorialPage extends Page {
+    header = {
+        title: "Tutorial Data Generation",
+        subtitle:
+            "This page allows you to generate a dataset with multiple subjects and sessions so you can practice using NWB GUIDE before converting your own datasets.",
+    };
+
     constructor(...args) {
         super(...args);
     }
@@ -39,47 +44,48 @@ export class TutorialPage extends Page {
         form.style.width = "100%";
 
         const entryExists = hasEntry(tutorialPipelineName);
+        const entry = entryExists ? get(tutorialPipelineName) : {};
 
-        return html` <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
-                <h1 style="margin: 0;">Tutorial Data Generation</h1>
-
-                <div>
-                    ${entryExists
-                        ? html` <nwb-button
-                                  size="small"
-                                  @click=${() => {
-                                      if (shell) {
-                                          const entry = get(tutorialPipelineName);
-                                          shell.showItemInFolder(entry.project.initialized);
-                                      }
-                                  }}
-                                  >${unsafeSVG(folderOpenSVG)}</nwb-button
-                              >
-
-                              <nwb-button
-                                  size="small"
-                                  @click=${async () => {
-                                      const hasBeenDeleted = await remove(tutorialPipelineName);
-                                      if (hasBeenDeleted) this.requestUpdate();
-                                  }}
-                                  >${unsafeSVG(restartSVG)}</nwb-button
-                              >`
-                        : ""}
-                </div>
-            </div>
-            <p>
-                This page allows you to generate a dataset with multiple subjects and sessions so you can practice using
-                NWB GUIDE before converting your own datasets.
-            </p>
-
-            <hr />
-
+        return html`
             ${hasEntry(tutorialPipelineName)
                 ? html`<div>
-                      Data has been preloaded into the <b>${tutorialPipelineName}</b> pipeline, which can be accessed
-                      via the <a @click=${() => this.to("guided")}>Guided Mode</a> conversion list.
+                      <p>
+                          A dataset has been generated for you at
+                          <small
+                              ><code
+                                  ><a @click=${() => shell?.showItemInFolder(entry.project.initialized)}
+                                      >${entry.project.initialized}</a
+                                  ></code
+                              ></small
+                          >
+                          and preloaded into the <b>${tutorialPipelineName}</b> conversion pipeline.
+                      </p>
 
-                      <br /><br />
+                      <p>Try to fill out as much metadata as you can while going through this tutorial. Be creative!</p>
+
+                      <p>
+                          Don't worry about providing incorrect information. We'll let you know if something will break
+                          the conversion.
+                      </p>
+
+                      <p>
+                          And remember,
+                          <b>the more you provide Global Metadata, the less you'll have to specify later.</b>
+                      </p>
+
+                      <div>
+                          ${new InspectorListItem({
+                              message: html` <h4 style="margin: 0;">A Final Note on DANDI Upload</h4>
+                                  <small
+                                      >When you reach the Upload page, make sure to provide a Dandiset ID on the
+                                      <b>DANDI Staging server</b> — just so we don't overrun the main server with test
+                                      data.</small
+                                  >`,
+                              type: "warning",
+                          })}
+                      </div>
+
+                      <p>Let's get started with your first conversion on the GUIDE!</p>
 
                       <nwb-button
                           primary
@@ -87,7 +93,16 @@ export class TutorialPage extends Page {
                           @click=${() => {
                               resume.call(this, tutorialPipelineName);
                           }}
-                          >Open Conversion Pipeline</nwb-button
+                          >${"page-before-exit" in entry ? "Resume" : "Begin"} Conversion</nwb-button
+                      >
+
+                      <nwb-button
+                          size="small"
+                          @click=${async () => {
+                              const hasBeenDeleted = await remove(tutorialPipelineName);
+                              if (hasBeenDeleted) this.requestUpdate();
+                          }}
+                          >Delete Pipeline</nwb-button
                       >
                   </div>`
                 : html`
@@ -161,7 +176,8 @@ export class TutorialPage extends Page {
                           }}
                           >Generate Dataset</nwb-button
                       >
-                  `}`;
+                  `}
+        `;
     }
 }
 

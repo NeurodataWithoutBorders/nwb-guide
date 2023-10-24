@@ -2,6 +2,8 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
+
+const folderPathKey = "filesystem_paths";
 import dandiUploadSchema from "../../../../../../schemas/json/dandi/upload.json";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}), { arrays: true });
@@ -11,15 +13,16 @@ import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { run } from "../guided-mode/options/utils.js";
-import { notyf } from "../../../dependencies/globals.js";
 import Swal from "sweetalert2";
 import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export async function uploadToDandi(info, type = "project" in info ? "" : "folder") {
-    const staging = isStaging(info.dandiset_id); // Automatically detect staging IDs
+export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
+    const { dandiset_id } = info;
+
+    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
     const api_key = global.data.DANDI?.api_keys?.[whichAPIKey];
@@ -44,23 +47,27 @@ export async function uploadToDandi(info, type = "project" in info ? "" : "folde
         },
         { title: "Uploading to DANDI" }
     ).catch((e) => {
-        notyf.open({
-            type: "error",
-            message: e.message,
-        });
+        this.notify(e.message, "error");
         throw e;
     });
 
     if (result)
-        notyf.open({
-            type: "success",
-            message: `${info.project ?? info.nwb_folder_path} successfully uploaded to Dandiset ${info.dandiset_id}`,
-        });
+        this.notify(
+            `${
+                info.project ?? `${info[folderPathKey].length} filesystem entries`
+            } successfully uploaded to Dandiset ${dandiset_id}`,
+            "success"
+        );
 
     return result;
 }
 
 export class UploadsPage extends Page {
+    header = {
+        title: "DANDI Uploads",
+        subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
+    };
+
     constructor(...args) {
         super(...args);
     }
@@ -89,13 +96,12 @@ export class UploadsPage extends Page {
             },
         });
 
-        const folderPathKey = "nwb_folder_path";
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
             results: globalState,
             schema: dandiSchema,
             sort: ([k1]) => {
-                if (k1 === "nwb_folder_path") return -1;
+                if (k1 === folderPathKey) return -1;
             },
             onUpdate: ([id]) => {
                 if (id === folderPathKey) {
@@ -111,17 +117,9 @@ export class UploadsPage extends Page {
         });
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
-                <h1 style="margin: 0;">DANDI Uploads</h1>
-            </div>
-            <p>This page allows you to upload folders with NWB files to the DANDI Archive.</p>
+            ${this.form}
             <hr />
-
-            <div>
-                ${this.form}
-                <hr />
-                ${button}
-            </div>
+            ${button}
         `;
     }
 }

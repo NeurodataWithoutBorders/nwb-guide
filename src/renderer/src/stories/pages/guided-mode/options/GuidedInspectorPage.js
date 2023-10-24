@@ -13,6 +13,7 @@ import { InspectorList } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { path as nodePath } from "../../../../electron";
+import { getMessageType } from "../../../../validation/index.js";
 
 const filter = (list, toFilter) => {
     return list.filter((o) => {
@@ -27,13 +28,15 @@ const filter = (list, toFilter) => {
     });
 };
 
+const emptyMessage = "No issues detected in these files!";
+
 export class GuidedInspectorPage extends Page {
     constructor(...args) {
         super(...args);
     }
 
     header = {
-        subtitle: () => `${getStubArray(this.info.globalState.preview.stubs).length} Files`,
+        subtitle: `The NWB Inspector has scanned your files for adherence to <a target="_blank" href="https://nwbinspector.readthedocs.io/en/dev/best_practices/best_practices_index.html">best practices</a>`,
         controls: () =>
             html`<nwb-button
                 size="small"
@@ -50,6 +53,14 @@ export class GuidedInspectorPage extends Page {
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {
         next: "Preview Files",
+    };
+
+    getStatus = (list) => {
+        return list.reduce((acc, o) => {
+            const res = getMessageType(o);
+            if (acc === "error") return acc;
+            else return res;
+        }, "valid");
     };
 
     render() {
@@ -75,7 +86,7 @@ export class GuidedInspectorPage extends Page {
                             (this.unsavedUpdates = globalState.preview.inspector =
                                 await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title }))
                         );
-                    return new InspectorList({ items });
+                    return new InspectorList({ items, emptyMessage });
                 }
 
                 const items = await (async () => {
@@ -88,12 +99,11 @@ export class GuidedInspectorPage extends Page {
                 })();
 
                 const _instances = fileArr.map(({ subject, session, info }) => {
-                    const display = () => {
-                        const filtered = removeFilePaths(
-                            filter(items, { file_path: [`sub-${subject}`, `sub-${subject}_ses-${session}`] })
-                        );
-                        return new InspectorList({ items: filtered });
-                    };
+                    const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
+                    const filtered = removeFilePaths(filter(items, { file_path }));
+
+                    const display = () => new InspectorList({ items: filtered, emptyMessage });
+                    display.status = this.getStatus(filtered);
 
                     return {
                         subject,
@@ -103,28 +113,39 @@ export class GuidedInspectorPage extends Page {
                 });
 
                 const instances = _instances.reduce((acc, { subject, session, display }) => {
-                    if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
-                    acc[`sub-${subject}`][`ses-${session}`] = display;
+                    const subLabel = `sub-${subject}`;
+                    if (!acc[`sub-${subject}`]) acc[subLabel] = {};
+                    acc[subLabel][`ses-${session}`] = display;
                     return acc;
                 }, {});
 
                 Object.keys(instances).forEach((subLabel) => {
+                    const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                    const path = getSharedPath(subItems.map((o) => o.file_path));
+                    const filtered = truncateFilePaths(subItems, path);
+
+                    const display = () => new InspectorList({ items: filtered, emptyMessage });
+                    display.status = this.getStatus(filtered);
+
                     instances[subLabel] = {
-                        ["All Files"]: () => {
-                            const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
-                            const path = getSharedPath(subItems.map((o) => o.file_path));
-                            return new InspectorList({ items: truncateFilePaths(subItems, path) });
-                        },
+                        ["All Files"]: display,
                         ...instances[subLabel],
                     };
                 });
 
-                return new InstanceManager({
-                    instances: {
-                        ["All Files"]: () => new InspectorList({ items }),
-                        ...instances,
-                    },
+                const allDisplay = () => new InspectorList({ items, emptyMessage });
+                allDisplay.status = this.getStatus(items);
+
+                const allInstances = {
+                    ["All Files"]: allDisplay,
+                    ...instances,
+                };
+
+                const manager = new InstanceManager({
+                    instances: allInstances,
                 });
+
+                return manager;
             })(),
             ""
         )}`;

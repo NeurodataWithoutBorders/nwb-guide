@@ -6,12 +6,16 @@ import { errorHue, warningHue } from "./globals";
 import { checkStatus } from "../validation";
 import { emojiFontFamily } from "./globals";
 
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
+
 const maxRows = 20;
 
 // Inject scoped stylesheet
 const styles = `
 
         ${css}
+
 
         .handsontable td[error] {
             background: hsl(${errorHue}, 100%, 90%) !important;
@@ -37,11 +41,8 @@ const styles = `
         padding-left: 20px
       }
 
-      [title] .relative::after {
-        content: 'ℹ️';
-        display: inline-block;
+      .relative .info {
         margin: 0px 5px;
-        text-align: center;
         font-size: 80%;
         font-family: ${emojiFontFamily}
       }
@@ -65,6 +66,7 @@ export class Table extends LitElement {
         onUpdate,
         validateEmptyCells,
         onStatusChange,
+        contextMenu,
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -72,6 +74,7 @@ export class Table extends LitElement {
         this.keyColumn = keyColumn;
         this.template = template ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
+        this.contextMenu = contextMenu ?? {};
 
         if (onUpdate) this.onUpdate = onUpdate;
         if (validateOnChange) this.validateOnChange = validateOnChange;
@@ -238,6 +241,11 @@ export class Table extends LitElement {
             const validator = async function (value, callback) {
                 if (!value) {
                     if (!ogThis.validateEmptyCells) {
+                        ogThis.#handleValidationResult(
+                            [], // Clear errors
+                            this.row,
+                            this.col
+                        );
                         callback(true); // Allow empty value
                         return true;
                     }
@@ -276,15 +284,47 @@ export class Table extends LitElement {
 
         const onAfterGetHeader = function (index, TH) {
             const desc = entries[colHeaders[index]].description;
-            if (desc) TH.setAttribute("title", desc);
+            if (desc) {
+                const rel = TH.querySelector(".relative");
+                let span = rel.querySelector(".info");
+                if (!span) {
+                    span = document.createElement("span");
+                    span.classList.add("info");
+                    span.innerText = "ℹ️";
+                    rel.append(span);
+                }
+
+                if (span._tippy) span._tippy.destroy();
+                tippy(span, { content: `${desc}` });
+            }
         };
 
         const data = this.#getData();
 
         let nRows = rowHeaders.length;
 
-        const contextMenu = ["row_below", "remove_row"];
+        let contextMenu = ["row_below", "remove_row"];
         if (this.schema.additionalProperties) contextMenu.push("col_right", "remove_col");
+
+        contextMenu = contextMenu.filter((k) => !(this.contextMenu.ignore ?? []).includes(k));
+
+        const descriptionEl = this.querySelector("#description");
+        const operations = {
+            rows: [],
+            columns: [],
+        };
+
+        if (contextMenu.includes("row_below")) operations.rows.push("add");
+        if (contextMenu.includes("remove_row")) operations.rows.push("remove");
+        if (contextMenu.includes("col_right")) operations.columns.push("add");
+        if (contextMenu.includes("remove_col")) operations.columns.push("remove");
+        const operationSet = new Set(Object.values(operations).flat());
+        const operationOn = Object.keys(operations).filter((k) => operations[k].length);
+
+        if (operationSet.size) {
+            const desc = `Right click to ${Array.from(operationSet).join("/")} ${operationOn.join("and")}.`;
+            descriptionEl.innerText = desc;
+        }
 
         const table = new Handsontable(div, {
             data,
@@ -398,17 +438,20 @@ export class Table extends LitElement {
 
         if (cell) {
             let title = "";
+            let theme = "";
             if (warnings.length) {
-                cell.setAttribute("warning", "");
-                title = warnings.map((o) => o.message).join("\n");
+                (theme = "warning"), (title = warnings.map((o) => o.message).join("\n"));
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                cell.setAttribute("error", "");
-                title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+                (theme = "error"), (title = errors.map((o) => o.message).join("\n")); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
-            if (title) cell.title = title;
+            if (theme) cell.setAttribute(theme, "");
+
+            if (cell._tippy) cell._tippy.destroy();
+
+            if (title) tippy(cell, { content: title, theme });
         }
 
         this.#checkStatus(); // Check status after every validation update
@@ -445,7 +488,7 @@ export class Table extends LitElement {
         return html`
             <div></div>
             <p style="width: 100%; margin: 10px 0px">
-                <small style="color: gray;">Right click to add or remove rows.</small>
+                <small id="description" style="color: gray;"></small>
             </p>
         `;
     }

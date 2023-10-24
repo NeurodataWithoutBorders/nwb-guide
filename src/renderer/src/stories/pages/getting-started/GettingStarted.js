@@ -22,13 +22,8 @@ export class GettingStartedPage extends Page {
 
     render() {
         return html`
-            <section
-                id="getting_started-section"
-                class="getting-started-overview section js-section u-category-windows is-shown fullShown"
-            >
-                <p class="header-text">
-                    Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br />
-                </p>
+            <section class="getting-started">
+                <h3>Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br /></h3>
 
                 <div class="overview-card-layout grid h-auto w-full grid-cols-3 gap-6">
                     <div id="overview-column-1" class="overview-column">
@@ -84,12 +79,6 @@ export class GettingStartedPage extends Page {
                             </svg>
                         </i>
                     </button>
-                </div>
-                <div style="display: flex; justify-content: center">
-                    <div
-                        class="flex w-full items-center justify-center pb-2"
-                        style="justify-content: center; display: flex; align-items: center"
-                    ></div>
                 </div>
             </section>
         `;

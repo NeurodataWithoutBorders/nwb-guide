@@ -7,7 +7,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
     },
     {
         "message": "Experiment description is missing.",
@@ -17,7 +17,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
     },
     {
         "message": "Metadata /general/institution is missing.",
@@ -27,7 +27,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
     },
     {
         "message": "Metadata /general/keywords is missing.",
@@ -37,7 +37,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-070623.nwb"
     },
     {
         "message": "Experimenter is missing.",
@@ -47,7 +47,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
     },
     {
         "message": "Experiment description is missing.",
@@ -57,7 +57,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
     },
     {
         "message": "Metadata /general/institution is missing.",
@@ -67,7 +67,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
     },
     {
         "message": "Metadata /general/keywords is missing.",
@@ -77,7 +77,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-070623.nwb"
     },
     {
         "message": "Experimenter is missing.",
@@ -87,7 +87,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
     },
     {
         "message": "Experiment description is missing.",
@@ -97,7 +97,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
     },
     {
         "message": "Metadata /general/institution is missing.",
@@ -107,7 +107,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
     },
     {
         "message": "Metadata /general/keywords is missing.",
@@ -117,7 +117,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse2/sub-mouse2_ses-060623.nwb"
     },
     {
         "message": "Experimenter is missing.",
@@ -127,7 +127,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
     },
     {
         "message": "Experiment description is missing.",
@@ -137,7 +137,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
     },
     {
         "message": "Metadata /general/institution is missing.",
@@ -147,7 +147,7 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
     },
     {
         "message": "Metadata /general/keywords is missing.",
@@ -157,6 +157,6 @@
         "object_type": "NWBFile",
         "object_name": "root",
         "location": "/",
-        "file_path": "/Users/garrettflynn/NWB_GUIDE/stubs/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
+        "file_path": "/Users/garrettflynn/NWB_GUIDE/preview/NWB GUIDE Tutorial Data/sub-mouse1/sub-mouse1_ses-060623.nwb"
     }
 ]

@@ -6,17 +6,36 @@ import { validateOnChange } from "../../../../validation/index.js";
 
 import projectGeneralSchema from "../../../../../../../schemas/json/project/general.json" assert { type: "json" };
 import projectGlobalSchema from "../../../../../../../schemas/json/project/globals.json" assert { type: "json" };
-import projectNWBFileSchema from "../../../../../../../schemas/json/project/nwbfile.json" assert { type: "json" };
-import projectSubjectSchema from "../../../../../../../schemas/json/project/subject.json" assert { type: "json" };
 import { merge } from "../../utils.js";
+import { schemaToPages } from "../../FormPage.js";
+import { onThrow } from "../../../../errors";
+import baseMetadataSchema from "../../../../../../../schemas/base-metadata.schema";
+
+const changesAcrossSessions = {
+    Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
+    NWBFile: [
+        "session_id",
+        "session_start_time",
+        "identifier",
+        "data_collection",
+        "notes",
+        "pharmacolocy",
+        "session_description",
+        "slices",
+        "source_script",
+        "source_script_file_name",
+    ],
+};
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
-merge(projectNWBFileSchema, projectMetadataSchema);
-merge(projectSubjectSchema, projectMetadataSchema);
 
-import { schemaToPages } from "../../FormPage.js";
+Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
+    const info = (projectMetadataSchema.properties[globalProp] = structuredClone(v));
 
-import { onThrow } from "../../../../errors";
+    changesAcrossSessions[globalProp]?.forEach((prop) => {
+        delete info.properties[prop];
+    });
+});
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -27,6 +46,10 @@ export class GuidedNewDatasetPage extends Page {
     state = {};
 
     #nameNotification;
+
+    header = {
+        subtitle: "Enter a name for this pipeline and specify the base folders to save all outputs to",
+    };
 
     footer = {
         onNext: async () => {
@@ -85,12 +108,23 @@ export class GuidedNewDatasetPage extends Page {
 
         this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
-        const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
-            info.title = `${info.label} Global Metadata`;
-            return info;
-        });
+        const pages = schemaToPages.call(
+            this,
+            schema,
+            ["project"],
+            { validateEmptyValues: false, requirementMode: "loose" },
+            (info) => {
+                info.title = `${info.label} Global Metadata`;
+                return info;
+            }
+        );
 
-        pages.forEach((page) => this.addPage(page.info.label, page));
+        pages.forEach((page) => {
+            page.header = {
+                subtitle: `Enter any ${page.info.label}-level metadata that can serve as the common default across each experiment session`,
+            };
+            this.addPage(page.info.label, page);
+        });
 
         this.form = new JSONSchemaForm({
             schema,

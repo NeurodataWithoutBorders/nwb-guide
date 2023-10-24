@@ -16,6 +16,10 @@
                 "verbose": {
                     "type": "boolean",
                     "default": true
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",

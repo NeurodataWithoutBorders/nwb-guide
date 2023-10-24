@@ -6,11 +6,16 @@ export class OptionalSection extends LitElement {
     static get styles() {
         return css`
             :host {
-                text-align: center;
+                display: block;
             }
 
             h2 {
                 margin: 0;
+                margin-bottom: 15px;
+            }
+
+            .optional-section__toggle {
+                padding-bottom: 20px;
             }
 
             .optional-section__content {
@@ -39,7 +44,7 @@ export class OptionalSection extends LitElement {
     constructor(props) {
         super();
         this.header = props.header ?? "";
-        this.description = props.description ?? "This is the description of the optional section.";
+        this.description = props.description ?? "";
         this.content = props.content ?? "";
         this.altContent = props.altContent ?? "";
         this.state = props.state;
@@ -97,17 +102,15 @@ export class OptionalSection extends LitElement {
 
     render() {
         return html`
-            <div class="optional-section">
-                <div class="optional-section__header">
-                    ${this.header ? html`<h2>${this.header}</h2>` : ""}
-                    <div>${this.description}</div>
-                    <div class="optional-section__toggle">${this.yes} ${this.no}</div>
-                </div>
-                <div class="optional-section__content" hidden>
-                    <slot>${this.content}</slot>
-                </div>
-                <div id="altContent" class="optional-section__content" hidden>${this.altContent}</div>
+            <div class="optional-section__header">
+                ${this.header ? html`<h2>${this.header}</h2>` : ""}
+                <div>${this.description}</div>
+                <div class="optional-section__toggle">${this.yes} ${this.no}</div>
             </div>
+            <div class="optional-section__content" hidden>
+                <slot>${this.content}</slot>
+            </div>
+            <div id="altContent" class="optional-section__content" hidden>${this.altContent}</div>
         `;
     }
 }

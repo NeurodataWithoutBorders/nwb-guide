@@ -6,6 +6,7 @@
         },
         "cleanup": {
             "type": "boolean",
+            "title": "Delete Local Files After Upload",
             "default": false
         }
     },

@@ -22,9 +22,6 @@ export class Page extends LitElement {
     constructor(info = {}) {
         super();
         Object.assign(this.info, info);
-
-        this.style.height = "100%";
-        this.style.color = "black";
     }
 
     createRenderRoot() {
@@ -56,13 +53,12 @@ export class Page extends LitElement {
     };
 
     notify = (...args) => {
-        const note = notify(...args);
-        this.#notifications.push(note);
+        const ref = notify(...args);
+        this.#notifications.push(ref);
+        return ref;
     };
 
     to = async (transition) => {
-        this.beforeTransition();
-
         // Otherwise note unsaved updates if present
         if (
             this.unsavedUpdates ||
@@ -72,7 +68,7 @@ export class Page extends LitElement {
         ) {
             if (transition === 1) await this.save(); // Save before a single forward transition
             else {
-                Swal.fire({
+                await Swal.fire({
                     title: "You have unsaved data on this page.",
                     text: "Would you like to save your changes?",
                     icon: "warning",
@@ -82,10 +78,7 @@ export class Page extends LitElement {
                     cancelButtonText: "Ignore Changes",
                 }).then(async (result) => {
                     if (result && result.isConfirmed) await this.save();
-                    this.onTransition(transition);
                 });
-
-                return;
             }
         }
 
@@ -95,12 +88,11 @@ export class Page extends LitElement {
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
     beforeSave = () => {}; // User-defined function
-    beforeTransition = () => {}; // User-defined function
 
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave();
         save(this, overrides);
-        this.info.states.saved = true;
+        if ("states" in this.info) this.info.states.saved = true;
         this.unsavedUpdates = false;
     };
 
@@ -143,10 +135,14 @@ export class Page extends LitElement {
         popup.hideLoading();
         const element = popup.getHtmlContainer();
         element.innerText = "";
-
+        element.style.textAlign = "left";
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
         element.append(progressBar);
+        element.insertAdjacentHTML(
+            "beforeend",
+            `<small><small><b>Note:</b> This may take a while to complete...</small></small>`
+        );
         // }
 
         let completed = 0;
@@ -156,7 +152,7 @@ export class Page extends LitElement {
             const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, stub_output_folder, name } = globalState.project;
+            const { conversion_output_folder, preview_output_folder, name } = globalState.project;
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
@@ -166,7 +162,7 @@ export class Page extends LitElement {
 
             const result = await runConversion(
                 {
-                    output_folder: conversionOptions.stub_test ? stub_output_folder : conversion_output_folder,
+                    output_folder: conversionOptions.stub_test ? preview_output_folder : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
@@ -193,6 +189,7 @@ export class Page extends LitElement {
         }
 
         popup.close();
+        element.style.textAlign = ""; // Clear style update
 
         return results;
     }

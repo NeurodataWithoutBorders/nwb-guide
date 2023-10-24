@@ -22,6 +22,10 @@ export class GuidedUploadPage extends Page {
         if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
     };
 
+    header = {
+        subtitle: "Settings to upload your conversion to the DANDI Archive",
+    };
+
     footer = {
         next: "Upload Project",
         onNext: async () => {

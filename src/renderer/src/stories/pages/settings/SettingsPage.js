@@ -17,6 +17,7 @@ import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
+import { header } from "../../forms/utils";
 
 const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
 
@@ -29,9 +30,21 @@ const setUndefinedIfNotDeclared = (schema, resolved) => {
 };
 
 export class SettingsPage extends Page {
+    header = {
+        title: "App Settings",
+        subtitle: "This page allows you to set global settings for the GUIDE.",
+    };
+
     constructor(...args) {
         super(...args);
     }
+
+    #notification;
+
+    #openNotyf = (message, type) => {
+        if (this.#notification) notyf.dismiss(this.#notification);
+        return (this.#notification = this.notify(message, type));
+    };
 
     beforeSave = () => {
         const { resolved } = this.form;
@@ -44,10 +57,7 @@ export class SettingsPage extends Page {
         merge(this.form.resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
-        notyf.open({
-            type: "success",
-            message: "Global settings changes saved",
-        });
+        this.#openNotyf("Global settings changes saved", "success");
     };
 
     render() {
@@ -56,7 +66,7 @@ export class SettingsPage extends Page {
         const button = new Button({
             label: "Save Changes",
             onClick: async () => {
-                if (!this.unsavedUpdates) return;
+                if (!this.unsavedUpdates) return this.#openNotyf("All changes were already saved", "success");
                 this.save();
             },
         });
@@ -69,24 +79,17 @@ export class SettingsPage extends Page {
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: (name, parent) => {
                 const value = parent[name];
-                if (name.includes("api_key")) return dandiAPITokenRegex.test(value);
+                if (value && name.includes("api_key") && !dandiAPITokenRegex.test(value))
+                    return [{ type: "error", message: `${header(name)} must be a 40 character hexadecimal string` }];
                 return true;
             },
             onThrow,
         });
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 10px;">
-                <h1 style="margin: 0;">NWB GUIDE Settings</h1>
-            </div>
-            <p>This page allows you to set global settings for the NWB GUIDE.</p>
+            ${this.form}
             <hr />
-
-            <div>
-                ${this.form}
-                <hr />
-                ${button}
-            </div>
+            ${button}
         `;
     }
 }
