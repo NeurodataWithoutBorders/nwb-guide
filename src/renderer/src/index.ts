@@ -108,6 +108,7 @@ async function pythonServerOpened() {
 
   // Confirm requests are actually received by the server
   const isLive = await serverIsLiveStartup()
+  console.log('IS LIVE', isLive)
   if (isLive) await preloadFlaskImports() // initiate preload of Flask imports
   if (!isLive) return pythonServerClosed()
 
@@ -122,9 +123,8 @@ async function pythonServerOpened() {
 }
 
 
-async function pythonServerClosed(message?: string) {
+async function pythonServerClosed() {
 
-  if (message) console.error(message)
   statusBar.items[2].status = false
 
     await Swal.fire({
@@ -147,19 +147,11 @@ async function pythonServerClosed(message?: string) {
 }
 
 if (isElectron) {
-    ipcRenderer.send("python.status"); // Trigger status check
 
-    ipcRenderer.on("python.open", pythonServerOpened);
+    const service = COMMONERS.services.flask
 
-    ipcRenderer.on("python.closed", (_, message) => pythonServerClosed(message));
-    ipcRenderer.on("python.restart", () => {
-      statusBar.items[2].status = undefined
-      if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
-      openPythonStatusNotyf = notyf.open({
-        type: "warning",
-        message: "Backend services are restarting...",
-      })
-    });
+    service.onActivityDetected(pythonServerOpened)
+    service.onClosed(pythonServerClosed)
 
     // Check for update and show the pop up box
     ipcRenderer.on("update_available", () => {

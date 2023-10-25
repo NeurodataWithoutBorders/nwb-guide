@@ -4,7 +4,7 @@ import isElectron from "./check.js";
 export { isElectron };
 
 export let port = 4242;
-export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
+export let electron = {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
 export let remote = {};
@@ -15,14 +15,15 @@ export let crypto = null;
 
 if (isElectron) {
     try {
+        electron = require("electron");
         fs = require("fs-extra"); // File System
-        os = require("os");
+        os = require("node:os");
 
         // remote = require("@electron/remote");
         // app = remote.app;
-        crypto = require("crypto");
+        crypto = require("node:crypto");
         // NOTE: Must reintegrate...
-        electron.ipcRenderer.on("fileOpened", (info, filepath) => {
+        electron.ipcRenderer.on("nwb-guide:fileOpened", (info, filepath) => {
             updateURLParams({ file: filepath });
             const dashboard = document.querySelector("nwb-dashboard");
             const activePage = dashboard.getAttribute("activePage");
@@ -35,7 +36,7 @@ if (isElectron) {
         port = pythonUrl.port
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
-        path = require("path");
+        path = require("node:path");
     } catch (e) {
         console.error("Electron API access failed —", e);
     }

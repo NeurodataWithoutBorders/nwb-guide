@@ -1,0 +1,19 @@
+{
+    "commute": {
+        "title": "Heading to work",
+        "video": "https://www.youtube.com/embed/2eMkth8FWno",
+        "options": [
+            { 
+                "text": "Go to work",
+                "next": "work"
+            },
+            { 
+                "text": "Go back to bed",
+                "next": "bed"
+            }
+        ]
+    },
+    "work": {
+
+    }
+}

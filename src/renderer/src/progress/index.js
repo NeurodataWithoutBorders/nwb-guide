@@ -32,7 +32,7 @@ function decode(message) {
     if (!crypto || !/[0-9A-Fa-f]{6}/g.test(message)) return message;
 
     try {
-        const mykey = crypto.createDecipher("aes-128-cbc", homeDirectory);
+        const mykey = crypto.createDecipheriv("aes-128-cbc", homeDirectory);
         const mystr = mykey.update(message, "hex", "utf8");
         return mystr + mykey.final("utf8");
     } catch {

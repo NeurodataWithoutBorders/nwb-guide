@@ -1,13 +1,38 @@
 export default {
 
-    plugins: [],
+
+    icon: 'src/renderer/assets/img/logo-guide-draft.png',
+
+    plugins: [
+        {
+            loadDesktop: function ( win ){
+
+                function isValidFile(filepath) {
+                    return !fs.existsSync(filepath) && path.extname(filepath) === '.nwb'
+                }
+                
+                function onFileOpened(_, filepath) {
+                    // restoreWindow() || initialize(); // Ensure the application is properly visible
+                    win.webContents.send('fileOpened', filepath)
+                }
+                
+                if (isWindows && process.argv.length >= 2) {
+                    const openFilePath = process.argv[1];
+                    if (isValidFile(openFilePath)) onFileOpened(null, openFilePath)
+                }
+                
+                this.on("open-file", onFileOpened)
+            }
+        }
+    ],
 
     services: {
         flask: {
             src: './pyflask/app.py',
             port: 4242,
             publish: {
-                src: './build/flask/nwb-guide/nwb-guide', 
+                src: 'nwb-guide',
+                base: './build/flask/nwb-guide',
                 build: "npm run build:flask"
             }
         }
@@ -28,6 +53,19 @@ export default {
                 contextIsolation: false,
                 sandbox: false,
             },
+        },
+
+        build: {
+            win: {
+                requestedExecutionLevel: "requireAdministrator"
+            },
+            fileAssociations: [
+                {
+                    ext: "nwb",
+                    name: "NWB File",
+                    role: "Viewer"
+                }
+              ],
         }
     }
 }
