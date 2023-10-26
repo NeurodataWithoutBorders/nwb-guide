@@ -21,27 +21,27 @@ export class ContactPage extends Page {
 
     render() {
         return html`
-            <div class="documentation_container">
-                <div class="document_container">
-                    <div class="doc_container">
-                        <div class="dc_con">
-                            <div class="document-content">
-                                <div id="contact-us-lottie" class="documentation-lottie_style"></div>
-                            </div>
-                            <div class="docu-content-container">
-                                <h2 class="document_text">
-                                    If you encounter any issues or have requests for new features, please create a new
-                                    <a
-                                        target="_blank"
-                                        href="https://github.com/NeurodataWithoutBorders/nwb-guide/issues/new/choose"
-                                        >ticket on our GitHub page</a
-                                    >.
-                                </h2>
-                            </div>
-                        </div>
+        <div class="documentation_container">
+        <div class="document_container">
+            <div class="doc_container">
+                <div class="dc_con">
+                    <div class="document-content">
+                        <div id="contact-us-lottie" class="documentation-lottie_style"></div>
+                    </div>
+                    <div class="docu-content-container">
+                        <h2 class="document_text">
+                            If you encounter any issues or have requests for new features, please create a new
+                            <a
+                                target="_blank"
+                                href="https://github.com/NeurodataWithoutBorders/nwb-guide/issues/new/choose"
+                                >ticket on our GitHub page</a
+                            >.
+                        </h2>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
         `;
     }
 }
