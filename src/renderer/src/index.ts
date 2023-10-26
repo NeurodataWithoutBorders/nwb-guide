@@ -101,25 +101,47 @@ const serverIsLiveStartup = async () => {
 };
 
 // Preload Flask imports for faster on-demand operations
-const preloadFlaskImports = async () => await fetch(`${baseUrl}/startup/preload-imports`).then(res => res.json()).catch(e => e)
+const preloadFlaskImports = () => fetch(`${baseUrl}/startup/preload-imports`).then(res => {
+  if (res.ok) return res.json()
+  else throw new Error('Error preloading Flask imports')
+})
 
 let openPythonStatusNotyf: undefined | any;
 
 async function pythonServerOpened() {
 
+
   // Confirm requests are actually received by the server
   const isLive = await serverIsLiveStartup()
-  if (isLive) await preloadFlaskImports() // initiate preload of Flask imports
-  if (!isLive) return pythonServerClosed()
 
-  // Update server status and throw a notification
-  statusBar.items[2].status = true
+  // initiate preload of Flask imports
+  if (isLive) await preloadFlaskImports()
+  .then(() => {
 
-  if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
-  openPythonStatusNotyf = notyf.open({
-    type: "success",
-    message: "Backend services are available",
-  });
+      // Update server status and throw a notification
+    statusBar.items[2].status = true
+
+    if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
+    openPythonStatusNotyf = notyf.open({
+      type: "success",
+      message: "Backend services are available",
+    });
+
+  })
+  .catch(e =>{
+
+    statusBar.items[2].status = 'issue'
+
+    notyf.open({
+      type: "warning",
+      message: e.message,
+    });
+
+  })
+
+  // If the server is not live, throw an error
+  else return pythonServerClosed()
+
 }
 
 
