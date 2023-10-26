@@ -24,12 +24,6 @@ export class OptionalSection extends LitElement {
         `;
     }
 
-    static get properties() {
-        return {
-            state: { type: Boolean, reflect: true },
-        };
-    }
-
     get hidden() {
         return this.shadowRoot.querySelector(".optional-section__content").hidden;
     }

@@ -2,7 +2,6 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 // For Multi-Select Form
-import { notyf } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { OptionalSection } from "../../../OptionalSection.js";
 import { run } from "../options/utils.js";
@@ -119,12 +118,15 @@ export class GuidedPathExpansionPage extends Page {
 
         // Force single subject/session
         if (hidden) {
+
+            const existingMetadata = globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
+
+            const existingSourceData = globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
+
             const source_data = {};
-            for (let key in globalState.interfaces) source_data[key] = {};
+            for (let key in globalState.interfaces) source_data[key] = existingSourceData[key] ?? {};
 
-            const existingMetadata =
-                globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
-
+ 
             globalState.results = {
                 [this.altInfo.subject_id]: {
                     [this.altInfo.session_id]: {
@@ -147,6 +149,8 @@ export class GuidedPathExpansionPage extends Page {
         // Otherwise use path expansion to merge into existing subjects
         else if (!hidden && hidden !== undefined) {
             const structure = globalState.structure.results;
+
+            await this.form.validate()
 
             const finalStructure = {};
             for (let key in structure) {
@@ -173,17 +177,26 @@ export class GuidedPathExpansionPage extends Page {
             // Save an overall results object organized by subject and session
             merge({ results }, globalState);
 
-            // // NOTE: Current behavior is to ONLY add new results, not remove old ones
-            // // If we'd like, we could label sessions as user-defined so they never clear
+            for (let sub in globalState.results) {
+                const subRef = globalState.results[sub];
+                if (!globalState.results[sub]) delete globalState.results[sub]; // Delete removed subjects
+                else {
+                    for (let ses in subRef) {
+                        const sesRef = globalState.results[sub];
 
-            // // Remove previous results that are no longer present
-            // const globalResults = this.info.globalState.results
-            // for (let sub in globalResults) {
-            //   for (let ses in globalResults[sub]) {
-            //     if (!results[sub]?.[ses]) delete globalResults[sub]?.[ses]
-            //   }
-            //   if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]
-            // }
+                        if (!sesRef) delete globalState.results[sub][ses]; // Delete removed sessions
+                        else {
+                            for (let name in sesRef.source_data) {
+                                if (!sesRef.source_data[name]) delete sesRef.source_data[name]; // Delete removed interfaces
+                            }
+                        }
+
+                    }
+
+                    if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub] // Delete empty subjects
+
+                }
+            }
         }
     };
 
@@ -225,21 +238,22 @@ export class GuidedPathExpansionPage extends Page {
     //   }
     // })
 
-    optional = new OptionalSection({
-        header: "Would you like to locate data programmatically?",
-        description: pathExpansionInfoBox,
-        onChange: () => (this.unsavedUpdates = true),
-        // altContent: this.altForm,
-    });
-
     localState = {};
 
     render() {
+        this.optional = new OptionalSection({
+            header: "Would you like to locate data programmatically?",
+            description: pathExpansionInfoBox,
+            onChange: () => (this.unsavedUpdates = true),
+            // altContent: this.altForm,
+        });
+
         const structureState = (this.localState = merge(this.info.globalState.structure, { results: {} }));
 
         const state = structureState.state;
-        if (state !== undefined) this.optional.state = state;
-        else pathExpansionInfoBox.open = true; // Open the info box if no option has been selected
+
+        this.optional.state = state;
+        if (state === undefined) pathExpansionInfoBox.open = true; // Open the info box if no option has been selected
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {} };
@@ -262,7 +276,6 @@ export class GuidedPathExpansionPage extends Page {
                         // const res = getFiles(value);
 
                         const input = form.getInput([...parentPath, "format_string_path"]);
-                        console.log(input);
                         input.updateData(input.value);
                     } else if (name === "format_string_path") {
                         const base_directory = [...parentPath, "base_directory"].reduce(

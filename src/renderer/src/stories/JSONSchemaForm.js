@@ -40,10 +40,6 @@ const componentCSS = `
       line-height: 1.4285em;
     }
 
-    .invalid {
-      background: rgb(255, 229, 228) !important;
-    }
-
     .guided--form-label {
       display: block;
       width: 100%;
@@ -182,8 +178,8 @@ export class JSONSchemaForm extends LitElement {
     #updateRendered = (force) =>
         force || this.#rendered === true
             ? (this.#rendered = new Promise(
-                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
-              ))
+                (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+            ))
             : this.#rendered;
 
     resolved = {}; // Keep track of actual resolved values—not just what the user provides as results
@@ -320,11 +316,11 @@ export class JSONSchemaForm extends LitElement {
 
     validate = async (resolved) => {
         // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
-        const isValid = this.requirementMode === "loose" ? true : !invalidInputs.length;
+        const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
+        const isValid = this.requirementMode === "loose" ? true : !requiredButNotSpecified.length;
 
         // Print out a detailed error message if any inputs are missing
-        let message = isValid ? "" : `${invalidInputs.length} required inputs are not specified properly.`;
+        let message = isValid ? "" : `${requiredButNotSpecified.length} required inputs are not specified properly.`;
 
         // Check if all inputs are valid
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
@@ -376,11 +372,7 @@ export class JSONSchemaForm extends LitElement {
     #checkRequiredAfterChange = async (localPath) => {
         const path = [...localPath];
         const name = path.pop();
-        const element = this.shadowRoot
-            .querySelector(`#${localPath.join("-")}`)
-            .querySelector("jsonschema-input")
-            .getElement();
-        const isValid = await this.triggerValidation(name, element, path, false);
+        const isValid = await this.triggerValidation(name, path, false);
         if (!isValid) return true;
     };
 
@@ -448,8 +440,8 @@ export class JSONSchemaForm extends LitElement {
             <div
                 id=${localPath.join("-")}
                 class="form-section ${isRequired || isConditional ? "required" : ""} ${isConditional
-                    ? "conditional"
-                    : ""}"
+                ? "conditional"
+                : ""}"
             >
                 <label class="guided--form-label">${info.title ?? header(name)}</label>
                 ${interactiveInput}
@@ -498,9 +490,9 @@ export class JSONSchemaForm extends LitElement {
     };
 
     // Checks missing required properties and throws an error if any are found
-    onInvalid = () => {};
-    onLoaded = () => {};
-    onUpdate = () => {};
+    onInvalid = () => { };
+    onLoaded = () => { };
+    onUpdate = () => { };
 
     #deleteExtraneousResults = (results, schema) => {
         for (let name in results) {
@@ -551,10 +543,10 @@ export class JSONSchemaForm extends LitElement {
         return flattenRecursedValues(res); // Flatten on the last pass
     };
 
-    validateOnChange = () => {};
-    onStatusChange = () => {};
-    onThrow = () => {};
-    renderTable = () => {};
+    validateOnChange = () => { };
+    onStatusChange = () => { };
+    onThrow = () => { };
+    renderTable = () => { };
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -603,7 +595,7 @@ export class JSONSchemaForm extends LitElement {
     };
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    triggerValidation = async (name, element, path = [], checkLinks = true) => {
+    triggerValidation = async (name, path = [], checkLinks = true) => {
         const parent = this.#get(path, this.resolved);
 
         const pathToValidate = [...(this.base ?? []), ...path];
@@ -641,15 +633,22 @@ export class JSONSchemaForm extends LitElement {
                     }, externalPath);
                 }
             }
-        } else {
+        }
+
+        else {
+
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
-                const schema = this.getSchema(localPath);
-                errors.push({
-                    message: `${schema.title ?? header(name)} is a required property.`,
-                    type: "error",
-                    missing: true,
-                }); // Throw at least a basic error if the property is required
+
+                // Skip simple required checks in loose mode
+                if (this.requirementMode !== 'loose') {
+                    const schema = this.getSchema(localPath);
+                    errors.push({
+                        message: `${schema.title ?? header(name)} is a required property.`,
+                        type: "error",
+                        missing: true,
+                    }); // Throw at least a basic error if the property is required
+                }
             }
         }
 
@@ -676,8 +675,10 @@ export class JSONSchemaForm extends LitElement {
         warnings.forEach((info) => this.#addMessage(localPath, info, "warnings"));
         info.forEach((info) => this.#addMessage(localPath, info, "info"));
 
+        const input = this.getInput(localPath);
+
         if (isValid && errors.length === 0) {
-            element.classList.remove("invalid");
+            input.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(externalPath);
             if (linkEl) linkEl.classList.remove("required", "conditional");
@@ -690,8 +691,9 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
+
             // Add new invalid classes and errors
-            element.classList.add("invalid");
+            input.classList.add("invalid");
 
             const linkEl = this.#getLinkElement(externalPath);
             if (linkEl) linkEl.classList.add("required", "conditional");
