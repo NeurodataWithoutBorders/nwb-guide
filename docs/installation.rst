@@ -2,7 +2,7 @@
 Installation
 ===============
 
-Begin by downloading the latest release from the [GitHub release page](https://github.com/NeurodataWithoutBorders/nwb-guide/releases).
+Begin by downloading the latest release from the :releases:`GitHub release page <>`.
 
 Windows
 ----------------------
