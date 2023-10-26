@@ -38,7 +38,6 @@ export class DocumentationPage extends Page {
                                 })}
                             </div>
                             <div class="docu-content-container">
-                        
                                 <h3 style="padding: 0; margin-top: 25px;">Additional Resources</h3>
                                 <p>
                                     Conversion to NWB is powered by
@@ -71,10 +70,12 @@ export class DocumentationPage extends Page {
                                 <h3 style="padding: 0; margin-top: 25px;">Acknowledgments</h3>
                                 <p>
                                     <small>
-                                        NWB GUIDE is an open-source project developed by CatalystNeuro (Cody Baker, Garrett
-                                        Flynn, Ben Dichter) and Lawrence Berkeley National Laboratory (Ryan Ly, Oliver
-                                        Ruebel) and generously supported by
-                                        <a target="_blank" href="https://www.kavlifoundation.org/">The Kavli Foundation</a>.
+                                        NWB GUIDE is an open-source project developed by CatalystNeuro (Cody Baker,
+                                        Garrett Flynn, Ben Dichter) and Lawrence Berkeley National Laboratory (Ryan Ly,
+                                        Oliver Ruebel) and generously supported by
+                                        <a target="_blank" href="https://www.kavlifoundation.org/"
+                                            >The Kavli Foundation</a
+                                        >.
                                     </small>
                                 </p>
                             </div>
