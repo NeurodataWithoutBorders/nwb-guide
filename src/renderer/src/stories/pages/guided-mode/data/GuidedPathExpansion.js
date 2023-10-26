@@ -118,15 +118,15 @@ export class GuidedPathExpansionPage extends Page {
 
         // Force single subject/session
         if (hidden) {
+            const existingMetadata =
+                globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
 
-            const existingMetadata = globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
-
-            const existingSourceData = globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
+            const existingSourceData =
+                globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
 
             const source_data = {};
             for (let key in globalState.interfaces) source_data[key] = existingSourceData[key] ?? {};
 
- 
             globalState.results = {
                 [this.altInfo.subject_id]: {
                     [this.altInfo.session_id]: {
@@ -150,7 +150,7 @@ export class GuidedPathExpansionPage extends Page {
         else if (!hidden && hidden !== undefined) {
             const structure = globalState.structure.results;
 
-            await this.form.validate()
+            await this.form.validate();
 
             const finalStructure = {};
             for (let key in structure) {
@@ -190,11 +190,9 @@ export class GuidedPathExpansionPage extends Page {
                                 if (!sesRef.source_data[name]) delete sesRef.source_data[name]; // Delete removed interfaces
                             }
                         }
-
                     }
 
-                    if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub] // Delete empty subjects
-
+                    if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]; // Delete empty subjects
                 }
             }
         }

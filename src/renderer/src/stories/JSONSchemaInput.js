@@ -33,7 +33,6 @@ export class JSONSchemaInput extends LitElement {
             :host(.invalid) .guided--input {
                 background: rgb(255, 229, 228) !important;
             }
-          
 
             .guided--input {
                 width: 100%;
@@ -288,10 +287,7 @@ export class JSONSchemaInput extends LitElement {
             });
 
             return html`
-                <div
-                    class="schema-input"
-                    @change=${() => validateOnChange && this.#triggerValidation(name, path)}
-                >
+                <div class="schema-input" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
                     ${list} ${addButton}
                 </div>
             `;

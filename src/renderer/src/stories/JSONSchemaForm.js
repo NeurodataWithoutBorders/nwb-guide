@@ -178,8 +178,8 @@ export class JSONSchemaForm extends LitElement {
     #updateRendered = (force) =>
         force || this.#rendered === true
             ? (this.#rendered = new Promise(
-                (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
-            ))
+                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+              ))
             : this.#rendered;
 
     resolved = {}; // Keep track of actual resolved values—not just what the user provides as results
@@ -440,8 +440,8 @@ export class JSONSchemaForm extends LitElement {
             <div
                 id=${localPath.join("-")}
                 class="form-section ${isRequired || isConditional ? "required" : ""} ${isConditional
-                ? "conditional"
-                : ""}"
+                    ? "conditional"
+                    : ""}"
             >
                 <label class="guided--form-label">${info.title ?? header(name)}</label>
                 ${interactiveInput}
@@ -490,9 +490,9 @@ export class JSONSchemaForm extends LitElement {
     };
 
     // Checks missing required properties and throws an error if any are found
-    onInvalid = () => { };
-    onLoaded = () => { };
-    onUpdate = () => { };
+    onInvalid = () => {};
+    onLoaded = () => {};
+    onUpdate = () => {};
 
     #deleteExtraneousResults = (results, schema) => {
         for (let name in results) {
@@ -543,10 +543,10 @@ export class JSONSchemaForm extends LitElement {
         return flattenRecursedValues(res); // Flatten on the last pass
     };
 
-    validateOnChange = () => { };
-    onStatusChange = () => { };
-    onThrow = () => { };
-    renderTable = () => { };
+    validateOnChange = () => {};
+    onStatusChange = () => {};
+    onThrow = () => {};
+    renderTable = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -633,15 +633,11 @@ export class JSONSchemaForm extends LitElement {
                     }, externalPath);
                 }
             }
-        }
-
-        else {
-
+        } else {
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
-
                 // Skip simple required checks in loose mode
-                if (this.requirementMode !== 'loose') {
+                if (this.requirementMode !== "loose") {
                     const schema = this.getSchema(localPath);
                     errors.push({
                         message: `${schema.title ?? header(name)} is a required property.`,
@@ -691,7 +687,6 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
-
             // Add new invalid classes and errors
             input.classList.add("invalid");
 
