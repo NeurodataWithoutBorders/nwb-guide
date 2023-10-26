@@ -6,7 +6,7 @@ import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
-import getSourceDataSchema from "../../../../../../../schemas/source-data.schema";
+import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
@@ -95,7 +95,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     const schema = this.info.globalState.schema;
                     if (!schema.metadata) schema.metadata = {};
                     if (!schema.metadata[subject]) schema.metadata[subject] = {};
-                    schema.metadata[subject][session] = result.schema;
+                    schema.metadata[subject][session] = result.schema
                 })
             );
 
@@ -109,12 +109,10 @@ export class GuidedSourceDataPage extends ManagedPage {
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
 
-        const schemaResolved = getSourceDataSchema(schema);
-
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema: schemaResolved,
+            schema: preprocessSourceDataSchema(schema),
             results: info.source_data,
             emptyMessage: "No source data required for this session.",
             ignore: [
