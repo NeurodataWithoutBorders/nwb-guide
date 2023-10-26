@@ -1,7 +1,7 @@
 // import { merge } from "../src/renderer/src/stories/pages/utils"
 
 export default function preprocessSourceDataSchema (schema) {
-    
+
     // Abstract across different interfaces
     Object.values(schema.properties ?? {}).forEach((schema: any) => {
 

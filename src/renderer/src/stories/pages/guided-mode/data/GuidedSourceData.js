@@ -95,7 +95,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     const schema = this.info.globalState.schema;
                     if (!schema.metadata) schema.metadata = {};
                     if (!schema.metadata[subject]) schema.metadata[subject] = {};
-                    schema.metadata[subject][session] = result.schema
+                    schema.metadata[subject][session] = result.schema;
                 })
             );
 
