@@ -3,44 +3,6 @@ Developer Guide
 
 We welcome contributions from the community! If you are interested in contributing, please read the following guide to get started.
 
-Installation
-----------------------
-Start by cloning the repository
-
-```
-git clone https://github.com/catalystneuro/nwb-guide
-```
-
-Install the appropriate Python dependencies for your operating system.
-
-Windows
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-```bash
-conda env create -f ./environments/environment-Windows.yml
-```
-
-Mac
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-```bash
-conda env create -f ./environments/environment-MAC.yml
-```
-
-M1 Mac
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-```bash
-conda env create -f ./environments/environment-MAC-arm64.yml
-```
-
-Linux
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-```bash
-conda env create -f ./environments/environment-Linux.yml
-```
-
 Starting a New Feature
 ---------------------------
 

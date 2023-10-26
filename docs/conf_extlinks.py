@@ -1,5 +1,6 @@
 # Use this for mapping to external links
 extlinks = {
+    "linux-fix": ("https://github.com/neurodatawithoutborders/nwb-guide/tree/linux-fix/%s", "%s"),
     "pynwb-docs": ("https://pynwb.readthedocs.io/en/stable/%s", "%s"),
     "matnwb-src": ("https://github.com/NeurodataWithoutBorders/matnwb/%s", "%s"),
     "nwb-overview": ("https://nwb-overview.readthedocs.io/en/latest/%s", "%s"),
