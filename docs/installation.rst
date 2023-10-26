@@ -18,4 +18,3 @@ Ubuntu
 ---------------------------
 
 Please follow the Developer Installation instructions on the :linux-fix:`linux-fix <>` branch of the NWB GUIDE.
-
