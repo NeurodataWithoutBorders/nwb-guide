@@ -183,7 +183,7 @@ export class GuidedPathExpansionPage extends Page {
                 const subRef = results[sub];
                 if (!results[sub]) delete globalResults[sub]; // Delete removed subjects
                 else {
-                    for (let ses in subRef) {
+                    for (let ses in globalResults[sub]) {
                         const sesRef = results[sub][ses];
 
                         if (!sesRef) delete globalResults[sub][ses]; // Delete removed sessions
