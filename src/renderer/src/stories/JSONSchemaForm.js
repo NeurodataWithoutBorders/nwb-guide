@@ -168,6 +168,7 @@ export class JSONSchemaForm extends LitElement {
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
             requirementMode: { type: String, reflect: true },
+            globals: { type: Object, reflect: false },
         };
     }
 

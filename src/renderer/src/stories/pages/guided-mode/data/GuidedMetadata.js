@@ -12,6 +12,15 @@ import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
 
+const propsToIgnore = [
+    "Ophys", // Always ignore ophys metadata (for now)
+    "Icephys", // Always ignore icephys metadata (for now)
+    "Behavior", // Always ignore behavior metadata (for now)
+    new RegExp("ndx-.+"), // Ignore all ndx extensions
+    "subject_id",
+    "session_id",
+]
+
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
     if (subject.startsWith("sub-")) subject = subject.slice(4);
@@ -110,14 +119,7 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: [
-                "Ophys", // Always ignore ophys metadata (for now)
-                "Icephys", // Always ignore icephys metadata (for now)
-                "Behavior", // Always ignore behavior metadata (for now)
-                new RegExp("ndx-.+"), // Ignore all ndx extensions
-                "subject_id",
-                "session_id",
-            ],
+            ignore: propsToIgnore,
 
             conditionalRequirements: [
                 {
