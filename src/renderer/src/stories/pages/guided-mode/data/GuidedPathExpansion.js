@@ -177,14 +177,16 @@ export class GuidedPathExpansionPage extends Page {
             // Save an overall results object organized by subject and session
             merge({ results }, globalState);
 
-            for (let sub in globalState.results) {
-                const subRef = globalState.results[sub];
-                if (!globalState.results[sub]) delete globalState.results[sub]; // Delete removed subjects
+            const globalResults = globalState.results
+
+            for (let sub in globalResults) {
+                const subRef = results[sub];
+                if (!results[sub]) delete globalResults[sub]; // Delete removed subjects
                 else {
                     for (let ses in subRef) {
-                        const sesRef = globalState.results[sub];
+                        const sesRef = results[sub][ses];
 
-                        if (!sesRef) delete globalState.results[sub][ses]; // Delete removed sessions
+                        if (!sesRef) delete globalResults[sub][ses]; // Delete removed sessions
                         else {
                             for (let name in sesRef.source_data) {
                                 if (!sesRef.source_data[name]) delete sesRef.source_data[name]; // Delete removed interfaces
