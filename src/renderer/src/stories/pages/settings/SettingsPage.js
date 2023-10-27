@@ -21,9 +21,9 @@ import { header } from "../../forms/utils";
 
 const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
 
-const setUndefinedIfNotDeclared = (schema, resolved) => {
-    for (let prop in schema.properties) {
-        const propInfo = schema.properties[prop];
+const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
+    for (const prop in schemaProps) {
+    const propInfo = schemaProps[prop]?.properties;
         if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
         else if (!(prop in resolved)) resolved[prop] = undefined;
     }
@@ -46,15 +46,18 @@ export class SettingsPage extends Page {
         return (this.#notification = this.notify(message, type));
     };
 
-    beforeSave = () => {
-        const { resolved } = this.form;
-        for (let prop in schema.properties) {
-            const propInfo = schema.properties[prop];
-            const res = resolved[prop];
-            if (propInfo) setUndefinedIfNotDeclared(propInfo, res);
-        }
+    beforeSave = async () => {
 
-        merge(this.form.resolved, global.data);
+        await this.form.validate()
+        
+        const { resolved } = this.form;
+        setUndefinedIfNotDeclared(schema.properties, resolved);
+
+
+        console.log('Merging', resolved, global.data )
+
+
+        merge(resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
         this.#openNotyf("Global settings changes saved", "success");
