@@ -109,7 +109,6 @@ export class GuidedPathExpansionPage extends Page {
     };
 
     beforeSave = async () => {
-
         const keepExistingData = this.dataManagementForm.resolved.keep_existing_data;
 
         const globalState = this.info.globalState;
@@ -119,9 +118,8 @@ export class GuidedPathExpansionPage extends Page {
         globalState.structure.state = !hidden;
 
         if (hidden) {
-
             // Force single subject/session if not keeping existing data
-            if (!keepExistingData || !globalState.results){
+            if (!keepExistingData || !globalState.results) {
                 const existingMetadata =
                     globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
 
@@ -149,7 +147,6 @@ export class GuidedPathExpansionPage extends Page {
                     },
                 };
             }
-
         }
 
         // Otherwise use path expansion to merge into existing subjects
@@ -186,7 +183,6 @@ export class GuidedPathExpansionPage extends Page {
             const globalResults = globalState.results;
 
             if (!keepExistingData) {
-
                 for (let sub in globalResults) {
                     const subRef = results[sub];
                     if (!subRef) delete globalResults[sub]; // Delete removed subjects
@@ -205,7 +201,6 @@ export class GuidedPathExpansionPage extends Page {
                         if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]; // Delete empty subjects
                     }
                 }
-
             }
         }
     };
@@ -251,7 +246,6 @@ export class GuidedPathExpansionPage extends Page {
     localState = {};
 
     render() {
-
         this.optional = new OptionalSection({
             header: "Will you locate your files programmatically?",
             description: infoBox,
@@ -267,7 +261,7 @@ export class GuidedPathExpansionPage extends Page {
         if (state === undefined) infoBox.open = true; // Open the info box if no option has been selected
 
         // Require properties for all sources
-        const generatedSchema = { type: "object", properties: {}};
+        const generatedSchema = { type: "object", properties: {} };
         for (let key in this.info.globalState.interfaces)
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
         structureState.schema = generatedSchema;
@@ -342,16 +336,16 @@ export class GuidedPathExpansionPage extends Page {
 
         this.dataManagementForm = new JSONSchemaForm({
             results: { keep_existing_data: true },
-            schema: { 
-                type: "object", 
+            schema: {
+                type: "object",
                 properties: {
                     keep_existing_data: {
                         type: "boolean",
                         description: "Maintain data for subjects / sessions that are not located.",
                     },
-                }}
+                },
+            },
         });
-
 
         this.optional.append(form);
 
