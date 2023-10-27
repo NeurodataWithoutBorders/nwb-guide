@@ -6,7 +6,8 @@ import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
 import dandiUploadSchema from "../../../../../../../schemas/json/dandi/upload.json";
-import { uploadToDandi } from "../../uploads/UploadsPage.js";
+import { dandisetInfoContent, uploadToDandi } from "../../uploads/UploadsPage.js";
+import { InfoBox } from "../../../InfoBox.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -19,7 +20,7 @@ export class GuidedUploadPage extends Page {
         const globalState = this.info.globalState;
         const isNewDandiset = globalState.upload?.dandiset_id !== this.localState.dandiset_id;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
-        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
+        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new Dandiset
     };
 
     header = {
@@ -36,7 +37,7 @@ export class GuidedUploadPage extends Page {
             const globalState = this.info.globalState;
             const globalUploadInfo = globalState.upload;
 
-            // Catch if dandiset is already uploaded
+            // Catch if Dandiset is already uploaded
             if ("results" in globalUploadInfo) {
                 const result = await Swal.fire({
                     title: "This pipeline has already uploaded to DANDI",
@@ -70,7 +71,10 @@ export class GuidedUploadPage extends Page {
             onThrow,
         });
 
-        return html` ${this.form} `;
+        return html`${new InfoBox({
+            header: "How do I create a Dandiset?",
+            content: dandisetInfoContent,
+        })}<br><br>${this.form} `;
     }
 }
 

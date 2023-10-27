@@ -21,10 +21,22 @@ import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { header } from "../../forms/utils";
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
+import { InfoBox } from "../../InfoBox.js";
 
 
 
 export const isStaging = (id) => parseInt(id) >= 100000;
+
+export const dandisetInfoContent = html`<span>
+    You can create a new Dandiset on the <a href="http://dandiarchive.org" target="_blank">main DANDI archive</a>. This Dandiset can be fully public or embargoed according to NIH policy. When you create a Dandiset, a permanent ID is automatically assigned to it. 
+    </span>
+    <hr>
+    <small>To prevent the production server from being inundated with test Dandisets, we encourage developers 
+    to develop against the <a href="http://gui-staging.dandiarchive.org" target="_blank">development server</a>. Note that the development 
+    server should not be used to stage your data. All data are uploaded as draft and can be adjusted before 
+    publishing on the production server. The development server is primarily used by users learning to use 
+    DANDI or by developers.</small>
+`
 
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const { dandiset_id } = info;
@@ -34,11 +46,14 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
     let api_key = global.data.DANDI?.api_keys?.[whichAPIKey];
 
-    if (!api_key) {
+    const errors = await validateDANDIApiKey(api_key, staging);
 
+    const isInvalid = !errors || errors.length;
+
+    if (isInvalid) {
 
         const modal = new Modal({ 
-            header: `Provide your ${header(whichAPIKey)}`,
+            header: `${api_key ? 'Update' : 'Provide'} your ${header(whichAPIKey)}`,
             open: true 
         });
 
@@ -175,6 +190,12 @@ export class UploadsPage extends Page {
         });
 
         return html`
+            ${new InfoBox({
+                header: "How do I create a Dandiset?",
+                content: dandisetInfoContent,
+            })}
+            <br>
+            <br>
             ${this.form}
             <hr />
             ${button}
