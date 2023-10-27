@@ -110,9 +110,8 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value) {
-
         if (this.value === value) return false;
-        
+
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
