@@ -277,15 +277,11 @@ export class GuidedPathExpansionPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
             onThrow,
+            requirementMode: "loose",
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
                 if (fs) {
                     if (name === "base_directory") {
-                        // for (const f of getFiles(value)) {
-                        //     console.log(f);
-                        //   }
-                        // const res = getFiles(value);
-
                         const input = form.getInput([...parentPath, "format_string_path"]);
                         input.updateData(input.value);
                     } else if (name === "format_string_path") {
@@ -316,8 +312,6 @@ export class GuidedPathExpansionPage extends Page {
                                 resolved.push(path);
                             }
                         }
-
-                        console.log("Metadata Results for", interfaceName, results);
 
                         return [
                             {
