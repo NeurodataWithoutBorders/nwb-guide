@@ -5,6 +5,8 @@ import { onThrow } from "../../../errors";
 import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
 import projectGlobalSchema from "../../../../../../schemas/json/project/globals.json" assert { type: "json" };
 
+import { validateDANDIApiKey } from "../../../validation/dandi";
+
 const schema = {
     properties: {
         output_locations: projectGlobalSchema,
@@ -17,9 +19,6 @@ import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
-import { header } from "../../forms/utils";
-
-const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
 
 const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
     for (const prop in schemaProps) {
@@ -54,9 +53,6 @@ export class SettingsPage extends Page {
         setUndefinedIfNotDeclared(schema.properties, resolved);
 
 
-        console.log('Merging', resolved, global.data )
-
-
         merge(resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
@@ -80,10 +76,9 @@ export class SettingsPage extends Page {
             schema,
             mode: "accordion",
             onUpdate: () => (this.unsavedUpdates = true),
-            validateOnChange: (name, parent) => {
+            validateOnChange: async (name, parent) => {
                 const value = parent[name];
-                if (value && name.includes("api_key") && !dandiAPITokenRegex.test(value))
-                    return [{ type: "error", message: `${header(name)} must be a 40 character hexadecimal string` }];
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes('staging'));
                 return true;
             },
             onThrow,

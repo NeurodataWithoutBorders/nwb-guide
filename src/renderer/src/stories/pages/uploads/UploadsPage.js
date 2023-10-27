@@ -13,9 +13,16 @@ import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { run } from "../guided-mode/options/utils.js";
-import Swal from "sweetalert2";
 import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
+
+import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
+import { JSONSchemaInput } from "../../JSONSchemaInput.js";
+import { header } from "../../forms/utils";
+
+import { validateDANDIApiKey } from "../../../validation/dandi";
+
+
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
@@ -25,17 +32,68 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
-    const api_key = global.data.DANDI?.api_keys?.[whichAPIKey];
+    let api_key = global.data.DANDI?.api_keys?.[whichAPIKey];
 
     if (!api_key) {
-        await Swal.fire({
-            title: `Your DANDI API key (${whichAPIKey}) is not configured.`,
-            html: "Edit your settings to include this value.",
-            icon: "warning",
-            confirmButtonText: "Go to Settings",
+
+
+        const modal = new Modal({ 
+            header: `Provide your ${header(whichAPIKey)}`,
+            open: true 
         });
 
-        return this.to("settings");
+        const input = new JSONSchemaInput({
+            path: [whichAPIKey],
+            info: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey]
+        })
+
+        input.style.padding = "25px";
+
+
+        modal.append(input);
+
+        let notification;
+
+        const notify = (message, type) => {
+            if (notification) this.dismiss(notification);
+            return (notification = this.notify(message, type));
+        };
+
+        modal.onClose = async () => notify("Your DANDI API key was not set", "error");
+
+
+        api_key = await new Promise((resolve) => {
+            const button = new Button({
+                label: "Save",
+                primary: true,
+                onClick: async () => {
+                    const value = input.value;
+                    if (value) {
+                        
+                        const errors = await validateDANDIApiKey(input.value, staging);
+                        if (!errors || !errors.length) {
+                            modal.remove()
+                            global.data.DANDI.api_keys[whichAPIKey] = value;
+                            global.save();
+                            resolve(value)
+                        }
+                        else {
+                            notify(errors[0].message, "error");
+                            return false;
+                        }
+
+                    } else {
+                        notify("Your DANDI API key was not set", "error");
+                    }
+                },
+            });
+
+            modal.footer = button;
+
+            document.body.append(modal);
+
+        })
+
     }
 
     const result = await run(
