@@ -72,9 +72,9 @@ export class GuidedUploadPage extends Page {
         });
 
         return html`${new InfoBox({
-            header: "How do I create a Dandiset?",
-            content: dandisetInfoContent,
-        })}<br><br>${this.form} `;
+                header: "How do I create a Dandiset?",
+                content: dandisetInfoContent,
+            })}<br /><br />${this.form} `;
     }
 }
 

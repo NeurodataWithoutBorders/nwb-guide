@@ -22,7 +22,7 @@ import { notyf } from "../../../dependencies/globals.js";
 
 const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
     for (const prop in schemaProps) {
-    const propInfo = schemaProps[prop]?.properties;
+        const propInfo = schemaProps[prop]?.properties;
         if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
         else if (!(prop in resolved)) resolved[prop] = undefined;
     }
@@ -46,12 +46,10 @@ export class SettingsPage extends Page {
     };
 
     beforeSave = async () => {
+        await this.form.validate();
 
-        await this.form.validate()
-        
         const { resolved } = this.form;
         setUndefinedIfNotDeclared(schema.properties, resolved);
-
 
         merge(resolved, global.data);
 
@@ -78,7 +76,7 @@ export class SettingsPage extends Page {
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: async (name, parent) => {
                 const value = parent[name];
-                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes('staging'));
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
                 return true;
             },
             onThrow,

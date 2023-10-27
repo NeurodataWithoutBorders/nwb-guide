@@ -44,7 +44,7 @@ export class GuidedStubPreviewPage extends Page {
                 title: "Running all conversions",
             });
 
-            await this.save() // Save the conversion results
+            await this.save(); // Save the conversion results
 
             this.to(1);
         },

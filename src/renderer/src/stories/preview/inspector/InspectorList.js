@@ -4,7 +4,6 @@ import { getMessageType, isErrorImportance } from "../../../validation";
 
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-
 const sortList = (items) => {
     return items
         .sort((a, b) => {
@@ -143,7 +142,9 @@ export class InspectorListItem extends LitElement {
 
         return html`
             ${hasMetadata ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>` : ""}
-            ${hasMetadata ? html`<span id="message">${unsafeHTML(this.message)}</span>` : html`<p>${unsafeHTML(this.message)}</p>`}
+            ${hasMetadata
+                ? html`<span id="message">${unsafeHTML(this.message)}</span>`
+                : html`<p>${unsafeHTML(this.message)}</p>`}
             ${this.file_path
                 ? html`<span id="filepath"
                       >${this.files && this.files.length > 1
