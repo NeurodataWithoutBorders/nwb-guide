@@ -177,7 +177,7 @@ export class GuidedPathExpansionPage extends Page {
             // Save an overall results object organized by subject and session
             merge({ results }, globalState);
 
-            const globalResults = globalState.results
+            const globalResults = globalState.results;
 
             for (let sub in globalResults) {
                 const subRef = results[sub];
