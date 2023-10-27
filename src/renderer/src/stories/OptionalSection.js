@@ -11,11 +11,12 @@ export class OptionalSection extends LitElement {
 
             h2 {
                 margin: 0;
-                margin-bottom: 15px;
+                margin-bottom: 10px;
             }
 
             .optional-section__toggle {
-                padding-bottom: 20px;
+                margin: 10px 0px;
+                margin-bottom: 20px;
             }
 
             .optional-section__content {
