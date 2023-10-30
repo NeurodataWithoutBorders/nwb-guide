@@ -189,6 +189,8 @@ export class JSONSchemaForm extends LitElement {
 
     resolved = {}; // Keep track of actual resolved values—not just what the user provides as results
 
+    states = {};
+
     constructor(props = {}) {
         super();
 
@@ -199,6 +201,8 @@ export class JSONSchemaForm extends LitElement {
         this.schema = props.schema ?? {};
         this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
+
+        this.states = props.states ?? {}; // Accordion and other states
 
         this.ignore = props.ignore ?? [];
         this.required = props.required ?? {};
@@ -390,7 +394,7 @@ export class JSONSchemaForm extends LitElement {
 
     #get = (path, object = this.resolved, omitted = []) => {
         // path = path.slice(this.base.length); // Correct for base path
-        return path.reduce((acc, curr) => (acc = acc[curr] ?? acc?.[omitted.find((str) => acc[str])]?.[curr]), object);
+        return path.reduce((acc, curr) => (acc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str])]?.[curr]), object);
     };
 
     #checkRequiredAfterChange = async (localPath) => {
@@ -827,11 +831,14 @@ export class JSONSchemaForm extends LitElement {
             if (this.mode === "accordion" && hasMany) {
                 const headerName = header(name);
 
+
                 this.#nestedForms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
                     results: { ...results[name] },
                     globals: this.globals?.[name],
+
+                    states: this.states,
 
                     mode: this.mode,
 
@@ -840,6 +847,7 @@ export class JSONSchemaForm extends LitElement {
                         this.updateData(path, value);
                     },
 
+                    requirementMode: this.requirementMode,
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,
                     dialogOptions: this.dialogOptions,
@@ -865,14 +873,13 @@ export class JSONSchemaForm extends LitElement {
                     base: [...this.base, ...localPath],
                 });
 
-                const accordion = new Accordion({
-                    sections: {
-                        [headerName]: {
-                            subtitle: `${this.#getRenderable(info, required[name], localPath, true).length} fields`,
-                            content: this.#nestedForms[name],
-                        },
-                    },
-                });
+                if (!this.states[headerName]) this.states[headerName] = {}
+                this.states[headerName].subtitle = `${this.#getRenderable(info, required[name], localPath, true).length} fields`
+                this.states[headerName].content = this.#nestedForms[name]
+
+                const accordion = new Accordion({ sections: {
+                    [headerName]: this.states[headerName]
+                } });
 
                 accordion.id = name; // assign name to accordion id
 

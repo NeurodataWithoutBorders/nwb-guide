@@ -15,7 +15,8 @@ export function createGlobalFormModal(this: Page, {
     propsToRemove = [],
     key,
     hasInstances = false,
-    validateOnChange
+    validateOnChange,
+    mergeFunction = merge
 }: {
     header: string
     schema: any
@@ -23,7 +24,8 @@ export function createGlobalFormModal(this: Page, {
     propsToRemove?: string[]
     key?: string,
     hasInstances?: boolean
-    validateOnChange?: Function
+    validateOnChange?: Function,
+    mergeFunction?: Function
 
 }) {
     const modal = new Modal({
@@ -41,8 +43,9 @@ export function createGlobalFormModal(this: Page, {
     if (hasInstances) Object.keys(schemaCopy.properties).forEach(i => removeProperties(schemaCopy.properties[i].properties, propsToRemove))
     else removeProperties(schemaCopy.properties, propsToRemove)
 
-    const form = new JSONSchemaForm({
+    const globalForm = new JSONSchemaForm({
         requirementMode: "loose",
+        mode: 'accordion',
         schema: schemaCopy,
         emptyMessage: "No properties to edit globally.",
         ignore: propsToIgnore,
@@ -50,7 +53,7 @@ export function createGlobalFormModal(this: Page, {
         validateOnChange
     })
 
-    content.append(form)
+    content.append(globalForm)
 
     content.style.padding = "25px"
 
@@ -58,20 +61,35 @@ export function createGlobalFormModal(this: Page, {
         label: "Update",
         primary: true,
         onClick: async () => {
-            await form.validate()
-            const result = merge(key ?  {[key]: form.results} : form.results, this.info.globalState.project)
-            await save(this)
+            await globalForm.validate()
 
-            const forms = hasInstances ? this.forms.map(o => o.form) :  this.form ? [ this.form ] : []
-            const tables = hasInstances ? this.tables : this.table ? [ this.table ] : []
-            forms.forEach(form =>form.globals = structuredClone(key ?  result[key]: result))
-            tables.forEach(table => table.globals = structuredClone(key ?  result[key]: result))
+            const cached: any = {}
+
+            const toPass = { project: key ?  {[key]: globalForm.results} : globalForm.results}
+
+            const forms = (hasInstances ? this.forms :  this.form ? [ { form: this.form }] : []) ?? []
+            const tables = (hasInstances ? this.tables : this.table ? [ this.table ] : []) ?? []
+            
+            forms.forEach(formInfo => {
+                const { subject, form } = formInfo
+                const result = cached[subject] ?? (cached[subject] = mergeFunction.call(formInfo, toPass, this.info.globalState))
+                form.globals = structuredClone(key ?  result[key]: result)
+            })
+            
+
+            tables.forEach(table => {
+                const subject = null
+                const result = cached[subject] ?? (cached[subject] = mergeFunction(toPass, this.info.globalState))
+                table.globals = structuredClone( key ?  result[key]: result)
+            })
+
+            await save(this) // Save after all updates are made
 
             modal.open = false
         }
     })
 
-    modal.form = form
+    modal.form = globalForm
 
     modal.footer = saveButton
 

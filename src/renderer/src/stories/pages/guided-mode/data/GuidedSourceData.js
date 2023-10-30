@@ -10,6 +10,7 @@ import getSourceDataSchema from "../../../../../../../schemas/source-data.schema
 
 import {  createGlobalFormModal } from '../../../forms/GlobalFormModal'
 import { header } from "../../../forms/utils";
+import { Button } from "../../../Button.js";
 
 const propsToIgnore = [
     "verbose",
@@ -30,8 +31,18 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     header = {
+        controls: [
+            new Button({
+                label: "Edit Global Metadata",
+                onClick: () => {
+                    this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {})
+                    this.#globalModal.open = true
+                    
+                },
+            })
+        ],
         subtitle:
-            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
     };
 
     footer = {
@@ -183,16 +194,6 @@ export class GuidedSourceDataPage extends ManagedPage {
             header: "Sessions",
             // instanceType: 'Session',
             instances,
-            controls: [
-                {
-                    name: "Edit Global Metadata",
-                    onClick: () => {
-                        this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {})
-                        this.#globalModal.open = true
-                        
-                    },
-                },
-            ]
             // onAdded: (path) => {
 
             //   let details = this.getDetails(path)

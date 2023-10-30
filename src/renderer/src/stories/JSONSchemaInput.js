@@ -110,9 +110,11 @@ export class JSONSchemaInput extends LitElement {
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
         const el = this.getElement();
+
         this.#triggerValidation(name, el, path);
         this.#updateData(fullPath, value);
         if (el.type === "checkbox") el.checked = value;
+        else if (el.classList.contains('list')) el.children[0].items = value ? value.map((value) => { return { value } }) : []
         else el.value = value;
 
         return true;
@@ -284,7 +286,7 @@ export class JSONSchemaInput extends LitElement {
 
             return html`
                 <div
-                    class="schema-input"
+                    class="schema-input list"
                     @change=${() => validateOnChange && this.#triggerValidation(name, list, path)}
                 >
                     ${list} ${addButton}
