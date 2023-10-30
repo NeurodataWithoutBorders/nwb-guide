@@ -22,16 +22,15 @@ export class GuidedSubjectsPage extends Page {
             new Button({
                 label: "Edit Global Metadata",
                 onClick: () => {
-                    this.#globalModal.form.results = merge(this.info.globalState.project?.Subject, {})
-                    this.#globalModal.open = true
-                }
-            })
-        ]
+                    this.#globalModal.form.results = merge(this.info.globalState.project?.Subject, {});
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
     };
 
     // Abort save if subject structure is invalid
     beforeSave = () => {
-        
         // setUndefinedIfNotDeclared(subjectSchema, this.localState); // Set undefined if not declared in schema
 
         this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
@@ -68,7 +67,7 @@ export class GuidedSubjectsPage extends Page {
             throw e;
         }
 
-        console.log(this.info.globalState)
+        console.log(this.info.globalState);
     };
 
     footer = {
@@ -83,23 +82,23 @@ export class GuidedSubjectsPage extends Page {
 
     #globalModal;
 
-    connectedCallback(){
-        super.connectedCallback()
-        const modal = this.#globalModal = createGlobalFormModal.call(this, {
+    connectedCallback() {
+        super.connectedCallback();
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Edit Global Subject Data",
-            key: 'Subject',
+            key: "Subject",
             schema: globalSchema.properties.Subject,
             validateOnChange: (key, parent, path) => {
-                console.log(key, parent[key], path)
-                return validateOnChange(key, parent, ["Subject", ...path])
-            }
-        })
-        document.body.append(modal)
+                console.log(key, parent[key], path);
+                return validateOnChange(key, parent, ["Subject", ...path]);
+            },
+        }));
+        document.body.append(modal);
     }
 
-    disconnectedCallback(){
-        super.disconnectedCallback()
-        this.#globalModal.remove()
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
     }
 
     render() {
@@ -116,7 +115,6 @@ export class GuidedSubjectsPage extends Page {
             subjects[subject].sessions = sessions;
         }
 
-
         this.table = new Table({
             schema: subjectSchema,
             data: subjects,
@@ -127,7 +125,7 @@ export class GuidedSubjectsPage extends Page {
                 ignore: ["row_below"],
             },
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, 'warning', 3000)
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             onUpdate: () => {
                 this.unsavedUpdates = true;

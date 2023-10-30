@@ -302,7 +302,7 @@ export class JSONSchemaForm extends LitElement {
             }
             resultParent[name] = undefined; // NOTE: Will be removed when stringified
         } else {
-            resultParent[name] = (value === globalValue) ? undefined : value; // Retain association with global value
+            resultParent[name] = value === globalValue ? undefined : value; // Retain association with global value
             resolvedParent[name] = value;
         }
 
@@ -394,7 +394,10 @@ export class JSONSchemaForm extends LitElement {
 
     #get = (path, object = this.resolved, omitted = []) => {
         // path = path.slice(this.base.length); // Correct for base path
-        return path.reduce((acc, curr) => (acc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str])]?.[curr]), object);
+        return path.reduce(
+            (acc, curr) => (acc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str])]?.[curr]),
+            object
+        );
     };
 
     #checkRequiredAfterChange = async (localPath) => {
@@ -628,7 +631,7 @@ export class JSONSchemaForm extends LitElement {
     };
 
     isUndefined(value) {
-        return value === undefined || value === '';
+        return value === undefined || value === "";
     }
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
@@ -831,7 +834,6 @@ export class JSONSchemaForm extends LitElement {
             if (this.mode === "accordion" && hasMany) {
                 const headerName = header(name);
 
-
                 this.#nestedForms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
@@ -873,13 +875,17 @@ export class JSONSchemaForm extends LitElement {
                     base: [...this.base, ...localPath],
                 });
 
-                if (!this.states[headerName]) this.states[headerName] = {}
-                this.states[headerName].subtitle = `${this.#getRenderable(info, required[name], localPath, true).length} fields`
-                this.states[headerName].content = this.#nestedForms[name]
+                if (!this.states[headerName]) this.states[headerName] = {};
+                this.states[headerName].subtitle = `${
+                    this.#getRenderable(info, required[name], localPath, true).length
+                } fields`;
+                this.states[headerName].content = this.#nestedForms[name];
 
-                const accordion = new Accordion({ sections: {
-                    [headerName]: this.states[headerName]
-                } });
+                const accordion = new Accordion({
+                    sections: {
+                        [headerName]: this.states[headerName],
+                    },
+                });
 
                 accordion.id = name; // assign name to accordion id
 

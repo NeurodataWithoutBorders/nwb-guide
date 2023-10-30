@@ -69,13 +69,13 @@ export function createGlobalFormModal(this: Page, {
 
             const forms = (hasInstances ? this.forms :  this.form ? [ { form: this.form }] : []) ?? []
             const tables = (hasInstances ? this.tables : this.table ? [ this.table ] : []) ?? []
-            
+
             forms.forEach(formInfo => {
                 const { subject, form } = formInfo
                 const result = cached[subject] ?? (cached[subject] = mergeFunction.call(formInfo, toPass, this.info.globalState))
                 form.globals = structuredClone(key ?  result[key]: result)
             })
-            
+
 
             tables.forEach(table => {
                 const subject = null

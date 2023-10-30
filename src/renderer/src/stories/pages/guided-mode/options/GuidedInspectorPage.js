@@ -15,7 +15,7 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { path as nodePath } from "../../../../electron";
 import { getMessageType } from "../../../../validation/index.js";
 
-import { InfoBox } from '../../../InfoBox'
+import { InfoBox } from "../../../InfoBox";
 
 const filter = (list, toFilter) => {
     return list.filter((o) => {
@@ -79,10 +79,10 @@ export class GuidedInspectorPage extends Page {
                 })
             )
             .flat();
-        return html` 
-        ${new InfoBox({
+        return html` ${new InfoBox({
             header: "How do I fix these suggestions?",
-            content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues shared across files.`
+            content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues shared
+                across files.`,
         })}
         ${until(
             (async () => {

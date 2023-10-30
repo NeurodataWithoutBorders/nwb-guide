@@ -19,14 +19,13 @@ const isObject = (o) => {
 };
 
 export const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
-    if ('properties' in schemaProps) schemaProps = schemaProps.properties;
+    if ("properties" in schemaProps) schemaProps = schemaProps.properties;
     for (const prop in schemaProps) {
         const propInfo = schemaProps[prop]?.properties;
         if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
         else if (!(prop in resolved)) resolved[prop] = undefined;
     }
 };
-
 
 export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
     // Deep merge objects

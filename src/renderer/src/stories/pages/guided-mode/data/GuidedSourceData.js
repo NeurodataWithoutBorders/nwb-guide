@@ -8,7 +8,7 @@ import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import getSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
-import {  createGlobalFormModal } from '../../../forms/GlobalFormModal'
+import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { header } from "../../../forms/utils";
 import { Button } from "../../../Button.js";
 
@@ -19,7 +19,7 @@ const propsToIgnore = [
     "load_sync_channel",
     "stream_id", // NOTE: May be desired for other interfaces
     "nsx_override",
-]
+];
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
@@ -35,11 +35,10 @@ export class GuidedSourceDataPage extends ManagedPage {
             new Button({
                 label: "Edit Global Metadata",
                 onClick: () => {
-                    this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {})
-                    this.#globalModal.open = true
-                    
+                    this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {});
+                    this.#globalModal.open = true;
                 },
-            })
+            }),
         ],
         subtitle:
             "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
@@ -143,7 +142,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             ignore: propsToIgnore,
             globals: this.info.globalState.project.SourceData,
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, 'warning', 3000)
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             // onlyRequired: true,
             onUpdate: () => (this.unsavedUpdates = true),
@@ -160,23 +159,23 @@ export class GuidedSourceDataPage extends ManagedPage {
         };
     };
 
-    #globalModal = null
-    
-    connectedCallback(){
-        super.connectedCallback()
-        const modal = this.#globalModal = createGlobalFormModal.call(this, {
+    #globalModal = null;
+
+    connectedCallback() {
+        super.connectedCallback();
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Edit Global Source Data",
-            propsToRemove: [...propsToIgnore, 'folder_path', 'file_path'],
-            key: 'SourceData',
+            propsToRemove: [...propsToIgnore, "folder_path", "file_path"],
+            key: "SourceData",
             schema: this.info.globalState.schema.source_data,
-            hasInstances: true
-        })
-        document.body.append(modal)
+            hasInstances: true,
+        }));
+        document.body.append(modal);
     }
 
-    disconnectedCallback(){
-        super.disconnectedCallback()
-        this.#globalModal.remove()
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
     }
 
     render() {

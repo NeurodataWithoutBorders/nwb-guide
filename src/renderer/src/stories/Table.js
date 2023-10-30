@@ -135,7 +135,7 @@ export class Table extends LitElement {
         if (!message) {
             const errors = this.querySelectorAll("[error]");
             const len = errors.length;
-            if (len === 1) message = errors[0].getAttribute('data-message') || "Error found";
+            if (len === 1) message = errors[0].getAttribute("data-message") || "Error found";
             else if (len) message = `${len} errors exist on this table.`;
         }
 
@@ -377,7 +377,7 @@ export class Table extends LitElement {
                 }
             }
 
-            const isUserUpdate = initialCellsToUpdate <= validated
+            const isUserUpdate = initialCellsToUpdate <= validated;
 
             // Transfer data to object
             if (header === this.keyColumn) {
@@ -398,11 +398,10 @@ export class Table extends LitElement {
                     if (globalValue) {
                         value = target[rowName][header] = globalValue;
                         table.setDataAtCell(row, prop, value);
-                        this.onOverride(header, value, rowName)
+                        this.onOverride(header, value, rowName);
                     }
                     target[rowName][header] = undefined;
-                }
-                else target[rowName][header] = (value === globalValue) ? undefined : value;
+                } else target[rowName][header] = value === globalValue ? undefined : value;
             }
 
             validated++;
@@ -468,12 +467,12 @@ export class Table extends LitElement {
 
             if (cell._tippy) {
                 cell._tippy.destroy();
-                cell.removeAttribute('data-message')
+                cell.removeAttribute("data-message");
             }
 
             if (message) {
                 tippy(cell, { content: message, theme });
-                cell.setAttribute('data-message', message)
+                cell.setAttribute("data-message", message);
             }
         }
 
