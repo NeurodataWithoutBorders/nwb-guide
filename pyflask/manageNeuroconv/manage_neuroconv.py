@@ -3,6 +3,8 @@ import os
 import json
 import math
 import copy
+import re
+
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
@@ -141,13 +143,33 @@ def module_to_dict(my_module):
     return module_dict
 
 
+doc_pattern = r":py:class:`\~.+\..+\.(\w+)`"
+remove_extra_spaces_pattern = r"\s+"
+
+
+def get_class_ref_in_docstring(input_string):
+    match = re.search(doc_pattern, input_string)
+
+    if match:
+        return match.group(1)
+
+
+def derive_interface_info(interface):
+    info = {"keywords": getattr(interface, "keywords", []), "description": ""}
+    if interface.__doc__:
+        info["description"] = re.sub(
+            remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
+        )
+
+    return info
+
+
 def get_all_converter_info() -> dict:
     from neuroconv import converters
 
-    return {
-        name: {"keywords": [], "description": f"{converter.__doc__.split('.')[0]}." if converter.__doc__ else ""}
-        for name, converter in module_to_dict(converters).items()
-    }
+    return {name: derive_interface_info(converter) for name, converter in module_to_dict(converters).items()}
+
+    return output
 
 
 def get_all_interface_info() -> dict:
@@ -173,10 +195,7 @@ def get_all_interface_info() -> dict:
     ]
 
     return {
-        interface.__name__: {
-            "keywords": interface.keywords,
-            "description": f"{interface.__doc__.split('.')[0]}." if interface.__doc__ else "",
-        }
+        interface.__name__: derive_interface_info(interface)
         for interface in interface_list
         if not interface.__name__ in exclude_interfaces_from_selection
     }
