@@ -108,7 +108,7 @@ export class TutorialPage extends Page {
                 : html`
                       ${new InfoBox({
                           header: "How to download test data",
-                          content: html`Please refer to the
+                          content: `Please refer to the
                               <a
                                   href="https://neuroconv.readthedocs.io/en/main/developer_guide/testing_suite.html#testing-on-example-data"
                                   target="_blank"
