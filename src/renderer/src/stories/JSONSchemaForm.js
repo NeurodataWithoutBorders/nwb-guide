@@ -25,6 +25,16 @@ const componentCSS = `
       width:100%;
     }
 
+    #empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        color: gray;
+    }
+
+
     p {
       margin: 0 0 1em;
       line-height: 1.4285em;
@@ -113,6 +123,11 @@ hr {
     color: #ff0033;
   }
 
+  :host([requirementmode="loose"]) .required label:after {
+    color: gray;
+  }
+
+
   .required.conditional label:after {
     color: transparent;
   }
@@ -152,6 +167,7 @@ export class JSONSchemaForm extends LitElement {
             required: { type: Object, reflect: false },
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
+            requirementMode: { type: String, reflect: true },
         };
     }
 
@@ -189,6 +205,9 @@ export class JSONSchemaForm extends LitElement {
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
+        this.emptyMessage = props.emptyMessage ?? "No properties to render";
+
+        this.requirementMode = props.requirementMode ?? "default";
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
 
@@ -302,7 +321,7 @@ export class JSONSchemaForm extends LitElement {
     validate = async (resolved) => {
         // Check if any required inputs are missing
         const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
-        const isValid = !invalidInputs.length;
+        const isValid = this.requirementMode === "loose" ? true : !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
         let message = isValid ? "" : `${invalidInputs.length} required inputs are not specified properly.`;
@@ -514,7 +533,13 @@ export class JSONSchemaForm extends LitElement {
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore.includes(key)) return false;
+                if (
+                    this.ignore.find((v) => {
+                        if (typeof v === "string") return v === key;
+                        else return v.test(key);
+                    })
+                )
+                    return false;
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
@@ -620,7 +645,6 @@ export class JSONSchemaForm extends LitElement {
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && !parent[name]) {
                 const schema = this.getSchema(localPath);
-                console.log(schema);
                 errors.push({
                     message: `${schema.title ?? header(name)} is a required property.`,
                     type: "error",
@@ -693,7 +717,7 @@ export class JSONSchemaForm extends LitElement {
         // // Filter non-required properties (if specified) and render the sub-schema
         // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
-        if (renderable.length === 0) return html`<p>No properties to render</p>`;
+        if (renderable.length === 0) return html`<div id="empty">${this.emptyMessage}</div>`;
 
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
@@ -898,13 +922,11 @@ export class JSONSchemaForm extends LitElement {
         this.#registerRequirements(this.schema, this.required);
 
         return html`
-            <div>
-                ${schema.description
-                    ? html`<h4>Description</h4>
-                          <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
-                    : ""}
-                ${this.#render(schema, this.resolved, this.#requirements)}
-            </div>
+            ${schema.description
+                ? html`<h4>Description</h4>
+                      <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
+                : ""}
+            ${this.#render(schema, this.resolved, this.#requirements)}
         `;
     }
 }

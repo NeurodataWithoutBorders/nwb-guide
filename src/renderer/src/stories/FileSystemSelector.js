@@ -126,7 +126,7 @@ export class FilesystemSelector extends LitElement {
     };
 
     #checkType = (value) => {
-        const isLikelyFile = fs ? fs.lstatSync(value).isFile() : value.split(".").length;
+        const isLikelyFile = fs ? fs.statSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
     };

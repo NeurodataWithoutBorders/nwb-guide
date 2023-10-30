@@ -116,6 +116,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             mode: "accordion",
             schema: schemaResolved,
             results: info.source_data,
+            emptyMessage: "No source data required for this session.",
             ignore: [
                 "verbose",
                 "es_key",
@@ -129,6 +130,8 @@ export class GuidedSourceDataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });
+
+        form.style.height = "100%";
 
         return {
             subject,

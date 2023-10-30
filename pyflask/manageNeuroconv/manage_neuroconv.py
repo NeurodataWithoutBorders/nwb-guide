@@ -128,35 +128,67 @@ def locate_data(info: dict) -> dict:
     return organized_output
 
 
+def module_to_dict(my_module):
+    # Create an empty dictionary
+    module_dict = {}
+
+    # Iterate through the module's attributes
+    for attr_name in dir(my_module):
+        if not attr_name.startswith("__"):  # Exclude special attributes
+            attr_value = getattr(my_module, attr_name)
+            module_dict[attr_name] = attr_value
+
+    return module_dict
+
+
+def get_all_converter_info() -> dict:
+    from neuroconv import converters
+
+    return {
+        name: {"keywords": [], "description": f"{converter.__doc__.split('.')[0]}." if converter.__doc__ else ""}
+        for name, converter in module_to_dict(converters).items()
+    }
+
+
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
-    exclude_interfaces_from_selection = ["SpikeGLXLFP"]  # Should have 'interface' stripped from name
-
-    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
-    for excluded_interface in exclude_interfaces_from_selection:
-        interfaces_to_load.pop(excluded_interface)
+    exclude_interfaces_from_selection = [
+        # Deprecated
+        "SpikeGLXLFPInterface",
+        # Aliased
+        "CEDRecordingInterface",
+        "OpenEphysBinaryRecordingInterface",
+        "OpenEphysLegacyRecordingInterface",
+        # Ignored
+        "AxonaPositionDataInterface",
+        "AxonaUnitRecordingInterface",
+        "CsvTimeIntervalsInterface",
+        "ExcelTimeIntervalsInterface",
+        "Hdf5ImagingInterface",
+        "MaxOneRecordingInterface",
+        "OpenEphysSortingInterface",
+        "SimaSegmentationInterface",
+    ]
 
     return {
         interface.__name__: {
             "keywords": interface.keywords,
-            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves
-            # have a label property
-            "label": format_name
-            # Can also add a description here if we want to provide more information about the interface
+            "description": f"{interface.__doc__.split('.')[0]}." if interface.__doc__ else "",
         }
-        for format_name, interface in interfaces_to_load.items()
+        for interface in interface_list
+        if not interface.__name__ in exclude_interfaces_from_selection
     }
 
 
 # Combine Multiple Interfaces
 def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
-    from neuroconv import datainterfaces, NWBConverter
+    from neuroconv import converters, datainterfaces, NWBConverter
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
-            custom_name: getattr(datainterfaces, interface_name)
+            custom_name: getattr(datainterfaces, interface_name, getattr(converters, interface_name, None))
             for custom_name, interface_name in interface_class_dict.items()
         }
 
@@ -356,7 +388,7 @@ def convert_to_nwb(info: dict) -> str:
     options = (
         {
             interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
-            if available_options.get("properties").get(interface).get("properties").get("stub_test")
+            if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
             else {}
             for interface in info["source_data"]
         }

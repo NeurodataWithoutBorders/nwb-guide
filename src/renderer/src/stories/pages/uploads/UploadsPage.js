@@ -13,7 +13,6 @@ import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { run } from "../guided-mode/options/utils.js";
-import { notyf } from "../../../dependencies/globals.js";
 import Swal from "sweetalert2";
 import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
@@ -48,25 +47,27 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         },
         { title: "Uploading to DANDI" }
     ).catch((e) => {
-        notyf.open({
-            type: "error",
-            message: e.message,
-        });
+        this.notify(e.message, "error");
         throw e;
     });
 
     if (result)
-        notyf.open({
-            type: "success",
-            message: `${
+        this.notify(
+            `${
                 info.project ?? `${info[folderPathKey].length} filesystem entries`
             } successfully uploaded to Dandiset ${dandiset_id}`,
-        });
+            "success"
+        );
 
     return result;
 }
 
 export class UploadsPage extends Page {
+    header = {
+        title: "DANDI Uploads",
+        subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
+    };
+
     constructor(...args) {
         super(...args);
     }
@@ -116,17 +117,9 @@ export class UploadsPage extends Page {
         });
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
-                <h1 style="margin: 0;">DANDI Uploads</h1>
-            </div>
-            <p>This page allows you to upload folders with NWB files to the DANDI Archive.</p>
+            ${this.form}
             <hr />
-
-            <div>
-                ${this.form}
-                <hr />
-                ${button}
-            </div>
+            ${button}
         `;
     }
 }

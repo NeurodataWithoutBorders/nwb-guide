@@ -151,6 +151,7 @@
     "lottie-web": "^5.9.5",
     "notyf": "^3.9.0",
     "sweetalert2": "^11.6.13",
+    "tippy.js": "^6.3.7",
     "v8-compile-cache": "^2.3.0"
   },
   "devDependencies": {
