@@ -120,13 +120,33 @@ export class JSONSchemaInput extends LitElement {
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");
 
-    #updateData = (path, value) => {
-        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(path, value) : "";
-        this.value = value; // Update the latest value
+    #activateTimeoutValidation = (name, el, path) => {
+        this.#clearTimeoutValidation();
+        this.#validationTimeout = setTimeout(() => {
+            this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
+        }, 1000);
     };
 
-    #triggerValidation = (name, el, path) =>
-        this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
+    #clearTimeoutValidation = () => {
+        if (this.#validationTimeout) clearTimeout(this.#validationTimeout);
+    };
+
+    #validationTimeout = null;
+    #updateData = (fullPath, value) => {
+        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value) : "";
+
+        const path = [...fullPath];
+        const name = path.splice(-1)[0];
+
+        this.value = value; // Update the latest value
+
+        this.#activateTimeoutValidation(name, this.getElement(), path);
+    };
+
+    #triggerValidation = (name, el, path) => {
+        this.#clearTimeoutValidation();
+        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
+    };
 
     updated() {
         const el = this.getElement();
@@ -297,7 +317,10 @@ export class JSONSchemaInput extends LitElement {
             return html`
                 <select
                     class="guided--input schema-input"
-                    @input=${(ev) => this.#updateData(fullPath, info.enum[ev.target.value])}
+                    @input=${(ev) => {
+                        this.#updateData(fullPath, info.enum[ev.target.value]);
+                        this.#activateTimeoutValidation(name, ev.target, path);
+                    }}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
                 >
                     <option disabled selected value>${info.placeholder ?? "Select an option"}</option>
