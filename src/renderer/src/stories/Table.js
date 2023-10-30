@@ -50,6 +50,16 @@ const styles = `
       .handsontable {
         overflow: unset !important;
       }
+
+      th > [data-required] > *:first-child::after {
+        content: '*';
+        margin-left: 2px;
+        color: gray;
+      }
+
+      th > [data-required=true] > *:first-child::after {
+        color: red;
+      }
 `;
 
 const styleSymbol = Symbol("table-styles");
@@ -282,11 +292,18 @@ export class Table extends LitElement {
             return info;
         });
 
-        const onAfterGetHeader = function (index, TH) {
-            const desc = entries[colHeaders[index]].description;
+        const onAfterGetHeader =  (index, TH) => {
+            const col = colHeaders[index]
+            const desc = entries[col].description;
+
+            const rel = TH.querySelector(".relative");
+
+            const isRequired = this.schema?.required?.includes(col)
+            if (isRequired) rel.setAttribute('data-required', this.validateEmptyCells ? true : undefined)
+
             if (desc) {
-                const rel = TH.querySelector(".relative");
                 let span = rel.querySelector(".info");
+
                 if (!span) {
                     span = document.createElement("span");
                     span.classList.add("info");
