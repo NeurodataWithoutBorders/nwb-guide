@@ -18,7 +18,15 @@ export class GuidedSubjectsPage extends Page {
 
     // Abort save if subject structure is invalid
     beforeSave = () => {
-        this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
+
+        // Delete old subjects before merging
+        const { subjects: globalSubjects } = this.info.globalState;
+        for (let key in globalSubjects) {
+            console.log(key, this.localState[key],globalSubjects[key])
+            if (!this.localState[key]) delete globalSubjects[key];
+        }
+
+        this.info.globalState.subjects = merge(this.localState, globalSubjects); // Merge the local and global states
 
         const { results, subjects } = this.info.globalState;
 

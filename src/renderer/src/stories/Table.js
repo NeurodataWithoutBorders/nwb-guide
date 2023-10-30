@@ -159,6 +159,10 @@ export class Table extends LitElement {
     onStatusChange = () => {};
     onUpdate = () => {};
 
+    isRequired = (col) =>{
+        return this.schema?.required?.includes(col)
+    }
+
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
 
@@ -179,13 +183,26 @@ export class Table extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        const colHeaders = (this.colHeaders = Object.keys(entries).sort((a, b) => {
+        const colHeaders = (this.colHeaders = Object.keys(entries)
+        .sort((a,b) => {
+            //Sort alphabetically
+            if (a < b) return -1;
+            if (a > b) return 1;
+            return 0;
+        })
+        .sort((a, b) => {
+            const aRequired = this.isRequired(a)
+            const bRequired = this.isRequired(b)
+            if (aRequired && bRequired) return 0;
+            if (aRequired) return -1;
+            if (bRequired) return 1;
+            return 0;
+        }).
+        sort((a, b) => {
             if (a === this.keyColumn) return -1;
             if (b === this.keyColumn) return 1;
-            if (entries[a].required && !entries[b].required) return -1;
-            if (!entries[a].required && entries[b].required) return 1;
-            return 0;
-        }));
+            return 0
+        }))
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -246,7 +263,7 @@ export class Table extends LitElement {
             };
 
             let ogThis = this;
-            const isRequired = ogThis.schema?.required?.includes(k);
+            const isRequired = this.isRequired(k) 
 
             const validator = async function (value, callback) {
                 if (!value) {
@@ -298,7 +315,7 @@ export class Table extends LitElement {
 
             const rel = TH.querySelector(".relative");
 
-            const isRequired = this.schema?.required?.includes(col)
+            const isRequired = this.isRequired(col)
             if (isRequired) rel.setAttribute('data-required', this.validateEmptyCells ? true : undefined)
 
             if (desc) {
@@ -424,11 +441,13 @@ export class Table extends LitElement {
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
             physicalRows.map(async (row) => {
+                const rowName = rowHeaders[row]
                 // const cols = this.data[rowHeaders[row]]
                 // Object.keys(cols).map(k => cols[k] = '')
                 // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k])) // Validate with empty values before removing
                 delete this.data[rowHeaders[row]];
                 delete unresolved[row];
+                this.onUpdate(rowName, null, undefined); // NOTE: Global metadata PR might simply set all data values to undefined
             });
         });
 
