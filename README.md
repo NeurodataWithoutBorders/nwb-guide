@@ -40,7 +40,7 @@ Start by cloning the repository
 git clone https://github.com/catalystneuro/nwb-guide
 ```
 
-### Install Pythoh Dependencies
+### Install Python Dependencies
 
 Install the appropriate Python dependencies for your operating system.
 
