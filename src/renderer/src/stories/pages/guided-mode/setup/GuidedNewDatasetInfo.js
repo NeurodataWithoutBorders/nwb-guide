@@ -15,8 +15,6 @@ import { header } from "../../../forms/utils";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 
-merge(globalSchema, projectMetadataSchema);
-
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
         super(...args);
@@ -88,7 +86,7 @@ export class GuidedNewDatasetPage extends Page {
 
         this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
-        const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
+        const pages = schemaToPages.call(this, globalSchema, ["project"], { validateEmptyValues: false }, (info) => {
             info.title = `${info.label} Global Metadata`;
             return info;
         });
@@ -103,7 +101,7 @@ export class GuidedNewDatasetPage extends Page {
         this.form = new JSONSchemaForm({
             schema,
             results: this.state,
-            validateEmptyValues: false,
+            // validateEmptyValues: false,
             dialogOptions: {
                 properties: ["createDirectory"],
             },
