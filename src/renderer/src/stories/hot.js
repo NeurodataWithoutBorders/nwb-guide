@@ -22,7 +22,6 @@ function arrayRenderer(instance, td, row, col, prop, value, cellProperties) {
     return td;
 }
 
-
 class DateTimeEditor extends Handsontable.editors.BaseEditor {
     constructor(hotInstance) {
         super(hotInstance);

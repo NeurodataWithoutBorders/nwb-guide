@@ -159,9 +159,9 @@ export class Table extends LitElement {
     onStatusChange = () => {};
     onUpdate = () => {};
 
-    isRequired = (col) =>{
-        return this.schema?.required?.includes(col)
-    }
+    isRequired = (col) => {
+        return this.schema?.required?.includes(col);
+    };
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -184,25 +184,25 @@ export class Table extends LitElement {
 
         // Sort Columns by Key Column and Requirement
         const colHeaders = (this.colHeaders = Object.keys(entries)
-        .sort((a,b) => {
-            //Sort alphabetically
-            if (a < b) return -1;
-            if (a > b) return 1;
-            return 0;
-        })
-        .sort((a, b) => {
-            const aRequired = this.isRequired(a)
-            const bRequired = this.isRequired(b)
-            if (aRequired && bRequired) return 0;
-            if (aRequired) return -1;
-            if (bRequired) return 1;
-            return 0;
-        }).
-        sort((a, b) => {
-            if (a === this.keyColumn) return -1;
-            if (b === this.keyColumn) return 1;
-            return 0
-        }))
+            .sort((a, b) => {
+                //Sort alphabetically
+                if (a < b) return -1;
+                if (a > b) return 1;
+                return 0;
+            })
+            .sort((a, b) => {
+                const aRequired = this.isRequired(a);
+                const bRequired = this.isRequired(b);
+                if (aRequired && bRequired) return 0;
+                if (aRequired) return -1;
+                if (bRequired) return 1;
+                return 0;
+            })
+            .sort((a, b) => {
+                if (a === this.keyColumn) return -1;
+                if (b === this.keyColumn) return 1;
+                return 0;
+            }));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -263,7 +263,7 @@ export class Table extends LitElement {
             };
 
             let ogThis = this;
-            const isRequired = this.isRequired(k) 
+            const isRequired = this.isRequired(k);
 
             const validator = async function (value, callback) {
                 if (!value) {
@@ -309,14 +309,14 @@ export class Table extends LitElement {
             return info;
         });
 
-        const onAfterGetHeader =  (index, TH) => {
-            const col = colHeaders[index]
+        const onAfterGetHeader = (index, TH) => {
+            const col = colHeaders[index];
             const desc = entries[col].description;
 
             const rel = TH.querySelector(".relative");
 
-            const isRequired = this.isRequired(col)
-            if (isRequired) rel.setAttribute('data-required', this.validateEmptyCells ? true : undefined)
+            const isRequired = this.isRequired(col);
+            if (isRequired) rel.setAttribute("data-required", this.validateEmptyCells ? true : undefined);
 
             if (desc) {
                 let span = rel.querySelector(".info");
@@ -407,7 +407,7 @@ export class Table extends LitElement {
 
             // Transfer data to object
             if (header === this.keyColumn) {
-                console.log(value, rowName)
+                console.log(value, rowName);
                 if (value && value !== rowName) {
                     const old = target[rowName] ?? {};
                     this.data[value] = old;
@@ -442,7 +442,7 @@ export class Table extends LitElement {
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
             physicalRows.map(async (row) => {
-                const rowName = rowHeaders[row]
+                const rowName = rowHeaders[row];
                 // const cols = this.data[rowHeaders[row]]
                 // Object.keys(cols).map(k => cols[k] = '')
                 // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k])) // Validate with empty values before removing
@@ -461,7 +461,6 @@ export class Table extends LitElement {
         // Trigger validation on all cells
         data.forEach((row, i) => this.#setRow(i, row));
     }
-
 
     #setRow(row, data) {
         data.forEach((value, j) => this.table.setDataAtCell(row, j, value));
