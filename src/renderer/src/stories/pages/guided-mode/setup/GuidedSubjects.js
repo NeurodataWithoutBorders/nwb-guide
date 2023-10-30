@@ -21,9 +21,31 @@ export class GuidedSubjectsPage extends Page {
 
         // Delete old subjects before merging
         const { subjects: globalSubjects } = this.info.globalState;
+
         for (let key in globalSubjects) {
-            console.log(key, this.localState[key],globalSubjects[key])
             if (!this.localState[key]) delete globalSubjects[key];
+        }
+
+
+        // Check local subjects for missing information
+        const localSubjects = this.localState
+
+        const noIds = Object.getOwnPropertySymbols(this.localState)
+        if (noIds.length) {
+            const error = `${noIds.length} subject${
+                noIds.length > 1 ? "s are" : " is"
+            } missing their Session ID${noIds.length > 1 ? "s" : ""}`;
+            this.notify(error, "error");
+            throw new Error(error);
+        }
+
+        const noSessions = Object.keys(this.localState).filter((sub) => !this.localState[sub].sessions?.length);
+        if (noSessions.length) {
+            const error = `${noSessions.length} subject${
+                noSessions.length > 1 ? "s are" : " is"
+            } missing Sessions entries`;
+            this.notify(error, "error");
+            throw new Error(error);
         }
 
         this.info.globalState.subjects = merge(this.localState, globalSubjects); // Merge the local and global states
@@ -35,15 +57,6 @@ export class GuidedSubjectsPage extends Page {
         //         delete subjects[sub]
         //     }
         // });
-
-        const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
-        if (noSessions.length) {
-            const error = `${noSessions.length} subject${
-                noSessions.length > 1 ? "s are" : " is"
-            } missing Sessions entries`;
-            this.notify(error, "error");
-            throw new Error(error);
-        }
 
         const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => {
             acc[key] = {};

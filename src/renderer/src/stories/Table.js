@@ -115,7 +115,7 @@ export class Table extends LitElement {
             let value;
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
-                else return "";
+                else return undefined;
             } else
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
@@ -408,6 +408,7 @@ export class Table extends LitElement {
             // Transfer data to object
             if (header === this.keyColumn) {
                 if (value !== rowName) {
+                    if (!value) value = Symbol('unresolved row') // Ensure unique row name
                     const old = target[rowName] ?? {};
                     this.data[value] = old;
                     delete target[rowName];
@@ -460,6 +461,7 @@ export class Table extends LitElement {
         // Trigger validation on all cells
         data.forEach((row, i) => this.#setRow(i, row));
     }
+
 
     #setRow(row, data) {
         data.forEach((value, j) => this.table.setDataAtCell(row, j, value));
