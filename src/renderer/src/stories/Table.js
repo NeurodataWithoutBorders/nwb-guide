@@ -148,8 +148,8 @@ export class Table extends LitElement {
 
         const nUnresolved = Object.keys(this.unresolved).length;
         if (nUnresolved)
-            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a${
-                this.keyColumn ? `${this.keyColumn} ` : "n "
+            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a ${
+                this.keyColumn ? `${header(this.keyColumn)} ` : "n "
             }entry`;
 
         if (message) throw new Error(message);
@@ -407,8 +407,8 @@ export class Table extends LitElement {
 
             // Transfer data to object
             if (header === this.keyColumn) {
-                if (value !== rowName) {
-                    if (!value) value = Symbol('unresolved row') // Ensure unique row name
+                console.log(value, rowName)
+                if (value && value !== rowName) {
                     const old = target[rowName] ?? {};
                     this.data[value] = old;
                     delete target[rowName];

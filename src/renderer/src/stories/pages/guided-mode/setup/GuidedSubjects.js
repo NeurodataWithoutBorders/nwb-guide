@@ -19,22 +19,19 @@ export class GuidedSubjectsPage extends Page {
     // Abort save if subject structure is invalid
     beforeSave = () => {
 
+
+        try {
+            this.table.validate();
+        } catch (e) {
+            this.notify(e.message, "error");
+            throw e;
+        }
+
         // Delete old subjects before merging
         const { subjects: globalSubjects } = this.info.globalState;
 
         for (let key in globalSubjects) {
             if (!this.localState[key]) delete globalSubjects[key];
-        }
-
-
-        // Check local subjects for missing information
-        const noIds = Object.getOwnPropertySymbols(this.localState)
-        if (noIds.length) {
-            const error = `${noIds.length} subject${
-                noIds.length > 1 ? "s are" : " is"
-            } missing their Session ID${noIds.length > 1 ? "s" : ""}`;
-            this.notify(error, "error");
-            throw new Error(error);
         }
 
         const noSessions = Object.keys(this.localState).filter((sub) => !this.localState[sub].sessions?.length);
@@ -63,13 +60,6 @@ export class GuidedSubjectsPage extends Page {
 
         // Modify the results object to track new subjects / sessions
         updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
-
-        try {
-            this.table.validate();
-        } catch (e) {
-            this.notify(e.message, "error");
-            throw e;
-        }
     };
 
     footer = {
