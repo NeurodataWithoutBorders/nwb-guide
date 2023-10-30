@@ -4,6 +4,8 @@ import { Page } from "../Page.js";
 
 import { startLottie } from "../../../dependencies/globals.js";
 
+import { Button } from "../../Button.js";
+
 export class DocumentationPage extends Page {
     header = {
         title: "Documentation",
@@ -28,9 +30,15 @@ export class DocumentationPage extends Page {
                         <div class="dc_con">
                             <div class="document-content">
                                 <div id="documentation-lottie" class="documentation-lottie_style"></div>
+                                ${new Button({
+                                    label: "NWB GUIDE Documentation",
+                                    onClick: () => {
+                                        window.open("https://nwb-guide.readthedocs.io/en/latest/");
+                                    },
+                                })}
                             </div>
                             <div class="docu-content-container">
-                                <h2 class="document_text">Documentation for NWB GUIDE is in development.</h2>
+                                <h3 style="padding: 0; margin-top: 25px;">Additional Resources</h3>
                                 <p>
                                     Conversion to NWB is powered by
                                     <a target="_blank" href="https://neuroconv.readthedocs.io/">NeuroConv</a>.
@@ -59,27 +67,17 @@ export class DocumentationPage extends Page {
                                     >.
                                 </p>
 
+                                <h3 style="padding: 0; margin-top: 25px;">Acknowledgments</h3>
                                 <p>
-                                    NWB GUIDE is an open-source project developed by CatalystNeuro (Cody Baker, Garrett
-                                    Flynn, Ben Dichter) and Lawrence Berkeley National Laboratory (Ryan Ly, Oliver
-                                    Ruebel) and generously supported by
-                                    <a target="_blank" href="https://www.kavlifoundation.org/">The Kavli Foundation</a>.
+                                    <small>
+                                        NWB GUIDE is an open-source project developed by CatalystNeuro (Cody Baker,
+                                        Garrett Flynn, Ben Dichter) and Lawrence Berkeley National Laboratory (Ryan Ly,
+                                        Oliver Ruebel) and generously supported by
+                                        <a target="_blank" href="https://www.kavlifoundation.org/"
+                                            >The Kavli Foundation</a
+                                        >.
+                                    </small>
                                 </p>
-
-                                <!--
-                                    <div class="button_container_contact">
-                                        <button
-                                            id="doc-btn"
-                                            class="view_doc_button sodaVideo-button"
-                                            style="margin-top: 1rem"
-                                            @click="${() => {
-                                    window.open("https://neuroconv.readthedocs.io/en/main/");
-                                }}"
-                                        >
-                                            View the NeuroConv Documentation
-                                        </button>
-                                    </div>
-                                    -->
                             </div>
                         </div>
                     </div>

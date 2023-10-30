@@ -1728,14 +1728,9 @@ details[open] > summary::before {
 }
 
 .documentation-lottie_style {
-    --lottie-animation-container-width: 400px;
-    --lottie-animation-container-height: 400px;
-    --lottie-animation-container-background-color: transparent;
-    width: var(--lottie-animation-container-width);
-    height: var(--lottie-animation-container-height);
-    background-color: var(--lottie-animation-container-background-color);
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    margin: 0px !important;
 }
 
 .api_key-btn {
