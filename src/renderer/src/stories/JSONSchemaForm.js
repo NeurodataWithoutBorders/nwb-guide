@@ -196,7 +196,6 @@ export class JSONSchemaForm extends LitElement {
     constructor(props = {}) {
         super();
 
-
         this.#rendered = this.#updateRendered(true);
 
         this.identifier = props.identifier;
