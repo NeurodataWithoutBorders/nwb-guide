@@ -28,8 +28,6 @@ export class GuidedSubjectsPage extends Page {
 
 
         // Check local subjects for missing information
-        const localSubjects = this.localState
-
         const noIds = Object.getOwnPropertySymbols(this.localState)
         if (noIds.length) {
             const error = `${noIds.length} subject${
