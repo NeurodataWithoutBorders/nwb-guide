@@ -106,11 +106,7 @@ export class Table extends LitElement {
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
                 else return "";
-            } else
-                value =
-                    (hasRow ? this.data[row][col] : undefined) ??
-                    this.template[col]
-
+            } else value = (hasRow ? this.data[row][col] : undefined) ?? this.template[col];
 
             return value;
         });
@@ -417,7 +413,7 @@ export class Table extends LitElement {
 
         table.addHook("afterCreateRow", (index, amount) => {
             nRows += amount;
-            const physicalRows = Array.from({ length: amount }, (e, i) => index + i)
+            const physicalRows = Array.from({ length: amount }, (e, i) => index + i);
             physicalRows.forEach((row) => this.#setRow(row, this.#getRowData(row)));
         });
 
