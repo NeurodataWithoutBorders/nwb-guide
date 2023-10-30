@@ -121,10 +121,12 @@ hr {
   .required label:after {
     content: " *";
     color: #ff0033;
+
   }
 
-  :host([requirementmode="loose"]) .required label:after {
+  :host(:not([validateemptyvalues])) .required label:after {
     color: gray;
+
   }
 
 
@@ -167,8 +169,8 @@ export class JSONSchemaForm extends LitElement {
             required: { type: Object, reflect: false },
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
-            requirementMode: { type: String, reflect: true },
             globals: { type: Object, reflect: false },
+            validateEmptyValues: { type: Boolean, reflect: true },
         };
     }
 
@@ -194,6 +196,7 @@ export class JSONSchemaForm extends LitElement {
     constructor(props = {}) {
         super();
 
+
         this.#rendered = this.#updateRendered(true);
 
         this.identifier = props.identifier;
@@ -212,7 +215,6 @@ export class JSONSchemaForm extends LitElement {
 
         this.emptyMessage = props.emptyMessage ?? "No properties to render";
 
-        this.requirementMode = props.requirementMode ?? "default";
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
 
@@ -345,7 +347,7 @@ export class JSONSchemaForm extends LitElement {
     validate = async (resolved) => {
         // Check if any required inputs are missing
         const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
-        const isValid = this.requirementMode === "loose" ? true : !invalidInputs.length;
+        const isValid = !invalidInputs.length;
 
         // Print out a detailed error message if any inputs are missing
         let message = isValid ? "" : `${invalidInputs.length} required inputs are not specified properly.`;
@@ -517,7 +519,7 @@ export class JSONSchemaForm extends LitElement {
 
                 if (typeof isRequired === "object" && !Array.isArray(isRequired))
                     invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
-                else if (this.isUndefined(resolved[name])) invalid.push(path);
+                else if (this.isUndefined(resolved[name]) && this.validateEmptyValues) invalid.push(path);
             }
         }
 
@@ -849,7 +851,6 @@ export class JSONSchemaForm extends LitElement {
                         this.updateData(path, value);
                     },
 
-                    requirementMode: this.requirementMode,
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,
                     dialogOptions: this.dialogOptions,

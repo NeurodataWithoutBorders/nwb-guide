@@ -92,7 +92,7 @@ export class GuidedNewDatasetPage extends Page {
             this,
             schema,
             ["project"],
-            { validateEmptyValues: false, requirementMode: "loose" },
+            { validateEmptyValues: false },
             (info) => {
                 info.title = `${info.label} Global Metadata`;
                 return info;

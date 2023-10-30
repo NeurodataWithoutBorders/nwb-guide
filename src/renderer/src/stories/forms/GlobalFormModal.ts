@@ -44,7 +44,7 @@ export function createGlobalFormModal(this: Page, {
     else removeProperties(schemaCopy.properties, propsToRemove)
 
     const globalForm = new JSONSchemaForm({
-        requirementMode: "loose",
+        validateEmptyValues: false,
         mode: 'accordion',
         schema: schemaCopy,
         emptyMessage: "No properties to edit globally.",
