@@ -92,7 +92,7 @@ export class GuidedStartPage extends Page {
                         </p>
                         <h4>4. Final Review</h4>
                         <p>
-                            Finally, you will upload your conversion to DANDI and review the resulting dandiset.
+                            Finally, you will upload your conversion to DANDI and review the resulting Dandiset.
                         </p>
 
                         <br>

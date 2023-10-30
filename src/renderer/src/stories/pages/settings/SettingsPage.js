@@ -5,6 +5,8 @@ import { onThrow } from "../../../errors";
 import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
 import projectGlobalSchema from "../../../../../../schemas/json/project/globals.json" assert { type: "json" };
 
+import { validateDANDIApiKey } from "../../../validation/dandi";
+
 const schema = {
     properties: {
         output_locations: projectGlobalSchema,
@@ -17,13 +19,10 @@ import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
-import { header } from "../../forms/utils";
 
-const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
-
-const setUndefinedIfNotDeclared = (schema, resolved) => {
-    for (let prop in schema.properties) {
-        const propInfo = schema.properties[prop];
+const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
+    for (const prop in schemaProps) {
+        const propInfo = schemaProps[prop]?.properties;
         if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
         else if (!(prop in resolved)) resolved[prop] = undefined;
     }
@@ -46,15 +45,13 @@ export class SettingsPage extends Page {
         return (this.#notification = this.notify(message, type));
     };
 
-    beforeSave = () => {
-        const { resolved } = this.form;
-        for (let prop in schema.properties) {
-            const propInfo = schema.properties[prop];
-            const res = resolved[prop];
-            if (propInfo) setUndefinedIfNotDeclared(propInfo, res);
-        }
+    beforeSave = async () => {
+        await this.form.validate();
 
-        merge(this.form.resolved, global.data);
+        const { resolved } = this.form;
+        setUndefinedIfNotDeclared(schema.properties, resolved);
+
+        merge(resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
         this.#openNotyf("Global settings changes saved", "success");
@@ -77,10 +74,9 @@ export class SettingsPage extends Page {
             schema,
             mode: "accordion",
             onUpdate: () => (this.unsavedUpdates = true),
-            validateOnChange: (name, parent) => {
+            validateOnChange: async (name, parent) => {
                 const value = parent[name];
-                if (value && name.includes("api_key") && !dandiAPITokenRegex.test(value))
-                    return [{ type: "error", message: `${header(name)} must be a 40 character hexadecimal string` }];
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
                 return true;
             },
             onThrow,
