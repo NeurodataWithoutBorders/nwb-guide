@@ -9,33 +9,15 @@ import projectGlobalSchema from "../../../../../../../schemas/json/project/globa
 import { merge } from "../../utils.js";
 import { schemaToPages } from "../../FormPage.js";
 import { onThrow } from "../../../../errors";
-import baseMetadataSchema from "../../../../../../../schemas/base-metadata.schema";
 
-const changesAcrossSessions = {
-    Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
-    NWBFile: [
-        "session_id",
-        "session_start_time",
-        "identifier",
-        "data_collection",
-        "notes",
-        "pharmacolocy",
-        "session_description",
-        "slices",
-        "source_script",
-        "source_script_file_name",
-    ],
-};
+import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
+import { header } from "../../../forms/utils";
+
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 
-Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
-    const info = (projectMetadataSchema.properties[globalProp] = structuredClone(v));
+merge(globalSchema, projectMetadataSchema)
 
-    changesAcrossSessions[globalProp]?.forEach((prop) => {
-        delete info.properties[prop];
-    });
-});
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -132,6 +114,9 @@ export class GuidedNewDatasetPage extends Page {
             validateEmptyValues: false,
             dialogOptions: {
                 properties: ["createDirectory"],
+            },
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, 'warning', 3000)
             },
             validateOnChange,
             onUpdate: () => (this.unsavedUpdates = true),

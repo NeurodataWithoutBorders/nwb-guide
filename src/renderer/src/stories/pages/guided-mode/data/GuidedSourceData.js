@@ -9,6 +9,7 @@ import { merge } from "../../utils.js";
 import getSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 import {  createGlobalFormModal } from '../../../forms/GlobalFormModal'
+import { header } from "../../../forms/utils";
 
 const propsToIgnore = [
     "verbose",
@@ -130,6 +131,9 @@ export class GuidedSourceDataPage extends ManagedPage {
             emptyMessage: "No source data required for this session.",
             ignore: propsToIgnore,
             globals: this.info.globalState.project.SourceData,
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, 'warning', 3000)
+            },
             // onlyRequired: true,
             onUpdate: () => (this.unsavedUpdates = true),
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
@@ -153,7 +157,8 @@ export class GuidedSourceDataPage extends ManagedPage {
             header: "Edit Global Source Data",
             propsToRemove: [...propsToIgnore, 'folder_path', 'file_path'],
             key: 'SourceData',
-            schema: this.info.globalState.schema.source_data
+            schema: this.info.globalState.schema.source_data,
+            hasInstances: true
         })
         document.body.append(modal)
     }

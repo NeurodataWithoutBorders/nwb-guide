@@ -14,20 +14,12 @@ const schema = {
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
-import { merge } from "../utils.js";
+import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
 import { header } from "../../forms/utils";
 
 const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
-
-const setUndefinedIfNotDeclared = (schema, resolved) => {
-    for (let prop in schema.properties) {
-        const propInfo = schema.properties[prop];
-        if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
-        else if (!(prop in resolved)) resolved[prop] = undefined;
-    }
-};
 
 export class SettingsPage extends Page {
     header = {

@@ -11,6 +11,7 @@ import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
+import { header } from "../../../forms/utils";
 
 const propsToIgnore = [
     "Ophys", // Always ignore ophys metadata (for now)
@@ -69,6 +70,7 @@ export class GuidedMetadataPage extends ManagedPage {
         },
     };
 
+
     createForm = ({ subject, session, info }) => {
         // const results = createResults({ subject, info }, this.info.globalState);
 
@@ -120,6 +122,9 @@ export class GuidedMetadataPage extends ManagedPage {
             globals: aggregateGlobalMetadata,
 
             ignore: propsToIgnore,
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, 'warning', 3000)
+            },
 
             conditionalRequirements: [
                 {
