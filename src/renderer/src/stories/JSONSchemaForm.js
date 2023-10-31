@@ -300,7 +300,8 @@ export class JSONSchemaForm extends LitElement {
                     input.updateData(globalValue);
                     this.onOverride(name, globalValue, path);
                 }
-            }
+            } else resolvedParent[name] = undefined
+
             resultParent[name] = undefined; // NOTE: Will be removed when stringified
         } else {
             resultParent[name] = value === globalValue ? undefined : value; // Retain association with global value
@@ -642,7 +643,7 @@ export class JSONSchemaForm extends LitElement {
         const pathToValidate = [...(this.base ?? []), ...path];
 
         const valid =
-            !this.validateEmptyValues && !(name in parent)
+            !this.validateEmptyValues && parent[name] === undefined
                 ? true
                 : await this.validateOnChange(name, parent, pathToValidate);
 
@@ -650,6 +651,7 @@ export class JSONSchemaForm extends LitElement {
         const externalPath = [...this.base, name];
 
         const isRequired = this.#isRequired(localPath);
+
         let warnings = Array.isArray(valid)
             ? valid.filter((info) => info.type === "warning" && (!isRequired || !info.missing))
             : [];
@@ -678,11 +680,21 @@ export class JSONSchemaForm extends LitElement {
             // For non-links, throw a basic requirement error if the property is required
             if (!errors.length && isRequired && this.isUndefined(parent[name])) {
                 const schema = this.getSchema(localPath);
-                errors.push({
-                    message: `${schema.title ?? header(name)} is a required property.`,
-                    type: "error",
-                    missing: true,
-                }); // Throw at least a basic error if the property is required
+
+                // Throw at least a basic warning if the property is required and missing
+                if (this.validateEmptyValues) {
+                    errors.push({
+                        message: `${schema.title ?? header(name)} is a required property.`,
+                        type: "error",
+                        missing: true,
+                    }); 
+                } else {
+                    warnings.push({
+                        message: `${schema.title ?? header(name)} is a suggested property.`,
+                        type: "warning",
+                        missing: true,
+                    })
+                }
             }
         }
 

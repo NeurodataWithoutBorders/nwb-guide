@@ -89,7 +89,6 @@ export class GuidedSubjectsPage extends Page {
             key: "Subject",
             schema: globalSchema.properties.Subject,
             validateOnChange: (key, parent, path) => {
-                console.log(key, parent[key], path);
                 return validateOnChange(key, parent, ["Subject", ...path]);
             },
         }));

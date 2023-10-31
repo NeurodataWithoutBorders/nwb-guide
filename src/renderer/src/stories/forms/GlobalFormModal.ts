@@ -28,13 +28,14 @@ export function createGlobalFormModal(this: Page, {
     mergeFunction?: Function
 
 }) {
+
     const modal = new Modal({
         header
     })
 
     const content = document.createElement("div")
 
-    const schemaCopy = structuredClone(schema)
+    const schemaCopy = structuredClone(schema) // Ensure no mutation
 
     function removeProperties(obj: any, props: string[]) {
         props.forEach(prop =>  delete obj[prop])
@@ -73,14 +74,14 @@ export function createGlobalFormModal(this: Page, {
             forms.forEach(formInfo => {
                 const { subject, form } = formInfo
                 const result = cached[subject] ?? (cached[subject] = mergeFunction.call(formInfo, toPass, this.info.globalState))
-                form.globals = structuredClone(key ?  result[key]: result)
+                form.globals = structuredClone(key ?  result.project[key]: result)
             })
 
 
             tables.forEach(table => {
                 const subject = null
                 const result = cached[subject] ?? (cached[subject] = mergeFunction(toPass, this.info.globalState))
-                table.globals = structuredClone( key ?  result[key]: result)
+                table.globals = structuredClone( key ?  result.project[key]: result)
             })
 
             await save(this) // Save after all updates are made
