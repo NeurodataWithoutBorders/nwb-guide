@@ -606,7 +606,7 @@ def inspect_nwb_folder(payload):
     try:
         messages = list(inspect_all(**kwargs))
     except:
-        del kwargs['n_jobs']
+        del kwargs["n_jobs"]
         messages = list(inspect_all(**kwargs))
 
     return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
