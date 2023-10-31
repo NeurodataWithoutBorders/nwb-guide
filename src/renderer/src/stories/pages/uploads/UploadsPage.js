@@ -192,6 +192,8 @@ export class UploadsPage extends Page {
             ${this.form}
             <hr />
             ${button}
+            <br>
+            <br>
         `;
     }
 }
