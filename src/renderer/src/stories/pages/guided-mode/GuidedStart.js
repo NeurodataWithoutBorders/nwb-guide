@@ -100,7 +100,7 @@ export class GuidedStartPage extends Page {
                         <hr>
                         ${new InfoBox({
                             header: "Where can I learn more about the conversion process?",
-                            content: html`
+                            content: `
                                 Although not required to use the GUIDE, you can learn more about the NWB conversion
                                 process in the
                                 <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
