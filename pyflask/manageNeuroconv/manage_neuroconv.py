@@ -592,6 +592,7 @@ def inspect_nwb_file(payload):
 def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all, load_config
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from pickle import PicklingError
 
     kwargs = dict(
         n_jobs=-2,  # uses number of CPU - 1
@@ -605,9 +606,11 @@ def inspect_nwb_folder(payload):
 
     try:
         messages = list(inspect_all(**kwargs))
-    except:
+    except PicklingError as e:
         del kwargs['n_jobs']
         messages = list(inspect_all(**kwargs))
+    except Exception as e:
+        raise e
 
     return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
 
