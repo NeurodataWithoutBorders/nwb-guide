@@ -38,6 +38,7 @@ import MiniscopeBehaviorInterfaceSchema from '../../../../../../schemas/json/gen
 import EDFRecordingInterfaceSchema from '../../../../../../schemas/json/generated/EDFRecordingInterface.json'
 import SpikeGLXConverterPipeSchema from '../../../../../../schemas/json/generated/SpikeGLXConverterPipe.json'
 import BrukerTiffSinglePlaneConverterSchema from '../../../../../../schemas/json/generated/BrukerTiffSinglePlaneConverter.json'
+import BrukerTiffMultiPlaneConverterSchema from '../../../../../../schemas/json/generated/BrukerTiffMultiPlaneConverter.json'
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -89,6 +90,7 @@ globalStateCopy.schema.source_data.properties.MiniscopeBehaviorInterface = Minis
 globalStateCopy.schema.source_data.properties.EDFRecordingInterface = EDFRecordingInterfaceSchema.properties.EDFRecordingInterface
 globalStateCopy.schema.source_data.properties.SpikeGLXConverterPipe = SpikeGLXConverterPipeSchema.properties.SpikeGLXConverterPipe
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneConverter = BrukerTiffSinglePlaneConverterSchema.properties.BrukerTiffSinglePlaneConverter
+globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneConverter = BrukerTiffMultiPlaneConverterSchema.properties.BrukerTiffMultiPlaneConverter
 
 const results = globalStateCopy.results
 for (let sub in results){
@@ -332,4 +334,10 @@ const BrukerTiffSinglePlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globa
 BrukerTiffSinglePlaneConverterGlobalCopy.interfaces.interface = BrukerTiffSinglePlaneConverter
 BrukerTiffSinglePlaneConverterGlobalCopy.schema.source_data = BrukerTiffSinglePlaneConverterSchema
 BrukerTiffSinglePlaneConverter.args = { activePage, globalState: BrukerTiffSinglePlaneConverterGlobalCopy };
+
+export const BrukerTiffMultiPlaneConverter = PageTemplate.bind({});
+const BrukerTiffMultiPlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globalState))
+BrukerTiffMultiPlaneConverterGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneConverter
+BrukerTiffMultiPlaneConverterGlobalCopy.schema.source_data = BrukerTiffMultiPlaneConverterSchema
+BrukerTiffMultiPlaneConverter.args = { activePage, globalState: BrukerTiffMultiPlaneConverterGlobalCopy };
 
