@@ -11,6 +11,8 @@ export class GuidedResultsPage extends Page {
     render() {
         const { conversion } = this.info.globalState;
 
+        console.log(this.info.globalState);
+
         if (!conversion)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
