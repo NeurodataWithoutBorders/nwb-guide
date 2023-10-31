@@ -11,6 +11,7 @@ import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
+import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
@@ -106,7 +107,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema,
+            schema: preprocessMetadataSchema(schema),
             results,
             globals: aggregateGlobalMetadata,
 
