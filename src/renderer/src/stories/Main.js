@@ -105,7 +105,6 @@ export class Main extends LitElement {
 
             // Default Capsules Behavior
             const section = sections[info.section];
-            console.log("Sections", section, sections);
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
                     let pages = Object.values(section.pages);
