@@ -593,17 +593,21 @@ def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all, load_config
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
-    messages = list(
-        inspect_all(
-            n_jobs=-2,  # uses number of CPU - 1
-            ignore=[
-                "check_description",
-                "check_data_orientation",
-            ],  # TODO: remove when metadata control is exposed
-            config=load_config(filepath_or_keyword="dandi"),
-            **payload,
-        )
+    kwargs = dict(
+        n_jobs=-2,  # uses number of CPU - 1
+        ignore=[
+            "check_description",
+            "check_data_orientation",
+        ],  # TODO: remove when metadata control is exposed
+        config=load_config(filepath_or_keyword="dandi"),
+        **payload,
     )
+
+    try:
+        messages = list(inspect_all(**kwargs))
+    except:
+        del kwargs['n_jobs']
+        messages = list(inspect_all(**kwargs))
 
     return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
 
