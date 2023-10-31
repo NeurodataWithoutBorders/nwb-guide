@@ -118,7 +118,7 @@ export class JSONSchemaInput extends LitElement {
 
         this.#triggerValidation(name, path);
         this.#updateData(fullPath, value);
-        
+
         const el = this.getElement()
         if (el.type === "checkbox") el.checked = value;
         else el.value = value;
@@ -128,13 +128,33 @@ export class JSONSchemaInput extends LitElement {
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");
 
-    #updateData = (path, value) => {
-        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(path, value) : "";
-        this.value = value; // Update the latest value
+    #activateTimeoutValidation = (name, el, path) => {
+        this.#clearTimeoutValidation();
+        this.#validationTimeout = setTimeout(() => {
+            this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
+        }, 1000);
     };
 
-    #triggerValidation = (name, path) =>
-        this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
+    #clearTimeoutValidation = () => {
+        if (this.#validationTimeout) clearTimeout(this.#validationTimeout);
+    };
+
+    #validationTimeout = null;
+    #updateData = (fullPath, value) => {
+        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value) : "";
+
+        const path = [...fullPath];
+        const name = path.splice(-1)[0];
+
+        this.value = value; // Update the latest value
+
+        this.#activateTimeoutValidation(name, this.getElement(), path);
+    };
+
+    #triggerValidation = (name, path) => {
+        this.#clearTimeoutValidation();
+        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
+    };
 
     updated() {
         const el = this.getElement();
