@@ -607,7 +607,7 @@ def inspect_nwb_folder(payload):
     try:
         messages = list(inspect_all(**kwargs))
     except PicklingError as e:
-        del kwargs['n_jobs']
+        del kwargs["n_jobs"]
         messages = list(inspect_all(**kwargs))
     except Exception as e:
         raise e
