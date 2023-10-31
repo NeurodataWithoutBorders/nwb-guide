@@ -1,23 +1,19 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "SpikeGLXConverterPipe": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "folder_path"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
+                "folder_path": {
+                    "format": "directory",
                     "type": "string",
-                    "description": "Path to Tiff file."
-                },
-                "sampling_frequency": {
-                    "type": "number"
+                    "description": "Path to the folder containing SpikeGLX streams."
                 },
                 "verbose": {
                     "type": "boolean",
-                    "default": true
+                    "default": false
                 }
             },
             "type": "object",
