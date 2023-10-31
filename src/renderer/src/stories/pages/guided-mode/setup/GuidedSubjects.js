@@ -18,7 +18,30 @@ export class GuidedSubjectsPage extends Page {
 
     // Abort save if subject structure is invalid
     beforeSave = () => {
-        this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
+        try {
+            this.table.validate();
+        } catch (e) {
+            this.notify(e.message, "error");
+            throw e;
+        }
+
+        // Delete old subjects before merging
+        const { subjects: globalSubjects } = this.info.globalState;
+
+        for (let key in globalSubjects) {
+            if (!this.localState[key]) delete globalSubjects[key];
+        }
+
+        const noSessions = Object.keys(this.localState).filter((sub) => !this.localState[sub].sessions?.length);
+        if (noSessions.length) {
+            const error = `${noSessions.length} subject${
+                noSessions.length > 1 ? "s are" : " is"
+            } missing Sessions entries`;
+            this.notify(error, "error");
+            throw new Error(error);
+        }
+
+        this.info.globalState.subjects = merge(this.localState, globalSubjects); // Merge the local and global states
 
         const { results, subjects } = this.info.globalState;
 
@@ -28,15 +51,6 @@ export class GuidedSubjectsPage extends Page {
         //     }
         // });
 
-        const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
-        if (noSessions.length) {
-            const error = `${noSessions.length} subject${
-                noSessions.length > 1 ? "s are" : " is"
-            } missing Sessions entries`;
-            this.notify(error, "error");
-            throw new Error(error);
-        }
-
         const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => {
             acc[key] = {};
             return acc;
@@ -44,13 +58,6 @@ export class GuidedSubjectsPage extends Page {
 
         // Modify the results object to track new subjects / sessions
         updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
-
-        try {
-            this.table.validate();
-        } catch (e) {
-            this.notify(e.message, "error");
-            throw e;
-        }
     };
 
     footer = {
