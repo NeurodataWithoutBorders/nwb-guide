@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { createResults } from '../src/renderer/src/stories/pages/guided-mode/data/utils'
 import { mapSessions } from '../src/renderer/src/stories/pages/utils'
 
-import preprocessMetadataSchema from '../schemas/base-metadata.schema'
+import baseMetadataSchema from '../schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
@@ -25,7 +25,7 @@ describe('metadata is specified correctly', () => {
     test('session-specific metadata is merged with project and subject metadata correctly', () => {
         const globalState = createMockGlobalState()
         const result = mapSessions(info => createResults(info, globalState), globalState)
-        const res = v.validate(result[0], preprocessMetadataSchema()) // Check first session with JSON Schema
+        const res = v.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
 })
