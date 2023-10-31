@@ -40,10 +40,6 @@ const componentCSS = `
       line-height: 1.4285em;
     }
 
-    .invalid {
-      background: rgb(255, 229, 228) !important;
-    }
-
     .guided--form-label {
       display: block;
       width: 100%;
@@ -346,11 +342,11 @@ export class JSONSchemaForm extends LitElement {
 
     validate = async (resolved) => {
         // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
-        const isValid = !invalidInputs.length;
+        const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
+        const isValid = !requiredButNotSpecified.length;
 
         // Print out a detailed error message if any inputs are missing
-        let message = isValid ? "" : `${invalidInputs.length} required inputs are not specified properly.`;
+        let message = isValid ? "" : `${requiredButNotSpecified.length} required inputs are not specified properly.`;
 
         // Check if all inputs are valid
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
@@ -405,11 +401,7 @@ export class JSONSchemaForm extends LitElement {
     #checkRequiredAfterChange = async (localPath) => {
         const path = [...localPath];
         const name = path.pop();
-        const element = this.shadowRoot
-            .querySelector(`#${localPath.join("-")}`)
-            .querySelector("jsonschema-input")
-            .getElement();
-        const isValid = await this.triggerValidation(name, element, path, false);
+        const isValid = await this.triggerValidation(name, path, false);
         if (!isValid) return true;
     };
 
@@ -637,7 +629,7 @@ export class JSONSchemaForm extends LitElement {
     }
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    triggerValidation = async (name, element, path = [], checkLinks = true) => {
+    triggerValidation = async (name, path = [], checkLinks = true) => {
         const parent = this.#get(path, this.resolved);
 
         const pathToValidate = [...(this.base ?? []), ...path];
@@ -721,8 +713,10 @@ export class JSONSchemaForm extends LitElement {
         warnings.forEach((info) => this.#addMessage(localPath, info, "warnings"));
         info.forEach((info) => this.#addMessage(localPath, info, "info"));
 
+        const input = this.getInput(localPath);
+
         if (isValid && errors.length === 0) {
-            element.classList.remove("invalid");
+            input.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(externalPath);
             if (linkEl) linkEl.classList.remove("required", "conditional");
@@ -736,7 +730,7 @@ export class JSONSchemaForm extends LitElement {
             return true;
         } else {
             // Add new invalid classes and errors
-            element.classList.add("invalid");
+            input.classList.add("invalid");
 
             const linkEl = this.#getLinkElement(externalPath);
             if (linkEl) linkEl.classList.add("required", "conditional");

@@ -50,6 +50,16 @@ const styles = `
       .handsontable {
         overflow: unset !important;
       }
+
+      th > [data-required] > *:first-child::after {
+        content: '*';
+        margin-left: 2px;
+        color: gray;
+      }
+
+      th > [data-required=true] > *:first-child::after {
+        color: red;
+      }
 `;
 
 const styleSymbol = Symbol("table-styles");
@@ -108,7 +118,7 @@ export class Table extends LitElement {
             let value;
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
-                else return "";
+                else return undefined;
             } else
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
@@ -141,8 +151,8 @@ export class Table extends LitElement {
 
         const nUnresolved = Object.keys(this.unresolved).length;
         if (nUnresolved)
-            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a${
-                this.keyColumn ? `${this.keyColumn} ` : "n "
+            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a ${
+                this.keyColumn ? `${header(this.keyColumn)} ` : "n "
             }entry`;
 
         if (message) throw new Error(message);
@@ -152,6 +162,10 @@ export class Table extends LitElement {
     onStatusChange = () => {};
     onUpdate = () => {};
     onOverride = () => {};
+
+    isRequired = (col) => {
+        return this.schema?.required?.includes(col);
+    };
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -173,13 +187,26 @@ export class Table extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        const colHeaders = (this.colHeaders = Object.keys(entries).sort((a, b) => {
-            if (a === this.keyColumn) return -1;
-            if (b === this.keyColumn) return 1;
-            if (entries[a].required && !entries[b].required) return -1;
-            if (!entries[a].required && entries[b].required) return 1;
-            return 0;
-        }));
+        const colHeaders = (this.colHeaders = Object.keys(entries)
+            .sort((a, b) => {
+                //Sort alphabetically
+                if (a < b) return -1;
+                if (a > b) return 1;
+                return 0;
+            })
+            .sort((a, b) => {
+                const aRequired = this.isRequired(a);
+                const bRequired = this.isRequired(b);
+                if (aRequired && bRequired) return 0;
+                if (aRequired) return -1;
+                if (bRequired) return 1;
+                return 0;
+            })
+            .sort((a, b) => {
+                if (a === this.keyColumn) return -1;
+                if (b === this.keyColumn) return 1;
+                return 0;
+            }));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -240,7 +267,7 @@ export class Table extends LitElement {
             };
 
             let ogThis = this;
-            const isRequired = ogThis.schema?.required?.includes(k);
+            const isRequired = this.isRequired(k);
 
             const validator = async function (value, callback) {
                 if (!value) {
@@ -286,11 +313,18 @@ export class Table extends LitElement {
             return info;
         });
 
-        const onAfterGetHeader = function (index, TH) {
-            const desc = entries[colHeaders[index]].description;
+        const onAfterGetHeader = (index, TH) => {
+            const col = colHeaders[index];
+            const desc = entries[col].description;
+
+            const rel = TH.querySelector(".relative");
+
+            const isRequired = this.isRequired(col);
+            if (isRequired) rel.setAttribute("data-required", this.validateEmptyCells ? true : undefined);
+
             if (desc) {
-                const rel = TH.querySelector(".relative");
                 let span = rel.querySelector(".info");
+
                 if (!span) {
                     span = document.createElement("span");
                     span.classList.add("info");
@@ -381,7 +415,8 @@ export class Table extends LitElement {
 
             // Transfer data to object
             if (header === this.keyColumn) {
-                if (value !== rowName) {
+                console.log(value, rowName);
+                if (value && value !== rowName) {
                     const old = target[rowName] ?? {};
                     this.data[value] = old;
                     delete target[rowName];
@@ -423,11 +458,13 @@ export class Table extends LitElement {
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
             physicalRows.map(async (row) => {
+                const rowName = rowHeaders[row];
                 // const cols = this.data[rowHeaders[row]]
                 // Object.keys(cols).map(k => cols[k] = '')
                 // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k])) // Validate with empty values before removing
                 delete this.data[rowHeaders[row]];
                 delete unresolved[row];
+                this.onUpdate(rowName, null, undefined); // NOTE: Global metadata PR might simply set all data values to undefined
             });
         });
 
