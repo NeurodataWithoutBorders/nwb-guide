@@ -498,7 +498,7 @@ def upload_folder_to_dandi(
         staging=staging,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs,
-        number_of_threads=number_of_threads
+        number_of_threads=number_of_threads,
     )
 
 
@@ -523,7 +523,7 @@ def upload_to_dandi(
         staging=staging,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs,
-        number_of_threads=number_of_threads
+        number_of_threads=number_of_threads,
     )
 
 
