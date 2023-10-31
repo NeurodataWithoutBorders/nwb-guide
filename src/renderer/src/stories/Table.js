@@ -116,12 +116,8 @@ export class Table extends LitElement {
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
                 else return undefined;
-            } else
-                value =
-                    (hasRow ? this.data[row][col] : undefined) ??
-                    this.template[col] ??
-                    // this.schema.properties[col].default ??
-                    "";
+            } else value = (hasRow ? this.data[row][col] : undefined) ?? this.template[col];
+
             return value;
         });
     }

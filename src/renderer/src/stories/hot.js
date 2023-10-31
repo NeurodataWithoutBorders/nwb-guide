@@ -86,12 +86,13 @@ class ArrayEditor extends Handsontable.editors.TextEditor {
                 .split(",")
                 .map((str) => str.trim())
                 .filter((str) => str);
+
             return this.cellProperties.uniqueItems ? Array.from(new Set(split)) : split; // Only unique values
         }
     }
 
     setValue(newValue) {
-        if (Array.isArray(newValue)) return newValue.join(",");
+        if (Array.isArray(newValue)) newValue = newValue.join(",");
         super.setValue(newValue);
     }
 }
