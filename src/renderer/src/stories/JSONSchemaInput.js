@@ -30,6 +30,10 @@ export class JSONSchemaInput extends LitElement {
                 display: block;
             }
 
+            :host(.invalid) .guided--input {
+                background: rgb(255, 229, 228) !important;
+            }
+
             .guided--input {
                 width: 100%;
                 border-radius: 4px;
@@ -106,12 +110,16 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value) {
+        if (this.value === value) return false;
+
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
-        const el = this.getElement();
-        this.#triggerValidation(name, el, path);
+
+        this.#triggerValidation(name, path);
         this.#updateData(fullPath, value);
+
+        const el = this.getElement();
         if (el.type === "checkbox") el.checked = value;
         else el.value = value;
 
@@ -143,9 +151,9 @@ export class JSONSchemaInput extends LitElement {
         this.#activateTimeoutValidation(name, this.getElement(), path);
     };
 
-    #triggerValidation = (name, el, path) => {
+    #triggerValidation = (name, path) => {
         this.#clearTimeoutValidation();
-        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
+        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
     };
 
     updated() {
@@ -189,7 +197,7 @@ export class JSONSchemaInput extends LitElement {
                 type: format,
                 value: this.value,
                 onSelect: (filePath) => this.#updateData(fullPath, filePath),
-                onChange: (filePath) => validateOnChange && this.#triggerValidation(name, el, path),
+                onChange: (filePath) => validateOnChange && this.#triggerValidation(name, path),
                 onThrow: (...args) => this.#onThrow(...args),
                 dialogOptions: this.form?.dialogOptions,
                 dialogType: this.form?.dialogType,
@@ -290,7 +298,7 @@ export class JSONSchemaInput extends LitElement {
                     : [],
                 onChange: async () => {
                     this.#updateData(fullPath, list.items.length ? list.items.map((o) => o.value) : undefined);
-                    if (validateOnChange) await this.#triggerValidation(name, list, path);
+                    if (validateOnChange) await this.#triggerValidation(name, path);
                 },
             });
 
@@ -303,10 +311,7 @@ export class JSONSchemaInput extends LitElement {
             });
 
             return html`
-                <div
-                    class="schema-input"
-                    @change=${() => validateOnChange && this.#triggerValidation(name, list, path)}
-                >
+                <div class="schema-input" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
                     ${list} ${addButton}
                 </div>
             `;
@@ -317,11 +322,8 @@ export class JSONSchemaInput extends LitElement {
             return html`
                 <select
                     class="guided--input schema-input"
-                    @input=${(ev) => {
-                        this.#updateData(fullPath, info.enum[ev.target.value]);
-                        this.#activateTimeoutValidation(name, ev.target, path);
-                    }}
-                    @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
+                    @input=${(ev) => this.#updateData(fullPath, info.enum[ev.target.value])}
+                    @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                 >
                     <option disabled selected value>${info.placeholder ?? "Select an option"}</option>
                     ${info.enum.map(
@@ -335,7 +337,7 @@ export class JSONSchemaInput extends LitElement {
                 class="schema-input"
                 @input=${(ev) => this.#updateData(fullPath, ev.target.checked)}
                 ?checked=${this.value ?? false}
-                @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
+                @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
             />`;
         } else if (info.type === "string" || info.type === "number") {
             const fileSystemFormat = isFilesystemSelector(name, info.format);
@@ -352,7 +354,7 @@ export class JSONSchemaInput extends LitElement {
                     @input=${(ev) => {
                         this.#updateData(fullPath, ev.target.value);
                     }}
-                    @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
+                    @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                 ></textarea>`;
             // Handle other string formats
             else {
@@ -372,7 +374,7 @@ export class JSONSchemaInput extends LitElement {
                                 fullPath,
                                 info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
                             )}
-                        @change=${(ev) => validateOnChange && this.#triggerValidation(name, ev.target, path)}
+                        @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     />
                 `;
             }
