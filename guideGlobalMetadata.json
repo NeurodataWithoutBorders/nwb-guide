@@ -38,6 +38,7 @@
         "MiniscopeBehaviorInterface",
         "EDFRecordingInterface",
         "SpikeGLXConverterPipe",
-        "BrukerTiffSinglePlaneConverter"
+        "BrukerTiffSinglePlaneConverter",
+        "BrukerTiffMultiPlaneConverter"
     ]
 }
