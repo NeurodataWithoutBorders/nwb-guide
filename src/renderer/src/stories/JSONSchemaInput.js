@@ -118,6 +118,8 @@ export class JSONSchemaInput extends LitElement {
 
         this.#triggerValidation(name, path);
         this.#updateData(fullPath, value);
+        
+        const el = this.getElement()
         if (el.type === "checkbox") el.checked = value;
         else el.value = value;
 
