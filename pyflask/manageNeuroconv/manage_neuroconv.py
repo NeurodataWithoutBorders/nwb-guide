@@ -607,8 +607,11 @@ def inspect_nwb_folder(payload):
     try:
         messages = list(inspect_all(**kwargs))
     except PicklingError as e:
-        del kwargs["n_jobs"]
-        messages = list(inspect_all(**kwargs))
+        if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(e):
+            del kwargs["n_jobs"]
+            messages = list(inspect_all(**kwargs))
+        else:
+            raise e
     except Exception as e:
         raise e
 
