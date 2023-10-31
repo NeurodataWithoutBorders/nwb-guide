@@ -31,7 +31,6 @@ export class GuidedSubjectsPage extends Page {
 
     // Abort save if subject structure is invalid
     beforeSave = () => {
-        
         try {
             this.table.validate();
         } catch (e) {

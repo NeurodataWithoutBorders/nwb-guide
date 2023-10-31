@@ -317,10 +317,7 @@ export class JSONSchemaInput extends LitElement {
             });
 
             return html`
-                <div
-                    class="schema-input list"
-                    @change=${() => validateOnChange && this.#triggerValidation(name, path)}
-                >
+                <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
                     ${list} ${addButton}
                 </div>
             `;

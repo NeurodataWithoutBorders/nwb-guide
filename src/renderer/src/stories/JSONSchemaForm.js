@@ -296,7 +296,7 @@ export class JSONSchemaForm extends LitElement {
                     input.updateData(globalValue);
                     this.onOverride(name, globalValue, path);
                 }
-            } else resolvedParent[name] = undefined
+            } else resolvedParent[name] = undefined;
 
             resultParent[name] = undefined; // NOTE: Will be removed when stringified
         } else {
@@ -679,13 +679,13 @@ export class JSONSchemaForm extends LitElement {
                         message: `${schema.title ?? header(name)} is a required property.`,
                         type: "error",
                         missing: true,
-                    }); 
+                    });
                 } else {
                     warnings.push({
                         message: `${schema.title ?? header(name)} is a suggested property.`,
                         type: "warning",
                         missing: true,
-                    })
+                    });
                 }
             }
         }

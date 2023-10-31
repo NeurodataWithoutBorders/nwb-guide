@@ -9,7 +9,6 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
     return Object.entries(schema.properties)
         .filter(([_, value]) => value.properties)
         .map(([key, value]) => {
-
             const optionsCopy = { ...options };
 
             if (optionsCopy.required && optionsCopy.required[key])
