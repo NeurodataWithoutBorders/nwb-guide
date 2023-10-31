@@ -145,7 +145,6 @@ export class Table extends LitElement {
                 this.keyColumn ? `${header(this.keyColumn)} ` : "n "
             }entry`;
 
-
         if (!message) {
             const errors = this.querySelectorAll("[error]");
             const len = errors.length;
@@ -160,7 +159,7 @@ export class Table extends LitElement {
     onStatusChange = () => {};
     onUpdate = () => {};
     onOverride = () => {};
-    onThrow = () => {}
+    onThrow = () => {};
 
     isRequired = (col) => {
         return this.schema?.required?.includes(col);
@@ -271,11 +270,11 @@ export class Table extends LitElement {
             const isRequired = this.isRequired(k);
 
             const validator = async function (value, callback) {
-
                 const validateEmptyCells = ogThis.validateEmptyCells;
-                const willValidate = validateEmptyCells === true || (Array.isArray(validateEmptyCells) && validateEmptyCells.includes(k))
+                const willValidate =
+                    validateEmptyCells === true ||
+                    (Array.isArray(validateEmptyCells) && validateEmptyCells.includes(k));
 
-        
                 // Clear empty values if not validated
                 if (!value && !willValidate) {
                     ogThis.#handleValidationResult(
@@ -337,7 +336,15 @@ export class Table extends LitElement {
             const rel = TH.querySelector(".relative");
 
             const isRequired = this.isRequired(col);
-            if (isRequired) rel.setAttribute("data-required", this.validateEmptyCells ? (Array.isArray(this.validateEmptyCells) ?this.validateEmptyCells.includes(col) : true) : undefined);
+            if (isRequired)
+                rel.setAttribute(
+                    "data-required",
+                    this.validateEmptyCells
+                        ? Array.isArray(this.validateEmptyCells)
+                            ? this.validateEmptyCells.includes(col)
+                            : true
+                        : undefined
+                );
 
             if (desc) {
                 let span = rel.querySelector(".info");
@@ -441,7 +448,6 @@ export class Table extends LitElement {
 
             // Update data on passed object
             else {
-
                 const globalValue = this.globals[header];
 
                 if (value == undefined || value === "") {
@@ -452,7 +458,6 @@ export class Table extends LitElement {
                     }
                     target[rowName][header] = undefined;
                 } else {
-
                     // Correct for expected arrays (copy-paste issue)
                     if (entries[header]?.type === "array") {
                         if (value && !Array.isArray(value)) value = value.split(",").map((v) => v.trim());
@@ -473,7 +478,7 @@ export class Table extends LitElement {
         // If only one row, do not allow deletion
         table.addHook("beforeRemoveRow", (index, amount) => {
             if (nRows - amount < 1) {
-                this.onThrow("You must have at least one row", "error")
+                this.onThrow("You must have at least one row", "error");
                 return false;
             }
         });

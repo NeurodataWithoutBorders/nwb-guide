@@ -113,10 +113,7 @@ export class GuidedSubjectsPage extends Page {
             data: subjects,
             globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
-            validateEmptyCells: [
-                'subject_id',
-                'sessions'
-            ],
+            validateEmptyCells: ["subject_id", "sessions"],
             contextMenu: {
                 ignore: ["row_below"],
             },
@@ -129,17 +126,16 @@ export class GuidedSubjectsPage extends Page {
             },
             validateOnChange: (key, parent, v) => {
                 if (key === "sessions") {
-                    if (v?.length) return true
+                    if (v?.length) return true;
                     else {
                         return [
                             {
                                 message: "Sessions must have at least one entry",
                                 type: "error",
                             },
-                        ]
+                        ];
                     }
-                }
-                else {
+                } else {
                     delete parent.sessions; // Delete dessions from parent copy
                     return validateOnChange(key, parent, ["Subject"], v);
                 }
