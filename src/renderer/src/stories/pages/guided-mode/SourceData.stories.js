@@ -1,44 +1,44 @@
 import { globalState, PageTemplate } from "./storyStates";
-import SpikeGLXRecordingInterfaceSchema from '../../../../../../schemas/json/generated/SpikeGLXRecordingInterface.json'
-import SpikeGLXNIDQInterfaceSchema from '../../../../../../schemas/json/generated/SpikeGLXNIDQInterface.json'
-import PhySortingInterfaceSchema from '../../../../../../schemas/json/generated/PhySortingInterface.json'
-import NeuroScopeRecordingInterfaceSchema from '../../../../../../schemas/json/generated/NeuroScopeRecordingInterface.json'
-import NeuroScopeLFPInterfaceSchema from '../../../../../../schemas/json/generated/NeuroScopeLFPInterface.json'
-import NeuroScopeSortingInterfaceSchema from '../../../../../../schemas/json/generated/NeuroScopeSortingInterface.json'
-import BiocamRecordingInterfaceSchema from '../../../../../../schemas/json/generated/BiocamRecordingInterface.json'
-import IntanRecordingInterfaceSchema from '../../../../../../schemas/json/generated/IntanRecordingInterface.json'
-import OpenEphysRecordingInterfaceSchema from '../../../../../../schemas/json/generated/OpenEphysRecordingInterface.json'
-import BlackrockRecordingInterfaceSchema from '../../../../../../schemas/json/generated/BlackrockRecordingInterface.json'
-import BlackrockSortingInterfaceSchema from '../../../../../../schemas/json/generated/BlackrockSortingInterface.json'
-import CellExplorerSortingInterfaceSchema from '../../../../../../schemas/json/generated/CellExplorerSortingInterface.json'
-import KiloSortSortingInterfaceSchema from '../../../../../../schemas/json/generated/KiloSortSortingInterface.json'
-import Spike2RecordingInterfaceSchema from '../../../../../../schemas/json/generated/Spike2RecordingInterface.json'
-import BrukerTiffSinglePlaneImagingInterfaceSchema from '../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json'
-import ExtractSegmentationInterfaceSchema from '../../../../../../schemas/json/generated/ExtractSegmentationInterface.json'
-import CnmfeSegmentationInterfaceSchema from '../../../../../../schemas/json/generated/CnmfeSegmentationInterface.json'
-import BrukerTiffMultiPlaneImagingInterfaceSchema from '../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json'
-import MicroManagerTiffImagingInterfaceSchema from '../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json'
-import ScanImageImagingInterfaceSchema from '../../../../../../schemas/json/generated/ScanImageImagingInterface.json'
-import TiffImagingInterfaceSchema from '../../../../../../schemas/json/generated/TiffImagingInterface.json'
-import MiniscopeImagingInterfaceSchema from '../../../../../../schemas/json/generated/MiniscopeImagingInterface.json'
-import SbxImagingInterfaceSchema from '../../../../../../schemas/json/generated/SbxImagingInterface.json'
-import CaimanSegmentationInterfaceSchema from '../../../../../../schemas/json/generated/CaimanSegmentationInterface.json'
-import MCSRawRecordingInterfaceSchema from '../../../../../../schemas/json/generated/MCSRawRecordingInterface.json'
-import MEArecRecordingInterfaceSchema from '../../../../../../schemas/json/generated/MEArecRecordingInterface.json'
-import PlexonRecordingInterfaceSchema from '../../../../../../schemas/json/generated/PlexonRecordingInterface.json'
-import PlexonSortingInterfaceSchema from '../../../../../../schemas/json/generated/PlexonSortingInterface.json'
-import AxonaRecordingInterfaceSchema from '../../../../../../schemas/json/generated/AxonaRecordingInterface.json'
-import NeuralynxRecordingInterfaceSchema from '../../../../../../schemas/json/generated/NeuralynxRecordingInterface.json'
-import AlphaOmegaRecordingInterfaceSchema from '../../../../../../schemas/json/generated/AlphaOmegaRecordingInterface.json'
-import DeepLabCutInterfaceSchema from '../../../../../../schemas/json/generated/DeepLabCutInterface.json'
-import SLEAPInterfaceSchema from '../../../../../../schemas/json/generated/SLEAPInterface.json'
-import FicTracDataInterfaceSchema from '../../../../../../schemas/json/generated/FicTracDataInterface.json'
-import AudioInterfaceSchema from '../../../../../../schemas/json/generated/AudioInterface.json'
-import MiniscopeBehaviorInterfaceSchema from '../../../../../../schemas/json/generated/MiniscopeBehaviorInterface.json'
-import EDFRecordingInterfaceSchema from '../../../../../../schemas/json/generated/EDFRecordingInterface.json'
-import SpikeGLXConverterPipeSchema from '../../../../../../schemas/json/generated/SpikeGLXConverterPipe.json'
-import BrukerTiffSinglePlaneConverterSchema from '../../../../../../schemas/json/generated/BrukerTiffSinglePlaneConverter.json'
-import BrukerTiffMultiPlaneConverterSchema from '../../../../../../schemas/json/generated/BrukerTiffMultiPlaneConverter.json'
+import SpikeGLXRecordingInterfaceSchema from "../../../../../../schemas/json/generated/SpikeGLXRecordingInterface.json";
+import SpikeGLXNIDQInterfaceSchema from "../../../../../../schemas/json/generated/SpikeGLXNIDQInterface.json";
+import PhySortingInterfaceSchema from "../../../../../../schemas/json/generated/PhySortingInterface.json";
+import NeuroScopeRecordingInterfaceSchema from "../../../../../../schemas/json/generated/NeuroScopeRecordingInterface.json";
+import NeuroScopeLFPInterfaceSchema from "../../../../../../schemas/json/generated/NeuroScopeLFPInterface.json";
+import NeuroScopeSortingInterfaceSchema from "../../../../../../schemas/json/generated/NeuroScopeSortingInterface.json";
+import BiocamRecordingInterfaceSchema from "../../../../../../schemas/json/generated/BiocamRecordingInterface.json";
+import IntanRecordingInterfaceSchema from "../../../../../../schemas/json/generated/IntanRecordingInterface.json";
+import OpenEphysRecordingInterfaceSchema from "../../../../../../schemas/json/generated/OpenEphysRecordingInterface.json";
+import BlackrockRecordingInterfaceSchema from "../../../../../../schemas/json/generated/BlackrockRecordingInterface.json";
+import BlackrockSortingInterfaceSchema from "../../../../../../schemas/json/generated/BlackrockSortingInterface.json";
+import CellExplorerSortingInterfaceSchema from "../../../../../../schemas/json/generated/CellExplorerSortingInterface.json";
+import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/generated/KiloSortSortingInterface.json";
+import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
+import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
+import ExtractSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/ExtractSegmentationInterface.json";
+import CnmfeSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/CnmfeSegmentationInterface.json";
+import BrukerTiffMultiPlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneImagingInterface.json";
+import MicroManagerTiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/MicroManagerTiffImagingInterface.json";
+import ScanImageImagingInterfaceSchema from "../../../../../../schemas/json/generated/ScanImageImagingInterface.json";
+import TiffImagingInterfaceSchema from "../../../../../../schemas/json/generated/TiffImagingInterface.json";
+import MiniscopeImagingInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeImagingInterface.json";
+import SbxImagingInterfaceSchema from "../../../../../../schemas/json/generated/SbxImagingInterface.json";
+import CaimanSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/CaimanSegmentationInterface.json";
+import MCSRawRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MCSRawRecordingInterface.json";
+import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/generated/MEArecRecordingInterface.json";
+import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
+import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
+import AxonaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AxonaRecordingInterface.json";
+import NeuralynxRecordingInterfaceSchema from "../../../../../../schemas/json/generated/NeuralynxRecordingInterface.json";
+import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AlphaOmegaRecordingInterface.json";
+import DeepLabCutInterfaceSchema from "../../../../../../schemas/json/generated/DeepLabCutInterface.json";
+import SLEAPInterfaceSchema from "../../../../../../schemas/json/generated/SLEAPInterface.json";
+import FicTracDataInterfaceSchema from "../../../../../../schemas/json/generated/FicTracDataInterface.json";
+import AudioInterfaceSchema from "../../../../../../schemas/json/generated/AudioInterface.json";
+import MiniscopeBehaviorInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeBehaviorInterface.json";
+import EDFRecordingInterfaceSchema from "../../../../../../schemas/json/generated/EDFRecordingInterface.json";
+import SpikeGLXConverterPipeSchema from "../../../../../../schemas/json/generated/SpikeGLXConverterPipe.json";
+import BrukerTiffSinglePlaneConverterSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneConverter.json";
+import BrukerTiffMultiPlaneConverterSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneConverter.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -127,51 +127,90 @@ globalStateCopy.schema.source_data.properties.SpikeGLXConverterPipe =
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneConverter =
     BrukerTiffSinglePlaneConverterSchema.properties.BrukerTiffSinglePlaneConverter;
 
-const globalStateCopy = JSON.parse(JSON.stringify(globalState))
-globalStateCopy.schema.source_data.properties.SpikeGLXRecordingInterface = SpikeGLXRecordingInterfaceSchema.properties.SpikeGLXRecordingInterface
-globalStateCopy.schema.source_data.properties.SpikeGLXNIDQInterface = SpikeGLXNIDQInterfaceSchema.properties.SpikeGLXNIDQInterface
-globalStateCopy.schema.source_data.properties.PhySortingInterface = PhySortingInterfaceSchema.properties.PhySortingInterface
-globalStateCopy.schema.source_data.properties.NeuroScopeRecordingInterface = NeuroScopeRecordingInterfaceSchema.properties.NeuroScopeRecordingInterface
-globalStateCopy.schema.source_data.properties.NeuroScopeLFPInterface = NeuroScopeLFPInterfaceSchema.properties.NeuroScopeLFPInterface
-globalStateCopy.schema.source_data.properties.NeuroScopeSortingInterface = NeuroScopeSortingInterfaceSchema.properties.NeuroScopeSortingInterface
-globalStateCopy.schema.source_data.properties.BiocamRecordingInterface = BiocamRecordingInterfaceSchema.properties.BiocamRecordingInterface
-globalStateCopy.schema.source_data.properties.IntanRecordingInterface = IntanRecordingInterfaceSchema.properties.IntanRecordingInterface
-globalStateCopy.schema.source_data.properties.OpenEphysRecordingInterface = OpenEphysRecordingInterfaceSchema.properties.OpenEphysRecordingInterface
-globalStateCopy.schema.source_data.properties.BlackrockRecordingInterface = BlackrockRecordingInterfaceSchema.properties.BlackrockRecordingInterface
-globalStateCopy.schema.source_data.properties.BlackrockSortingInterface = BlackrockSortingInterfaceSchema.properties.BlackrockSortingInterface
-globalStateCopy.schema.source_data.properties.CellExplorerSortingInterface = CellExplorerSortingInterfaceSchema.properties.CellExplorerSortingInterface
-globalStateCopy.schema.source_data.properties.KiloSortSortingInterface = KiloSortSortingInterfaceSchema.properties.KiloSortSortingInterface
-globalStateCopy.schema.source_data.properties.Spike2RecordingInterface = Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface
-globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface = BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface
-globalStateCopy.schema.source_data.properties.ExtractSegmentationInterface = ExtractSegmentationInterfaceSchema.properties.ExtractSegmentationInterface
-globalStateCopy.schema.source_data.properties.CnmfeSegmentationInterface = CnmfeSegmentationInterfaceSchema.properties.CnmfeSegmentationInterface
-globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterface = BrukerTiffMultiPlaneImagingInterfaceSchema.properties.BrukerTiffMultiPlaneImagingInterface
-globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface = MicroManagerTiffImagingInterfaceSchema.properties.MicroManagerTiffImagingInterface
-globalStateCopy.schema.source_data.properties.ScanImageImagingInterface = ScanImageImagingInterfaceSchema.properties.ScanImageImagingInterface
-globalStateCopy.schema.source_data.properties.TiffImagingInterface = TiffImagingInterfaceSchema.properties.TiffImagingInterface
-globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface = MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface
-globalStateCopy.schema.source_data.properties.SbxImagingInterface = SbxImagingInterfaceSchema.properties.SbxImagingInterface
-globalStateCopy.schema.source_data.properties.CaimanSegmentationInterface = CaimanSegmentationInterfaceSchema.properties.CaimanSegmentationInterface
-globalStateCopy.schema.source_data.properties.MCSRawRecordingInterface = MCSRawRecordingInterfaceSchema.properties.MCSRawRecordingInterface
-globalStateCopy.schema.source_data.properties.MEArecRecordingInterface = MEArecRecordingInterfaceSchema.properties.MEArecRecordingInterface
-globalStateCopy.schema.source_data.properties.PlexonRecordingInterface = PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface
-globalStateCopy.schema.source_data.properties.PlexonSortingInterface = PlexonSortingInterfaceSchema.properties.PlexonSortingInterface
-globalStateCopy.schema.source_data.properties.AxonaRecordingInterface = AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface
-globalStateCopy.schema.source_data.properties.NeuralynxRecordingInterface = NeuralynxRecordingInterfaceSchema.properties.NeuralynxRecordingInterface
-globalStateCopy.schema.source_data.properties.AlphaOmegaRecordingInterface = AlphaOmegaRecordingInterfaceSchema.properties.AlphaOmegaRecordingInterface
-globalStateCopy.schema.source_data.properties.DeepLabCutInterface = DeepLabCutInterfaceSchema.properties.DeepLabCutInterface
-globalStateCopy.schema.source_data.properties.SLEAPInterface = SLEAPInterfaceSchema.properties.SLEAPInterface
-globalStateCopy.schema.source_data.properties.FicTracDataInterface = FicTracDataInterfaceSchema.properties.FicTracDataInterface
-globalStateCopy.schema.source_data.properties.AudioInterface = AudioInterfaceSchema.properties.AudioInterface
-globalStateCopy.schema.source_data.properties.MiniscopeBehaviorInterface = MiniscopeBehaviorInterfaceSchema.properties.MiniscopeBehaviorInterface
-globalStateCopy.schema.source_data.properties.EDFRecordingInterface = EDFRecordingInterfaceSchema.properties.EDFRecordingInterface
-globalStateCopy.schema.source_data.properties.SpikeGLXConverterPipe = SpikeGLXConverterPipeSchema.properties.SpikeGLXConverterPipe
-globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneConverter = BrukerTiffSinglePlaneConverterSchema.properties.BrukerTiffSinglePlaneConverter
-globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneConverter = BrukerTiffMultiPlaneConverterSchema.properties.BrukerTiffMultiPlaneConverter
+const globalStateCopy = JSON.parse(JSON.stringify(globalState));
+globalStateCopy.schema.source_data.properties.SpikeGLXRecordingInterface =
+    SpikeGLXRecordingInterfaceSchema.properties.SpikeGLXRecordingInterface;
+globalStateCopy.schema.source_data.properties.SpikeGLXNIDQInterface =
+    SpikeGLXNIDQInterfaceSchema.properties.SpikeGLXNIDQInterface;
+globalStateCopy.schema.source_data.properties.PhySortingInterface =
+    PhySortingInterfaceSchema.properties.PhySortingInterface;
+globalStateCopy.schema.source_data.properties.NeuroScopeRecordingInterface =
+    NeuroScopeRecordingInterfaceSchema.properties.NeuroScopeRecordingInterface;
+globalStateCopy.schema.source_data.properties.NeuroScopeLFPInterface =
+    NeuroScopeLFPInterfaceSchema.properties.NeuroScopeLFPInterface;
+globalStateCopy.schema.source_data.properties.NeuroScopeSortingInterface =
+    NeuroScopeSortingInterfaceSchema.properties.NeuroScopeSortingInterface;
+globalStateCopy.schema.source_data.properties.BiocamRecordingInterface =
+    BiocamRecordingInterfaceSchema.properties.BiocamRecordingInterface;
+globalStateCopy.schema.source_data.properties.IntanRecordingInterface =
+    IntanRecordingInterfaceSchema.properties.IntanRecordingInterface;
+globalStateCopy.schema.source_data.properties.OpenEphysRecordingInterface =
+    OpenEphysRecordingInterfaceSchema.properties.OpenEphysRecordingInterface;
+globalStateCopy.schema.source_data.properties.BlackrockRecordingInterface =
+    BlackrockRecordingInterfaceSchema.properties.BlackrockRecordingInterface;
+globalStateCopy.schema.source_data.properties.BlackrockSortingInterface =
+    BlackrockSortingInterfaceSchema.properties.BlackrockSortingInterface;
+globalStateCopy.schema.source_data.properties.CellExplorerSortingInterface =
+    CellExplorerSortingInterfaceSchema.properties.CellExplorerSortingInterface;
+globalStateCopy.schema.source_data.properties.KiloSortSortingInterface =
+    KiloSortSortingInterfaceSchema.properties.KiloSortSortingInterface;
+globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
+    Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
+globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
+    BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.ExtractSegmentationInterface =
+    ExtractSegmentationInterfaceSchema.properties.ExtractSegmentationInterface;
+globalStateCopy.schema.source_data.properties.CnmfeSegmentationInterface =
+    CnmfeSegmentationInterfaceSchema.properties.CnmfeSegmentationInterface;
+globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneImagingInterface =
+    BrukerTiffMultiPlaneImagingInterfaceSchema.properties.BrukerTiffMultiPlaneImagingInterface;
+globalStateCopy.schema.source_data.properties.MicroManagerTiffImagingInterface =
+    MicroManagerTiffImagingInterfaceSchema.properties.MicroManagerTiffImagingInterface;
+globalStateCopy.schema.source_data.properties.ScanImageImagingInterface =
+    ScanImageImagingInterfaceSchema.properties.ScanImageImagingInterface;
+globalStateCopy.schema.source_data.properties.TiffImagingInterface =
+    TiffImagingInterfaceSchema.properties.TiffImagingInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeImagingInterface =
+    MiniscopeImagingInterfaceSchema.properties.MiniscopeImagingInterface;
+globalStateCopy.schema.source_data.properties.SbxImagingInterface =
+    SbxImagingInterfaceSchema.properties.SbxImagingInterface;
+globalStateCopy.schema.source_data.properties.CaimanSegmentationInterface =
+    CaimanSegmentationInterfaceSchema.properties.CaimanSegmentationInterface;
+globalStateCopy.schema.source_data.properties.MCSRawRecordingInterface =
+    MCSRawRecordingInterfaceSchema.properties.MCSRawRecordingInterface;
+globalStateCopy.schema.source_data.properties.MEArecRecordingInterface =
+    MEArecRecordingInterfaceSchema.properties.MEArecRecordingInterface;
+globalStateCopy.schema.source_data.properties.PlexonRecordingInterface =
+    PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface;
+globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
+    PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
+globalStateCopy.schema.source_data.properties.AxonaRecordingInterface =
+    AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface;
+globalStateCopy.schema.source_data.properties.NeuralynxRecordingInterface =
+    NeuralynxRecordingInterfaceSchema.properties.NeuralynxRecordingInterface;
+globalStateCopy.schema.source_data.properties.AlphaOmegaRecordingInterface =
+    AlphaOmegaRecordingInterfaceSchema.properties.AlphaOmegaRecordingInterface;
+globalStateCopy.schema.source_data.properties.DeepLabCutInterface =
+    DeepLabCutInterfaceSchema.properties.DeepLabCutInterface;
+globalStateCopy.schema.source_data.properties.SLEAPInterface = SLEAPInterfaceSchema.properties.SLEAPInterface;
+globalStateCopy.schema.source_data.properties.FicTracDataInterface =
+    FicTracDataInterfaceSchema.properties.FicTracDataInterface;
+globalStateCopy.schema.source_data.properties.AudioInterface = AudioInterfaceSchema.properties.AudioInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeBehaviorInterface =
+    MiniscopeBehaviorInterfaceSchema.properties.MiniscopeBehaviorInterface;
+globalStateCopy.schema.source_data.properties.EDFRecordingInterface =
+    EDFRecordingInterfaceSchema.properties.EDFRecordingInterface;
+globalStateCopy.schema.source_data.properties.SpikeGLXConverterPipe =
+    SpikeGLXConverterPipeSchema.properties.SpikeGLXConverterPipe;
+globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneConverter =
+    BrukerTiffSinglePlaneConverterSchema.properties.BrukerTiffSinglePlaneConverter;
+globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneConverter =
+    BrukerTiffMultiPlaneConverterSchema.properties.BrukerTiffMultiPlaneConverter;
 
-const results = globalStateCopy.results
-for (let sub in results){
-    for (let ses in results[sub]) results[sub][ses].source_data = {SpikeGLXNIDQInterface: {file_path: '/dummy/file/path'}}
+const results = globalStateCopy.results;
+for (let sub in results) {
+    for (let ses in results[sub])
+        results[sub][ses].source_data = { SpikeGLXNIDQInterface: { file_path: "/dummy/file/path" } };
 }
 
 export const All = PageTemplate.bind({});
@@ -415,8 +454,7 @@ BrukerTiffSinglePlaneConverterGlobalCopy.schema.source_data = BrukerTiffSinglePl
 BrukerTiffSinglePlaneConverter.args = { activePage, globalState: BrukerTiffSinglePlaneConverterGlobalCopy };
 
 export const BrukerTiffMultiPlaneConverter = PageTemplate.bind({});
-const BrukerTiffMultiPlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globalState))
-BrukerTiffMultiPlaneConverterGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneConverter
-BrukerTiffMultiPlaneConverterGlobalCopy.schema.source_data = BrukerTiffMultiPlaneConverterSchema
+const BrukerTiffMultiPlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffMultiPlaneConverterGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneConverter;
+BrukerTiffMultiPlaneConverterGlobalCopy.schema.source_data = BrukerTiffMultiPlaneConverterSchema;
 BrukerTiffMultiPlaneConverter.args = { activePage, globalState: BrukerTiffMultiPlaneConverterGlobalCopy };
-
