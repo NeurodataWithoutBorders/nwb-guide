@@ -423,6 +423,7 @@ export class Table extends LitElement {
 
             // Update data on passed object
             else {
+
                 const globalValue = this.globals[header];
 
                 if (value == undefined || value === "") {
@@ -432,7 +433,15 @@ export class Table extends LitElement {
                         this.onOverride(header, value, rowName);
                     }
                     target[rowName][header] = undefined;
-                } else target[rowName][header] = value === globalValue ? undefined : value;
+                } else {
+
+                    // Correct for expected arrays (copy-paste issue)
+                    if (entries[header]?.type === "array") {
+                        if (value && !Array.isArray(value)) value = value.split(",").map((v) => v.trim());
+                    }
+
+                    target[rowName][header] = value === globalValue ? undefined : value;
+                }
             }
 
             validated++;
