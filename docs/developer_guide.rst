@@ -5,69 +5,80 @@ We welcome contributions from the community! If you are interested in contributi
 
 
 Installation
----------------------------
+------------
 
 Clone the Repo
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
 
 Start by cloning the repository
 
 .. code-block:: bash
+
     git clone https://github.com/catalystneuro/nwb-guide
 
+
 Install Python Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Install the appropriate Python dependencies for your operating system.
 
 Windows
-"""""""""
+"""""""
 .. code-block:: bash
+
     conda env create -f ./environments/environment-Windows.yml
 
 
 Mac
-"""""""""
+"""
 .. code-block:: bash
+
     conda env create -f ./environments/environment-MAC.yml
 
 
 M1 Mac
-"""""""""
+""""""
 .. code-block:: bash
+
     conda env create -f ./environments/environment-MAC-arm64.yml
 
 Linux
-"""""""""
+"""""
 .. code-block:: bash
+
     conda env create -f ./environments/environment-Linux.yml
 
 Before starting NWB GUIDE, you'll need to ensure that the Python environment is activated.
 
 .. code-block:: bash
+
     conda activate nwb-guide
 
+
 Installing JavaScript Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Next, install all JavaScript dependencies based on the `package-lock.json` file.
 
 .. code-block:: bash
+
     npm ci
 
 
 Run the Application
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 You can now run the following command to start the application using Electron.
 
 .. code-block:: bash
+
     npm start
 
 
+
 Repo Structure
----------------------------
+--------------
 1. **src/renderer/src** - Contains all the source code for the frontend
     - `index.js` - The entry point for the application
     - `pages.js` - The main code that controls which pages are rendered and how they are linked together
@@ -76,28 +87,36 @@ Repo Structure
     - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
 2. **pyflask** - Contains all the source code for the backend
 
+
+
+
 Starting a New Feature
----------------------------
+----------------------
 
 1. Create a new branch off of the ``main`` branch. The branch name should be descriptive of the feature you are working on.
 
 .. note::
+
     For example, if you are working on a feature to add a new page, you could name the branch ``add-new-metadata-page``.
 
 2. Make your changes on the new branch.
 
 .. important::
+
     When you are ready to commit, make sure to add :ref:`tests <testing>` for your new code as well.
 
 1. Push your changes to the remote branch. Then, open a pull request to merge your branch into the ``main`` branch.
 
 .. note::
+
     Make sure to add a description of the changes you made in the pull request.
 
 4. Once the pull request is approved, merge it into the ``main`` branch. You can then delete the branch you created in step 1.
 
+
+
 Adding a New Page
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 New pages can be added by linking a component in the ``src/pages.js`` file. For example, if you wanted to add a new page called ``NewPage``, you would add the following to the configuration file:
 
@@ -165,7 +184,7 @@ Extending the ``Page`` class rather than the ``LitElement`` class provides each 
 
 
 Discover Existing Components
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 While developing NWB GUIDE, you may find that you need to use a component that already exists in the codebase. To find a component, you can manually peruse the ``src/stories`` directory or run the project's Storybook instance to see all of the components in action.
 
@@ -174,10 +193,11 @@ To run Storybook, simply run ``npm run storybook`` in the root directory of the 
 To see if someone else has developed a third-party component to fit your needs, you can refer to :web-components:`WebComponents.org <>` and search based on your particular needs. :npm:`NPM` may also be useful to search for third-party packages (e.g. Handsontable) that implement the feature you need.
 
 
+
 .. _testing:
 
 Testing
----------------------------
+-------
 
 We use Chromatic on the Storybook to test changes to front-end components as well as to demonstrate example cases of what those components would look like on a real project.
 
@@ -186,21 +206,21 @@ We use :pytest:`pytest <>` for testing the back-end manager and REST API. To run
 .. _style:
 
 Coding Style
----------------------------
+------------
 
 For all JavaScript code on the frontend, we use the :prettier-code-formatter:`prettier code formatter <>` with parameters defined in the ``prettier.config.js`` configuration file.
 
 For all Python code on the backend, we use the :black-coding-style:`black coding style <>` with parameters defined in the ``pyproject.toml`` configuration file.
 
 Pre-Commit
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
 
 We use an automated pre-commit bot to enforce these on the main repo, but contributions from external forks would either have to grant bot permissions on their own fork (via :pre-commit-bot:`the pre-commit bot website <>`) or run pre-commit manually.
 
 For instructions to install pre-commit, as well as some other minor coding styles we follow, refer to the :neuroconv-coding-style:`NeuroConv style guide <>`.
 
 Code signing on Mac OS
----------------------------
+----------------------
 
 1. Sign up for an Apple Developer account (99 USD annual fee).
 
