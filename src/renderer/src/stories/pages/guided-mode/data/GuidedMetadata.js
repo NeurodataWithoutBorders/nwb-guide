@@ -26,6 +26,8 @@ const propsToIgnore = [
     "session_id",
 ];
 
+import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
+
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
     if (subject.startsWith("sub-")) subject = subject.slice(4);
@@ -153,7 +155,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const form = new JSONSchemaForm({
             identifier: instanceId,
             mode: "accordion",
-            schema,
+            schema: preprocessMetadataSchema(schema),
             results,
             globals: aggregateGlobalMetadata,
 
