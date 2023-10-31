@@ -141,13 +141,11 @@ export class InspectorListItem extends LitElement {
         const hasObjectType = "object_type" in this;
         const hasMetadata = hasObjectType && "object_name" in this;
 
-        const message = isString ? unsafeHTML(this.message) : this.message
+        const message = isString ? unsafeHTML(this.message) : this.message;
 
         return html`
             ${hasMetadata ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>` : ""}
-            ${hasMetadata
-                ? html`<span id="message">${message}</span>`
-                : html`<p>${message}</p>`}
+            ${hasMetadata ? html`<span id="message">${message}</span>` : html`<p>${message}</p>`}
             ${this.file_path
                 ? html`<span id="filepath"
                       >${this.files && this.files.length > 1
