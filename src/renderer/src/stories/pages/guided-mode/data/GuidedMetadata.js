@@ -17,6 +17,8 @@ import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { Button } from "../../../Button.js";
 import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
 
+import globalIcon from "../../../assets/global.svg?raw";
+
 const propsToIgnore = [
     "Ophys", // Always ignore ophys metadata (for now)
     "Icephys", // Always ignore icephys metadata (for now)
@@ -51,6 +53,7 @@ export class GuidedMetadataPage extends ManagedPage {
     header = {
         controls: [
             new Button({
+                icon: globalIcon,
                 label: "Edit Global Metadata",
                 onClick: () => {
                     this.#globalModal.form.results = merge(this.info.globalState.project, {});
@@ -92,7 +95,7 @@ export class GuidedMetadataPage extends ManagedPage {
         super.connectedCallback();
 
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
-            header: "Edit Global Metadata",
+            header: "Global Metadata",
             propsToRemove: [...propsToIgnore],
             schema: globalSchema, // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
             hasInstances: true,

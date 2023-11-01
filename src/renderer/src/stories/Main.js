@@ -152,11 +152,11 @@ export class Main extends LitElement {
                       style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1;"
                   >
                       <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
-                          <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:gray;">
+                          <div style="line-height: 1em; color: gray;">
                               <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
                               <small>${unsafeHTML(subtitle)}</small>
                           </div>
-                          <div style="padding-left: 25px">${controls}</div>
+                          <div style="padding-left: 25px;">${controls}</div>
                       </div>
                       <hr style="margin-bottom: 0;" />
                   </div>`
