@@ -111,11 +111,7 @@ export class JSONSchemaInput extends LitElement {
 
     updateData(value, forceValidation = false) {
 
-        console.log('GO?',value, forceValidation)
-
         if (this.value === value && !forceValidation) return false;
-
-        console.log('GO!',value)
 
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
