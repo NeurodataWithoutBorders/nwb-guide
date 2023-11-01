@@ -3,7 +3,7 @@ import { styleMap } from "lit/directives/style-map.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 export class Button extends LitElement {
-    constructor({ icon=null, primary, label, color = null, size, onClick, buttonStyles } = {}) {
+    constructor({ icon = null, primary, label, color = null, size, onClick, buttonStyles } = {}) {
         super();
         this.icon = icon;
         this.label = label;
@@ -100,7 +100,11 @@ export class Button extends LitElement {
                 )}
                 @click=${this.onClick}
             >
-                ${this.icon ? html`<span class="button-icon">${this.icon instanceof HTMLElement ? this.icon : unsafeHTML(this.icon)}</span>` : ""}
+                ${this.icon
+                    ? html`<span class="button-icon"
+                          >${this.icon instanceof HTMLElement ? this.icon : unsafeHTML(this.icon)}</span
+                      >`
+                    : ""}
                 <slot>${this.label ?? ""}</slot>
             </button>
         `;

@@ -847,11 +847,10 @@ export class JSONSchemaForm extends LitElement {
                 const headerName = header(name);
 
                 // Check properties that will be rendered before creating the accordion
-                const base = [...this.base, ...localPath]
+                const base = [...this.base, ...localPath];
                 const renderable = this.#getRenderable(info, required[name], base);
 
                 if (renderable.length) {
-
                     this.#nestedForms[name] = new JSONSchemaForm({
                         identifier: this.identifier,
                         schema: info,
@@ -899,7 +898,6 @@ export class JSONSchemaForm extends LitElement {
                 } fields`;
                 this.states[headerName].content = this.#nestedForms[name];
 
-
                 const accordion = new Accordion({
                     sections: {
                         [headerName]: this.states[headerName],
@@ -908,7 +906,7 @@ export class JSONSchemaForm extends LitElement {
 
                 accordion.id = name; // assign name to accordion id
 
-                if (!renderable.length) accordion.setAttribute('disabled', '')
+                if (!renderable.length) accordion.setAttribute("disabled", "");
 
                 return accordion;
             }
