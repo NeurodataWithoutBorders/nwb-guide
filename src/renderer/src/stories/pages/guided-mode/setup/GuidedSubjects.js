@@ -136,7 +136,7 @@ export class GuidedSubjectsPage extends Page {
                         ];
                     }
                 } else {
-                    delete parent.sessions; // Delete dessions from parent copy
+                    delete parent.sessions; // Delete sessions from parent copy
                     return validateOnChange(key, parent, ["Subject"], v);
                 }
             },

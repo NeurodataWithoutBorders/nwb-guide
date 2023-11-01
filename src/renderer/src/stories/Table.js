@@ -283,8 +283,9 @@ export class Table extends LitElement {
                         this.col
                     );
                     callback(true); // Allow empty value
-                    return true;
+                    return;
                 }
+
 
                 if (value && k === ogThis.keyColumn && unresolved[this.row]) {
                     if (value in ogThis.data) {
@@ -294,13 +295,13 @@ export class Table extends LitElement {
                             this.col
                         );
                         callback(false);
-                        return false;
+                        return;
                     }
                 }
 
                 if (!(await runThisValidator(value, this.row, this.col))) {
                     callback(false);
-                    return true;
+                    return;
                 }
 
                 if (!value && isRequired) {
@@ -310,20 +311,35 @@ export class Table extends LitElement {
                         this.col
                     );
                     callback(false);
-                    return true;
+                    return;
                 }
             };
 
             if (info.validator) {
                 const og = info.validator;
                 info.validator = async function (value, callback) {
-                    const called = await validator.call(this, value, callback);
-                    if (!called) og(value, callback);
+                    let wasCalled = false;
+
+                    const newCallback = (valid) => {
+                        wasCalled = true;
+                        callback(valid);
+                    };
+                    
+                    await validator.call(this, value, newCallback);
+                    if (!wasCalled) og(value, callback);
                 };
             } else
                 info.validator = async function (value, callback) {
-                    const called = await validator.call(this, value, callback);
-                    if (!called) callback(true); // Default to true if not called earlier
+
+                    let wasCalled = false;
+
+                    const newCallback = (valid) => {
+                        wasCalled = true;
+                        callback(valid);
+                    };
+
+                    await validator.call(this, value, newCallback);
+                    if (!wasCalled) callback(true); // Default to true if not called earlier
                 };
 
             return info;
@@ -435,14 +451,16 @@ export class Table extends LitElement {
 
             const isUserUpdate = initialCellsToUpdate <= validated;
 
-            // Transfer data to object
-            if (header === this.keyColumn) {
-                if (value && value !== rowName) {
-                    const old = target[rowName] ?? {};
-                    this.data[value] = old;
-                    delete target[rowName];
-                    delete unresolved[row];
-                    rowHeaders[row] = value;
+            // Transfer data to object (if valid)
+            if (isValid){
+                if (header === this.keyColumn) {
+                    if (value && value !== rowName) {
+                        const old = target[rowName] ?? {};
+                        this.data[value] = old;
+                        delete target[rowName];
+                        delete unresolved[row];
+                        rowHeaders[row] = value;
+                    }
                 }
             }
 
