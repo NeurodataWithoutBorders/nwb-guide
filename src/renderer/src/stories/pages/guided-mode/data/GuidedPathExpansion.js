@@ -299,7 +299,7 @@ export class GuidedPathExpansionPage extends Page {
                 if (fs) {
                     const baseDir = form.getInput([...parentPath, "base_directory"]);
                     if (name === "format_string_path") {
-                        if (value && !baseDir.value) {
+                        if (value && baseDir && !baseDir.value) {
                             return [
                                 {
                                     message: html`A base directory must be provided to locate your files.`,
