@@ -77,6 +77,11 @@ export class List extends LitElement {
         cursor: text;
       }
 
+      [data-idx]{
+        background: #f0f0f0;
+        height: 25px;
+      }
+
     `;
   }
 
@@ -131,28 +136,43 @@ export class List extends LitElement {
 
     allowDrop = (ev) => ev.preventDefault();
 
-    drag = (ev, i) => {
-      ev.dataTransfer.setData("text", `item-${i}`);
+
+    #dragged?: number
+    #placeholder = document.createElement('div')
+
+    drag = (ev, i) => this.#dragged = i
+
+    dragEnter = (ev, i) => {
+       ev.preventDefault();
+        if (this.#dragged !== i) {
+          const item = this.shadowRoot.getElementById(`item-${i}`)
+          this.#placeholder.setAttribute('data-idx', i)
+          item?.insertAdjacentElement('beforebegin',  this.#placeholder)
+        } else {
+          this.#removePlaceholder()
+        }
     }
 
-    // dragOver = (ev) => {
-    //       const data = ev.dataTransfer.getData("text");
-    //       el.insertAdjacentElement('beforebegin', this.shadowRoot.getElementById(data));
-    // }
+    dragExit = (ev, i) => {
+      ev.preventDefault();
+      if (this.#placeholder && i.toString() !== this.#placeholder.getAttribute('data-idx')){
+        this.#removePlaceholder()
+      }
+    }
 
     drop = (ev, i) => {
+
       ev.preventDefault();
-      const data = ev.dataTransfer.getData("text");
-      const movedIdx = data.split('-')[1]
-      const movedItem = this.items[movedIdx]
-      this.items.splice(movedIdx, 1)
+      const draggedIdx = this.#dragged as number
+      this.#dragged = undefined
+
+      const movedItem = this.items[draggedIdx]
+      this.items.splice(draggedIdx, 1)
       this.items.splice(i, 0, movedItem)
 
-      const ogMoved = this.#ogValues[movedIdx]
-      this.#ogValues.splice(movedIdx, 1)
+      const ogMoved = this.#ogValues[draggedIdx]
+      this.#ogValues.splice(draggedIdx, 1)
       this.#ogValues.splice(i, 0, ogMoved)
-
-
 
       this.items = [...this.items]
     }
@@ -177,6 +197,11 @@ export class List extends LitElement {
 
     #ogValues = []
 
+    #removePlaceholder = () => {
+      this.#placeholder.removeAttribute('data-idx')
+      this.#placeholder.remove()
+    }
+
     #renderListItem = (item: ListItemType, i: number) => {
       const { key, value, content = value } = item;
       const li = document.createElement("li");
@@ -185,8 +210,20 @@ export class List extends LitElement {
       if (!this.unordered) {
         li.draggable = true;
         li.ondragstart = (ev) => this.drag(ev, i);
+
+        li.ondragend = (ev) => {
+          if (this.#dragged !== undefined) {
+            const idx = this.#placeholder.getAttribute('data-idx')
+            if (idx !== null) this.drop(ev, parseInt(idx))
+            this.#removePlaceholder()
+          }
+        }
+
         li.ondrop = (ev) => this.drop(ev, i);
-        li.ondragover = this.allowDrop;
+
+        li.ondragover = (ev) => this.dragEnter(ev, i);
+        // li.ondragenter = (ev) => this.dragEnter(ev, i);
+        li.ondragleave = (ev) => this.dragExit(ev, i);
       }
 
 
