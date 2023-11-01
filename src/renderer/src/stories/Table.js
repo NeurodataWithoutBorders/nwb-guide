@@ -411,7 +411,6 @@ export class Table extends LitElement {
 
             // Transfer data to object
             if (header === this.keyColumn) {
-                console.log(value, rowName);
                 if (value && value !== rowName) {
                     const old = target[rowName] ?? {};
                     this.data[value] = old;
