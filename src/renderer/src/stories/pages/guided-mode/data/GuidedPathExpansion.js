@@ -110,6 +110,7 @@ export class GuidedPathExpansionPage extends Page {
 
     beforeSave = async () => {
         const keepExistingData = this.dataManagementForm.resolved.keep_existing_data;
+        this.localState.keep_existing_data = keepExistingData;
 
         const globalState = this.info.globalState;
         merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
@@ -159,6 +160,7 @@ export class GuidedPathExpansionPage extends Page {
             for (let key in structure) {
                 const entry = { ...structure[key] };
                 const fstring = entry.format_string_path;
+                if (!fstring) continue;
                 if (fstring.split(".").length > 1) entry.file_path = fstring;
                 else entry.folder_path = fstring;
                 delete entry.format_string_path;
@@ -192,8 +194,11 @@ export class GuidedPathExpansionPage extends Page {
 
                             if (!sesRef) delete globalResults[sub][ses]; // Delete removed sessions
                             else {
-                                for (let name in sesRef.source_data) {
-                                    if (!sesRef.source_data[name]) delete sesRef.source_data[name]; // Delete removed interfaces
+
+                                const globalSesRef = globalResults[sub][ses]
+
+                                for (let name in globalSesRef.source_data) {
+                                    if (!sesRef.source_data[name]) delete globalSesRef.source_data[name]; // Delete removed interfaces
                                 }
                             }
                         }
@@ -253,7 +258,7 @@ export class GuidedPathExpansionPage extends Page {
             // altContent: this.altForm,
         });
 
-        const structureState = (this.localState = merge(this.info.globalState.structure, { results: {} }));
+        const structureState = (this.localState = merge(this.info.globalState.structure, { results: {}, keep_existing_data: true }));
 
         const state = structureState.state;
 
@@ -271,14 +276,39 @@ export class GuidedPathExpansionPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
             onThrow,
-            requirementMode: "loose",
+            validateEmptyValues: false,
+
+            // NOTE: These are custom coupled form inputs
+            onUpdate: (path, value) => {
+                
+                this.unsavedUpdates = true
+
+                const parentPath = [...path]
+                const name = parentPath.pop();
+                
+                if (name === "base_directory") {
+                    form.getInput([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
+                    const input = form.getInput([...parentPath, "format_string_path"]);
+                    if (input.value) input.updateData(input.value, true);
+                }
+            },
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
+
                 if (fs) {
-                    if (name === "base_directory") {
-                        const input = form.getInput([...parentPath, "format_string_path"]);
-                        input.updateData(input.value);
-                    } else if (name === "format_string_path") {
+                    const baseDir = form.getInput([...parentPath, "base_directory"])
+                     if (name === "format_string_path") {
+
+                        if (value && !baseDir.value) {
+                            return [
+                                {
+                                    message: html`A base directory must be provided to locate your files.`,
+                                    type: "error",
+                                },
+                            ]
+                        }
+
+
                         const base_directory = [...parentPath, "base_directory"].reduce(
                             (acc, key) => acc[key],
                             this.form.resolved
@@ -303,14 +333,14 @@ export class GuidedPathExpansionPage extends Page {
                             for (let ses in results[sub]) {
                                 const source_data = results[sub][ses].source_data[interfaceName];
                                 const path = source_data.file_path ?? source_data.folder_path;
-                                resolved.push(path);
+                                resolved.push(path.slice(base_directory.length + 1));
                             }
                         }
 
                         return [
                             {
                                 message: html` <h4 style="margin: 0;">Source Files Found</h4>
-                                    <small><i>Inspect the Developer Console to preview the metadata results</i></small>
+                                    <small>${base_directory}</small>
                                     <small
                                         >${new List({
                                             items: resolved.map((path) => {
@@ -323,8 +353,6 @@ export class GuidedPathExpansionPage extends Page {
                                 type: "info",
                             },
                         ];
-
-                        // console.log('Updated format string', value, resolved)
                     }
                 }
             },
@@ -335,7 +363,8 @@ export class GuidedPathExpansionPage extends Page {
         this.optional.style.paddingTop = "10px";
 
         this.dataManagementForm = new JSONSchemaForm({
-            results: { keep_existing_data: true },
+            results: { keep_existing_data: structureState.keep_existing_data },
+            onUpdate: () => (this.unsavedUpdates = true),
             schema: {
                 type: "object",
                 properties: {
