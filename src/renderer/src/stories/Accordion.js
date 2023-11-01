@@ -111,8 +111,12 @@ export class Accordion extends LitElement {
             .guided--nav-bar-dropdown::after {
                 font-size: 0.8em;
                 position: absolute;
-                right: 50px;
+                right: 25px;
                 font-family: ${unsafeCSS(emojiFontFamily)};
+            }
+
+            .guided--nav-bar-dropdown.toggleable::after {
+                right: 50px;
             }
 
             .guided--nav-bar-dropdown.error::after {
@@ -127,7 +131,7 @@ export class Accordion extends LitElement {
                 content: "${successSymbol}";
             }
 
-            .guided--nav-bar-dropdown.content:hover {
+            .guided--nav-bar-dropdown.toggleable:hover {
                 cursor: pointer;
                 background-color: lightgray;
             }
@@ -168,20 +172,20 @@ export class Accordion extends LitElement {
         };
     }
 
-    constructor({ name, subtitle, content, info = {}, contentPadding } = {}) {
+
+    constructor({ name, subtitle, toggleable= true, content, info = {}, contentPadding } = {}) {
         super();
         this.name = name;
         this.subtitle = subtitle;
         this.content = content;
         this.info = info;
+        this.toggleable = toggleable;
         this.contentPadding = contentPadding;
     }
 
     updated() {
         if (!this.content) return
-        const isActive = this.info.open;
-        if (isActive) this.toggle(true);
-        else this.toggle(false);
+        this.toggle(!!this.info.open)
     }
 
     setStatus = (status) => {
@@ -205,7 +209,8 @@ export class Accordion extends LitElement {
         const hasForce = forcedState !== undefined;
         const toggledState = !this.info.open;
 
-        let state = hasForce ? forcedState : toggledState;
+        const desiredState = hasForce ? forcedState : toggledState
+        const state = this.toOpen(desiredState);
 
         //remove hidden from child elements with guided--nav-bar-section-page class
         const section = this.shadowRoot.getElementById('section')
@@ -216,32 +221,41 @@ export class Accordion extends LitElement {
 
         //toggle the chevron
         const chevron = dropdown.querySelector("nwb-chevron");
-        chevron.direction = state ? "bottom" : "right";
+        if (chevron) chevron.direction = state ? "bottom" : "right";
 
-        this.info.open = state;
+        if (desiredState === state) this.info.open = state; // Update state if not overridden
     };
 
+    toOpen = (state = this.info.open) => {
+        if (!this.toggleable) return true // Force open if not toggleable
+        else if (this.info.disabled) return false // Force closed if disabled
+        return state
+    }
+
     render() {
+
+        const isToggleable = this.content && this.toggleable;
+
         return html`
                 <div class="guided--nav-bar-section">
                     <div
                         id="dropdown"
-                        class="guided--nav-bar-dropdown ${this.content && 'content'} ${this.info.disabled ? "disabled" : ''} ${this.info.status}"
-                        @click=${() => this.content && this.toggle()}
+                        class="guided--nav-bar-dropdown ${isToggleable && 'toggleable'} ${this.info.disabled ? "disabled" : ''} ${this.info.status}"
+                        @click=${() =>isToggleable && this.toggle()}
                     >
                         <div class="header">
                             <span>${this.name}</span>
                             <small>${this.subtitle}</small>
                         </div>
-                        ${this.content && new Chevron({
+                        ${isToggleable ? new Chevron({
                             direction: "right",
                             color: faColor,
                             size: faSize,
-                        })}
+                        }) : ''}
                     </div>
                     ${this.content ? html`<div
                         id="section"
-                        class="content hidden"
+                        class="content hidden ${this.info.disabled ? "disabled" : ''}"
                         style="padding: ${this.contentPadding ?? "25px"}"
                     >
                         ${this.content}

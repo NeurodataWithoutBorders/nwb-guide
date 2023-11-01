@@ -64,7 +64,6 @@ export class SettingsPage extends Page {
         this.form = new JSONSchemaForm({
             results: this.localState,
             schema,
-            mode: "accordion",
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: async (name, parent) => {
                 const value = parent[name];

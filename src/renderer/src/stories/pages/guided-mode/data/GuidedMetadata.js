@@ -158,7 +158,6 @@ export class GuidedMetadataPage extends ManagedPage {
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
-            mode: "accordion",
             schema: preprocessMetadataSchema(schema),
             results,
             globals: aggregateGlobalMetadata,

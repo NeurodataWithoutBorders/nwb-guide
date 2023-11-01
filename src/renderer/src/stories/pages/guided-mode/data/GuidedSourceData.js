@@ -136,7 +136,6 @@ export class GuidedSourceDataPage extends ManagedPage {
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
-            mode: "accordion",
             schema: preprocessSourceDataSchema(schema),
             results: info.source_data,
             emptyMessage: "No source data required for this session.",

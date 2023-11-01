@@ -149,6 +149,11 @@ const componentCSS = `
     nwb-accordion {
         margin-bottom: 0.5em;
     }
+
+    [disabled]{
+        opacity: 0.5;
+        pointer-events: none;
+    }
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -163,7 +168,6 @@ export class JSONSchemaForm extends LitElement {
 
     static get properties() {
         return {
-            mode: { type: String, reflect: true },
             schema: { type: Object, reflect: false },
             results: { type: Object, reflect: false },
             required: { type: Object, reflect: false },
@@ -199,7 +203,6 @@ export class JSONSchemaForm extends LitElement {
         this.#rendered = this.#updateRendered(true);
 
         this.identifier = props.identifier;
-        this.mode = props.mode ?? "default";
         this.schema = props.schema ?? {};
         this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
@@ -243,8 +246,7 @@ export class JSONSchemaForm extends LitElement {
         const copy = [...path];
         const tableName = copy.pop();
 
-        if (this.mode === "accordion") return this.getForm(copy).getTable(tableName);
-        else return this.shadowRoot.getElementById(path.join("-")).children[1].shadowRoot.children[0]; // Get table from UI container, then JSONSchemaInput
+        return this.getForm(copy).getTable(tableName)
     };
 
     getForm = (path) => {
@@ -842,32 +844,30 @@ export class JSONSchemaForm extends LitElement {
 
             const localPath = [...path, name];
 
-            if (this.mode === "accordion" && hasMany) {
-                const headerName = header(name);
+            const enableToggle = document.createElement('input')
 
-                // Check properties that will be rendered before creating the accordion
-                const base = [...this.base, ...localPath];
+            // Check properties that will be rendered before creating the accordion
+            const base = [...this.base, ...localPath];
 
-                const renderable = this.#getRenderable(info, required[name], localPath, true);
+            const explicitlyRequired = schema.required?.includes(name) ?? false;
 
-                const explicitlyRequired = schema.required?.includes(name) ?? false;
+            Object.assign(enableToggle, {
+                type: 'checkbox',
+                checked: true,
+                style: 'margin-right: 10px; pointer-events:all;',
+            })
 
-                if (renderable.length) {
-                    this.#nestedForms[name] = new JSONSchemaForm({
+
+            const headerName = header(name);
+
+            const renderableInside = this.#getRenderable(info, required[name], localPath, true);
+
+            if (renderableInside.length) {
+                this.#nestedForms[name] = new JSONSchemaForm({
                         identifier: this.identifier,
                         schema: info,
                         results: { ...results[name] },
                         globals: this.globals?.[name],
-
-                        states: this.states,
-
-                        mode: this.mode,
-
-                        onUpdate: (internalPath, value) => {
-                            const path = [...localPath, ...internalPath];
-                            this.updateData(path, value);
-                        },
-
                         required: required[name], // Scoped to the sub-schema
                         ignore: this.ignore,
                         dialogOptions: this.dialogOptions,
@@ -894,48 +894,30 @@ export class JSONSchemaForm extends LitElement {
                     });
                 }
 
-                if (!this.states[headerName]) this.states[headerName] = {};
+            if (!this.states[headerName]) this.states[headerName] = { open: !hasMany};
 
-                const enableToggle = document.createElement('input')
+            const accordion = new Accordion({
+                name: headerName,
+                toggleable: hasMany,
+                subtitle:html`<div style="display:flex; align-items: center;">${explicitlyRequired ? '' : enableToggle}${renderableInside.length ? `${renderableInside.length} fields` : ''}</div>`,
+                content: this.#nestedForms[name], 
+                info: this.states[headerName]
+            });
 
-                Object.assign(enableToggle, {
-                    type: 'checkbox',
-                    checked: true,
-                    style: 'margin-right: 10px; pointer-events:all;',
-                })
+            accordion.id = name; // assign name to accordion id
 
-                enableToggle.addEventListener('click', (e) => {
-                    e.stopPropagation()
-                    const { checked } = e.target
-                    if (checked) accordion.info = { ...accordion.info, disabled: false }
-                    else {
-                        accordion.info = { ...accordion.info, disabled: true, open: false }
-                    }
-                })
+            // Set enable / disable behavior
+            enableToggle.addEventListener('click', (e) => {
+                e.stopPropagation()
+                const { checked } = e.target
+                if (checked) accordion.info = { ...accordion.info, disabled: false }
+                else {
+                    accordion.info = { ...accordion.info, disabled: true }
+                }
+            })
 
-                const accordion = new Accordion({
-                    name: headerName,
-                    subtitle:html`<div style="display:flex; align-items: center;">${explicitlyRequired ? '' : enableToggle}${renderable.length ? `${renderable.length} fields` : ''}</div>`,
-                    content: this.#nestedForms[name], 
-                    info: this.states[headerName]
-                });
+            return accordion;
 
-                accordion.id = name; // assign name to accordion id
-
-                return accordion;
-            }
-
-            // Render properties in the sub-schema
-            const rendered = this.#render(info, results?.[name], required[name], localPath);
-            return hasMany || path.length > 1
-                ? html`
-                      <div style="margin-top: 40px;">
-                          <label class="guided--form-label header">${header(name)}</label>
-                          <hr />
-                          ${rendered}
-                      </div>
-                  `
-                : rendered;
         });
 
         return rendered;
