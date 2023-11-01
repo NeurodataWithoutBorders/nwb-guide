@@ -754,6 +754,8 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
+    #accordions = {};
+
     #render = (schema, results, required = {}, path = []) => {
         let isLink = Symbol("isLink");
         // Filter non-required properties (if specified) and render the sub-schema
@@ -894,14 +896,15 @@ export class JSONSchemaForm extends LitElement {
                     });
                 }
 
-            if (!this.states[headerName]) this.states[headerName] = { open: !hasMany};
-
-            const accordion = new Accordion({
+            const oldStates = this.#accordions[headerName]
+            const accordion = this.#accordions[headerName] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
                 subtitle:html`<div style="display:flex; align-items: center;">${explicitlyRequired ? '' : enableToggle}${renderableInside.length ? `${renderableInside.length} fields` : ''}</div>`,
                 content: this.#nestedForms[name], 
-                info: this.states[headerName]
+                open: oldStates?.open ?? !hasMany,
+                disabled: oldStates?.disabled,
+                status: oldStates?.status,
             });
 
             accordion.id = name; // assign name to accordion id
@@ -910,9 +913,9 @@ export class JSONSchemaForm extends LitElement {
             enableToggle.addEventListener('click', (e) => {
                 e.stopPropagation()
                 const { checked } = e.target
-                if (checked) accordion.info = { ...accordion.info, disabled: false }
+                if (checked) accordion.disabled = false
                 else {
-                    accordion.info = { ...accordion.info, disabled: true }
+                    accordion.disabled = true
                 }
             })
 

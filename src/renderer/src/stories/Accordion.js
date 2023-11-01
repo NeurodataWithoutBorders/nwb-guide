@@ -159,40 +159,48 @@ export class Accordion extends LitElement {
         `;
     }
 
-    // declare info: {
-    //     open: boolean;
-    //     status: "error" | "warning" | "valid";
-    //     disabled: boolean
-    // }
 
     static get properties() {
         return {
             name: { type: String, reflect: true },
-            info : { type: Object, reflect: true },
+            open: { type: Boolean, reflect: true },
+            disabled: { type: Boolean, reflect: true },
+            status: { type: String, reflect: true },
         };
     }
 
 
-    constructor({ name, subtitle, toggleable= true, content, info = {}, contentPadding } = {}) {
+    constructor({ 
+        name, 
+        subtitle, 
+        toggleable= true, 
+        content, 
+        open = false,
+        status,
+        disabled = false,
+        contentPadding 
+    } = {}) {
         super();
         this.name = name;
         this.subtitle = subtitle;
         this.content = content;
-        this.info = info;
+        this.open = open;
+        this.status = status;
+        this.disabled = disabled;
         this.toggleable = toggleable;
         this.contentPadding = contentPadding;
     }
 
     updated() {
         if (!this.content) return
-        this.toggle(!!this.info.open)
+        this.toggle(!!this.open)
     }
 
     setStatus = (status) => {
         const el = this.shadowRoot.getElementById('dropdown')
         el.classList.remove("error", "warning", "valid");
         el.classList.add(status);
-        this.info.status = status;
+        this.status = status;
     };
 
     onClick = () => {}; // Set by the user
@@ -207,7 +215,7 @@ export class Accordion extends LitElement {
 
     toggle = (forcedState) => {
         const hasForce = forcedState !== undefined;
-        const toggledState = !this.info.open;
+        const toggledState = !this.open;
 
         const desiredState = hasForce ? forcedState : toggledState
         const state = this.toOpen(desiredState);
@@ -223,12 +231,12 @@ export class Accordion extends LitElement {
         const chevron = dropdown.querySelector("nwb-chevron");
         if (chevron) chevron.direction = state ? "bottom" : "right";
 
-        if (desiredState === state) this.info.open = state; // Update state if not overridden
+        if (desiredState === state) this.open = state; // Update state if not overridden
     };
 
-    toOpen = (state = this.info.open) => {
+    toOpen = (state = this.open) => {
         if (!this.toggleable) return true // Force open if not toggleable
-        else if (this.info.disabled) return false // Force closed if disabled
+        else if (this.disabled) return false // Force closed if disabled
         return state
     }
 
@@ -240,7 +248,7 @@ export class Accordion extends LitElement {
                 <div class="guided--nav-bar-section">
                     <div
                         id="dropdown"
-                        class="guided--nav-bar-dropdown ${isToggleable && 'toggleable'} ${this.info.disabled ? "disabled" : ''} ${this.info.status}"
+                        class="guided--nav-bar-dropdown ${isToggleable && 'toggleable'} ${this.disabled ? "disabled" : ''} ${this.status}"
                         @click=${() =>isToggleable && this.toggle()}
                     >
                         <div class="header">
@@ -255,7 +263,7 @@ export class Accordion extends LitElement {
                     </div>
                     ${this.content ? html`<div
                         id="section"
-                        class="content hidden ${this.info.disabled ? "disabled" : ''}"
+                        class="content hidden ${this.disabled ? "disabled" : ''}"
                         style="padding: ${this.contentPadding ?? "25px"}"
                     >
                         ${this.content}
