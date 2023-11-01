@@ -170,10 +170,6 @@ export class List extends LitElement {
       this.items.splice(draggedIdx, 1)
       this.items.splice(i, 0, movedItem)
 
-      const ogMoved = this.#ogValues[draggedIdx]
-      this.#ogValues.splice(draggedIdx, 1)
-      this.#ogValues.splice(i, 0, ogMoved)
-
       this.items = [...this.items]
     }
 
@@ -194,8 +190,6 @@ export class List extends LitElement {
     add = (item: ListItemType) => {
       this.items = [...this.items, item]
     }
-
-    #ogValues = []
 
     #removePlaceholder = () => {
       this.#placeholder.removeAttribute('data-idx')
@@ -238,8 +232,6 @@ export class List extends LitElement {
       const originalValue = resolvedKey;
 
       const isUnordered = !!key
-
-      if (!this.#ogValues[i]) this.#ogValues[i] = isUnordered ? resolvedKey : value
 
       if (isUnordered) {
 
@@ -302,11 +294,9 @@ export class List extends LitElement {
 
         const deleteListItem = () => this.delete(i);
 
-        const ogValue = this.#ogValues[i];
-
         editableElement.addEventListener("blur", () => {
             const newKey = editableElement.innerText;
-            if (newKey === "") editableElement.innerText = ogValue; // Reset to original value
+            if (newKey === "") this.delete(i); // Delete if empty
             else {
                   const oKey = isUnordered ? resolvedKey : i;
                   delete this.object[oKey];
