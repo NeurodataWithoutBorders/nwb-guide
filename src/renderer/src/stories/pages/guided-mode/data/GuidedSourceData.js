@@ -12,6 +12,8 @@ import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { header } from "../../../forms/utils";
 import { Button } from "../../../Button.js";
 
+import globalIcon from '../../../assets/global.svg?raw'
+
 const propsToIgnore = [
     "verbose",
     "es_key",
@@ -33,7 +35,8 @@ export class GuidedSourceDataPage extends ManagedPage {
     header = {
         controls: [
             new Button({
-                label: "Edit Global Metadata",
+                icon: globalIcon,
+                label: "Edit Global Source Data",
                 onClick: () => {
                     this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {});
                     this.#globalModal.open = true;
@@ -162,7 +165,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     connectedCallback() {
         super.connectedCallback();
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
-            header: "Edit Global Source Data",
+            header: "Global Source Data",
             propsToRemove: [...propsToIgnore, "folder_path", "file_path"],
             key: "SourceData",
             schema: this.info.globalState.schema.source_data,
