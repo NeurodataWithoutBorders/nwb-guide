@@ -286,7 +286,6 @@ export class Table extends LitElement {
                     return;
                 }
 
-
                 if (value && k === ogThis.keyColumn && unresolved[this.row]) {
                     if (value in ogThis.data) {
                         ogThis.#handleValidationResult(
@@ -324,13 +323,12 @@ export class Table extends LitElement {
                         wasCalled = true;
                         callback(valid);
                     };
-                    
+
                     await validator.call(this, value, newCallback);
                     if (!wasCalled) og(value, callback);
                 };
             } else
                 info.validator = async function (value, callback) {
-
                     let wasCalled = false;
 
                     const newCallback = (valid) => {
@@ -452,7 +450,7 @@ export class Table extends LitElement {
             const isUserUpdate = initialCellsToUpdate <= validated;
 
             // Transfer data to object (if valid)
-            if (isValid){
+            if (isValid) {
                 if (header === this.keyColumn) {
                     if (value && value !== rowName) {
                         const old = target[rowName] ?? {};
