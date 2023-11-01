@@ -2,7 +2,7 @@ import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
-import { merge, randomizeElements, mapSessions } from "./utils.js";
+import { randomizeElements, mapSessions } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
 import { resolveResults } from "./guided-mode/data/utils.js";

@@ -11,6 +11,21 @@ import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
+import { header } from "../../../forms/utils";
+
+import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { Button } from "../../../Button.js";
+import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
+
+const propsToIgnore = [
+    "Ophys", // Always ignore ophys metadata (for now)
+    "Icephys", // Always ignore icephys metadata (for now)
+    "Behavior", // Always ignore behavior metadata (for now)
+    new RegExp("ndx-.+"), // Ignore all ndx extensions
+    "subject_id",
+    "session_id",
+];
+
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 const getInfoFromId = (key) => {
@@ -33,6 +48,15 @@ export class GuidedMetadataPage extends ManagedPage {
     form;
 
     header = {
+        controls: [
+            new Button({
+                label: "Edit Global Metadata",
+                onClick: () => {
+                    this.#globalModal.form.results = merge(this.info.globalState.project, {});
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
         subtitle: "Edit all metadata for this conversion at the session level",
     };
 
@@ -60,6 +84,30 @@ export class GuidedMetadataPage extends ManagedPage {
             this.to(1);
         },
     };
+
+    #globalModal = null;
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
+            header: "Edit Global Metadata",
+            propsToRemove: [...propsToIgnore],
+            schema: globalSchema, // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+            hasInstances: true,
+            mergeFunction: function (globalResolved, globals) {
+                merge(globalResolved, globals);
+                return resolveGlobalOverrides(this.subject, globals);
+            },
+            validateOnChange,
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
+    }
 
     createForm = ({ subject, session, info }) => {
         // const results = createResults({ subject, info }, this.info.globalState);
@@ -111,14 +159,10 @@ export class GuidedMetadataPage extends ManagedPage {
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: [
-                "Ophys", // Always ignore ophys metadata (for now)
-                "Icephys", // Always ignore icephys metadata (for now)
-                "Behavior", // Always ignore behavior metadata (for now)
-                new RegExp("ndx-.+"), // Ignore all ndx extensions
-                "subject_id",
-                "session_id",
-            ],
+            ignore: propsToIgnore,
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+            },
 
             conditionalRequirements: [
                 {
