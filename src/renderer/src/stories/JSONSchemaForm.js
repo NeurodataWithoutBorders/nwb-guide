@@ -146,9 +146,8 @@ const componentCSS = `
         line-height: 1.4285em;
     }
 
-    [disabled] {
-        opacity: 0.5;
-        pointer-events: none;
+    nwb-accordion {
+        margin-bottom: 0.5em;
     }
 `;
 
@@ -848,7 +847,10 @@ export class JSONSchemaForm extends LitElement {
 
                 // Check properties that will be rendered before creating the accordion
                 const base = [...this.base, ...localPath];
-                const renderable = this.#getRenderable(info, required[name], base);
+
+                const renderable = this.#getRenderable(info, required[name], localPath, true);
+
+                const explicitlyRequired = schema.required?.includes(name) ?? false;
 
                 if (renderable.length) {
                     this.#nestedForms[name] = new JSONSchemaForm({
@@ -878,7 +880,7 @@ export class JSONSchemaForm extends LitElement {
                         onThrow: (...args) => this.onThrow(...args),
                         validateEmptyValues: this.validateEmptyValues,
                         onStatusChange: (status) => {
-                            accordion.setSectionStatus(headerName, status);
+                            accordion.setStatus(status);
                             this.checkStatus();
                         }, // Forward status changes to the parent form
                         onInvalid: (...args) => this.onInvalid(...args),
@@ -893,20 +895,32 @@ export class JSONSchemaForm extends LitElement {
                 }
 
                 if (!this.states[headerName]) this.states[headerName] = {};
-                this.states[headerName].subtitle = `${
-                    this.#getRenderable(info, required[name], localPath, true).length
-                } fields`;
-                this.states[headerName].content = this.#nestedForms[name];
+
+                const enableToggle = document.createElement('input')
+
+                Object.assign(enableToggle, {
+                    type: 'checkbox',
+                    checked: true,
+                    style: 'margin-right: 10px; pointer-events:all;',
+                })
+
+                enableToggle.addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    const { checked } = e.target
+                    if (checked) accordion.info = { ...accordion.info, disabled: false }
+                    else {
+                        accordion.info = { ...accordion.info, disabled: true, open: false }
+                    }
+                })
 
                 const accordion = new Accordion({
-                    sections: {
-                        [headerName]: this.states[headerName],
-                    },
+                    name: headerName,
+                    subtitle:html`<div style="display:flex; align-items: center;">${explicitlyRequired ? '' : enableToggle}${renderable.length ? `${renderable.length} fields` : ''}</div>`,
+                    content: this.#nestedForms[name], 
+                    info: this.states[headerName]
                 });
 
                 accordion.id = name; // assign name to accordion id
-
-                if (!renderable.length) accordion.setAttribute("disabled", "");
 
                 return accordion;
             }

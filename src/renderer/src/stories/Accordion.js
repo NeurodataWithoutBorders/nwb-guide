@@ -23,6 +23,10 @@ export class Accordion extends LitElement {
                 box-sizing: border-box;
             }
 
+            :host {
+                display: block;
+            }
+
             .header {
                 display: flex;
                 align-items: end;
@@ -123,7 +127,7 @@ export class Accordion extends LitElement {
                 content: "${successSymbol}";
             }
 
-            .guided--nav-bar-dropdown:hover {
+            .guided--nav-bar-dropdown.content:hover {
                 cursor: pointer;
                 background-color: lightgray;
             }
@@ -143,34 +147,48 @@ export class Accordion extends LitElement {
                 padding-left: 0px;
                 overflow-y: auto;
             }
+
+            .disabled {
+                opacity: 0.5;
+                pointer-events: none;
+            }
         `;
     }
 
+    // declare info: {
+    //     open: boolean;
+    //     status: "error" | "warning" | "valid";
+    //     disabled: boolean
+    // }
+
     static get properties() {
         return {
-            sections: { type: Object, reflect: false },
+            name: { type: String, reflect: true },
+            info : { type: Object, reflect: true },
         };
     }
 
-    constructor({ sections = {}, contentPadding } = {}) {
+    constructor({ name, subtitle, content, info = {}, contentPadding } = {}) {
         super();
-        this.sections = sections;
+        this.name = name;
+        this.subtitle = subtitle;
+        this.content = content;
+        this.info = info;
         this.contentPadding = contentPadding;
     }
 
     updated() {
-        Object.entries(this.sections).map(([sectionName, info]) => {
-            const isActive = info.open;
-            if (isActive) this.#toggleDropdown(sectionName, true);
-            else this.#toggleDropdown(sectionName, false);
-        });
+        if (!this.content) return
+        const isActive = this.info.open;
+        if (isActive) this.toggle(true);
+        else this.toggle(false);
     }
 
-    setSectionStatus = (sectionName, status) => {
-        const el = this.shadowRoot.querySelector("[data-section-name='" + sectionName + "']");
+    setStatus = (status) => {
+        const el = this.shadowRoot.getElementById('dropdown')
         el.classList.remove("error", "warning", "valid");
         el.classList.add(status);
-        this.sections[sectionName].status = status;
+        this.info.status = status;
     };
 
     onClick = () => {}; // Set by the user
@@ -183,60 +201,52 @@ export class Accordion extends LitElement {
         }
     };
 
-    #toggleDropdown = (sectionName, forcedState) => {
+    toggle = (forcedState) => {
         const hasForce = forcedState !== undefined;
-        const toggledState = !this.sections[sectionName].open;
+        const toggledState = !this.info.open;
 
         let state = hasForce ? forcedState : toggledState;
 
         //remove hidden from child elements with guided--nav-bar-section-page class
-        const section = this.shadowRoot.querySelector("[data-section='" + sectionName + "']");
+        const section = this.shadowRoot.getElementById('section')
         section.toggleAttribute("hidden", hasForce ? !state : undefined);
 
-        const dropdown = this.shadowRoot.querySelector("[data-section-name='" + sectionName + "']");
+        const dropdown = this.shadowRoot.getElementById('dropdown')
         this.#updateClass("active", dropdown, !state);
 
         //toggle the chevron
         const chevron = dropdown.querySelector("nwb-chevron");
         chevron.direction = state ? "bottom" : "right";
 
-        this.sections[sectionName].open = state;
+        this.info.open = state;
     };
 
     render() {
         return html`
-            <ul id="guided-nav-items" class="guided--container-nav-items">
-                ${Object.entries(this.sections)
-                    .map(([sectionName, info]) => {
-                        return html`
-                            <div class="guided--nav-bar-section">
-                                <div
-                                    class="guided--nav-bar-dropdown ${info.status}"
-                                    data-section-name=${sectionName}
-                                    @click=${() => this.#toggleDropdown(sectionName, undefined)}
-                                >
-                                    <div class="header">
-                                        <span>${sectionName}</span>
-                                        <small>${info.subtitle}</small>
-                                    </div>
-                                    ${new Chevron({
-                                        direction: "right",
-                                        color: faColor,
-                                        size: faSize,
-                                    })}
-                                </div>
-                                <div
-                                    data-section="${sectionName}"
-                                    class="content hidden"
-                                    style="padding: ${this.contentPadding ?? "25px"}"
-                                >
-                                    ${info.content}
-                                </div>
-                            </div>
-                        `;
-                    })
-                    .flat()}
-            </ul>
+                <div class="guided--nav-bar-section">
+                    <div
+                        id="dropdown"
+                        class="guided--nav-bar-dropdown ${this.content && 'content'} ${this.info.disabled ? "disabled" : ''} ${this.info.status}"
+                        @click=${() => this.content && this.toggle()}
+                    >
+                        <div class="header">
+                            <span>${this.name}</span>
+                            <small>${this.subtitle}</small>
+                        </div>
+                        ${this.content && new Chevron({
+                            direction: "right",
+                            color: faColor,
+                            size: faSize,
+                        })}
+                    </div>
+                    ${this.content ? html`<div
+                        id="section"
+                        class="content hidden"
+                        style="padding: ${this.contentPadding ?? "25px"}"
+                    >
+                        ${this.content}
+                    </div>` : ''}
+                </div>
         `;
     }
 }
