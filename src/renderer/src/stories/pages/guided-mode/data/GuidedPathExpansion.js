@@ -194,8 +194,7 @@ export class GuidedPathExpansionPage extends Page {
 
                             if (!sesRef) delete globalResults[sub][ses]; // Delete removed sessions
                             else {
-
-                                const globalSesRef = globalResults[sub][ses]
+                                const globalSesRef = globalResults[sub][ses];
 
                                 for (let name in globalSesRef.source_data) {
                                     if (!sesRef.source_data[name]) delete globalSesRef.source_data[name]; // Delete removed interfaces
@@ -258,7 +257,10 @@ export class GuidedPathExpansionPage extends Page {
             // altContent: this.altForm,
         });
 
-        const structureState = (this.localState = merge(this.info.globalState.structure, { results: {}, keep_existing_data: true }));
+        const structureState = (this.localState = merge(this.info.globalState.structure, {
+            results: {},
+            keep_existing_data: true,
+        }));
 
         const state = structureState.state;
 
@@ -280,12 +282,11 @@ export class GuidedPathExpansionPage extends Page {
 
             // NOTE: These are custom coupled form inputs
             onUpdate: (path, value) => {
-                
-                this.unsavedUpdates = true
+                this.unsavedUpdates = true;
 
-                const parentPath = [...path]
+                const parentPath = [...path];
                 const name = parentPath.pop();
-                
+
                 if (name === "base_directory") {
                     form.getInput([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
                     const input = form.getInput([...parentPath, "format_string_path"]);
@@ -296,18 +297,16 @@ export class GuidedPathExpansionPage extends Page {
                 const value = parent[name];
 
                 if (fs) {
-                    const baseDir = form.getInput([...parentPath, "base_directory"])
-                     if (name === "format_string_path") {
-
+                    const baseDir = form.getInput([...parentPath, "base_directory"]);
+                    if (name === "format_string_path") {
                         if (value && !baseDir.value) {
                             return [
                                 {
                                     message: html`A base directory must be provided to locate your files.`,
                                     type: "error",
                                 },
-                            ]
+                            ];
                         }
-
 
                         const base_directory = [...parentPath, "base_directory"].reduce(
                             (acc, key) => acc[key],
