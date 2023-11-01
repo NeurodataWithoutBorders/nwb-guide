@@ -6,6 +6,7 @@ from flask import Response
 
 from manageNeuroconv import (
     get_all_interface_info,
+    get_all_converter_info,
     locate_data,
     get_source_schema,
     get_metadata_schema,
@@ -40,7 +41,13 @@ class AllInterfaces(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
         try:
-            return get_all_interface_info()
+            # return get_all_interface_info()
+            # return get_all_converter_info()
+
+            return {
+                **get_all_interface_info(),
+                **get_all_converter_info(),
+            }
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))

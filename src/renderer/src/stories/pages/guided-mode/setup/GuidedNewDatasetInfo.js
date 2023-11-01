@@ -9,36 +9,11 @@ import projectGlobalSchema from "../../../../../../../schemas/json/project/globa
 import { merge } from "../../utils.js";
 import { schemaToPages } from "../../FormPage.js";
 import { onThrow } from "../../../../errors";
-import baseMetadataSchema from "../../../../../../../schemas/base-metadata.schema";
 
-const changesAcrossSessions = {
-    Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
-    NWBFile: [
-        "session_id",
-        "session_start_time",
-        "identifier",
-        "data_collection",
-        "notes",
-        "pharmacolocy",
-        "session_description",
-        "slices",
-        "source_script",
-        "source_script_file_name",
-    ],
-};
+import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
+import { header } from "../../../forms/utils";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
-
-Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
-    Object.keys(v.properties)
-        .filter((prop) => !(changesAcrossSessions[globalProp] ?? []).includes(prop))
-        .forEach((prop) => {
-            const globalNestedProp =
-                projectMetadataSchema.properties[globalProp] ??
-                (projectMetadataSchema.properties[globalProp] = { properties: {} });
-            globalNestedProp.properties[prop] = baseMetadataSchema.properties[globalProp].properties[prop];
-        });
-});
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -111,7 +86,7 @@ export class GuidedNewDatasetPage extends Page {
 
         this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
-        const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
+        const pages = schemaToPages.call(this, globalSchema, ["project"], { validateEmptyValues: false }, (info) => {
             info.title = `${info.label} Global Metadata`;
             return info;
         });
@@ -126,9 +101,12 @@ export class GuidedNewDatasetPage extends Page {
         this.form = new JSONSchemaForm({
             schema,
             results: this.state,
-            validateEmptyValues: false,
+            // validateEmptyValues: false,
             dialogOptions: {
                 properties: ["createDirectory"],
+            },
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             validateOnChange,
             onUpdate: () => (this.unsavedUpdates = true),

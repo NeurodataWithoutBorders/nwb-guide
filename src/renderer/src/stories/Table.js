@@ -6,12 +6,16 @@ import { errorHue, warningHue } from "./globals";
 import { checkStatus } from "../validation";
 import { emojiFontFamily } from "./globals";
 
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
+
 const maxRows = 20;
 
 // Inject scoped stylesheet
 const styles = `
 
         ${css}
+
 
         .handsontable td[error] {
             background: hsl(${errorHue}, 100%, 90%) !important;
@@ -37,17 +41,24 @@ const styles = `
         padding-left: 20px
       }
 
-      [title] .relative::after {
-        content: 'ℹ️';
-        display: inline-block;
+      .relative .info {
         margin: 0px 5px;
-        text-align: center;
         font-size: 80%;
         font-family: ${emojiFontFamily}
       }
 
       .handsontable {
         overflow: unset !important;
+      }
+
+      th > [data-required] > *:first-child::after {
+        content: '*';
+        margin-left: 2px;
+        color: gray;
+      }
+
+      th > [data-required=true] > *:first-child::after {
+        color: red;
       }
 `;
 
@@ -59,10 +70,11 @@ export class Table extends LitElement {
     constructor({
         schema,
         data,
-        template,
+        globals,
         keyColumn,
         validateOnChange,
         onUpdate,
+        onOverride,
         validateEmptyCells,
         onStatusChange,
         contextMenu,
@@ -71,11 +83,12 @@ export class Table extends LitElement {
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
-        this.template = template ?? {};
+        this.globals = globals ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.contextMenu = contextMenu ?? {};
 
         if (onUpdate) this.onUpdate = onUpdate;
+        if (onOverride) this.onOverride = onOverride;
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
 
@@ -91,6 +104,7 @@ export class Table extends LitElement {
     static get properties() {
         return {
             data: { type: Object, reflect: true },
+            globals: { type: Object, reflect: true },
         };
     }
 
@@ -104,13 +118,9 @@ export class Table extends LitElement {
             let value;
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
-                else return "";
-            } else
-                value =
-                    (hasRow ? this.data[row][col] : undefined) ??
-                    this.template[col] ??
-                    // this.schema.properties[col].default ??
-                    "";
+                else return undefined;
+            } else value = (hasRow ? this.data[row][col] : undefined) ?? this.globals[col];
+
             return value;
         });
     }
@@ -131,14 +141,14 @@ export class Table extends LitElement {
         if (!message) {
             const errors = this.querySelectorAll("[error]");
             const len = errors.length;
-            if (len === 1) message = errors[0].title || "Error found";
+            if (len === 1) message = errors[0].getAttribute("data-message") || "Error found";
             else if (len) message = `${len} errors exist on this table.`;
         }
 
         const nUnresolved = Object.keys(this.unresolved).length;
         if (nUnresolved)
-            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a${
-                this.keyColumn ? `${this.keyColumn} ` : "n "
+            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a ${
+                this.keyColumn ? `${header(this.keyColumn)} ` : "n "
             }entry`;
 
         if (message) throw new Error(message);
@@ -147,6 +157,11 @@ export class Table extends LitElement {
     status;
     onStatusChange = () => {};
     onUpdate = () => {};
+    onOverride = () => {};
+
+    isRequired = (col) => {
+        return this.schema?.required?.includes(col);
+    };
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -168,13 +183,26 @@ export class Table extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        const colHeaders = (this.colHeaders = Object.keys(entries).sort((a, b) => {
-            if (a === this.keyColumn) return -1;
-            if (b === this.keyColumn) return 1;
-            if (entries[a].required && !entries[b].required) return -1;
-            if (!entries[a].required && entries[b].required) return 1;
-            return 0;
-        }));
+        const colHeaders = (this.colHeaders = Object.keys(entries)
+            .sort((a, b) => {
+                //Sort alphabetically
+                if (a < b) return -1;
+                if (a > b) return 1;
+                return 0;
+            })
+            .sort((a, b) => {
+                const aRequired = this.isRequired(a);
+                const bRequired = this.isRequired(b);
+                if (aRequired && bRequired) return 0;
+                if (aRequired) return -1;
+                if (bRequired) return 1;
+                return 0;
+            })
+            .sort((a, b) => {
+                if (a === this.keyColumn) return -1;
+                if (b === this.keyColumn) return 1;
+                return 0;
+            }));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -235,7 +263,7 @@ export class Table extends LitElement {
             };
 
             let ogThis = this;
-            const isRequired = ogThis.schema?.required?.includes(k);
+            const isRequired = this.isRequired(k);
 
             const validator = async function (value, callback) {
                 if (!value) {
@@ -281,9 +309,28 @@ export class Table extends LitElement {
             return info;
         });
 
-        const onAfterGetHeader = function (index, TH) {
-            const desc = entries[colHeaders[index]].description;
-            if (desc) TH.setAttribute("title", desc);
+        const onAfterGetHeader = (index, TH) => {
+            const col = colHeaders[index];
+            const desc = entries[col].description;
+
+            const rel = TH.querySelector(".relative");
+
+            const isRequired = this.isRequired(col);
+            if (isRequired) rel.setAttribute("data-required", this.validateEmptyCells ? true : undefined);
+
+            if (desc) {
+                let span = rel.querySelector(".info");
+
+                if (!span) {
+                    span = document.createElement("span");
+                    span.classList.add("info");
+                    span.innerText = "ℹ️";
+                    rel.append(span);
+                }
+
+                if (span._tippy) span._tippy.destroy();
+                tippy(span, { content: `${desc}` });
+            }
         };
 
         const data = this.#getData();
@@ -312,6 +359,8 @@ export class Table extends LitElement {
             const desc = `Right click to ${Array.from(operationSet).join("/")} ${operationOn.join("and")}.`;
             descriptionEl.innerText = desc;
         }
+
+        if (this.table) this.table.destroy();
 
         const table = new Handsontable(div, {
             data,
@@ -358,9 +407,12 @@ export class Table extends LitElement {
                 }
             }
 
+            const isUserUpdate = initialCellsToUpdate <= validated;
+
             // Transfer data to object
             if (header === this.keyColumn) {
-                if (value !== rowName) {
+                console.log(value, rowName);
+                if (value && value !== rowName) {
                     const old = target[rowName] ?? {};
                     this.data[value] = old;
                     delete target[rowName];
@@ -371,13 +423,21 @@ export class Table extends LitElement {
 
             // Update data on passed object
             else {
-                if (value == undefined || value === "") delete target[rowName][header];
-                else target[rowName][header] = value;
+                const globalValue = this.globals[header];
+
+                if (value == undefined || value === "") {
+                    if (globalValue) {
+                        value = target[rowName][header] = globalValue;
+                        table.setDataAtCell(row, prop, value);
+                        this.onOverride(header, value, rowName);
+                    }
+                    target[rowName][header] = undefined;
+                } else target[rowName][header] = value === globalValue ? undefined : value;
             }
 
             validated++;
 
-            if (initialCellsToUpdate < validated) this.onUpdate(rowName, header, value);
+            if (isUserUpdate) this.onUpdate(rowName, header, value);
 
             if (typeof isValid === "function") isValid();
             // }
@@ -394,11 +454,13 @@ export class Table extends LitElement {
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
             physicalRows.map(async (row) => {
+                const rowName = rowHeaders[row];
                 // const cols = this.data[rowHeaders[row]]
                 // Object.keys(cols).map(k => cols[k] = '')
                 // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k])) // Validate with empty values before removing
                 delete this.data[rowHeaders[row]];
                 delete unresolved[row];
+                this.onUpdate(rowName, null, undefined); // NOTE: Global metadata PR might simply set all data values to undefined
             });
         });
 
@@ -424,18 +486,27 @@ export class Table extends LitElement {
         const cell = this.table.getCell(row, prop); // NOTE: Does not resolve unless the cell is rendered...
 
         if (cell) {
-            let title = "";
+            let message = "";
+            let theme = "";
             if (warnings.length) {
-                cell.setAttribute("warning", "");
-                title = warnings.map((o) => o.message).join("\n");
+                (theme = "warning"), (message = warnings.map((o) => o.message).join("\n"));
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                cell.setAttribute("error", "");
-                title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+                (theme = "error"), (message = errors.map((o) => o.message).join("\n")); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
-            if (title) cell.title = title;
+            if (theme) cell.setAttribute(theme, "");
+
+            if (cell._tippy) {
+                cell._tippy.destroy();
+                cell.removeAttribute("data-message");
+            }
+
+            if (message) {
+                tippy(cell, { content: message, theme });
+                cell.setAttribute("data-message", message);
+            }
         }
 
         this.#checkStatus(); // Check status after every validation update

@@ -55,7 +55,7 @@ export class GuidedStartPage extends Page {
                     <div>
                         <br>
                         <p>
-                           In the NWB GUIDE, the process of running a conversion pipeline is broken into four high-level sections.
+                           In the GUIDE, the process of running a conversion pipeline is broken into four high-level sections.
                         <p>
                         <h4>1. Project Structure</h4>
                         <p>
@@ -65,23 +65,34 @@ export class GuidedStartPage extends Page {
                         <p>
                             The second section will have you provide your source data files and NWB File metadata on a per-subject basis to populate your files.
                         </p>
+
                         ${new InspectorListItem({
-                            message: html`<b>Red boxes are error messages.</b> These will block your conversion progress
+                            message: html`Red boxes are <b>Error</b> messages. These will block your conversion progress
                                 until resolved.`,
                             type: "error",
                         })}
                         ${new InspectorListItem({
-                            message: html`<b>Yellow boxes are warnings.</b> Fixing them will align your NWB files with
-                                best practices.`,
+                            message: html`Yellow boxes are <b>Warning</b> messages. Fixing them will align your NWB
+                                files with best practices.`,
                             type: "warning",
                         })}
+
+                        <p>
+                            Throughout the forms found in the GUIDE, asterisks (<span style="color:red;">*</span>) represent required properties.
+                            Attempting to move forward will throw an <b>Error</b> until these properties are filled in.
+                        </p>
+                        <p>
+                            Gray asterisks (<span style="color:gray;">*</span>) are sometimes used to represent loose requirements, where missing this property will throw an <b>Error</b>
+                            — though you don't need to specify a value at the current stage.
+                        </p>
+
                         <h4>3. Conversion Preview</h4>
                         <p>
                             In the third section, you will preview your conversion before uploading to DANDI.
                         </p>
                         <h4>4. Final Review</h4>
                         <p>
-                            Finally, you will upload your conversion to DANDI and review the resulting dandiset.
+                            Finally, you will upload your conversion to DANDI and review the resulting Dandiset.
                         </p>
 
                         <br>
@@ -89,7 +100,7 @@ export class GuidedStartPage extends Page {
                         <hr>
                         ${new InfoBox({
                             header: "Where can I learn more about the conversion process?",
-                            content: html`
+                            content: `
                                 Although not required to use the GUIDE, you can learn more about the NWB conversion
                                 process in the
                                 <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"

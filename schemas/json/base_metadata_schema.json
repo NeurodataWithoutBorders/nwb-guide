@@ -1,8 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "base_metafile.schema.json",
-  "title": "Base schema for the metafile",
-  "description": "Base schema for the metafile",
   "version": "0.1.0",
   "type": "object",
   "required": ["NWBFile"],
@@ -102,7 +100,7 @@
         },
         "stimulus_notes": {
           "type": "string",
-          "description": "Notes about data collection and analysis."
+          "description": "Notes about stimuli, such as how and where presented."
         }
       }
     },

@@ -2,7 +2,7 @@ import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
-import { merge, randomizeElements, mapSessions } from "./utils.js";
+import { randomizeElements, mapSessions } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
 import { resolveResults } from "./guided-mode/data/utils.js";
@@ -22,9 +22,6 @@ export class Page extends LitElement {
     constructor(info = {}) {
         super();
         Object.assign(this.info, info);
-
-        this.style.height = "100%";
-        this.style.color = "black";
     }
 
     createRenderRoot() {
@@ -56,8 +53,9 @@ export class Page extends LitElement {
     };
 
     notify = (...args) => {
-        const note = notify(...args);
-        this.#notifications.push(note);
+        const ref = notify(...args);
+        this.#notifications.push(ref);
+        return ref;
     };
 
     to = async (transition) => {

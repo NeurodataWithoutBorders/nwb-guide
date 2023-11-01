@@ -33,6 +33,14 @@
         "AlphaOmegaRecordingInterface",
         "DeepLabCutInterface",
         "SLEAPInterface",
-        "AbfInterface"
+        "AbfInterface",
+        "FicTracDataInterface",
+        "AudioInterface",
+        "MiniscopeBehaviorInterface",
+        "EDFRecordingInterface",
+        "SpikeGLXConverterPipe",
+        "BrukerTiffSinglePlaneConverter",
+        "BrukerTiffMultiPlaneConverter",
+        "MiniscopeConverter"
     ]
 }

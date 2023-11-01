@@ -6,6 +6,10 @@ import { Table } from "../../../Table.js";
 
 import { updateResultsFromSubjects } from "./utils";
 import { merge } from "../../utils.js";
+import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
+import { Button } from "../../../Button.js";
+import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { header } from "../../../forms/utils";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
@@ -14,11 +18,43 @@ export class GuidedSubjectsPage extends Page {
 
     header = {
         subtitle: "Enter all metadata known about each experiment subject",
+        controls: [
+            new Button({
+                label: "Edit Global Metadata",
+                onClick: () => {
+                    this.#globalModal.form.results = merge(this.info.globalState.project?.Subject, {});
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
     };
 
     // Abort save if subject structure is invalid
     beforeSave = () => {
-        this.info.globalState.subjects = merge(this.localState, this.info.globalState.subjects); // Merge the local and global states
+        try {
+            this.table.validate();
+        } catch (e) {
+            this.notify(e.message, "error");
+            throw e;
+        }
+
+        // Delete old subjects before merging
+        const { subjects: globalSubjects } = this.info.globalState;
+
+        for (let key in globalSubjects) {
+            if (!this.localState[key]) delete globalSubjects[key];
+        }
+
+        const noSessions = Object.keys(this.localState).filter((sub) => !this.localState[sub].sessions?.length);
+        if (noSessions.length) {
+            const error = `${noSessions.length} subject${
+                noSessions.length > 1 ? "s are" : " is"
+            } missing Sessions entries`;
+            this.notify(error, "error");
+            throw new Error(error);
+        }
+
+        this.info.globalState.subjects = merge(this.localState, globalSubjects); // Merge the local and global states
 
         const { results, subjects } = this.info.globalState;
 
@@ -28,15 +64,6 @@ export class GuidedSubjectsPage extends Page {
         //     }
         // });
 
-        const noSessions = Object.keys(subjects).filter((sub) => !subjects[sub].sessions?.length);
-        if (noSessions.length) {
-            const error = `${noSessions.length} subject${
-                noSessions.length > 1 ? "s are" : " is"
-            } missing Sessions entries`;
-            this.notify(error, "error");
-            throw new Error(error);
-        }
-
         const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => {
             acc[key] = {};
             return acc;
@@ -44,13 +71,6 @@ export class GuidedSubjectsPage extends Page {
 
         // Modify the results object to track new subjects / sessions
         updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
-
-        try {
-            this.table.validate();
-        } catch (e) {
-            this.notify(e.message, "error");
-            throw e;
-        }
     };
 
     footer = {
@@ -61,6 +81,26 @@ export class GuidedSubjectsPage extends Page {
         const add = this.query("#addButton");
         add.onclick = () => this.table.table.alter("insert_row_below");
         super.updated(); // Call if updating data
+    }
+
+    #globalModal;
+
+    connectedCallback() {
+        super.connectedCallback();
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
+            header: "Edit Global Subject Data",
+            key: "Subject",
+            schema: globalSchema.properties.Subject,
+            validateOnChange: (key, parent, path) => {
+                return validateOnChange(key, parent, ["Subject", ...path]);
+            },
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
     }
 
     render() {
@@ -80,11 +120,14 @@ export class GuidedSubjectsPage extends Page {
         this.table = new Table({
             schema: subjectSchema,
             data: subjects,
-            template: this.info.globalState.project.Subject,
+            globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
             validateEmptyCells: false,
             contextMenu: {
                 ignore: ["row_below"],
+            },
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             onUpdate: () => {
                 this.unsavedUpdates = true;
