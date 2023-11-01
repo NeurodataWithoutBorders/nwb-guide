@@ -130,7 +130,7 @@ export class List extends LitElement {
     declare listStyles: any
 
     allowDrop = (ev) => ev.preventDefault();
-    
+
     drag = (ev, i) => {
       ev.dataTransfer.setData("text", `item-${i}`);
     }
@@ -188,7 +188,7 @@ export class List extends LitElement {
         li.ondrop = (ev) => this.drop(ev, i);
         li.ondragover = this.allowDrop;
       }
-      
+
 
       const outerDiv = document.createElement('div')
       const div = document.createElement('div')
@@ -225,8 +225,8 @@ export class List extends LitElement {
         div.append(keyEl, sepEl);
 
         this.object[resolvedKey] = value;
-      } 
-      
+      }
+
       else {
         this.object[i] = value;
       }
