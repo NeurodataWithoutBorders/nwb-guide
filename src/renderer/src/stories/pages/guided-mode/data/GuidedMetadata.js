@@ -21,7 +21,8 @@ const propsToIgnore = [
     "Ophys", // Always ignore ophys metadata (for now)
     "Icephys", // Always ignore icephys metadata (for now)
     "Behavior", // Always ignore behavior metadata (for now)
-    new RegExp("ndx-.+"), // Ignore all ndx extensions
+    // new RegExp("ndx-.+"), // Ignore all ndx extensions
+    "ndx-dandi-icephys",
     "subject_id",
     "session_id",
 ];
