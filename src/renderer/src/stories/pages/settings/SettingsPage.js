@@ -16,17 +16,9 @@ const schema = {
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
-import { merge } from "../utils.js";
+import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
-
-const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
-    for (const prop in schemaProps) {
-        const propInfo = schemaProps[prop]?.properties;
-        if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
-        else if (!(prop in resolved)) resolved[prop] = undefined;
-    }
-};
 
 export class SettingsPage extends Page {
     header = {

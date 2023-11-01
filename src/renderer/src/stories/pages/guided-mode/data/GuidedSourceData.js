@@ -8,6 +8,19 @@ import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
+import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { header } from "../../../forms/utils";
+import { Button } from "../../../Button.js";
+
+const propsToIgnore = [
+    "verbose",
+    "es_key",
+    "exclude_shanks",
+    "load_sync_channel",
+    "stream_id", // NOTE: May be desired for other interfaces
+    "nsx_override",
+];
+
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
@@ -18,8 +31,17 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     header = {
+        controls: [
+            new Button({
+                label: "Edit Global Metadata",
+                onClick: () => {
+                    this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {});
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
         subtitle:
-            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
     };
 
     footer = {
@@ -115,14 +137,11 @@ export class GuidedSourceDataPage extends ManagedPage {
             schema: preprocessSourceDataSchema(schema),
             results: info.source_data,
             emptyMessage: "No source data required for this session.",
-            ignore: [
-                "verbose",
-                "es_key",
-                "exclude_shanks",
-                "load_sync_channel",
-                "stream_id", // NOTE: May be desired for other interfaces
-                "nsx_override",
-            ],
+            ignore: propsToIgnore,
+            globals: this.info.globalState.project.SourceData,
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+            },
             // onlyRequired: true,
             onUpdate: () => (this.unsavedUpdates = true),
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
@@ -137,6 +156,25 @@ export class GuidedSourceDataPage extends ManagedPage {
             form,
         };
     };
+
+    #globalModal = null;
+
+    connectedCallback() {
+        super.connectedCallback();
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
+            header: "Edit Global Source Data",
+            propsToRemove: [...propsToIgnore, "folder_path", "file_path"],
+            key: "SourceData",
+            schema: this.info.globalState.schema.source_data,
+            hasInstances: true,
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
+    }
 
     render() {
         this.localState = { results: merge(this.info.globalState.results, {}) };

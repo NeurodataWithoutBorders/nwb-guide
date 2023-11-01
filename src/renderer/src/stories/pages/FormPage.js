@@ -30,8 +30,6 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
                 })
             );
 
-            delete schema.properties[key];
-
             if (optionsCopy.ignore && optionsCopy.ignore.includes(key)) return null;
             return page;
         })
