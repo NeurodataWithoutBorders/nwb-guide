@@ -100,9 +100,9 @@ const componentCSS = `
       margin: 15px;
     }
 
-hr {
-  margin: 1em 0 1.5em 0;
-}
+    hr {
+    margin: 1em 0 1.5em 0;
+    }
 
     pre {
         white-space: pre-wrap;       /* Since CSS 2.1 */
@@ -137,14 +137,19 @@ hr {
     border-bottom: 1px solid gainsboro;
   }
 
-  .guided--text-input-instructions {
-    font-size: 13px;
-    width: 100%;
-    padding-top: 4px;
-    color: dimgray !important;
-    margin: 0 0 1em;
-    line-height: 1.4285em;
-}
+    .guided--text-input-instructions {
+        font-size: 13px;
+        width: 100%;
+        padding-top: 4px;
+        color: dimgray !important;
+        margin: 0 0 1em;
+        line-height: 1.4285em;
+    }
+
+    [disabled] {
+        opacity: 0.5;
+        pointer-events: none;
+    }
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -843,45 +848,51 @@ export class JSONSchemaForm extends LitElement {
             if (this.mode === "accordion" && hasMany) {
                 const headerName = header(name);
 
-                this.#nestedForms[name] = new JSONSchemaForm({
-                    identifier: this.identifier,
-                    schema: info,
-                    results: { ...results[name] },
-                    globals: this.globals?.[name],
+                // Check properties that will be rendered before creating the accordion
+                const base = [...this.base, ...localPath];
+                const renderable = this.#getRenderable(info, required[name], base);
 
-                    states: this.states,
+                if (renderable.length) {
+                    this.#nestedForms[name] = new JSONSchemaForm({
+                        identifier: this.identifier,
+                        schema: info,
+                        results: { ...results[name] },
+                        globals: this.globals?.[name],
 
-                    mode: this.mode,
+                        states: this.states,
 
-                    onUpdate: (internalPath, value) => {
-                        const path = [...localPath, ...internalPath];
-                        this.updateData(path, value);
-                    },
+                        mode: this.mode,
 
-                    required: required[name], // Scoped to the sub-schema
-                    ignore: this.ignore,
-                    dialogOptions: this.dialogOptions,
-                    dialogType: this.dialogType,
-                    onlyRequired: this.onlyRequired,
-                    showLevelOverride: this.showLevelOverride,
-                    deferLoading: this.deferLoading,
-                    conditionalRequirements: this.conditionalRequirements,
-                    validateOnChange: (...args) => this.validateOnChange(...args),
-                    onThrow: (...args) => this.onThrow(...args),
-                    validateEmptyValues: this.validateEmptyValues,
-                    onStatusChange: (status) => {
-                        accordion.setSectionStatus(headerName, status);
-                        this.checkStatus();
-                    }, // Forward status changes to the parent form
-                    onInvalid: (...args) => this.onInvalid(...args),
-                    onLoaded: () => {
-                        this.nLoaded++;
-                        this.checkAllLoaded();
-                    },
-                    renderTable: (...args) => this.renderTable(...args),
-                    onOverride: (...args) => this.onOverride(...args),
-                    base: [...this.base, ...localPath],
-                });
+                        onUpdate: (internalPath, value) => {
+                            const path = [...localPath, ...internalPath];
+                            this.updateData(path, value);
+                        },
+
+                        required: required[name], // Scoped to the sub-schema
+                        ignore: this.ignore,
+                        dialogOptions: this.dialogOptions,
+                        dialogType: this.dialogType,
+                        onlyRequired: this.onlyRequired,
+                        showLevelOverride: this.showLevelOverride,
+                        deferLoading: this.deferLoading,
+                        conditionalRequirements: this.conditionalRequirements,
+                        validateOnChange: (...args) => this.validateOnChange(...args),
+                        onThrow: (...args) => this.onThrow(...args),
+                        validateEmptyValues: this.validateEmptyValues,
+                        onStatusChange: (status) => {
+                            accordion.setSectionStatus(headerName, status);
+                            this.checkStatus();
+                        }, // Forward status changes to the parent form
+                        onInvalid: (...args) => this.onInvalid(...args),
+                        onLoaded: () => {
+                            this.nLoaded++;
+                            this.checkAllLoaded();
+                        },
+                        renderTable: (...args) => this.renderTable(...args),
+                        onOverride: (...args) => this.onOverride(...args),
+                        base,
+                    });
+                }
 
                 if (!this.states[headerName]) this.states[headerName] = {};
                 this.states[headerName].subtitle = `${
@@ -896,6 +907,8 @@ export class JSONSchemaForm extends LitElement {
                 });
 
                 accordion.id = name; // assign name to accordion id
+
+                if (!renderable.length) accordion.setAttribute("disabled", "");
 
                 return accordion;
             }
