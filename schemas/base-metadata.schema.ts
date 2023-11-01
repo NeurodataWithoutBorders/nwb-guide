@@ -11,4 +11,31 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
 
 }
 
+
+export const instanceSpecificFields = {
+    Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
+    NWBFile: [
+        "session_id",
+        "session_start_time",
+        "identifier",
+        "data_collection",
+        "notes",
+        "pharmacolocy",
+        "session_description",
+        "slices",
+        "source_script",
+        "source_script_file_name",
+    ],
+};
+
+
+const globalSchema = structuredClone(preprocessMetadataSchema());
+Object.entries(globalSchema.properties).forEach(([globalProp, schema]) => {
+    instanceSpecificFields[globalProp]?.forEach((prop) =>  delete schema.properties[prop]);
+});
+
+export {
+    globalSchema
+}
+
 export default preprocessMetadataSchema()

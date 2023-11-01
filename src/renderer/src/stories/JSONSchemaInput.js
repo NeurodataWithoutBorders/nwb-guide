@@ -121,6 +121,12 @@ export class JSONSchemaInput extends LitElement {
 
         const el = this.getElement();
         if (el.type === "checkbox") el.checked = value;
+        else if (el.classList.contains("list"))
+            el.children[0].items = value
+                ? value.map((value) => {
+                      return { value };
+                  })
+                : [];
         else el.value = value;
 
         return true;
@@ -311,7 +317,7 @@ export class JSONSchemaInput extends LitElement {
             });
 
             return html`
-                <div class="schema-input" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
+                <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
                     ${list} ${addButton}
                 </div>
             `;

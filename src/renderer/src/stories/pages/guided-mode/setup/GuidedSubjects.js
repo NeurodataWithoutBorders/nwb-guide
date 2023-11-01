@@ -6,6 +6,10 @@ import { Table } from "../../../Table.js";
 
 import { updateResultsFromSubjects } from "./utils";
 import { merge } from "../../utils.js";
+import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
+import { Button } from "../../../Button.js";
+import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { header } from "../../../forms/utils";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
@@ -14,6 +18,15 @@ export class GuidedSubjectsPage extends Page {
 
     header = {
         subtitle: "Enter all metadata known about each experiment subject",
+        controls: [
+            new Button({
+                label: "Edit Global Metadata",
+                onClick: () => {
+                    this.#globalModal.form.results = merge(this.info.globalState.project?.Subject, {});
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
     };
 
     // Abort save if subject structure is invalid
@@ -70,6 +83,26 @@ export class GuidedSubjectsPage extends Page {
         super.updated(); // Call if updating data
     }
 
+    #globalModal;
+
+    connectedCallback() {
+        super.connectedCallback();
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
+            header: "Edit Global Subject Data",
+            key: "Subject",
+            schema: globalSchema.properties.Subject,
+            validateOnChange: (key, parent, path) => {
+                return validateOnChange(key, parent, ["Subject", ...path]);
+            },
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
+    }
+
     render() {
         const subjects = (this.localState = merge(this.info.globalState.subjects ?? {}, {}));
 
@@ -87,11 +120,14 @@ export class GuidedSubjectsPage extends Page {
         this.table = new Table({
             schema: subjectSchema,
             data: subjects,
-            template: this.info.globalState.project.Subject,
+            globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
             validateEmptyCells: false,
             contextMenu: {
                 ignore: ["row_below"],
+            },
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             onUpdate: () => {
                 this.unsavedUpdates = true;
