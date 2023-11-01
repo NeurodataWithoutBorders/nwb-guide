@@ -51,6 +51,10 @@ export class List extends LitElement {
         text-overflow: ellipsis
       }
 
+      :host(:not([unordered])) li {
+        cursor: move;
+      }
+
       :host([unordered]) ol {
         list-style-type: none;
         display: flex;
@@ -67,6 +71,10 @@ export class List extends LitElement {
         justify-content: center;
         display: flex;
         align-items: center;
+      }
+
+      [contenteditable] {
+        cursor: text;
       }
 
     `;
@@ -121,6 +129,34 @@ export class List extends LitElement {
 
     declare listStyles: any
 
+    allowDrop = (ev) => ev.preventDefault();
+    
+    drag = (ev, i) => {
+      ev.dataTransfer.setData("text", `item-${i}`);
+    }
+
+    // dragOver = (ev) => {
+    //       const data = ev.dataTransfer.getData("text");
+    //       el.insertAdjacentElement('beforebegin', this.shadowRoot.getElementById(data));
+    // }
+
+    drop = (ev, i) => {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text");
+      const movedIdx = data.split('-')[1]
+      const movedItem = this.items[movedIdx]
+      this.items.splice(movedIdx, 1)
+      this.items.splice(i, 0, movedItem)
+
+      const ogMoved = this.#ogValues[movedIdx]
+      this.#ogValues.splice(movedIdx, 1)
+      this.#ogValues.splice(i, 0, ogMoved)
+
+
+
+      this.items = [...this.items]
+    }
+
 
     constructor(props: ListProps = {}) {
       super();
@@ -139,21 +175,36 @@ export class List extends LitElement {
       this.items = [...this.items, item]
     }
 
+    #ogValues = []
+
     #renderListItem = (item: ListItemType, i: number) => {
       const { key, value, content = value } = item;
       const li = document.createElement("li");
+      li.id = `item-${i}`;
+
+      if (!this.unordered) {
+        li.draggable = true;
+        li.ondragstart = (ev) => this.drag(ev, i);
+        li.ondrop = (ev) => this.drop(ev, i);
+        li.ondragover = this.allowDrop;
+      }
+      
 
       const outerDiv = document.createElement('div')
       const div = document.createElement('div')
       li.append(outerDiv)
       outerDiv.append(div)
 
-      const keyEl = document.createElement("span");
+      let editableElement = document.createElement("span");
 
       let resolvedKey = key;
       const originalValue = resolvedKey;
 
-      if (key) {
+      const isUnordered = !!key
+
+      if (!this.#ogValues[i]) this.#ogValues[i] = isUnordered ? resolvedKey : value
+
+      if (isUnordered) {
 
         this.setAttribute('unordered', '')
 
@@ -164,8 +215,9 @@ export class List extends LitElement {
             resolvedKey = `${originalValue}_${i}`;
         }
 
+        const keyEl = editableElement
+
         keyEl.innerText = resolvedKey;
-        keyEl.contentEditable = true;
         keyEl.style.cursor = "text";
 
         const sepEl = document.createElement("span");
@@ -173,14 +225,18 @@ export class List extends LitElement {
         div.append(keyEl, sepEl);
 
         this.object[resolvedKey] = value;
-      } else this.object[i] = value;
+      } 
+      
+      else {
+        this.object[i] = value;
+      }
 
       if (typeof content === 'string')  {
-        const valueEl = document.createElement("span");
+          const valueEl = editableElement = document.createElement("span");
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
-      else li.append(content)
+      else li.append(editableElement = content)
 
 
 
@@ -197,23 +253,32 @@ export class List extends LitElement {
 
         outerDiv.appendChild(button);
 
+        editableElement.contentEditable = true;
+
         // Stop enter key from creating new line
-        keyEl.addEventListener("keydown", function (e) {
+        editableElement.addEventListener("keydown", (e) => {
             if (e.keyCode === 13) {
-                keyEl.blur();
+              editableElement.blur();
                 return false;
             }
         });
 
         const deleteListItem = () => this.delete(i);
 
-        keyEl.addEventListener("blur", () => {
-            const newKey = keyEl.innerText;
-            if (newKey === "") keyEl.innerText = resolvedKey; // Reset to original value
+        const ogValue = this.#ogValues[i];
+
+        editableElement.addEventListener("blur", () => {
+            const newKey = editableElement.innerText;
+            if (newKey === "") editableElement.innerText = ogValue; // Reset to original value
             else {
-                delete this.object[resolvedKey];
-                resolvedKey = newKey;
-                this.object[resolvedKey] = value;
+                  const oKey = isUnordered ? resolvedKey : i;
+                  delete this.object[oKey];
+                  this.object[newKey] = value;
+
+                  if (!isUnordered) {
+                    this.items[i].value = newKey
+                    this.items = [...this.items]
+                  }
             }
         });
 
