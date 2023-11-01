@@ -110,7 +110,6 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value, forceValidation = false) {
-
         if (this.value === value && !forceValidation) return false;
 
         const { path: fullPath } = this;
