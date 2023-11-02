@@ -270,7 +270,6 @@ export class Table extends LitElement {
             const isRequired = this.isRequired(k);
 
             const validator = async function (value, callback) {
-
                 const validateEmptyCells = ogThis.validateEmptyCells;
                 const willValidate =
                     validateEmptyCells === true ||
@@ -465,7 +464,6 @@ export class Table extends LitElement {
                     delete unresolved[row];
                     rowHeaders[row] = value;
                 }
-
             }
 
             // Update data on passed object
