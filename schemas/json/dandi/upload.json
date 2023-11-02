@@ -5,16 +5,18 @@
             "description": "The unique identifier for your Dandiset, manually created on the <a href='https://dandiarchive.org' target='_blank'>main archive</a> or <a href='https://gui-staging.dandiarchive.org' target='_blank'>staging server</a>."
         },
         "number_of_jobs": {
-            "type": "number",
+            "type": "integer",
             "title": "Job Count",
-            "description": "The number of files to upload in parallel.",
-            "default": 1
+            "description": "The number of files to upload in parallel. A value of <code>-1</code> uses all available processes",
+            "default": 1,
+            "min": -1
         },
         "number_of_threads": {
-            "type": "number",
+            "type": "integer",
             "title": "Threads per Job",
             "description": "The number of threads to handle each file.",
-            "default": 1
+            "default": 1,
+            "min": -1
         },
         "cleanup": {
             "type": "boolean",

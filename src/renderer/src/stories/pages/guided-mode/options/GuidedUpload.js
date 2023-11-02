@@ -5,9 +5,12 @@ import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
-import dandiUploadSchema from "../../../../../../../schemas/json/dandi/upload.json";
+import dandiUploadSchema from "../../../../../../../schemas/dandi-upload.schema";
 import { dandisetInfoContent, uploadToDandi } from "../../uploads/UploadsPage.js";
 import { InfoBox } from "../../../InfoBox.js";
+import { until } from "lit/directives/until.js";
+import { onServerOpen } from "../../../../server";
+import { baseUrl } from "../../../../globals.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -64,17 +67,30 @@ export class GuidedUploadPage extends Page {
     render() {
         const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
 
-        this.form = new JSONSchemaForm({
-            schema: dandiUploadSchema,
-            results: state.info,
-            onUpdate: () => (this.unsavedUpdates = true),
-            onThrow,
-        });
+
+        const promise = onServerOpen(() => {
+            return fetch(new URL("cpus", baseUrl))
+            .then((res) => res.json()).then(({ physical }) => {
+
+                dandiUploadSchema.properties.number_of_jobs.max = physical;
+
+                return this.form = new JSONSchemaForm({
+                    schema: dandiUploadSchema,
+                    results: state.info,
+                    onUpdate: () => (this.unsavedUpdates = true),
+                    onThrow,
+                });
+
+            })
+        })
 
         return html`${new InfoBox({
                 header: "How do I create a Dandiset?",
                 content: dandisetInfoContent,
-            })}<br /><br />${this.form} `;
+            })}<br /><br />${until(
+                promise,
+                html`Loading form contents...`
+            )} `;
     }
 }
 

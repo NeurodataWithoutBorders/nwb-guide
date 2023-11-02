@@ -124,6 +124,8 @@ export class GuidedSourceDataPage extends ManagedPage {
                 })
             );
 
+            await this.save()
+
             this.to(1);
         },
     };
