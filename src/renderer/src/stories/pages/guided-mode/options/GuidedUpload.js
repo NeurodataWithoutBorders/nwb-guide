@@ -70,8 +70,10 @@ export class GuidedUploadPage extends Page {
         const promise = onServerOpen(() => {
             return fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
-                .then(({ physical }) => {
+                .then(({ physical, logical }) => {
+                    
                     dandiUploadSchema.properties.number_of_jobs.max = physical;
+                    dandiUploadSchema.properties.number_of_threads.max = logical / physical;
 
                     return (this.form = new JSONSchemaForm({
                         schema: dandiUploadSchema,

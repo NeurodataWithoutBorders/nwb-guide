@@ -171,11 +171,10 @@ export class UploadsPage extends Page {
             return fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
                 .then(({ physical, logical }) => {
-                    console.log(physical);
 
                     dandiSchema.properties.number_of_jobs.max = physical;
                     dandiSchema.properties.number_of_threads.max = logical / physical;
-                    
+
                     // NOTE: API Keys and Dandiset IDs persist across selected project
                     return (this.form = new JSONSchemaForm({
                         results: globalState,
