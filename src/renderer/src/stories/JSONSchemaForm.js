@@ -501,6 +501,8 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
+    // willValidateWhenEmpty = (k) =>  (Array.isArray(this.validateEmptyValues) && this.validateEmptyValues.includes(k)) || this.validateEmptyValues;
+
     #validateRequirements = async (resolved = this.resolved, requirements = this.#requirements, parentPath) => {
         let invalid = [];
 
