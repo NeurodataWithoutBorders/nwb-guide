@@ -102,10 +102,7 @@ def get_cpu_count():
     physical = cpu_count(logical=False)
     logical = cpu_count()
 
-    return dict(
-        physical=physical,
-        logical=logical
-    )
+    return dict(physical=physical, logical=logical)
 
 
 @api.route("/server_shutdown", endpoint="shutdown")
