@@ -11,6 +11,8 @@ import { Button } from "../../../Button.js";
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { header } from "../../../forms/utils";
 
+import globalIcon from "../../../assets/global.svg?raw";
+
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {
         super(...args);
@@ -20,6 +22,7 @@ export class GuidedSubjectsPage extends Page {
         subtitle: "Enter all metadata known about each experiment subject",
         controls: [
             new Button({
+                icon: globalIcon,
                 label: "Edit Global Metadata",
                 onClick: () => {
                     this.#globalModal.form.results = merge(this.info.globalState.project?.Subject, {});
@@ -88,7 +91,7 @@ export class GuidedSubjectsPage extends Page {
     connectedCallback() {
         super.connectedCallback();
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
-            header: "Edit Global Subject Data",
+            header: "Global Subject Metadata",
             key: "Subject",
             schema: globalSchema.properties.Subject,
             validateOnChange: (key, parent, path) => {
