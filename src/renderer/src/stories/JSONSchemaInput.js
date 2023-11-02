@@ -249,10 +249,10 @@ export class JSONSchemaInput extends LitElement {
                         }
                     },
                     onThrow: (...args) => this.#onThrow(...args),
-                }
+                };
 
-                table = this.createTable(name, tableMetadata, fullPath) // Try creating table. Otherwise use nested form
-                if (table) return this.form.tables[name] = (table === true) ? new BasicTable(tableMetadata) : table
+                table = this.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
+                if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
 
             const headerText = document.createElement("span");
@@ -268,17 +268,15 @@ export class JSONSchemaInput extends LitElement {
 
             let tempParent = {};
 
-            const itemInfo = info.items
-            const formProperties = itemInfo.properties
+            const itemInfo = info.items;
+            const formProperties = itemInfo.properties;
 
-
-            let element
-
+            let element;
 
             addButton.addEventListener("click", () => {
                 if (modal) modal.remove();
 
-                tempParent[name] = {} // Wipe previous values
+                tempParent[name] = {}; // Wipe previous values
 
                 modal = new Modal({
                     header: headerText,
@@ -288,17 +286,19 @@ export class JSONSchemaInput extends LitElement {
                 const div = document.createElement("div");
                 div.style.padding = "25px";
 
-                element = formProperties ? new JSONSchemaForm({
-                    schema: itemInfo,
-                    results: tempParent[name],
-                    onThrow: this.#onThrow
-                }) : new JSONSchemaInput({
-                    info: itemInfo,
-                    validateOnChange: false,
-                    path: this.path,
-                    form: this.form,
-                    onUpdate: (value) => (tempParent[name] = value),
-                })
+                element = formProperties
+                    ? new JSONSchemaForm({
+                          schema: itemInfo,
+                          results: tempParent[name],
+                          onThrow: this.#onThrow,
+                      })
+                    : new JSONSchemaInput({
+                          info: itemInfo,
+                          validateOnChange: false,
+                          path: this.path,
+                          form: this.form,
+                          onUpdate: (value) => (tempParent[name] = value),
+                      });
 
                 div.append(element);
 
@@ -326,16 +326,16 @@ export class JSONSchemaInput extends LitElement {
                 primary: true,
             });
 
-            submitButton.addEventListener("click", async  () => {
-                
+            submitButton.addEventListener("click", async () => {
                 let value = tempParent[name];
 
                 if (formProperties) {
-                    await element.validate()
+                    await element.validate();
                     if (itemInfo?.format) {
-                        let newValue = itemInfo?.format
-                        for (let key in formProperties) newValue = newValue.replace(`{${key}}`, value[key] ?? '').trim()
-                        value = newValue
+                        let newValue = itemInfo?.format;
+                        for (let key in formProperties)
+                            newValue = newValue.replace(`{${key}}`, value[key] ?? "").trim();
+                        value = newValue;
                     }
                 }
 

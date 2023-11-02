@@ -350,22 +350,24 @@ export class JSONSchemaForm extends LitElement {
         const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !requiredButNotSpecified.length;
 
-
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
 
-        const allErrors = Array.from(flaggedInputs).map(el => {
-            return Array.from(el.nextElementSibling.children).map(li => li.message)
-        }).flat()
+        const allErrors = Array.from(flaggedInputs)
+            .map((el) => {
+                return Array.from(el.nextElementSibling.children).map((li) => li.message);
+            })
+            .flat();
 
         const nMissingRequired = allErrors.reduce((acc, curr) => {
-            return acc += curr.includes(this.#isARequiredPropertyString) ? 1 : 0
-        }, 0)
-        
-        console.log(allErrors)
+            return (acc += curr.includes(this.#isARequiredPropertyString) ? 1 : 0);
+        }, 0);
+
+        console.log(allErrors);
 
         // Print out a detailed error message if any inputs are missing
-        let message = '';
-        if (!isValid && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`
+        let message = "";
+        if (!isValid && nMissingRequired === allErrors.length)
+            message = `${nMissingRequired} required inputs are not defined.`;
 
         // Check if all inputs are valid
         if (flaggedInputs.length) {
@@ -647,7 +649,7 @@ export class JSONSchemaForm extends LitElement {
         return value === undefined || value === "";
     }
 
-    #isARequiredPropertyString = `is a required property`
+    #isARequiredPropertyString = `is a required property`;
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, path = [], checkLinks = true) => {
@@ -674,10 +676,8 @@ export class JSONSchemaForm extends LitElement {
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
 
-
         const isUndefined = this.isUndefined(parent[name]);
         const schema = this.getSchema(localPath);
-    
 
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {
@@ -694,12 +694,10 @@ export class JSONSchemaForm extends LitElement {
                     }, externalPath);
                 }
             }
-        } 
+        }
 
         if (!errors.length) {
-
             if (isUndefined) {
-
                 // Throw at least a basic warning if a non-linked property is required and missing
                 if (!hasLinks && isRequired) {
                     const schema = this.getSchema(localPath);
@@ -718,8 +716,8 @@ export class JSONSchemaForm extends LitElement {
                         });
                     }
                 }
-            } 
-            
+            }
+
             // Validate Regex Pattern automatically
             else if (schema.pattern) {
                 const regex = new RegExp(schema.pattern);
