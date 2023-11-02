@@ -1,5 +1,4 @@
 import { LitElement, html } from "lit";
-import { notify } from "../dependencies/globals";
 import { Handsontable, css } from "./hot";
 import { header } from "./forms/utils";
 import { errorHue, warningHue } from "./globals";
@@ -77,6 +76,7 @@ export class Table extends LitElement {
         onOverride,
         validateEmptyCells,
         onStatusChange,
+        onThrow,
         contextMenu,
     } = {}) {
         super();
@@ -87,6 +87,7 @@ export class Table extends LitElement {
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.contextMenu = contextMenu ?? {};
 
+        if (onThrow) this.onThrow = onThrow;
         if (onUpdate) this.onUpdate = onUpdate;
         if (onOverride) this.onOverride = onOverride;
         if (validateOnChange) this.validateOnChange = validateOnChange;
@@ -138,18 +139,18 @@ export class Table extends LitElement {
     validate = () => {
         let message;
 
+        const nUnresolved = Object.keys(this.unresolved).length;
+        if (nUnresolved)
+            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a ${
+                this.keyColumn ? `${header(this.keyColumn)} ` : "n "
+            }entry`;
+
         if (!message) {
             const errors = this.querySelectorAll("[error]");
             const len = errors.length;
             if (len === 1) message = errors[0].getAttribute("data-message") || "Error found";
             else if (len) message = `${len} errors exist on this table.`;
         }
-
-        const nUnresolved = Object.keys(this.unresolved).length;
-        if (nUnresolved)
-            message = `${nUnresolved} row${nUnresolved > 1 ? "s are" : " is"} missing a ${
-                this.keyColumn ? `${header(this.keyColumn)} ` : "n "
-            }entry`;
 
         if (message) throw new Error(message);
     };
@@ -158,6 +159,7 @@ export class Table extends LitElement {
     onStatusChange = () => {};
     onUpdate = () => {};
     onOverride = () => {};
+    onThrow = () => {};
 
     isRequired = (col) => {
         return this.schema?.required?.includes(col);
@@ -165,6 +167,8 @@ export class Table extends LitElement {
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
+
+        const unresolved = (this.unresolved = {});
 
         const entries = { ...this.schema.properties };
 
@@ -266,47 +270,76 @@ export class Table extends LitElement {
             const isRequired = this.isRequired(k);
 
             const validator = async function (value, callback) {
+                const validateEmptyCells = ogThis.validateEmptyCells;
+                const willValidate =
+                    validateEmptyCells === true ||
+                    (Array.isArray(validateEmptyCells) && validateEmptyCells.includes(k));
+
                 value = ogThis.#getValue(value, colInfo);
-                console.log(value);
 
-                if (!value) {
-                    if (!ogThis.validateEmptyCells) {
-                        ogThis.#handleValidationResult(
-                            [], // Clear errors
-                            this.row,
-                            this.col
-                        );
-                        callback(true); // Allow empty value
-                        return true;
-                    }
+                // Clear empty values if not validated
+                if (!value && !willValidate) {
+                    ogThis.#handleValidationResult(
+                        [], // Clear errors
+                        this.row,
+                        this.col
+                    );
+                    callback(true); // Allow empty value
+                    return;
+                }
 
-                    if (isRequired) {
+                if (value && k === ogThis.keyColumn && unresolved[this.row]) {
+                    if (value in ogThis.data) {
                         ogThis.#handleValidationResult(
-                            [{ message: `${k} is a required property.`, type: "error" }],
+                            [{ message: `${header(k)} already exists`, type: "error" }],
                             this.row,
                             this.col
                         );
                         callback(false);
-                        return true;
+                        return;
                     }
                 }
 
                 if (!(await runThisValidator(value, this.row, this.col))) {
                     callback(false);
-                    return true;
+                    return;
+                }
+
+                if (!value && isRequired) {
+                    ogThis.#handleValidationResult(
+                        [{ message: `${header(k)} is a required property.`, type: "error" }],
+                        this.row,
+                        this.col
+                    );
+                    callback(false);
+                    return;
                 }
             };
 
             if (info.validator) {
                 const og = info.validator;
                 info.validator = async function (value, callback) {
-                    const called = await validator.call(this, value, callback);
-                    if (!called) og(value, callback);
+                    let wasCalled = false;
+
+                    const newCallback = (valid) => {
+                        wasCalled = true;
+                        callback(valid);
+                    };
+
+                    await validator.call(this, value, newCallback);
+                    if (!wasCalled) og(value, callback);
                 };
             } else
                 info.validator = async function (value, callback) {
-                    const called = await validator.call(this, value, callback);
-                    if (!called) callback(true); // Default to true if not called earlier
+                    let wasCalled = false;
+
+                    const newCallback = (valid) => {
+                        wasCalled = true;
+                        callback(valid);
+                    };
+
+                    await validator.call(this, value, newCallback);
+                    if (!wasCalled) callback(true); // Default to true if not called earlier
                 };
 
             return info;
@@ -319,7 +352,15 @@ export class Table extends LitElement {
             const rel = TH.querySelector(".relative");
 
             const isRequired = this.isRequired(col);
-            if (isRequired) rel.setAttribute("data-required", this.validateEmptyCells ? true : undefined);
+            if (isRequired)
+                rel.setAttribute(
+                    "data-required",
+                    this.validateEmptyCells
+                        ? Array.isArray(this.validateEmptyCells)
+                            ? this.validateEmptyCells.includes(col)
+                            : true
+                        : undefined
+                );
 
             if (desc) {
                 let span = rel.querySelector(".info");
@@ -389,8 +430,6 @@ export class Table extends LitElement {
         const menu = div.ownerDocument.querySelector(".htContextMenu");
         if (menu) this.#root.appendChild(menu); // Move to style root
 
-        const unresolved = (this.unresolved = {});
-
         let validated = 0;
         const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0);
 
@@ -416,9 +455,9 @@ export class Table extends LitElement {
 
             value = this.#getValue(value, entries[header]);
 
-            // Transfer data to object
+            // Transfer data to object (if valid)
             if (header === this.keyColumn) {
-                if (value && value !== rowName) {
+                if (isValid && value && value !== rowName) {
                     const old = target[rowName] ?? {};
                     this.data[value] = old;
                     delete target[rowName];
@@ -438,7 +477,14 @@ export class Table extends LitElement {
                         this.onOverride(header, value, rowName);
                     }
                     target[rowName][header] = undefined;
-                } else target[rowName][header] = value === globalValue ? undefined : value;
+                } else {
+                    // Correct for expected arrays (copy-paste issue)
+                    if (entries[header]?.type === "array") {
+                        if (value && !Array.isArray(value)) value = value.split(",").map((v) => v.trim());
+                    }
+
+                    target[rowName][header] = value === globalValue ? undefined : value;
+                }
             }
 
             validated++;
@@ -452,7 +498,7 @@ export class Table extends LitElement {
         // If only one row, do not allow deletion
         table.addHook("beforeRemoveRow", (index, amount) => {
             if (nRows - amount < 1) {
-                notify("You must have at least one row", "error");
+                this.onThrow("You must have at least one row", "error");
                 return false;
             }
         });
