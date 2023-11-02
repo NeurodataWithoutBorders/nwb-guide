@@ -6,10 +6,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
     schema.properties.Subject.properties.weight.unit = 'kg'
 
     schema.properties.Subject.properties.sex.enumLabels = {
-        O: 'Other',
         M: 'Male',
         F: 'Female',
-        U: 'Unknown'
+        U: 'Unknown',
+        O: 'Other'
     }
 
 
