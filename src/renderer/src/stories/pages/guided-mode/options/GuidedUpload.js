@@ -73,7 +73,8 @@ export class GuidedUploadPage extends Page {
                 .then(({ physical, logical }) => {
                     dandiUploadSchema.properties.number_of_jobs.max = physical;
                     dandiUploadSchema.properties.number_of_threads.max = logical / physical;
-                }).catch(() => {});
+                })
+                .catch(() => {});
 
             return (this.form = new JSONSchemaForm({
                 schema: dandiUploadSchema,
