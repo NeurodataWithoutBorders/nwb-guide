@@ -32,7 +32,7 @@ const serverIsLiveStartup = async () => {
     const echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json()).catch(e => e)
     return echoResponse === "server ready" ? true : false;
   };
-  
+
   // Preload Flask imports for faster on-demand operations
   const preloadFlaskImports = () => fetch(`${baseUrl}/startup/preload-imports`).then(res => {
     if (res.ok) return res.json()

@@ -98,7 +98,9 @@ def send_preview(path):
 @app.route("/cpus")
 def get_cpu_count():
     from psutil import cpu_count
-    return {"physical": cpu_count(logical=False) }
+
+    return {"physical": cpu_count(logical=False)}
+
 
 @api.route("/server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
