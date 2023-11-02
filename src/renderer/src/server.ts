@@ -53,10 +53,15 @@ export const onServerOpen = (callback:Function) => {
  }
 }
 
+export const activateServer = () => {
+    console.log('GO!')
+ statusBar.items[2].status = true
+
+ serverCallbacks.forEach(cb => cb())
+ serverCallbacks = []
+}
+
 export async function pythonServerOpened() {
-
-
-  console.error('Server open')
 
   // Confirm requests are actually received by the server
   const isLive = await serverIsLiveStartup()
@@ -65,11 +70,8 @@ export async function pythonServerOpened() {
   if (isLive) await preloadFlaskImports()
   .then(() => {
 
-      // Update server status and throw a notification
-    statusBar.items[2].status = true
-
-    serverCallbacks.forEach(cb => cb())
-    serverCallbacks = []
+    // Update server status and throw a notification
+   activateServer()
 
     if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
     openPythonStatusNotyf = notyf.open({
@@ -136,4 +138,6 @@ export const loadServerEvents = () => {
         })
         });
     }
+
+    else activateServer() // Just mock-activate the server if we're in the browser
 }

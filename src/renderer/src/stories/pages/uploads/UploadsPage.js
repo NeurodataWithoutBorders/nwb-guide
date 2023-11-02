@@ -167,34 +167,35 @@ export class UploadsPage extends Page {
             },
         });
 
-        const promise = onServerOpen(() => {
-            return fetch(new URL("cpus", baseUrl))
+        const promise = onServerOpen(async () => {
+            await fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
                 .then(({ physical, logical }) => {
 
                     dandiSchema.properties.number_of_jobs.max = physical;
                     dandiSchema.properties.number_of_threads.max = logical / physical;
+                })
+                .catch(() => {});
 
-                    // NOTE: API Keys and Dandiset IDs persist across selected project
-                    return (this.form = new JSONSchemaForm({
-                        results: globalState,
-                        schema: dandiSchema,
-                        sort: ([k1]) => {
-                            if (k1 === folderPathKey) return -1;
-                        },
-                        onUpdate: ([id]) => {
-                            if (id === folderPathKey) {
-                                for (let key in dandiSchema.properties) {
-                                    const input = this.form.getInput([key]);
-                                    if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
-                                }
-                            }
+            // NOTE: API Keys and Dandiset IDs persist across selected project
+            return (this.form = new JSONSchemaForm({
+                results: globalState,
+                schema: dandiSchema,
+                sort: ([k1]) => {
+                    if (k1 === folderPathKey) return -1;
+                },
+                onUpdate: ([id]) => {
+                    if (id === folderPathKey) {
+                        for (let key in dandiSchema.properties) {
+                            const input = this.form.getInput([key]);
+                            if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
+                        }
+                    }
 
-                            global.save();
-                        },
-                        onThrow,
-                    }));
-                });
+                    global.save();
+                },
+                onThrow,
+            }));
         });
 
         return html`

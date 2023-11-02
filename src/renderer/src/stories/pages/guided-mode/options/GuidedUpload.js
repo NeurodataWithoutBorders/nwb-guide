@@ -67,21 +67,20 @@ export class GuidedUploadPage extends Page {
     render() {
         const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
 
-        const promise = onServerOpen(() => {
-            return fetch(new URL("cpus", baseUrl))
+        const promise = onServerOpen(async () => {
+            await fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
                 .then(({ physical, logical }) => {
-                    
                     dandiUploadSchema.properties.number_of_jobs.max = physical;
                     dandiUploadSchema.properties.number_of_threads.max = logical / physical;
+                }).catch(() => {});
 
-                    return (this.form = new JSONSchemaForm({
-                        schema: dandiUploadSchema,
-                        results: state.info,
-                        onUpdate: () => (this.unsavedUpdates = true),
-                        onThrow,
-                    }));
-                });
+            return (this.form = new JSONSchemaForm({
+                schema: dandiUploadSchema,
+                results: state.info,
+                onUpdate: () => (this.unsavedUpdates = true),
+                onThrow,
+            }));
         });
 
         return html`${new InfoBox({

@@ -17,7 +17,6 @@ const dashboard = document.querySelector('nwb-dashboard') as Dashboard
 
 dashboard.subtitle = statusBar
 
-
 //////////////////////////////////
 // Connect to Python back-end
 //////////////////////////////////
