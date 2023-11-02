@@ -110,7 +110,6 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value, forceValidate = false) {
-
         if (this.value === value && !forceValidate) {
             const el = this.getElement();
             if (el.type === "checkbox") el.checked = value;
@@ -129,7 +128,6 @@ export class JSONSchemaInput extends LitElement {
 
         this.#triggerValidation(name, path);
         this.#updateData(fullPath, value);
-
 
         return true;
     }
