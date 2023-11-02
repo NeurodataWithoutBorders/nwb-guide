@@ -5,6 +5,14 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
     // Add unit to weight
     schema.properties.Subject.properties.weight.unit = 'kg'
 
+    schema.properties.Subject.properties.sex.enumLabels = {
+        O: 'Other',
+        M: 'Male',
+        F: 'Female',
+        U: 'Unknown'
+    }
+
+
     // Override description of keywords
     schema.properties.NWBFile.properties.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
     return schema

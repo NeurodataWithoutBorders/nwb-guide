@@ -335,7 +335,7 @@ export class JSONSchemaInput extends LitElement {
                 >
                     <option disabled selected value>${info.placeholder ?? "Select an option"}</option>
                     ${info.enum.map(
-                        (item, i) => html`<option value=${i} ?selected=${this.value === item}>${item}</option>`
+                        (item, i) => html`<option value=${i} ?selected=${this.value === item}>${info.enumLabels?.[item] ?? item}</option>`
                     )}
                 </select>
             `;
