@@ -139,7 +139,6 @@ export class GuidedStructurePage extends Page {
         // Reset list
         this.list.style.display = "inline-block";
         this.list.clear();
-        this.addButton.style.display = "block";
         this.addButton.setAttribute("hidden", "");
 
         return html`
