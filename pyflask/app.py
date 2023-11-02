@@ -99,7 +99,13 @@ def send_preview(path):
 def get_cpu_count():
     from psutil import cpu_count
 
-    return {"physical": cpu_count(logical=False)}
+    physical = cpu_count(logical=False)
+    logical = cpu_count()
+
+    return dict(
+        physical=physical,
+        logical=logical
+    )
 
 
 @api.route("/server_shutdown", endpoint="shutdown")
