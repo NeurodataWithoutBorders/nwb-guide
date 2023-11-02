@@ -348,7 +348,11 @@ export class JSONSchemaInput extends LitElement {
                 ?checked=${this.value ?? false}
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
             />`;
-        } else if (info.type === "string" || info.type === "number") {
+        } else if (info.type === "string" || info.type === "number" || info.type === "integer") {
+            const isInteger = info.type === "integer";
+            if (isInteger) info.type = "number";
+            const isNumber = info.type === "number";
+
             const fileSystemFormat = isFilesystemSelector(name, info.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
@@ -375,14 +379,38 @@ export class JSONSchemaInput extends LitElement {
                     <input
                         class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
                         type="${type}"
-                        step=${type === "number" && info.step ? info.step : ""}
+                        step=${isNumber && info.step ? info.step : ""}
                         placeholder="${info.placeholder ?? ""}"
                         .value="${this.value ?? ""}"
-                        @input=${(ev) =>
-                            this.#updateData(
-                                fullPath,
-                                info.type === "number" ? parseFloat(ev.target.value) : ev.target.value
-                            )}
+                        @input=${(ev) => {
+                            let value = ev.target.value;
+                            let newValue = value;
+
+                            // const isBlank = value === '';
+
+                            if (isInteger) newValue = parseInt(value);
+                            else if (isNumber) newValue = parseFloat(value);
+
+                            if (isNumber) {
+                                if ("min" in info && value < info.min) newValue = info.min;
+                                else if ("max" in info && value > info.max) newValue = info.max;
+                            }
+
+                            if (info.transform) newValue = info.transform(newValue, this.value, info);
+
+                            // // Do not check patter if value is empty
+                            // if (info.pattern && !isBlank) {
+                            //     const regex = new RegExp(info.pattern)
+                            //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
+                            // }
+
+                            if (!isNaN(newValue) && newValue !== value) {
+                                ev.target.value = newValue;
+                                value = newValue;
+                            }
+
+                            this.#updateData(fullPath, value);
+                        }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     />
                 `;

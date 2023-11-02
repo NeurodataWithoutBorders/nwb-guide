@@ -1,10 +1,12 @@
 import { html } from "lit";
+import { until } from "lit/directives/until.js";
+
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";
 import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 
 const folderPathKey = "filesystem_paths";
-import dandiUploadSchema from "../../../../../../schemas/json/dandi/upload.json";
+import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}), { arrays: true });
 
@@ -22,6 +24,9 @@ import { header } from "../../forms/utils";
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
 import { InfoBox } from "../../InfoBox.js";
+
+import { onServerOpen } from "../../../server";
+import { baseUrl } from "../../../globals.js";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
@@ -162,24 +167,34 @@ export class UploadsPage extends Page {
             },
         });
 
-        // NOTE: API Keys and Dandiset IDs persist across selected project
-        this.form = new JSONSchemaForm({
-            results: globalState,
-            schema: dandiSchema,
-            sort: ([k1]) => {
-                if (k1 === folderPathKey) return -1;
-            },
-            onUpdate: ([id]) => {
-                if (id === folderPathKey) {
-                    for (let key in dandiSchema.properties) {
-                        const input = this.form.getInput([key]);
-                        if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
-                    }
-                }
+        const promise = onServerOpen(async () => {
+            await fetch(new URL("cpus", baseUrl))
+                .then((res) => res.json())
+                .then(({ physical, logical }) => {
+                    dandiSchema.properties.number_of_jobs.max = physical;
+                    dandiSchema.properties.number_of_threads.max = logical / physical;
+                })
+                .catch(() => {});
 
-                global.save();
-            },
-            onThrow,
+            // NOTE: API Keys and Dandiset IDs persist across selected project
+            return (this.form = new JSONSchemaForm({
+                results: globalState,
+                schema: dandiSchema,
+                sort: ([k1]) => {
+                    if (k1 === folderPathKey) return -1;
+                },
+                onUpdate: ([id]) => {
+                    if (id === folderPathKey) {
+                        for (let key in dandiSchema.properties) {
+                            const input = this.form.getInput([key]);
+                            if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
+                        }
+                    }
+
+                    global.save();
+                },
+                onThrow,
+            }));
         });
 
         return html`
@@ -189,9 +204,19 @@ export class UploadsPage extends Page {
             })}
             <br />
             <br />
-            ${this.form}
-            <hr />
-            ${button}
+            ${until(
+                promise.then((form) => {
+                    return html`
+                        ${form}
+                        <hr />
+                        ${button}
+                    `;
+                }),
+                html`<p>Waiting to connect to the Flask server...</p>
+                    <p />`
+            )}
+            <br />
+            <br />
         `;
     }
 }
