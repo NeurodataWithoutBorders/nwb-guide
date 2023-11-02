@@ -14,7 +14,7 @@
         "number_of_threads": {
             "type": "integer",
             "title": "Threads per Job",
-            "description": "The number of threads to handle each file.",
+            "description": "The number of threads to handle each file. A value of <code>-1</code> uses all available threads per process.",
             "default": 1,
             "min": -1
         },
