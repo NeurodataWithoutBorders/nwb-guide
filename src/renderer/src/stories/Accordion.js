@@ -25,6 +25,7 @@ export class Accordion extends LitElement {
 
             :host {
                 display: block;
+                overflow: hidden;
             }
 
             .header {

@@ -46,7 +46,6 @@ export function createGlobalFormModal(this: Page, {
 
     const globalForm = new JSONSchemaForm({
         validateEmptyValues: false,
-        mode: 'accordion',
         schema: schemaCopy,
         emptyMessage: "No properties to edit globally.",
         ignore: propsToIgnore,

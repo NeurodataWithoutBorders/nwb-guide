@@ -27,14 +27,25 @@ export const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
     }
 };
 
+export const sanitize = (o, condition) => {
+    if (isObject(o)) {
+        for (const [k, v] of Object.entries(o)) {
+            if (condition(k, v)) delete o[k];
+            else sanitize(v, condition);
+        }
+    }
+
+    return o
+}
+
 export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
     // Deep merge objects
     for (const [k, v] of Object.entries(toMerge)) {
         const targetV = target[k];
         if (mergeOpts.arrays && Array.isArray(v) && Array.isArray(targetV))
             target[k] = [...targetV, ...v]; // Merge array entries together
-        else if (isObject(v) || isObject(targetV)) target[k] = merge(v, target[k], mergeOpts);
         else if (v === undefined) delete target[k]; // Remove matched values
+        else if (isObject(v) || isObject(targetV)) target[k] = merge(v, target[k], mergeOpts);
         else target[k] = v; // Replace primitive values
     }
 

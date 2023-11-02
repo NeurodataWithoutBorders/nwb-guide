@@ -13,6 +13,7 @@ import { header } from "../../../forms/utils";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
+import { run } from "../options/utils.js";
 
 const propsToIgnore = [
     "verbose",
@@ -79,15 +80,10 @@ export class GuidedSourceDataPage extends ManagedPage {
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }) => {
                     // NOTE: This clears all user-defined results
-                    const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            source_data: info.source_data,
-                            interfaces: this.info.globalState.interfaces,
-                        }),
+                    const result = await run(`metadata`, {
+                        source_data: info.source_data,
+                        interfaces: this.info.globalState.interfaces,
                     })
-                        .then((res) => res.json())
                         .catch((e) => {
                             Swal.close();
                             stillFireSwal = false;
@@ -145,7 +141,9 @@ export class GuidedSourceDataPage extends ManagedPage {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             // onlyRequired: true,
-            onUpdate: () => (this.unsavedUpdates = true),
+            onUpdate: () => {
+                (this.unsavedUpdates = true)
+            },
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });

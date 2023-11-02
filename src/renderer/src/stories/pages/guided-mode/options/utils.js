@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import { baseUrl } from "../../../../globals.js";
+import { sanitize } from "../../utils.js";
 
 export const openProgressSwal = (options) => {
     return new Promise((resolve) => {
@@ -25,6 +26,9 @@ export const run = async (url, payload, options = {}) => {
     if (needsSwal) openProgressSwal(options).then((swal) => (options.onOpen ? options.onOpen(swal) : undefined));
 
     if (!("base" in options)) options.base = "/neuroconv";
+
+    // Clear private keys from being passed
+    payload = sanitize(structuredClone(payload), k => k.slice(0, 2) == '__')
 
     const results = await fetch(`${baseUrl}${options.base || ""}/${url}`, {
         method: "POST",
