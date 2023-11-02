@@ -215,14 +215,6 @@ export class Table extends LitElement {
 
         const displayHeaders = [...colHeaders].map(header);
 
-        const getValue = (value, colInfo) => {
-
-            // Handle enums
-            if (colInfo.enumLabels) return Object.keys(colInfo.enumLabels).find((k) => colInfo.enumLabels[k] === value) ?? value;
-            
-            return value;
-        };
-
         const columns = colHeaders.map((k, i) => {
             const info = { type: "text" };
 
@@ -276,7 +268,7 @@ export class Table extends LitElement {
 
             const validator = async function (value, callback) {
                 
-                value = getValue(value, colInfo)
+                value = ogThis.#getValue(value, colInfo)
                 console.log(value)
 
                 if (!value) {
@@ -375,8 +367,10 @@ export class Table extends LitElement {
 
         if (this.table) this.table.destroy();
 
+        console.log('Rendered data', this.#getRenderedData(data))
+
         const table = new Handsontable(div, {
-            data,
+            data: this.#getRenderedData(data),
             // rowHeaders: rowHeaders.map(v => `sub-${v}`),
             colHeaders: displayHeaders,
             columns,
@@ -422,8 +416,7 @@ export class Table extends LitElement {
 
             const isUserUpdate = initialCellsToUpdate <= validated;
 
-            value = getValue(value, entries[header])
-
+            value = this.#getValue(value, entries[header])
 
             // Transfer data to object
             if (header === this.keyColumn) {
@@ -492,8 +485,29 @@ export class Table extends LitElement {
         data.forEach((row, i) => this.#setRow(i, row));
     }
 
+    #getRenderedValue = (value, colInfo) => {
+        // Handle enums
+        if (colInfo.enumLabels) return colInfo.enumLabels[value] ?? value;
+        return value;
+    }
+
+    #getRenderedData = (data) => {
+        return Object.values(data).map((row) => row.map((value, j) => this.#getRenderedValue(value, this.schema.properties[this.colHeaders[j]])))
+    }
+
+    #getValue = (value, colInfo) => {
+
+        // Handle enums
+        if (colInfo.enumLabels) return Object.keys(colInfo.enumLabels).find((k) => colInfo.enumLabels[k] === value) ?? value;
+        
+        return value;
+    };
+
     #setRow(row, data) {
-        data.forEach((value, j) => this.table.setDataAtCell(row, j, value));
+        data.forEach((value, j) => {
+            value = this.#getRenderedValue(value, this.schema.properties[this.colHeaders[j]])
+            this.table.setDataAtCell(row, j, value)
+        });
     }
 
     #handleValidationResult = (result, row, prop) => {
