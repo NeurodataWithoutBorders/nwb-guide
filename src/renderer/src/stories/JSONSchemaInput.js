@@ -10,6 +10,7 @@ import { List } from "./List";
 import { Modal } from "./Modal";
 
 import { capitalize } from "./forms/utils";
+import { JSONSchemaForm } from "./JSONSchemaForm";
 
 const isFilesystemSelector = (name, format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
@@ -218,11 +219,10 @@ export class JSONSchemaInput extends LitElement {
 
             // Catch tables
             const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
-            const isTable = itemSchema.type === "object";
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-            else if (isTable) {
+            else if (itemSchema.type === "object") {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
@@ -249,10 +249,10 @@ export class JSONSchemaInput extends LitElement {
                         }
                     },
                     onThrow: (...args) => this.#onThrow(...args),
-                };
+                }
 
-                return (this.form.tables[name] =
-                    this.form.renderTable(name, tableMetadata, fullPath) || new BasicTable(tableMetadata));
+                table = this.createTable(name, tableMetadata, fullPath) // Try creating table. Otherwise use nested form
+                if (table) return this.form.tables[name] = (table === true) ? new BasicTable(tableMetadata) : table
             }
 
             const headerText = document.createElement("span");
@@ -266,10 +266,19 @@ export class JSONSchemaInput extends LitElement {
 
             let modal;
 
-            const tempParent = {};
+            let tempParent = {};
+
+            const itemInfo = info.items
+            const formProperties = itemInfo.properties
+
+
+            let element
+
 
             addButton.addEventListener("click", () => {
                 if (modal) modal.remove();
+
+                tempParent[name] = {} // Wipe previous values
 
                 modal = new Modal({
                     header: headerText,
@@ -279,15 +288,19 @@ export class JSONSchemaInput extends LitElement {
                 const div = document.createElement("div");
                 div.style.padding = "25px";
 
-                div.append(
-                    new JSONSchemaInput({
-                        info: info.items,
-                        validateOnChange: false,
-                        path: this.path,
-                        form: this.form,
-                        onUpdate: (value) => (tempParent[name] = value),
-                    })
-                );
+                element = formProperties ? new JSONSchemaForm({
+                    schema: itemInfo,
+                    results: tempParent[name],
+                    onThrow: this.#onThrow
+                }) : new JSONSchemaInput({
+                    info: itemInfo,
+                    validateOnChange: false,
+                    path: this.path,
+                    form: this.form,
+                    onUpdate: (value) => (tempParent[name] = value),
+                })
+
+                div.append(element);
 
                 modal.append(div);
 
@@ -308,10 +321,24 @@ export class JSONSchemaInput extends LitElement {
                 },
             });
 
-            const submitButton = new Button();
-            submitButton.innerText = `Submit`;
-            submitButton.addEventListener("click", function () {
-                const value = tempParent[name];
+            const submitButton = new Button({
+                label: "Submit",
+                primary: true,
+            });
+
+            submitButton.addEventListener("click", async  () => {
+                
+                let value = tempParent[name];
+
+                if (formProperties) {
+                    await element.validate()
+                    if (itemInfo?.format) {
+                        let newValue = itemInfo?.format
+                        for (let key in formProperties) newValue = newValue.replace(`{${key}}`, value[key] ?? '').trim()
+                        value = newValue
+                    }
+                }
+
                 list.add({ value });
                 modal.toggle(false);
             });
