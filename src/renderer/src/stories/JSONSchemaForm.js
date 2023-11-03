@@ -723,7 +723,9 @@ export class JSONSchemaForm extends LitElement {
                 const regex = new RegExp(schema.pattern);
                 if (!regex.test(parent[name])) {
                     errors.push({
-                        message: `${schema.title ?? header(name)} does not match the required pattern (${schema.pattern}).`,
+                        message: `${schema.title ?? header(name)} does not match the required pattern (${
+                            schema.pattern
+                        }).`,
                         type: "error",
                     });
                 }
