@@ -26,8 +26,8 @@ export class List extends LitElement {
         overflow: auto;
       }
 
+
       #empty {
-        padding: 20px 10px;
         margin-left: -40px;
         color: gray;
       }
@@ -59,7 +59,6 @@ export class List extends LitElement {
         list-style-type: none;
         display: flex;
         flex-wrap: wrap;
-        margin: 0;
         padding: 0;
       }
 

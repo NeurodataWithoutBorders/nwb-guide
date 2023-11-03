@@ -54,7 +54,6 @@ export const onServerOpen = (callback:Function) => {
 }
 
 export const activateServer = () => {
-    console.log('GO!')
  statusBar.items[2].status = true
 
  serverCallbacks.forEach(cb => cb())
