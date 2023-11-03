@@ -48,15 +48,6 @@ export class GuidedSubjectsPage extends Page {
             if (!this.localState[key]) delete globalSubjects[key];
         }
 
-        const noSessions = Object.keys(this.localState).filter((sub) => !this.localState[sub].sessions?.length);
-        if (noSessions.length) {
-            const error = `${noSessions.length} subject${
-                noSessions.length > 1 ? "s are" : " is"
-            } missing Sessions entries`;
-            this.notify(error, "error");
-            throw new Error(error);
-        }
-
         this.info.globalState.subjects = merge(this.localState, globalSubjects); // Merge the local and global states
 
         const { results, subjects } = this.info.globalState;
@@ -125,10 +116,11 @@ export class GuidedSubjectsPage extends Page {
             data: subjects,
             globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
-            validateEmptyCells: false,
+            validateEmptyCells: ["subject_id", "sessions"],
             contextMenu: {
                 ignore: ["row_below"],
             },
+            onThrow: (message, type) => this.notify(message, type),
             onOverride: (name) => {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
@@ -136,9 +128,18 @@ export class GuidedSubjectsPage extends Page {
                 this.unsavedUpdates = true;
             },
             validateOnChange: (key, parent, v) => {
-                if (key === "sessions") return true;
-                else {
-                    delete parent.sessions; // Delete dessions from parent copy
+                if (key === "sessions") {
+                    if (v?.length) return true;
+                    else {
+                        return [
+                            {
+                                message: "Sessions must have at least one entry",
+                                type: "error",
+                            },
+                        ];
+                    }
+                } else {
+                    delete parent.sessions; // Delete sessions from parent copy
                     return validateOnChange(key, parent, ["Subject"], v);
                 }
             },
