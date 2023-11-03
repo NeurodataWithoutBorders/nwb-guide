@@ -485,6 +485,8 @@ def upload_folder_to_dandi(
     nwb_folder_path: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -495,6 +497,8 @@ def upload_folder_to_dandi(
         nwb_folder_path=Path(nwb_folder_path),
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
@@ -504,6 +508,8 @@ def upload_to_dandi(
     project: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -516,6 +522,8 @@ def upload_to_dandi(
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
