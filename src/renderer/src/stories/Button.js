@@ -87,7 +87,6 @@ export class Button extends LitElement {
     render() {
         const mode = this.primary ? "storybook-button--primary" : "storybook-button--secondary";
 
-        console.log;
         return html`
             <button
                 type="button"

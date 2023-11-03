@@ -288,7 +288,6 @@ export class JSONSchemaForm extends LitElement {
 
         // NOTE: Forms with nested forms will handle their own state updates
         if (this.isUndefined(value)) {
-            const globalValue = this.getGlobalValue(localPath);
 
             // Continue to resolve and re-render...
             if (globalValue) {
@@ -348,7 +347,7 @@ export class JSONSchemaForm extends LitElement {
         const isValid = !requiredButNotSpecified.length;
 
         // Print out a detailed error message if any inputs are missing
-        let message = isValid ? "" : `${requiredButNotSpecified.length} required inputs are not specified properly.`;
+        let message = isValid ? "" : requiredButNotSpecified.length === 1 ? `${requiredButNotSpecified[0]} is not defined.` : `${requiredButNotSpecified.length} required inputs are not specified properly.`;
 
         // Check if all inputs are valid
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
@@ -867,12 +866,19 @@ export class JSONSchemaForm extends LitElement {
 
             const renderableInside = this.#getRenderable(info, required[name], localPath, true);
 
-            const { __disabled = {} } = this.results
+            const hasInteraction = '__disabled' in this.results // NOTE: This locks the specific value to what the user has chosen...
+            
+            const { __disabled = {} } = this.results //.__disabled ?? (this.results.__disabled = {})
+            const { __disabled: __disabledGlobal = {}} = this.getGlobalValue(localPath.slice(0, -1));
 
-            const disabled = name in __disabled
-            enableToggle.checked = !disabled
+            
+            const __disabledResolved = (hasInteraction || name in __disabled) ? __disabled : __disabledGlobal
 
-            const nestedResults = disabled ? __disabled[name] : results[name]
+            const isDisabled = name in __disabledResolved
+
+            enableToggle.checked = !isDisabled
+
+            const nestedResults = __disabled[name] ?? results[name] // One or the other will exist—depending on global or local disabling
 
             if (renderableInside.length) {
                 this.#nestedForms[name] = new JSONSchemaForm({
@@ -914,7 +920,6 @@ export class JSONSchemaForm extends LitElement {
 
             const oldStates = this.#accordions[headerName]
 
-            
             const accordion = this.#accordions[headerName] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
@@ -923,8 +928,8 @@ export class JSONSchemaForm extends LitElement {
 
                 // States
                 open: oldStates?.open ?? !hasMany,
-                disabled,
-                status: oldStates?.status,
+                disabled: isDisabled,
+                status: oldStates?.status ?? 'valid', // Always show a status
             });
 
             accordion.id = name; // assign name to accordion id
@@ -933,7 +938,7 @@ export class JSONSchemaForm extends LitElement {
 
             const addDisabled = (name, o) => {
                 if (!o.__disabled) o.__disabled = {}
-                o.__disabled[name] = o[name] // Track disabled values
+                o.__disabled[name] = o[name] ?? {} // Track disabled values (or at least something)
             }
 
             enableToggle.addEventListener('click', (e) => {
@@ -942,12 +947,21 @@ export class JSONSchemaForm extends LitElement {
                 if (checked) {
                     accordion.disabled = false
 
-                    // Restore disabled values
-                    this.results[name] =  this.results.__disabled[name]
-                    this.resolved[name] = this.resolved.__disabled[name]
+                    const { __disabled = {} } = this.results
+                    const { __disabled: resolvedDisabled = {}} = this.resolved
 
-                    this.results.__disabled[name] = this.resolved.__disabled[name] = undefined // Wipe disabled values
+                    if (__disabled[name]) {
+                        this.results[name] = __disabled[name] // Restore disabled values
+                        __disabled[name] = undefined // Wipe disabled values
+                    }
+
+                    if (resolvedDisabled[name]) {
+                        this.resolved[name] = resolvedDisabled[name] // Restore disabled values
+                        resolvedDisabled[name] = undefined // Wipe disabled values
+                    }
                 }
+
+                // Register a custom disabled value
                 else {
                     accordion.disabled = true
 

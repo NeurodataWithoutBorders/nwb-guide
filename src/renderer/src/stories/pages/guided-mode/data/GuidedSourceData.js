@@ -78,7 +78,9 @@ export class GuidedSourceDataPage extends ManagedPage {
             });
 
             await Promise.all(
-                this.mapSessions(async ({ subject, session, info }) => {
+                this.mapSessions(async ({ subject, session, info }, i) => {
+
+
                     // NOTE: This clears all user-defined results
                     const result = await run(`metadata`, {
                         source_data: info.source_data,
@@ -109,14 +111,27 @@ export class GuidedSourceDataPage extends ManagedPage {
                         throw result;
                     }
 
+                    const { results: metadata, schema } = result
+
+
+                    // Always delete Ecephys if absent ( NOTE: temporarily manually removing from schema on backend...)
+                    const alwaysDelete = ['Ecephys']
+                    alwaysDelete.forEach(k => {
+                        if (!metadata[k]) metadata[k] = undefined
+                    })
+                    
+                    for (let key in info.metadata) {
+                        if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined
+                    }
+
                     // Merge metadata results with the generated info
-                    merge(result.results, info.metadata);
+                    merge(metadata, info.metadata);
 
                     // Mirror structure with metadata schema
-                    const schema = this.info.globalState.schema;
-                    if (!schema.metadata) schema.metadata = {};
-                    if (!schema.metadata[subject]) schema.metadata[subject] = {};
-                    schema.metadata[subject][session] = result.schema;
+                    const schemaGlobal = this.info.globalState.schema;
+                    if (!schemaGlobal.metadata) schemaGlobal.metadata = {};
+                    if (!schemaGlobal.metadata[subject]) schemaGlobal.metadata[subject] = {};
+                    schemaGlobal.metadata[subject][session] = schema;
                 })
             );
 
@@ -129,7 +144,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
-
+        
         const form = new JSONSchemaForm({
             identifier: instanceId,
             schema: preprocessSourceDataSchema(schema),
