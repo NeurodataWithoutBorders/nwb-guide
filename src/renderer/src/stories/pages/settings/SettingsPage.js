@@ -24,10 +24,20 @@ export class SettingsPage extends Page {
     header = {
         title: "App Settings",
         subtitle: "This page allows you to set global settings for the GUIDE.",
+        controls: [
+            new Button({
+                label: "Save Changes",
+                onClick: async () => {
+                    if (!this.unsavedUpdates) return this.#openNotyf("All changes were already saved", "success");
+                    this.save();
+                },
+            })
+        ]
     };
 
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     #notification;
@@ -52,14 +62,6 @@ export class SettingsPage extends Page {
     render() {
         this.localState = merge(global.data, {});
 
-        const button = new Button({
-            label: "Save Changes",
-            onClick: async () => {
-                if (!this.unsavedUpdates) return this.#openNotyf("All changes were already saved", "success");
-                this.save();
-            },
-        });
-
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
             results: this.localState,
@@ -75,8 +77,6 @@ export class SettingsPage extends Page {
 
         return html`
             ${this.form}
-            <hr />
-            ${button}
         `;
     }
 }

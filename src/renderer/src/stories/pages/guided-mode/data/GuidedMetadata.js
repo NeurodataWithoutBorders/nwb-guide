@@ -42,6 +42,7 @@ const getInfoFromId = (key) => {
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     beforeSave = () => {
