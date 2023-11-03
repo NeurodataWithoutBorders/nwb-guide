@@ -17,7 +17,6 @@ export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
         this.style.height = "100%"; // Fix main section
-
     }
 
     header = {
