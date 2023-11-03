@@ -13,6 +13,7 @@ export class PreviewPage extends Page {
 
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     updatePath = async (path) => {

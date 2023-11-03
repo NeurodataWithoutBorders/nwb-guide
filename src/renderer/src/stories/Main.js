@@ -146,10 +146,10 @@ export class Main extends LitElement {
             ${headerEl}
             ${capsules
                 ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
-                : html`<div style="height:50px"</div>`}
+                : html``}
             ${title
                 ? html`<div
-                      style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1;"
+                      style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${capsules ? '' : 'padding-top: 35px;'}"
                   >
                       <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
                           <div style="line-height: 1em; color: gray;">
@@ -162,8 +162,8 @@ export class Main extends LitElement {
                   </div>`
                 : ""}
 
-            <main id="content" class="js-content" style="overflow: hidden;">
-                <section class="section ${capsules ? "nested" : ""}">${page}</section>
+            <main id="content" class="js-content" style="overflow: hidden; ${capsules || title ? '' : 'padding-top: 35px;'}"">
+                <section class="section">${page}</section>
             </main>
             ${footerEl}
         `;
