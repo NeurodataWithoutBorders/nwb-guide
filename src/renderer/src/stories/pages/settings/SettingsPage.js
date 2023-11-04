@@ -31,8 +31,8 @@ export class SettingsPage extends Page {
                     if (!this.unsavedUpdates) return this.#openNotyf("All changes were already saved", "success");
                     this.save();
                 },
-            })
-        ]
+            }),
+        ],
     };
 
     constructor(...args) {
@@ -76,9 +76,7 @@ export class SettingsPage extends Page {
             onThrow,
         });
 
-        return html`
-            ${this.form}
-        `;
+        return html` ${this.form} `;
     }
 }
 
