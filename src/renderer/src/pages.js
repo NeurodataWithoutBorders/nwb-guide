@@ -108,11 +108,13 @@ const pages = {
             start: new GuidedStartPage({
                 label: "Start",
             }),
+
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
                 section: sections[0],
             }),
+
             structure: new GuidedStructurePage({
                 title: "Data Formats",
                 label: "Data formats",
