@@ -120,12 +120,13 @@ export class GuidedSourceDataPage extends ManagedPage {
                     // Always delete Ecephys if absent ( NOTE: temporarily manually removing from schema on backend...)
                     const alwaysDelete = ['Ecephys']
                     alwaysDelete.forEach(k => {
-                        if (!metadata[k]) metadata[k] = undefined
+                        if (!metadata[k]) delete info.metadata[k] // Delete directly on metadata
                     })
                     
                     for (let key in info.metadata) {
                         if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined
                     }
+
 
                     // Merge metadata results with the generated info
                     merge(metadata, info.metadata);
@@ -138,7 +139,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 })
             );
 
-            await this.save();
+            await this.save(undefined, false); // Just save new raw values
 
             this.to(1);
         },

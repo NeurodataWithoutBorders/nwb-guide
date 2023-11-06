@@ -868,17 +868,19 @@ export class JSONSchemaForm extends LitElement {
 
             const renderableInside = this.#getRenderable(info, required[name], localPath, true);
 
-            const hasInteraction = '__disabled' in this.results // NOTE: This locks the specific value to what the user has chosen...
+            const __disabled = this.results.__disabled ?? (this.results.__disabled = {})
+
+            const hasInteraction = __disabled.__interacted // NOTE: This locks the specific value to what the user has chosen...
             
-            const { __disabled = {} } = this.results //.__disabled ?? (this.results.__disabled = {})
             const { __disabled: __disabledGlobal = {}} = this.getGlobalValue(localPath.slice(0, -1));
-
             
-            const __disabledResolved = (hasInteraction || name in __disabled) ? __disabled : __disabledGlobal
+            const __disabledResolved = (hasInteraction) ? __disabled : __disabledGlobal
 
-            const isDisabled = name in __disabledResolved
+            const isDisabled = !!__disabledResolved[name]
 
             enableToggle.checked = !isDisabled
+
+            console.log('Is Disabled', isDisabled, hasInteraction)
 
             const nestedResults = __disabled[name] ?? results[name] // One or the other will exist—depending on global or local disabling
 
@@ -937,45 +939,55 @@ export class JSONSchemaForm extends LitElement {
             accordion.id = name; // assign name to accordion id
 
             // Set enable / disable behavior
-
             const addDisabled = (name, o) => {
                 if (!o.__disabled) o.__disabled = {}
+                console.log('SAVING', o[name])
+
                 o.__disabled[name] = o[name] ?? {} // Track disabled values (or at least something)
+            }
+
+            const disable = () => {
+                accordion.disabled = true
+                console.log('WHAT ARE THEIR VALUES', this.resolved[name], this.results[name])
+                addDisabled(name, this.resolved)
+                addDisabled(name, this.results)
+                this.resolved[name] = this.results[name] = undefined
+            }
+
+            const enable = () => {
+                accordion.disabled = false
+
+                const { __disabled = {} } = this.results
+                const { __disabled: resolvedDisabled = {}} = this.resolved
+
+                if (__disabled[name]) {
+                    console.log('REPLACING', __disabled[name])
+                    this.results[name] = __disabled[name] // Restore disabled values
+                    __disabled[name] = undefined // Track disabled value as interacted with
+                }
+
+                if (resolvedDisabled[name]) {
+                    this.resolved[name] = resolvedDisabled[name] // Restore disabled values
+                    resolvedDisabled[name] = undefined // Track disabled value as interacted with
+                }
             }
 
             enableToggle.addEventListener('click', (e) => {
                 e.stopPropagation()
                 const { checked } = e.target
-                if (checked) {
-                    accordion.disabled = false
 
-                    const { __disabled = {} } = this.results
-                    const { __disabled: resolvedDisabled = {}} = this.resolved
+                const { __disabled = {} } = this.results
+                const { __disabled: resolvedDisabled = {}} = this.resolved
 
-                    if (__disabled[name]) {
-                        this.results[name] = __disabled[name] // Restore disabled values
-                        __disabled[name] = undefined // Wipe disabled values
-                    }
+                __disabled.__interacted = resolvedDisabled.__interacted = true // Track that the user has interacted with the form
 
-                    if (resolvedDisabled[name]) {
-                        this.resolved[name] = resolvedDisabled[name] // Restore disabled values
-                        resolvedDisabled[name] = undefined // Wipe disabled values
-                    }
-                }
-
-                // Register a custom disabled value
-                else {
-                    accordion.disabled = true
-
-                    addDisabled(name, this.resolved)
-                    addDisabled(name, this.results)
-
-                    this.resolved[name] = this.results[name] = undefined
-                }
+                checked ? enable() : disable();
 
                 this.onUpdate(localPath, this.results[name])                    
 
             })
+
+            if (__disabledResolved === __disabledGlobal) (isDisabled)? disable() : enable();
 
             return accordion;
 
