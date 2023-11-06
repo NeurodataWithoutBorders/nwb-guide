@@ -12,6 +12,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
         O: 'Other'
     }
 
+    // Ensure experimenter schema has custom structure
+    schema.properties.NWBFile.properties.experimenter = baseMetadataSchema.properties.NWBFile.properties.experimenter
 
     // Override description of keywords
     schema.properties.NWBFile.properties.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
