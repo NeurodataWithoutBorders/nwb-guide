@@ -284,16 +284,16 @@ export class List extends LitElement {
         editableElement.contentEditable = true;
 
         // Stop enter key from creating new line
-        editableElement.addEventListener("keydown", (e) => {
+        editableElement.onkeydown = (e) => {
             if (e.keyCode === 13) {
               editableElement.blur();
                 return false;
             }
-        });
+        };
 
         const deleteListItem = () => this.delete(i);
 
-        editableElement.addEventListener("blur", () => {
+        editableElement.onblur = () => {
             const newKey = editableElement.innerText;
             if (newKey === "") this.delete(i); // Delete if empty
             else {
@@ -306,7 +306,7 @@ export class List extends LitElement {
                     this.items = [...this.items]
                   }
             }
-        });
+        };
 
         button.onClick = deleteListItem;
       }

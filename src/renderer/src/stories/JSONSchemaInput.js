@@ -217,12 +217,13 @@ export class JSONSchemaInput extends LitElement {
         if (isArray) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-            // Catch tables
             const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-            else if (itemSchema.type === "object") {
+
+            // Create tables if possible
+            else if (itemSchema.type === "object" && this.form.createTable) {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
@@ -251,7 +252,7 @@ export class JSONSchemaInput extends LitElement {
                     onThrow: (...args) => this.#onThrow(...args),
                 };
 
-                table = this.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
+                const table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
 
