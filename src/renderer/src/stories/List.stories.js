@@ -20,13 +20,13 @@ WithKeys.args = {
 
 export const Empty = Template.bind({});
 Empty.args = {
-    emptyMessage: 'This is empty',
+    emptyMessage: "This is empty",
     unordered: true,
     items: [],
 };
 
 export const EmptyKeys = Template.bind({});
 EmptyKeys.args = {
-    emptyMessage: 'This is empty',
+    emptyMessage: "This is empty",
     items: [],
 };
