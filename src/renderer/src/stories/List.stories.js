@@ -17,3 +17,16 @@ export const WithKeys = Template.bind({});
 WithKeys.args = {
     items: [{ key: "TestKey", value: "test" }],
 };
+
+export const Empty = Template.bind({});
+Empty.args = {
+    emptyMessage: 'This is empty',
+    unordered: true,
+    items: [],
+};
+
+export const EmptyKeys = Template.bind({});
+EmptyKeys.args = {
+    emptyMessage: 'This is empty',
+    items: [],
+};
