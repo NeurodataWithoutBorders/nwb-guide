@@ -32,6 +32,10 @@ export class List extends LitElement {
         color: gray;
       }
 
+      :host([unordered]) #empty {
+        margin: 0;
+      }
+
       li {
         padding-bottom: 10px;
       }
@@ -54,6 +58,8 @@ export class List extends LitElement {
       :host(:not([unordered])) li {
         cursor: move;
       }
+
+
 
       :host([unordered]) ol {
         list-style-type: none;
