@@ -4,7 +4,7 @@ import isElectron from "./check.js";
 export { isElectron };
 
 export let port = 4242;
-export let SERVER_FILE_PATH = ''
+export let SERVER_FILE_PATH = "";
 export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;

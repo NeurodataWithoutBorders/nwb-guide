@@ -77,11 +77,10 @@ export class SettingsPage extends Page {
             onThrow,
         });
 
-        return html` 
-        <p><b>Server Port:</b> ${port}</p>
-        <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
-        ${this.form} 
-        
+        return html`
+            <p><b>Server Port:</b> ${port}</p>
+            <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
+            ${this.form}
         `;
     }
 }
