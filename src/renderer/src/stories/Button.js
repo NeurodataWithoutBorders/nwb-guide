@@ -33,14 +33,14 @@ export class Button extends LitElement {
                 justify-content: center;
             }
 
-            .button-icon {
-                margin-right: 7px;
+            .button-label {
+                margin-left: 10px;
             }
 
             svg {
                 margin: 0px !important;
                 width: auto;
-                height: 25px;
+                height: 20px;
             }
 
             .storybook-button--primary {
@@ -104,7 +104,7 @@ export class Button extends LitElement {
                           >${this.icon instanceof HTMLElement ? this.icon : unsafeHTML(this.icon)}</span
                       >`
                     : ""}
-                <slot>${this.label ?? ""}</slot>
+                <slot>${this.label ? html`<span class="button-label">${this.label}</span>` : ""}</slot>
             </button>
         `;
     }

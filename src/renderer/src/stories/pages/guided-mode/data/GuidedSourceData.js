@@ -25,8 +25,6 @@ const propsToIgnore = [
 ];
 
 export class GuidedSourceDataPage extends ManagedPage {
-
-
     constructor(...args) {
         super(...args);
         this.style.height = "100%"; // Fix main section

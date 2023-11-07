@@ -20,19 +20,24 @@ import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
 
+import saveSVG from '../../assets/save.svg?raw'
+
+
+
 export class SettingsPage extends Page {
+    
     header = {
         title: "App Settings",
         subtitle: "This page allows you to set global settings for the GUIDE.",
         controls: [
             new Button({
-                label: "Save Changes",
+                icon: saveSVG,
                 onClick: async () => {
                     if (!this.unsavedUpdates) return this.#openNotyf("All changes were already saved", "success");
                     this.save();
                 },
-            })
-        ]
+            }),
+        ],
     };
 
     constructor(...args) {
@@ -75,9 +80,7 @@ export class SettingsPage extends Page {
             onThrow,
         });
 
-        return html`
-            ${this.form}
-        `;
+        return html` ${this.form} `;
     }
 }
 

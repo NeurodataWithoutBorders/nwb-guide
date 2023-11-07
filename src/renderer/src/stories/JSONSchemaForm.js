@@ -231,7 +231,7 @@ export class JSONSchemaForm extends LitElement {
         if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
         if (props.onUpdate) this.onUpdate = props.onUpdate;
-        if (props.renderTable) this.renderTable = props.renderTable;
+        if (props.createTable) this.createTable = props.createTable;
         if (props.onOverride) this.onOverride = props.onOverride;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
@@ -346,20 +346,40 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved) => {
+        
         // Check if any required inputs are missing
         const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !requiredButNotSpecified.length;
 
-        // Print out a detailed error message if any inputs are missing
-        let message = isValid ? "" : requiredButNotSpecified.length === 1 ? `${requiredButNotSpecified[0]} is not defined.` : `${requiredButNotSpecified.length} required inputs are not specified properly.`;
-
         // Check if all inputs are valid
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
 
+        const allErrors = Array.from(flaggedInputs)
+            .map((el) => {
+                return Array.from(el.nextElementSibling.children).map((li) => li.message);
+            })
+            .flat();
+
+        const nMissingRequired = allErrors.reduce((acc, curr) => {
+            return (acc += curr.includes(this.#isARequiredPropertyString) ? 1 : 0);
+        }, 0);
+
+        // Print out a detailed error message if any inputs are missing
+        let message = isValid ? "" : requiredButNotSpecified.length === 1 ? `<b>${requiredButNotSpecified[0]}</b> is not defined` : `${requiredButNotSpecified.length} required inputs are not specified properly`;
+        if (requiredButNotSpecified.length !== nMissingRequired) console.warn('Disagreement about the correct error to throw...')
+
+        // // Print out a detailed error message if any required inputs are missing
+        // if (!isValid && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`;
+
+        // Check if all inputs are valid
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
-            if (!message) message = `${flaggedInputs.length} invalid form values.`;
-            message += ` Please check the highlighted fields.`;
+            if (!message) {
+                console.log(flaggedInputs)
+                if (flaggedInputs.length === 1) message = `<b>${header(flaggedInputs[0].path.join('.'))}</b> is not valid`;
+                else message = `${flaggedInputs.length} invalid form values`;
+            }
+            message += `${(this.base) ? ` in the <b>${this.base.join('.')}</b> section` : ''}. Please check the highlighted fields.`;
         }
 
         if (message) this.throw(message);
@@ -590,7 +610,7 @@ export class JSONSchemaForm extends LitElement {
     validateOnChange = () => {};
     onStatusChange = () => {};
     onThrow = () => {};
-    renderTable = () => {};
+    createTable = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -642,6 +662,8 @@ export class JSONSchemaForm extends LitElement {
         return value === undefined || value === "";
     }
 
+    #isARequiredPropertyString = `is a required property`;
+
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, path = [], checkLinks = true) => {
         const parent = this.#get(path, this.resolved);
@@ -667,6 +689,9 @@ export class JSONSchemaForm extends LitElement {
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
 
+        const isUndefined = this.isUndefined(parent[name]);
+        const schema = this.getSchema(localPath);
+
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {
             if (checkLinks) {
@@ -682,23 +707,39 @@ export class JSONSchemaForm extends LitElement {
                     }, externalPath);
                 }
             }
-        } else {
-            // For non-links, throw a basic requirement error if the property is required
-            if (!errors.length && isRequired && this.isUndefined(parent[name])) {
-                const schema = this.getSchema(localPath);
+        }
 
-                // Throw at least a basic warning if the property is required and missing
-                if (this.validateEmptyValues) {
+        if (!errors.length) {
+            if (isUndefined) {
+                // Throw at least a basic warning if a non-linked property is required and missing
+                if (!hasLinks && isRequired) {
+                    const schema = this.getSchema(localPath);
+
+                    if (this.validateEmptyValues) {
+                        errors.push({
+                            message: `${schema.title ?? header(name)} ${this.#isARequiredPropertyString}.`,
+                            type: "error",
+                            missing: true,
+                        });
+                    } else {
+                        warnings.push({
+                            message: `${schema.title ?? header(name)} is a suggested property.`,
+                            type: "warning",
+                            missing: true,
+                        });
+                    }
+                }
+            }
+
+            // Validate Regex Pattern automatically
+            else if (schema.pattern) {
+                const regex = new RegExp(schema.pattern);
+                if (!regex.test(parent[name])) {
                     errors.push({
-                        message: `${schema.title ?? header(name)} is a required property.`,
+                        message: `${schema.title ?? header(name)} does not match the required pattern (${
+                            schema.pattern
+                        }).`,
                         type: "error",
-                        missing: true,
-                    });
-                } else {
-                    warnings.push({
-                        message: `${schema.title ?? header(name)} is a suggested property.`,
-                        type: "warning",
-                        missing: true,
                     });
                 }
             }
@@ -927,7 +968,7 @@ export class JSONSchemaForm extends LitElement {
                         this.nLoaded++;
                         this.checkAllLoaded();
                     },
-                    renderTable: (...args) => this.renderTable(...args),
+                    createTable: (...args) => this.createTable(...args),
                     onOverride: (...args) => this.onOverride(...args),
                     base,
                 });

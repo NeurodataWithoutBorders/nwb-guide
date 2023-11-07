@@ -142,7 +142,9 @@ export class GuidedStructurePage extends Page {
         this.addButton.setAttribute("hidden", "");
 
         return html`
-            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">${this.list} ${this.addButton}</div>
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                ${this.list} ${this.addButton}
+            </div>
             ${this.searchModal}
         `;
     }
