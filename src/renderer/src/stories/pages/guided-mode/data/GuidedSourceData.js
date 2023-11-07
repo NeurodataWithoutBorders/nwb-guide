@@ -80,20 +80,17 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await Promise.all(
                 this.mapSessions(async ({ subject, session, info }, i) => {
-
-
-                    console.log('RUNNING', subject, session, info.source_data)
+                    console.log("RUNNING", subject, session, info.source_data);
                     // NOTE: This clears all user-defined results
                     const result = await run(`metadata`, {
                         source_data: info.source_data,
                         interfaces: this.info.globalState.interfaces,
-                    })
-                        .catch((e) => {
-                            Swal.close();
-                            stillFireSwal = false;
-                            this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
-                            throw e;
-                        });
+                    }).catch((e) => {
+                        Swal.close();
+                        stillFireSwal = false;
+                        this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
+                        throw e;
+                    });
 
                     Swal.close();
 
@@ -113,19 +110,17 @@ export class GuidedSourceDataPage extends ManagedPage {
                         throw result;
                     }
 
-                    const { results: metadata, schema } = result
-
+                    const { results: metadata, schema } = result;
 
                     // Always delete Ecephys if absent ( NOTE: temporarily manually removing from schema on backend...)
-                    const alwaysDelete = ['Ecephys']
-                    alwaysDelete.forEach(k => {
-                        if (!metadata[k]) delete info.metadata[k] // Delete directly on metadata
-                    })
-                    
-                    for (let key in info.metadata) {
-                        if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined
-                    }
+                    const alwaysDelete = ["Ecephys"];
+                    alwaysDelete.forEach((k) => {
+                        if (!metadata[k]) delete info.metadata[k]; // Delete directly on metadata
+                    });
 
+                    for (let key in info.metadata) {
+                        if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
+                    }
 
                     // Merge metadata results with the generated info
                     merge(metadata, info.metadata);
@@ -149,7 +144,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
-        
+
         const form = new JSONSchemaForm({
             identifier: instanceId,
             schema: preprocessSourceDataSchema(schema),
@@ -162,7 +157,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             },
             // onlyRequired: true,
             onUpdate: () => {
-                (this.unsavedUpdates = true)
+                this.unsavedUpdates = true;
             },
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,

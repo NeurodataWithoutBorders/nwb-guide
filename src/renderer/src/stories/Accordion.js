@@ -160,7 +160,6 @@ export class Accordion extends LitElement {
         `;
     }
 
-
     static get properties() {
         return {
             name: { type: String, reflect: true },
@@ -170,16 +169,15 @@ export class Accordion extends LitElement {
         };
     }
 
-
-    constructor({ 
-        name, 
-        subtitle, 
-        toggleable= true, 
-        content, 
+    constructor({
+        name,
+        subtitle,
+        toggleable = true,
+        content,
         open = false,
         status,
         disabled = false,
-        contentPadding 
+        contentPadding,
     } = {}) {
         super();
         this.name = name;
@@ -193,12 +191,12 @@ export class Accordion extends LitElement {
     }
 
     updated() {
-        if (!this.content) return
-        this.toggle(!!this.open)
+        if (!this.content) return;
+        this.toggle(!!this.open);
     }
 
     setStatus = (status) => {
-        const el = this.shadowRoot.getElementById('dropdown')
+        const el = this.shadowRoot.getElementById("dropdown");
         el.classList.remove("error", "warning", "valid");
         el.classList.add(status);
         this.status = status;
@@ -218,14 +216,14 @@ export class Accordion extends LitElement {
         const hasForce = forcedState !== undefined;
         const toggledState = !this.open;
 
-        const desiredState = hasForce ? forcedState : toggledState
+        const desiredState = hasForce ? forcedState : toggledState;
         const state = this.toOpen(desiredState);
 
         //remove hidden from child elements with guided--nav-bar-section-page class
-        const section = this.shadowRoot.getElementById('section')
+        const section = this.shadowRoot.getElementById("section");
         section.toggleAttribute("hidden", hasForce ? !state : undefined);
 
-        const dropdown = this.shadowRoot.getElementById('dropdown')
+        const dropdown = this.shadowRoot.getElementById("dropdown");
         this.#updateClass("active", dropdown, !state);
 
         //toggle the chevron
@@ -236,40 +234,45 @@ export class Accordion extends LitElement {
     };
 
     toOpen = (state = this.open) => {
-        if (!this.toggleable) return true // Force open if not toggleable
-        else if (this.disabled) return false // Force closed if disabled
-        return state
-    }
+        if (!this.toggleable) return true; // Force open if not toggleable
+        else if (this.disabled) return false; // Force closed if disabled
+        return state;
+    };
 
     render() {
-
         const isToggleable = this.content && this.toggleable;
 
         return html`
-                <div class="guided--nav-bar-section">
-                    <div
-                        id="dropdown"
-                        class="guided--nav-bar-dropdown ${isToggleable && 'toggleable'} ${this.disabled ? "disabled" : ''} ${this.status}"
-                        @click=${() =>isToggleable && this.toggle()}
-                    >
-                        <div class="header">
-                            <span>${this.name}</span>
-                            <small>${this.subtitle}</small>
-                        </div>
-                        ${isToggleable ? new Chevron({
-                            direction: "right",
-                            color: faColor,
-                            size: faSize,
-                        }) : ''}
+            <div class="guided--nav-bar-section">
+                <div
+                    id="dropdown"
+                    class="guided--nav-bar-dropdown ${isToggleable && "toggleable"} ${this.disabled
+                        ? "disabled"
+                        : ""} ${this.status}"
+                    @click=${() => isToggleable && this.toggle()}
+                >
+                    <div class="header">
+                        <span>${this.name}</span>
+                        <small>${this.subtitle}</small>
                     </div>
-                    ${this.content ? html`<div
-                        id="section"
-                        class="content hidden ${this.disabled ? "disabled" : ''}"
-                        style="padding: ${this.contentPadding ?? "25px"}"
-                    >
-                        ${this.content}
-                    </div>` : ''}
+                    ${isToggleable
+                        ? new Chevron({
+                              direction: "right",
+                              color: faColor,
+                              size: faSize,
+                          })
+                        : ""}
                 </div>
+                ${this.content
+                    ? html`<div
+                          id="section"
+                          class="content hidden ${this.disabled ? "disabled" : ""}"
+                          style="padding: ${this.contentPadding ?? "25px"}"
+                      >
+                          ${this.content}
+                      </div>`
+                    : ""}
+            </div>
         `;
     }
 }

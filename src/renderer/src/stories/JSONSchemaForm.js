@@ -246,7 +246,7 @@ export class JSONSchemaForm extends LitElement {
         const copy = [...path];
         const tableName = copy.pop();
 
-        return this.getForm(copy).getTable(tableName)
+        return this.getForm(copy).getTable(tableName);
     };
 
     getForm = (path) => {
@@ -292,7 +292,6 @@ export class JSONSchemaForm extends LitElement {
 
         // NOTE: Forms with nested forms will handle their own state updates
         if (this.isUndefined(value)) {
-
             // Continue to resolve and re-render...
             if (globalValue) {
                 value = resolvedParent[name] = globalValue;
@@ -306,7 +305,8 @@ export class JSONSchemaForm extends LitElement {
             resultParent[name] = undefined; // NOTE: Will be removed when stringified
         } else {
             resultParent[name] = value === globalValue ? undefined : value; // Retain association with global value
-            resolvedParent[name] = (isObject(value) && isObject(resolvedParent)) ? merge(value, resolvedParent[name]) : value; // Merge with existing resolved values
+            resolvedParent[name] =
+                isObject(value) && isObject(resolvedParent) ? merge(value, resolvedParent[name]) : value; // Merge with existing resolved values
         }
 
         if (hasUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
@@ -346,7 +346,6 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved) => {
-        
         // Check if any required inputs are missing
         const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !requiredButNotSpecified.length;
@@ -365,8 +364,13 @@ export class JSONSchemaForm extends LitElement {
         }, 0);
 
         // Print out a detailed error message if any inputs are missing
-        let message = isValid ? "" : requiredButNotSpecified.length === 1 ? `<b>${requiredButNotSpecified[0]}</b> is not defined` : `${requiredButNotSpecified.length} required inputs are not specified properly`;
-        if (requiredButNotSpecified.length !== nMissingRequired) console.warn('Disagreement about the correct error to throw...')
+        let message = isValid
+            ? ""
+            : requiredButNotSpecified.length === 1
+            ? `<b>${requiredButNotSpecified[0]}</b> is not defined`
+            : `${requiredButNotSpecified.length} required inputs are not specified properly`;
+        if (requiredButNotSpecified.length !== nMissingRequired)
+            console.warn("Disagreement about the correct error to throw...");
 
         // // Print out a detailed error message if any required inputs are missing
         // if (!isValid && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`;
@@ -375,18 +379,22 @@ export class JSONSchemaForm extends LitElement {
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
             if (!message) {
-                console.log(flaggedInputs)
-                if (flaggedInputs.length === 1) message = `<b>${header(flaggedInputs[0].path.join('.'))}</b> is not valid`;
+                console.log(flaggedInputs);
+                if (flaggedInputs.length === 1)
+                    message = `<b>${header(flaggedInputs[0].path.join("."))}</b> is not valid`;
                 else message = `${flaggedInputs.length} invalid form values`;
             }
-            message += `${(this.base) ? ` in the <b>${this.base.join('.')}</b> section` : ''}. Please check the highlighted fields.`;
+            message += `${
+                this.base ? ` in the <b>${this.base.join(".")}</b> section` : ""
+            }. Please check the highlighted fields.`;
         }
 
         if (message) this.throw(message);
 
         // Validate nested forms (skip disabled)
         for (let name in this.#nestedForms) {
-           if (!this.#accordions[name].disabled) await this.#nestedForms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
+            if (!this.#accordions[name].disabled)
+                await this.#nestedForms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
 
         try {
@@ -534,7 +542,7 @@ export class JSONSchemaForm extends LitElement {
             let isRequired = requirements[name];
 
             if (this.#accordions[name]?.disabled) continue; // Skip disabled accordions
-            
+
             // // NOTE: Uncomment to block checking requirements inside optional properties
             // if (!requirements[name][selfRequiredSymbol] && !resolved[name]) continue; // Do not continue checking requirements if absent and not required
 
@@ -544,7 +552,7 @@ export class JSONSchemaForm extends LitElement {
 
                 // if (typeof isRequired === "object" && !Array.isArray(isRequired))
                 //     invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
-                // else 
+                // else
                 if (this.isUndefined(resolved[name]) && this.validateEmptyValues) invalid.push(path);
             }
         }
@@ -895,12 +903,12 @@ export class JSONSchemaForm extends LitElement {
 
             const localPath = [...path, name];
 
-            const enableToggle = document.createElement('input')
-            const enableToggleContainer = document.createElement('div')
+            const enableToggle = document.createElement("input");
+            const enableToggleContainer = document.createElement("div");
             Object.assign(enableToggleContainer.style, {
-                position: 'relative'
-            })
-            enableToggleContainer.append(enableToggle)
+                position: "relative",
+            });
+            enableToggleContainer.append(enableToggle);
 
             // Check properties that will be rendered before creating the accordion
             const base = [...this.base, ...localPath];
@@ -908,33 +916,32 @@ export class JSONSchemaForm extends LitElement {
             const explicitlyRequired = schema.required?.includes(name) ?? false;
 
             Object.assign(enableToggle, {
-                type: 'checkbox',
+                type: "checkbox",
                 checked: true,
-                style: 'margin-right: 10px; pointer-events:all;',
-            })
-
+                style: "margin-right: 10px; pointer-events:all;",
+            });
 
             const headerName = header(name);
 
             const renderableInside = this.#getRenderable(info, required[name], localPath, true);
 
-            const __disabled = this.results.__disabled ?? (this.results.__disabled = {})
+            const __disabled = this.results.__disabled ?? (this.results.__disabled = {});
 
-            const hasInteraction = __disabled.__interacted // NOTE: This locks the specific value to what the user has chosen...
-            
-            const { __disabled: __tempDisabledGlobal = {}} = this.getGlobalValue(localPath.slice(0, -1));
+            const hasInteraction = __disabled.__interacted; // NOTE: This locks the specific value to what the user has chosen...
 
-            const __disabledGlobal = structuredClone(__tempDisabledGlobal)  // NOTE: Cloning ensures no property transfer
+            const { __disabled: __tempDisabledGlobal = {} } = this.getGlobalValue(localPath.slice(0, -1));
 
-            let isGlobalEffect = !hasInteraction || (!hasInteraction && __disabledGlobal.__interacted) // Indicate whether global effect is used
+            const __disabledGlobal = structuredClone(__tempDisabledGlobal); // NOTE: Cloning ensures no property transfer
 
-            const __disabledResolved = isGlobalEffect ? __disabledGlobal : __disabled
+            let isGlobalEffect = !hasInteraction || (!hasInteraction && __disabledGlobal.__interacted); // Indicate whether global effect is used
 
-            const isDisabled = !!__disabledResolved[name]
+            const __disabledResolved = isGlobalEffect ? __disabledGlobal : __disabled;
 
-            enableToggle.checked = !isDisabled
+            const isDisabled = !!__disabledResolved[name];
 
-            const nestedResults = __disabled[name] ?? results[name] ?? this.results[name] // One or the other will exist—depending on global or local disabling
+            enableToggle.checked = !isDisabled;
+
+            const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
 
             if (renderableInside.length) {
                 this.#nestedForms[name] = new JSONSchemaForm({
@@ -974,83 +981,84 @@ export class JSONSchemaForm extends LitElement {
                 });
             }
 
-            const oldStates = this.#accordions[headerName]
+            const oldStates = this.#accordions[headerName];
 
-            const accordion = this.#accordions[headerName] = new Accordion({
+            const accordion = (this.#accordions[headerName] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
-                subtitle: html`<div style="display:flex; align-items: center;">${explicitlyRequired ? '' : enableToggleContainer}${renderableInside.length ? `${renderableInside.length} fields` : ''}</div>`,
-                content: this.#nestedForms[name], 
+                subtitle: html`<div style="display:flex; align-items: center;">
+                    ${explicitlyRequired ? "" : enableToggleContainer}${renderableInside.length
+                        ? `${renderableInside.length} fields`
+                        : ""}
+                </div>`,
+                content: this.#nestedForms[name],
 
                 // States
                 open: oldStates?.open ?? !hasMany,
                 disabled: isDisabled,
-                status: oldStates?.status ?? 'valid', // Always show a status
-            });
+                status: oldStates?.status ?? "valid", // Always show a status
+            }));
 
             accordion.id = name; // assign name to accordion id
 
             // Set enable / disable behavior
             const addDisabled = (name, o) => {
-                if (!o.__disabled) o.__disabled = {}
+                if (!o.__disabled) o.__disabled = {};
 
                 // Do not overwrite cache of disabled values (with globals, for instance)
                 if (o.__disabled[name]) {
-                    if (isGlobalEffect) return 
+                    if (isGlobalEffect) return;
                 }
-                
-                o.__disabled[name] = (o[name] ?? (o[name] = {})) // Track disabled values (or at least something)
-            }
+
+                o.__disabled[name] = o[name] ?? (o[name] = {}); // Track disabled values (or at least something)
+            };
 
             const disable = () => {
-                accordion.disabled = true
-                addDisabled(name, this.resolved)
-                addDisabled(name, this.results)
-                this.resolved[name] = this.results[name] = undefined // Remove entry from results
-            }
+                accordion.disabled = true;
+                addDisabled(name, this.resolved);
+                addDisabled(name, this.results);
+                this.resolved[name] = this.results[name] = undefined; // Remove entry from results
+            };
 
             const enable = () => {
-                accordion.disabled = false
+                accordion.disabled = false;
 
-                const { __disabled = {} } = this.results
-                const { __disabled: resolvedDisabled = {}} = this.resolved
+                const { __disabled = {} } = this.results;
+                const { __disabled: resolvedDisabled = {} } = this.resolved;
 
-                if (__disabled[name]) this.updateData(localPath, __disabled[name])  // Propagate restored disabled values
-                __disabled[name] = undefined // Clear disabled value
-                resolvedDisabled[name] = undefined // Clear disabled value
-            }
+                if (__disabled[name]) this.updateData(localPath, __disabled[name]); // Propagate restored disabled values
+                __disabled[name] = undefined; // Clear disabled value
+                resolvedDisabled[name] = undefined; // Clear disabled value
+            };
 
-            enableToggle.addEventListener('click', (e) => {
-                e.stopPropagation()
-                const { checked } = e.target
+            enableToggle.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const { checked } = e.target;
 
                 // Reset parameters on interaction
-                isGlobalEffect = false
+                isGlobalEffect = false;
                 Object.assign(enableToggle.style, {
-                    accentColor: 'unset'
-                })
+                    accentColor: "unset",
+                });
 
-                const { __disabled = {} } = this.results
-                const { __disabled: resolvedDisabled = {}} = this.resolved
+                const { __disabled = {} } = this.results;
+                const { __disabled: resolvedDisabled = {} } = this.resolved;
 
-                __disabled.__interacted = resolvedDisabled.__interacted = true // Track that the user has interacted with the form
+                __disabled.__interacted = resolvedDisabled.__interacted = true; // Track that the user has interacted with the form
 
                 checked ? enable() : disable();
 
-                this.onUpdate(localPath, this.results[name])                    
-
-            })
+                this.onUpdate(localPath, this.results[name]);
+            });
 
             if (isGlobalEffect) {
-                (isDisabled) ? disable() : enable();
+                isDisabled ? disable() : enable();
                 Object.assign(enableToggle.style, {
-                    accentColor: 'gray'
-                })
-                
+                    accentColor: "gray",
+                });
             }
 
             return accordion;
-
         });
 
         return rendered;

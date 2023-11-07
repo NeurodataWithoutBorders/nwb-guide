@@ -25,9 +25,9 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
                     globalStatePath,
                     formOptions: {
                         ...optionsCopy,
-                        schema: { 
+                        schema: {
                             properties: { [key]: value },
-                            required: [ key ]
+                            required: [key],
                         },
                     },
                 })

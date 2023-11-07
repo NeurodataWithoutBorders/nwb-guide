@@ -28,7 +28,7 @@ export const run = async (url, payload, options = {}) => {
     if (!("base" in options)) options.base = "/neuroconv";
 
     // Clear private keys from being passed
-    payload = sanitize(structuredClone(payload))
+    payload = sanitize(structuredClone(payload));
 
     const results = await fetch(`${baseUrl}${options.base || ""}/${url}`, {
         method: "POST",
