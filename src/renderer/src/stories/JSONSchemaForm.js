@@ -12,6 +12,10 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
+const isObject = (o) => {
+    return o && typeof o === "object" && !Array.isArray(o);
+};
+
 const selfRequiredSymbol = Symbol();
 
 const componentCSS = `
@@ -302,7 +306,7 @@ export class JSONSchemaForm extends LitElement {
             resultParent[name] = undefined; // NOTE: Will be removed when stringified
         } else {
             resultParent[name] = value === globalValue ? undefined : value; // Retain association with global value
-            resolvedParent[name] = value;
+            resolvedParent[name] = (isObject(value) && isObject(resolvedParent)) ? merge(value, resolvedParent[name]) : value; // Merge with existing resolved values
         }
 
         if (hasUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
@@ -851,6 +855,11 @@ export class JSONSchemaForm extends LitElement {
             const localPath = [...path, name];
 
             const enableToggle = document.createElement('input')
+            const enableToggleContainer = document.createElement('div')
+            Object.assign(enableToggleContainer.style, {
+                position: 'relative'
+            })
+            enableToggleContainer.append(enableToggle)
 
             // Check properties that will be rendered before creating the accordion
             const base = [...this.base, ...localPath];
@@ -872,17 +881,19 @@ export class JSONSchemaForm extends LitElement {
 
             const hasInteraction = __disabled.__interacted // NOTE: This locks the specific value to what the user has chosen...
             
-            const { __disabled: __disabledGlobal = {}} = this.getGlobalValue(localPath.slice(0, -1));
-            
-            const __disabledResolved = (hasInteraction) ? __disabled : __disabledGlobal
+            const { __disabled: __tempDisabledGlobal = {}} = this.getGlobalValue(localPath.slice(0, -1));
+
+            const __disabledGlobal = structuredClone(__tempDisabledGlobal)  // NOTE: Cloning ensures no property transfer
+
+            let isGlobalEffect = !hasInteraction || (!hasInteraction && __disabledGlobal.__interacted) // Indicate whether global effect is used
+
+            const __disabledResolved = isGlobalEffect ? __disabledGlobal : __disabled
 
             const isDisabled = !!__disabledResolved[name]
 
             enableToggle.checked = !isDisabled
 
-            console.log('Is Disabled', isDisabled, hasInteraction)
-
-            const nestedResults = __disabled[name] ?? results[name] // One or the other will exist—depending on global or local disabling
+            const nestedResults = __disabled[name] ?? results[name] ?? this.results[name] // One or the other will exist—depending on global or local disabling
 
             if (renderableInside.length) {
                 this.#nestedForms[name] = new JSONSchemaForm({
@@ -927,7 +938,7 @@ export class JSONSchemaForm extends LitElement {
             const accordion = this.#accordions[headerName] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
-                subtitle: html`<div style="display:flex; align-items: center;">${explicitlyRequired ? '' : enableToggle}${renderableInside.length ? `${renderableInside.length} fields` : ''}</div>`,
+                subtitle: html`<div style="display:flex; align-items: center;">${explicitlyRequired ? '' : enableToggleContainer}${renderableInside.length ? `${renderableInside.length} fields` : ''}</div>`,
                 content: this.#nestedForms[name], 
 
                 // States
@@ -941,17 +952,20 @@ export class JSONSchemaForm extends LitElement {
             // Set enable / disable behavior
             const addDisabled = (name, o) => {
                 if (!o.__disabled) o.__disabled = {}
-                console.log('SAVING', o[name])
 
-                o.__disabled[name] = o[name] ?? {} // Track disabled values (or at least something)
+                // Do not overwrite cache of disabled values (with globals, for instance)
+                if (o.__disabled[name]) {
+                    if (isGlobalEffect) return 
+                }
+                
+                o.__disabled[name] = (o[name] ?? (o[name] = {})) // Track disabled values (or at least something)
             }
 
             const disable = () => {
                 accordion.disabled = true
-                console.log('WHAT ARE THEIR VALUES', this.resolved[name], this.results[name])
                 addDisabled(name, this.resolved)
                 addDisabled(name, this.results)
-                this.resolved[name] = this.results[name] = undefined
+                this.resolved[name] = this.results[name] = undefined // Remove entry from results
             }
 
             const enable = () => {
@@ -960,21 +974,20 @@ export class JSONSchemaForm extends LitElement {
                 const { __disabled = {} } = this.results
                 const { __disabled: resolvedDisabled = {}} = this.resolved
 
-                if (__disabled[name]) {
-                    console.log('REPLACING', __disabled[name])
-                    this.results[name] = __disabled[name] // Restore disabled values
-                    __disabled[name] = undefined // Track disabled value as interacted with
-                }
-
-                if (resolvedDisabled[name]) {
-                    this.resolved[name] = resolvedDisabled[name] // Restore disabled values
-                    resolvedDisabled[name] = undefined // Track disabled value as interacted with
-                }
+                if (__disabled[name]) this.updateData(localPath, __disabled[name])  // Propagate restored disabled values
+                __disabled[name] = undefined // Clear disabled value
+                resolvedDisabled[name] = undefined // Clear disabled value
             }
 
             enableToggle.addEventListener('click', (e) => {
                 e.stopPropagation()
                 const { checked } = e.target
+
+                // Reset parameters on interaction
+                isGlobalEffect = false
+                Object.assign(enableToggle.style, {
+                    accentColor: 'unset'
+                })
 
                 const { __disabled = {} } = this.results
                 const { __disabled: resolvedDisabled = {}} = this.resolved
@@ -987,7 +1000,13 @@ export class JSONSchemaForm extends LitElement {
 
             })
 
-            if (__disabledResolved === __disabledGlobal) (isDisabled)? disable() : enable();
+            if (isGlobalEffect) {
+                (isDisabled) ? disable() : enable();
+                Object.assign(enableToggle.style, {
+                    accentColor: 'gray'
+                })
+                
+            }
 
             return accordion;
 

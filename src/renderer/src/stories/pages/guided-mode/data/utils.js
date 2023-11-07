@@ -47,7 +47,7 @@ export function resolveProperties(properties = {}, target, globals = {}) {
             else if (info.default) target[name] = info.default;
         }
 
-        resolveProperties(props, target[name], globals[name]);
+        if (target[name]) resolveProperties(props, target[name], globals[name]);
     }
 
     return target;

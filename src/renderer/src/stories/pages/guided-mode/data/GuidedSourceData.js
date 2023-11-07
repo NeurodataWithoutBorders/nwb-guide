@@ -84,6 +84,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 this.mapSessions(async ({ subject, session, info }, i) => {
 
 
+                    console.log('RUNNING', subject, session, info.source_data)
                     // NOTE: This clears all user-defined results
                     const result = await run(`metadata`, {
                         source_data: info.source_data,
