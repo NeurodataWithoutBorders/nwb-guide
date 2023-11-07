@@ -193,13 +193,17 @@ export class Dashboard extends LitElement {
         // Update Active Page
         this.#active = page;
 
+
+        // Reset global state if page has no parent
+        if ( !this.#active.info.parent ) toPass.globalState = {}; 
+
         if (isNested) {
             let parent = info.parent;
             while (parent.info.parent) parent = parent.info.parent; // Lock sections to the top-level parent
             this.subSidebar.sections = this.#getSections(parent.info.pages, toPass.globalState); // Update sidebar items (if changed)
             this.subSidebar.active = info.id; // Update active item (if changed)
             this.sidebar.hide(true);
-            this.subSidebar.show();
+            this.subSidebar.show(); 
         } else {
             this.sidebar.show();
             this.subSidebar.hide();
