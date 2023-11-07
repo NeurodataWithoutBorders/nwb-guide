@@ -102,8 +102,9 @@ test('inter-table updates are triggered', async () => {
         schema,
         results,
         validateOnChange,
-        renderTable: (name, metadata, path) => {
+        createTable: (name, metadata, path) => {
             if (name !== "Electrodes") return new SimpleTable(metadata);
+            else return true
         },
     })
 
