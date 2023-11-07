@@ -21,12 +21,9 @@ import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 import { notyf } from "../../../dependencies/globals.js";
 import { SERVER_FILE_PATH, port } from "../../../electron/index.js";
 
-import saveSVG from '../../assets/save.svg?raw'
-
-
+import saveSVG from "../../assets/save.svg?raw";
 
 export class SettingsPage extends Page {
-    
     header = {
         title: "App Settings",
         subtitle: "This page allows you to set global settings for the GUIDE.",
