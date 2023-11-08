@@ -635,7 +635,7 @@ export class SimpleTable extends LitElement {
             else target[rowName][header] = value;
         }
 
-        if (cell.interacted) this.onUpdate([ rowName, header ], value);
+        if (cell.interacted) this.onUpdate([rowName, header], value);
     };
 
     #createCell = (value, info) => {

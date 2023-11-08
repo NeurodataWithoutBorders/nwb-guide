@@ -226,7 +226,7 @@ export class JSONSchemaInput extends LitElement {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
-                    
+
                     onUpdate: () => this.#updateData(fullPath, tableMetadata.data, true), // Ensure change propagates to all forms
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
@@ -250,7 +250,7 @@ export class JSONSchemaInput extends LitElement {
                             this.form.checkAllLoaded();
                         }
                     },
-                    onThrow: (...args) => this.#onThrow(...args)
+                    onThrow: (...args) => this.#onThrow(...args),
                 };
 
                 const table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
