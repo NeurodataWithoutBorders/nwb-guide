@@ -211,7 +211,9 @@ export class Dashboard extends LitElement {
 
         this.#active.set(toPass, false);
 
-        // this.#active.checkSyncState().then(() => {
+        this.#active.checkSyncState().then(() => {
+
+            this.#active.requestUpdate() // Re-render page
 
             const projectName = info.globalState?.project?.name;
             this.subSidebar.header = projectName
@@ -224,7 +226,7 @@ export class Dashboard extends LitElement {
                 sections: this.subSidebar.sections ?? {},
             });
 
-        // })
+        })
     }
 
     // Populate the sections tracked for this page by using the global state as a model
