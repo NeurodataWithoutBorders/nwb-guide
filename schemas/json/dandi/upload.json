@@ -7,7 +7,7 @@
         "number_of_jobs": {
             "type": "integer",
             "title": "Job Count",
-            "description": "The number of files to upload in parallel. A value of <code>-1</code> uses all available processes",
+            "description": "The number of files to upload in parallel. A value of <code>-1</code> uses all available processes.<br><small><b>Note:</b> If you encounter an error for any selector value, particularly a Segmentation Fault error, try a value of <code>1</code> to run the jobs without parallelization.</small>",
             "default": -1,
             "min": -1
         },
