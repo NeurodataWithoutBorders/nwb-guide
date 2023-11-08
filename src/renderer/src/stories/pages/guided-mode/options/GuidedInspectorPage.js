@@ -87,12 +87,17 @@ export class GuidedInspectorPage extends Page {
         ${until(
             (async () => {
                 if (fileArr.length <= 1) {
+
                     const items =
                         inspector ??
                         removeFilePaths(
-                            (this.unsavedUpdates = globalState.preview.inspector =
+                            (globalState.preview.inspector =
                                 await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title }))
                         );
+
+
+                    if (!inspector) await this.save()
+
                     return new InspectorList({ items, emptyMessage });
                 }
 
@@ -100,9 +105,12 @@ export class GuidedInspectorPage extends Page {
                     const path = getSharedPath(fileArr.map((o) => o.info.file));
                     const report =
                         inspector ??
-                        (this.unsavedUpdates = globalState.preview.inspector =
+                        (globalState.preview.inspector =
                             await run("inspect_folder", { path, ...opts }, { title: title + "s" }));
-                    return truncateFilePaths(report, path);
+                    
+                            if (!inspector) await this.save()
+
+                        return truncateFilePaths(report, path);
                 })();
 
                 const _instances = fileArr.map(({ subject, session, info }) => {
