@@ -34,13 +34,15 @@ const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
 const PYINSTALLER_NAME = "nwb-guide"
 
+const isWindows = process.platform === 'win32'
+
+
 let pyflaskProcess: any = null;
 
 let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
+let serverFilePath = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
 const portRange = 100;
-
-const isWindows = process.platform === 'win32'
 
 let readyQueue: Function[] = []
 
@@ -110,7 +112,7 @@ const pythonIsClosed = (err = globals.python.latestError) => {
  * The resources path is used for Linux and Mac builds and the app.getAppPath() is used for Windows builds.
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
-const getPackagedPath = () => {
+function getPackagedPath () {
   const scriptPath = isWindows ? path.join(__dirname, PY_FLASK_DIST_FOLDER, PYINSTALLER_NAME, `${PYINSTALLER_NAME}.exe`) : path.join(process.resourcesPath, PYFLASK_BUILD_SUBFOLDER_NAME, PYINSTALLER_NAME)
   if (fs.existsSync(scriptPath)) return scriptPath;
 };
@@ -119,7 +121,6 @@ const createPyProc = async () => {
 
   return new Promise(async (resolve, reject) => {
 
-    let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
     await killAllPreviousProcesses();
 
     const defaultPort = PORT as number
@@ -129,7 +130,7 @@ const createPyProc = async () => {
       .then(([freePort]: string[]) => {
         selectedPort = freePort;
 
-        pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
+        pyflaskProcess = (serverFilePath.slice(-3) === '.py') ? child_process.spawn("python", [serverFilePath, freePort], {}) : child_process.spawn(`${serverFilePath}`, [freePort], {});
 
         if (pyflaskProcess != null) {
 
@@ -447,6 +448,10 @@ ipcMain.on("resize-window", (event, dir) => {
 
 ipcMain.on("get-port", (event) => {
   event.returnValue = selectedPort;
+});
+
+ipcMain.on("get-server-file-path", (event) => {
+  event.returnValue = serverFilePath;
 });
 
 // Allow the browser to request status if already sent once
