@@ -153,8 +153,7 @@ export class GuidedHomePage extends Page {
     };
 
     async updated() {
-        this.info.globalState = {}; // Reset global state when navigating back to this page
-
+        
         const htmlBase = this.shadowRoot ?? this;
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         const lottieContainer = htmlBase.querySelector("#new-dataset-lottie-container");
