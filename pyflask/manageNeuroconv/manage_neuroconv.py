@@ -169,8 +169,6 @@ def get_all_converter_info() -> dict:
 
     return {name: derive_interface_info(converter) for name, converter in module_to_dict(converters).items()}
 
-    return output
-
 
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
@@ -470,7 +468,7 @@ def convert_to_nwb(info: dict) -> str:
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs):
-    tmp_folder_path = aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
+    tmp_folder_path = _aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
     innerKwargs = {**kwargs}
     del innerKwargs["filesystem_paths"]
     innerKwargs["nwb_folder_path"] = tmp_folder_path
@@ -497,12 +495,12 @@ def upload_folder_to_dandi(
         nwb_folder_path=Path(nwb_folder_path),
         staging=staging,
         cleanup=cleanup,
-        number_of_jobs=number_of_jobs,
-        number_of_threads=number_of_threads,
+        number_of_jobs=1,
+        number_of_threads=1,
     )
 
 
-def upload_to_dandi(
+def upload_project_to_dandi(
     dandiset_id: str,
     api_key: str,
     project: Optional[str] = None,
@@ -522,8 +520,8 @@ def upload_to_dandi(
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
-        number_of_jobs=number_of_jobs,
-        number_of_threads=number_of_threads,
+        number_of_jobs=1,
+        number_of_threads=1,
     )
 
 
