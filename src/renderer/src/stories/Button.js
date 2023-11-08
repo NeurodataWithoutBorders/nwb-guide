@@ -33,7 +33,7 @@ export class Button extends LitElement {
                 justify-content: center;
             }
 
-            .button-label {
+            .with-icon {
                 margin-left: 10px;
             }
 
@@ -104,7 +104,7 @@ export class Button extends LitElement {
                           >${this.icon instanceof HTMLElement ? this.icon : unsafeHTML(this.icon)}</span
                       >`
                     : ""}
-                <slot>${this.label ? html`<span class="button-label">${this.label}</span>` : ""}</slot>
+                <slot>${this.label ? html`<span class="button-label ${this.icon ? 'with-icon' : ''}">${this.label}</span>` : ""}</slot>
             </button>
         `;
     }
