@@ -926,14 +926,15 @@ export class JSONSchemaForm extends LitElement {
             const renderableInside = this.#getRenderable(info, required[name], localPath, true);
 
             const __disabled = this.results.__disabled ?? (this.results.__disabled = {});
+            const __interacted = __disabled.__interacted ?? (__disabled.__interacted = {});
 
-            const hasInteraction = __disabled.__interacted; // NOTE: This locks the specific value to what the user has chosen...
+            const hasInteraction = __interacted[name]; // NOTE: This locks the specific value to what the user has chosen...
 
             const { __disabled: __tempDisabledGlobal = {} } = this.getGlobalValue(localPath.slice(0, -1));
 
             const __disabledGlobal = structuredClone(__tempDisabledGlobal); // NOTE: Cloning ensures no property transfer
 
-            let isGlobalEffect = !hasInteraction || (!hasInteraction && __disabledGlobal.__interacted); // Indicate whether global effect is used
+            let isGlobalEffect = !hasInteraction || (!hasInteraction && __disabledGlobal.__interacted?.[name]); // Indicate whether global effect is used
 
             const __disabledResolved = isGlobalEffect ? __disabledGlobal : __disabled;
 
@@ -1044,7 +1045,10 @@ export class JSONSchemaForm extends LitElement {
                 const { __disabled = {} } = this.results;
                 const { __disabled: resolvedDisabled = {} } = this.resolved;
 
-                __disabled.__interacted = resolvedDisabled.__interacted = true; // Track that the user has interacted with the form
+                if (!__disabled.__interacted) __disabled.__interacted = {}
+                if (!resolvedDisabled.__interacted) resolvedDisabled.__interacted = {}
+
+                __disabled.__interacted[name] = resolvedDisabled.__interacted[name] = true; // Track that the user has interacted with the form
 
                 checked ? enable() : disable();
 
