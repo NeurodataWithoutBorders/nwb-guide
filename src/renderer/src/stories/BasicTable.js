@@ -274,7 +274,7 @@ export class BasicTable extends LitElement {
                 });
             });
         });
-
+        
         promises.resolveAll(results, () => {
             this.#checkStatus();
             this.#rendered(true);

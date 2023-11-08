@@ -241,6 +241,7 @@ export class JSONSchemaForm extends LitElement {
 
     getTable = (path) => {
         if (typeof path === "string") path = path.split(".");
+
         if (path.length === 1) return this.tables[path[0]]; // return table if accessible
 
         const copy = [...path];
@@ -248,7 +249,7 @@ export class JSONSchemaForm extends LitElement {
 
         return this.getForm(copy).getTable(tableName);
     };
-
+v
     getForm = (path) => {
         if (typeof path === "string") path = path.split(".");
         const form = this.#nestedForms[path[0]];
@@ -259,9 +260,11 @@ export class JSONSchemaForm extends LitElement {
 
     getInput = (path) => {
         if (typeof path === "string") path = path.split(".");
+
         const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
-        if (!container) return;
-        return container.querySelector("jsonschema-input");
+
+        if (!container) return this.getForm(path[0]).getInput(path.slice(1))
+        return container?.querySelector("jsonschema-input");
     };
 
     #requirements = {};
@@ -278,7 +281,9 @@ export class JSONSchemaForm extends LitElement {
     }
 
     // Track resolved values for the form (data only)
-    updateData(localPath, value) {
+    updateData(localPath, value, forceUpdate = false) {
+
+        if (!value) throw new Error('Cannot update data with undefined value')
         const path = [...localPath];
         const name = path.pop();
 
@@ -309,7 +314,7 @@ export class JSONSchemaForm extends LitElement {
                 isObject(value) && isObject(resolvedParent) ? merge(value, resolvedParent[name]) : value; // Merge with existing resolved values
         }
 
-        if (hasUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
+        if (hasUpdate || forceUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
     }
 
     #addMessage = (name, message, type) => {
@@ -342,7 +347,7 @@ export class JSONSchemaForm extends LitElement {
                     return !accordion || !accordion.disabled;
                 })
                 .map(([_, v]) => v),
-            // ...Object.values(this.tables),
+            ...Object.values(this.tables),
         ]);
     };
 
@@ -391,9 +396,10 @@ export class JSONSchemaForm extends LitElement {
                 else message = `${flaggedInputs.length} invalid form values`;
             }
             message += `${
-                this.base ? ` in the <b>${this.base.join(".")}</b> section` : ""
+                this.base.length ? ` in the <b>${this.base.join(".")}</b> section` : ""
             }. Please check the highlighted fields.`;
         }
+
 
         if (message) this.throw(message);
 
@@ -436,6 +442,7 @@ export class JSONSchemaForm extends LitElement {
 
     #get = (path, object = this.resolved, omitted = []) => {
         // path = path.slice(this.base.length); // Correct for base path
+        if (!path) throw new Error('Path not specified')
         return path.reduce(
             (acc, curr) => (acc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str])]?.[curr]),
             object
@@ -488,6 +495,7 @@ export class JSONSchemaForm extends LitElement {
                     else return false;
                 }
             };
+
 
         const interactiveInput = new JSONSchemaInput({
             info,
@@ -958,9 +966,9 @@ export class JSONSchemaForm extends LitElement {
                     results: { ...nestedResults },
                     globals: this.globals?.[name],
 
-                    onUpdate: (internalPath, value) => {
+                    onUpdate: (internalPath, value, forceUpdate) => {
                         const path = [...localPath, ...internalPath];
-                        this.updateData(path, value);
+                        this.updateData(path, value, forceUpdate);
                     },
 
                     required: required[name], // Scoped to the sub-schema
