@@ -335,16 +335,16 @@ export class JSONSchemaForm extends LitElement {
 
     status;
     checkStatus = () => {
-
-
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
-            ...Object.entries(this.#nestedForms).filter(([k,v]) => {
-                const accordion = this.#accordions[k];
-                return !accordion || !accordion.disabled;
-            }).map(([_, v]) => v),
+            ...Object.entries(this.#nestedForms)
+                .filter(([k, v]) => {
+                    const accordion = this.#accordions[k];
+                    return !accordion || !accordion.disabled;
+                })
+                .map(([_, v]) => v),
             // ...Object.values(this.tables),
         ]);
-    }
+    };
 
     throw = (message) => {
         this.onThrow(message, this.identifier);
@@ -1027,8 +1027,7 @@ export class JSONSchemaForm extends LitElement {
                 addDisabled(name, this.results);
                 this.resolved[name] = this.results[name] = undefined; // Remove entry from results
 
-                this.checkStatus()
-
+                this.checkStatus();
             };
 
             const enable = () => {
@@ -1041,7 +1040,7 @@ export class JSONSchemaForm extends LitElement {
                 __disabled[name] = undefined; // Clear disabled value
                 resolvedDisabled[name] = undefined; // Clear disabled value
 
-                this.checkStatus()
+                this.checkStatus();
             };
 
             enableToggle.addEventListener("click", (e) => {
