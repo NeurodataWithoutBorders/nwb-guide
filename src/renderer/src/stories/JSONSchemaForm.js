@@ -334,11 +334,17 @@ export class JSONSchemaForm extends LitElement {
     };
 
     status;
-    checkStatus = () =>
+    checkStatus = () => {
+
+
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
-            ...Object.values(this.#nestedForms),
-            ...Object.values(this.tables),
+            ...Object.entries(this.#nestedForms).filter(([k,v]) => {
+                const accordion = this.#accordions[k];
+                return !accordion || !accordion.disabled;
+            }).map(([_, v]) => v),
+            // ...Object.values(this.tables),
         ]);
+    }
 
     throw = (message) => {
         this.onThrow(message, this.identifier);
@@ -393,7 +399,8 @@ export class JSONSchemaForm extends LitElement {
 
         // Validate nested forms (skip disabled)
         for (let name in this.#nestedForms) {
-            if (!this.#accordions[name].disabled)
+            const accordion = this.#accordions[name];
+            if (!accordion || !accordion.disabled)
                 await this.#nestedForms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
 
@@ -1019,6 +1026,9 @@ export class JSONSchemaForm extends LitElement {
                 addDisabled(name, this.resolved);
                 addDisabled(name, this.results);
                 this.resolved[name] = this.results[name] = undefined; // Remove entry from results
+
+                this.checkStatus()
+
             };
 
             const enable = () => {
@@ -1030,6 +1040,8 @@ export class JSONSchemaForm extends LitElement {
                 if (__disabled[name]) this.updateData(localPath, __disabled[name]); // Propagate restored disabled values
                 __disabled[name] = undefined; // Clear disabled value
                 resolvedDisabled[name] = undefined; // Clear disabled value
+
+                this.checkStatus()
             };
 
             enableToggle.addEventListener("click", (e) => {
