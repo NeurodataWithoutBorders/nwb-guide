@@ -193,6 +193,9 @@ export class Dashboard extends LitElement {
         // Update Active Page
         this.#active = page;
 
+        // Reset global state if page has no parent
+        if (!this.#active.info.parent) toPass.globalState = {};
+
         if (isNested) {
             let parent = info.parent;
             while (parent.info.parent) parent = parent.info.parent; // Lock sections to the top-level parent

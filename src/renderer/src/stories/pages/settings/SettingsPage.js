@@ -19,6 +19,7 @@ import { global } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
+import { SERVER_FILE_PATH, port } from "../../../electron/index.js";
 
 import saveSVG from "../../assets/save.svg?raw";
 
@@ -77,7 +78,11 @@ export class SettingsPage extends Page {
             onThrow,
         });
 
-        return html` ${this.form} `;
+        return html`
+            <p><b>Server Port:</b> ${port}</p>
+            <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
+            ${this.form}
+        `;
     }
 }
 
