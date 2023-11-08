@@ -1045,8 +1045,8 @@ export class JSONSchemaForm extends LitElement {
                 const { __disabled = {} } = this.results;
                 const { __disabled: resolvedDisabled = {} } = this.resolved;
 
-                if (!__disabled.__interacted) __disabled.__interacted = {}
-                if (!resolvedDisabled.__interacted) resolvedDisabled.__interacted = {}
+                if (!__disabled.__interacted) __disabled.__interacted = {};
+                if (!resolvedDisabled.__interacted) resolvedDisabled.__interacted = {};
 
                 __disabled.__interacted[name] = resolvedDisabled.__interacted[name] = true; // Track that the user has interacted with the form
 
