@@ -69,7 +69,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     backdrop: "rgba(0,0,0, 0.4)",
                     timerProgressBar: false,
                     didOpen: () => {
-                        Swal.showLoading();
+                        Swal.showLoading(); 
                     },
                 });
             };
@@ -79,18 +79,26 @@ export class GuidedSourceDataPage extends ManagedPage {
             });
 
             await Promise.all(
-                this.mapSessions(async ({ subject, session, info }, i) => {
-                    console.log("RUNNING", subject, session, info.source_data);
+                Object.values(this.forms).map(async ({ subject, session, form }) => {
+                    
+                    const info = this.info.globalState.results[subject][session];
+
                     // NOTE: This clears all user-defined results
-                    const result = await run(`metadata`, {
-                        source_data: info.source_data,
-                        interfaces: this.info.globalState.interfaces,
-                    }).catch((e) => {
-                        Swal.close();
-                        stillFireSwal = false;
-                        this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
-                        throw e;
-                    });
+                    const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            source_data: form.resolved, // Use resolved values, including global source data
+                            interfaces: this.info.globalState.interfaces,
+                        }),
+                    })
+                        .then((res) => res.json())
+                        .catch((e) => {
+                            Swal.close();
+                            stillFireSwal = false;
+                            this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
+                            throw e;
+                        });
 
                     Swal.close();
 
@@ -178,7 +186,12 @@ export class GuidedSourceDataPage extends ManagedPage {
         super.connectedCallback();
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Source Data",
-            propsToRemove: [...propsToIgnore, "folder_path", "file_path"],
+            propsToRemove: [
+                ...propsToIgnore, 
+                "folder_path", 
+                "file_path",
+                // NOTE: Still keeping plural path specifications for now
+            ],
             key: "SourceData",
             schema: this.info.globalState.schema.source_data,
             hasInstances: true,

@@ -2,16 +2,17 @@ import { merge } from "../../utils.js";
 
 // Merge project-wide data into metadata
 export function populateWithProjectMetadata(info, globalState) {
+    const copy = structuredClone(info)
     const toMerge = Object.entries(globalState.project).filter(([_, value]) => value && typeof value === "object");
     toMerge.forEach(([key, value]) => {
-        let internalMetadata = info[key];
-        if (!info[key]) internalMetadata = info[key] = {};
+        let internalMetadata = copy[key];
+        if (!copy[key]) internalMetadata = copy[key] = {};
         for (let key in value) {
             if (!(key in internalMetadata)) internalMetadata[key] = value[key]; // Prioritize existing results (cannot override with new information...)
         }
     });
 
-    return info;
+    return copy;
 }
 
 export function resolveGlobalOverrides(subject, globalState) {
@@ -57,17 +58,16 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 export function resolveResults(subject, session, globalState) {
     const overrides = resolveGlobalOverrides(subject, globalState); // Unique per-subject (but not sessions)
     const metadata = globalState.results[subject][session].metadata;
-    const results = merge(metadata, {}); // Copy the metadata results from the form
+    const results = structuredClone(metadata); // Copy the metadata results from the form
     const schema = globalState.schema.metadata[subject][session];
     resolveProperties(schema, results, overrides);
     return results;
 }
 
-// NOTE: Remove this...
 export function createResults({ subject, info }, globalState) {
     const results = populateWithProjectMetadata(info.metadata, globalState);
-    const metadataCopy = { ...globalState.subjects[subject] };
-    delete metadataCopy.sessions; // Remove extra key from metadata
-    merge(metadataCopy, results.Subject);
+    const subjectGlobalsCopy = { ...globalState.subjects[subject] };
+    delete subjectGlobalsCopy.sessions; // Remove extra key from metadata
+    merge(subjectGlobalsCopy, results.Subject);
     return results;
 }
