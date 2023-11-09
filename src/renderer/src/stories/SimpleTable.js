@@ -170,6 +170,7 @@ export class SimpleTable extends LitElement {
         onThrow,
         deferLoading,
         maxHeight,
+        contextOptions = {}
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -180,6 +181,8 @@ export class SimpleTable extends LitElement {
         this.deferLoading = deferLoading ?? false;
         this.maxHeight = maxHeight ?? "";
 
+        this.contextOptions = contextOptions;
+
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
@@ -187,6 +190,7 @@ export class SimpleTable extends LitElement {
         if (onUpdate) this.onUpdate = onUpdate;
 
         this.onmousedown = (ev) => {
+            ev.stopPropagation();
             this.#clearSelected();
             this.#selecting = true;
             const cell = this.#getCellFromEvent(ev);
@@ -451,9 +455,12 @@ export class SimpleTable extends LitElement {
         if (options.column?.add) items.push(this.#menuOptions.column.add);
         if (options.column?.remove) items.push(this.#menuOptions.column.remove);
 
-        this.#context = new ContextMenu({ target: this.shadowRoot.querySelector("table"), items });
+        this.#context = new ContextMenu({ 
+            target: this.shadowRoot.querySelector("table"), 
+            items,
+        });
 
-        this.shadowRoot.append(this.#context); // Insert context menu
+        document.body.append(this.#context); // Insert context menu
     }
 
     #loaded = false;
@@ -500,6 +507,7 @@ export class SimpleTable extends LitElement {
                     add: true,
                     remove: true,
                 },
+                ...this.contextOptions
             });
         }
     };
@@ -664,6 +672,9 @@ export class SimpleTable extends LitElement {
 
         // Track the cell renderer
         const cell = new TableCell({
+            info: { 
+                col: this.colHeaders[info.j],
+            },
             value,
             schema,
             validateOnChange: (value) => {

@@ -2,6 +2,10 @@ import { LitElement, PropertyValueMap, css, html } from "lit"
 import { placeCaretAtEnd } from "../utils"
 
 type BaseTableProps = {
+    info: { 
+        col: string,
+    },
+    toggle: (state?: boolean) => void,
     schema: any,
     onOpen: Function,
     onClose: Function,
@@ -47,20 +51,28 @@ export class TableCellBase extends LitElement {
         `
     }
 
-    schema: any;
+    schema: BaseTableProps['schema'];
+    info: BaseTableProps['info'];
+    editToggle: BaseTableProps['toggle']
 
     interacted = false
 
     constructor({
+        info,
         schema,
         onOpen,
         onClose,
-        onChange
+        onChange,
+        toggle
     }: Partial<BaseTableProps> = {}) {
 
         super()
 
+        this.info = info ?? {}
         this.schema = schema ?? {}
+        
+        this.editToggle = toggle ?? (() => {});
+
         if (onOpen) this.onOpen = onOpen
         if (onChange) this.onChange = onChange
         if (onClose) this.onClose = onClose
@@ -79,20 +91,44 @@ export class TableCellBase extends LitElement {
     onClose: BaseTableProps['onClose'] = () => {}
     onChange: BaseTableProps['onChange'] = () => {}
 
+    #editableClose = () => this.editToggle(false)
+
     toggle (state = !this.#active) {
         if (state === this.#active) return
 
         if (state) {
-            this.#editable.setAttribute('contenteditable', '')
-            this.setAttribute('editing', ''),
+
+            this.setAttribute('editing', '')
+
+            if (this.#editor === this.#editable) {
+                this.#editable.setAttribute('contenteditable', '')
+                this.#editable.style.pointerEvents = 'auto'
+                placeCaretAtEnd(this.#editable)
+                document.addEventListener('click', this.#editableClose)
+            } else {
+                this.#editor.onEditStart()
+
+            }
+
             this.onOpen()
-            this.#editable.style.pointerEvents = 'auto'
-            placeCaretAtEnd(this.#editable)
+
         } else {
-            const current = this.getElementValue(this.#editable)
+
+            let current
             this.removeAttribute('editing')
+
+            if (this.#editor === this.#editable) {
+                current = this.getElementValue(this.#editable)
+                this.#editable.style.pointerEvents = ''
+                document.removeEventListener('click', this.#editableClose)
+            } else {
+                current = this.#editor.value
+                if (this.#editor && this.#editor.onEditEnd) this.#editor.onEditEnd()
+            }
+
             this.onClose()
-            this.#editable.style.pointerEvents = ''
+
+
             this.setText( current )
         }
 
@@ -103,15 +139,20 @@ export class TableCellBase extends LitElement {
 
     #update(current: any) {
         let value = this.getValue(current)
-        if (this.value !== value) {
+        console.log('Updating', this.value, value)
+        // NOTE: Forcing change registration for all cells
+        // if (this.value !== value) {
             this.value = value
             this.onChange(value)
-        }
+        // }
     }
 
     setText(value: any, setOnInput = true) {
         if (setOnInput) [ this.#editor, this.#renderer ].forEach(el => this.setChild(el, value)) // RESETS HISTORY
-        this.#update(`${value}`) // Coerce to string
+
+        if (this.schema.type === 'array') this.#update(value) // Ensure array values are not coerced
+        else this.#update(`${value}`) // Coerce to string
+
     }
 
 
@@ -168,8 +209,11 @@ export class TableCellBase extends LitElement {
 
         const editor = this.#editor = this.#render('editor')
         const renderer = this.#renderer = this.#render('renderer')
-
-        this.addEventListener('blur', () => this.toggle(false))
+        
+        this.addEventListener('blur', (ev) => {
+            ev.stopPropagation()
+            this.toggle(false)
+        })
 
 
         if (!editor || !renderer || renderer === editor) return editor || renderer

@@ -85,6 +85,8 @@ export class ContextMenu extends LitElement{
         e.stopPropagation()
         this.#activePath = e.path || e.composedPath()
         this.style.display = 'block';
+
+
         this.style.left = e.pageX + "px";
         this.style.top = e.pageY + "px";
     }

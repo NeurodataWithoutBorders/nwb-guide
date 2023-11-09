@@ -1,5 +1,7 @@
 import { LitElement, css, html } from "lit"
 import { ArrayCell } from "./cells/array"
+import { NestedTableCell } from "./cells/table"
+
 import { TableCellBase } from "./cells/base"
 import { DateTimeCell } from "./cells/date-time"
 
@@ -15,6 +17,7 @@ type OnValidateFunction = (info: ValidationResult) => void
 
 type TableCellProps = {
     value: string,
+    info: { col: string }
     schema: {[key: string]: any},
     validateOnChange?: ValidationFunction,
     onValidate?: OnValidateFunction,
@@ -23,6 +26,7 @@ type TableCellProps = {
 export class TableCell extends LitElement {
 
     declare schema: TableCellProps['schema']
+    declare info: TableCellProps['info']
 
     static get styles() {
         return css`
@@ -63,10 +67,12 @@ export class TableCell extends LitElement {
     //     }
     // }
 
-    constructor({ value, schema, validateOnChange, onValidate }: TableCellProps) {
+    constructor({ info, value, schema, validateOnChange, onValidate }: TableCellProps) {
         super()
         this.#value = value
         this.schema = schema
+        this.info = info
+        
         if (validateOnChange) this.validateOnChange = validateOnChange
 
         if (onValidate) this.onValidate = onValidate
@@ -78,7 +84,6 @@ export class TableCell extends LitElement {
         }
 
         this.ondblclick = () => this.input.toggle(true)
-        document.addEventListener('click', () => this.input ? this.input.toggle(false) : false)
 
     }
 
@@ -159,7 +164,11 @@ export class TableCell extends LitElement {
 
         this.interacted = false
 
-        if (this.schema.type === "array") cls = ArrayCell
+        if (this.schema.type === "array") {
+            const items = this.schema.items
+            if (items && items.type === "object") cls = NestedTableCell
+            else cls = ArrayCell
+        }
         else if (this.schema.format === "date-time") cls =  DateTimeCell
 
         // Only actually rerender if new class type
@@ -169,6 +178,8 @@ export class TableCell extends LitElement {
                     if (this.input.interacted) this.interacted = true
                     this.validate()
                 },
+                toggle: (v) => this.input ? this.input.toggle(v) : "",
+                info: this.info,
                 schema: this.schema
             })
         }
