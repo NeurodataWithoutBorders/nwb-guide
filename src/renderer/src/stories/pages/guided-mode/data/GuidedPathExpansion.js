@@ -128,7 +128,10 @@ export class GuidedPathExpansionPage extends Page {
                     globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
 
                 const source_data = {};
-                for (let key in globalState.interfaces) source_data[key] = existingSourceData?.[key] ?? {};
+                for (let key in globalState.interfaces) {
+                    const existing = existingSourceData?.[key]
+                    if (existing) source_data[key] = existing ?? {};
+                }
 
                 globalState.results = {
                     [this.altInfo.subject_id]: {

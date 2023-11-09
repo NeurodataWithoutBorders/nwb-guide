@@ -366,7 +366,7 @@ export class JSONSchemaForm extends LitElement {
 
         // Print out a detailed error message if any inputs are missing
         let message = "";
-        if (!isValid && nMissingRequired === allErrors.length)
+        if (!isValid && allErrors.length && nMissingRequired === allErrors.length)
             message = `${nMissingRequired} required inputs are not defined.`;
 
         // Check if all inputs are valid
