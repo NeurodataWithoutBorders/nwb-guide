@@ -230,7 +230,6 @@ export class Page extends LitElement {
     
     checkSyncState = async ( info = this.info, sync = info.sync) => {
         
-        console.log(info, sync)
         if (!sync) return 
 
         const { desyncedData } = info.globalState;
