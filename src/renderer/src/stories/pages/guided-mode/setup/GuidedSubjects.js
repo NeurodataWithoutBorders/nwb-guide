@@ -25,7 +25,7 @@ export class GuidedSubjectsPage extends Page {
                 icon: globalIcon,
                 label: "Edit Global Metadata",
                 onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project?.Subject ?? {});
+                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
                     this.#globalModal.open = true;
                 },
             }),
