@@ -38,6 +38,7 @@ export class TableCell extends LitElement {
                 white-space: nowrap;
                 color: black;
                 font-size: 13px;
+                height: 100%;
             }
 
             :host > * {
@@ -85,9 +86,14 @@ export class TableCell extends LitElement {
             this.#validator = (value) => regex.test(value)
         }
 
-        this.ondblclick = () => this.input.toggle(true)
+        this.ondblclick = (ev) => {
+            ev.stopPropagation()
+            this.toggle(true)
+        }
 
     }
+
+    toggle = (v: boolean) => this.input.toggle(v)
 
     get value() {
         return this.input ? this.input.getValue() : this.#value
@@ -181,7 +187,7 @@ export class TableCell extends LitElement {
                     if (this.input.interacted) this.interacted = true
                     this.validate()
                 },
-                toggle: (v) => this.input ? this.input.toggle(v) : "",
+                toggle: (v) => this.toggle(v),
                 info: this.info,
                 schema: this.schema
             })

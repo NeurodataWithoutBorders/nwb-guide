@@ -722,6 +722,8 @@ export class SimpleTable extends LitElement {
             if (this.#selecting) this.#selectCells(cell);
         };
 
+        td.ondblclick = () => cell.toggle(true);
+        
         td.appendChild(cell);
         return td;
     };

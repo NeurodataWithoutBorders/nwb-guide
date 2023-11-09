@@ -8,14 +8,6 @@ import { header } from "../../forms/utils";
 
 export class NestedTableEditor extends LitElement {
 
-
-    static get styles() {
-        return [
-            css`
-            `
-        ]
-    }
-
     info: any
     schema: any
     toggle: any

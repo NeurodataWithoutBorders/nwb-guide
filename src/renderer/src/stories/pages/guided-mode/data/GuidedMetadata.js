@@ -203,8 +203,6 @@ export class GuidedMetadataPage extends ManagedPage {
             onThrow,
         });
 
-        setInterval(() => console.log(form.results.Ophys?.ImagingPlane[0]?.optical_channel.length), 1000)
-
         return {
             subject,
             session,

@@ -92,6 +92,7 @@ export class TableCellBase extends LitElement {
     onChange: BaseTableProps['onChange'] = () => {}
 
     #editableClose = () => this.editToggle(false)
+    #originalEditorValue = undefined
 
     toggle (state = !this.#active) {
         if (state === this.#active) return
@@ -107,7 +108,6 @@ export class TableCellBase extends LitElement {
                 document.addEventListener('click', this.#editableClose)
             } else {
                 this.#editor.onEditStart()
-
             }
 
             this.onOpen()
@@ -123,6 +123,7 @@ export class TableCellBase extends LitElement {
                 document.removeEventListener('click', this.#editableClose)
             } else {
                 current = this.#editor.value
+                this.interacted = true 
                 if (this.#editor && this.#editor.onEditEnd) this.#editor.onEditEnd()
             }
 
@@ -137,20 +138,19 @@ export class TableCellBase extends LitElement {
 
     getValue = (input: any = this.value) => input // Process inputs from the editor
 
-    #update(current: any) {
+    #update(current: any, forceUpdate = false) {
         let value = this.getValue(current)
-        console.log('Updating', this.value, value)
         // NOTE: Forcing change registration for all cells
-        // if (this.value !== value) {
+        if (this.value !== value || forceUpdate) {
             this.value = value
             this.onChange(value)
-        // }
+        }
     }
 
     setText(value: any, setOnInput = true) {
         if (setOnInput) [ this.#editor, this.#renderer ].forEach(el => this.setChild(el, value)) // RESETS HISTORY
 
-        if (this.schema.type === 'array') this.#update(value) // Ensure array values are not coerced
+        if (this.schema.type === 'array') this.#update(value, true) // Ensure array values are not coerced
         else this.#update(`${value}`) // Coerce to string
 
     }
