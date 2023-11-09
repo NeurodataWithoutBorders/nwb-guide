@@ -382,7 +382,6 @@ export class JSONSchemaForm extends LitElement {
         if (requiredButNotSpecified.length !== nMissingRequired)
             console.warn("Disagreement about the correct error to throw...");
 
-        // // Print out a detailed error message if any required inputs are missing
         // if (!isValid && allErrors.length && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`;
 
         // Check if all inputs are valid
