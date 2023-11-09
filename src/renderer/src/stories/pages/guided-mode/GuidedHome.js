@@ -154,7 +154,6 @@ export class GuidedHomePage extends Page {
     };
 
     async updated() {
-        
         const htmlBase = this.shadowRoot ?? this;
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         const lottieContainer = htmlBase.querySelector("#new-dataset-lottie-container");

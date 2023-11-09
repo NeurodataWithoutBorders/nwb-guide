@@ -39,7 +39,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 icon: globalIcon,
                 label: "Edit Global Source Data",
                 onClick: () => {
-                    this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {});
+                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
                     this.#globalModal.open = true;
                 },
             }),
@@ -68,7 +68,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     backdrop: "rgba(0,0,0, 0.4)",
                     timerProgressBar: false,
                     didOpen: () => {
-                        Swal.showLoading();
+                        Swal.showLoading(); 
                     },
                 });
             };
@@ -78,14 +78,16 @@ export class GuidedSourceDataPage extends ManagedPage {
             });
 
             await Promise.all(
-                this.mapSessions(async ({ subject, session, info }) => {
-                    console.log("info", info);
+                Object.values(this.forms).map(async ({ subject, session, form }) => {
+                    
+                    const info = this.info.globalState.results[subject][session];
+
                     // NOTE: This clears all user-defined results
                     const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            source_data: info.source_data,
+                            source_data: form.resolved, // Use resolved values, including global source data
                             interfaces: this.info.globalState.interfaces,
                         }),
                     })
@@ -170,7 +172,12 @@ export class GuidedSourceDataPage extends ManagedPage {
         super.connectedCallback();
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Source Data",
-            propsToRemove: [...propsToIgnore, "folder_path", "file_path"],
+            propsToRemove: [
+                ...propsToIgnore, 
+                "folder_path", 
+                "file_path",
+                // NOTE: Still keeping plural path specifications for now
+            ],
             key: "SourceData",
             schema: this.info.globalState.schema.source_data,
             hasInstances: true,
@@ -184,7 +191,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     }
 
     render() {
-        this.localState = { results: merge(this.info.globalState.results, {}) };
+        this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState);
 

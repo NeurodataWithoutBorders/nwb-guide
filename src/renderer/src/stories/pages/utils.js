@@ -31,11 +31,18 @@ export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
     // Deep merge objects
     for (const [k, v] of Object.entries(toMerge)) {
         const targetV = target[k];
-        if (mergeOpts.arrays && Array.isArray(v) && Array.isArray(targetV))
-            target[k] = [...targetV, ...v]; // Merge array entries together
-        else if (isObject(v) || isObject(targetV)) target[k] = merge(v, target[k], mergeOpts);
-        else if (v === undefined) delete target[k]; // Remove matched values
-        else target[k] = v; // Replace primitive values
+        // if (isPrivate(k)) continue;
+        if (mergeOpts.arrays && Array.isArray(v) && Array.isArray(targetV)) target[k] = [...targetV, ...v]; // Merge array entries together
+        else if (v === undefined) {
+            delete target[k]; // Remove matched values
+            // if (mergeOpts.remove !== false) delete target[k]; // Remove matched values
+        } else if (isObject(v)) {
+            if (isObject(targetV)) target[k] = merge(v, targetV, mergeOpts);
+            else {
+                if (mergeOpts.clone) target[k] = merge(v, {}, mergeOpts); // Replace primitive values
+                else target[k] = v; // Replace object values
+            }
+        } else target[k] = v; // Replace primitive values
     }
 
     return target;

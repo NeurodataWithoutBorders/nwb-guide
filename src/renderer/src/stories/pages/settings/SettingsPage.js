@@ -19,13 +19,11 @@ import { global } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
+import { SERVER_FILE_PATH, port } from "../../../electron/index.js";
 
-import saveSVG from '../../assets/save.svg?raw'
-
-
+import saveSVG from "../../assets/save.svg?raw";
 
 export class SettingsPage extends Page {
-    
     header = {
         title: "App Settings",
         subtitle: "This page allows you to set global settings for the GUIDE.",
@@ -53,19 +51,18 @@ export class SettingsPage extends Page {
     };
 
     beforeSave = async () => {
-        await this.form.validate();
-
         const { resolved } = this.form;
         setUndefinedIfNotDeclared(schema.properties, resolved);
 
         merge(resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
-        this.#openNotyf("Global settings changes saved", "success");
+        this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
     render() {
-        this.localState = merge(global.data, {});
+        
+        this.localState = structuredClone(global.data);
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
@@ -81,7 +78,11 @@ export class SettingsPage extends Page {
             onThrow,
         });
 
-        return html` ${this.form} `;
+        return html`
+            <p><b>Server Port:</b> ${port}</p>
+            <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
+            ${this.form}
+        `;
     }
 }
 

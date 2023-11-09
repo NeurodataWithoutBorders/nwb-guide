@@ -70,7 +70,7 @@ export class GuidedFormPage extends Page {
             ? this.info.globalStatePath.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.info.globalState)
             : {};
 
-        const results = (this.localState = merge({ [key]: temp[key] ?? (temp[key] = {}) }, {})); // Keep a local copy of the results
+        const results = (this.localState = structuredClone({ [key]: temp[key] ?? (temp[key] = {}) })); // Keep a local copy of the results
 
         const form = (this.form = new JSONSchemaForm({
             ...this.info.formOptions,

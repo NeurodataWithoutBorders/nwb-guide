@@ -35,6 +35,11 @@ const emptyMessage = "No issues detected in these files!";
 export class GuidedInspectorPage extends Page {
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
+        Object.assign(this.style, {
+            display: 'flex',
+            flexDirection: 'column'
+        })
     }
 
     header = {
@@ -86,6 +91,9 @@ export class GuidedInspectorPage extends Page {
             content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues shared
                 across files.`,
         })}
+
+        <br>
+        
         ${until(
             (async () => {
                 if (fileArr.length <= 1) {
