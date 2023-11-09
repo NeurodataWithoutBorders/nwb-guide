@@ -25,7 +25,7 @@ export class GuidedSubjectsPage extends Page {
                 icon: globalIcon,
                 label: "Edit Global Metadata",
                 onClick: () => {
-                    this.#globalModal.form.results = merge(this.info.globalState.project?.Subject, {});
+                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
                     this.#globalModal.open = true;
                 },
             }),
@@ -98,7 +98,7 @@ export class GuidedSubjectsPage extends Page {
     }
 
     render() {
-        const subjects = (this.localState = merge(this.info.globalState.subjects ?? {}, {}));
+        const subjects = (this.localState = structuredClone(this.info.globalState.subjects ?? {}));
 
         // Ensure all the proper subjects are in the global state
         const toHave = Object.keys(this.info.globalState.results);

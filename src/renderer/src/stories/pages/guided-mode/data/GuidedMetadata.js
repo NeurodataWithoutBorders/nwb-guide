@@ -57,7 +57,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 icon: globalIcon,
                 label: "Edit Global Metadata",
                 onClick: () => {
-                    this.#globalModal.form.results = merge(this.info.globalState.project, {});
+                    this.#globalModal.form.results = structuredClone(this.info.globalState.project);
                     this.#globalModal.open = true;
                 },
             }),
@@ -230,7 +230,7 @@ export class GuidedMetadataPage extends ManagedPage {
     render() {
         this.#resetLoadState(); // Reset on each render
 
-        this.localState = { results: merge(this.info.globalState.results, {}) };
+        this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState);
 
@@ -258,7 +258,7 @@ export class GuidedMetadataPage extends ManagedPage {
                                 {
                                     subject,
                                     session,
-                                    globalState: merge(this.localState, merge(this.info.globalState, {})),
+                                    globalState: merge(this.localState, structuredClone(this.info.globalState)),
                                 },
                             ],
                             { title: "Running conversion preview" }

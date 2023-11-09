@@ -19,7 +19,7 @@ export function resolveGlobalOverrides(subject, globalState) {
     const subjectMetadataCopy = { ...globalState.subjects[subject] };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata
 
-    const overrides = merge(globalState.project, {}); // Copy project-wide metadata
+    const overrides = structuredClone(globalState.project ?? {}); // Copy project-wide metadata
     merge(subjectMetadataCopy, overrides.Subject);
 
     return overrides;

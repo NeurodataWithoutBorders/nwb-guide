@@ -52,19 +52,18 @@ export class SettingsPage extends Page {
     };
 
     beforeSave = async () => {
-        await this.form.validate();
-
         const { resolved } = this.form;
         setUndefinedIfNotDeclared(schema.properties, resolved);
 
         merge(resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
-        this.#openNotyf("Global settings changes saved", "success");
+        this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
     render() {
-        this.localState = merge(global.data, {});
+        
+        this.localState = structuredClone(global.data);
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
