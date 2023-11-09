@@ -39,7 +39,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 icon: globalIcon,
                 label: "Edit Global Source Data",
                 onClick: () => {
-                    this.#globalModal.form.results = merge(this.info.globalState.project?.SourceData, {});
+                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
                     this.#globalModal.open = true;
                 },
             }),
@@ -191,7 +191,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     }
 
     render() {
-        this.localState = { results: merge(this.info.globalState.results, {}) };
+        this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState);
 

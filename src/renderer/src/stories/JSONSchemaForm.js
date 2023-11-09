@@ -1006,7 +1006,7 @@ export class JSONSchemaForm extends LitElement {
 
         const schema = this.schema ?? {};
 
-        this.resolved = merge(this.results, {}); // Track resolved values as a copy of the user-specified results
+        this.resolved = structuredClone(this.results); // Track resolved values as a copy of the user-specified results
 
         // Register default properties
         resolveProperties(schema.properties, this.resolved, this.globals);

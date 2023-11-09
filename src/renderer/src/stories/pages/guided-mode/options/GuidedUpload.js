@@ -1,7 +1,6 @@
 import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
-import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
@@ -65,7 +64,7 @@ export class GuidedUploadPage extends Page {
     };
 
     render() {
-        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
+        const state = (this.localState = structuredClone(this.info.globalState.upload ?? { info: {} }));
 
         const promise = onServerOpen(async () => {
             await fetch(new URL("cpus", baseUrl))

@@ -63,7 +63,8 @@ export class SettingsPage extends Page {
     };
 
     render() {
-        this.localState = merge(global.data, {});
+        
+        this.localState = structuredClone(global.data);
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({

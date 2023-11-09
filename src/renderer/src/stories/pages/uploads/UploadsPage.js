@@ -8,7 +8,9 @@ import { onThrow } from "../../../errors";
 const folderPathKey = "filesystem_paths";
 import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
-const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}), { arrays: true });
+
+const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), { arrays: true });
+console.log(dandiSchema)
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
@@ -50,7 +52,8 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
-    let api_key = global.data.DANDI?.api_keys?.[whichAPIKey];
+    const DANDI = global.data.DANDI
+    let api_key = DANDI?.api_keys?.[whichAPIKey];
 
     const errors = await validateDANDIApiKey(api_key, staging);
 
@@ -90,7 +93,15 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
                         const errors = await validateDANDIApiKey(input.value, staging);
                         if (!errors || !errors.length) {
                             modal.remove();
-                            global.data.DANDI.api_keys[whichAPIKey] = value;
+ 
+                            merge({
+                                DANDI: {
+                                    api_keys: {
+                                        [whichAPIKey]: value
+                                    }
+                                }
+                            }, global.data)
+
                             global.save();
                             resolve(value);
                         } else {
@@ -107,6 +118,8 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
             document.body.append(modal);
         });
+
+        console.log(api_key)
     }
 
     const result = await run(
