@@ -12,7 +12,7 @@ const schema = {
         output_locations: projectGlobalSchema,
         DANDI: dandiGlobalSchema,
     },
-    required: ["output_locations", "DANDI"]
+    required: ["output_locations", "DANDI"],
 };
 
 import { Button } from "../../Button.js";
