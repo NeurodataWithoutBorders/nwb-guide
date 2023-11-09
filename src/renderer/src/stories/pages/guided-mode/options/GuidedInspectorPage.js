@@ -69,7 +69,7 @@ export class GuidedInspectorPage extends Page {
         const { globalState } = this.info;
         const { stubs, inspector } = globalState.preview;
 
-        console.log('Already got', inspector)
+        console.log("Already got", inspector);
 
         const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
@@ -89,16 +89,17 @@ export class GuidedInspectorPage extends Page {
         ${until(
             (async () => {
                 if (fileArr.length <= 1) {
-
                     const items =
                         inspector ??
                         removeFilePaths(
-                            (globalState.preview.inspector =
-                                await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title }))
+                            (globalState.preview.inspector = await run(
+                                "inspect_file",
+                                { nwbfile_path: fileArr[0].info.file, ...opts },
+                                { title }
+                            ))
                         );
 
-
-                    if (!inspector) await this.save()
+                    if (!inspector) await this.save();
 
                     return new InspectorList({ items, emptyMessage });
                 }
@@ -107,12 +108,15 @@ export class GuidedInspectorPage extends Page {
                     const path = getSharedPath(fileArr.map((o) => o.info.file));
                     const report =
                         inspector ??
-                        (globalState.preview.inspector =
-                            await run("inspect_folder", { path, ...opts }, { title: title + "s" }));
-                    
-                            if (!inspector) await this.save()
+                        (globalState.preview.inspector = await run(
+                            "inspect_folder",
+                            { path, ...opts },
+                            { title: title + "s" }
+                        ));
 
-                        return truncateFilePaths(report, path);
+                    if (!inspector) await this.save();
+
+                    return truncateFilePaths(report, path);
                 })();
 
                 const _instances = fileArr.map(({ subject, session, info }) => {

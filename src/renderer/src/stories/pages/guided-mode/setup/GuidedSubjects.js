@@ -125,7 +125,7 @@ export class GuidedSubjectsPage extends Page {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             onUpdate: () => {
-                this.unsavedUpdates = 'conversions';
+                this.unsavedUpdates = "conversions";
             },
             validateOnChange: (key, parent, v) => {
                 if (key === "sessions") {

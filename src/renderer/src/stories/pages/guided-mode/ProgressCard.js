@@ -98,7 +98,7 @@ export class ProgressCard extends LitElement {
                           margin-bottom: 15px;
                         "
                             @click="${(ev) => {
-                                this.resume(ev.target)
+                                this.resume(ev.target);
                             }}"
                         >
                             Resume Conversion

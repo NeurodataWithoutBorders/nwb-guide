@@ -69,10 +69,10 @@ export class GuidedMetadataPage extends ManagedPage {
         next: "Run Conversion Preview",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-            
+
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
-            await this.convert({ preview: true})
+            await this.convert({ preview: true });
 
             this.to(1);
         },
@@ -174,7 +174,7 @@ export class GuidedMetadataPage extends ManagedPage {
             },
 
             onUpdate: () => {
-                this.unsavedUpdates = 'conversions';
+                this.unsavedUpdates = "conversions";
             },
 
             validateOnChange,
