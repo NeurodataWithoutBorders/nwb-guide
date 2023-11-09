@@ -129,7 +129,7 @@ export class GuidedPathExpansionPage extends Page {
 
                 const source_data = {};
                 for (let key in globalState.interfaces) {
-                    const existing = existingSourceData?.[key]
+                    const existing = existingSourceData?.[key];
                     if (existing) source_data[key] = existing ?? {};
                 }
 

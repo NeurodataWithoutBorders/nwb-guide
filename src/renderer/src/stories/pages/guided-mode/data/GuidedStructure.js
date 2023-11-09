@@ -87,10 +87,10 @@ export class GuidedStructurePage extends Page {
             this.mapSessions(({ info }) => {
                 Object.keys(info.source_data).forEach((key) => {
                     if (!this.info.globalState.interfaces[key]) delete info.source_data[key];
-                })
-            })
+                });
+            });
         }
-        
+
         await this.save(undefined, false); // Interrim save, in case the schema request fails
         await this.getSchema();
     };
