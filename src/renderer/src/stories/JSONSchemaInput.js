@@ -138,7 +138,7 @@ export class JSONSchemaInput extends LitElement {
     #activateTimeoutValidation = (name, el, path) => {
         this.#clearTimeoutValidation();
         this.#validationTimeout = setTimeout(() => {
-            this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, el, path) : "";
+            this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
         }, 1000);
     };
 

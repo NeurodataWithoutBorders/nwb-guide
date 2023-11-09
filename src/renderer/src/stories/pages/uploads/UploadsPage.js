@@ -10,7 +10,6 @@ import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 
 const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), { arrays: true });
-console.log(dandiSchema)
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
@@ -67,7 +66,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
         const input = new JSONSchemaInput({
             path: [whichAPIKey],
-            info: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey],
+            info: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey]
         });
 
         input.style.padding = "25px";
@@ -81,7 +80,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
             return (notification = this.notify(message, type));
         };
 
-        modal.onClose = async () => notify("Your DANDI API key was not set", "error");
+        modal.onClose = async () => notify("The updated DANDI API key was not set", "error");
 
         api_key = await new Promise((resolve) => {
             const button = new Button({
