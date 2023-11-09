@@ -45,7 +45,8 @@ export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
     for (const [k, v] of Object.entries(toMerge)) {
         const targetV = target[k];
         // if (isPrivate(k)) continue;
-        if (mergeOpts.arrays && Array.isArray(v) && Array.isArray(targetV)) target[k] = [...targetV, ...v]; // Merge array entries together
+        if (mergeOpts.arrays && Array.isArray(v) && Array.isArray(targetV))
+            target[k] = [...targetV, ...v]; // Merge array entries together
         else if (v === undefined) {
             delete target[k]; // Remove matched values
             // if (mergeOpts.remove !== false) delete target[k]; // Remove matched values
