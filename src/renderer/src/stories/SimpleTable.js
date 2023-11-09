@@ -1,14 +1,16 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, unsafeCSS } from "lit";
 import { header } from "./forms/utils";
 import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
 import { ContextMenu } from "./table/ContextMenu";
-import { errorHue, warningHue } from "./globals";
+import { emojiFontFamily, errorHue, warningHue } from "./globals";
 
 import { Loader } from "./Loader";
 import { styleMap } from "lit/directives/style-map.js";
+
 import "./Button";
+import tippy from "tippy.js";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -96,7 +98,6 @@ export class SimpleTable extends LitElement {
             }
 
             .table-container {
-                position: relative;
                 overflow: auto;
                 max-height: 400px;
             }
@@ -110,6 +111,7 @@ export class SimpleTable extends LitElement {
                 position: sticky;
                 top: 0;
                 left: 0;
+                z-index: 1;
             }
 
             th {
@@ -140,15 +142,10 @@ export class SimpleTable extends LitElement {
                 user-select: none;
             }
 
-            [title] .relative::after {
-                content: "ℹ️";
-                cursor: help;
-                display: inline-block;
+            .relative .info {
                 margin: 0px 5px;
-                text-align: center;
                 font-size: 80%;
-                font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-                    "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif;
+                font-family: ${unsafeCSS(emojiFontFamily)}
             }
         `;
     }
@@ -584,11 +581,27 @@ export class SimpleTable extends LitElement {
         }
     }
 
-    #renderHeaderContent = (str) => html`<div class="relative"><span>${str}</span></div>`;
-
     #renderHeader = (str, { description }) => {
-        if (description) return html`<th title="${description}">${this.#renderHeaderContent(str)}</th>`;
-        return html`<th>${this.#renderHeaderContent(str)}</th>`;
+        const header = document.createElement('th')
+
+        // Inner Content
+        const div = document.createElement("div");
+        div.classList.add("relative");
+        const span = document.createElement("span");
+        span.innerHTML = str
+        div.append(span);
+        header.append(div)
+
+        // Add Description Tooltip
+        if (description) {
+            const span = document.createElement("span");
+            span.classList.add("info");
+            span.innerText = "ℹ️";
+            div.append(span);
+            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}` });
+        }
+
+        return header;
     };
 
     #cells = [];

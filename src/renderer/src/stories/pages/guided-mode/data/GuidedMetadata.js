@@ -20,7 +20,7 @@ import { globalSchema } from "../../../../../../../schemas/base-metadata.schema"
 import globalIcon from "../../../assets/global.svg?raw";
 
 const propsToIgnore = [
-    "Ophys", // Always ignore ophys metadata (for now)
+    // "Ophys", // Always ignore ophys metadata (for now)
     "Icephys", // Always ignore icephys metadata (for now)
     "Behavior", // Always ignore behavior metadata (for now)
     // new RegExp("ndx-.+"), // Ignore all ndx extensions
