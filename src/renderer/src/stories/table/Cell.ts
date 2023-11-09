@@ -75,7 +75,7 @@ export class TableCell extends LitElement {
         this.#value = value
         this.schema = schema
         this.info = info
-        
+
         if (validateOnChange) this.validateOnChange = validateOnChange
 
         if (onValidate) this.onValidate = onValidate

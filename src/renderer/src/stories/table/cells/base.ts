@@ -2,7 +2,7 @@ import { LitElement, PropertyValueMap, css, html } from "lit"
 import { placeCaretAtEnd } from "../utils"
 
 type BaseTableProps = {
-    info: { 
+    info: {
         col: string,
     },
     toggle: (state?: boolean) => void,
@@ -70,7 +70,7 @@ export class TableCellBase extends LitElement {
 
         this.info = info ?? {}
         this.schema = schema ?? {}
-        
+
         this.editToggle = toggle ?? (() => {});
 
         if (onOpen) this.onOpen = onOpen
@@ -123,7 +123,7 @@ export class TableCellBase extends LitElement {
                 document.removeEventListener('click', this.#editableClose)
             } else {
                 current = this.#editor.value
-                this.interacted = true 
+                this.interacted = true
                 if (this.#editor && this.#editor.onEditEnd) this.#editor.onEditEnd()
             }
 
@@ -209,7 +209,7 @@ export class TableCellBase extends LitElement {
 
         const editor = this.#editor = this.#render('editor')
         const renderer = this.#renderer = this.#render('renderer')
-        
+
         this.addEventListener('blur', (ev) => {
             ev.stopPropagation()
             this.toggle(false)

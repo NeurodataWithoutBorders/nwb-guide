@@ -145,7 +145,7 @@ export class SimpleTable extends LitElement {
             .relative .info {
                 margin: 0px 5px;
                 font-size: 80%;
-                font-family: ${unsafeCSS(emojiFontFamily)}
+                font-family: ${unsafeCSS(emojiFontFamily)};
             }
         `;
     }
@@ -170,7 +170,7 @@ export class SimpleTable extends LitElement {
         onThrow,
         deferLoading,
         maxHeight,
-        contextOptions = {}
+        contextOptions = {},
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -455,8 +455,8 @@ export class SimpleTable extends LitElement {
         if (options.column?.add) items.push(this.#menuOptions.column.add);
         if (options.column?.remove) items.push(this.#menuOptions.column.remove);
 
-        this.#context = new ContextMenu({ 
-            target: this.shadowRoot.querySelector("table"), 
+        this.#context = new ContextMenu({
+            target: this.shadowRoot.querySelector("table"),
             items,
         });
 
@@ -507,7 +507,7 @@ export class SimpleTable extends LitElement {
                     add: true,
                     remove: true,
                 },
-                ...this.contextOptions
+                ...this.contextOptions,
             });
         }
     };
@@ -590,15 +590,15 @@ export class SimpleTable extends LitElement {
     }
 
     #renderHeader = (str, { description }) => {
-        const header = document.createElement('th')
+        const header = document.createElement("th");
 
         // Inner Content
         const div = document.createElement("div");
         div.classList.add("relative");
         const span = document.createElement("span");
-        span.innerHTML = str
+        span.innerHTML = str;
         div.append(span);
-        header.append(div)
+        header.append(div);
 
         // Add Description Tooltip
         if (description) {
@@ -672,7 +672,7 @@ export class SimpleTable extends LitElement {
 
         // Track the cell renderer
         const cell = new TableCell({
-            info: { 
+            info: {
                 col: this.colHeaders[info.j],
             },
             value,
@@ -723,7 +723,7 @@ export class SimpleTable extends LitElement {
         };
 
         td.ondblclick = () => cell.toggle(true);
-        
+
         td.appendChild(cell);
         return td;
     };

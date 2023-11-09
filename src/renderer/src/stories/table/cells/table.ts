@@ -25,7 +25,7 @@ export class NestedTableEditor extends LitElement {
     })
 
     #table: SimpleTable
-    
+
     onEditStart () {
         const modal = this.#modal
 
@@ -74,7 +74,7 @@ export class NestedTableEditor extends LitElement {
         Array.from(this.#modal.children).forEach(child => child.remove())
     }
 
-    render() { 
+    render() {
         return this.#modal
     }
 }
@@ -102,7 +102,7 @@ export class NestedTableRenderer extends BaseRenderer {
         super(...args)
     }
 
-    render() { 
+    render() {
         return html`<small>Click to view table</small>`
     }
 }
@@ -117,7 +117,7 @@ export class NestedTableCell extends TableCellBase {
     }
 
     renderer = new NestedTableRenderer({ value: this.value })
-    
+
     editor = new NestedTableEditor({ info: this.info, toggle: this.editToggle, value: this.value, schema: this.schema })
 }
 

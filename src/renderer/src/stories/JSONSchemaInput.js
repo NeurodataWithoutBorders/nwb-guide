@@ -148,7 +148,6 @@ export class JSONSchemaInput extends LitElement {
 
     #validationTimeout = null;
     #updateData = (fullPath, value, forceUpdate) => {
-
         this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value, forceUpdate) : "";
 
         const path = [...fullPath];
@@ -224,7 +223,6 @@ export class JSONSchemaInput extends LitElement {
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema.type === "object" && this.form.createTable) {
-
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
