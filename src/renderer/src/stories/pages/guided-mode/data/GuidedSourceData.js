@@ -5,7 +5,7 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils.js";
+import { merge, sanitize } from "../../utils.js";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
@@ -87,7 +87,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            source_data: form.resolved, // Use resolved values, including global source data
+                            source_data: sanitize(structuredClone(form.resolved)), // Use resolved values, including global source data
                             interfaces: this.info.globalState.interfaces,
                         }),
                     })
