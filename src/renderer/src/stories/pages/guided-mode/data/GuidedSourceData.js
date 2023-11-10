@@ -5,7 +5,7 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils.js";
+import { merge, sanitize } from "../../utils.js";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
@@ -13,6 +13,7 @@ import { header } from "../../../forms/utils";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
+import { run } from "../options/utils.js";
 
 const propsToIgnore = [
     "verbose",
@@ -68,7 +69,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     backdrop: "rgba(0,0,0, 0.4)",
                     timerProgressBar: false,
                     didOpen: () => {
-                        Swal.showLoading(); 
+                        Swal.showLoading();
                     },
                 });
             };
@@ -79,7 +80,6 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await Promise.all(
                 Object.values(this.forms).map(async ({ subject, session, form }) => {
-                    
                     const info = this.info.globalState.results[subject][session];
 
                     // NOTE: This clears all user-defined results
@@ -87,7 +87,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            source_data: form.resolved, // Use resolved values, including global source data
+                            source_data: sanitize(structuredClone(form.resolved)), // Use resolved values, including global source data
                             interfaces: this.info.globalState.interfaces,
                         }),
                     })
@@ -117,18 +117,30 @@ export class GuidedSourceDataPage extends ManagedPage {
                         throw result;
                     }
 
+                    const { results: metadata, schema } = result;
+
+                    // Always delete Ecephys if absent ( NOTE: temporarily manually removing from schema on backend...)
+                    const alwaysDelete = ["Ecephys"];
+                    alwaysDelete.forEach((k) => {
+                        if (!metadata[k]) delete info.metadata[k]; // Delete directly on metadata
+                    });
+
+                    for (let key in info.metadata) {
+                        if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
+                    }
+
                     // Merge metadata results with the generated info
-                    merge(result.results, info.metadata);
+                    merge(metadata, info.metadata);
 
                     // Mirror structure with metadata schema
-                    const schema = this.info.globalState.schema;
-                    if (!schema.metadata) schema.metadata = {};
-                    if (!schema.metadata[subject]) schema.metadata[subject] = {};
-                    schema.metadata[subject][session] = result.schema;
+                    const schemaGlobal = this.info.globalState.schema;
+                    if (!schemaGlobal.metadata) schemaGlobal.metadata = {};
+                    if (!schemaGlobal.metadata[subject]) schemaGlobal.metadata[subject] = {};
+                    schemaGlobal.metadata[subject][session] = schema;
                 })
             );
 
-            await this.save();
+            await this.save(undefined, false); // Just save new raw values
 
             this.to(1);
         },
@@ -142,7 +154,6 @@ export class GuidedSourceDataPage extends ManagedPage {
 
         const form = new JSONSchemaForm({
             identifier: instanceId,
-            mode: "accordion",
             schema: preprocessSourceDataSchema(schema),
             results: info.source_data,
             emptyMessage: "No source data required for this session.",
@@ -152,7 +163,9 @@ export class GuidedSourceDataPage extends ManagedPage {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             // onlyRequired: true,
-            onUpdate: () => (this.unsavedUpdates = true),
+            onUpdate: () => {
+                this.unsavedUpdates = true;
+            },
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });
@@ -173,8 +186,8 @@ export class GuidedSourceDataPage extends ManagedPage {
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Source Data",
             propsToRemove: [
-                ...propsToIgnore, 
-                "folder_path", 
+                ...propsToIgnore,
+                "folder_path",
                 "file_path",
                 // NOTE: Still keeping plural path specifications for now
             ],

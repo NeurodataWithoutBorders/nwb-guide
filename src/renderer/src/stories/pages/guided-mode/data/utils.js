@@ -2,7 +2,7 @@ import { merge } from "../../utils.js";
 
 // Merge project-wide data into metadata
 export function populateWithProjectMetadata(info, globalState) {
-    const copy = structuredClone(info)
+    const copy = structuredClone(info);
     const toMerge = Object.entries(globalState.project).filter(([_, value]) => value && typeof value === "object");
     toMerge.forEach(([key, value]) => {
         let internalMetadata = copy[key];
@@ -48,7 +48,7 @@ export function resolveProperties(properties = {}, target, globals = {}) {
             else if (info.default) target[name] = info.default;
         }
 
-        resolveProperties(props, target[name], globals[name]);
+        if (target[name]) resolveProperties(props, target[name], globals[name]);
     }
 
     return target;

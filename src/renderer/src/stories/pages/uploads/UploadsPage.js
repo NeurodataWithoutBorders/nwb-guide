@@ -51,7 +51,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
-    const DANDI = global.data.DANDI
+    const DANDI = global.data.DANDI;
     let api_key = DANDI?.api_keys?.[whichAPIKey];
 
     const errors = await validateDANDIApiKey(api_key, staging);
@@ -66,7 +66,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
         const input = new JSONSchemaInput({
             path: [whichAPIKey],
-            info: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey]
+            info: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey],
         });
 
         input.style.padding = "25px";
@@ -92,14 +92,17 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
                         const errors = await validateDANDIApiKey(input.value, staging);
                         if (!errors || !errors.length) {
                             modal.remove();
- 
-                            merge({
-                                DANDI: {
-                                    api_keys: {
-                                        [whichAPIKey]: value
-                                    }
-                                }
-                            }, global.data)
+
+                            merge(
+                                {
+                                    DANDI: {
+                                        api_keys: {
+                                            [whichAPIKey]: value,
+                                        },
+                                    },
+                                },
+                                global.data
+                            );
 
                             global.save();
                             resolve(value);
@@ -118,7 +121,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
             document.body.append(modal);
         });
 
-        console.log(api_key)
+        console.log(api_key);
     }
 
     const result = await run(

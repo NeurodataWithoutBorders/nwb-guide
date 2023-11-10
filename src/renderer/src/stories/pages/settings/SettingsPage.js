@@ -12,6 +12,7 @@ const schema = {
         output_locations: projectGlobalSchema,
         DANDI: dandiGlobalSchema,
     },
+    required: ["output_locations", "DANDI"],
 };
 
 import { Button } from "../../Button.js";
@@ -61,14 +62,12 @@ export class SettingsPage extends Page {
     };
 
     render() {
-        
         this.localState = structuredClone(global.data);
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
             results: this.localState,
             schema,
-            mode: "accordion",
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: async (name, parent) => {
                 const value = parent[name];

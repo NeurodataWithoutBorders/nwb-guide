@@ -37,9 +37,9 @@ export class GuidedInspectorPage extends Page {
         super(...args);
         this.style.height = "100%"; // Fix main section
         Object.assign(this.style, {
-            display: 'flex',
-            flexDirection: 'column'
-        })
+            display: "flex",
+            flexDirection: "column",
+        });
     }
 
     header = {
@@ -85,85 +85,89 @@ export class GuidedInspectorPage extends Page {
             )
             .flat();
         return html` ${new InfoBox({
-            header: "How do I fix these suggestions?",
-            content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues shared
-                across files.`,
-        })}
+                header: "How do I fix these suggestions?",
+                content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues
+                    shared across files.`,
+            })}
 
-        <br>
-        
-        ${until(
-            (async () => {
-                if (fileArr.length <= 1) {
-                    const items =
-                        inspector ??
-                        removeFilePaths(
+            <br />
+
+            ${until(
+                (async () => {
+                    if (fileArr.length <= 1) {
+                        const items =
+                            inspector ??
+                            removeFilePaths(
+                                (this.unsavedUpdates = globalState.preview.inspector =
+                                    await run(
+                                        "inspect_file",
+                                        { nwbfile_path: fileArr[0].info.file, ...opts },
+                                        { title }
+                                    ))
+                            );
+                        return new InspectorList({ items, emptyMessage });
+                    }
+
+                    const items = await (async () => {
+                        const path = getSharedPath(fileArr.map((o) => o.info.file));
+                        const report =
+                            inspector ??
                             (this.unsavedUpdates = globalState.preview.inspector =
-                                await run("inspect_file", { nwbfile_path: fileArr[0].info.file, ...opts }, { title }))
-                        );
-                    return new InspectorList({ items, emptyMessage });
-                }
+                                await run("inspect_folder", { path, ...opts }, { title: title + "s" }));
+                        return truncateFilePaths(report, path);
+                    })();
 
-                const items = await (async () => {
-                    const path = getSharedPath(fileArr.map((o) => o.info.file));
-                    const report =
-                        inspector ??
-                        (this.unsavedUpdates = globalState.preview.inspector =
-                            await run("inspect_folder", { path, ...opts }, { title: title + "s" }));
-                    return truncateFilePaths(report, path);
-                })();
+                    const _instances = fileArr.map(({ subject, session, info }) => {
+                        const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
+                        const filtered = removeFilePaths(filter(items, { file_path }));
 
-                const _instances = fileArr.map(({ subject, session, info }) => {
-                    const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
-                    const filtered = removeFilePaths(filter(items, { file_path }));
+                        const display = () => new InspectorList({ items: filtered, emptyMessage });
+                        display.status = this.getStatus(filtered);
 
-                    const display = () => new InspectorList({ items: filtered, emptyMessage });
-                    display.status = this.getStatus(filtered);
+                        return {
+                            subject,
+                            session,
+                            display,
+                        };
+                    });
 
-                    return {
-                        subject,
-                        session,
-                        display,
+                    const instances = _instances.reduce((acc, { subject, session, display }) => {
+                        const subLabel = `sub-${subject}`;
+                        if (!acc[`sub-${subject}`]) acc[subLabel] = {};
+                        acc[subLabel][`ses-${session}`] = display;
+                        return acc;
+                    }, {});
+
+                    Object.keys(instances).forEach((subLabel) => {
+                        const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                        const path = getSharedPath(subItems.map((o) => o.file_path));
+                        const filtered = truncateFilePaths(subItems, path);
+
+                        const display = () => new InspectorList({ items: filtered, emptyMessage });
+                        display.status = this.getStatus(filtered);
+
+                        instances[subLabel] = {
+                            ["All Files"]: display,
+                            ...instances[subLabel],
+                        };
+                    });
+
+                    const allDisplay = () => new InspectorList({ items, emptyMessage });
+                    allDisplay.status = this.getStatus(items);
+
+                    const allInstances = {
+                        ["All Files"]: allDisplay,
+                        ...instances,
                     };
-                });
 
-                const instances = _instances.reduce((acc, { subject, session, display }) => {
-                    const subLabel = `sub-${subject}`;
-                    if (!acc[`sub-${subject}`]) acc[subLabel] = {};
-                    acc[subLabel][`ses-${session}`] = display;
-                    return acc;
-                }, {});
+                    const manager = new InstanceManager({
+                        instances: allInstances,
+                    });
 
-                Object.keys(instances).forEach((subLabel) => {
-                    const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
-                    const path = getSharedPath(subItems.map((o) => o.file_path));
-                    const filtered = truncateFilePaths(subItems, path);
-
-                    const display = () => new InspectorList({ items: filtered, emptyMessage });
-                    display.status = this.getStatus(filtered);
-
-                    instances[subLabel] = {
-                        ["All Files"]: display,
-                        ...instances[subLabel],
-                    };
-                });
-
-                const allDisplay = () => new InspectorList({ items, emptyMessage });
-                allDisplay.status = this.getStatus(items);
-
-                const allInstances = {
-                    ["All Files"]: allDisplay,
-                    ...instances,
-                };
-
-                const manager = new InstanceManager({
-                    instances: allInstances,
-                });
-
-                return manager;
-            })(),
-            ""
-        )}`;
+                    return manager;
+                })(),
+                ""
+            )}`;
     }
 }
 
