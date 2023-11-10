@@ -135,7 +135,7 @@ export class JSONSchemaInput extends LitElement {
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");
 
-    #activateTimeoutValidation = (name, el, path) => {
+    #activateTimeoutValidation = (name, path) => {
         this.#clearTimeoutValidation();
         this.#validationTimeout = setTimeout(() => {
             this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
@@ -147,15 +147,15 @@ export class JSONSchemaInput extends LitElement {
     };
 
     #validationTimeout = null;
-    #updateData = (fullPath, value) => {
-        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value) : "";
+    #updateData = (fullPath, value, forceUpdate) => {
+        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value, forceUpdate) : "";
 
         const path = [...fullPath];
         const name = path.splice(-1)[0];
 
         this.value = value; // Update the latest value
 
-        this.#activateTimeoutValidation(name, this.getElement(), path);
+        this.#activateTimeoutValidation(name, path);
     };
 
     #triggerValidation = (name, path) => {
@@ -226,6 +226,8 @@ export class JSONSchemaInput extends LitElement {
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
+
+                    onUpdate: () => this.#updateData(fullPath, tableMetadata.data, true), // Ensure change propagates to all forms
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: (key, parent, v) => {

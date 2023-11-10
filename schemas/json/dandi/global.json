@@ -16,5 +16,6 @@
             },
             "required": ["main_api_key"]
         }
-    }
+    },
+    "required": ["api_keys"]
 }

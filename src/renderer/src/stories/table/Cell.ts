@@ -20,6 +20,8 @@ type TableCellProps = {
     onValidate?: OnValidateFunction,
 }
 
+const persistentInteraction = Symbol('persistentInteraction')
+
 export class TableCell extends LitElement {
 
     declare schema: TableCellProps['schema']
@@ -132,8 +134,9 @@ export class TableCell extends LitElement {
     };
 
     setInput(value: any) {
-        this.interacted = true
-        this.input.set(value)  // Ensure all operations are undoable
+        this.interacted = persistentInteraction
+        if (this.input) this.input.set(value)  // Ensure all operations are undoable
+        else this.#value = value // Silently set value if not rendered yet
     }
 
     #value
@@ -147,7 +150,7 @@ export class TableCell extends LitElement {
 
     #cls: any
 
-    interacted = false
+    interacted: boolean | symbol = false
 
     // input = new TableCellBase({ })
 
@@ -157,7 +160,7 @@ export class TableCell extends LitElement {
 
         let cls = TableCellBase
 
-        this.interacted = false
+        this.interacted = this.interacted === persistentInteraction
 
         if (this.schema.type === "array") cls = ArrayCell
         else if (this.schema.format === "date-time") cls =  DateTimeCell

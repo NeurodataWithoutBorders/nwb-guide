@@ -27,6 +27,19 @@ export const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
     }
 };
 
+export const isPrivate = (k, v) => k.slice(0, 2) === "__";
+
+export const sanitize = (o, condition = isPrivate) => {
+    if (isObject(o)) {
+        for (const [k, v] of Object.entries(o)) {
+            if (condition(k, v)) delete o[k];
+            else sanitize(v, condition);
+        }
+    }
+
+    return o;
+};
+
 export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
     // Deep merge objects
     for (const [k, v] of Object.entries(toMerge)) {
@@ -52,7 +65,7 @@ export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
 export function mapSessions(callback = (v) => v, globalState) {
     return Object.entries(globalState.results)
         .map(([subject, sessions]) => {
-            return Object.entries(sessions).map(([session, info]) => callback({ subject, session, info }));
+            return Object.entries(sessions).map(([session, info], i) => callback({ subject, session, info }, i));
         })
         .flat(2);
 }
