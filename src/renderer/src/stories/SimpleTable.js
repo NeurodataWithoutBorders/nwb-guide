@@ -758,12 +758,14 @@ export class SimpleTable extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        this.colHeaders = sortTable({
-            ...this.schema,
-            properties: entries
-        }, this.keyColumn, this.schema.order)
-
-
+        this.colHeaders = sortTable(
+            {
+                ...this.schema,
+                properties: entries,
+            },
+            this.keyColumn,
+            this.schema.order
+        );
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -778,7 +780,9 @@ export class SimpleTable extends LitElement {
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                     <thead>
                         <tr>
-                            ${[...this.colHeaders].map(header).map((str, i) => this.#renderHeader(str, entries[this.colHeaders[i]]))}
+                            ${[...this.colHeaders]
+                                .map(header)
+                                .map((str, i) => this.#renderHeader(str, entries[this.colHeaders[i]]))}
                         </tr>
                     </thead>
                     <tbody></tbody>

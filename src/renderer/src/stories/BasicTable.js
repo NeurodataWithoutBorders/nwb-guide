@@ -363,10 +363,15 @@ export class BasicTable extends LitElement {
         // Sort Columns by Key Column and Requirement
         const keys =
             (this.#keys =
-            this.colHeaders = sortTable({
-                ...this.schema,
-                properties: entries
-            }, this.keyColumn, this.schema.order));
+            this.colHeaders =
+                sortTable(
+                    {
+                        ...this.schema,
+                        properties: entries,
+                    },
+                    this.keyColumn,
+                    this.schema.order
+                ));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
