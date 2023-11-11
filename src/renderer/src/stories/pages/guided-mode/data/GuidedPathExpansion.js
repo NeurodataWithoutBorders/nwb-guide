@@ -256,7 +256,7 @@ export class GuidedPathExpansionPage extends Page {
         this.optional = new OptionalSection({
             header: "Will you locate your files programmatically?",
             description: infoBox,
-            onChange: () => (this.unsavedUpdates = true),
+            onChange: () => (this.unsavedUpdates = "conversions"),
             // altContent: this.altForm,
         });
 
@@ -285,7 +285,7 @@ export class GuidedPathExpansionPage extends Page {
 
             // NOTE: These are custom coupled form inputs
             onUpdate: (path, value) => {
-                this.unsavedUpdates = true;
+                this.unsavedUpdates = "conversions";
 
                 const parentPath = [...path];
                 const name = parentPath.pop();
@@ -366,7 +366,7 @@ export class GuidedPathExpansionPage extends Page {
 
         this.dataManagementForm = new JSONSchemaForm({
             results: { keep_existing_data: structureState.keep_existing_data },
-            onUpdate: () => (this.unsavedUpdates = true),
+            onUpdate: () => (this.unsavedUpdates = "conversions"),
             schema: {
                 type: "object",
                 properties: {

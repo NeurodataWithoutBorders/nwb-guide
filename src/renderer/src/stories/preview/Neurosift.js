@@ -87,7 +87,7 @@ export class Neurosift extends LitElement {
                       src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
                       @load=${function () {
                           const loader = this.shadowRoot.querySelector(".loader-container");
-                          loader.remove();
+                          if (loader) loader.remove();
                       }}
                   ></iframe>`
             : ``;

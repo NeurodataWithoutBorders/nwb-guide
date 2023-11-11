@@ -144,12 +144,13 @@ export class GuidedHomePage extends Page {
         }
     };
 
-    resume = async (resumeProgressButton) => {
+    resume = (resumeProgressButton) => {
         resumeProgressButton.classList.add("loading");
         const datasetNameToResume =
             resumeProgressButton.parentNode.parentNode.querySelector(".progress-file-name").innerText;
 
         progress.resume.call(this, datasetNameToResume);
+        resumeProgressButton.classList.remove("loading");
     };
 
     async updated() {

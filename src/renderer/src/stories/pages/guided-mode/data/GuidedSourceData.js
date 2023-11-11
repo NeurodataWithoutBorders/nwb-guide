@@ -163,9 +163,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             // onlyRequired: true,
-            onUpdate: () => {
-                this.unsavedUpdates = true;
-            },
+            onUpdate: () => (this.unsavedUpdates = "conversions"),
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });
