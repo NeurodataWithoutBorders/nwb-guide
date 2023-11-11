@@ -24,16 +24,16 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
 
     if (ophys) {
 
-        const defs = ophys.properties.definitions
+        const getProp = (name: string) => ophys.properties.definitions[name] ?? ophys.properties[name]
 
-        if (defs.TwoPhotonSeries) defs.TwoPhotonSeries.order = [
+        if (getProp("TwoPhotonSeries")) getProp("TwoPhotonSeries").order = [
             "name",
             "description",
             "scan_line_rate",
             "field_of_view"
         ]
 
-        if (defs.ImagingPlane) defs.ImagingPlane.order = [
+        if (getProp("ImagingPlane")) getProp("ImagingPlane").order = [
             "name",
             "description",
             "device",
