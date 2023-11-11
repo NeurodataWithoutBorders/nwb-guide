@@ -36,7 +36,7 @@ const propsToIgnore = {
             device: true,
             unit: true,
             conversion: true,
-            offset: true
+            offset: true,
         },
     }, // Always ignore ophys metadata (for now)
     Icephys: true, // Always ignore icephys metadata (for now)
