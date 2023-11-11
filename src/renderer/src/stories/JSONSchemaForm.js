@@ -282,7 +282,7 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form (data only)
     updateData(localPath, value, forceUpdate = false) {
-        if (!value) throw new Error("Cannot update data with undefined value");
+       
         const path = [...localPath];
         const name = path.pop();
 
