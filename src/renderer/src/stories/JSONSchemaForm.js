@@ -601,12 +601,17 @@ export class JSONSchemaForm extends LitElement {
         };
 
         const isRenderable = (key, value) => {
-
-            if (recursive && value.properties) return this.#getRenderable(value, required[key], {
-                ...ignore[key],
-                "*": {...ignore["*"] ?? {}, ...ignore[key]["*"] ?? {}}, // Accumulate ignore values
-            }, [...path, key], true);
-
+            if (recursive && value.properties)
+                return this.#getRenderable(
+                    value,
+                    required[key],
+                    {
+                        ...ignore[key],
+                        "*": { ...(ignore["*"] ?? {}), ...(ignore[key]["*"] ?? {}) }, // Accumulate ignore values
+                    },
+                    [...path, key],
+                    true
+                );
             else return [key, value];
         };
 

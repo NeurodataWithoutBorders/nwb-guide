@@ -45,7 +45,7 @@ export function createGlobalFormModal(this: Page, {
 
     const schemaCopy = structuredClone(schema) // Ensure no mutation
 
-    
+
     function removeProperties(obj: any, props: IgnorePropsLevel = {}, extraGlobalProps?: SingleIgnorePropsLevel) {
 
         if (extraGlobalProps && Object.keys(extraGlobalProps).length > 0) {
