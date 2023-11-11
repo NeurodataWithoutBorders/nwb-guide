@@ -34,11 +34,11 @@ export class Page extends LitElement {
 
     onSet = () => {}; // User-defined function
 
-    set = (info) => {
+    set = (info, rerender = true) => {
         if (info) {
             Object.assign(this.info, info);
             this.onSet();
-            this.requestUpdate();
+            if (rerender) this.requestUpdate();
         }
     };
 
@@ -114,6 +114,30 @@ export class Page extends LitElement {
     }
 
     mapSessions = (callback, data = this.info.globalState) => mapSessions(callback, data);
+
+    async convert({ preview } = {}) {
+        const key = preview ? "preview" : "conversion";
+
+        delete this.info.globalState[key]; // Clear the preview results
+
+        if (preview) {
+            const stubs = await this.runConversions({ stub_test: true }, undefined, {
+                title: "Running stub conversion on all sessions...",
+            });
+            this.info.globalState[key] = { stubs };
+        } else {
+            this.info.globalState[key] = await this.runConversions({}, true, { title: "Running all conversions" });
+        }
+
+        this.unsavedUpdates = true;
+
+        // Indicate conversion has run successfully
+        const { desyncedData } = this.info.globalState;
+        if (desyncedData) {
+            delete desyncedData[key];
+            if (Object.keys(desyncedData).length === 0) delete this.info.globalState.desyncedData;
+        }
+    }
 
     async runConversions(conversionOptions = {}, toRun, options = {}) {
         let original = toRun;
@@ -201,7 +225,31 @@ export class Page extends LitElement {
         this.updatePages();
     };
 
-    unsavedUpdates = false; // Track unsaved updates
+    checkSyncState = async (info = this.info, sync = info.sync) => {
+        if (!sync) return;
+
+        const { desyncedData } = info.globalState;
+        if (desyncedData) {
+            return Promise.all(
+                sync.map((k) => {
+                    if (desyncedData[k]) {
+                        if (k === "conversion") return this.convert();
+                        else if (k === "preview") return this.convert({ preview: true });
+                    }
+                })
+            );
+        }
+    };
+
+    #unsaved = false;
+    get unsavedUpdates() {
+        return this.#unsaved;
+    }
+
+    set unsavedUpdates(value) {
+        this.#unsaved = !!value;
+        if (value === "conversions") this.info.globalState.desyncedData = { preview: true, conversion: true };
+    }
 
     // NOTE: Make sure you call this explicitly if a child class overwrites this AND data is updated
     updated() {
