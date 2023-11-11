@@ -186,8 +186,9 @@ export class UploadsPage extends Page {
             await fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
                 .then(({ physical, logical }) => {
-                    dandiSchema.properties.number_of_jobs.max = physical;
-                    dandiSchema.properties.number_of_threads.max = logical / physical;
+                    const { number_of_jobs, number_of_threads } = dandiSchema.properties
+                    number_of_jobs.max = number_of_jobs.default = physical;
+                    number_of_threads.max = number_of_threads.default = logical / physical;
                 })
                 .catch(() => {});
 
