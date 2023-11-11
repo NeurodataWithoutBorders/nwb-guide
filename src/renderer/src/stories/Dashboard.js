@@ -208,17 +208,21 @@ export class Dashboard extends LitElement {
             this.subSidebar.hide();
         }
 
-        page.set(toPass);
+        this.#active.set(toPass, false);
 
-        const projectName = info.globalState?.project?.name;
-        this.subSidebar.header = projectName
-            ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
-            : projectName;
+        this.#active.checkSyncState().then(() => {
+            this.#active.requestUpdate(); // Re-render page
 
-        // const page = this.getPage(info)
-        this.main.set({
-            page,
-            sections: this.subSidebar.sections ?? {},
+            const projectName = info.globalState?.project?.name;
+
+            this.subSidebar.header = projectName
+                ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
+                : projectName;
+
+            this.main.set({
+                page,
+                sections: this.subSidebar.sections ?? {},
+            });
         });
     }
 

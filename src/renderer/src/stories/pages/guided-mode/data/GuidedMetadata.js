@@ -100,19 +100,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
-            // Preview a single random conversion
-            delete this.info.globalState.preview; // Clear the preview results
-
-            const stubs = await this.runConversions({ stub_test: true }, undefined, {
-                title: "Running stub conversion on all sessions...",
-            });
-
-            // Save the preview results
-            this.info.globalState.preview = {
-                stubs,
-            };
-
-            this.unsavedUpdates = true;
+            await this.convert({ preview: true });
 
             this.to(1);
         },
@@ -213,7 +201,7 @@ export class GuidedMetadataPage extends ManagedPage {
             },
 
             onUpdate: () => {
-                this.unsavedUpdates = true;
+                this.unsavedUpdates = "conversions";
             },
 
             validateOnChange,
