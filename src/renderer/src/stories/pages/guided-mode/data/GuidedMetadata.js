@@ -20,7 +20,22 @@ import { globalSchema } from "../../../../../../../schemas/base-metadata.schema"
 import globalIcon from "../../../assets/global.svg?raw";
 
 const propsToIgnore = {
-    "Ophys": true, // Always ignore ophys metadata (for now)
+    "Ophys": {
+        "ImagingPlane": {
+            "manifold": true, 
+            "unit": true, 
+            "conversion": true, 
+        },
+        "TwoPhotonSeries": {
+            "format": true,
+            "starting_frame": true,
+            "starting_time": true,
+            "rate": true,
+            "control": true,
+            "control_description": true,
+            "device": true
+        }
+    }, // Always ignore ophys metadata (for now)
     "Icephys": true, // Always ignore icephys metadata (for now)
     "Behavior": true, // Always ignore behavior metadata (for now)
     "ndx-dandi-icephys": true,
@@ -168,8 +183,6 @@ export class GuidedMetadataPage extends ManagedPage {
         }
 
         resolveResults(subject, session, globalState);
-
-        console.log(subject, session, results);
 
         // Create the form
         const form = new JSONSchemaForm({

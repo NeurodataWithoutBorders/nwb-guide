@@ -105,6 +105,7 @@ export class BasicTable extends LitElement {
     constructor({
         name,
         schema,
+        ignore,
         data,
         keyColumn,
         maxHeight,
@@ -120,6 +121,8 @@ export class BasicTable extends LitElement {
         this.keyColumn = keyColumn;
         this.maxHeight = maxHeight ?? "";
         this.validateEmptyCells = validateEmptyCells ?? true;
+
+        this.ignore = ignore ?? {};
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
@@ -339,6 +342,9 @@ export class BasicTable extends LitElement {
         this.#updateRendered();
 
         const entries = { ...this.schema.properties };
+
+        for (let key in this.ignore) delete entries[key]
+        for (let key in (this.ignore["*"] ?? {})) delete entries[key]
 
         // Add existing additional properties to the entries variable if necessary
         if (this.schema.additionalProperties) {

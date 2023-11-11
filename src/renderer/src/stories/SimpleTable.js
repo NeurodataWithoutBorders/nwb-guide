@@ -171,6 +171,7 @@ export class SimpleTable extends LitElement {
         deferLoading,
         maxHeight,
         contextOptions = {},
+        ignore = {}
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -180,6 +181,8 @@ export class SimpleTable extends LitElement {
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.deferLoading = deferLoading ?? false;
         this.maxHeight = maxHeight ?? "";
+
+        this.ignore = ignore
 
         this.contextOptions = contextOptions;
 
@@ -735,6 +738,9 @@ export class SimpleTable extends LitElement {
         this.#resetLoadState();
 
         const entries = (this.#schema = { ...this.schema.properties });
+
+        for (let key in this.ignore) delete entries[key]
+        for (let key in (this.ignore["*"] ?? {})) delete entries[key]
 
         // Add existing additional properties to the entries variable if necessary
         if (this.schema.additionalProperties) {

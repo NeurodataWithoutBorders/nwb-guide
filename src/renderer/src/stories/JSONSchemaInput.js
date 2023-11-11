@@ -10,7 +10,7 @@ import { List } from "./List";
 import { Modal } from "./Modal";
 
 import { capitalize } from "./forms/utils";
-import { JSONSchemaForm } from "./JSONSchemaForm";
+import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 
 const isFilesystemSelector = (name, format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
@@ -223,9 +223,14 @@ export class JSONSchemaInput extends LitElement {
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema.type === "object" && this.form.createTable) {
+
+                const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, [...this.form.base, ...path, name]) : {}
+                
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
+
+                    ignore, 
 
                     onUpdate: () => this.#updateData(fullPath, tableMetadata.data, true), // Ensure change propagates to all forms
 
@@ -254,6 +259,8 @@ export class JSONSchemaInput extends LitElement {
                 };
 
                 const table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
+
+
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
 
