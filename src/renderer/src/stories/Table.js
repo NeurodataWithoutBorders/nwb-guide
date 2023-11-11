@@ -15,36 +15,37 @@ const isRequired = (col, schema) => {
 };
 
 export function sortTable(schema, keyColumn, order) {
-
     const cols = Object.keys(schema.properties)
 
-    //Sort alphabetically
-    .sort((a, b) => {
-        if (a < b) return -1;
-        if (a > b) return 1;
-        return 0;
-    })
-    .sort((a, b) => {
-        const aRequired = isRequired(a, schema);
-        const bRequired = isRequired(b, schema);
-        if (aRequired && bRequired) return 0;
-        if (aRequired) return -1;
-        if (bRequired) return 1;
-        return 0;
-    })
-    .sort((a, b) => {
-        if (a === keyColumn) return -1;
-        if (b === keyColumn) return 1;
-        return 0;
-    });
+        //Sort alphabetically
+        .sort((a, b) => {
+            if (a < b) return -1;
+            if (a > b) return 1;
+            return 0;
+        })
+        .sort((a, b) => {
+            const aRequired = isRequired(a, schema);
+            const bRequired = isRequired(b, schema);
+            if (aRequired && bRequired) return 0;
+            if (aRequired) return -1;
+            if (bRequired) return 1;
+            return 0;
+        })
+        .sort((a, b) => {
+            if (a === keyColumn) return -1;
+            if (b === keyColumn) return 1;
+            return 0;
+        });
 
-    return order ? cols.sort((a,b) => {
-        const idxA = order.indexOf(a);
-        const idxB = order.indexOf(b);
-        if (idxA === -1) return 1;
-        if (idxB === -1) return -1;
-        return idxA - idxB;
-    }) : cols;
+    return order
+        ? cols.sort((a, b) => {
+              const idxA = order.indexOf(a);
+              const idxB = order.indexOf(b);
+              if (idxA === -1) return 1;
+              if (idxB === -1) return -1;
+              return idxA - idxB;
+          })
+        : cols;
 }
 
 // Inject scoped stylesheet
@@ -226,10 +227,14 @@ export class Table extends LitElement {
 
         // Sort Columns by Key Column and Requirement
 
-        const colHeaders = this.colHeaders = sortTable({
-            ...this.schema,
-            properties: entries,
-        }, this.keyColumn, this.schema.order);
+        const colHeaders = (this.colHeaders = sortTable(
+            {
+                ...this.schema,
+                properties: entries,
+            },
+            this.keyColumn,
+            this.schema.order
+        ));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
