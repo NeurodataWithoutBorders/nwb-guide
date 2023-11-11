@@ -20,7 +20,7 @@ import { globalSchema } from "../../../../../../../schemas/base-metadata.schema"
 import globalIcon from "../../../assets/global.svg?raw";
 
 const propsToIgnore = {
-    "Ophys": {
+    Ophys: {
         "ImagingPlane": {
             "manifold": true, 
             "unit": true, 
@@ -36,16 +36,16 @@ const propsToIgnore = {
             "device": true
         }
     }, // Always ignore ophys metadata (for now)
-    "Icephys": true, // Always ignore icephys metadata (for now)
-    "Behavior": true, // Always ignore behavior metadata (for now)
+    Icephys: true, // Always ignore icephys metadata (for now)
+    Behavior: true, // Always ignore behavior metadata (for now)
     "ndx-dandi-icephys": true,
-    "Subject": {
-        "subject_id": true,
+    Subject: {
+        subject_id: true,
     },
-    "NWBFile": {
-        "session_id": true,
-    }
-}
+    NWBFile: {
+        session_id: true,
+    },
+};
 
 // const propsToIgnore = [
 //     // "Ophys", // Always ignore ophys metadata (for now)

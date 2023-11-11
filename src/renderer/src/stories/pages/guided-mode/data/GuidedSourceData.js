@@ -26,14 +26,14 @@ import { run } from "../options/utils.js";
 
 const propsToIgnore = {
     "*": {
-        "verbose": true,
-        "es_key": true,
-        "exclude_shanks": true,
-        "load_sync_channel": true,
-        "stream_id": true, // NOTE: May be desired for other interfaces
-        "nsx_override": true,
-    }
-}
+        verbose: true,
+        es_key: true,
+        exclude_shanks: true,
+        load_sync_channel: true,
+        stream_id: true, // NOTE: May be desired for other interfaces
+        nsx_override: true,
+    },
+};
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
@@ -199,10 +199,10 @@ export class GuidedSourceDataPage extends ManagedPage {
             propsToRemove: {
                 "*": {
                     ...propsToIgnore["*"],
-                    "folder_path": true,
-                    "file_path": true,
+                    folder_path: true,
+                    file_path: true,
                     // NOTE: Still keeping plural path specifications for now
-                }
+                },
             },
             key: "SourceData",
             schema: this.info.globalState.schema.source_data,
