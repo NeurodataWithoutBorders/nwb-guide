@@ -294,7 +294,6 @@ export class JSONSchemaForm extends LitElement {
 
     // Track resolved values for the form (data only)
     updateData(localPath, value, forceUpdate = false) {
-       
         const path = [...localPath];
         const name = path.pop();
 
