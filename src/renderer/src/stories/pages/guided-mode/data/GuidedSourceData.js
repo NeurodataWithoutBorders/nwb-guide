@@ -15,14 +15,25 @@ import { Button } from "../../../Button.js";
 import globalIcon from "../../../assets/global.svg?raw";
 import { run } from "../options/utils.js";
 
-const propsToIgnore = [
-    "verbose",
-    "es_key",
-    "exclude_shanks",
-    "load_sync_channel",
-    "stream_id", // NOTE: May be desired for other interfaces
-    "nsx_override",
-];
+// const propsToIgnore = [
+//     "verbose",
+//     "es_key",
+//     "exclude_shanks",
+//     "load_sync_channel",
+//     "stream_id", // NOTE: May be desired for other interfaces
+//     "nsx_override",
+// ];
+
+const propsToIgnore = {
+    "*": {
+        "verbose": true,
+        "es_key": true,
+        "exclude_shanks": true,
+        "load_sync_channel": true,
+        "stream_id": true, // NOTE: May be desired for other interfaces
+        "nsx_override": true,
+    }
+}
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
@@ -185,12 +196,14 @@ export class GuidedSourceDataPage extends ManagedPage {
         super.connectedCallback();
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Source Data",
-            propsToRemove: [
-                ...propsToIgnore,
-                "folder_path",
-                "file_path",
-                // NOTE: Still keeping plural path specifications for now
-            ],
+            propsToRemove: {
+                "*": {
+                    ...propsToIgnore["*"],
+                    "folder_path": true,
+                    "file_path": true,
+                    // NOTE: Still keeping plural path specifications for now
+                }
+            },
             key: "SourceData",
             schema: this.info.globalState.schema.source_data,
             hasInstances: true,

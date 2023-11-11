@@ -19,15 +19,28 @@ import { globalSchema } from "../../../../../../../schemas/base-metadata.schema"
 
 import globalIcon from "../../../assets/global.svg?raw";
 
-const propsToIgnore = [
-    // "Ophys", // Always ignore ophys metadata (for now)
-    "Icephys", // Always ignore icephys metadata (for now)
-    "Behavior", // Always ignore behavior metadata (for now)
-    // new RegExp("ndx-.+"), // Ignore all ndx extensions
-    "ndx-dandi-icephys",
-    "subject_id",
-    "session_id",
-];
+const propsToIgnore = {
+    "Ophys": true, // Always ignore ophys metadata (for now)
+    "Icephys": true, // Always ignore icephys metadata (for now)
+    "Behavior": true, // Always ignore behavior metadata (for now)
+    "ndx-dandi-icephys": true,
+    "Subject": {
+        "subject_id": true,
+    },
+    "NWBFile": {
+        "session_id": true,
+    }
+}
+
+// const propsToIgnore = [
+//     // "Ophys", // Always ignore ophys metadata (for now)
+//     "Icephys", // Always ignore icephys metadata (for now)
+//     "Behavior", // Always ignore behavior metadata (for now)
+//     // new RegExp("ndx-.+"), // Ignore all ndx extensions
+//     "ndx-dandi-icephys",
+//     "subject_id",
+//     "session_id",
+// ];
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
@@ -97,7 +110,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Metadata",
-            propsToRemove: [...propsToIgnore],
+            propsToRemove: propsToIgnore,
             schema: globalSchema, // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
             hasInstances: true,
             mergeFunction: function (globalResolved, globals) {

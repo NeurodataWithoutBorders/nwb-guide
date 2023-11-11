@@ -209,7 +209,7 @@ export class JSONSchemaForm extends LitElement {
         this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
 
-        this.ignore = props.ignore ?? [];
+        this.ignore = props.ignore ?? {};
         this.required = props.required ?? {};
         this.dialogOptions = props.dialogOptions;
         this.dialogType = props.dialogType;
@@ -585,7 +585,7 @@ export class JSONSchemaForm extends LitElement {
     //     }
     // };
 
-    #getRenderable = (schema = {}, required, path, recursive = false) => {
+    #getRenderable = (schema = {}, required, ignore = {}, path, recursive = false) => {
         const entries = Object.entries(schema.properties ?? {});
 
         const isArrayOfArrays = (arr) => !!arr.find((v) => Array.isArray(v));
@@ -601,20 +601,20 @@ export class JSONSchemaForm extends LitElement {
         };
 
         const isRenderable = (key, value) => {
-            if (recursive && value.properties) return this.#getRenderable(value, required[key], [...path, key], true);
+
+            if (recursive && value.properties) return this.#getRenderable(value, required[key], {
+                ...ignore[key],
+                "*": {...ignore["*"] ?? {}, ...ignore[key]["*"] ?? {}}, // Accumulate ignore values
+            }, [...path, key], true);
+
             else return [key, value];
         };
 
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (
-                    this.ignore.find((v) => {
-                        if (typeof v === "string") return v === key;
-                        else return v.test(key);
-                    })
-                )
-                    return false;
+                if (this.ignore["*"]?.[key]) return false; // Skip all properties with this name
+                else if (this.ignore[key] === true) return false; // Skip this property
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
@@ -824,10 +824,10 @@ export class JSONSchemaForm extends LitElement {
 
     #accordions = {};
 
-    #render = (schema, results, required = {}, path = []) => {
+    #render = (schema, results, required = {}, ignore = {}, path = []) => {
         let isLink = Symbol("isLink");
         // Filter non-required properties (if specified) and render the sub-schema
-        const renderable = this.#getRenderable(schema, required, path);
+        const renderable = this.#getRenderable(schema, required, ignore, path);
 
         // // Filter non-required properties (if specified) and render the sub-schema
         // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
@@ -934,7 +934,7 @@ export class JSONSchemaForm extends LitElement {
 
             const headerName = header(name);
 
-            const renderableInside = this.#getRenderable(info, required[name], localPath, true);
+            const renderableInside = this.#getRenderable(info, required[name], ignore, localPath, true);
 
             const __disabled = this.results.__disabled ?? (this.results.__disabled = {});
             const __interacted = __disabled.__interacted ?? (__disabled.__interacted = {});
@@ -1140,7 +1140,7 @@ export class JSONSchemaForm extends LitElement {
                 ? html`<h4>Description</h4>
                       <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
                 : ""}
-            ${this.#render(schema, this.resolved, this.#requirements)}
+            ${this.#render(schema, this.resolved, this.#requirements, this.ignore)}
         `;
     }
 }
