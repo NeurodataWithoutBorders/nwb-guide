@@ -24,7 +24,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
 
     if (ophys) {
 
-        const getProp = (name: string) => ophys.properties.definitions[name] ?? ophys.properties[name]
+        const getProp = (name: string) => ophys.properties.definitions?.[name] ?? ophys.properties[name]
 
         if (getProp("TwoPhotonSeries")) getProp("TwoPhotonSeries").order = [
             "name",
