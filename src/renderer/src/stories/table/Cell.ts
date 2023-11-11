@@ -35,10 +35,11 @@ export class TableCell extends LitElement {
 
             :host {
                 display: flex;
-                white-space: nowrap;
                 color: black;
                 font-size: 13px;
                 height: 100%;
+                max-height:  100px;
+                overflow-y: scroll;
             }
 
             :host > * {

@@ -28,10 +28,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
             "name",
             "description",
             "scan_line_rate",
-            "field_of_view",
-            "unit",
-            "conversion",
-            "offset"
+            "field_of_view"
         ]
 
         ophys.properties.definitions.ImagingPlane.order = [
