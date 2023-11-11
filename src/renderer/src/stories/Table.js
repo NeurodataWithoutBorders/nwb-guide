@@ -78,7 +78,7 @@ export class Table extends LitElement {
         onStatusChange,
         onThrow,
         contextMenu,
-        ignore
+        ignore,
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -174,8 +174,8 @@ export class Table extends LitElement {
 
         const entries = { ...this.schema.properties };
 
-        for (let key in this.ignore) delete entries[key]
-        for (let key in (this.ignore["*"] ?? {})) delete entries[key]
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional properties to the entries variable if necessary
         if (this.schema.additionalProperties) {

@@ -16,20 +16,17 @@ const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
 };
 
-
 export const getIgnore = (o, path) => {
     if (typeof path === "string") path = path.split(".");
     return path.reduce((acc, key) => {
-
         const info = acc[key] ?? {};
 
         return {
             ...info,
-            "*": {...(acc["*"] ?? {}), ...(info["*"] ?? {})}, // Accumulate ignore values
-        }
-
-    }, o)
-}
+            "*": { ...(acc["*"] ?? {}), ...(info["*"] ?? {}) }, // Accumulate ignore values
+        };
+    }, o);
+};
 
 const selfRequiredSymbol = Symbol();
 
@@ -616,9 +613,8 @@ export class JSONSchemaForm extends LitElement {
         };
 
         const isRenderable = (key, value) => {
-
-            if (recursive && value.properties) return this.#getRenderable(value, required[key], getIgnore(ignore, key), [...path, key], true);
-
+            if (recursive && value.properties)
+                return this.#getRenderable(value, required[key], getIgnore(ignore, key), [...path, key], true);
             else return [key, value];
         };
 
