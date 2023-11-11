@@ -11,6 +11,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 import "./Button";
 import tippy from "tippy.js";
+import { sortTable } from "./Table";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -757,13 +758,12 @@ export class SimpleTable extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        const keys = (this.colHeaders = Object.keys(entries).sort((a, b) => {
-            if (a === this.keyColumn) return -1;
-            if (b === this.keyColumn) return 1;
-            if (entries[a].required && !entries[b].required) return -1;
-            if (!entries[a].required && entries[b].required) return 1;
-            return 0;
-        }));
+        this.colHeaders = sortTable({
+            ...this.schema,
+            properties: entries
+        }, this.keyColumn, this.schema.order)
+
+
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -778,7 +778,7 @@ export class SimpleTable extends LitElement {
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                     <thead>
                         <tr>
-                            ${[...keys].map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
+                            ${[...this.colHeaders].map(header).map((str, i) => this.#renderHeader(str, entries[this.colHeaders[i]]))}
                         </tr>
                     </thead>
                     <tbody></tbody>

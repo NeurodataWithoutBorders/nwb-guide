@@ -10,6 +10,43 @@ import "tippy.js/dist/tippy.css";
 
 const maxRows = 20;
 
+const isRequired = (col, schema) => {
+    return schema.required?.includes(col);
+};
+
+export function sortTable(schema, keyColumn, order) {
+
+    const cols = Object.keys(schema.properties)
+
+    //Sort alphabetically
+    .sort((a, b) => {
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+    })
+    .sort((a, b) => {
+        const aRequired = isRequired(a, schema);
+        const bRequired = isRequired(b, schema);
+        if (aRequired && bRequired) return 0;
+        if (aRequired) return -1;
+        if (bRequired) return 1;
+        return 0;
+    })
+    .sort((a, b) => {
+        if (a === keyColumn) return -1;
+        if (b === keyColumn) return 1;
+        return 0;
+    });
+
+    return order ? cols.sort((a,b) => {
+        const idxA = order.indexOf(a);
+        const idxB = order.indexOf(b);
+        if (idxA === -1) return 1;
+        if (idxB === -1) return -1;
+        return idxA - idxB;
+    }) : cols;
+}
+
 // Inject scoped stylesheet
 const styles = `
 
@@ -163,10 +200,6 @@ export class Table extends LitElement {
     onOverride = () => {};
     onThrow = () => {};
 
-    isRequired = (col) => {
-        return this.schema?.required?.includes(col);
-    };
-
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
 
@@ -192,26 +225,11 @@ export class Table extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        const colHeaders = (this.colHeaders = Object.keys(entries)
-            .sort((a, b) => {
-                //Sort alphabetically
-                if (a < b) return -1;
-                if (a > b) return 1;
-                return 0;
-            })
-            .sort((a, b) => {
-                const aRequired = this.isRequired(a);
-                const bRequired = this.isRequired(b);
-                if (aRequired && bRequired) return 0;
-                if (aRequired) return -1;
-                if (bRequired) return 1;
-                return 0;
-            })
-            .sort((a, b) => {
-                if (a === this.keyColumn) return -1;
-                if (b === this.keyColumn) return 1;
-                return 0;
-            }));
+
+        const colHeaders = this.colHeaders = sortTable({
+            ...this.schema,
+            properties: entries,
+        }, this.keyColumn, this.schema.order);
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -272,7 +290,7 @@ export class Table extends LitElement {
             };
 
             let ogThis = this;
-            const isRequired = this.isRequired(k);
+            const required = isRequired(k, this.schema);
 
             const validator = async function (value, callback) {
                 const validateEmptyCells = ogThis.validateEmptyCells;
@@ -310,7 +328,7 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (!value && isRequired) {
+                if (!value && required) {
                     ogThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         this.row,
@@ -356,8 +374,8 @@ export class Table extends LitElement {
 
             const rel = TH.querySelector(".relative");
 
-            const isRequired = this.isRequired(col);
-            if (isRequired)
+            const required = isRequired(col, this.schema);
+            if (required)
                 rel.setAttribute(
                     "data-required",
                     this.validateEmptyCells
