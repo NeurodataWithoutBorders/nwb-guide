@@ -133,7 +133,9 @@ class UploadProject(Resource):
             if "number_of_jobs" not in upload_options:
                 upload_options.update(number_of_jobs=psutil.cpu_count(logical=False))
             if "number_of_threads" not in upload_options:
-                upload_options.update(number_of_threads=psutil.cpu_count(logical=True) / psutil.cpu_count(logical=False))
+                upload_options.update(
+                    number_of_threads=psutil.cpu_count(logical=True) / psutil.cpu_count(logical=False)
+                )
 
             return upload_project_to_dandi(**upload_options)
 
@@ -153,7 +155,9 @@ class UploadFolder(Resource):
             if "number_of_jobs" not in upload_options:
                 upload_options.update(number_of_jobs=psutil.cpu_count(logical=False))
             if "number_of_threads" not in upload_options:
-                upload_options.update(number_of_threads=psutil.cpu_count(logical=True) / psutil.cpu_count(logical=False))
+                upload_options.update(
+                    number_of_threads=psutil.cpu_count(logical=True) / psutil.cpu_count(logical=False)
+                )
 
             return upload_folder_to_dandi(**upload_options)
 
