@@ -214,6 +214,7 @@ export class Dashboard extends LitElement {
             this.#active.requestUpdate(); // Re-render page
 
             const projectName = info.globalState?.project?.name;
+
             this.subSidebar.header = projectName
                 ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
                 : projectName;
