@@ -24,7 +24,7 @@ export class NavigationSidebar extends LitElement {
         return {
             sections: { type: Object, reflect: false },
             active: { type: String, reflect: true },
-            header: { type: Object, reflect: false}
+            header: { type: Object, reflect: false },
         };
     }
 
