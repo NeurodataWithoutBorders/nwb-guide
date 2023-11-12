@@ -23,29 +23,29 @@ Install Python Dependencies
 
 Install the appropriate Python dependencies for your operating system.
 
-Windows
+**Windows**
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    conda env create -f ./environments/environment-Windows.yml
+        conda env create -f ./environments/environment-Windows.yml
 
-Mac with x64 architecture
+**Mac with x64 architecture**
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC.yml
+        conda env create -f ./environments/environment-MAC.yml
 
-Mac with arm64 architecture
+**Mac with arm64 architecture**
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-arm64.yml
+        conda env create -f ./environments/environment-MAC-arm64.yml
 
-Linux
+**Linux**
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    conda env create -f ./environments/environment-Linux.yml
+        conda env create -f ./environments/environment-Linux.yml
 
 Before starting NWB GUIDE, you'll need to ensure that the Python environment is activated.
 
