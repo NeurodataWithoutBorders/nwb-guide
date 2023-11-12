@@ -19,7 +19,9 @@ lines.insert(8, "import scipy\n")
 
 hiddenImportIdx = lines.index("hiddenimports = []\n")
 
-lines[hiddenImportIdx] = "hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]\n\n"
+lines[
+    hiddenImportIdx
+] = "hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]\n\n"
 
 
 # Originally this was a separate `npm` command per platform to account for CLI syntax differences between ; and :

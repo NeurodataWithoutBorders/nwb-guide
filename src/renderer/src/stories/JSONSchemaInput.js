@@ -178,9 +178,11 @@ export class JSONSchemaInput extends LitElement {
         return html`
             ${input}
             <p class="guided--text-input-instructions">
-            ${info.description
-                ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}`
-                : ""}
+                ${info.description
+                    ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "."
+                          ? ""
+                          : "."}`
+                    : ""}
             </p>
         `;
     }
