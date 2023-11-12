@@ -150,15 +150,15 @@ export class Page extends LitElement {
 
         const results = {};
 
-        if (!('showCancelButton' in options)) {
+        if (!("showCancelButton" in options)) {
             options.showCancelButton = true;
-            options.customClass = { actions: 'swal-conversion-actions' }
+            options.customClass = { actions: "swal-conversion-actions" };
         }
 
-        const cancelController = new AbortController()
+        const cancelController = new AbortController();
 
         const popup = await openProgressSwal({ title: `Running conversion`, ...options }, (result) => {
-            if (!result.isConfirmed) cancelController.abort()
+            if (!result.isConfirmed) cancelController.abort();
         });
 
         const isMultiple = toRun.length > 1;
@@ -205,11 +205,11 @@ export class Page extends LitElement {
                 },
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((e) => {
-                let message = e.message
+                let message = e.message;
 
-                if (message.includes('The user aborted a request.')) {
+                if (message.includes("The user aborted a request.")) {
                     this.notify("Conversion was cancelled.", "warning");
-                    throw e
+                    throw e;
                 }
 
                 this.notify(message, "error");

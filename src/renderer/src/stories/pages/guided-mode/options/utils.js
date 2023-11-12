@@ -17,8 +17,8 @@ export const openProgressSwal = (options, callback) => {
                 Swal.showLoading();
                 resolve(Swal);
             },
-            ...options
-        }).then(result => callback?.(result));
+            ...options,
+        }).then((result) => callback?.(result));
     });
 };
 
@@ -35,7 +35,7 @@ export const run = async (url, payload, options = {}) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        ...(options.fetch ?? {})
+        ...(options.fetch ?? {}),
     }).then((res) => res.json());
 
     if (needsSwal) Swal.close();
