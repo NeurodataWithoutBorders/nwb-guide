@@ -3,13 +3,37 @@ import baseMetadataSchema from './json/base_metadata_schema.json' assert { type:
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
 
     // Add unit to weight
-    schema.properties.Subject.properties.weight.unit = 'kg'
+    const subjectProps = schema.properties.Subject.properties
+    subjectProps.weight.unit = 'kg'
 
-    schema.properties.Subject.properties.sex.enumLabels = {
+    subjectProps.sex.enumLabels = {
         M: 'Male',
         F: 'Female',
         U: 'Unknown',
         O: 'Other'
+    }
+
+    const species = [
+        "Mus musculus - House mouse",
+        "Homo sapiens - Human",
+        "Rattus norvegicus - Norway rat",
+        "Rattus rattus - Black rat",
+        "Macaca mulatta - Rhesus monkey",
+        "Callithrix jacchus - Common marmoset",
+        "Drosophila melanogaster - Fruit fly",
+        "Danio rerio - Zebra fish",
+        "Caenorhabditis elegans"
+      ].map(str => str.split(' - ')[0]) // Remove common names so this passes the validator
+    
+      subjectProps.species = {
+        type: 'string',
+        // enumLabels: 
+        enum: species, // Remove common names so this passes the validator
+        items: {
+            type: 'string'
+        },
+        strict: false,
+        description: 'The species of your subject.'
     }
 
     // Ensure experimenter schema has custom structure

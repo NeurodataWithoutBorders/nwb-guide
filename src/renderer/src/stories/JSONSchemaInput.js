@@ -353,7 +353,8 @@ export class JSONSchemaInput extends LitElement {
         }
 
         // Basic enumeration of properties on a select element
-        if (info.enum) {
+        if (info.enum && info.strict !== false) {
+
             return html`
                 <select
                     class="guided--input schema-input"
@@ -369,6 +370,7 @@ export class JSONSchemaInput extends LitElement {
                     )}
                 </select>
             `;
+            
         } else if (info.type === "boolean") {
             return html`<input
                 type="checkbox"
