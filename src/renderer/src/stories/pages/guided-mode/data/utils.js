@@ -40,7 +40,6 @@ export function resolveProperties(properties = {}, target, globals = {}) {
         const props = info.properties;
 
         if (!(name in target)) {
-
             if (target.__disabled?.[name]) continue; // Skip disabled properties
 
             if (props) target[name] = {}; // Regisiter new interfaces in results
