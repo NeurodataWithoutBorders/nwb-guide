@@ -150,7 +150,16 @@ export class Page extends LitElement {
 
         const results = {};
 
-        const popup = await openProgressSwal({ title: `Running conversion`, ...options });
+        if (!('showCancelButton' in options)) {
+            options.showCancelButton = true;
+            options.customClass = { actions: 'swal-conversion-actions' }
+        }
+
+        const cancelController = new AbortController()
+
+        const popup = await openProgressSwal({ title: `Running conversion`, ...options }, (result) => {
+            if (!result.isConfirmed) cancelController.abort()
+        });
 
         const isMultiple = toRun.length > 1;
 
@@ -165,9 +174,8 @@ export class Page extends LitElement {
         element.append(progressBar);
         element.insertAdjacentHTML(
             "beforeend",
-            `<small><small><b>Note:</b> This may take a while to complete...</small></small>`
+            `<small><small><b>Note:</b> This may take a while to complete...</small></small><hr style="margin-bottom: 0;">`
         );
-        // }
 
         let completed = 0;
         elements.progress.value = { b: completed, tsize: toRun.length };
@@ -195,9 +203,16 @@ export class Page extends LitElement {
 
                     interfaces: globalState.interfaces,
                 },
-                { swal: popup, ...options }
+                { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((e) => {
-                this.notify(e.message, "error");
+                let message = e.message
+
+                if (message.includes('The user aborted a request.')) {
+                    this.notify("Conversion was cancelled.", "warning");
+                    throw e
+                }
+
+                this.notify(message, "error");
                 popup.close();
                 throw e;
             });
