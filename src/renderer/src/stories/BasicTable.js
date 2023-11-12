@@ -7,6 +7,7 @@ import { errorHue, warningHue } from "./globals";
 import * as promises from "../promises";
 
 import "./Button";
+import { sortTable } from "./Table";
 
 export class BasicTable extends LitElement {
     static get styles() {
