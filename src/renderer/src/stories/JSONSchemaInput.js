@@ -166,7 +166,7 @@ export class JSONSchemaInput extends LitElement {
     updated() {
         const el = this.getElement();
         if (el) {
-            if (this.validateEmptyValue || (el.value ?? el.checked) !== "") el.dispatchEvent(new Event("change"));
+            el.dispatchEvent(new Event("change"));
         }
     }
 
@@ -174,13 +174,14 @@ export class JSONSchemaInput extends LitElement {
         const { info } = this;
 
         const input = this.#render();
+
         return html`
             ${input}
+            <p class="guided--text-input-instructions">
             ${info.description
-                ? html`<p class="guided--text-input-instructions">
-                      ${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}
-                  </p>`
+                ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}`
                 : ""}
+            </p>
         `;
     }
 
