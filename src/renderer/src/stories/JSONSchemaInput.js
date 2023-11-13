@@ -178,9 +178,11 @@ export class JSONSchemaInput extends LitElement {
         return html`
             ${input}
             <p class="guided--text-input-instructions">
-            ${info.description
-                ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "." ? "" : "."}`
-                : ""}
+                ${info.description
+                    ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "."
+                          ? ""
+                          : "."}`
+                    : ""}
             </p>
         `;
     }
@@ -237,8 +239,8 @@ export class JSONSchemaInput extends LitElement {
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
-                                ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
-                                : "")
+                                  ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
+                                  : "")
                         );
                     },
 
