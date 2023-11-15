@@ -120,8 +120,6 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
             document.body.append(modal);
         });
-
-        console.log(api_key);
     }
 
     const result = await run(
@@ -131,7 +129,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
             staging,
             api_key,
         },
-        { title: "Uploading to DANDI" }
+        { title: "Uploading your files to DANDI" }
     ).catch((e) => {
         this.notify(e.message, "error");
         throw e;
