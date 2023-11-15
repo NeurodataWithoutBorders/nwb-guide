@@ -2,10 +2,10 @@ import Swal from "sweetalert2";
 import { baseUrl } from "../../../../globals.js";
 import { sanitize } from "../../utils.js";
 
-export const openProgressSwal = (options) => {
+export const openProgressSwal = (options, callback) => {
     return new Promise((resolve) => {
         Swal.fire({
-            title: options.title ?? "Requesting data from server",
+            title: "Requesting data from server",
             html: `Please wait...`,
             allowEscapeKey: false,
             allowOutsideClick: false,
@@ -17,7 +17,8 @@ export const openProgressSwal = (options) => {
                 Swal.showLoading();
                 resolve(Swal);
             },
-        });
+            ...options,
+        }).then((result) => callback?.(result));
     });
 };
 
@@ -34,6 +35,7 @@ export const run = async (url, payload, options = {}) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        ...(options.fetch ?? {}),
     }).then((res) => res.json());
 
     if (needsSwal) Swal.close();
