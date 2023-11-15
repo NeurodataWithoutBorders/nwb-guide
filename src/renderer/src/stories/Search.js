@@ -3,16 +3,8 @@ import { styleMap } from "lit/directives/style-map.js";
 
 import tippy from "tippy.js";
 
-
 export class Search extends LitElement {
-    constructor({ 
-            options, 
-            showAllWhenEmpty = true, 
-            listMode = "list", 
-            headerStyles = {},
-            disabledLabel 
-        } = {}
-    ) {
+    constructor({ options, showAllWhenEmpty = true, listMode = "list", headerStyles = {}, disabledLabel } = {}) {
         super();
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
@@ -20,9 +12,9 @@ export class Search extends LitElement {
         this.listMode = listMode;
         this.headerStyles = headerStyles;
 
-        document.addEventListener('click', () => {
-            if (this.listMode === 'click') this.setAttribute('active', false)
-        })
+        document.addEventListener("click", () => {
+            if (this.listMode === "click") this.setAttribute("active", false);
+        });
     }
 
     static get styles() {
@@ -62,7 +54,6 @@ export class Search extends LitElement {
                 opacity: 0.5;
             }
 
-
             ul {
                 list-style: none;
                 padding: 0;
@@ -81,7 +72,7 @@ export class Search extends LitElement {
                 max-height: 50vh;
             }
 
-            :host([active=false]) ul{
+            :host([active="false"]) ul {
                 visibility: hidden;
             }
 
@@ -133,7 +124,6 @@ export class Search extends LitElement {
                 white-space: nowrap;
                 min-width: min-content;
             }
-
         `;
     }
 
@@ -148,14 +138,14 @@ export class Search extends LitElement {
     updated() {
         const options = this.shadowRoot.querySelectorAll(".option");
         this.#options = Array.from(options).map((option) => {
-            const keywordString = option.getAttribute("data-keywords")
+            const keywordString = option.getAttribute("data-keywords");
             const keywords = keywordString ? JSON.parse(keywordString) : [];
             return { option, keywords, label: option.querySelector(".label").innerText };
         });
 
         this.#initialize();
 
-        console.log(this)
+        console.log(this);
     }
 
     onSelect = (id, value) => {};
@@ -172,20 +162,18 @@ export class Search extends LitElement {
             option[this.showAllWhenEmpty ? "removeAttribute" : "setAttribute"]("hidden", "")
         );
 
-        if (!this.showAllWhenEmpty) this.setAttribute('active', false)
-    }
+        if (!this.showAllWhenEmpty) this.setAttribute("active", false);
+    };
 
     list = document.createElement("ul");
 
     categories = {};
 
-    #sortedCategories = []
+    #sortedCategories = [];
 
-
-    #populate = ( input ) => {
-
-          // Hide all if empty
-          if (!input) {
+    #populate = (input) => {
+        // Hide all if empty
+        if (!input) {
             this.#initialize();
             return;
         }
@@ -211,7 +199,6 @@ export class Search extends LitElement {
                 option.setAttribute("hidden", "");
             }
         });
-        
 
         this.#sortedCategories.forEach(({ entries, element }) => {
             if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length)
@@ -219,10 +206,8 @@ export class Search extends LitElement {
             else element.removeAttribute("hidden");
         });
 
-
-        this.setAttribute("active", !!toShow.length)
-
-    }
+        this.setAttribute("active", !!toShow.length);
+    };
 
     render() {
         this.categories = {};
@@ -319,11 +304,11 @@ export class Search extends LitElement {
         }
 
         // Categories sorted alphabetically
-        const categories = this.#sortedCategories = Object.values(this.categories).sort((a, b) => {
+        const categories = (this.#sortedCategories = Object.values(this.categories).sort((a, b) => {
             if (a.element.innerText < b.element.innerText) return -1;
             if (a.element.innerText > b.element.innerText) return 1;
             return 0;
-        });
+        }));
 
         categories.forEach(({ entries, element }) => {
             this.list.append(element, ...entries);
@@ -331,17 +316,17 @@ export class Search extends LitElement {
 
         return html`
     <div class="header" style=${styleMap({
-        ...this.headerStyles
+        ...this.headerStyles,
     })}>
       <input placeholder="Type here to search" @click=${(ev) => {
-            ev.stopPropagation();
-            if (this.listMode === 'click') {
-                const input = ev.target.value;
-                this.#populate(input)
-            }
+          ev.stopPropagation();
+          if (this.listMode === "click") {
+              const input = ev.target.value;
+              this.#populate(input);
+          }
       }} @input=${(ev) => {
           const input = ev.target.value;
-          this.#populate(input)
+          this.#populate(input);
       }}></input>
     </div>
     ${this.list}

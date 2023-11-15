@@ -358,31 +358,28 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (info.enum) {
-
             if (info.strict === false) {
                 // const category = categories.find(({ test }) => test.test(key))?.value;
 
                 const options = info.enum.map((v) => {
                     return {
                         key: v,
-                        keywords: [ info.enumLabels?.[v] ] ?? []
+                        keywords: [info.enumLabels?.[v]] ?? [],
                         // label: info.label,
                         // value: info.value,
                         // category,
                     }; // Has label and keywords property already
-                })
-
+                });
 
                 return new Search({
                     options,
                     value: this.value,
                     showAllWhenEmpty: false,
-                    listMode: 'click',
+                    listMode: "click",
                     onChange: (value) => this.#updateData(fullPath, value),
                     onThrow: (...args) => this.#onThrow(...args),
-                })
+                });
             }
-
 
             return html`
                 <select
@@ -399,7 +396,6 @@ export class JSONSchemaInput extends LitElement {
                     )}
                 </select>
             `;
-            
         } else if (info.type === "boolean") {
             return html`<input
                 type="checkbox"

@@ -47,8 +47,8 @@ export class GuidedStructurePage extends Page {
     search = new Search({
         disabledLabel: "Not supported",
         headerStyles: {
-            padding: '15px'
-        }
+            padding: "15px",
+        },
     });
 
     list = new List({

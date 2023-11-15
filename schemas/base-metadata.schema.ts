@@ -24,10 +24,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
         "Danio rerio - Zebra fish",
         "Caenorhabditis elegans - Roundworm"
       ] // Remove common names so this passes the validator
-    
+
       subjectProps.species = {
         type: 'string',
-        
+
         enumLabels: species.reduce((acc, v) => {
             const [ k, label ] = v.split(' - ')
             acc[k] = label
