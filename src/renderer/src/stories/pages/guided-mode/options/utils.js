@@ -24,9 +24,8 @@ export const openProgressSwal = (options, callback) => {
 
 export const run = async (url, payload, options = {}) => {
     const needsSwal = !options.swal && options.swal !== false;
-    
-    if (needsSwal) {
 
+    if (needsSwal) {
         if (!("showCancelButton" in options)) {
             options.showCancelButton = true;
             options.customClass = { actions: "swal-conversion-actions" };
@@ -36,37 +35,32 @@ export const run = async (url, payload, options = {}) => {
 
         options.fetch = {
             signal: cancelController.signal,
-        }
+        };
 
         const popup = await openProgressSwal(options, (result) => {
             if (!result.isConfirmed) cancelController.abort();
         }).then(async (swal) => {
-            if (options.onOpen) await options.onOpen(swal)
-            return swal
+            if (options.onOpen) await options.onOpen(swal);
+            return swal;
         });
 
         const element = popup.getHtmlContainer();
-        const actions = popup.getActions()
-        const loader = actions.querySelector(".swal2-loader")
+        const actions = popup.getActions();
+        const loader = actions.querySelector(".swal2-loader");
         const container = document.createElement("div");
-        container.append(loader)
+        container.append(loader);
         element.innerText = "";
         Object.assign(container.style, {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '25px'
-        })
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "25px",
+        });
 
         element.appendChild(container);
 
-        element.insertAdjacentHTML(
-            "beforeend",
-            `<hr style="margin-bottom: 0;">`
-        );
-
-        
+        element.insertAdjacentHTML("beforeend", `<hr style="margin-bottom: 0;">`);
     }
 
     if (!("base" in options)) options.base = "/neuroconv";
@@ -79,8 +73,8 @@ export const run = async (url, payload, options = {}) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         ...(options.fetch ?? {}),
-    }).then((res) => res.json())
-    
+    }).then((res) => res.json());
+
     if (needsSwal) Swal.close();
 
     if (results?.message) throw new Error(`Request to ${url} failed: ${results.message}`);
