@@ -376,8 +376,8 @@ export class JSONSchemaForm extends LitElement {
         let message = isValid
             ? ""
             : requiredButNotSpecified.length === 1
-            ? `<b>${requiredButNotSpecified[0]}</b> is not defined`
-            : `${requiredButNotSpecified.length} required inputs are not specified properly`;
+              ? `<b>${requiredButNotSpecified[0]}</b> is not defined`
+              : `${requiredButNotSpecified.length} required inputs are not specified properly`;
         if (requiredButNotSpecified.length !== nMissingRequired)
             console.warn("Disagreement about the correct error to throw...");
 
