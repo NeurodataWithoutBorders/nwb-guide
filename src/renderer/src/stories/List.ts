@@ -266,7 +266,8 @@ export class List extends LitElement {
       }
 
       if (typeof content === 'string')  {
-          const valueEl = editableElement = document.createElement("span");
+          const valueEl = document.createElement("span");
+          if (!key) editableElement = valueEl
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
