@@ -11,6 +11,7 @@ import { Modal } from "./Modal";
 
 import { capitalize } from "./forms/utils";
 import { JSONSchemaForm } from "./JSONSchemaForm";
+import { Search } from "./Search";
 
 const isFilesystemSelector = (name, format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
@@ -353,7 +354,32 @@ export class JSONSchemaInput extends LitElement {
         }
 
         // Basic enumeration of properties on a select element
-        if (info.enum && info.strict !== false) {
+        if (info.enum) {
+
+            if (info.strict === false) {
+                // const category = categories.find(({ test }) => test.test(key))?.value;
+
+                const options = info.enum.map((v) => {
+                    return {
+                        key: v,
+                        keywords: [ info.enumLabels?.[v] ] ?? []
+                        // label: info.label,
+                        // value: info.value,
+                        // category,
+                    }; // Has label and keywords property already
+                })
+
+
+                return new Search({
+                    options,
+                    value: this.value,
+                    showAllWhenEmpty: false,
+                    listMode: 'click',
+                    onChange: (value) => this.#updateData(fullPath, value),
+                    onThrow: (...args) => this.#onThrow(...args),
+                })
+            }
+
 
             return html`
                 <select

@@ -22,13 +22,19 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
         "Callithrix jacchus - Common marmoset",
         "Drosophila melanogaster - Fruit fly",
         "Danio rerio - Zebra fish",
-        "Caenorhabditis elegans"
-      ].map(str => str.split(' - ')[0]) // Remove common names so this passes the validator
+        "Caenorhabditis elegans - Roundworm"
+      ] // Remove common names so this passes the validator
     
       subjectProps.species = {
         type: 'string',
-        // enumLabels: 
-        enum: species, // Remove common names so this passes the validator
+        
+        enumLabels: species.reduce((acc, v) => {
+            const [ k, label ] = v.split(' - ')
+            acc[k] = label
+            return acc
+        }, {}),
+
+        enum: species.map(str => str.split(' - ')[0]), // Remove common names so this passes the validator
         items: {
             type: 'string'
         },
