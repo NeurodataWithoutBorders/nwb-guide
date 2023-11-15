@@ -86,10 +86,16 @@ export class GuidedNewDatasetPage extends Page {
 
         this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
-        const pages = schemaToPages.call(this, preprocessMetadataSchema(), ["project"], { validateEmptyValues: false }, (info) => {
-            info.title = `${info.label} Global Metadata`;
-            return info;
-        });
+        const pages = schemaToPages.call(
+            this,
+            preprocessMetadataSchema(),
+            ["project"],
+            { validateEmptyValues: false },
+            (info) => {
+                info.title = `${info.label} Global Metadata`;
+                return info;
+            }
+        );
 
         pages.forEach((page) => {
             page.header = {
