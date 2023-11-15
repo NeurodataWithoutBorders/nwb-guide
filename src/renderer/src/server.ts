@@ -140,3 +140,40 @@ export const loadServerEvents = () => {
 
     else activateServer() // Just mock-activate the server if we're in the browser
 }
+
+
+
+const isPromise = (o) => typeof o === 'object' && typeof o.then === 'function'
+
+export const resolve = (object, callback) => {
+  if (isPromise(object)) {
+    return new Promise(resolvePromise => {
+        object.then((res) => resolvePromise((callback) ? callback(res) : res))
+    })
+  } else return (callback) ? callback(object) : object
+}
+
+export const serverGlobals = {
+  species: new Promise((res, rej) => {
+    onServerOpen(() => {
+      fetch(new URL("get-recommended-species", baseUrl))
+        .then((res) => res.json())
+        .then((species) => {
+          res(species)
+          serverGlobals.species = species
+        })
+        .catch(() => rej());
+    });
+  }),
+  cpus: new Promise((res, rej) => {
+    onServerOpen(() => {
+      fetch(new URL("cpus", baseUrl))
+        .then((res) => res.json())
+        .then((cpus) => {
+          res(cpus)
+          serverGlobals.cpus = cpus
+        })
+        .catch(() => rej());
+    });
+  })
+}

@@ -1,20 +1,37 @@
 import { LitElement, html, css } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
+import searchSVG from './assets/search.svg?raw';
+
 import tippy from "tippy.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 export class Search extends LitElement {
-    constructor({ options, showAllWhenEmpty = true, listMode = "list", headerStyles = {}, disabledLabel } = {}) {
+    constructor({ 
+            value,
+            options, 
+            showAllWhenEmpty = true, 
+            listMode = "list", 
+            headerStyles = {},
+            disabledLabel,
+            onSelect
+        } = {}
+    ) {
         super();
+        this.value = value;
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
         this.disabledLabel = disabledLabel;
         this.listMode = listMode;
         this.headerStyles = headerStyles;
+        if (onSelect) this.onSelect = onSelect
 
-        document.addEventListener("click", () => {
-            if (this.listMode === "click") this.setAttribute("active", false);
-        });
+        document.addEventListener('click', () => {
+            if (this.listMode === 'click' && this.getAttribute('active') === 'true') {
+                this.#onSelect({ value: this.shadowRoot.querySelector('input').value })
+                this.setAttribute('active', false)
+            }
+        })
     }
 
     static get styles() {
@@ -35,6 +52,7 @@ export class Search extends LitElement {
 
             .header {
                 background: white;
+                position: relative;
             }
 
             input {
@@ -49,6 +67,7 @@ export class Search extends LitElement {
                 color: rgb(33, 49, 60);
                 background-color: rgb(255, 255, 255);
             }
+
 
             input::placeholder {
                 opacity: 0.5;
@@ -70,6 +89,31 @@ export class Search extends LitElement {
                 left: 0;
                 right: 0;
                 max-height: 50vh;
+                z-index: 2;
+            }
+
+            svg {
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                padding: 0px 15px;
+                transform: translateY(-50%);
+                fill: gray;
+                box-sizing: unset;
+                width: 20px;
+                height: 20px;
+            }
+
+            :host([listmode="click"]) svg {
+                position: absolute;
+                top: 50%;
+                padding: 0px;
+                right: 10px;
+                transform: translateY(-50%);
+                fill: gray;
+                box-sizing: unset;
+                width: 20px;
+                height: 20px;
             }
 
             :host([active="false"]) ul {
@@ -145,15 +189,22 @@ export class Search extends LitElement {
 
         this.#initialize();
 
-        console.log(this);
     }
 
     onSelect = (id, value) => {};
 
-    #onSelect = (id, value) => {
-        this.shadowRoot.querySelector("input").value = "";
+    #onSelect = (option) => {
+
+        const input = this.shadowRoot.querySelector("input");
+
+        if (this.listMode === 'click') {
+            input.value = option.value ?? option.key;
+            return this.onSelect(option);
+        }
+
+        input.value = "";
         this.#initialize();
-        this.onSelect(id, value);
+        this.onSelect(option);
     };
 
     #options = [];
@@ -318,7 +369,7 @@ export class Search extends LitElement {
     <div class="header" style=${styleMap({
         ...this.headerStyles,
     })}>
-      <input placeholder="Type here to search" @click=${(ev) => {
+      <input placeholder="Type here to search" value=${this.value} @click=${(ev) => {
           ev.stopPropagation();
           if (this.listMode === "click") {
               const input = ev.target.value;
@@ -328,6 +379,7 @@ export class Search extends LitElement {
           const input = ev.target.value;
           this.#populate(input);
       }}></input>
+      ${unsafeHTML(searchSVG)}
     </div>
     ${this.list}
     `;

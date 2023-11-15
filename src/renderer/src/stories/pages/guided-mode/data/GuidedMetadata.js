@@ -15,7 +15,6 @@ import { header } from "../../../forms/utils";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { Button } from "../../../Button.js";
-import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 import globalIcon from "../../../assets/global.svg?raw";
 
@@ -86,7 +85,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Metadata",
             propsToRemove: [...propsToIgnore],
-            schema: globalSchema, // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+            schema: preprocessMetadataSchema(), // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
             hasInstances: true,
             mergeFunction: function (globalResolved, globals) {
                 merge(globalResolved, globals);
@@ -143,8 +142,6 @@ export class GuidedMetadataPage extends ManagedPage {
         }
 
         resolveResults(subject, session, globalState);
-
-        console.log(subject, session, results);
 
         // Create the form
         const form = new JSONSchemaForm({

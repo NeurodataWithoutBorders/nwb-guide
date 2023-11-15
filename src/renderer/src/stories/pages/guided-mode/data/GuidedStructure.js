@@ -27,8 +27,8 @@ export class GuidedStructurePage extends Page {
 
         // Handle Search Bar Interactions
         this.search.list.style.position = "unset";
-        this.search.onSelect = (...args) => {
-            this.list.add(...args);
+        this.search.onSelect = (item) => {
+            this.list.add(item);
             this.searchModal.toggle(false);
         };
 

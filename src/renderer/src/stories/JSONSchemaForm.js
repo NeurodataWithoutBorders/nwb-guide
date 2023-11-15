@@ -387,7 +387,6 @@ export class JSONSchemaForm extends LitElement {
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
             if (!message) {
-                console.log(flaggedInputs);
                 if (flaggedInputs.length === 1)
                     message = `<b>${header(flaggedInputs[0].path.join("."))}</b> is not valid`;
                 else message = `${flaggedInputs.length} invalid form values`;
