@@ -432,9 +432,8 @@ export class Table extends LitElement {
         const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0);
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
-
             const isUserUpdate = initialCellsToUpdate <= validated;
-            
+
             if (isUserUpdate) {
                 const header = typeof prop === "number" ? colHeaders[prop] : prop;
                 let rowName = this.keyColumn ? rowHeaders[row] : row;
