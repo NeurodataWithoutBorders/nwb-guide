@@ -31,7 +31,7 @@ if (isElectron) {
             else dashboard.setAttribute("activePage", "preview");
         });
 
-        const pythonUrl = new URL(COMMONERS.services.flask.url)
+        const pythonUrl = new URL(commoners.services.flask.url)
 
         port = pythonUrl.port
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());

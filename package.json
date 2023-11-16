@@ -4,10 +4,10 @@
   "description": "",
   "main": ".commoners/.temp/main.js",
   "scripts": {
-    "start": "commoners --desktop",
+    "start": "commoners --target desktop",
     "dev": "commoners",
-    "build": "commoners build --desktop",
-    "launch": "commoners launch --desktop",
+    "build": "commoners build --target desktop",
+    "launch": "commoners launch --target desktop",
     "dev:app": "vite src/renderer",
     "dev:server": "cd pyflask && python -m flask run --port 4242",
     "echo": "python -c \"print('hello')\"",

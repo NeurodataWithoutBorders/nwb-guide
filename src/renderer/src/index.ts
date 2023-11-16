@@ -24,7 +24,7 @@ const dashboard = document.querySelector('nwb-dashboard') as Dashboard
 
 const statusBar = new StatusBar({
   items: [
-    { label: unsafeSVG(webAssetSVG), value: isElectron ? COMMONERS.VERSION ?? 'ERROR' : 'Web'  }, // NOTE: Expose version
+    { label: unsafeSVG(webAssetSVG), value: isElectron ? commoners.version ?? 'ERROR' : 'Web'  }, // NOTE: Expose version
     { label: unsafeSVG(wifiSVG) },
     { label: unsafeSVG(serverSVG) }
   ]
@@ -148,7 +148,7 @@ async function pythonServerClosed() {
 
 if (isElectron) {
 
-    const service = COMMONERS.services.flask
+    const service = commoners.services.flask
 
     service.onActivityDetected(pythonServerOpened)
     service.onClosed(pythonServerClosed)

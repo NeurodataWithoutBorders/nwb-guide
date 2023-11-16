@@ -11,12 +11,12 @@ export default {
                     return !fs.existsSync(filepath) && path.extname(filepath) === '.nwb'
                 }
                 
-                function onFileOpened(_, filepath) {
-                    // restoreWindow() || initialize(); // Ensure the application is properly visible
+                const onFileOpened = (_, filepath) => {
+                    this.open(); // Ensure the application is properly visible
                     win.webContents.send('fileOpened', filepath)
                 }
                 
-                if (isWindows && process.argv.length >= 2) {
+                if (process.platform === 'win32' && process.argv.length >= 2) {
                     const openFilePath = process.argv[1];
                     if (isValidFile(openFilePath)) onFileOpened(null, openFilePath)
                 }
