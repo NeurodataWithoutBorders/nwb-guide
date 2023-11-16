@@ -7,7 +7,7 @@ import { supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
-import { baseUrl } from "../../../../server/globals.js";
+import { baseUrl } from "../../../../server/globals";
 
 const defaultEmptyMessage = "No interfaces selected";
 

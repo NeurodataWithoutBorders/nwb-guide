@@ -1,6 +1,6 @@
 import Swal from "sweetalert2";
 import { sanitize } from "../../utils.js";
-import { baseUrl } from "../../../../server/globals.js";
+import { baseUrl } from "../../../../server/globals";
 
 export const openProgressSwal = (options, callback) => {
     return new Promise((resolve) => {

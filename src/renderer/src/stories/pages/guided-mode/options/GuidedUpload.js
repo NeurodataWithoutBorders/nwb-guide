@@ -8,8 +8,8 @@ import dandiUploadSchema from "../../../../../../../schemas/dandi-upload.schema"
 import { dandisetInfoContent, uploadToDandi } from "../../uploads/UploadsPage.js";
 import { InfoBox } from "../../../InfoBox.js";
 import { until } from "lit/directives/until.js";
-import { onServerOpen } from "../../../../server/index.js";
-import { baseUrl } from "../../../../server/globals.js";
+
+import { baseUrl, onServerOpen } from "../../../../server/globals";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {

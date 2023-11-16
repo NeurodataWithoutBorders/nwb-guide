@@ -10,7 +10,9 @@ import {
 } from './dependencies/globals.js'
 
 import Swal from 'sweetalert2'
-import { loadServerEvents, pythonServerOpened, statusBar } from "./server/index.js";
+import { loadServerEvents, pythonServerOpened } from "./server/index.js";
+
+import { statusBar } from "./server/globals.js";
 
 // Set the sidebar subtitle to the current app version
 const dashboard = document.querySelector('nwb-dashboard') as Dashboard

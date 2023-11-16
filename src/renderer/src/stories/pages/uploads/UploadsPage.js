@@ -26,8 +26,7 @@ import { header } from "../../forms/utils";
 import { validateDANDIApiKey } from "../../../validation/dandi";
 import { InfoBox } from "../../InfoBox.js";
 
-import { onServerOpen } from "../../../server/index.js";
-import { baseUrl } from "../../../server/globals.js";
+import { baseUrl, onServerOpen } from "../../../server/globals";
 
 export const isStaging = (id) => parseInt(id) >= 100000;
 
