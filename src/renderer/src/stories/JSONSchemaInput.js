@@ -358,32 +358,30 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (info.enum && info.enum.length) {
-
             if (info.strict === false) {
                 // const category = categories.find(({ test }) => test.test(key))?.value;
 
                 const options = info.enum.map((v) => {
                     return {
                         key: v,
-                        keywords: info.enumKeywords?.[v]
+                        keywords: info.enumKeywords?.[v],
                     };
-                })
-
+                });
 
                 const search = new Search({
                     options,
                     value: this.value,
                     showAllWhenEmpty: false,
-                    listMode: 'click',
+                    listMode: "click",
                     onSelect: async ({ value, key }) => {
-                        const result = value ?? key
-                        this.#updateData(fullPath, result)
-                        if (validateOnChange) await this.#triggerValidation(name, path)
-                    }
-                })
+                        const result = value ?? key;
+                        this.#updateData(fullPath, result);
+                        if (validateOnChange) await this.#triggerValidation(name, path);
+                    },
+                });
 
                 // search.classList.add("schema-input")
-                return search
+                return search;
             }
 
             return html`

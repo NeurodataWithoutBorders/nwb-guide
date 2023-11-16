@@ -1,22 +1,21 @@
 import { LitElement, html, css } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
-import searchSVG from './assets/search.svg?raw';
+import searchSVG from "./assets/search.svg?raw";
 
 import tippy from "tippy.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 export class Search extends LitElement {
-    constructor({ 
-            value,
-            options, 
-            showAllWhenEmpty = true, 
-            listMode = "list", 
-            headerStyles = {},
-            disabledLabel,
-            onSelect
-        } = {}
-    ) {
+    constructor({
+        value,
+        options,
+        showAllWhenEmpty = true,
+        listMode = "list",
+        headerStyles = {},
+        disabledLabel,
+        onSelect,
+    } = {}) {
         super();
         this.value = value;
         this.options = options;
@@ -24,14 +23,14 @@ export class Search extends LitElement {
         this.disabledLabel = disabledLabel;
         this.listMode = listMode;
         this.headerStyles = headerStyles;
-        if (onSelect) this.onSelect = onSelect
+        if (onSelect) this.onSelect = onSelect;
 
-        document.addEventListener('click', () => {
-            if (this.listMode === 'click' && this.getAttribute('active') === 'true') {
-                this.#onSelect({ value: this.shadowRoot.querySelector('input').value })
-                this.setAttribute('active', false)
+        document.addEventListener("click", () => {
+            if (this.listMode === "click" && this.getAttribute("active") === "true") {
+                this.#onSelect({ value: this.shadowRoot.querySelector("input").value });
+                this.setAttribute("active", false);
             }
-        })
+        });
     }
 
     static get styles() {
@@ -67,7 +66,6 @@ export class Search extends LitElement {
                 color: rgb(33, 49, 60);
                 background-color: rgb(255, 255, 255);
             }
-
 
             input::placeholder {
                 opacity: 0.5;
@@ -188,16 +186,14 @@ export class Search extends LitElement {
         });
 
         this.#initialize();
-
     }
 
     onSelect = (id, value) => {};
 
     #onSelect = (option) => {
-
         const input = this.shadowRoot.querySelector("input");
 
-        if (this.listMode === 'click') {
+        if (this.listMode === "click") {
             input.value = option.value ?? option.key;
             return this.onSelect(option);
         }

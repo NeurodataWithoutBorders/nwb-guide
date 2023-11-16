@@ -14,7 +14,7 @@ function getSpeciesNameComponents(arr: any[]) {
 
 
 function getSpeciesInfo(species: any[][] = []) {
-    
+
 
     return {
 
@@ -30,7 +30,7 @@ function getSpeciesInfo(species: any[][] = []) {
         }, {}),
 
         enum: species.map(arr => getSpeciesNameComponents(arr).name), // Remove common names so this passes the validator
-    }    
+    }
 
 }
 
@@ -49,7 +49,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
         O: 'Other'
     }
 
-    
+
       subjectProps.species = {
         type: 'string',
         ...getSpeciesInfo(),

@@ -26,7 +26,7 @@ const data = subjectIds.reduce((acc, key) => {
 
 const BasicTableTemplate = (args) => new BasicTable(args);
 
-const subjectSchema = getSubjectSchema()
+const subjectSchema = getSubjectSchema();
 
 subjectSchema.additionalProperties = true;
 
