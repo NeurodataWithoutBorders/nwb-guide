@@ -3,10 +3,11 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { Button } from "../../../Button.js";
-import { baseUrl, supportedInterfaces } from "../../../../globals.js";
+import { supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
+import { baseUrl } from "../../../../server/globals.js";
 
 const defaultEmptyMessage = "No interfaces selected";
 

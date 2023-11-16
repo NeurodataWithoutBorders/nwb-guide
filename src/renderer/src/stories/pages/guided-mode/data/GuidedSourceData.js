@@ -3,7 +3,6 @@ import { isStorybook } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
-import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
 import { merge, sanitize } from "../../utils.js";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
@@ -13,7 +12,8 @@ import { header } from "../../../forms/utils";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
-import { run } from "../options/utils.js";
+
+import { baseUrl } from "../../../../server/globals.js";
 
 const propsToIgnore = [
     "verbose",
