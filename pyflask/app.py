@@ -117,4 +117,4 @@ if __name__ == "__main__":
         api.logger.info(f"Starting server on port {PORT}")
         app.run(host=HOST, port = PORT)
     else:
-        raise Exception("No port provided for the NWB GUIDE backend.")
+        raise Exception(f"No port provided for the NWB GUIDE backend: {env_port}.")

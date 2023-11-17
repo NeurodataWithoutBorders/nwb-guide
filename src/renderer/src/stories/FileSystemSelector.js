@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit";
 
-import { fs, remote } from "../electron/index";
-const { dialog } = remote;
+import { fs } from "../electron/index";
+// const { dialog } = remote;
+const { dialog } = commoners.electron ?? {};
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
     if (Array.isArray(type))

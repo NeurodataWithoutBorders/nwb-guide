@@ -1,3 +1,7 @@
+import { updateURLParams } from './src/renderer/utils/url';
+
+const name = 'nwb-guide'
+
 export default {
 
 
@@ -5,24 +9,65 @@ export default {
 
     plugins: [
         {
-            loadDesktop: function ( win ){
+            name: 'custom-unload-popup',
+            desktop: {
+                unload: async function() {
 
-                function isValidFile(filepath) {
-                    return !fs.existsSync(filepath) && path.extname(filepath) === '.nwb'
-                }
-                
-                const onFileOpened = (_, filepath) => {
-                    this.open(); // Ensure the application is properly visible
-                    win.webContents.send('fileOpened', filepath)
-                }
-                
-                if (process.platform === 'win32' && process.argv.length >= 2) {
-                    const openFilePath = process.argv[1];
-                    if (isValidFile(openFilePath)) onFileOpened(null, openFilePath)
-                }
-                
-                this.on("open-file", onFileOpened)
+                    const { response } = await this.electron.dialog
+                    .showMessageBox(this.electron.BrowserWindow.getFocusedWindow(), {
+                      type: "question",
+                      buttons: ["Yes", "No"],
+                      title: "Confirm",
+                      message: "Any running process will be stopped. Are you sure you want to quit?",
+                    })
+                    
+                    if (response !== 0) return false // Skip quitting
+                  
+                },
+
             }
+        },
+        {
+
+            name: "open-file",
+
+            load: function () {
+                this.on(`${name}:fileOpened`, (info, filepath) => {
+                    updateURLParams({ file: filepath });
+                    const dashboard = document.querySelector("nwb-dashboard");
+                    const activePage = dashboard.getAttribute("activePage");
+                    if (activePage === "preview") dashboard.requestUpdate();
+                    else dashboard.setAttribute("activePage", "preview");
+                });
+            },
+
+            desktop: {
+                
+                preload: function (){
+
+                    const fs = require('node:fs')
+                    const path = require('node:path')
+                    
+                    function isValidFile(filepath) {
+                        return !fs.existsSync(filepath) && path.extname(filepath) === '.nwb'
+                    }
+                    
+                    const onFileOpened = (_, filepath) => {
+                        this.open(); // Ensure the application is properly visible
+                        this.send(`${name}:fileOpened`, filepath) // Safely send
+                    }
+                    
+                    if (process.platform === 'win32' && process.argv.length >= 2) {
+                        const openFilePath = process.argv[1];
+                        if (isValidFile(openFilePath)) onFileOpened(null, openFilePath)
+                    }
+                    
+                    // NOTE: This event is triggered but the SEND function is not 
+                    // behaving as expected when the application is docked without a window (MacOS)
+                    this.electron.app.on("open-file", onFileOpened)
+                }
+            }
+            
         }
     ],
 
@@ -59,6 +104,11 @@ export default {
             win: {
                 requestedExecutionLevel: "requireAdministrator"
             },
+
+            mac: {
+                identity: null // Signed builds are breaking on M2
+            },
+
             fileAssociations: [
                 {
                     ext: "nwb",

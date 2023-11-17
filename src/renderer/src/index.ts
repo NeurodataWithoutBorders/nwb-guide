@@ -108,7 +108,6 @@ async function pythonServerOpened() {
 
   // Confirm requests are actually received by the server
   const isLive = await serverIsLiveStartup()
-  console.log('IS LIVE', isLive)
   if (isLive) await preloadFlaskImports() // initiate preload of Flask imports
   if (!isLive) return pythonServerClosed()
 
@@ -137,8 +136,8 @@ async function pythonServerClosed() {
       allowEscapeKey: false,
     });
 
-    console.error('CANNOT CLOSE!')
-    if (isElectron) app.exit();
+    // if (isElectron) app.exit();
+    if (isElectron) commoners.quit();
     else location.reload()
 
     Swal.close();
