@@ -2,6 +2,8 @@ import { LitElement, css, html } from "lit";
 import { List } from "../../List";
 import { getMessageType, isErrorImportance } from "../../../validation";
 
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 const sortList = (items) => {
     return items
         .sort((a, b) => {
@@ -42,7 +44,7 @@ export class InspectorList extends List {
     }
 
     constructor(props) {
-        const { items } = props
+        const { items } = props;
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
             aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
@@ -57,7 +59,7 @@ export class InspectorList extends List {
                 const item = new InspectorListItem(o);
                 item.style.flexGrow = "1";
                 return { content: item };
-            })
+            }),
         });
     }
 }
@@ -72,9 +74,10 @@ export class InspectorListItem extends LitElement {
                 background: WhiteSmoke;
                 border: 1px solid gray;
                 border-radius: 10px;
-                padding: 5px 10px;
                 overflow: hidden;
                 text-wrap: wrap;
+                padding: 25px;
+                margin: 0 0 1em;
             }
 
             #message {
@@ -97,20 +100,16 @@ export class InspectorListItem extends LitElement {
 
             :host([type="error"]) {
                 color: #9d0b0b;
-                padding: 25px;
                 background: #f8d7da;
                 border: 1px solid #f5c2c7;
                 border-radius: 4px;
-                margin: 0 0 1em;
             }
 
             :host([type="warning"]) {
                 color: #856404;
-                padding: 25px;
                 background: #fff3cd;
                 border: 1px solid #ffeeba;
                 border-radius: 4px;
-                margin: 0 0 1em;
             }
         `;
     }
@@ -133,17 +132,20 @@ export class InspectorListItem extends LitElement {
     render() {
         this.type = getMessageType({
             ...this,
-            type: this.ORIGINAL_TYPE
-        })
+            type: this.ORIGINAL_TYPE,
+        });
 
-        this.setAttribute("title", this.message);
+        const isString = typeof this.message === "string";
+        if (isString) this.setAttribute("title", this.message);
 
         const hasObjectType = "object_type" in this;
         const hasMetadata = hasObjectType && "object_name" in this;
 
+        const message = isString ? unsafeHTML(this.message) : this.message;
+
         return html`
             ${hasMetadata ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>` : ""}
-            ${hasMetadata ? html`<span id="message">${this.message}</span>` : html`<p>${this.message}</p>`}
+            ${hasMetadata ? html`<span id="message">${message}</span>` : html`<p>${message}</p>`}
             ${this.file_path
                 ? html`<span id="filepath"
                       >${this.files && this.files.length > 1

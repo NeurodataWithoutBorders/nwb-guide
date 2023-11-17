@@ -11,6 +11,25 @@ import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
+import { header } from "../../../forms/utils";
+
+import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { Button } from "../../../Button.js";
+import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
+
+import globalIcon from "../../../assets/global.svg?raw";
+
+const propsToIgnore = [
+    "Ophys", // Always ignore ophys metadata (for now)
+    "Icephys", // Always ignore icephys metadata (for now)
+    "Behavior", // Always ignore behavior metadata (for now)
+    // new RegExp("ndx-.+"), // Ignore all ndx extensions
+    "ndx-dandi-icephys",
+    "subject_id",
+    "session_id",
+];
+
+import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
@@ -23,6 +42,7 @@ const getInfoFromId = (key) => {
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     beforeSave = () => {
@@ -32,6 +52,16 @@ export class GuidedMetadataPage extends ManagedPage {
     form;
 
     header = {
+        controls: [
+            new Button({
+                icon: globalIcon,
+                label: "Edit Global Metadata",
+                onClick: () => {
+                    this.#globalModal.form.results = structuredClone(this.info.globalState.project);
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
         subtitle: "Edit all metadata for this conversion at the session level",
     };
 
@@ -42,23 +72,35 @@ export class GuidedMetadataPage extends ManagedPage {
 
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
-            // Preview a single random conversion
-            delete this.info.globalState.preview; // Clear the preview results
-
-            const stubs = await this.runConversions({ stub_test: true }, undefined, {
-                title: "Running stub conversion on all sessions...",
-            });
-
-            // Save the preview results
-            this.info.globalState.preview = {
-                stubs,
-            };
-
-            this.unsavedUpdates = true;
+            await this.convert({ preview: true });
 
             this.to(1);
         },
     };
+
+    #globalModal = null;
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
+            header: "Global Metadata",
+            propsToRemove: [...propsToIgnore],
+            schema: globalSchema, // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+            hasInstances: true,
+            mergeFunction: function (globalResolved, globals) {
+                merge(globalResolved, globals);
+                return resolveGlobalOverrides(this.subject, globals);
+            },
+            validateOnChange,
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
+    }
 
     createForm = ({ subject, session, info }) => {
         // const results = createResults({ subject, info }, this.info.globalState);
@@ -102,15 +144,19 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveResults(subject, session, globalState);
 
+        console.log(subject, session, results);
+
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
-            mode: "accordion",
-            schema,
+            schema: preprocessMetadataSchema(schema),
             results,
             globals: aggregateGlobalMetadata,
 
-            ignore: ["Ophys", "subject_id", "session_id"],
+            ignore: propsToIgnore,
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+            },
 
             conditionalRequirements: [
                 {
@@ -129,16 +175,17 @@ export class GuidedMetadataPage extends ManagedPage {
             },
 
             onUpdate: () => {
-                this.unsavedUpdates = true;
+                this.unsavedUpdates = "conversions";
             },
 
             validateOnChange,
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
-            renderTable: (name, metadata, path) => {
+            createTable: (name, metadata, path) => {
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
                 if (name !== "Electrodes") return new SimpleTable(metadata);
+                else return true; // All other tables are handled by the default behavior
                 // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
             },
             onThrow,
@@ -171,7 +218,7 @@ export class GuidedMetadataPage extends ManagedPage {
     render() {
         this.#resetLoadState(); // Reset on each render
 
-        this.localState = { results: merge(this.info.globalState.results, {}) };
+        this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState);
 
@@ -199,14 +246,13 @@ export class GuidedMetadataPage extends ManagedPage {
                                 {
                                     subject,
                                     session,
-                                    globalState: merge(this.localState, merge(this.info.globalState, {})),
+                                    globalState: merge(this.localState, structuredClone(this.info.globalState)),
                                 },
                             ],
                             { title: "Running conversion preview" }
-                        ).catch((e) => {
-                            this.notify(e.message, "error");
-                            throw e;
-                        });
+                        ).catch(() => {});
+
+                        if (!results) return;
 
                         const modal = new Modal({
                             header: `Conversion Preview: ${key}`,
@@ -235,6 +281,8 @@ export class GuidedMetadataPage extends ManagedPage {
                                 this.localState.results[subject][session],
                                 this.info.globalState.results[subject][session]
                             );
+
+                            this.notify(`Session ${id} metadata saved!`);
                         };
                         await this.save();
                         this.beforeSave = ogCallback;

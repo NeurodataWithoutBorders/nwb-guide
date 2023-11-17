@@ -124,6 +124,10 @@ export class InstanceManager extends LitElement {
             #new-info > input {
                 margin-right: 10px;
             }
+
+            nwb-accordion {
+                margin-bottom: 0.5em;
+            }
         `;
     }
 
@@ -161,7 +165,7 @@ export class InstanceManager extends LitElement {
             const id = path.slice(0, i + 1).join("/");
             const accordion = this.#accordions[id];
             target = target[path[i]]; // Progressively check the deeper nested instances
-            if (accordion) accordion.setSectionStatus(id, checkStatus(false, false, [...Object.values(target)]));
+            if (accordion) accordion.setStatus(checkStatus(false, false, [...Object.values(target)]));
         }
     };
 
@@ -224,11 +228,9 @@ export class InstanceManager extends LitElement {
 
         setTimeout(() => {
             Object.entries(this.#info).forEach(([id, { status }]) => {
-                if (status) this.updateState(id, status) 
-            })
-        }) // NOTE: Why is this not possible without waiting?
-
-
+                if (status) this.updateState(id, status);
+            });
+        }); // NOTE: Why is this not possible without waiting?
     };
 
     #isCategory(value) {
@@ -272,7 +274,7 @@ export class InstanceManager extends LitElement {
         });
     }
 
-    #ids = {}
+    #ids = {};
     #accordions = {};
 
     #onSelected = () => {
@@ -301,11 +303,8 @@ export class InstanceManager extends LitElement {
                 const list = this.#render(value, [...path, key]);
 
                 const accordion = new Accordion({
-                    sections: {
-                        [key]: {
-                            content: list,
-                        },
-                    },
+                    name: key,
+                    content: list,
                     contentPadding: "10px",
                 });
 
@@ -359,10 +358,9 @@ export class InstanceManager extends LitElement {
 
         return list;
     }
-    
 
     render() {
-        this.#info = {}
+        this.#info = {};
         this.#items = [];
 
         const instances = this.#render();

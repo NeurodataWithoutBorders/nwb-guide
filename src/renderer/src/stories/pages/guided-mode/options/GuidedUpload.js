@@ -1,12 +1,15 @@
 import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
-import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
-import dandiUploadSchema from "../../../../../../../schemas/json/dandi/upload.json";
-import { uploadToDandi } from "../../uploads/UploadsPage.js";
+import dandiUploadSchema from "../../../../../../../schemas/dandi-upload.schema";
+import { dandisetInfoContent, uploadToDandi } from "../../uploads/UploadsPage.js";
+import { InfoBox } from "../../../InfoBox.js";
+import { until } from "lit/directives/until.js";
+import { onServerOpen } from "../../../../server";
+import { baseUrl } from "../../../../globals.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -19,7 +22,7 @@ export class GuidedUploadPage extends Page {
         const globalState = this.info.globalState;
         const isNewDandiset = globalState.upload?.dandiset_id !== this.localState.dandiset_id;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
-        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
+        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new Dandiset
     };
 
     header = {
@@ -36,7 +39,7 @@ export class GuidedUploadPage extends Page {
             const globalState = this.info.globalState;
             const globalUploadInfo = globalState.upload;
 
-            // Catch if dandiset is already uploaded
+            // Catch if Dandiset is already uploaded
             if ("results" in globalUploadInfo) {
                 const result = await Swal.fire({
                     title: "This pipeline has already uploaded to DANDI",
@@ -61,16 +64,30 @@ export class GuidedUploadPage extends Page {
     };
 
     render() {
-        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
+        const state = (this.localState = structuredClone(this.info.globalState.upload ?? { info: {} }));
 
-        this.form = new JSONSchemaForm({
-            schema: dandiUploadSchema,
-            results: state.info,
-            onUpdate: () => (this.unsavedUpdates = true),
-            onThrow,
+        const promise = onServerOpen(async () => {
+            await fetch(new URL("cpus", baseUrl))
+                .then((res) => res.json())
+                .then(({ physical, logical }) => {
+                    const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties;
+                    number_of_jobs.max = number_of_jobs.default = physical;
+                    number_of_threads.max = number_of_threads.default = logical / physical;
+                })
+                .catch(() => {});
+
+            return (this.form = new JSONSchemaForm({
+                schema: dandiUploadSchema,
+                results: state.info,
+                onUpdate: () => (this.unsavedUpdates = true),
+                onThrow,
+            }));
         });
 
-        return html` ${this.form} `;
+        return html`${new InfoBox({
+                header: "How do I create a Dandiset?",
+                content: dandisetInfoContent,
+            })}<br /><br />${until(promise, html`Loading form contents...`)} `;
     }
 }
 

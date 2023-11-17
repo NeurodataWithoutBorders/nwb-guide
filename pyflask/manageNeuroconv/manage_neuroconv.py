@@ -3,6 +3,8 @@ import os
 import json
 import math
 import copy
+import re
+
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
@@ -128,35 +130,82 @@ def locate_data(info: dict) -> dict:
     return organized_output
 
 
+def module_to_dict(my_module):
+    # Create an empty dictionary
+    module_dict = {}
+
+    # Iterate through the module's attributes
+    for attr_name in dir(my_module):
+        if not attr_name.startswith("__"):  # Exclude special attributes
+            attr_value = getattr(my_module, attr_name)
+            module_dict[attr_name] = attr_value
+
+    return module_dict
+
+
+doc_pattern = r":py:class:`\~.+\..+\.(\w+)`"
+remove_extra_spaces_pattern = r"\s+"
+
+
+def get_class_ref_in_docstring(input_string):
+    match = re.search(doc_pattern, input_string)
+
+    if match:
+        return match.group(1)
+
+
+def derive_interface_info(interface):
+    info = {"keywords": getattr(interface, "keywords", []), "description": ""}
+    if interface.__doc__:
+        info["description"] = re.sub(
+            remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
+        )
+
+    return info
+
+
+def get_all_converter_info() -> dict:
+    from neuroconv import converters
+
+    return {name: derive_interface_info(converter) for name, converter in module_to_dict(converters).items()}
+
+
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
-    exclude_interfaces_from_selection = ["SpikeGLXLFP"]  # Should have 'interface' stripped from name
-
-    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
-    for excluded_interface in exclude_interfaces_from_selection:
-        interfaces_to_load.pop(excluded_interface)
+    exclude_interfaces_from_selection = [
+        # Deprecated
+        "SpikeGLXLFPInterface",
+        # Aliased
+        "CEDRecordingInterface",
+        "OpenEphysBinaryRecordingInterface",
+        "OpenEphysLegacyRecordingInterface",
+        # Ignored
+        "AxonaPositionDataInterface",
+        "AxonaUnitRecordingInterface",
+        "CsvTimeIntervalsInterface",
+        "ExcelTimeIntervalsInterface",
+        "Hdf5ImagingInterface",
+        "MaxOneRecordingInterface",
+        "OpenEphysSortingInterface",
+        "SimaSegmentationInterface",
+    ]
 
     return {
-        interface.__name__: {
-            "keywords": interface.keywords,
-            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves
-            # have a label property
-            "label": format_name
-            # Can also add a description here if we want to provide more information about the interface
-        }
-        for format_name, interface in interfaces_to_load.items()
+        interface.__name__: derive_interface_info(interface)
+        for interface in interface_list
+        if not interface.__name__ in exclude_interfaces_from_selection
     }
 
 
 # Combine Multiple Interfaces
 def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
-    from neuroconv import datainterfaces, NWBConverter
+    from neuroconv import converters, datainterfaces, NWBConverter
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
-            custom_name: getattr(datainterfaces, interface_name)
+            custom_name: getattr(datainterfaces, interface_name, getattr(converters, interface_name, None))
             for custom_name, interface_name in interface_class_dict.items()
         }
 
@@ -341,11 +390,7 @@ def convert_to_nwb(info: dict) -> str:
     resolved_output_path = resolved_output_directory / nwbfile_path
 
     # Remove symlink placed at the default_output_directory if this will hold real data
-    if (
-        not run_stub_test
-        and resolved_output_directory == default_output_directory
-        and default_output_directory.is_symlink()
-    ):
+    if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
         default_output_directory.unlink()
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
@@ -360,7 +405,7 @@ def convert_to_nwb(info: dict) -> str:
     options = (
         {
             interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
-            if available_options.get("properties").get(interface).get("properties").get("stub_test")
+            if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
             else {}
             for interface in info["source_data"]
         }
@@ -401,7 +446,7 @@ def convert_to_nwb(info: dict) -> str:
     )
 
     # Create a symlink between the fake data and custom data
-    if not run_stub_test and not resolved_output_directory == default_output_directory:
+    if not resolved_output_directory == default_output_directory:
         if default_output_directory.exists():
             # If default default_output_directory is not a symlink, delete all contents and create a symlink there
             if not default_output_directory.is_symlink():
@@ -423,7 +468,7 @@ def convert_to_nwb(info: dict) -> str:
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs):
-    tmp_folder_path = aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
+    tmp_folder_path = _aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
     innerKwargs = {**kwargs}
     del innerKwargs["filesystem_paths"]
     innerKwargs["nwb_folder_path"] = tmp_folder_path
@@ -438,6 +483,8 @@ def upload_folder_to_dandi(
     nwb_folder_path: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -448,18 +495,21 @@ def upload_folder_to_dandi(
         nwb_folder_path=Path(nwb_folder_path),
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
-def upload_to_dandi(
+def upload_project_to_dandi(
     dandiset_id: str,
     api_key: str,
     project: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
-
 
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
@@ -470,6 +520,8 @@ def upload_to_dandi(
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
@@ -526,66 +578,53 @@ def generate_dataset(test_data_directory_path: str):
 
 
 def inspect_nwb_file(payload):
-    from nwbinspector import inspect_nwbfile
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
-    return json.loads(
-        json.dumps(
-            list(
-                inspect_nwbfile(
-                    ignore=[
-                        "check_description",
-                        "check_data_orientation",
-                    ],  # TODO: remove when metadata control is exposed
-                    **payload,
-                )
-            ),
-            cls=InspectorOutputJSONEncoder,
-        )
-    )
-
-
-def inspect_nwb_file(payload):
-    from nwbinspector import inspect_nwbfile
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
-    return json.loads(
-        json.dumps(
-            list(
-                inspect_nwbfile(
-                    ignore=[
-                        "check_description",
-                        "check_data_orientation",
-                    ],  # TODO: remove when metadata control is exposed
-                    **payload,
-                )
-            ),
-            cls=InspectorOutputJSONEncoder,
-        )
-    )
-
-
-def inspect_nwb_folder(payload):
-    from nwbinspector import inspect_all
+    from nwbinspector import inspect_nwbfile, load_config
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     messages = list(
-        inspect_all(
-            n_jobs=-2,  # uses number of CPU - 1
+        inspect_nwbfile(
             ignore=[
                 "check_description",
                 "check_data_orientation",
             ],  # TODO: remove when metadata control is exposed
+            config=load_config(filepath_or_keyword="dandi"),
             **payload,
         )
     )
 
-    # messages = organize_messages(messages, levels=["importance", "message"])
-
-    return json.loads(json.dumps(messages, cls=InspectorOutputJSONEncoder))
+    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
 
 
-def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+def inspect_nwb_folder(payload):
+    from nwbinspector import inspect_all, load_config
+    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from pickle import PicklingError
+
+    kwargs = dict(
+        n_jobs=-2,  # uses number of CPU - 1
+        ignore=[
+            "check_description",
+            "check_data_orientation",
+        ],  # TODO: remove when metadata control is exposed
+        config=load_config(filepath_or_keyword="dandi"),
+        **payload,
+    )
+
+    try:
+        messages = list(inspect_all(**kwargs))
+    except PicklingError as e:
+        if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(e):
+            del kwargs["n_jobs"]
+            messages = list(inspect_all(**kwargs))
+        else:
+            raise e
+    except Exception as e:
+        raise e
+
+    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+
+
+def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
     if folder_path is None:
         folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
@@ -595,7 +634,7 @@ def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
         path = Path(path)
         new_path = folder_path / path.name
         if path.is_dir():
-            aggregate_symlinks_in_new_directory(
+            _aggregate_symlinks_in_new_directory(
                 list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
             )
         else:
@@ -605,7 +644,7 @@ def aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
 
 
 def inspect_multiple_filesystem_objects(paths):
-    tmp_folder_path = aggregate_symlinks_in_new_directory(paths, "inspect")
+    tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
     result = inspect_nwb_folder({"path": tmp_folder_path})
     rmtree(tmp_folder_path)
     return result

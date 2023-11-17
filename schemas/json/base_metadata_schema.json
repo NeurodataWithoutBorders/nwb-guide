@@ -1,8 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "base_metafile.schema.json",
-  "title": "Base schema for the metafile",
-  "description": "Base schema for the metafile",
   "version": "0.1.0",
   "type": "object",
   "required": ["NWBFile"],
@@ -33,8 +31,26 @@
           "type": "array",
           "items": {
             "type": "string",
-            "title": "experimenter"
-          }
+            "format": "{last_name}, {first_name} {middle_name_or_initial}",
+            "properties": {
+              "first_name": {
+                "pattern": "^[A-Z][a-z,'-]+$",
+                "type": "string"
+              },
+              "last_name": {
+                  "pattern": "^[A-Z][a-z,'-]+$",
+                  "type": "string"
+              },
+              "middle_name_or_initial": {
+                  "pattern": "^[A-Z][a-z.'-]*$",
+                  "type": "string"
+              }
+            },
+            "required": [
+                "first_name",
+                "last_name"
+            ]
+        }
         },
         "identifier": {
           "type": "string",
@@ -102,7 +118,7 @@
         },
         "stimulus_notes": {
           "type": "string",
-          "description": "Notes about data collection and analysis."
+          "description": "Notes about stimuli, such as how and where presented."
         }
       }
     },

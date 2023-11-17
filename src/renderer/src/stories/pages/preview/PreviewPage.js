@@ -6,8 +6,14 @@ import { Neurosift } from "../../preview/Neurosift.js";
 import { baseUrl } from "../../../globals.js";
 
 export class PreviewPage extends Page {
+    header = {
+        title: "Neurosift File Visualization",
+        subtitle: "Explore your NWB file using Neurosift.",
+    };
+
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     updatePath = async (path) => {
@@ -25,7 +31,7 @@ export class PreviewPage extends Page {
             type: "string",
             format: "file",
             description:
-                "Please provide a file path that you'd like to visualize using Neurosift. The NWB GUIDE will serve this file and access the appropriate URL automatically.",
+                "Please provide a file path that you'd like to visualize using Neurosift. The GUIDE will serve this file and access the appropriate URL automatically.",
         },
         onUpdate: this.updatePath,
         onThrow,
@@ -40,14 +46,7 @@ export class PreviewPage extends Page {
         }
 
         return html`
-            <div style="display: grid; height: 100%; grid-template-rows: min-content min-content 1fr; gap: 10px;">
-                <div>
-                    <div style="display: flex; align-items: end; justify-content: space-between;">
-                        <h1 style="margin: 0;">Neurosift File Visualization</h1>
-                    </div>
-                    <p>Explore your NWB file using Neurosift</p>
-                    <hr />
-                </div>
+            <div style="display: grid; width: 100%; height: 100%; grid-template-rows: min-content 1fr; gap: 10px;">
                 ${this.input} ${this.neurosift}
             </div>
         `;

@@ -102,8 +102,9 @@ test('inter-table updates are triggered', async () => {
         schema,
         results,
         validateOnChange,
-        renderTable: (name, metadata, path) => {
+        createTable: (name, metadata, path) => {
             if (name !== "Electrodes") return new SimpleTable(metadata);
+            else return true
         },
     })
 
@@ -112,8 +113,7 @@ test('inter-table updates are triggered', async () => {
     await form.rendered
 
     // Validate that the results are incorrect
-    let errors = false
-    await form.validate().catch(e => errors = true)
+    const errors = await form.validate().catch(() => true).catch(e =>  true)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
@@ -122,13 +122,19 @@ test('inter-table updates are triggered', async () => {
 
     const baseRow = table.getRow(0)
     row.forEach((cell, i) => {
-        if (cell.simpleTableInfo.col === 'name') cell.value = randomStringId // Set name to random string id
-        else cell.value = baseRow[i].value // Otherwise carry over info
+        if (cell.simpleTableInfo.col === 'name') cell.setInput(randomStringId) // Set name to random string id
+        else cell.setInput(baseRow[i].value) // Otherwise carry over info
     })
 
+    // Wait a second for new row values to resolve as table data (async)
+    await new Promise((res) => setTimeout(() => res(true), 1000))
+
     // Validate that the new structure is correct
-    await form.validate().then(res => errors = false).catch(e => errors = true)
-    expect(errors).toBe(false) // Is valid
+    const hasErrors = await form.validate().then(() => false).catch((e) => {
+        console.error(e)
+        return true
+    })
+    expect(hasErrors).toBe(false) // Is valid
 })
 
 
@@ -192,6 +198,7 @@ test('changes are resolved correctly', async () => {
     input3.updateData('test')
 
     // Validate that the new structure is correct
-    await form.validate(form.results).then(res => errors = false).catch(e => errors = true)
-    expect(errors).toBe(false) // Is valid
+    const hasErrors = await form.validate(form.results).then(res => false).catch(e => true)
+
+    expect(hasErrors).toBe(false) // Is valid
 })
