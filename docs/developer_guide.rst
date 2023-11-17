@@ -18,6 +18,7 @@ Start by cloning the repository
 .. code-block:: bash
 
     git clone https://github.com/NeurodataWithoutBorders/nwb-guide
+    cd nwb-guide
 
 
 Install Python Dependencies
