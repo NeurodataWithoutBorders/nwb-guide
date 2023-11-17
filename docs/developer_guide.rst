@@ -4,6 +4,9 @@ Developer Guide
 We welcome contributions from the community! If you are interested in contributing, please read the following guide to get started.
 
 
+
+.. _developer_installation:
+
 Installation
 ------------
 
