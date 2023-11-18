@@ -1,8 +1,8 @@
 import { LitElement, css, html } from "lit";
 
 import { fs } from "../electron/index";
-// const { dialog } = remote;
-const { dialog } = commoners.electron ?? {};
+
+const dialog = commoners.plugins.dialog
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
     if (Array.isArray(type))
@@ -92,8 +92,6 @@ export class FilesystemSelector extends LitElement {
         this.value = props.value ?? "";
         this.dialogOptions = props.dialogOptions ?? {};
         this.onChange = props.onChange ?? (() => {});
-        this.dialogType = props.dialogType ?? "showOpenDialog";
-
         this.addEventListener("change", () => this.onChange(this.value));
     }
 
@@ -119,11 +117,9 @@ export class FilesystemSelector extends LitElement {
             options.properties.push("multiSelections");
 
         this.classList.add("active");
-        const result = await dialog[this.dialogType](options);
-
+        const result = dialog.showOpenDialogSync(options);
         this.classList.remove("active");
-        if (result.canceled) return [];
-        return result;
+        return result ?? [];
     };
 
     #checkType = (value) => {
@@ -161,7 +157,7 @@ export class FilesystemSelector extends LitElement {
         if (dialog) {
             const results = await this.#useElectronDialog(type);
             // const path = file.filePath ?? file.filePaths?.[0];
-            this.#handleFiles(results.filePath ?? results.filePaths, type);
+            this.#handleFiles(results, type);
         } else {
             let handles = await (type === "directory"
                 ? window.showDirectoryPicker()

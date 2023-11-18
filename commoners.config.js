@@ -9,6 +9,19 @@ export default {
 
     plugins: [
         {
+            name: 'dialog',
+            desktop: {
+                load: function() {
+                    this.on(`${name}:dialog`, (event, type, ...args) => event.returnValue = this.electron.dialog[type](...args))
+                }
+            },
+            load: function() {
+                return {
+                    showOpenDialogSync:  (...args) => this.sendSync(`${name}:dialog`, 'showOpenDialogSync', ...args)
+                }
+            }
+        },
+        {
             name: 'custom-unload-popup',
             desktop: {
                 unload: async function() {
