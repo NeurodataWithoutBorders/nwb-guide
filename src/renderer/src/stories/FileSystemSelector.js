@@ -2,7 +2,11 @@ import { LitElement, css, html } from "lit";
 
 import { fs } from "../electron/index";
 
-const dialog = commoners.plugins.dialog
+const globals = {
+    get dialog() {
+        return commoners.plugins.dialog;
+    }
+}
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
     if (Array.isArray(type))
@@ -11,7 +15,7 @@ function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
             .join(" / ")}`;
 
     const isDir = type === "directory";
-    return multiple && (!isDir || (isDir && !native) || dialog)
+    return multiple && (!isDir || (isDir && !native) || globals.dialog)
         ? type === "directory"
             ? "directories"
             : "files"
@@ -117,7 +121,7 @@ export class FilesystemSelector extends LitElement {
             options.properties.push("multiSelections");
 
         this.classList.add("active");
-        const result = dialog.showOpenDialogSync(options);
+        const result = globals.dialog.showOpenDialogSync(options);
         this.classList.remove("active");
         return result ?? [];
     };
@@ -154,7 +158,7 @@ export class FilesystemSelector extends LitElement {
     };
 
     async selectFormat(type = this.type) {
-        if (dialog) {
+        if (globals.dialog) {
             const results = await this.#useElectronDialog(type);
             // const path = file.filePath ?? file.filePaths?.[0];
             this.#handleFiles(results, type);
@@ -218,7 +222,7 @@ export class FilesystemSelector extends LitElement {
                 ${resolvedValueDisplay
                     ? html`
                           ${resolvedValueDisplay}
-                          ${dialog
+                          ${globals.dialog
                               ? ""
                               : html`<br /><small
                                         >Cannot get full ${isMultipleTypes ? this.type.join(" / ") : this.type}
