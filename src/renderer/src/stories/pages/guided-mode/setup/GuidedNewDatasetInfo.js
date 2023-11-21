@@ -77,7 +77,6 @@ export class GuidedNewDatasetPage extends Page {
     };
 
     updateForm = () => {
-
         // Properly clone the schema to produce multiple pages from the project metadata schema
         const schema = { ...projectMetadataSchema };
         schema.properties = { ...schema.properties };
