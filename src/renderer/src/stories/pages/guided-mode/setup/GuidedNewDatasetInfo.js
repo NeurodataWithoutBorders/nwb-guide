@@ -88,7 +88,7 @@ export class GuidedNewDatasetPage extends Page {
 
         const pages = schemaToPages.call(
             this,
-            preprocessMetadataSchema(),
+            preprocessMetadataSchema(undefined, true),
             ["project"],
             { validateEmptyValues: false },
             (info) => {
