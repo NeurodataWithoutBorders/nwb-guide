@@ -179,7 +179,6 @@ export class Search extends LitElement {
     }
 
     updated() {
-
         const options = this.shadowRoot.querySelectorAll(".option");
         this.#options = Array.from(options).map((option) => {
             const keywordString = option.getAttribute("data-keywords");
@@ -257,10 +256,8 @@ export class Search extends LitElement {
 
         this.setAttribute("active", !!toShow.length);
     };
-    
 
     render() {
-
         this.categories = {};
 
         // Update list
