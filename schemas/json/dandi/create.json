@@ -5,7 +5,7 @@
             "type": "string",
             "description": "A title associated with the Dandiset"
         },
-        
+
         "embargo_status": {
             "type": "boolean",
             "default": false
@@ -47,7 +47,7 @@
                     },
                     "description": "Keywords used to describe this content."
                 },
-                
+
                 "study_target": {
                     "type": "string",
                     "description": "Objectives or specific questions of the study."

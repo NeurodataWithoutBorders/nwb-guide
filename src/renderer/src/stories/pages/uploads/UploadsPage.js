@@ -31,12 +31,9 @@ import { baseUrl } from "../../../globals.js";
 
 import * as dandi from "../../../../../../../webnwb/packages/dandi/dist/dandi.es.js";
 
-
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-
 export async function createDandiset() {
-
     let notification;
 
     const notify = (message, type) => {
@@ -45,68 +42,63 @@ export async function createDandiset() {
     };
 
     const modal = new Modal({
-        header: "Create a Dandiset"
-    })
+        header: "Create a Dandiset",
+    });
 
-    const content = document.createElement("div")
+    const content = document.createElement("div");
     Object.assign(content.style, {
         padding: "25px",
-        paddingBottom: "0px"
-    })
+        paddingBottom: "0px",
+    });
 
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
         results: {},
-    })
+    });
 
-    content.append(form)
-    modal.append(content)
+    content.append(form);
+    modal.append(content);
 
     modal.onClose = async () => notify("Dandiset was not created.", "error");
 
     return new Promise((resolve) => {
-
         const button = new Button({
             label: "Create",
             primary: true,
             onClick: async () => {
-
                 await form.validate().catch(() => {
-                    const message = "Please fill out all required fields"
+                    const message = "Please fill out all required fields";
                     notify("Dandiset was not set", "error");
-                    throw message
-                })
+                    throw message;
+                });
 
-                const staging = form.resolved.staging
+                const staging = form.resolved.staging;
                 const api_key = await getAPIKey(staging);
 
-                const apiStaging = new dandi.API({ token: api_key, type: staging ? 'staging' : undefined })
-                await apiStaging.init()
+                const apiStaging = new dandi.API({ token: api_key, type: staging ? "staging" : undefined });
+                await apiStaging.init();
 
-                const res =  await apiStaging.create(
-                    form.resolved.title, 
+                const res = await apiStaging.create(
+                    form.resolved.title,
                     form.resolved.metadata,
                     form.resolved.embargo_status
-                )
-            
-                resolve(res)
+                );
+
+                resolve(res);
             },
-        })
+        });
 
         modal.footer = button;
 
-        modal.open = true    
+        modal.open = true;
 
-
-        document.body.append(modal)
-
+        document.body.append(modal);
     }).finally(() => {
         modal.remove();
     });
 }
 
 async function getAPIKey(staging = false) {
-
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let api_key = DANDI?.api_keys?.[whichAPIKey];
@@ -179,8 +171,7 @@ async function getAPIKey(staging = false) {
         });
     }
 
-    return api_key
-
+    return api_key;
 }
 
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
@@ -222,11 +213,11 @@ export class UploadsPage extends Page {
             new Button({
                 label: "Create Dandiset",
                 onClick: async () => {
-                    const dandiset = await createDandiset.call(this) // Will throw an error if not created
-                    this.form.updateData(['dandiset_id'], dandiset.identifier)
+                    const dandiset = await createDandiset.call(this); // Will throw an error if not created
+                    this.form.updateData(["dandiset_id"], dandiset.identifier);
                 },
-            })
-        ]
+            }),
+        ],
     };
 
     constructor(...args) {
