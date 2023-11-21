@@ -104,7 +104,7 @@ export async function createDandiset() {
     });
 }
 
-function addDandisetID (id) {
+function addDandisetID(id) {
     const dandisets = new Set(global.data.DANDI.dandisets ?? []);
     dandisets.add(id);
     global.data.DANDI.dandisets = [...dandisets];
