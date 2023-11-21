@@ -174,7 +174,6 @@ export class Search extends LitElement {
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
             listMode: { type: String, reflect: true },
-            value: { type: String, reflect: true },
         };
     }
 
@@ -187,6 +186,7 @@ export class Search extends LitElement {
         });
 
         this.#initialize();
+        
     }
 
     onSelect = (id, value) => {};
@@ -220,11 +220,6 @@ export class Search extends LitElement {
     #sortedCategories = [];
 
     #populate = (input) => {
-        // Hide all if empty
-        if (!input) {
-            this.#initialize();
-            return;
-        }
 
         const toShow = [];
 
