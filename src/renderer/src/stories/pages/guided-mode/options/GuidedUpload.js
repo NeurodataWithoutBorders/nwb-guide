@@ -89,7 +89,6 @@ export class GuidedUploadPage extends Page {
                 })
                 .catch(() => {});
 
-            
             return (this.form = new JSONSchemaForm({
                 schema: dandiUploadSchema,
                 results: state.info,
