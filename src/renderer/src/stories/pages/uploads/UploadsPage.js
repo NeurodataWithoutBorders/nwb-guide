@@ -85,9 +85,12 @@ export async function createDandiset() {
                     form.resolved.embargo_status
                 );
 
-                addDandisetID(res.identifier);
+                const id = res.identifier;
+                addDandisetToRegistry(id);
 
-                notify(`Dandiset <b>${res.identifier}</b> was created`, "success");
+                notify(`Dandiset <b>${id}</b> was created`, "success");
+
+                this.form.updateData(["dandiset_id"], id);
 
                 resolve(res);
             },
@@ -103,10 +106,11 @@ export async function createDandiset() {
     });
 }
 
-function addDandisetID(id) {
-    const dandisets = new Set(global.data.DANDI.dandisets ?? []);
-    dandisets.add(id);
-    global.data.DANDI.dandisets = [...dandisets];
+function addDandisetToRegistry(id, info = true) {
+    if (!global.data.DANDI) global.data.DANDI = {};
+    const dandiGlobals = global.data.DANDI ?? (global.data.DANDI = {})
+    if (!dandiGlobals.dandisets) dandiGlobals.dandisets = {};
+    dandiGlobals.dandisets[id] = info
     global.save();
 }
 
@@ -206,7 +210,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         throw e;
     });
 
-    addDandisetID(dandiset_id);
+    addDandisetToRegistry(dandiset_id);
 
     if (result)
         this.notify(
@@ -227,10 +231,7 @@ export class UploadsPage extends Page {
             new Button({
                 icon: dandiSVG,
                 label: "Create Dandiset",
-                onClick: async () => {
-                    const dandiset = await createDandiset.call(this); // Will throw an error if not created
-                    this.form.updateData(["dandiset_id"], dandiset.identifier);
-                },
+                onClick: async () => await createDandiset.call(this) // Will throw an error if not created
             }),
         ],
     };
