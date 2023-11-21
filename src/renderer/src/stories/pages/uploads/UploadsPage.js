@@ -90,8 +90,9 @@ export async function createDandiset() {
 
                 notify(`Dandiset <b>${id}</b> was created`, "success");
 
-                this.form.updateData(["dandiset_id"], id);
-
+                const input = this.form.getInput([ 'dandiset_id' ]);
+                input.updateData(id);
+ 
                 resolve(res);
             },
         });
@@ -115,6 +116,7 @@ function addDandisetToRegistry(id, info = true) {
 }
 
 async function getAPIKey(staging = false) {
+    
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let api_key = DANDI?.api_keys?.[whichAPIKey];
