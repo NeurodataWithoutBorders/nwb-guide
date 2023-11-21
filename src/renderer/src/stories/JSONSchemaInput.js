@@ -312,7 +312,7 @@ export class JSONSchemaInput extends LitElement {
 
                 modal.append(div);
 
-                addButton.insertAdjacentElement("beforebegin", modal);
+                document.body.append(modal)
 
                 setTimeout(() => modal.toggle(true));
             });
