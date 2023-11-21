@@ -170,7 +170,7 @@ export class Page extends LitElement {
         Object.assign(element.style, {
             textAlign: "left",
             display: "block",
-        })
+        });
 
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
