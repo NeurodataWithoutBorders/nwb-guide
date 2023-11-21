@@ -29,7 +29,7 @@ import { validateDANDIApiKey } from "../../../validation/dandi";
 import { onServerOpen } from "../../../server";
 import { baseUrl } from "../../../globals.js";
 
-import * as dandi from "../../../../../../../webnwb/packages/dandi/dist/dandi.es.js";
+import * as dandi from "dandi";
 
 
 export const isStaging = (id) => parseInt(id) >= 100000;
