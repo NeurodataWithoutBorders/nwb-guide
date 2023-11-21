@@ -84,6 +84,8 @@ export async function createDandiset() {
                     form.resolved.embargo_status
                 );
 
+                notify(`Dandiset <b>${res.identifier}</b> was created`, "success");
+
                 resolve(res);
             },
         });
