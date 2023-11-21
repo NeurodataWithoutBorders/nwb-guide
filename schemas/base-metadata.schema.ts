@@ -34,10 +34,13 @@ function getSpeciesInfo(species: any[][] = []) {
 
 }
 
-export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
+export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
+
+
+    const copy = structuredClone(schema)
 
     // Add unit to weight
-    const subjectProps = schema.properties.Subject.properties
+    const subjectProps = copy.properties.Subject.properties
     subjectProps.weight.unit = 'kg'
 
     // subjectProps.order = ['weight', 'age', 'age__reference', 'date_of_birth', 'genotype', 'strain']
@@ -67,11 +70,21 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema) => {
     })
 
     // Ensure experimenter schema has custom structure
-    schema.properties.NWBFile.properties.experimenter = baseMetadataSchema.properties.NWBFile.properties.experimenter
+    copy.properties.NWBFile.properties.experimenter = baseMetadataSchema.properties.NWBFile.properties.experimenter
 
     // Override description of keywords
-    schema.properties.NWBFile.properties.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
-    return schema
+    copy.properties.NWBFile.properties.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
+
+
+
+    // Remove non-global properties
+    if (global) {
+        Object.entries(copy.properties).forEach(([globalProp, schema]) => {
+            instanceSpecificFields[globalProp]?.forEach((prop) =>  delete schema.properties[prop]);
+        });
+    }
+
+    return copy
 
 }
 
@@ -93,13 +106,7 @@ export const instanceSpecificFields = {
 };
 
 
-const globalSchema = structuredClone(preprocessMetadataSchema());
-Object.entries(globalSchema.properties).forEach(([globalProp, schema]) => {
-    instanceSpecificFields[globalProp]?.forEach((prop) =>  delete schema.properties[prop]);
-});
+export const globalSchema = preprocessMetadataSchema(undefined, true);
 
-export {
-    globalSchema
-}
 
 export default preprocessMetadataSchema()
