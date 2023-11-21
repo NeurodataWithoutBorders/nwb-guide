@@ -1,12 +1,12 @@
 import Swal from "sweetalert2";
 import { baseUrl } from "../../../../globals.js";
 import { sanitize } from "../../utils.js";
+import { Loader } from "../../../Loader";
 
-export const openProgressSwal = (options) => {
+export const openProgressSwal = (options, callback) => {
     return new Promise((resolve) => {
         Swal.fire({
-            title: options.title ?? "Requesting data from server",
-            html: `Please wait...`,
+            title: "Requesting data from server",
             allowEscapeKey: false,
             allowOutsideClick: false,
             showConfirmButton: false,
@@ -17,13 +17,54 @@ export const openProgressSwal = (options) => {
                 Swal.showLoading();
                 resolve(Swal);
             },
-        });
+            ...options,
+        }).then((result) => callback?.(result));
     });
 };
 
 export const run = async (url, payload, options = {}) => {
-    const needsSwal = !options.swal && options.swal !== false;
-    if (needsSwal) openProgressSwal(options).then((swal) => (options.onOpen ? options.onOpen(swal) : undefined));
+
+    let internalSwal
+
+    if (options.swal === false) {}
+    else if (!options.swal || options.swal === true) {
+
+        if (!("showCancelButton" in options)) {
+            options.showCancelButton = true;
+            options.customClass = { actions: "swal-conversion-actions" };
+        }
+
+        const cancelController = new AbortController();
+
+        options.fetch = {
+            signal: cancelController.signal,
+        };
+
+        const popup = internalSwal = await openProgressSwal(options, (result) => {
+            if (!result.isConfirmed) cancelController.abort();
+        }).then(async (swal) => {
+            if (options.onOpen) await options.onOpen(swal);
+            return swal;
+        });
+
+        const element = popup.getHtmlContainer();
+        const actions = popup.getActions();
+        const loader = actions.querySelector(".swal2-loader");
+        const container = document.createElement("div");
+        container.append(loader);
+        element.innerText = "";
+        Object.assign(container.style, {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "25px",
+        });
+
+        element.appendChild(container);
+
+        element.insertAdjacentHTML("beforeend", `<hr style="margin-bottom: 0;">`);
+    }
 
     if (!("base" in options)) options.base = "/neuroconv";
 
@@ -34,9 +75,10 @@ export const run = async (url, payload, options = {}) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        ...(options.fetch ?? {}),
     }).then((res) => res.json());
 
-    if (needsSwal) Swal.close();
+    if (internalSwal) Swal.close();
 
     if (results?.message) throw new Error(`Request to ${url} failed: ${results.message}`);
 

@@ -434,8 +434,6 @@ export class Table extends LitElement {
 
         if (this.table) this.table.destroy();
 
-        console.log("Rendered data", this.#getRenderedData(data));
-
         const table = new Handsontable(div, {
             data: this.#getRenderedData(data),
             // rowHeaders: rowHeaders.map(v => `sub-${v}`),
@@ -462,65 +460,66 @@ export class Table extends LitElement {
         const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0);
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
-            const header = typeof prop === "number" ? colHeaders[prop] : prop;
-            let rowName = this.keyColumn ? rowHeaders[row] : row;
-
-            // NOTE: We would like to allow invalid values to mutate the results
-            // if (isValid) {
-            const isResolved = rowName in this.data;
-            let target = this.data;
-
-            if (!isResolved) {
-                if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
-                else {
-                    rowName = row;
-                    if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
-                    target = unresolved;
-                }
-            }
-
             const isUserUpdate = initialCellsToUpdate <= validated;
 
-            value = this.#getValue(value, entries[header]);
+            if (isUserUpdate) {
+                const header = typeof prop === "number" ? colHeaders[prop] : prop;
+                let rowName = this.keyColumn ? rowHeaders[row] : row;
 
-            // Transfer data to object (if valid)
-            if (header === this.keyColumn) {
-                if (isValid && value && value !== rowName) {
-                    const old = target[rowName] ?? {};
-                    this.data[value] = old;
-                    delete target[rowName];
-                    delete unresolved[row];
-                    rowHeaders[row] = value;
-                }
-            }
+                // NOTE: We would like to allow invalid values to mutate the results
+                // if (isValid) {
+                const isResolved = rowName in this.data;
+                let target = this.data;
 
-            // Update data on passed object
-            else {
-                const globalValue = this.globals[header];
-
-                if (value == undefined || value === "") {
-                    if (globalValue) {
-                        value = target[rowName][header] = globalValue;
-                        table.setDataAtCell(row, prop, value);
-                        this.onOverride(header, value, rowName);
+                if (!isResolved) {
+                    if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+                    else {
+                        rowName = row;
+                        if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
+                        target = unresolved;
                     }
-                    target[rowName][header] = undefined;
-                } else {
-                    // Correct for expected arrays (copy-paste issue)
-                    if (entries[header]?.type === "array") {
-                        if (value && !Array.isArray(value)) value = value.split(",").map((v) => v.trim());
-                    }
-
-                    target[rowName][header] = value === globalValue ? undefined : value;
                 }
+
+                value = this.#getValue(value, entries[header]);
+
+                // Transfer data to object (if valid)
+                if (header === this.keyColumn) {
+                    if (isValid && value && value !== rowName) {
+                        const old = target[rowName] ?? {};
+                        this.data[value] = old;
+                        delete target[rowName];
+                        delete unresolved[row];
+                        rowHeaders[row] = value;
+                    }
+                }
+
+                // Update data on passed object
+                else {
+                    const globalValue = this.globals[header];
+
+                    if (value == undefined || value === "") {
+                        if (globalValue) {
+                            value = target[rowName][header] = globalValue;
+                            table.setDataAtCell(row, prop, value);
+                            this.onOverride(header, value, rowName);
+                        }
+                        target[rowName][header] = undefined;
+                    } else {
+                        // Correct for expected arrays (copy-paste issue)
+                        if (entries[header]?.type === "array") {
+                            if (value && !Array.isArray(value)) value = value.split(",").map((v) => v.trim());
+                        }
+
+                        target[rowName][header] = value === globalValue ? undefined : value;
+                    }
+                }
+
+                this.onUpdate(rowName, header, value);
             }
 
             validated++;
 
-            if (isUserUpdate) this.onUpdate(rowName, header, value);
-
             if (typeof isValid === "function") isValid();
-            // }
         });
 
         // If only one row, do not allow deletion

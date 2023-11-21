@@ -4,6 +4,9 @@ Developer Guide
 We welcome contributions from the community! If you are interested in contributing, please read the following guide to get started.
 
 
+
+.. _developer_installation:
+
 Installation
 ------------
 
@@ -14,7 +17,8 @@ Start by cloning the repository
 
 .. code-block:: bash
 
-    git clone https://github.com/catalystneuro/nwb-guide
+    git clone https://github.com/NeurodataWithoutBorders/nwb-guide
+    cd nwb-guide
 
 
 Install Python Dependencies
@@ -23,28 +27,26 @@ Install Python Dependencies
 
 Install the appropriate Python dependencies for your operating system.
 
-Windows
-"""""""
+**Windows**
+
 .. code-block:: bash
 
     conda env create -f ./environments/environment-Windows.yml
 
+**Mac with x64 architecture**
 
-Mac
-"""
 .. code-block:: bash
 
     conda env create -f ./environments/environment-MAC.yml
 
+**Mac with arm64 architecture**
 
-M1 Mac
-""""""
 .. code-block:: bash
 
     conda env create -f ./environments/environment-MAC-arm64.yml
 
-Linux
-"""""
+**Linux**
+
 .. code-block:: bash
 
     conda env create -f ./environments/environment-Linux.yml
@@ -84,8 +86,8 @@ Repo Structure
     - `pages.js` - The main code that controls which pages are rendered and how they are linked together
     - `stories` - Contains all the Web Components and related Storybook stories
     - `electron` - Contains all the Electron-related code to enable conditional inclusion for development mode
-    - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
-2. **pyflask** - Contains all the source code for the backend
+2. **src/renderer/assets** - Contains all the frontend-facing assets (e.g. images, css, etc.)
+3. **pyflask** - Contains all the source code for the backend
 
 
 
@@ -118,7 +120,8 @@ Starting a New Feature
 Adding a New Page
 ^^^^^^^^^^^^^^^^^
 
-New pages can be added by linking a component in the ``src/pages.js`` file. For example, if you wanted to add a new page called ``NewPage``, you would add the following to the configuration file:
+New pages can be added by linking a component in the ``src/pages.js`` file. For example, if you wanted to
+add a new page called ``NewPage``, you would add the following to the configuration file:
 
 .. code-block:: javascript
 
@@ -155,7 +158,9 @@ New pages can be added by linking a component in the ``src/pages.js`` file. For 
 
     // ...
 
-This will automatically add the new page to the sidebar. The page itself can be defined in the ``src/stories/pages/NewPage.js`` file. For example, if you wanted to add a new page that displays a simple message, you could add the following to the ``src/stories/pages/NewPage.js`` file:
+This will automatically add the new page to the sidebar. The page itself can be defined in the
+``src/stories/pages/NewPage.js`` file. For example, if you wanted to add a new page that displays
+a simple message, you could add the following to the ``src/stories/pages/NewPage.js`` file:
 
 
 .. code-block:: javascript
@@ -180,17 +185,23 @@ This will automatically add the new page to the sidebar. The page itself can be 
         }
     }
 
-Extending the ``Page`` class rather than the ``LitElement`` class provides each page with standard properties and methods that allow for uniform handling across the application.
+Extending the ``Page`` class rather than the ``LitElement`` class provides each page with standard properties and
+methods that allow for uniform handling across the application.
 
 
 Discover Existing Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While developing NWB GUIDE, you may find that you need to use a component that already exists in the codebase. To find a component, you can manually peruse the ``src/stories`` directory or run the project's Storybook instance to see all of the components in action.
+While developing NWB GUIDE, you may find that you need to use a component that already exists in the codebase. To
+find a component, you can manually peruse the ``src/stories`` directory or run the project's Storybook instance to
+see all of the components in action.
 
-To run Storybook, simply run ``npm run storybook`` in the root directory of the repository. This will start a local server that you can access using the link provided on the command line.
+To run Storybook, simply run ``npm run storybook`` in the root directory of the repository. This will start a local
+server that you can access using the link provided on the command line.
 
-To see if someone else has developed a third-party component to fit your needs, you can refer to :web-components:`WebComponents.org <>` and search based on your particular needs. :npm:`NPM` may also be useful to search for third-party packages (e.g. Handsontable) that implement the feature you need.
+To see if someone else has developed a third-party component to fit your needs, you can refer to
+:web-components:`WebComponents.org <>` and search based on your particular needs. :npm:`NPM` may also be
+useful to search for third-party packages (e.g. Handsontable) that implement the feature you need.
 
 
 
@@ -199,25 +210,32 @@ To see if someone else has developed a third-party component to fit your needs, 
 Testing
 -------
 
-We use Chromatic on the Storybook to test changes to front-end components as well as to demonstrate example cases of what those components would look like on a real project.
+We use Chromatic on the Storybook to test changes to front-end components as well as to demonstrate example cases of
+what those components would look like on a real project.
 
-We use :pytest:`pytest <>` for testing the back-end manager and REST API. To run the tests, simply run ``pytest`` in the root directory of the repository.
+We use :pytest:`pytest <>` for testing the back-end manager and REST API. To run the tests, simply run ``pytest`` in
+the root directory of the repository.
 
 .. _style:
 
 Coding Style
 ------------
 
-For all JavaScript code on the frontend, we use the :prettier-code-formatter:`prettier code formatter <>` with parameters defined in the ``prettier.config.js`` configuration file.
+For all JavaScript code on the frontend, we use the :prettier-code-formatter:`prettier code formatter <>` with
+parameters defined in the ``prettier.config.js`` configuration file.
 
-For all Python code on the backend, we use the :black-coding-style:`black coding style <>` with parameters defined in the ``pyproject.toml`` configuration file.
+For all Python code on the backend, we use the :black-coding-style:`black coding style <>` with parameters defined
+in the ``pyproject.toml`` configuration file.
 
 Pre-Commit
 ^^^^^^^^^^
 
-We use an automated pre-commit bot to enforce these on the main repo, but contributions from external forks would either have to grant bot permissions on their own fork (via :pre-commit-bot:`the pre-commit bot website <>`) or run pre-commit manually.
+We use an automated pre-commit bot to enforce these on the main repo, but contributions from external forks would
+either have to grant bot permissions on their own fork (via :pre-commit-bot:`the pre-commit bot website <>`) or
+run pre-commit manually.
 
-For instructions to install pre-commit, as well as some other minor coding styles we follow, refer to the :neuroconv-coding-style:`NeuroConv style guide <>`.
+For instructions to install pre-commit, as well as some other minor coding styles we follow, refer to the
+:neuroconv-coding-style:`NeuroConv style guide <>`.
 
 Code signing on Mac OS
 ----------------------
