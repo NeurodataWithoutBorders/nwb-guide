@@ -186,7 +186,6 @@ export class Search extends LitElement {
         });
 
         this.#initialize();
-        
     }
 
     onSelect = (id, value) => {};
@@ -220,7 +219,6 @@ export class Search extends LitElement {
     #sortedCategories = [];
 
     #populate = (input) => {
-
         const toShow = [];
 
         // Check if the input value matches the label
