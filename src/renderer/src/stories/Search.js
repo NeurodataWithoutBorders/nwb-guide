@@ -174,7 +174,7 @@ export class Search extends LitElement {
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
             listMode: { type: String, reflect: true },
-            value: { type: String },
+            value: { type: String, reflect: true },
         };
     }
 
