@@ -7,16 +7,20 @@ import projectGlobalSchema from "../../../../../../schemas/json/project/globals.
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
 
-const schema = merge(projectGlobalSchema, { 
-    properties: {
-        DANDI: dandiGlobalSchema,
+const schema = merge(
+    projectGlobalSchema,
+    {
+        properties: {
+            DANDI: dandiGlobalSchema,
+        },
+        required: ["DANDI"],
     },
-    required: ["DANDI"]
- }, {
-    arrays: true
- });
+    {
+        arrays: true,
+    }
+);
 
-console.log(schema)
+console.log(schema);
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
