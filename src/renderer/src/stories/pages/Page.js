@@ -164,11 +164,14 @@ export class Page extends LitElement {
         const isMultiple = toRun.length > 1;
 
         let elements = {};
-        // if (isMultiple) {
         popup.hideLoading();
         const element = popup.getHtmlContainer();
         element.innerText = "";
-        element.style.textAlign = "left";
+        Object.assign(element.style, {
+            textAlign: "left",
+            display: "block",
+        })
+
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
         element.append(progressBar);
