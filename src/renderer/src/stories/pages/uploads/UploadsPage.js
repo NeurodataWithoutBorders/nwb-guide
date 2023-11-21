@@ -31,6 +31,8 @@ import { baseUrl } from "../../../globals.js";
 
 import * as dandi from "dandi";
 
+import dandiSVG from "../../assets/dandi.svg?raw";
+
 export const isStaging = (id) => parseInt(id) >= 100000;
 
 export async function createDandiset() {
@@ -84,6 +86,8 @@ export async function createDandiset() {
                     form.resolved.embargo_status
                 );
 
+                addDandisetID(res.identifier);
+
                 notify(`Dandiset <b>${res.identifier}</b> was created`, "success");
 
                 resolve(res);
@@ -98,6 +102,13 @@ export async function createDandiset() {
     }).finally(() => {
         modal.remove();
     });
+}
+
+function addDandisetID (id) {
+    const dandisets = new Set(global.data.DANDI.dandisets ?? []);
+    dandisets.add(id);
+    global.data.DANDI.dandisets = [...dandisets];
+    global.save();
 }
 
 async function getAPIKey(staging = false) {
@@ -196,6 +207,8 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         throw e;
     });
 
+    addDandisetID(dandiset_id);
+
     if (result)
         this.notify(
             `${
@@ -213,6 +226,7 @@ export class UploadsPage extends Page {
         subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
         controls: [
             new Button({
+                icon: dandiSVG,
                 label: "Create Dandiset",
                 onClick: async () => {
                     const dandiset = await createDandiset.call(this); // Will throw an error if not created

@@ -11,6 +11,8 @@ import { onServerOpen } from "../../../../server";
 import { baseUrl } from "../../../../globals.js";
 import { Button } from "../../../Button.js";
 
+import dandiSVG from "../../../assets/dandi.svg?raw";
+
 export class GuidedUploadPage extends Page {
     constructor(...args) {
         super(...args);
@@ -29,6 +31,7 @@ export class GuidedUploadPage extends Page {
         subtitle: "Settings to upload your conversion to the DANDI Archive",
         controls: [
             new Button({
+                icon: dandiSVG,
                 label: "Create Dandiset",
                 onClick: async () => {
                     const dandiset = await createDandiset.call(this); // Will throw an error if not created
@@ -85,6 +88,7 @@ export class GuidedUploadPage extends Page {
                 })
                 .catch(() => {});
 
+            
             return (this.form = new JSONSchemaForm({
                 schema: dandiUploadSchema,
                 results: state.info,

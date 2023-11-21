@@ -1,3 +1,13 @@
+import { global } from '../src/renderer/src/progress'
 import upload from './json/dandi/upload.json' assert { type: "json" }
 
-export default upload
+// NOTE: Dependent on other PR
+const schema = structuredClone(upload)
+// const idSchema = schema.properties.dandiset_id
+// Object.assign(idSchema, {
+//     enum: global.data.DANDI.dandisets,
+//     strict: false
+// })
+
+
+export default schema
