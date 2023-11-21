@@ -4,6 +4,9 @@ Developer Guide
 We welcome contributions from the community! If you are interested in contributing, please read the following guide to get started.
 
 
+
+.. _developer_installation:
+
 Installation
 ------------
 
@@ -15,6 +18,7 @@ Start by cloning the repository
 .. code-block:: bash
 
     git clone https://github.com/NeurodataWithoutBorders/nwb-guide
+    cd nwb-guide
 
 
 Install Python Dependencies
