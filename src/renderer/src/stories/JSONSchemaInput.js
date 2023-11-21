@@ -11,6 +11,7 @@ import { Modal } from "./Modal";
 
 import { capitalize } from "./forms/utils";
 import { JSONSchemaForm } from "./JSONSchemaForm";
+import { Search } from "./Search";
 
 const isFilesystemSelector = (name, format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
@@ -356,7 +357,33 @@ export class JSONSchemaInput extends LitElement {
         }
 
         // Basic enumeration of properties on a select element
-        if (info.enum) {
+        if (info.enum && info.enum.length) {
+            if (info.strict === false) {
+                // const category = categories.find(({ test }) => test.test(key))?.value;
+
+                const options = info.enum.map((v) => {
+                    return {
+                        key: v,
+                        keywords: info.enumKeywords?.[v],
+                    };
+                });
+
+                const search = new Search({
+                    options,
+                    value: this.value,
+                    showAllWhenEmpty: false,
+                    listMode: "click",
+                    onSelect: async ({ value, key }) => {
+                        const result = value ?? key;
+                        this.#updateData(fullPath, result);
+                        if (validateOnChange) await this.#triggerValidation(name, path);
+                    },
+                });
+
+                // search.classList.add("schema-input")
+                return search;
+            }
+
             return html`
                 <select
                     class="guided--input schema-input"

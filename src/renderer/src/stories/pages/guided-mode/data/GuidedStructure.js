@@ -3,10 +3,11 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { Button } from "../../../Button.js";
-import { baseUrl, supportedInterfaces } from "../../../../globals.js";
+import { supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
+import { baseUrl } from "../../../../server/globals";
 
 const defaultEmptyMessage = "No interfaces selected";
 
@@ -27,8 +28,8 @@ export class GuidedStructurePage extends Page {
 
         // Handle Search Bar Interactions
         this.search.list.style.position = "unset";
-        this.search.onSelect = (...args) => {
-            this.list.add(...args);
+        this.search.onSelect = (item) => {
+            this.list.add(item);
             this.searchModal.toggle(false);
         };
 
@@ -46,6 +47,9 @@ export class GuidedStructurePage extends Page {
 
     search = new Search({
         disabledLabel: "Not supported",
+        headerStyles: {
+            padding: "15px",
+        },
     });
 
     list = new List({

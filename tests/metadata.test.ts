@@ -24,6 +24,10 @@ describe('metadata is specified correctly', () => {
 
     test('session-specific metadata is merged with project and subject metadata correctly', () => {
         const globalState = createMockGlobalState()
+
+        // Allow mouse (full list populated from server)
+        baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
+
         const result = mapSessions(info => createResults(info, globalState), globalState)
         const res = v.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])

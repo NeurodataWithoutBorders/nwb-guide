@@ -1,13 +1,36 @@
 import { LitElement, html, css } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+import searchSVG from "./assets/search.svg?raw";
 
 import tippy from "tippy.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 export class Search extends LitElement {
-    constructor({ options, showAllWhenEmpty = true, disabledLabel } = {}) {
+    constructor({
+        value,
+        options,
+        showAllWhenEmpty = true,
+        listMode = "list",
+        headerStyles = {},
+        disabledLabel,
+        onSelect,
+    } = {}) {
         super();
+        this.value = value;
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
         this.disabledLabel = disabledLabel;
+        this.listMode = listMode;
+        this.headerStyles = headerStyles;
+        if (onSelect) this.onSelect = onSelect;
+
+        document.addEventListener("click", () => {
+            if (this.listMode === "click" && this.getAttribute("active") === "true") {
+                this.#onSelect({ value: this.shadowRoot.querySelector("input").value });
+                this.setAttribute("active", false);
+            }
+        });
     }
 
     static get styles() {
@@ -24,20 +47,28 @@ export class Search extends LitElement {
                 border-radius: 5px;
                 width: 100%;
                 height: 100%;
-                overflow: hidden;
             }
 
             .header {
-                padding: 25px;
                 background: white;
+                position: relative;
             }
 
             input {
                 width: 100%;
-                background: #f2f2f2;
-                border: 1px solid #d9d9d9;
-                border-radius: 10px;
-                padding: 10px 15px;
+                border-radius: 4px;
+                padding: 10px 12px;
+                font-size: 100%;
+                font-weight: normal;
+                border: 1px solid var(--color-border);
+                transition: border-color 150ms ease-in-out 0s;
+                outline: none;
+                color: rgb(33, 49, 60);
+                background-color: rgb(255, 255, 255);
+            }
+
+            input::placeholder {
+                opacity: 0.5;
             }
 
             ul {
@@ -45,8 +76,46 @@ export class Search extends LitElement {
                 padding: 0;
                 margin: 0;
                 position: relative;
-                overflow: auto;
                 background: white;
+                border: 1px solid var(--color-border);
+                overflow: auto;
+            }
+
+            :host([listmode="click"]) ul {
+                position: absolute;
+                top: 38px;
+                left: 0;
+                right: 0;
+                max-height: 50vh;
+                z-index: 2;
+            }
+
+            svg {
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                padding: 0px 15px;
+                transform: translateY(-50%);
+                fill: gray;
+                box-sizing: unset;
+                width: 20px;
+                height: 20px;
+            }
+
+            :host([listmode="click"]) svg {
+                position: absolute;
+                top: 50%;
+                padding: 0px;
+                right: 10px;
+                transform: translateY(-50%);
+                fill: gray;
+                box-sizing: unset;
+                width: 20px;
+                height: 20px;
+            }
+
+            :host([active="false"]) ul {
+                visibility: hidden;
             }
 
             .option {
@@ -104,13 +173,15 @@ export class Search extends LitElement {
         return {
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
+            listMode: { type: String, reflect: true },
         };
     }
 
     updated() {
         const options = this.shadowRoot.querySelectorAll(".option");
         this.#options = Array.from(options).map((option) => {
-            const keywords = JSON.parse(option.getAttribute("data-keywords"));
+            const keywordString = option.getAttribute("data-keywords");
+            const keywords = keywordString ? JSON.parse(keywordString) : [];
             return { option, keywords, label: option.querySelector(".label").innerText };
         });
 
@@ -119,21 +190,71 @@ export class Search extends LitElement {
 
     onSelect = (id, value) => {};
 
-    #onSelect = (id, value) => {
-        this.shadowRoot.querySelector("input").value = "";
+    #onSelect = (option) => {
+        const input = this.shadowRoot.querySelector("input");
+
+        if (this.listMode === "click") {
+            input.value = option.value ?? option.key;
+            return this.onSelect(option);
+        }
+
+        input.value = "";
         this.#initialize();
-        this.onSelect(id, value);
+        this.onSelect(option);
     };
 
     #options = [];
-    #initialize = () =>
+    #initialize = () => {
         this.#options.forEach(({ option }) =>
             option[this.showAllWhenEmpty ? "removeAttribute" : "setAttribute"]("hidden", "")
         );
 
+        if (!this.showAllWhenEmpty) this.setAttribute("active", false);
+    };
+
     list = document.createElement("ul");
 
     categories = {};
+
+    #sortedCategories = [];
+
+    #populate = (input) => {
+        // Hide all if empty
+        if (!input) {
+            this.#initialize();
+            return;
+        }
+
+        const toShow = [];
+
+        // Check if the input value matches the label
+        this.#options.forEach(({ option, label }, i) => {
+            if (label.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
+        });
+
+        // Check if the input value matches any of the keywords
+        this.#options.forEach(({ option, keywords = [] }, i) => {
+            keywords.forEach((keyword) => {
+                if (keyword.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
+            });
+        });
+
+        this.#options.forEach(({ option }, i) => {
+            if (toShow.includes(i)) {
+                option.removeAttribute("hidden");
+            } else {
+                option.setAttribute("hidden", "");
+            }
+        });
+
+        this.#sortedCategories.forEach(({ entries, element }) => {
+            if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length)
+                element.setAttribute("hidden", "");
+            else element.removeAttribute("hidden");
+        });
+
+        this.setAttribute("active", !!toShow.length);
+    };
 
     render() {
         this.categories = {};
@@ -171,7 +292,7 @@ export class Search extends LitElement {
                     const li = document.createElement("li");
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
-                    li.setAttribute("data-keywords", JSON.stringify(option.keywords));
+                    if (option.keywords) li.setAttribute("data-keywords", JSON.stringify(option.keywords));
                     li.addEventListener("click", () => this.#onSelect(option));
 
                     if (option.disabled) li.setAttribute("disabled", "");
@@ -197,10 +318,12 @@ export class Search extends LitElement {
 
                     container.appendChild(label);
 
-                    const keywords = document.createElement("small");
-                    keywords.classList.add("keywords");
-                    keywords.innerText = option.keywords.join(", ");
-                    container.appendChild(keywords);
+                    if (option.keywords) {
+                        const keywords = document.createElement("small");
+                        keywords.classList.add("keywords");
+                        keywords.innerText = option.keywords.join(", ");
+                        container.appendChild(keywords);
+                    }
 
                     li.append(container);
 
@@ -228,54 +351,31 @@ export class Search extends LitElement {
         }
 
         // Categories sorted alphabetically
-        const categories = Object.values(this.categories).sort((a, b) => {
+        const categories = (this.#sortedCategories = Object.values(this.categories).sort((a, b) => {
             if (a.element.innerText < b.element.innerText) return -1;
             if (a.element.innerText > b.element.innerText) return 1;
             return 0;
-        });
+        }));
 
         categories.forEach(({ entries, element }) => {
             this.list.append(element, ...entries);
         });
 
         return html`
-    <div class="header">
-      <input placeholder="Type here to search" @input=${(ev) => {
-          const input = ev.target.value;
-
-          // Hide all if empty
-          if (!input) {
-              this.#initialize();
-              return;
+    <div class="header" style=${styleMap({
+        ...this.headerStyles,
+    })}>
+      <input placeholder="Type here to search" value=${this.value} @click=${(ev) => {
+          ev.stopPropagation();
+          if (this.listMode === "click") {
+              const input = ev.target.value;
+              this.#populate(input);
           }
-
-          const toShow = [];
-          // Check if the input value matches the label
-          this.#options.forEach(({ option, label }, i) => {
-              if (label.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-          });
-
-          // Check if the input value matches any of the keywords
-          this.#options.forEach(({ option, keywords }, i) => {
-              keywords.forEach((keyword) => {
-                  if (keyword.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-              });
-          });
-
-          this.#options.forEach(({ option }, i) => {
-              if (toShow.includes(i)) {
-                  option.removeAttribute("hidden");
-              } else {
-                  option.setAttribute("hidden", "");
-              }
-          });
-
-          categories.forEach(({ entries, element }) => {
-              if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length)
-                  element.setAttribute("hidden", "");
-              else element.removeAttribute("hidden");
-          });
+      }} @input=${(ev) => {
+          const input = ev.target.value;
+          this.#populate(input);
       }}></input>
+      ${unsafeHTML(searchSVG)}
     </div>
     ${this.list}
     `;

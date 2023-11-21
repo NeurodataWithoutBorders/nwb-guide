@@ -7,11 +7,12 @@ import Swal from "sweetalert2";
 import dandiUploadSchema from "../../../../../../../schemas/dandi-upload.schema";
 import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
 import { until } from "lit/directives/until.js";
-import { onServerOpen } from "../../../../server";
-import { baseUrl } from "../../../../globals.js";
+
 import { Button } from "../../../Button.js";
 
 import dandiSVG from "../../../assets/dandi.svg?raw";
+
+import { baseUrl, onServerOpen } from "../../../../server/globals";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {

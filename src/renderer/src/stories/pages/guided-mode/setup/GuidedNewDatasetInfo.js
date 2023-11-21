@@ -10,8 +10,8 @@ import { merge } from "../../utils.js";
 import { schemaToPages } from "../../FormPage.js";
 import { onThrow } from "../../../../errors";
 
-import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
 import { header } from "../../../forms/utils";
+import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 
@@ -86,10 +86,16 @@ export class GuidedNewDatasetPage extends Page {
 
         this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
 
-        const pages = schemaToPages.call(this, globalSchema, ["project"], { validateEmptyValues: false }, (info) => {
-            info.title = `${info.label} Global Metadata`;
-            return info;
-        });
+        const pages = schemaToPages.call(
+            this,
+            preprocessMetadataSchema(),
+            ["project"],
+            { validateEmptyValues: false },
+            (info) => {
+                info.title = `${info.label} Global Metadata`;
+                return info;
+            }
+        );
 
         pages.forEach((page) => {
             page.header = {

@@ -26,8 +26,7 @@ import { header } from "../../forms/utils";
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
 
-import { onServerOpen } from "../../../server";
-import { baseUrl } from "../../../globals.js";
+import { baseUrl, onServerOpen } from "../../../server/globals";
 
 import * as dandi from "dandi";
 

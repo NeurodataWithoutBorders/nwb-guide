@@ -1,5 +1,5 @@
-import { baseUrl } from "../globals";
 import { resolveAll } from "../promises";
+import { baseUrl } from "../server/globals";
 import validationSchema from "./validation";
 
 // NOTE: Only validation missing on NWBFile Metadata is check_subject_exists and check_processing_module_name
