@@ -108,9 +108,9 @@ export async function createDandiset() {
 
 function addDandisetToRegistry(id, info = true) {
     if (!global.data.DANDI) global.data.DANDI = {};
-    const dandiGlobals = global.data.DANDI ?? (global.data.DANDI = {})
+    const dandiGlobals = global.data.DANDI ?? (global.data.DANDI = {});
     if (!dandiGlobals.dandisets) dandiGlobals.dandisets = {};
-    dandiGlobals.dandisets[id] = info
+    dandiGlobals.dandisets[id] = info;
     global.save();
 }
 
@@ -231,7 +231,7 @@ export class UploadsPage extends Page {
             new Button({
                 icon: dandiSVG,
                 label: "Create Dandiset",
-                onClick: async () => await createDandiset.call(this) // Will throw an error if not created
+                onClick: async () => await createDandiset.call(this), // Will throw an error if not created
             }),
         ],
     };

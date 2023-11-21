@@ -34,7 +34,7 @@ export class GuidedUploadPage extends Page {
             new Button({
                 icon: dandiSVG,
                 label: "Create Dandiset",
-                onClick: async () => await createDandiset.call(this) // Will throw an error if not created
+                onClick: async () => await createDandiset.call(this), // Will throw an error if not created
             }),
         ],
     };
