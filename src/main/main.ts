@@ -248,7 +248,23 @@ function initialize() {
       },
     };
 
-    globals.mainWindow = new BrowserWindow(windowOptions);
+    const win = globals.mainWindow = new BrowserWindow(windowOptions);
+
+    // Avoid CORS for Dandiset creation
+    win.webContents.session.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
+      },
+    );
+  
+    win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          'Access-Control-Allow-Origin': ['*'],
+          ...details.responseHeaders,
+        },
+      });
+    });
 
 
     // Only create one python process
@@ -273,14 +289,14 @@ function initialize() {
       })
     }
 
-    main.enable(globals.mainWindow.webContents);
+    main.enable(win.webContents);
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) globals.mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  else globals.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) win.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  else win.loadFile(path.join(__dirname, '../renderer/index.html'))
 
-    globals.mainWindow.once("closed", () => {
+    win.once("closed", () => {
       delete globals.mainWindow
     })
 
@@ -296,14 +312,14 @@ function initialize() {
     splash.loadFile(splashHTML)
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
-    globals.mainWindow.once("ready-to-show", () => {
+    win.once("ready-to-show", () => {
 
       setTimeout(function () {
 
         hasBeenOpened = true
 
         splash.close();
-        globals.mainWindow.show();
+        win.show();
         createWindow();
 
         // autoUpdater.checkForUpdatesAndNotify();

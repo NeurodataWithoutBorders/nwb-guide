@@ -2,7 +2,7 @@
     "properties": {
         "dandiset_id": {
             "type": "string",
-            "description": "The unique identifier for your Dandiset, manually created on the <a href='https://dandiarchive.org' target='_blank'>main archive</a> or <a href='https://gui-staging.dandiarchive.org' target='_blank'>staging server</a>."
+            "description": "The unique identifier for your Dandiset."
         },
         "number_of_jobs": {
             "type": "integer",

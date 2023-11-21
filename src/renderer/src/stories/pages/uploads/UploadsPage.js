@@ -8,6 +8,7 @@ import { onThrow } from "../../../errors";
 const folderPathKey = "filesystem_paths";
 import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
+import dandiCreateSchema from "../../../../../../schemas/json/dandi/create.json";
 
 const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), { arrays: true });
 
@@ -24,31 +25,87 @@ import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { header } from "../../forms/utils";
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
-import { InfoBox } from "../../InfoBox.js";
 
 import { onServerOpen } from "../../../server";
 import { baseUrl } from "../../../globals.js";
 
+import * as dandi from "../../../../../../../webnwb/packages/dandi/dist/dandi.es.js";
+
+
 export const isStaging = (id) => parseInt(id) >= 100000;
 
-export const dandisetInfoContent = html`<span>
-        You can create a new Dandiset on the <a href="http://dandiarchive.org" target="_blank">main DANDI archive</a>.
-        This Dandiset can be fully public or embargoed according to NIH policy. When you create a Dandiset, a permanent
-        ID is automatically assigned to it.
-    </span>
-    <hr />
-    <small
-        >To prevent the production server from being inundated with test Dandisets, we encourage developers to develop
-        against the <a href="http://gui-staging.dandiarchive.org" target="_blank">development server</a>. Note that the
-        development server should not be used to stage your data. All data are uploaded as draft and can be adjusted
-        before publishing on the production server. The development server is primarily used by users learning to use
-        DANDI or by developers.</small
-    > `;
 
-export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
-    const { dandiset_id } = info;
+export async function createDandiset() {
 
-    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
+    let notification;
+
+    const notify = (message, type) => {
+        if (notification) this.dismiss(notification);
+        return (notification = this.notify(message, type));
+    };
+
+    const modal = new Modal({
+        header: "Create a Dandiset"
+    })
+
+    const content = document.createElement("div")
+    Object.assign(content.style, {
+        padding: "25px",
+        paddingBottom: "0px"
+    })
+
+    const form = new JSONSchemaForm({
+        schema: dandiCreateSchema,
+        results: {},
+    })
+
+    content.append(form)
+    modal.append(content)
+
+    modal.onClose = async () => notify("Dandiset was not created.", "error");
+
+    return new Promise((resolve) => {
+
+        const button = new Button({
+            label: "Create",
+            primary: true,
+            onClick: async () => {
+
+                await form.validate().catch(() => {
+                    const message = "Please fill out all required fields"
+                    notify("Dandiset was not set", "error");
+                    throw message
+                })
+
+                const staging = form.resolved.staging
+                const api_key = await getAPIKey(staging);
+
+                const apiStaging = new dandi.API({ token: api_key, type: staging ? 'staging' : undefined })
+                await apiStaging.init()
+
+                const res =  await apiStaging.create(
+                    form.resolved.title, 
+                    form.resolved.metadata,
+                    form.resolved.embargo_status
+                )
+            
+                resolve(res)
+            },
+        })
+
+        modal.footer = button;
+
+        modal.open = true    
+
+
+        document.body.append(modal)
+
+    }).finally(() => {
+        modal.remove();
+    });
+}
+
+async function getAPIKey(staging = false) {
 
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
@@ -122,6 +179,17 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         });
     }
 
+    return api_key
+
+}
+
+export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
+    const { dandiset_id } = info;
+
+    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
+
+    const api_key = await getAPIKey(staging);
+
     const result = await run(
         type ? `upload/${type}` : "upload",
         {
@@ -150,6 +218,15 @@ export class UploadsPage extends Page {
     header = {
         title: "DANDI Uploads",
         subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
+        controls: [
+            new Button({
+                label: "Create Dandiset",
+                onClick: async () => {
+                    const dandiset = await createDandiset.call(this) // Will throw an error if not created
+                    this.form.updateData(['dandiset_id'], dandiset.identifier)
+                },
+            })
+        ]
     };
 
     constructor(...args) {
@@ -212,12 +289,6 @@ export class UploadsPage extends Page {
         });
 
         return html`
-            ${new InfoBox({
-                header: "How do I create a Dandiset?",
-                content: dandisetInfoContent,
-            })}
-            <br />
-            <br />
             ${until(
                 promise.then((form) => {
                     return html`
@@ -229,8 +300,6 @@ export class UploadsPage extends Page {
                 html`<p>Waiting to connect to the Flask server...</p>
                     <p />`
             )}
-            <br />
-            <br />
         `;
     }
 }

@@ -1,5 +1,4 @@
 import { html } from "lit";
-import lottie from "lottie-web";
 import { column1Lottie, column2Lottie, column3Lottie } from "../../../../assets/lotties/overview-lotties.js";
 import { Page } from "../Page.js";
 
@@ -11,6 +10,7 @@ export class GettingStartedPage extends Page {
     }
 
     updated() {
+
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         let column1 = this.query("#lottie1");
         let column2 = this.query("#lottie2");

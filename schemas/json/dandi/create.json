@@ -1,0 +1,70 @@
+{
+    "order": ["title", "staging", "embargo_status", "metadata"],
+    "properties": {
+        "title": {
+            "type": "string",
+            "description": "A title associated with the Dandiset"
+        },
+        
+        "embargo_status": {
+            "type": "boolean",
+            "default": false
+        },
+
+        "staging": {
+            "type": "boolean",
+            "default": true,
+            "description": "Create a Dandiset on the development server. <br><small><b>Note:</b> Recommended for developers or users learning to use DANDI</small>"
+        },
+
+        "metadata": {
+            "type": "object",
+            "order": [
+                "description",
+                "study_target",
+                "license",
+                "protocol",
+                "keywords",
+                "acknowledgement"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "A description of the Dandiset."
+                },
+                "license": {
+                    "type": "string",
+                    "enum": [
+                        "spdx:CC0-1.0",
+                        "spdx:CC-BY-4.0"
+                    ],
+                    "description": "Licenses associated with the item. <br><small><b>Note:</b> DANDI only supports a subset of <a href='https://creativecommons.org' target='_blank'>Creative Commons Licenses</a> applicable to datasets</small>"
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Keywords used to describe this content."
+                },
+                
+                "study_target": {
+                    "type": "string",
+                    "description": "Objectives or specific questions of the study."
+                },
+
+                "protocol": {
+                    "type": "string",
+                    "description": "A list of persistent URLs describing the protocol (e.g. protocols.io, or other DOIs)."
+                },
+
+                "acknowledgement": {
+                    "type": "string"
+                }
+
+            },
+            "required": ["description", "license"]
+        }
+    },
+    "required": ["title", "metadata"]
+}

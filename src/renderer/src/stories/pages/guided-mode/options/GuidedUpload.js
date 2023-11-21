@@ -5,11 +5,11 @@ import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
 import dandiUploadSchema from "../../../../../../../schemas/dandi-upload.schema";
-import { dandisetInfoContent, uploadToDandi } from "../../uploads/UploadsPage.js";
-import { InfoBox } from "../../../InfoBox.js";
+import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
 import { until } from "lit/directives/until.js";
 import { onServerOpen } from "../../../../server";
 import { baseUrl } from "../../../../globals.js";
+import { Button } from "../../../Button.js";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -27,6 +27,15 @@ export class GuidedUploadPage extends Page {
 
     header = {
         subtitle: "Settings to upload your conversion to the DANDI Archive",
+        controls: [
+            new Button({
+                label: "Create Dandiset",
+                onClick: async () => {
+                    const dandiset = await createDandiset.call(this) // Will throw an error if not created
+                    this.form.updateData(['dandiset_id'], dandiset.identifier)
+                },
+            })
+        ]
     };
 
     footer = {
@@ -84,10 +93,7 @@ export class GuidedUploadPage extends Page {
             }));
         });
 
-        return html`${new InfoBox({
-                header: "How do I create a Dandiset?",
-                content: dandisetInfoContent,
-            })}<br /><br />${until(promise, html`Loading form contents...`)} `;
+        return html`${until(promise, html`Loading form contents...`)} `;
     }
 }
 

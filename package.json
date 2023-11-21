@@ -142,7 +142,7 @@
     "@sweetalert2/theme-bulma": "^4.0.3",
     "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
-    "dandi": "^0.0.2",
+    "dandi": "^0.0.3",
     "find-free-port": "^2.0.0",
     "fomantic-ui": "^2.8.8",
     "fs-extra": "^10.0.0",
