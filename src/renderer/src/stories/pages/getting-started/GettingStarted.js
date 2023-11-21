@@ -10,7 +10,6 @@ export class GettingStartedPage extends Page {
     }
 
     updated() {
-
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         let column1 = this.query("#lottie1");
         let column2 = this.query("#lottie2");

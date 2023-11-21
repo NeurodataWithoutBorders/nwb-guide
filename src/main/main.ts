@@ -256,7 +256,7 @@ function initialize() {
         callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
       },
     );
-  
+
     win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
       callback({
         responseHeaders: {
