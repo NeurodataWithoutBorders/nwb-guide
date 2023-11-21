@@ -174,11 +174,12 @@ export class Search extends LitElement {
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
             listMode: { type: String, reflect: true },
-            value: { type: String },
+            value: { type: String, reflect: true },
         };
     }
 
     updated() {
+
         const options = this.shadowRoot.querySelectorAll(".option");
         this.#options = Array.from(options).map((option) => {
             const keywordString = option.getAttribute("data-keywords");
@@ -256,8 +257,10 @@ export class Search extends LitElement {
 
         this.setAttribute("active", !!toShow.length);
     };
+    
 
     render() {
+
         this.categories = {};
 
         // Update list

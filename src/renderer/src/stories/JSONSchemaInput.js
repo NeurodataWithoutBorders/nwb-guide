@@ -112,7 +112,8 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value, forceValidate = false) {
-        if (this.value === value && !forceValidate) {
+
+        if (this.value !== value && !forceValidate) {
             const el = this.getElement();
             if (el.type === "checkbox") el.checked = value;
             else if (el.classList.contains("list"))
@@ -122,6 +123,7 @@ export class JSONSchemaInput extends LitElement {
                       })
                     : [];
             else el.value = value;
+
         }
 
         const { path: fullPath } = this;
@@ -191,6 +193,7 @@ export class JSONSchemaInput extends LitElement {
     #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
 
     #render() {
+
         const { validateOnChange, info, path: fullPath } = this;
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
@@ -380,7 +383,7 @@ export class JSONSchemaInput extends LitElement {
                     },
                 });
 
-                // search.classList.add("schema-input")
+                search.classList.add("schema-input")
                 return search;
             }
 
