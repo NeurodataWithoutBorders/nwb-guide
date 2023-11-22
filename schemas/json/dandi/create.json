@@ -41,7 +41,7 @@
                             "spdx:CC-BY-4.0"
                         ]
                     },
-                    "uniqueItems": true,                    
+                    "uniqueItems": true,
                     "description": "Licenses associated with the item. <br><small><b>Note:</b> DANDI only supports a subset of <a href='https://creativecommons.org' target='_blank'>Creative Commons Licenses</a> applicable to datasets</small>"
                 },
                 "keywords": {

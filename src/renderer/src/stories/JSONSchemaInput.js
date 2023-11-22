@@ -348,9 +348,8 @@ export class JSONSchemaInput extends LitElement {
                 }
 
                 if (info.uniqueItems) {
-                    if (!list.items.find((item) => item.value === value)) list.add({ value }) 
-                }
-                else list.add({ value });
+                    if (!list.items.find((item) => item.value === value)) list.add({ value });
+                } else list.add({ value });
                 modal.toggle(false);
             });
 
