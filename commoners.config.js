@@ -1,4 +1,4 @@
-import { updateURLParams } from './src/renderer/utils/url';
+import { updateURLParams } from './src/utils/url';
 
 const name = 'nwb-guide'
 
@@ -10,7 +10,7 @@ const isSupported = {
 export default {
 
 
-    icon: 'src/renderer/assets/img/logo-guide-draft.png',
+    icon: 'src/assets/img/logo-guide-draft.png',
 
     plugins: [
         {
@@ -50,7 +50,7 @@ export default {
         {
 
             name: "open-file",
-            
+
             isSupported,
 
             load: function () {
@@ -106,7 +106,7 @@ export default {
     },
 
     electron: {
-        splash: './src/main/splash-screen.html',
+        splash: './src/splash-screen.html',
         window: {
             minWidth: 1121,
             minHeight: 735,
