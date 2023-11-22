@@ -105,7 +105,6 @@ export class Main extends LitElement {
 
             // Default Capsules Behavior
             const section = sections[info.section];
-            console.log("Sections", section, sections);
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
                     let pages = Object.values(section.pages);
@@ -145,26 +144,34 @@ export class Main extends LitElement {
 
         return html`
             ${headerEl}
-            ${capsules
-                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
-                : html`<div style="height:50px"</div>`}
-            ${title
-                ? html`<div
-                      style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1;"
-                  >
-                      <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
-                          <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:gray;">
-                              <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
-                              <small>${unsafeHTML(subtitle)}</small>
+            ${
+                capsules
+                    ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
+                    : html``
+            }
+            ${
+                title
+                    ? html`<div
+                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${capsules
+                              ? ""
+                              : "padding-top: 35px;"}"
+                      >
+                          <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
+                              <div style="line-height: 1em; color: gray;">
+                                  <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
+                                  <small>${unsafeHTML(subtitle)}</small>
+                              </div>
+                              <div style="padding-left: 25px;">${controls}</div>
                           </div>
-                          <div style="padding-left: 25px">${controls}</div>
-                      </div>
-                      <hr style="margin-bottom: 0;" />
-                  </div>`
-                : ""}
+                          <hr style="margin-bottom: 0;" />
+                      </div>`
+                    : ""
+            }
 
-            <main id="content" class="js-content" style="overflow: hidden;">
-                <section class="section ${capsules ? "nested" : ""}">${page}</section>
+            <main id="content" class="js-content" style="overflow: hidden; ${
+                capsules || title ? "" : "padding-top: 35px;"
+            }"">
+                <section class="section">${page}</section>
             </main>
             ${footerEl}
         `;

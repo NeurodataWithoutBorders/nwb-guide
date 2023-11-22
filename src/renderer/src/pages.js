@@ -108,11 +108,13 @@ const pages = {
             start: new GuidedStartPage({
                 label: "Start",
             }),
+
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
                 section: sections[0],
             }),
+
             structure: new GuidedStructurePage({
                 title: "Data Formats",
                 label: "Data formats",
@@ -147,18 +149,21 @@ const pages = {
                 title: "Inspector Report",
                 label: "Inspect files",
                 section: sections[2],
+                sync: ["preview"],
             }),
 
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
                 label: "Preview files",
                 section: sections[2],
+                sync: ["preview"],
             }),
 
             upload: new GuidedUploadPage({
                 title: "DANDI Upload Options",
                 label: "Upload to DANDI",
                 section: sections[3],
+                sync: ["conversion"],
             }),
 
             review: new GuidedResultsPage({

@@ -24,6 +24,7 @@ export class NavigationSidebar extends LitElement {
         return {
             sections: { type: Object, reflect: false },
             active: { type: String, reflect: true },
+            header: { type: Object, reflect: false },
         };
     }
 
@@ -102,6 +103,7 @@ export class NavigationSidebar extends LitElement {
 
     render() {
         const header = this.header ?? this.#header;
+
         return html`
             <nav id="guided-nav" class="guided--nav">
                 ${header

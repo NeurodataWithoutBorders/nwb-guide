@@ -20,8 +20,8 @@ function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
             ? "directories"
             : "files"
         : nested
-        ? type
-        : `a ${type}`;
+          ? type
+          : `a ${type}`;
 }
 
 const componentCSS = css`

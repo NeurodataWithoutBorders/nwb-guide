@@ -1,5 +1,5 @@
 import "./pages.js"
-import { isElectron, electron, app } from './electron/index.js'
+import { isElectron, electron } from './electron/index.js'
 const { ipcRenderer } = electron;
 
 import { Dashboard } from './stories/Dashboard.js'
@@ -9,29 +9,15 @@ import {
   notify
 } from './dependencies/globals.js'
 
-import { baseUrl } from './globals.js'
-
 import Swal from 'sweetalert2'
+import { loadServerEvents, pythonServerOpened } from "./server/index.js";
 
-import { StatusBar } from "./stories/status/StatusBar.js";
-import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import serverSVG from "./stories/assets/server.svg?raw";
-import webAssetSVG from "./stories/assets/web_asset.svg?raw";
-import wifiSVG from "./stories/assets/wifi.svg?raw";
+import { statusBar } from "./server/globals.js";
 
 // Set the sidebar subtitle to the current app version
 const dashboard = document.querySelector('nwb-dashboard') as Dashboard
 
-const statusBar = new StatusBar({
-  items: [
-    { label: unsafeSVG(webAssetSVG), value: isElectron ? commoners.version ?? 'ERROR' : 'Web'  }, // NOTE: Expose version
-    { label: unsafeSVG(wifiSVG) },
-    { label: unsafeSVG(serverSVG) }
-  ]
-})
-
 dashboard.subtitle = statusBar
-
 
 //////////////////////////////////
 // Connect to Python back-end
@@ -93,64 +79,10 @@ async function checkInternetConnection() {
     return hasInternet
 };
 
-// Check if the Flask server is live
-const serverIsLiveStartup = async () => {
-  const echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json()).catch(e => e)
-  return echoResponse === "server ready" ? true : false;
-};
 
-// Preload Flask imports for faster on-demand operations
-const preloadFlaskImports = async () => await fetch(`${baseUrl}/startup/preload-imports`).then(res => res.json()).catch(e => e)
-
-let openPythonStatusNotyf: undefined | any;
-
-async function pythonServerOpened() {
-
-  // Confirm requests are actually received by the server
-  const isLive = await serverIsLiveStartup()
-  if (isLive) await preloadFlaskImports() // initiate preload of Flask imports
-  if (!isLive) return pythonServerClosed()
-
-  // Update server status and throw a notification
-  statusBar.items[2].status = true
-
-  if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
-  openPythonStatusNotyf = notyf.open({
-    type: "success",
-    message: "Backend services are available",
-  });
-}
-
-
-async function pythonServerClosed() {
-
-  statusBar.items[2].status = false
-
-    await Swal.fire({
-      icon: "error",
-      html: `<p>Something went wrong while initializing the application's background services.</p><small>Please restart NWB GUIDE and try again. If this issue occurs multiple times, please open an issue on the <a href='https://github.com/catalystneuro/nwb-guide/issues' target='_blank'>NWB GUIDE Issue Tracker</a>.</small>`,
-      heightAuto: false,
-      backdrop: "rgba(0,0,0, 0.4)",
-      confirmButtonText: "Exit Now",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-    });
-
-    // if (isElectron) app.exit();
-    if (isElectron) commoners.quit();
-    else location.reload()
-
-    Swal.close();
-
-
-}
+loadServerEvents()
 
 if (isElectron) {
-
-    const service = commoners.services.flask
-
-    service.onActivityDetected(pythonServerOpened)
-    service.onClosed(pythonServerClosed)
 
     // Check for update and show the pop up box
     ipcRenderer.on("update_available", () => {
@@ -174,11 +106,12 @@ if (isElectron) {
       } else {
         update_downloaded_notification = notyf.open({
           type: "app_update_warning",
-          message:
+      message:
             "Update downloaded. It will be installed on the restart of the app. Click here to restart NWB GUIDE now.",
         });
       }
-      update_downloaded_notification.on("click", async ({ target, event }) => {
+
+      update_downloaded_notification.on("click", async () => {
         restartApp();
       });
     });

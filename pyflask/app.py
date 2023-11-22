@@ -94,6 +94,23 @@ def send_preview(path):
     return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
 
 
+@app.route("/cpus")
+def get_cpu_count():
+    from psutil import cpu_count
+
+    physical = cpu_count(logical=False)
+    logical = cpu_count()
+
+    return dict(physical=physical, logical=logical)
+
+
+@app.route("/get-recommended-species")
+def get_species():
+    from dandi.metadata import species_map
+
+    return species_map
+
+
 @api.route("/server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
     def get(self):

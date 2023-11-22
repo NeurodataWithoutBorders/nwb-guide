@@ -3,6 +3,8 @@ import os
 import json
 import math
 import copy
+import re
+
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
@@ -141,13 +143,31 @@ def module_to_dict(my_module):
     return module_dict
 
 
+doc_pattern = r":py:class:`\~.+\..+\.(\w+)`"
+remove_extra_spaces_pattern = r"\s+"
+
+
+def get_class_ref_in_docstring(input_string):
+    match = re.search(doc_pattern, input_string)
+
+    if match:
+        return match.group(1)
+
+
+def derive_interface_info(interface):
+    info = {"keywords": getattr(interface, "keywords", []), "description": ""}
+    if interface.__doc__:
+        info["description"] = re.sub(
+            remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
+        )
+
+    return info
+
+
 def get_all_converter_info() -> dict:
     from neuroconv import converters
 
-    return {
-        name: {"keywords": [], "description": f"{converter.__doc__.split('.')[0]}." if converter.__doc__ else ""}
-        for name, converter in module_to_dict(converters).items()
-    }
+    return {name: derive_interface_info(converter) for name, converter in module_to_dict(converters).items()}
 
 
 def get_all_interface_info() -> dict:
@@ -173,10 +193,7 @@ def get_all_interface_info() -> dict:
     ]
 
     return {
-        interface.__name__: {
-            "keywords": interface.keywords,
-            "description": f"{interface.__doc__.split('.')[0]}." if interface.__doc__ else "",
-        }
+        interface.__name__: derive_interface_info(interface)
         for interface in interface_list
         if not interface.__name__ in exclude_interfaces_from_selection
     }
@@ -451,7 +468,7 @@ def convert_to_nwb(info: dict) -> str:
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs):
-    tmp_folder_path = aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
+    tmp_folder_path = _aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
     innerKwargs = {**kwargs}
     del innerKwargs["filesystem_paths"]
     innerKwargs["nwb_folder_path"] = tmp_folder_path
@@ -466,6 +483,8 @@ def upload_folder_to_dandi(
     nwb_folder_path: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -476,15 +495,19 @@ def upload_folder_to_dandi(
         nwb_folder_path=Path(nwb_folder_path),
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
-def upload_to_dandi(
+def upload_project_to_dandi(
     dandiset_id: str,
     api_key: str,
     project: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -497,6 +520,8 @@ def upload_to_dandi(
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
@@ -573,18 +598,28 @@ def inspect_nwb_file(payload):
 def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all, load_config
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from pickle import PicklingError
 
-    messages = list(
-        inspect_all(
-            n_jobs=-2,  # uses number of CPU - 1
-            ignore=[
-                "check_description",
-                "check_data_orientation",
-            ],  # TODO: remove when metadata control is exposed
-            config=load_config(filepath_or_keyword="dandi"),
-            **payload,
-        )
+    kwargs = dict(
+        n_jobs=-2,  # uses number of CPU - 1
+        ignore=[
+            "check_description",
+            "check_data_orientation",
+        ],  # TODO: remove when metadata control is exposed
+        config=load_config(filepath_or_keyword="dandi"),
+        **payload,
     )
+
+    try:
+        messages = list(inspect_all(**kwargs))
+    except PicklingError as e:
+        if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(e):
+            del kwargs["n_jobs"]
+            messages = list(inspect_all(**kwargs))
+        else:
+            raise e
+    except Exception as e:
+        raise e
 
     return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
 

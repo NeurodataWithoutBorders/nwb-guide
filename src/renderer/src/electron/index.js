@@ -3,7 +3,8 @@ import isElectron from "./check.js";
 export { isElectron };
 
 export let port = 4242;
-export let electron = {}; // ipcRenderer, remote, shell, etc.
+export let SERVER_FILE_PATH = "";
+export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
 export let remote = {};
@@ -17,15 +18,17 @@ if (isElectron) {
         electron = require("electron");
         fs = require("fs-extra"); // File System
         os = require("node:os");
-
-        crypto = require("node:crypto");
-
-        const pythonUrl = new URL(commoners.services.flask.url)
-
-        port = pythonUrl.port
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
+        crypto = require("node:crypto");
         path = require("node:path");
+
+        const { url, abspath } = commoners.services.flask
+
+        port = (new URL(url)).port
+
+        SERVER_FILE_PATH = abspath
+        
     } catch (e) {
         console.error("Electron API access failed —", e);
     }
