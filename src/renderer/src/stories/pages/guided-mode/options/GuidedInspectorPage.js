@@ -74,8 +74,6 @@ export class GuidedInspectorPage extends Page {
         const { globalState } = this.info;
         const { stubs, inspector } = globalState.preview;
 
-        console.log("Already got", inspector);
-
         const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
 

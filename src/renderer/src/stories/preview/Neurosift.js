@@ -1,8 +1,8 @@
 import { LitElement, css, html } from "lit";
-import { baseUrl } from "../../globals";
 
 import { Loader } from "../Loader";
 import { FullScreenToggle } from "../FullScreenToggle";
+import { baseUrl } from "../../server/globals";
 
 export function getURLFromFilePath(file, projectName) {
     const regexp = new RegExp(`.+(${projectName}.+)`);
