@@ -15,7 +15,6 @@ import { header } from "../../../forms/utils";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { Button } from "../../../Button.js";
-import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 import globalIcon from "../../../assets/global.svg?raw";
 
@@ -52,16 +51,6 @@ const propsToIgnore = {
         session_id: true,
     },
 };
-
-// const propsToIgnore = [
-//     // "Ophys", // Always ignore ophys metadata (for now)
-//     "Icephys", // Always ignore icephys metadata (for now)
-//     "Behavior", // Always ignore behavior metadata (for now)
-//     // new RegExp("ndx-.+"), // Ignore all ndx extensions
-//     "ndx-dandi-icephys",
-//     "subject_id",
-//     "session_id",
-// ];
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
@@ -120,7 +109,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Metadata",
             propsToRemove: propsToIgnore,
-            schema: globalSchema, // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+            schema: preprocessMetadataSchema(undefined, true), // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
             hasInstances: true,
             mergeFunction: function (globalResolved, globals) {
                 merge(globalResolved, globals);

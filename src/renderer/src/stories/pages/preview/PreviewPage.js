@@ -3,7 +3,7 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { Neurosift } from "../../preview/Neurosift.js";
-import { baseUrl } from "../../../globals.js";
+import { baseUrl } from "../../../server/globals";
 
 export class PreviewPage extends Page {
     header = {

@@ -9,6 +9,7 @@ import projectGlobalSchema from "../../../../../../../schemas/json/project/globa
 import { merge } from "../../utils.js";
 import { onThrow } from "../../../../errors";
 import { header } from "../../../forms/utils";
+import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 
