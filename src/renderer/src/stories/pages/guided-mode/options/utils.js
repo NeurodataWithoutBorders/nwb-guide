@@ -23,12 +23,10 @@ export const openProgressSwal = (options, callback) => {
 };
 
 export const run = async (url, payload, options = {}) => {
+    let internalSwal;
 
-    let internalSwal
-
-    if (options.swal === false) {}
-    else if (!options.swal || options.swal === true) {
-
+    if (options.swal === false) {
+    } else if (!options.swal || options.swal === true) {
         if (!("showCancelButton" in options)) {
             options.showCancelButton = true;
             options.customClass = { actions: "swal-conversion-actions" };
@@ -40,12 +38,12 @@ export const run = async (url, payload, options = {}) => {
             signal: cancelController.signal,
         };
 
-        const popup = internalSwal = await openProgressSwal(options, (result) => {
+        const popup = (internalSwal = await openProgressSwal(options, (result) => {
             if (!result.isConfirmed) cancelController.abort();
         }).then(async (swal) => {
             if (options.onOpen) await options.onOpen(swal);
             return swal;
-        });
+        }));
 
         const element = popup.getHtmlContainer();
         const actions = popup.getActions();

@@ -77,26 +77,11 @@ export class GuidedNewDatasetPage extends Page {
     };
 
     updateForm = () => {
-        let projectGlobalState = this.info.globalState.project;
-        if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {};
-
         // Properly clone the schema to produce multiple pages from the project metadata schema
         const schema = { ...projectMetadataSchema };
         schema.properties = { ...schema.properties };
 
         this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
-
-        const pages = schemaToPages.call(this, globalSchema, ["project"], { validateEmptyValues: false }, (info) => {
-            info.title = `${info.label} Global Metadata`;
-            return info;
-        });
-
-        pages.forEach((page) => {
-            page.header = {
-                subtitle: `Enter any ${page.info.label}-level metadata that can serve as the common default across each experiment session`,
-            };
-            this.addPage(page.info.label, page);
-        });
 
         this.form = new JSONSchemaForm({
             schema,
