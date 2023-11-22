@@ -47,4 +47,4 @@ jobs:
           # Currently this is set to Ryan's Apple ID and app-specific password
           appleId: ${{ secrets.APPLE_ID }}
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
-        run: npm run deploy:mac
+        run: npm run deploy

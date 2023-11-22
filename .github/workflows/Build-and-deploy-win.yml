@@ -35,4 +35,4 @@ jobs:
       - name: Build and deploy on Windows
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run deploy:win
+        run: npm run deploy
