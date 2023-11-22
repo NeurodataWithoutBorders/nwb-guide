@@ -4,7 +4,7 @@ export { isElectron };
 
 export let port = 4242;
 export let SERVER_FILE_PATH = "";
-export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
+export let electron = {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
 export let remote = {};
@@ -23,11 +23,11 @@ if (isElectron) {
         crypto = require("node:crypto");
         path = require("node:path");
 
-        const { url, abspath } = commoners.services.flask
+        const { url, filepath } = commoners.services.flask
 
         port = (new URL(url)).port
 
-        SERVER_FILE_PATH = abspath
+        SERVER_FILE_PATH = filepath
         
     } catch (e) {
         console.error("Electron API access failed —", e);

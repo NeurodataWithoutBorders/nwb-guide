@@ -1,4 +1,4 @@
-import { isElectron, electron, app, port } from '../electron/index.js'
+import { isElectron, electron } from '../electron/index.js'
 const { ipcRenderer } = electron;
 
 import {
@@ -72,7 +72,7 @@ export async function pythonServerClosed(message?: string) {
       allowEscapeKey: false,
     });
 
-    if (isElectron) app.exit();
+    if (isElectron) commoners.exit();
     else location.reload()
 
     Swal.close();
@@ -84,19 +84,9 @@ let openPythonStatusNotyf: undefined | any;
 
 export const loadServerEvents = () => {
     if (isElectron) {
-        ipcRenderer.send("python.status"); // Trigger status check
-
-        ipcRenderer.on("python.open", pythonServerOpened);
-
-        ipcRenderer.on("python.closed", (_, message) => pythonServerClosed(message));
-        ipcRenderer.on("python.restart", () => {
-        statusBar.items[2].status = undefined
-        if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
-        openPythonStatusNotyf = notyf.open({
-            type: "warning",
-            message: "Backend services are restarting...",
-        })
-        });
+        const service = commoners.services.flask
+        service.onActivityDetected(pythonServerOpened)
+        service.onClosed(pythonServerClosed)
     }
 
     else activateServer() // Just mock-activate the server if we're in the browser

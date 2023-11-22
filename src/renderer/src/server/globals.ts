@@ -1,4 +1,4 @@
-import { isElectron, app, port } from '../electron/index.js'
+import { isElectron, port } from '../electron/index.js'
 
 import serverSVG from "../stories/assets/server.svg?raw";
 import webAssetSVG from "../stories/assets/web_asset.svg?raw";
@@ -22,11 +22,9 @@ export const resolve = (object, callback) => {
 import { StatusBar } from "../stories/status/StatusBar.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 
-const appVersion = app?.getVersion();
-
 export const statusBar = new StatusBar({
   items: [
-    { label: unsafeSVG(webAssetSVG), value: isElectron ? appVersion ?? 'ERROR' : 'Web' },
+    { label: unsafeSVG(webAssetSVG), value: isElectron ? commoners.version ?? 'ERROR' : 'Web' },
     { label: unsafeSVG(wifiSVG) },
     { label: unsafeSVG(serverSVG) }
   ]
