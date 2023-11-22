@@ -1,5 +1,4 @@
 import { isElectron, electron } from '../electron/index.js'
-const { ipcRenderer } = electron;
 
 import {
   notyf,

@@ -2,6 +2,11 @@ import { updateURLParams } from './src/renderer/utils/url';
 
 const name = 'nwb-guide'
 
+const isSupported = {
+    web: false, 
+    mobile: false
+}
+
 export default {
 
 
@@ -10,6 +15,7 @@ export default {
     plugins: [
         {
             name: 'dialog',
+            isSupported,
             desktop: {
                 load: function() {
                     this.on(`${name}:dialog`, (event, type, ...args) => event.returnValue = this.electron.dialog[type](...args))
@@ -23,6 +29,7 @@ export default {
         },
         {
             name: 'custom-unload-popup',
+            isSupported,
             desktop: {
                 unload: async function() {
 
@@ -43,6 +50,8 @@ export default {
         {
 
             name: "open-file",
+            
+            isSupported,
 
             load: function () {
                 this.on(`${name}:fileOpened`, (info, filepath) => {
