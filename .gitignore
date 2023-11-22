@@ -10,6 +10,9 @@ coverage
 
 *.log
 
+
+.pytest_cache
+
 # Ignore node_modules folder
 node_modules
 build/api

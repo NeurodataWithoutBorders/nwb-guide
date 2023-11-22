@@ -20,8 +20,6 @@ const schema = merge(
     }
 );
 
-console.log(schema);
-
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
