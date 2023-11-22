@@ -33,11 +33,15 @@
                     "description": "A description of the Dandiset."
                 },
                 "license": {
-                    "type": "string",
-                    "enum": [
-                        "spdx:CC0-1.0",
-                        "spdx:CC-BY-4.0"
-                    ],
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "spdx:CC0-1.0",
+                            "spdx:CC-BY-4.0"
+                        ]
+                    },
+                    "uniqueItems": true,                    
                     "description": "Licenses associated with the item. <br><small><b>Note:</b> DANDI only supports a subset of <a href='https://creativecommons.org' target='_blank'>Creative Commons Licenses</a> applicable to datasets</small>"
                 },
                 "keywords": {

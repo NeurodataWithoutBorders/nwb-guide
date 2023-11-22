@@ -324,7 +324,7 @@ export class JSONSchemaInput extends LitElement {
                       })
                     : [],
                 onChange: async () => {
-                    this.#updateData(fullPath, list.items.length ? list.items.map((o) => o.value) : undefined);
+                    this.#updateData(fullPath, items.length ? ist.items.map((o) => o.value) : undefined);
                     if (validateOnChange) await this.#triggerValidation(name, path);
                 },
             });
@@ -347,7 +347,10 @@ export class JSONSchemaInput extends LitElement {
                     }
                 }
 
-                list.add({ value });
+                if (info.uniqueItems) {
+                    if (!list.items.find((item) => item.value === value)) list.add({ value }) 
+                }
+                else list.add({ value });
                 modal.toggle(false);
             });
 
