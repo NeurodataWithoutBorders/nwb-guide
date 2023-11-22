@@ -85,7 +85,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Metadata",
             propsToRemove: [...propsToIgnore],
-            schema: preprocessMetadataSchema(), // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+            schema: preprocessMetadataSchema(undefined, true), // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
             hasInstances: true,
             mergeFunction: function (globalResolved, globals) {
                 merge(globalResolved, globals);
