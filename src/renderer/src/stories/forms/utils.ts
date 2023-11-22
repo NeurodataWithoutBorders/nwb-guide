@@ -7,9 +7,7 @@ export const capitalize = (str: string) => {
 }
 
 
-export const header = (headerStr: string) => {
-    return headerStr.split('_').filter(str => !!str).map(capitalize).join(' ')
-}
+export const header = (headerStr: string) => headerStr.split(/[_\s]/).filter(str => !!str).map(capitalize).join(' ')
 
 export const textToArray = (value: string) => value.split("\n")
                                             .map((str) => str.trim())

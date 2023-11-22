@@ -1,12 +1,12 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
-import subjectSchema from "../../../../../../../schemas/subject.schema";
+import getSubjectSchema from "../../../../../../../schemas/subject.schema";
 import { validateOnChange } from "../../../../validation/index.js";
 import { Table } from "../../../Table.js";
 
 import { updateResultsFromSubjects } from "./utils";
 import { merge } from "../../utils.js";
-import { globalSchema } from "../../../../../../../schemas/base-metadata.schema";
+import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 import { Button } from "../../../Button.js";
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { header } from "../../../forms/utils";
@@ -84,7 +84,7 @@ export class GuidedSubjectsPage extends Page {
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Subject Metadata",
             key: "Subject",
-            schema: globalSchema.properties.Subject,
+            schema: preprocessMetadataSchema(undefined, true).properties.Subject,
             validateOnChange: (key, parent, path) => {
                 return validateOnChange(key, parent, ["Subject", ...path]);
             },
@@ -112,7 +112,7 @@ export class GuidedSubjectsPage extends Page {
         }
 
         this.table = new Table({
-            schema: subjectSchema,
+            schema: getSubjectSchema(),
             data: subjects,
             globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",

@@ -1,31 +1,13 @@
-import { isElectron, electron, app } from './electron/index.js'
+import { isElectron, electron, app, port } from '../electron/index.js'
 const { ipcRenderer } = electron;
 
 import {
   notyf,
-} from './dependencies/globals.js'
-
-import { baseUrl } from './globals.js'
+} from '../dependencies/globals.js'
 
 import Swal from 'sweetalert2'
 
-
-import { StatusBar } from "./stories/status/StatusBar.js";
-import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import serverSVG from "./stories/assets/server.svg?raw";
-import webAssetSVG from "./stories/assets/web_asset.svg?raw";
-import wifiSVG from "./stories/assets/wifi.svg?raw";
-
-const appVersion = app?.getVersion();
-
-export const statusBar = new StatusBar({
-  items: [
-    { label: unsafeSVG(webAssetSVG), value: isElectron ? appVersion ?? 'ERROR' : 'Web' },
-    { label: unsafeSVG(wifiSVG) },
-    { label: unsafeSVG(serverSVG) }
-  ]
-})
-
+import { activateServer, baseUrl } from './globals.js';
 
 // Check if the Flask server is live
 const serverIsLiveStartup = async () => {
@@ -38,27 +20,6 @@ const serverIsLiveStartup = async () => {
     if (res.ok) return res.json()
     else throw new Error('Error preloading Flask imports')
   })
-
-
-let serverCallbacks: Function[] = []
-export const onServerOpen = (callback:Function) => {
-  if (statusBar.items[2].status === true) return callback()
-  else {
-    return new Promise(res => {
-        serverCallbacks.push(() => {
-            res(callback())
-        })
-
-    })
- }
-}
-
-export const activateServer = () => {
- statusBar.items[2].status = true
-
- serverCallbacks.forEach(cb => cb())
- serverCallbacks = []
-}
 
 export async function pythonServerOpened() {
 
