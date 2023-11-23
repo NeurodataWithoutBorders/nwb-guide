@@ -5,8 +5,8 @@ import { fs } from "../electron/index";
 const globals = {
     get dialog() {
         return commoners.plugins.dialog;
-    }
-}
+    },
+};
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
     if (Array.isArray(type))
