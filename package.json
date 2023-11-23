@@ -1,6 +1,6 @@
 {
   "name": "nwb-guide",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "",
   "scripts": {
     "start": "commoners --target desktop",
