@@ -1,55 +1,55 @@
-import { updateURLParams } from './src/utils/url';
+import { updateURLParams } from "./src/utils/url";
 
-const name = 'nwb-guide'
+const name = "nwb-guide";
 
 const isSupported = {
-    web: false, 
-    mobile: false
-}
+    web: false,
+    mobile: false,
+};
 
 export default {
-
     name: "NWB GUIDE",
 
-    icon: 'src/assets/img/logo-guide-draft.png',
+    icon: "src/assets/img/logo-guide-draft.png",
 
     plugins: [
         {
-            name: 'dialog',
+            name: "dialog",
             isSupported,
             desktop: {
-                load: function() {
-                    this.on(`${name}:dialog`, (event, type, ...args) => event.returnValue = this.electron.dialog[type](...args))
-                }
-            },
-            load: function() {
-                return {
-                    showOpenDialogSync:  (...args) => this.sendSync(`${name}:dialog`, 'showOpenDialogSync', ...args)
-                }
-            }
-        },
-        {
-            name: 'custom-unload-popup',
-            isSupported,
-            desktop: {
-                unload: async function() {
-
-                    const { response } = await this.electron.dialog
-                    .showMessageBox(this.electron.BrowserWindow.getFocusedWindow(), {
-                      type: "question",
-                      buttons: ["Yes", "No"],
-                      title: "Confirm",
-                      message: "Any running process will be stopped. Are you sure you want to quit?",
-                    })
-                    
-                    if (response !== 0) return false // Skip quitting
-                  
+                load: function () {
+                    this.on(
+                        `${name}:dialog`,
+                        (event, type, ...args) => (event.returnValue = this.electron.dialog[type](...args))
+                    );
                 },
-
-            }
+            },
+            load: function () {
+                return {
+                    showOpenDialogSync: (...args) => this.sendSync(`${name}:dialog`, "showOpenDialogSync", ...args),
+                };
+            },
         },
         {
+            name: "custom-unload-popup",
+            isSupported,
+            desktop: {
+                unload: async function () {
+                    const { response } = await this.electron.dialog.showMessageBox(
+                        this.electron.BrowserWindow.getFocusedWindow(),
+                        {
+                            type: "question",
+                            buttons: ["Yes", "No"],
+                            title: "Confirm",
+                            message: "Any running process will be stopped. Are you sure you want to quit?",
+                        }
+                    );
 
+                    if (response !== 0) return false; // Skip quitting
+                },
+            },
+        },
+        {
             name: "open-file",
 
             isSupported,
@@ -65,49 +65,46 @@ export default {
             },
 
             desktop: {
-                
-                preload: function (){
+                preload: function () {
+                    const fs = require("node:fs");
+                    const path = require("node:path");
 
-                    const fs = require('node:fs')
-                    const path = require('node:path')
-                    
                     function isValidFile(filepath) {
-                        return !fs.existsSync(filepath) && path.extname(filepath) === '.nwb'
+                        return !fs.existsSync(filepath) && path.extname(filepath) === ".nwb";
                     }
-                    
+
                     const onFileOpened = (_, filepath) => {
                         this.open(); // Ensure the application is properly visible
-                        this.send(`${name}:fileOpened`, filepath) // Safely send
-                    }
-                    
-                    if (process.platform === 'win32' && process.argv.length >= 2) {
+                        this.send(`${name}:fileOpened`, filepath); // Safely send
+                    };
+
+                    if (process.platform === "win32" && process.argv.length >= 2) {
                         const openFilePath = process.argv[1];
-                        if (isValidFile(openFilePath)) onFileOpened(null, openFilePath)
+                        if (isValidFile(openFilePath)) onFileOpened(null, openFilePath);
                     }
-                    
-                    // NOTE: This event is triggered but the SEND function is not 
+
+                    // NOTE: This event is triggered but the SEND function is not
                     // behaving as expected when the application is docked without a window (MacOS)
-                    this.electron.app.on("open-file", onFileOpened)
-                }
-            }
-            
-        }
+                    this.electron.app.on("open-file", onFileOpened);
+                },
+            },
+        },
     ],
 
     services: {
         flask: {
-            src: './pyflask/app.py',
+            src: "./pyflask/app.py",
             port: 4242,
             publish: {
-                src: 'nwb-guide',
-                base: './build/flask/nwb-guide',
-                build: "npm run build:flask"
-            }
-        }
+                src: "nwb-guide",
+                base: "./build/flask/nwb-guide",
+                build: "npm run build:flask",
+            },
+        },
     },
 
     electron: {
-        splash: './src/splash-screen.html',
+        splash: "./src/splash-screen.html",
         window: {
             minWidth: 1121,
             minHeight: 735,
@@ -125,20 +122,20 @@ export default {
 
         build: {
             win: {
-                requestedExecutionLevel: "requireAdministrator"
+                requestedExecutionLevel: "requireAdministrator",
             },
 
             mac: {
-                identity: null // Signed builds are breaking on M2
+                identity: null, // Signed builds are breaking on M2
             },
 
             fileAssociations: [
                 {
                     ext: "nwb",
                     name: "NWB File",
-                    role: "Viewer"
-                }
-              ],
-        }
-    }
-}
+                    role: "Viewer",
+                },
+            ],
+        },
+    },
+};

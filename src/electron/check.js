@@ -1,3 +1,3 @@
 // var userAgent = navigator.userAgent.toLowerCase();
 // export const isElectron = userAgent.indexOf(" electron/") > -1;
-export default commoners.target === 'desktop';
+export default commoners.target === "desktop";

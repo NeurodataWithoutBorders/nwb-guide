@@ -125,13 +125,12 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-
-    env_port = getenv('PORT')
+    env_port = getenv("PORT")
     PORT = int(env_port) if env_port else 8080
-    HOST = getenv('HOST') or 'localhost'
-    
+    HOST = getenv("HOST") or "localhost"
+
     if PORT:
         api.logger.info(f"Starting server on port {PORT}")
-        app.run(host=HOST, port = PORT)
+        app.run(host=HOST, port=PORT)
     else:
         raise Exception(f"No port provided for the NWB GUIDE backend: {env_port}.")

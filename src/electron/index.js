@@ -23,12 +23,11 @@ if (isElectron) {
         crypto = require("node:crypto");
         path = require("node:path");
 
-        const { url, filepath } = commoners.services.flask
+        const { url, filepath } = commoners.services.flask;
 
-        port = (new URL(url)).port
+        port = new URL(url).port;
 
-        SERVER_FILE_PATH = filepath
-        
+        SERVER_FILE_PATH = filepath;
     } catch (e) {
         console.error("Electron API access failed —", e);
     }
