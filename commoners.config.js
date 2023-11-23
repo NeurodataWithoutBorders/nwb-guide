@@ -9,6 +9,7 @@ const isSupported = {
 
 export default {
 
+    name: "NWB GUIDE",
 
     icon: 'src/assets/img/logo-guide-draft.png',
 
