@@ -130,7 +130,7 @@ if __name__ == "__main__":
     HOST = getenv("HOST") or "localhost"
 
     if PORT:
-        api.logger.info(f"Starting server on port {PORT}")
+        api.logger.info(f"Starting server. Port: {PORT}. Host: {HOST}")
         app.run(host=HOST, port=PORT)
     else:
         raise Exception(f"No port provided for the NWB GUIDE backend: {env_port}.")

@@ -15,7 +15,12 @@ process.argv.forEach((v, i) => {
 
 console.log("Found file", fs.existsSync(cmds.script));
 
-const proc2 = child_process.spawn(`${cmds.script}`, [cmds.port]);
+const proc2 = child_process.spawn(`${cmds.script}`, {
+    env: {
+        PORT: cmds.port
+    }
+});
+
 handleProcess(proc2, "spawn");
 
 let now = Date.now();
