@@ -126,7 +126,24 @@ export default {
             },
 
             mac: {
-                // identity: null, // Toggle Code-Signing — Signed builds are breaking on M2
+
+                // Create both M1 and Intel builds
+                target: [
+                    {
+                      target: "dmg",
+                      arch: [
+                        "x64",
+                        "arm64"
+                      ]
+                    },
+                    {
+                      target: "zip",
+                      arch: [
+                        "x64",
+                        "arm64"
+                      ]
+                    }
+                ],
             },
 
             fileAssociations: [
