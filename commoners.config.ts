@@ -126,7 +126,7 @@ export default {
             },
 
             mac: {
-                identity: null, // Signed builds are breaking on M2
+                // identity: null, // Toggle Code-Signing — Signed builds are breaking on M2
             },
 
             fileAssociations: [
