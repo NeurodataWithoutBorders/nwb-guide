@@ -17,8 +17,8 @@ console.log("Found file", fs.existsSync(cmds.script));
 
 const proc2 = child_process.spawn(`${cmds.script}`, {
     env: {
-        PORT: cmds.port
-    }
+        PORT: cmds.port,
+    },
 });
 
 handleProcess(proc2, "spawn");
