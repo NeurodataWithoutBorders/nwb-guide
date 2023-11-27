@@ -1,7 +1,10 @@
 {
   "name": "nwb-guide",
   "version": "0.0.14",
-  "description": "",
+  "description": "NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.",
+  "engine": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "commoners --target desktop",
     "dev": "commoners",
