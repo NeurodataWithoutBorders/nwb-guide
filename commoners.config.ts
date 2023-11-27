@@ -12,9 +12,8 @@ export default {
 
     icon: "src/assets/img/logo-guide-draft.png",
 
-    plugins: [
-        {
-            name: "dialog",
+    plugins: {
+        dialog: {
             isSupported,
             desktop: {
                 load: function () {
@@ -30,8 +29,7 @@ export default {
                 };
             },
         },
-        {
-            name: "custom-unload-popup",
+        customUnloadPopup: {
             isSupported,
             desktop: {
                 unload: async function () {
@@ -49,8 +47,7 @@ export default {
                 },
             },
         },
-        {
-            name: "open-file",
+        openFile: {
 
             isSupported,
 
@@ -89,7 +86,7 @@ export default {
                 },
             },
         },
-    ],
+    },
 
     services: {
         flask: {
