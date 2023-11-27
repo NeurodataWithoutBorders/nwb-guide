@@ -1,7 +1,7 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "",
   "main": "./build/main/main.js",
   "engine": {
@@ -156,6 +156,7 @@
   },
   "devDependencies": {
     "@electron-toolkit/utils": "^2.0.1",
+    "@electron/notarize": "^2.2.0",
     "@storybook/addon-essentials": "^7.0.0-beta.62",
     "@storybook/addon-links": "^7.0.0-beta.62",
     "@storybook/blocks": "^7.0.0-beta.62",
@@ -165,7 +166,6 @@
     "chromatic": "^6.17.1",
     "electron": "^26.2.2",
     "electron-builder": "^24.6.4",
-    "electron-notarize": "^1.2.2",
     "electron-packager": "^17.1.2",
     "electron-updater": "^6.1.4",
     "electron-vite": "^1.0.28",

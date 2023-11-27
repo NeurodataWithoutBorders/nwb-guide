@@ -30,7 +30,7 @@ jobs:
           node-version: "18"
 
       - name: Install package.json modules and their dependencies
-        run: npm install --ignore-scripts
+        run: si
 
       - name: Remove bad sonpy file (might make Spike2 format unusable on Mac - should exclude from selection)
         run: rm -f /usr/local/miniconda/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
@@ -45,6 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Currently this is set to Ryan's Apple ID and app-specific password
+          teamId: ${{ secrets.APPLE_TEAM_ID }}
           appleId: ${{ secrets.APPLE_ID }}
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
         run: npm run deploy:mac
