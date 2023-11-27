@@ -1,8 +1,8 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.14",
-  "description": "",
+  "version": "0.0.13",
+  "description": "NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.",
   "main": "./build/main/main.js",
   "engine": {
     "node": ">=18"
