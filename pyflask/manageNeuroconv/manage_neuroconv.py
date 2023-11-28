@@ -712,15 +712,18 @@ userNotes=
 
 
 def generate_tutorial_data(base_path: str):
+    """
+    Autogenerate the data formats needed for the tutorial pipeline.
+
+    Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy spiking data.
+    """
     from spikeinterface import generate_ground_truth_recording, write_binary_recording, extract_waveforms
     from spikeinterface.preprocessing import bandpass_filter
     from spikeinterface.exporters import export_to_phy
 
     base_path = Path(base_path)
-
-    base_output_folder = Path("/Users/codybaker/Downloads/test_generation/")
-    spikeglx_output_folder = base_output_folder / "spikeglx"
-    phy_output_folder = base_output_folder / "phy"
+    spikeglx_output_folder = base_path / "spikeglx"
+    phy_output_folder = base_path / "phy"
 
     recording, sorting = generate_ground_truth_recording(
         sampling_frequency=30_000.0, num_channels=384, num_units=200, seed=0

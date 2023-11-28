@@ -27,7 +27,7 @@
     "build:electron:linux": "electron-builder build --linux --publish never",
     "test": "npm run test:app && npm run test:server",
     "test:app": "vitest run",
-    "test:server": "pytest pyflask/tests/ -s",
+    "test:server": "pytest pyflask/tests/ -s -vv",
     "wait3s": "node -e \"setTimeout(() => process.exit(0),3000)\"",
     "test:executable": "concurrently -n EXE,TEST --kill-others --success first \"node tests/testPyinstallerExecutable.js --port 3434 --forever\" \"npm run wait3s && pytest pyflask/tests/ -s --target http://localhost:3434\"",
     "test:coverage": "npm run coverage:app && npm run coverage:server",
