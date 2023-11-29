@@ -1,26 +1,30 @@
 {
     "properties": {
-        "dandiset_id": {
+        "dandiset": {
             "type": "string",
-            "description": "The unique identifier for your Dandiset."
+            "description": "The unique identifier for your Dandiset. Can also be created or searched by <b>title</b>."
         },
-        "number_of_jobs": {
-            "type": "integer",
-            "title": "Job Count",
-            "description": "The number of files to upload in parallel. <br><small><b>Note:</b> If you encounter an error for any selector value, particularly a Segmentation Fault error, try a value of <code>1</code> to run the jobs without parallelization.</small>",
-            "min": 1
-        },
-        "number_of_threads": {
-            "type": "integer",
-            "title": "Threads per Job",
-            "description": "The number of threads to handle each file.",
-            "min": 1
-        },
-        "cleanup": {
-            "type": "boolean",
-            "title": "Delete Local Files After Upload",
-            "default": false
+        "additional_settings": {
+            "properties": {
+                "number_of_jobs": {
+                    "type": "integer",
+                    "title": "Job Count",
+                    "description": "The number of files to upload in parallel. <br><small><b>Note:</b> If you encounter an error for any selector value, particularly a Segmentation Fault error, try a value of <code>1</code> to run the jobs without parallelization.</small>",
+                    "min": 1
+                },
+                "number_of_threads": {
+                    "type": "integer",
+                    "title": "Threads per Job",
+                    "description": "The number of threads to handle each file.",
+                    "min": 1
+                },
+                "cleanup": {
+                    "type": "boolean",
+                    "title": "Delete Local Files After Upload",
+                    "default": false
+                }
+            }
         }
     },
-    "required": ["dandiset_id"]
+    "required": ["dandiset", "additional_settings"]
 }

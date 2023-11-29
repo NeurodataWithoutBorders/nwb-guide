@@ -161,7 +161,7 @@ export class JSONSchemaInput extends LitElement {
         this.#activateTimeoutValidation(name, path);
     };
 
-    #triggerValidation = (name, path) => {
+    #triggerValidation = async (name, path) => {
         this.#clearTimeoutValidation();
         return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
     };
@@ -368,13 +368,23 @@ export class JSONSchemaInput extends LitElement {
                 const options = info.enum.map((v) => {
                     return {
                         key: v,
+                        value: v,
+                        category: info.enumCategories?.[v],
+                        label: info.enumLabels?.[v] ?? v,
                         keywords: info.enumKeywords?.[v],
                     };
                 });
 
+
                 const search = new Search({
                     options,
-                    value: this.value,
+                    value: {
+                        value: this.value,
+                        key: this.value,
+                        category: info.enumCategories?.[this.value],
+                        label: info.enumLabels?.[this.value],
+                        keywords: info.enumKeywords?.[this.value],
+                    },
                     showAllWhenEmpty: false,
                     listMode: "click",
                     onSelect: async ({ value, key }) => {
@@ -455,8 +465,8 @@ export class JSONSchemaInput extends LitElement {
                             else if (isNumber) newValue = parseFloat(value);
 
                             if (isNumber) {
-                                if ("min" in info && value < info.min) newValue = info.min;
-                                else if ("max" in info && value > info.max) newValue = info.max;
+                                if ("min" in info && newValue < info.min) newValue = info.min;
+                                if ("max" in info && newValue > info.max) newValue = info.max;
                             }
 
                             if (info.transform) newValue = info.transform(newValue, this.value, info);

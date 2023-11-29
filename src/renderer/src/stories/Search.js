@@ -17,7 +17,7 @@ export class Search extends LitElement {
         onSelect,
     } = {}) {
         super();
-        this.value = value;
+        this.#value = value;
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
         this.disabledLabel = disabledLabel;
@@ -28,9 +28,18 @@ export class Search extends LitElement {
         document.addEventListener("click", () => {
             if (this.listMode === "click" && this.getAttribute("active") === "true") {
                 this.#onSelect({ value: this.shadowRoot.querySelector("input").value });
-                this.setAttribute("active", false);
             }
         });
+    }
+
+    #value
+    get value () {
+        return this.#value && typeof this.#value === 'object' ? this.#value.value : this.#value;
+    }
+
+    set value (val) {
+        this.#value = val;
+        this.requestUpdate();
     }
 
     static get styles() {
@@ -190,17 +199,23 @@ export class Search extends LitElement {
 
     onSelect = (id, value) => {};
 
+    #displayValue = (option) => {
+        return option?.label ?? option?.value ?? option?.key ?? option
+    }
+
     #onSelect = (option) => {
         const input = this.shadowRoot.querySelector("input");
 
         if (this.listMode === "click") {
-            input.value = option.value ?? option.key;
+            input.value = this.#displayValue(option);
+            this.setAttribute("active", false);
             return this.onSelect(option);
         }
 
         input.value = "";
         this.#initialize();
         this.onSelect(option);
+        
     };
 
     #options = [];
@@ -283,11 +298,15 @@ export class Search extends LitElement {
                     else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
                 .map((option) => {
+
                     const li = document.createElement("li");
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
                     if (option.keywords) li.setAttribute("data-keywords", JSON.stringify(option.keywords));
-                    li.addEventListener("click", () => this.#onSelect(option));
+                    li.addEventListener("click", (ev) => {
+                        ev.stopPropagation();
+                        this.#onSelect(option)
+                    });
 
                     if (option.disabled) li.setAttribute("disabled", "");
 
@@ -355,11 +374,14 @@ export class Search extends LitElement {
             this.list.append(element, ...entries);
         });
 
+        const valueToDisplay = this.#displayValue(this.#value);
+        console.log(valueToDisplay, this.#value)
+
         return html`
     <div class="header" style=${styleMap({
         ...this.headerStyles,
     })}>
-      <input placeholder="Type here to search" value=${this.value} @click=${(ev) => {
+      <input placeholder="Type here to search" value=${valueToDisplay} @click=${(ev) => {
           ev.stopPropagation();
           if (this.listMode === "click") {
               const input = ev.target.value;

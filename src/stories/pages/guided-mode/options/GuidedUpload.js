@@ -4,13 +4,10 @@ import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
-import dandiUploadSchema from "../../../../../../../schemas/dandi-upload.schema";
-import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
+import dandiUploadSchema from "../../../../../schemas/dandi-upload.schema";
+import { dandisetInfoContent, uploadToDandi } from "../../uploads/UploadsPage.js";
+import { InfoBox } from "../../../InfoBox.js";
 import { until } from "lit/directives/until.js";
-
-import { Button } from "../../../Button.js";
-
-import dandiSVG from "../../../assets/dandi.svg?raw";
 
 import { baseUrl, onServerOpen } from "../../../../server/globals";
 
@@ -23,20 +20,13 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
-        const isNewDandiset = globalState.upload?.dandiset !== this.localState.dandiset;
+        const isNewDandiset = globalState.upload?.dandiset_id !== this.localState.dandiset_id;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
         if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new Dandiset
     };
 
     header = {
         subtitle: "Settings to upload your conversion to the DANDI Archive",
-        controls: [
-            new Button({
-                icon: dandiSVG,
-                label: "Create Dandiset",
-                onClick: async () => await createDandiset.call(this), // Will throw an error if not created
-            }),
-        ],
     };
 
     footer = {
@@ -80,7 +70,7 @@ export class GuidedUploadPage extends Page {
             await fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
                 .then(({ physical, logical }) => {
-                    const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties;
+                    const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties.additional_settings.properties;
                     number_of_jobs.max = number_of_jobs.default = physical;
                     number_of_threads.max = number_of_threads.default = logical / physical;
                 })
@@ -94,7 +84,10 @@ export class GuidedUploadPage extends Page {
             }));
         });
 
-        return html`${until(promise, html`Loading form contents...`)} `;
+        return html`${new InfoBox({
+                header: "How do I create a Dandiset?",
+                content: dandisetInfoContent,
+            })}<br /><br />${until(promise, html`Loading form contents...`)} `;
     }
 }
 

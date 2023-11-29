@@ -10,8 +10,6 @@ import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 import dandiCreateSchema from "../../../../../../schemas/json/dandi/create.json";
 
-const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), { arrays: true });
-
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
 import { merge } from "../utils.js";
@@ -31,8 +29,7 @@ import { baseUrl, onServerOpen } from "../../../server/globals";
 import * as dandi from "dandi";
 
 import dandiSVG from "../../assets/dandi.svg?raw";
-
-export const isStaging = (id) => parseInt(id) >= 100000;
+import { isStaging } from "./utils";
 
 export async function createDandiset() {
     let notification;
@@ -74,7 +71,7 @@ export async function createDandiset() {
                 });
 
                 const staging = form.resolved.staging;
-                const api_key = await getAPIKey(staging);
+                const api_key = await getAPIKey.call(this, staging);
 
                 const apiStaging = new dandi.API({ token: api_key, type: staging ? "staging" : undefined });
                 await apiStaging.init();
@@ -86,7 +83,7 @@ export async function createDandiset() {
                 );
 
                 const id = res.identifier;
-                addDandisetToRegistry(id);
+                await addDandisetToRegistry(id);
 
                 notify(`Dandiset <b>${id}</b> was created`, "success");
 
@@ -107,11 +104,11 @@ export async function createDandiset() {
     });
 }
 
-function addDandisetToRegistry(id, info = true) {
+async function addDandisetToRegistry(id) {
     if (!global.data.DANDI) global.data.DANDI = {};
     const dandiGlobals = global.data.DANDI ?? (global.data.DANDI = {});
     if (!dandiGlobals.dandisets) dandiGlobals.dandisets = {};
-    dandiGlobals.dandisets[id] = info;
+    dandiGlobals.dandisets[id] = true
     global.save();
 }
 
@@ -192,16 +189,20 @@ async function getAPIKey(staging = false) {
 }
 
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
-    const { dandiset_id } = info;
+    const { dandiset } = info;
+
+    const dandiset_id = dandiset
 
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
-    const api_key = await getAPIKey(staging);
+    const api_key = await getAPIKey.call(this, staging);
 
     const result = await run(
         type ? `upload/${type}` : "upload",
         {
-            ...info,
+            dandiset_id,
+            filesystem_paths: info.filesystem_paths,
+            ...info.additional_settings,
             staging,
             api_key,
         },
@@ -211,7 +212,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         throw e;
     });
 
-    addDandisetToRegistry(dandiset_id);
+    await addDandisetToRegistry(dandiset_id);
 
     if (result)
         this.notify(
@@ -242,6 +243,7 @@ export class UploadsPage extends Page {
     }
 
     render() {
+
         const globalState = (global.data.uploads = global.data.uploads ?? {});
         const defaultButtonMessage = "Upload Files";
 
@@ -255,7 +257,7 @@ export class UploadsPage extends Page {
 
                 const modal = new Modal({ open: true });
                 modal.header = "DANDI Upload Summary";
-                const summary = new DandiResults({ id: globalState.dandiset_id });
+                const summary = new DandiResults({ id: globalState.dandiset });
                 summary.style.padding = "25px";
                 modal.append(summary);
 
@@ -265,13 +267,18 @@ export class UploadsPage extends Page {
             },
         });
 
+        // Resolve dandiSchema on each render
+        const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), { arrays: true });
+
+
         const promise = onServerOpen(async () => {
             await fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
                 .then(({ physical, logical }) => {
-                    const { number_of_jobs, number_of_threads } = dandiSchema.properties;
+                    const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties.additional_settings.properties;
                     number_of_jobs.max = number_of_jobs.default = physical;
                     number_of_threads.max = number_of_threads.default = logical / physical;
+                    console.log(dandiUploadSchema)
                 })
                 .catch(() => {});
 

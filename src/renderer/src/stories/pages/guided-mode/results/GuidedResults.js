@@ -16,9 +16,9 @@ export class GuidedResultsPage extends Page {
         if (!conversion)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
-        const { dandiset_id } = this.info.globalState.upload?.info ?? {};
+        const { dandiset } = this.info.globalState.upload?.info ?? {};
 
-        return html`<div style="padding: 10px 20px;">${new DandiResults({ id: dandiset_id, files: conversion })}</div>`;
+        return html`<div style="padding: 10px 20px;">${new DandiResults({ id: dandiset, files: conversion })}</div>`;
     }
 }
 
