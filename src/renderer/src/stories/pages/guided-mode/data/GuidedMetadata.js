@@ -18,7 +18,7 @@ import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
 
-const imagingPlaneKey = 'imaging_plane';
+const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
     Ophys: {
         ImagingPlane: {
