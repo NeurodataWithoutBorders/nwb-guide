@@ -43,7 +43,7 @@ export class Search extends LitElement {
         return this.#isObject() ? this.#value.value : this.#value;
     }
 
-    set value (val) {
+    set value(val) {
         this.#value = val;
         this.requestUpdate();
     }
@@ -221,7 +221,6 @@ export class Search extends LitElement {
         input.value = "";
         this.#initialize();
         this.onSelect(option);
-        
     };
 
     #options = [];
@@ -304,14 +303,13 @@ export class Search extends LitElement {
                     else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
                 .map((option) => {
-
                     const li = document.createElement("li");
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
                     if (option.keywords) li.setAttribute("data-keywords", JSON.stringify(option.keywords));
                     li.addEventListener("click", (ev) => {
                         ev.stopPropagation();
-                        this.#onSelect(option)
+                        this.#onSelect(option);
                     });
 
                     if (option.disabled) li.setAttribute("disabled", "");

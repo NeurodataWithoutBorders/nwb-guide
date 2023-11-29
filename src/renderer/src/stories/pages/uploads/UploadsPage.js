@@ -108,7 +108,7 @@ async function addDandisetToRegistry(id) {
     if (!global.data.DANDI) global.data.DANDI = {};
     const dandiGlobals = global.data.DANDI ?? (global.data.DANDI = {});
     if (!dandiGlobals.dandisets) dandiGlobals.dandisets = {};
-    dandiGlobals.dandisets[id] = true
+    dandiGlobals.dandisets[id] = true;
     global.save();
 }
 
@@ -191,7 +191,7 @@ async function getAPIKey(staging = false) {
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const { dandiset } = info;
 
-    const dandiset_id = dandiset
+    const dandiset_id = dandiset;
 
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
@@ -247,7 +247,6 @@ export class UploadsPage extends Page {
     }
 
     render() {
-
         const globalState = (global.data.uploads = global.data.uploads ?? {});
         const defaultButtonMessage = "Upload Files";
 
@@ -272,14 +271,16 @@ export class UploadsPage extends Page {
         });
 
         // Resolve dandiSchema on each render
-        const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), { arrays: true });
-
+        const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), {
+            arrays: true,
+        });
 
         const promise = onServerOpen(async () => {
             await fetch(new URL("cpus", baseUrl))
                 .then((res) => res.json())
                 .then(({ physical, logical }) => {
-                    const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties.additional_settings.properties;
+                    const { number_of_jobs, number_of_threads } =
+                        dandiUploadSchema.properties.additional_settings.properties;
                     number_of_jobs.max = number_of_jobs.default = physical;
                     number_of_threads.max = number_of_threads.default = logical / physical;
                 })
