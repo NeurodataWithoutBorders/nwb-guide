@@ -37,7 +37,7 @@ export class DandiResults extends LitElement {
         const otherElIds = ["embargo_status"];
 
         const type = isStaging(this.id) ? "staging" : undefined;
-        const dandiset = await get(this.id, type);
+        const dandiset = await get(this.id, { type });
 
         otherElIds.forEach((str) => handleId(str, dandiset));
         elIds.forEach((str) => handleId(str, dandiset.draft_version));

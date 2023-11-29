@@ -78,13 +78,13 @@ export class GuidedUploadPage extends Page {
 
         const promise = onServerOpen(async () => {
             await fetch(new URL("cpus", baseUrl))
-                .then((res) => res.json())
-                .then(({ physical, logical }) => {
-                    const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties;
-                    number_of_jobs.max = number_of_jobs.default = physical;
-                    number_of_threads.max = number_of_threads.default = logical / physical;
-                })
-                .catch(() => {});
+            .then((res) => res.json())
+            .then(({ physical, logical }) => {
+                const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties.additional_settings.properties;
+                number_of_jobs.max = number_of_jobs.default = physical;
+                number_of_threads.max = number_of_threads.default = logical / physical;
+            })
+            .catch(() => {});
 
             return (this.form = new JSONSchemaForm({
                 schema: dandiUploadSchema,

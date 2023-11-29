@@ -197,15 +197,19 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
     const api_key = await getAPIKey.call(this, staging);
 
+    const payload = {
+        dandiset_id,
+        ...info.additional_settings,
+        staging,
+        api_key,
+    }
+
+    if (info.project) payload.project = info.project
+    else payload.filesystem_paths = info.filesystem_paths
+
     const result = await run(
         type ? `upload/${type}` : "upload",
-        {
-            dandiset_id,
-            filesystem_paths: info.filesystem_paths,
-            ...info.additional_settings,
-            staging,
-            api_key,
-        },
+        payload,
         { title: "Uploading your files to DANDI" }
     ).catch((e) => {
         this.notify(e.message, "error");
@@ -278,7 +282,6 @@ export class UploadsPage extends Page {
                     const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties.additional_settings.properties;
                     number_of_jobs.max = number_of_jobs.default = physical;
                     number_of_threads.max = number_of_threads.default = logical / physical;
-                    console.log(dandiUploadSchema)
                 })
                 .catch(() => {});
 

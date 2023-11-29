@@ -27,14 +27,20 @@ export class Search extends LitElement {
 
         document.addEventListener("click", () => {
             if (this.listMode === "click" && this.getAttribute("active") === "true") {
-                this.#onSelect({ value: this.shadowRoot.querySelector("input").value });
+                const matched = this.option.find({ label: this.shadowRoot.querySelector("input").value });
+                this.#onSelect(matched ?? { value: this.shadowRoot.querySelector("input").value });
             }
         });
     }
 
     #value
+
+    #isObject(value = this.value) {
+        return value && typeof value === 'object'
+    }
+
     get value () {
-        return this.#value && typeof this.#value === 'object' ? this.#value.value : this.#value;
+        return this.#isObject() ? this.#value.value : this.#value;
     }
 
     set value (val) {
@@ -200,7 +206,7 @@ export class Search extends LitElement {
     onSelect = (id, value) => {};
 
     #displayValue = (option) => {
-        return option?.label ?? option?.value ?? option?.key ?? option
+        return option?.label ?? option?.value ?? option?.key ?? (this.#isObject(option) ? undefined : option)
     }
 
     #onSelect = (option) => {
@@ -375,7 +381,6 @@ export class Search extends LitElement {
         });
 
         const valueToDisplay = this.#displayValue(this.#value);
-        console.log(valueToDisplay, this.#value)
 
         return html`
     <div class="header" style=${styleMap({

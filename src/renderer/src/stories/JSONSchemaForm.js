@@ -700,6 +700,8 @@ export class JSONSchemaForm extends LitElement {
 
         const validationResult = await v.validate(parent[name], this.schema.properties[name])
 
+        if (validationResult.errors.length) console.log(name, validationResult)
+
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
@@ -715,9 +717,19 @@ export class JSONSchemaForm extends LitElement {
             ? valid.filter((info) => info.type === "warning" && (!isRequired || !info.missing))
             : [];
 
+        const jsonSchemaErrors = validationResult.errors.map(e => ({type: 'error', message: `${header(name)} ${e.message}.`}))
+                                    .filter(({ message }) => {
+
+                                        // JSON Schema Exceptions
+                                        if (message.includes('does not conform to the "date-time" format.')) return false;
+
+                                        return true;
+                                    })
+
+
         const errors = [
             ...Array.isArray(valid) ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing)) : [], // Derived Errors
-            ...validationResult.errors.map(e => ({type: 'error', message: `${header(name)} ${e.message}`})) // JSON Schema Errors
+            ...jsonSchemaErrors // JSON Schema Errors
         ];
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
