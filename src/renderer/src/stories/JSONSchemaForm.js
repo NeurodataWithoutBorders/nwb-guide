@@ -12,10 +12,9 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
-import { Validator } from 'jsonschema'
+import { Validator } from "jsonschema";
 
 var v = new Validator();
-
 
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
@@ -360,10 +359,8 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+        const result = await v.validate(resolved, this.schema);
 
-        const result = await v.validate(resolved, this.schema)
-
-        
         // Check if any required inputs are missing
         const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !requiredButNotSpecified.length;
@@ -568,7 +565,7 @@ export class JSONSchemaForm extends LitElement {
             if (isRequired) {
                 let path = parentPath ? `${parentPath}-${name}` : name;
 
-                console.log('Required', path, resolved[name], this.validateEmptyValues)
+                console.log("Required", path, resolved[name], this.validateEmptyValues);
 
                 // if (typeof isRequired === "object" && !Array.isArray(isRequired))
                 //     invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
@@ -698,8 +695,7 @@ export class JSONSchemaForm extends LitElement {
 
         const pathToValidate = [...(this.base ?? []), ...path];
 
-        const validationResult = await v.validate(parent[name], this.schema.properties[name])
-
+        const validationResult = await v.validate(parent[name], this.schema.properties[name]);
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
@@ -716,8 +712,10 @@ export class JSONSchemaForm extends LitElement {
             : [];
 
         const errors = [
-            ...Array.isArray(valid) ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing)) : [], // Derived Errors
-            ...validationResult.errors.map(e => ({type: 'error', message: `${header(name)} ${e.message}`})) // JSON Schema Errors
+            ...(Array.isArray(valid)
+                ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
+                : []), // Derived Errors
+            ...validationResult.errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}` })), // JSON Schema Errors
         ];
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
@@ -741,7 +739,7 @@ export class JSONSchemaForm extends LitElement {
                 }
             }
         }
-        
+
         if (!errors.length) {
             if (isUndefined) {
                 // Throw at least a basic warning if a non-linked property is required and missing

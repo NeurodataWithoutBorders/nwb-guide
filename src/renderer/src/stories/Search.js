@@ -32,12 +32,12 @@ export class Search extends LitElement {
         });
     }
 
-    #value
-    get value () {
-        return this.#value && typeof this.#value === 'object' ? this.#value.value : this.#value;
+    #value;
+    get value() {
+        return this.#value && typeof this.#value === "object" ? this.#value.value : this.#value;
     }
 
-    set value (val) {
+    set value(val) {
         this.#value = val;
         this.requestUpdate();
     }
@@ -200,8 +200,8 @@ export class Search extends LitElement {
     onSelect = (id, value) => {};
 
     #displayValue = (option) => {
-        return option?.label ?? option?.value ?? option?.key ?? option
-    }
+        return option?.label ?? option?.value ?? option?.key ?? option;
+    };
 
     #onSelect = (option) => {
         const input = this.shadowRoot.querySelector("input");
@@ -215,7 +215,6 @@ export class Search extends LitElement {
         input.value = "";
         this.#initialize();
         this.onSelect(option);
-        
     };
 
     #options = [];
@@ -298,14 +297,13 @@ export class Search extends LitElement {
                     else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
                 .map((option) => {
-
                     const li = document.createElement("li");
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
                     if (option.keywords) li.setAttribute("data-keywords", JSON.stringify(option.keywords));
                     li.addEventListener("click", (ev) => {
                         ev.stopPropagation();
-                        this.#onSelect(option)
+                        this.#onSelect(option);
                     });
 
                     if (option.disabled) li.setAttribute("disabled", "");
@@ -375,7 +373,7 @@ export class Search extends LitElement {
         });
 
         const valueToDisplay = this.#displayValue(this.#value);
-        console.log(valueToDisplay, this.#value)
+        console.log(valueToDisplay, this.#value);
 
         return html`
     <div class="header" style=${styleMap({

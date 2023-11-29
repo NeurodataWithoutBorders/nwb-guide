@@ -375,7 +375,6 @@ export class JSONSchemaInput extends LitElement {
                     };
                 });
 
-
                 const search = new Search({
                     options,
                     value: {
