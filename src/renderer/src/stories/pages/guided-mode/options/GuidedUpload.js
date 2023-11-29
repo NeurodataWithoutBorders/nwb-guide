@@ -19,7 +19,6 @@ import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.js
 import { createFormModal } from "../../../forms/GlobalFormModal";
 import { validateDANDIApiKey } from "../../../../validation/dandi";
 
-
 export class GuidedUploadPage extends Page {
     constructor(...args) {
         super(...args);
@@ -57,12 +56,12 @@ export class GuidedUploadPage extends Page {
             header: "DANDI API Keys",
             schema: dandiGlobalSchema.properties.api_keys,
             onSave: async (form) => {
-                const apiKeys = form.resolved
+                const apiKeys = form.resolved;
                 merge(apiKeys, global.data.DANDI.api_keys);
-                global.save()
-                await regenerateDandisets()
-                const input = this.form.getInput([ "dandiset "])
-                input.requestUpdate()
+                global.save();
+                await regenerateDandisets();
+                const input = this.form.getInput(["dandiset "]);
+                input.requestUpdate();
             },
             validateOnChange: async (name, parent) => {
                 const value = parent[name];
@@ -77,7 +76,6 @@ export class GuidedUploadPage extends Page {
         this.#globalModal.remove();
     }
 
-
     footer = {
         next: "Upload Project",
         onNext: async () => {
@@ -90,7 +88,7 @@ export class GuidedUploadPage extends Page {
 
             const possibleTitle = globalUploadInfo.info.dandiset;
             if (willCreate(globalUploadInfo.info.dandiset)) {
-                await createDandiset.call(this, { title: possibleTitle })
+                await createDandiset.call(this, { title: possibleTitle });
                 await this.save();
             }
 
@@ -120,7 +118,6 @@ export class GuidedUploadPage extends Page {
 
     render() {
         const state = (this.localState = structuredClone(this.info.globalState.upload ?? { info: {} }));
-        
 
         const promise = ready.cpus
             .then(() => ready.dandisets)
@@ -130,9 +127,10 @@ export class GuidedUploadPage extends Page {
                     results: state.info,
                     onUpdate: () => (this.unsavedUpdates = true),
                     onThrow,
-                    validateOnChange: validate
+                    validateOnChange: validate,
                 }));
-            }).catch((e) => html`<p>${e}</p>`);
+            })
+            .catch((e) => html`<p>${e}</p>`);
 
         return html`${until(promise, html`Loading form contents...`)} `;
     }

@@ -324,7 +324,7 @@ export class JSONSchemaInput extends LitElement {
                       })
                     : [],
                 onChange: async () => {
-                    const { items } = list
+                    const { items } = list;
                     this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
                     if (validateOnChange) await this.#triggerValidation(name, path);
                 },

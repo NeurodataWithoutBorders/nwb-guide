@@ -6,7 +6,11 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 
 const folderPathKey = "filesystem_paths";
-import dandiUploadSchema, { addDandiset, ready, regenerateDandisets } from "../../../../../../schemas/dandi-upload.schema";
+import dandiUploadSchema, {
+    addDandiset,
+    ready,
+    regenerateDandisets,
+} from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: true });
 
@@ -92,9 +96,9 @@ export async function createDandiset(results = {}) {
 
                 const input = this.form.getInput(["dandiset"]);
                 input.updateData(id);
-                input.requestUpdate()
+                input.requestUpdate();
 
-                this.save()
+                this.save();
 
                 resolve(res);
             },
@@ -214,7 +218,8 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
     if (result)
         this.notify(
-            `${info.project ?? `${info[folderPathKey].length} filesystem entries`
+            `${
+                info.project ?? `${info[folderPathKey].length} filesystem entries`
             } successfully uploaded to Dandiset ${dandiset_id}`,
             "success"
         );
@@ -242,7 +247,6 @@ export class UploadsPage extends Page {
         super(...args);
     }
 
-
     #globalModal = null;
 
     connectedCallback() {
@@ -252,12 +256,12 @@ export class UploadsPage extends Page {
             header: "DANDI API Keys",
             schema: dandiGlobalSchema.properties.api_keys,
             onSave: async (form) => {
-                const apiKeys = form.resolved
+                const apiKeys = form.resolved;
                 merge(apiKeys, global.data.DANDI.api_keys);
-                global.save()
-                await regenerateDandisets()
-                const input = this.form.getInput([ "dandiset "])
-                input.requestUpdate()
+                global.save();
+                await regenerateDandisets();
+                const input = this.form.getInput(["dandiset "]);
+                input.requestUpdate();
             },
             validateOnChange: async (name, parent) => {
                 const value = parent[name];
@@ -299,7 +303,6 @@ export class UploadsPage extends Page {
         const promise = ready.cpus
             .then(() => ready.dandisets)
             .then(() => {
-
                 // NOTE: API Keys and Dandiset IDs persist across selected project
                 return (this.form = new JSONSchemaForm({
                     results: globalState,
@@ -309,35 +312,34 @@ export class UploadsPage extends Page {
                     },
                     onUpdate: ([id]) => {
                         if (id === folderPathKey) {
-                            const keysToUpdate = ['dandiset']
-                            keysToUpdate.forEach(k => {
+                            const keysToUpdate = ["dandiset"];
+                            keysToUpdate.forEach((k) => {
                                 const input = this.form.getInput([k]);
-                                if (input.value) input.updateData("")
-                            })
+                                if (input.value) input.updateData("");
+                            });
                         }
 
                         global.save();
                     },
                     onThrow,
 
-                    validateOnChange: validate
-
+                    validateOnChange: validate,
                 }));
-
-            }).catch((e) => html`<p>${e}</p>`);
+            })
+            .catch((e) => html`<p>${e}</p>`);
 
         return html`
             ${until(
-            promise.then((form) => {
-                return html`
+                promise.then((form) => {
+                    return html`
                         ${form}
                         <hr />
                         ${button}
                     `;
-            }),
-            html`<p>Waiting to connect to the Flask server...</p>
+                }),
+                html`<p>Waiting to connect to the Flask server...</p>
                     <p />`
-        )}
+            )}
         `;
     }
 }

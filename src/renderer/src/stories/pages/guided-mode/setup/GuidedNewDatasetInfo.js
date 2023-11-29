@@ -80,7 +80,7 @@ export class GuidedNewDatasetPage extends Page {
         schema.properties = { ...schema.properties };
 
         const globalState = this.info.globalState;
-        if (!globalState.project) globalState.project = {}
+        if (!globalState.project) globalState.project = {};
         this.state = merge(global.data, structuredClone(globalState.project));
 
         this.form = new JSONSchemaForm({

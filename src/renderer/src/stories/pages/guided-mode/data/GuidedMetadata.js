@@ -156,10 +156,8 @@ export class GuidedMetadataPage extends ManagedPage {
             },
 
             transformErrors: (e) => {
-
                 // JSON Schema Exceptions
                 if (e.message.includes('does not conform to the "date-time" format.')) return false;
-
             },
 
             conditionalRequirements: [

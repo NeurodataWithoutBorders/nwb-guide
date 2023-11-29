@@ -61,7 +61,7 @@ export const updateDandisets = async (main = true) => {
     return await fetch(url, { headers: { 'Authorization': `token ${token}` } })
         .then(res => res.json())
         .then(({ results }) => results.map(addDandiset))
-    
+
 }
 
 export const addDandiset = async (info) => {

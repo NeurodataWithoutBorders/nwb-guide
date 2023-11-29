@@ -15,7 +15,7 @@ type BaseFormModalOptions = {
     validateOnChange?: Function,
     hasInstances?: boolean
 }
-    
+
 
 export function createFormModal ({
     onSave,

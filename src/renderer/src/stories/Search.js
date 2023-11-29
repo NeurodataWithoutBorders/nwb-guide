@@ -38,7 +38,7 @@ export class Search extends LitElement {
     #value;
 
     #isObject(value = this.#value) {
-        return value && typeof value === 'object'
+        return value && typeof value === "object";
     }
 
     get value() {
@@ -270,7 +270,7 @@ export class Search extends LitElement {
         });
 
         this.setAttribute("active", !!toShow.length);
-        this.setAttribute("interacted", true)
+        this.setAttribute("interacted", true);
     };
 
     render() {

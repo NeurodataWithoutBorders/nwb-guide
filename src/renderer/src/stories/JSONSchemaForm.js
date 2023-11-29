@@ -701,27 +701,28 @@ export class JSONSchemaForm extends LitElement {
         const externalPath = [...this.base, name];
         const schema = this.getSchema(localPath);
 
-        const jsonSchemaErrors = await v.validate(parent[name], this.schema.properties[name]).errors.map(e => ({type: 'error', message: `${header(name)} ${e.message}.`}))
-                                    .map((e) => {
+        const jsonSchemaErrors = await v
+            .validate(parent[name], this.schema.properties[name])
+            .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }))
+            .map((e) => {
+                // Non-Strict Rule
+                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
 
-                                        // Non-Strict Rule
-                                        if (schema.strict === false && e.message.includes('is not one of enum values')) return
+                // Custom Error Transformations
+                if (this.transformErrors) {
+                    const res = this.transformErrors(e, externalPath, parent[name]);
+                    if (res === false) return;
+                }
 
-                                        // Custom Error Transformations
-                                        if (this.transformErrors) {
-                                            const res = this.transformErrors(e, externalPath, parent[name])
-                                            if (res === false) return
-                                        }
-                                        
-                                        return e;
-                                    }).filter(v => !!v)
+                return e;
+            })
+            .filter((v) => !!v);
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
                 ? true
                 : await this.validateOnChange(name, parent, pathToValidate);
 
-  
         const isRequired = this.#isRequired(localPath);
 
         let warnings = Array.isArray(valid)
