@@ -337,7 +337,7 @@ export class UploadsPage extends Page {
                         ${button}
                     `;
                 }),
-                html`<p>Waiting to connect to the Flask server...</p>
+                html`<p>Loading form contents...</p>
                     <p />`
             )}
         `;

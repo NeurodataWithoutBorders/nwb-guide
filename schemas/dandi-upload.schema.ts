@@ -60,7 +60,7 @@ export const updateDandisets = async (main = true) => {
     const url = new URL(`dandisets/?user=me`, `https://${staging ? 'api-staging' : 'api'}.dandiarchive.org/api/`)
     return await fetch(url, { headers: { 'Authorization': `token ${token}` } })
         .then(res => res.json())
-        .then(({ results }) => results.map(addDandiset))
+        .then(({ results }) => Promise.all(results.map(addDandiset)))
 
 }
 
@@ -88,15 +88,27 @@ export const addDandiset = async (info) => {
     info = new Dandiset(info, { type: staging ? "staging" : undefined })
 
     const latestVersionInfo = (info.most_recent_published_version ?? info.draft_version)!
-    idSchema.enumLabels[id] = `${latestVersionInfo.name}`
+    const enumLabels = `${latestVersionInfo.name}`
 
     const isDraft = latestVersionInfo.version === 'draft'
-    idSchema.enumCategories[id] = (staging ? 'Staging' : 'Main') + (isDraft ? ' — Draft' : '')
-    idSchema.enumKeywords[id] = [ id ]
+    const enumCategories = (staging ? 'Staging' : 'Main') + (isDraft ? ' — Draft' : '')
 
     const fullInfo = await info.getInfo({ type: staging ? "staging" : undefined, version: latestVersionInfo.version });
-    idSchema.enumKeywords[id] = [ `${id}${fullInfo.description ? ` — ${fullInfo.description}` : ''}` ]
 
+    const enumKeywords = [ `${id}${fullInfo.description ? ` — ${fullInfo.description}` : ''}` ]
+
+    const idInfo = {
+        id,
+        enumLabels,
+        enumCategories,
+        enumKeywords,
+    }
+
+    idSchema.enumLabels[id] = idInfo.enumLabels
+    idSchema.enumCategories[id] = idInfo.enumCategories
+    idSchema.enumKeywords[id] = idInfo.enumKeywords
+
+    return idInfo
 }
 
 regenerateDandisets({ newPromise: false })
