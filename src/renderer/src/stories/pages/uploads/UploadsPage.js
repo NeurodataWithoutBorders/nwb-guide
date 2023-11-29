@@ -6,8 +6,10 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 
 const folderPathKey = "filesystem_paths";
-import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
+import dandiUploadSchema, { addDandiset, ready, regenerateDandisets } from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
+const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: true });
+
 import dandiCreateSchema from "../../../../../../schemas/json/dandi/create.json";
 
 import { Button } from "../../Button.js";
@@ -24,14 +26,14 @@ import { header } from "../../forms/utils";
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
 
-import { baseUrl, onServerOpen } from "../../../server/globals";
-
 import * as dandi from "dandi";
 
-import dandiSVG from "../../assets/dandi.svg?raw";
-import { isStaging } from "./utils";
+import keyIcon from "../../assets/key.svg?raw";
 
-export async function createDandiset() {
+import { isStaging, validate } from "./utils";
+import { createFormModal } from "../../forms/GlobalFormModal";
+
+export async function createDandiset(results = {}) {
     let notification;
 
     const notify = (message, type) => {
@@ -51,7 +53,7 @@ export async function createDandiset() {
 
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
-        results: {},
+        results,
     });
 
     content.append(form);
@@ -83,12 +85,16 @@ export async function createDandiset() {
                 );
 
                 const id = res.identifier;
-                await addDandisetToRegistry(id);
 
                 notify(`Dandiset <b>${id}</b> was created`, "success");
 
-                const input = this.form.getInput(["dandiset_id"]);
+                await addDandiset(res);
+
+                const input = this.form.getInput(["dandiset"]);
                 input.updateData(id);
+                input.requestUpdate()
+
+                this.save()
 
                 resolve(res);
             },
@@ -102,14 +108,6 @@ export async function createDandiset() {
     }).finally(() => {
         modal.remove();
     });
-}
-
-async function addDandisetToRegistry(id) {
-    if (!global.data.DANDI) global.data.DANDI = {};
-    const dandiGlobals = global.data.DANDI ?? (global.data.DANDI = {});
-    if (!dandiGlobals.dandisets) dandiGlobals.dandisets = {};
-    dandiGlobals.dandisets[id] = true;
-    global.save();
 }
 
 async function getAPIKey(staging = false) {
@@ -216,12 +214,9 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         throw e;
     });
 
-    await addDandisetToRegistry(dandiset_id);
-
     if (result)
         this.notify(
-            `${
-                info.project ?? `${info[folderPathKey].length} filesystem entries`
+            `${info.project ?? `${info[folderPathKey].length} filesystem entries`
             } successfully uploaded to Dandiset ${dandiset_id}`,
             "success"
         );
@@ -235,15 +230,48 @@ export class UploadsPage extends Page {
         subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
         controls: [
             new Button({
-                icon: dandiSVG,
-                label: "Create Dandiset",
-                onClick: async () => await createDandiset.call(this), // Will throw an error if not created
+                icon: keyIcon,
+                label: "API Keys",
+                onClick: () => {
+                    this.#globalModal.form.results = structuredClone(global.data.DANDI.api_keys);
+                    this.#globalModal.open = true;
+                },
             }),
         ],
     };
 
     constructor(...args) {
         super(...args);
+    }
+
+
+    #globalModal = null;
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        const modal = (this.#globalModal = createFormModal.call(this, {
+            header: "DANDI API Keys",
+            schema: dandiGlobalSchema.properties.api_keys,
+            onSave: async (form) => {
+                const apiKeys = form.resolved
+                merge(apiKeys, global.data.DANDI.api_keys);
+                global.save()
+                await regenerateDandisets()
+                const input = this.form.getInput([ "dandiset "])
+                input.requestUpdate()
+            },
+            validateOnChange: async (name, parent) => {
+                const value = parent[name];
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+            },
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
     }
 
     render() {
@@ -270,55 +298,48 @@ export class UploadsPage extends Page {
             },
         });
 
-        // Resolve dandiSchema on each render
-        const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), {
-            arrays: true,
-        });
+        const promise = ready.cpus
+            .then(() => ready.dandisets)
+            .then(() => {
 
-        const promise = onServerOpen(async () => {
-            await fetch(new URL("cpus", baseUrl))
-                .then((res) => res.json())
-                .then(({ physical, logical }) => {
-                    const { number_of_jobs, number_of_threads } =
-                        dandiUploadSchema.properties.additional_settings.properties;
-                    number_of_jobs.max = number_of_jobs.default = physical;
-                    number_of_threads.max = number_of_threads.default = logical / physical;
-                })
-                .catch(() => {});
-
-            // NOTE: API Keys and Dandiset IDs persist across selected project
-            return (this.form = new JSONSchemaForm({
-                results: globalState,
-                schema: dandiSchema,
-                sort: ([k1]) => {
-                    if (k1 === folderPathKey) return -1;
-                },
-                onUpdate: ([id]) => {
-                    if (id === folderPathKey) {
-                        for (let key in dandiSchema.properties) {
-                            const input = this.form.getInput([key]);
-                            if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
+                // NOTE: API Keys and Dandiset IDs persist across selected project
+                return (this.form = new JSONSchemaForm({
+                    results: globalState,
+                    schema: dandiSchema,
+                    sort: ([k1]) => {
+                        if (k1 === folderPathKey) return -1;
+                    },
+                    onUpdate: ([id]) => {
+                        if (id === folderPathKey) {
+                            const keysToUpdate = ['dandiset']
+                            keysToUpdate.forEach(k => {
+                                const input = this.form.getInput([k]);
+                                if (input.value) input.updateData("")
+                            })
                         }
-                    }
 
-                    global.save();
-                },
-                onThrow,
-            }));
-        });
+                        global.save();
+                    },
+                    onThrow,
+
+                    validateOnChange: validate
+
+                }));
+
+            }).catch((e) => html`<p>${e}</p>`);
 
         return html`
             ${until(
-                promise.then((form) => {
-                    return html`
+            promise.then((form) => {
+                return html`
                         ${form}
                         <hr />
                         ${button}
                     `;
-                }),
-                html`<p>Waiting to connect to the Flask server...</p>
+            }),
+            html`<p>Waiting to connect to the Flask server...</p>
                     <p />`
-            )}
+        )}
         `;
     }
 }

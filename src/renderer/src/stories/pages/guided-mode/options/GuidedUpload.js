@@ -4,15 +4,21 @@ import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
-import dandiUploadSchema from "../../../../../../../schemas/dandi-upload.schema";
+import dandiUploadSchema, { ready, regenerateDandisets } from "../../../../../../../schemas/dandi-upload.schema";
 import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
 import { until } from "lit/directives/until.js";
 
 import { Button } from "../../../Button.js";
 
-import dandiSVG from "../../../assets/dandi.svg?raw";
+import keyIcon from "../../../assets/key.svg?raw";
 
-import { baseUrl, onServerOpen } from "../../../../server/globals";
+import { validate, willCreate } from "../../uploads/utils";
+import { global } from "../../../../progress/index.js";
+
+import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.json";
+import { createFormModal } from "../../../forms/GlobalFormModal";
+import { validateDANDIApiKey } from "../../../../validation/dandi";
+
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -32,22 +38,61 @@ export class GuidedUploadPage extends Page {
         subtitle: "Settings to upload your conversion to the DANDI Archive",
         controls: [
             new Button({
-                icon: dandiSVG,
-                label: "Create Dandiset",
-                onClick: async () => await createDandiset.call(this), // Will throw an error if not created
+                icon: keyIcon,
+                label: "API Keys",
+                onClick: () => {
+                    this.#globalModal.form.results = structuredClone(global.data.DANDI.api_keys);
+                    this.#globalModal.open = true;
+                },
             }),
         ],
     };
+
+    #globalModal = null;
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        const modal = (this.#globalModal = createFormModal.call(this, {
+            header: "DANDI API Keys",
+            schema: dandiGlobalSchema.properties.api_keys,
+            onSave: async (form) => {
+                const apiKeys = form.resolved
+                merge(apiKeys, global.data.DANDI.api_keys);
+                global.save()
+                await regenerateDandisets()
+                const input = this.form.getInput([ "dandiset "])
+                input.requestUpdate()
+            },
+            validateOnChange: async (name, parent) => {
+                const value = parent[name];
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+            },
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#globalModal.remove();
+    }
+
 
     footer = {
         next: "Upload Project",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
-            await this.form.validate(); // Will throw an error in the callback
-
             const globalState = this.info.globalState;
             const globalUploadInfo = globalState.upload;
+
+            await this.form.validate(); // Will throw an error in the callback
+
+            const possibleTitle = globalUploadInfo.info.dandiset;
+            if (willCreate(globalUploadInfo.info.dandiset)) {
+                await createDandiset.call(this, { title: possibleTitle })
+                await this.save();
+            }
 
             // Catch if Dandiset is already uploaded
             if ("results" in globalUploadInfo) {
@@ -75,24 +120,19 @@ export class GuidedUploadPage extends Page {
 
     render() {
         const state = (this.localState = structuredClone(this.info.globalState.upload ?? { info: {} }));
+        
 
-        const promise = onServerOpen(async () => {
-            await fetch(new URL("cpus", baseUrl))
-            .then((res) => res.json())
-            .then(({ physical, logical }) => {
-                const { number_of_jobs, number_of_threads } = dandiUploadSchema.properties.additional_settings.properties;
-                number_of_jobs.max = number_of_jobs.default = physical;
-                number_of_threads.max = number_of_threads.default = logical / physical;
-            })
-            .catch(() => {});
-
-            return (this.form = new JSONSchemaForm({
-                schema: dandiUploadSchema,
-                results: state.info,
-                onUpdate: () => (this.unsavedUpdates = true),
-                onThrow,
-            }));
-        });
+        const promise = ready.cpus
+            .then(() => ready.dandisets)
+            .then(() => {
+                return (this.form = new JSONSchemaForm({
+                    schema: dandiUploadSchema,
+                    results: state.info,
+                    onUpdate: () => (this.unsavedUpdates = true),
+                    onThrow,
+                    validateOnChange: validate
+                }));
+            }).catch((e) => html`<p>${e}</p>`);
 
         return html`${until(promise, html`Loading form contents...`)} `;
     }

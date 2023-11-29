@@ -26,16 +26,18 @@ export class Search extends LitElement {
         if (onSelect) this.onSelect = onSelect;
 
         document.addEventListener("click", () => {
-            if (this.listMode === "click" && this.getAttribute("active") === "true") {
-                const matched = this.option.find({ label: this.shadowRoot.querySelector("input").value });
-                this.#onSelect(matched ?? { value: this.shadowRoot.querySelector("input").value });
+            if (this.listMode === "click" && this.getAttribute("interacted") === "true") {
+                this.setAttribute("interacted", false);
+                const value = this.shadowRoot.querySelector("input").value;
+                const matched = this.options.find((o) => o.label === value);
+                this.#onSelect(matched ?? { value });
             }
         });
     }
 
     #value
 
-    #isObject(value = this.value) {
+    #isObject(value = this.#value) {
         return value && typeof value === 'object'
     }
 
@@ -268,6 +270,7 @@ export class Search extends LitElement {
         });
 
         this.setAttribute("active", !!toShow.length);
+        this.setAttribute("interacted", true)
     };
 
     render() {

@@ -219,6 +219,8 @@ export class JSONSchemaForm extends LitElement {
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
+        this.transformErrors = props.transformErrors;
+
         this.emptyMessage = props.emptyMessage ?? "No properties to render";
 
         this.onlyRequired = props.onlyRequired ?? false;
@@ -267,7 +269,10 @@ export class JSONSchemaForm extends LitElement {
 
         const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
 
-        if (!container) return this.getForm(path[0]).getInput(path.slice(1));
+        if (!container) {
+            if (path.length > 1) return this.getForm(path[0]).getInput(path.slice(1));
+            else return;
+        }
         return container?.querySelector("jsonschema-input");
     };
 
@@ -565,8 +570,6 @@ export class JSONSchemaForm extends LitElement {
             if (isRequired) {
                 let path = parentPath ? `${parentPath}-${name}` : name;
 
-                console.log("Required", path, resolved[name], this.validateEmptyValues);
-
                 // if (typeof isRequired === "object" && !Array.isArray(isRequired))
                 //     invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
                 // else
@@ -694,32 +697,36 @@ export class JSONSchemaForm extends LitElement {
         const parent = this.#get(path, this.resolved);
 
         const pathToValidate = [...(this.base ?? []), ...path];
+        const localPath = [...path, name]; // Use basePath to augment the validation
+        const externalPath = [...this.base, name];
+        const schema = this.getSchema(localPath);
 
-        const validationResult = await v.validate(parent[name], this.schema.properties[name]);
+        const jsonSchemaErrors = await v.validate(parent[name], this.schema.properties[name]).errors.map(e => ({type: 'error', message: `${header(name)} ${e.message}.`}))
+                                    .map((e) => {
+
+                                        // Non-Strict Rule
+                                        if (schema.strict === false && e.message.includes('is not one of enum values')) return
+
+                                        // Custom Error Transformations
+                                        if (this.transformErrors) {
+                                            const res = this.transformErrors(e, externalPath, parent[name])
+                                            if (res === false) return
+                                        }
+                                        
+                                        return e;
+                                    }).filter(v => !!v)
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
                 ? true
                 : await this.validateOnChange(name, parent, pathToValidate);
 
-        const localPath = [...path, name]; // Use basePath to augment the validation
-        const externalPath = [...this.base, name];
-
+  
         const isRequired = this.#isRequired(localPath);
 
         let warnings = Array.isArray(valid)
             ? valid.filter((info) => info.type === "warning" && (!isRequired || !info.missing))
             : [];
-
-        const jsonSchemaErrors = validationResult.errors.map(e => ({type: 'error', message: `${header(name)} ${e.message}.`}))
-                                    .filter(({ message }) => {
-
-                                        // JSON Schema Exceptions
-                                        if (message.includes('does not conform to the "date-time" format.')) return false;
-
-                                        return true;
-                                    })
-
 
         const errors = [
             ...Array.isArray(valid) ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing)) : [], // Derived Errors
@@ -729,7 +736,6 @@ export class JSONSchemaForm extends LitElement {
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
 
         const isUndefined = this.isUndefined(parent[name]);
-        const schema = this.getSchema(localPath);
 
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {
@@ -986,6 +992,8 @@ export class JSONSchemaForm extends LitElement {
                         const path = [...localPath, ...internalPath];
                         this.updateData(path, value, forceUpdate);
                     },
+
+                    transformErrors: this.transformErrors,
 
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,

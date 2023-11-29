@@ -2,7 +2,7 @@
     "properties": {
         "dandiset": {
             "type": "string",
-            "description": "The unique identifier for your Dandiset. Can also be created or searched by <b>title</b>."
+            "description": "The unique identifier for your Dandiset. Can also be created or searched by name."
         },
         "additional_settings": {
             "properties": {
