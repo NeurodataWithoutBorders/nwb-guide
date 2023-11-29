@@ -15,19 +15,8 @@ def exception_handler(error):
     return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
 
 
-# @tutorial_api.route("/generate/<string:base_path>")
-# class GenerateTutorialData(Resource):
-#     @tutorial_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-#     def post(self, base_path: str):
-#         try:
-#             generate_tutorial_data(base_path=base_path)
-#         except Exception as exception:
-#             if notBadRequestException(exception):
-#                 tutorial_api.abort(500, str(exception))
-#             raise exception
-
 generate_tutorial_data_parser = reqparse.RequestParser()
-generate_tutorial_data_parser.add_argument("base_path", type=str)
+generate_tutorial_data_parser.add_argument("base_path", type=str, required=True)
 
 
 @tutorial_api.route("/generate")
@@ -36,7 +25,8 @@ class GenerateTutorialData(Resource):
     @tutorial_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            generate_tutorial_data(**tutorial_api.payload)
+            arguments = generate_tutorial_data_parser.parse_args()
+            generate_tutorial_data(base_path=arguments["base_path"])
         except Exception as exception:
             if notBadRequestException(exception):
                 tutorial_api.abort(500, str(exception))
