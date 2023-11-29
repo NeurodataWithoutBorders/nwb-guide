@@ -729,8 +729,10 @@ export class JSONSchemaForm extends LitElement {
             : [];
 
         const errors = [
-            ...Array.isArray(valid) ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing)) : [], // Derived Errors
-            ...jsonSchemaErrors // JSON Schema Errors
+            ...(Array.isArray(valid)
+                ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
+                : []), // Derived Errors
+            ...jsonSchemaErrors, // JSON Schema Errors
         ];
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];

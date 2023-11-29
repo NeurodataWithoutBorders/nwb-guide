@@ -35,13 +35,13 @@ export class Search extends LitElement {
         });
     }
 
-    #value
+    #value;
 
     #isObject(value = this.#value) {
         return value && typeof value === 'object'
     }
 
-    get value () {
+    get value() {
         return this.#isObject() ? this.#value.value : this.#value;
     }
 
@@ -208,8 +208,8 @@ export class Search extends LitElement {
     onSelect = (id, value) => {};
 
     #displayValue = (option) => {
-        return option?.label ?? option?.value ?? option?.key ?? (this.#isObject(option) ? undefined : option)
-    }
+        return option?.label ?? option?.value ?? option?.key ?? (this.#isObject(option) ? undefined : option);
+    };
 
     #onSelect = (option) => {
         const input = this.shadowRoot.querySelector("input");

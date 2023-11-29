@@ -200,16 +200,14 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         ...info.additional_settings,
         staging,
         api_key,
-    }
+    };
 
-    if (info.project) payload.project = info.project
-    else payload.filesystem_paths = info.filesystem_paths
+    if (info.project) payload.project = info.project;
+    else payload.filesystem_paths = info.filesystem_paths;
 
-    const result = await run(
-        type ? `upload/${type}` : "upload",
-        payload,
-        { title: "Uploading your files to DANDI" }
-    ).catch((e) => {
+    const result = await run(type ? `upload/${type}` : "upload", payload, {
+        title: "Uploading your files to DANDI",
+    }).catch((e) => {
         this.notify(e.message, "error");
         throw e;
     });
