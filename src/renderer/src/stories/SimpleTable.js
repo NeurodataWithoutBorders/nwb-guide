@@ -743,8 +743,8 @@ export class SimpleTable extends LitElement {
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
-        // Add existing additional properties to the entries variable if necessary
-        if (this.schema.additionalProperties) {
+        // Add existing additional / pattern properties to the entries variable if necessary
+        if (this.schema.additionalProperties !== false || this.schema.patternProperties) {
             Object.values(this.data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)

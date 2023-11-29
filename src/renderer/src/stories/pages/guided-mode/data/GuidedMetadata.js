@@ -18,14 +18,17 @@ import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
 
+const imagingPlaneKey = 'imaging_plane';
 const propsToIgnore = {
     Ophys: {
         ImagingPlane: {
+            [imagingPlaneKey]: true,
             manifold: true,
             unit: true,
             conversion: true,
         },
         TwoPhotonSeries: {
+            [imagingPlaneKey]: true,
             format: true,
             starting_frame: true,
             starting_time: true,
