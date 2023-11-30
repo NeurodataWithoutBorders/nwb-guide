@@ -197,7 +197,6 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
     if (willCreate(dandiset)) dandiset_id = (await createDandiset.call(this, { title: dandiset })).identifier;
 
-
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
     const api_key = await getAPIKey.call(this, staging);
