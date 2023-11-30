@@ -94,12 +94,15 @@ export class Main extends LitElement {
 
                 // Go to home screen if there is no next page
                 if (!info.next) {
-                    console.log('setting', info)
-                    footer = Object.assign({
-                        exit: false,
-                        onNext: () => this.toRender.page.to("/"),
-                    }, footer && typeof footer === "object" ? footer : {});
-                } 
+                    console.log("setting", info);
+                    footer = Object.assign(
+                        {
+                            exit: false,
+                            onNext: () => this.toRender.page.to("/"),
+                        },
+                        footer && typeof footer === "object" ? footer : {}
+                    );
+                }
             }
 
             if (footer === true) footer = {};
