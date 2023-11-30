@@ -76,13 +76,15 @@ export async function createDandiset(results = {}) {
                     throw message;
                 });
 
-                const staging = form.resolved.staging;
+                const uploadToMain = form.resolved.archive === "main";
+                const staging = !uploadToMain
+
                 const api_key = await getAPIKey.call(this, staging);
 
-                const apiStaging = new dandi.API({ token: api_key, type: staging ? "staging" : undefined });
-                await apiStaging.init();
+                const api = new dandi.API({ token: api_key, type: staging ? "staging" : undefined });
+                await api.init();
 
-                const res = await apiStaging.create(
+                const res = await api.create(
                     form.resolved.title,
                     form.resolved.metadata,
                     form.resolved.embargo_status
