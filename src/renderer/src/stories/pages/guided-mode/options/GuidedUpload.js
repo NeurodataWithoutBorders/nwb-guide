@@ -73,7 +73,7 @@ export class GuidedUploadPage extends Page {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.#globalModal.remove();
+        if (this.#globalModal) this.#globalModal.remove();
     }
 
     footer = {

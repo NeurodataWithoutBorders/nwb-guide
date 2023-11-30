@@ -276,7 +276,7 @@ export class UploadsPage extends Page {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.#globalModal.remove();
+        if (this.#globalModal) this.#globalModal.remove();
     }
 
     render() {
