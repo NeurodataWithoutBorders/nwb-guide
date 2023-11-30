@@ -12,6 +12,8 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
+const encode = (str) => btoa(str).replace(/\+|\/|\=/g, '_');
+
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
 };
@@ -273,7 +275,7 @@ export class JSONSchemaForm extends LitElement {
     getInput = (path) => {
         if (typeof path === "string") path = path.split(".");
 
-        const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
+        const container = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
 
         if (!container) return this.getForm(path[0]).getInput(path.slice(1));
         return container?.querySelector("jsonschema-input");
@@ -329,14 +331,14 @@ export class JSONSchemaForm extends LitElement {
 
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
-        const container = this.shadowRoot.querySelector(`#${name} .${type}`);
+        const container = this.shadowRoot.querySelector(`#${encode(name)} .${type}`);
         const item = new InspectorListItem(message);
         container.appendChild(item);
     };
 
     #clearMessages = (localPath, type) => {
         if (Array.isArray(localPath)) localPath = localPath.join("-"); // Convert array to string
-        const container = this.shadowRoot.querySelector(`#${localPath} .${type}`);
+        const container = this.shadowRoot.querySelector(`#${encode(localPath)} .${type}`);
 
         if (container) {
             const nChildren = container.children.length;
@@ -525,7 +527,7 @@ export class JSONSchemaForm extends LitElement {
 
         return html`
             <div
-                id=${localPath.join("-")}
+                id=${encode(localPath.join("-"))}
                 class="form-section ${isRequired || isConditional ? "required" : ""} ${isConditional
                     ? "conditional"
                     : ""}"
