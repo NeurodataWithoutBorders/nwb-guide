@@ -92,7 +92,8 @@ export class Main extends LitElement {
             if (footer === true || (!("footer" in page) && info.parent)) footer = true; // Allow navigating laterally if there is a next page
             
             // Go to home screen if there is no next page
-            if (!info.next) {
+            if (!info.next && info.parent) {
+                console.log('setting', info)
                 footer = Object.assign({
                     exit: false,
                     onNext: () => this.toRender.page.to("/"),
