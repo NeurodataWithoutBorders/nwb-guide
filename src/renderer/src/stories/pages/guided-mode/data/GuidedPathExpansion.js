@@ -14,7 +14,6 @@ import { CodeBlock } from "../../../CodeBlock.js";
 import { List } from "../../../List";
 import { fs } from "../../../../electron/index.js";
 import { joinPath } from "../../../../globals.js";
-import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
 const exampleFileStructure = `mylab/
     ¦   Subjects/

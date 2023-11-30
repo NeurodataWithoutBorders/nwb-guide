@@ -65,7 +65,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
         const input = new JSONSchemaInput({
             path: [whichAPIKey],
-            info: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey],
+            schema: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey],
         });
 
         input.style.padding = "25px";

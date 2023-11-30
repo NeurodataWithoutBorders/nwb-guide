@@ -451,7 +451,7 @@ export class JSONSchemaForm extends LitElement {
         // path = path.slice(this.base.length); // Correct for base path
         if (!path) throw new Error("Path not specified");
         return path.reduce(
-            (acc, curr) => (acc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str])]?.[curr]),
+            (acc, curr) => (acc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str]?.[curr])]?.[curr]),
             object
         );
     };
@@ -473,20 +473,20 @@ export class JSONSchemaForm extends LitElement {
             if (indexOf !== -1) path = path.slice(indexOf + 1);
         }
 
-        const resolved = this.#get(path, schema, ["properties"]);
+        const resolved = this.#get(path, schema, ["properties", "patternProperties"]);
         if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
     }
 
-    #renderInteractiveElement = (name, info, required, path = []) => {
+    #renderInteractiveElement = (name, info, required, path = [], value) => {
         let isRequired = required[name];
 
         const localPath = [...path, name];
         const externalPath = [...this.base, ...localPath];
 
         const resolved = this.#get(path, this.resolved);
-        const value = resolved[name];
+        if (value === undefined) value = resolved[name];
 
         const isConditional = this.#getLink(externalPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
 
@@ -504,12 +504,12 @@ export class JSONSchemaForm extends LitElement {
             };
 
         const interactiveInput = new JSONSchemaInput({
-            info,
+            schema: info,
             path: localPath,
             value,
             form: this,
             required: isRequired,
-            validateEmptyValue: this.validateEmptyValues,
+            validateEmptyValue: this.validateEmptyValues
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
@@ -530,7 +530,7 @@ export class JSONSchemaForm extends LitElement {
                     ? "conditional"
                     : ""}"
             >
-                <label class="guided--form-label">${info.title ?? header(name)}</label>
+                <label class="guided--form-label">${(info.title ? unsafeHTML(info.title) : null) ?? header(name)}</label>
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
@@ -832,13 +832,15 @@ export class JSONSchemaForm extends LitElement {
 
     #render = (schema, results, required = {}, ignore = {}, path = []) => {
         let isLink = Symbol("isLink");
+
+        const hasPatternProperties = !!schema.patternProperties;
+
         // Filter non-required properties (if specified) and render the sub-schema
         const renderable = this.#getRenderable(schema, required, ignore, path);
-
         // // Filter non-required properties (if specified) and render the sub-schema
         // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
-        if (renderable.length === 0) return html`<div id="empty">${this.emptyMessage}</div>`;
+        if (renderable.length === 0 && !hasPatternProperties) return html`<div id="empty">${this.emptyMessage}</div>`;
 
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
@@ -896,8 +898,11 @@ export class JSONSchemaForm extends LitElement {
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
+
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
+
+            const hasPatternProperties = !!info.patternProperties;
 
             // Render linked properties
             if (entry[isLink]) {
@@ -960,9 +965,10 @@ export class JSONSchemaForm extends LitElement {
             enableToggle.checked = !isDisabled;
 
             const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
-
+            
             if (renderableInside.length) {
-                this.#nestedForms[name] = new JSONSchemaForm({
+                const ogContext = this
+                const nested = this.#nestedForms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
                     results: { ...nestedResults },
@@ -993,7 +999,9 @@ export class JSONSchemaForm extends LitElement {
                         this.nLoaded++;
                         this.checkAllLoaded();
                     },
-                    createTable: (...args) => this.createTable(...args),
+                    createTable: function (...args) {
+                        return ogContext.createTable.call(this, ...args)
+                    },
                     onOverride: (...args) => this.onOverride(...args),
                     base,
                 });
@@ -1006,7 +1014,7 @@ export class JSONSchemaForm extends LitElement {
                 toggleable: hasMany,
                 subtitle: html`<div style="display:flex; align-items: center;">
                     ${explicitlyRequired ? "" : enableToggleContainer}${renderableInside.length
-                        ? `${renderableInside.length} fields`
+                        ? `${hasPatternProperties ? 'Dynamic' : renderableInside.length} fields`
                         : ""}
                 </div>`,
                 content: this.#nestedForms[name],
@@ -1085,6 +1093,19 @@ export class JSONSchemaForm extends LitElement {
 
             return accordion;
         });
+
+        if (hasPatternProperties) {
+              
+              const patternProps = Object.entries(schema.patternProperties).map(( [ key, schema ] ) => {
+                    return this.#renderInteractiveElement(key, schema, required, path, results) 
+              })
+    
+              return [
+                  ...rendered,
+                  ...patternProps
+              ]
+        }
+
 
         return rendered;
     };

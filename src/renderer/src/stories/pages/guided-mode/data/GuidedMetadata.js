@@ -206,7 +206,11 @@ export class GuidedMetadataPage extends ManagedPage {
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
-            createTable: (name, metadata, path) => {
+            createTable: function (name, metadata, path) {
+
+                const parentSchema = this.getSchema(path)
+                if (parentSchema.patternProperties) return false
+
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
                 if (name !== "Electrodes") return new SimpleTable(metadata);
                 else return true; // All other tables are handled by the default behavior

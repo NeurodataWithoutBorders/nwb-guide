@@ -53,7 +53,7 @@ export class InspectPage extends Page {
 
     input = new JSONSchemaInput({
         path: ["filesystem_paths"],
-        info: {
+        schema: {
             type: "array",
             items: {
                 format: ["file", "directory"],

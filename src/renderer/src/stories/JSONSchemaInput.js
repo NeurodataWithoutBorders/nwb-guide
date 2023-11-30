@@ -96,10 +96,11 @@ export class JSONSchemaInput extends LitElement {
         `;
     }
 
-    // info,
+    // schema,
     // parent,
     // path,
     // form,
+    // patternProperties
     required = false;
     validateOnChange = true;
 
@@ -116,12 +117,13 @@ export class JSONSchemaInput extends LitElement {
             // Update the actual input element
             const el = this.getElement();
             if (el.type === "checkbox") el.checked = value;
-            else if (el.classList.contains("list"))
-                el.children[0].items = value
-                    ? value.map((value) => {
-                          return { value };
-                      })
-                    : [];
+            else if (el.classList.contains("list")) {
+                const list = el.children[0];
+                el.children[0].items = this.#mapToList({
+                    value,
+                    list
+                }) // NOTE: Make sure this is correct
+            }
             else if (el instanceof Search) el.shadowRoot.querySelector("input").value = value;
             else el.value = value;
         }
@@ -136,7 +138,7 @@ export class JSONSchemaInput extends LitElement {
         return true;
     }
 
-    getElement = () => this.shadowRoot.querySelector(".schema-input");
+    getElement = () => this.shadowRoot.querySelector(".schema-input")
 
     #activateTimeoutValidation = (name, path) => {
         this.#clearTimeoutValidation();
@@ -174,35 +176,176 @@ export class JSONSchemaInput extends LitElement {
     }
 
     render() {
-        const { info } = this;
+        const { schema } = this;
 
         const input = this.#render();
 
         return html`
             ${input}
             <p class="guided--text-input-instructions">
-                ${info.description
-                    ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "."
-                          ? ""
-                          : "."}`
-                    : ""}
+                ${schema.description
+                ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
+                    ? ""
+                    : "."}`
+                : ""}
             </p>
         `;
     }
 
     #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
 
+    #isEditableObject = (schema = this.schema) => schema.type === "object";
+
+
+    #list
+    #mapToList({
+        value = this.value,
+        schema = this.schema,
+        list
+    } = {}) {
+
+        const { path: fullPath } = this;
+        const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
+        const name = path.splice(-1)[0];
+
+        const isEditableObject = this.#isEditableObject()
+        const resolved = isEditableObject ? Object.values(value ?? {}) : value ?? [];
+        let items = resolved ? resolved.map((value) => { return { value } }) : []
+
+
+        if (isEditableObject) {
+
+            let regex;
+            try { regex = new RegExp(name) } catch (e) { }
+
+            items = Object.entries(this.value)
+
+            if (regex) items = items.filter(([key]) => regex.test(key))
+
+            items = items.map(([key, value]) => {
+                return {
+                    key,
+                    value,
+                    controls: [
+                        new Button({
+                            label: 'Edit',
+                            size: "small",
+                            onClick: () => {
+
+                                this.#createModal({
+                                    key,
+                                    schema,
+                                    results: value,
+                                    list: list ?? this.#list
+                                })
+                            }
+                        })
+                    ]
+                }
+            })
+        }
+
+        return items
+    }
+
+    #schemaElement
+    #modal
+
+    async #createModal({
+        key = name,
+        schema,
+        results,
+        list
+    } = {}) {
+
+        const createNewObject = !results
+
+        if (this.#modal) this.#modal.remove();
+
+        const submitButton = new Button({
+            label: "Submit",
+            primary: true,
+        });
+
+        const updateTarget = results ?? {};
+
+        submitButton.addEventListener("click", async () => {
+
+            if (this.#schemaElement instanceof JSONSchemaForm) await this.#schemaElement.validate();
+
+            let value = updateTarget
+
+            if (schema?.format && schema.properties) {
+                let newValue = schema?.format;
+                for (let key in schema.properties) newValue = newValue.replace(`{${key}}`, value[key] ?? "").trim();
+                value = newValue;
+            }
+
+            if (createNewObject) list.add({ value });
+            else list.requestUpdate();
+
+            this.#modal.toggle(false);
+        });
+
+        this.#modal = new Modal({
+            header: header(key),
+            footer: submitButton,
+            showCloseButton: createNewObject
+        });
+
+        const div = document.createElement("div");
+        div.style.padding = "25px";
+
+        console.warn('Creating form', name, results, schema, name)
+
+        const isObject = schema.type === "object" || schema.properties; // NOTE: For formatted strings, this is not an object
+
+        this.#schemaElement = isObject
+            ? new JSONSchemaForm({
+                schema,
+                results: updateTarget,
+                onUpdate: (internalPath, value, forceUpdate) => {
+                    if (createNewObject) updateTarget[key] = value
+                    else {
+                        const path = [key, ...internalPath];
+                        console.log(path, this.path)
+                        this.#updateData(path, value, forceUpdate);
+                    }
+                },
+                onThrow: this.#onThrow,
+            })
+            : new JSONSchemaInput({
+                schema,
+                validateOnChange: false,
+                path: this.path,
+                form: this.form,
+                value: updateTarget,
+                onUpdate: (value) => {
+                    if (createNewObject) updateTarget[key] = value
+                    else this.#updateData(key, value, forceUpdate); // NOTE: Untested
+                },
+            });
+
+        div.append(this.#schemaElement);
+
+        this.#modal.append(div);
+
+        document.body.append(this.#modal);
+
+        setTimeout(() => this.#modal.toggle(true));
+    }
+
     #render() {
-        const { validateOnChange, info, path: fullPath } = this;
+        const { validateOnChange, schema, path: fullPath } = this;
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
 
-        const isArray = info.type === "array"; // Handle string (and related) formats / types
+        const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
-        const hasItemsRef = "items" in info && "$ref" in info.items;
-        if (!("items" in info)) info.items = {};
-        if (!("type" in info.items) && !hasItemsRef) info.items.type = "string";
+        const hasItemsRef = "items" in schema && "$ref" in schema.items;
+        if (!("items" in schema)) schema.items = {};
+        if (!("type" in schema.items) && !hasItemsRef) schema.items.type = "string";
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
@@ -220,10 +363,10 @@ export class JSONSchemaInput extends LitElement {
             return el;
         };
 
-        if (isArray) {
+        if (isArray || this.#isEditableObject()) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-            const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
+            const itemSchema = this.form ? this.form.getSchema("items", schema) : schema["items"];
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -248,8 +391,8 @@ export class JSONSchemaInput extends LitElement {
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
-                                  ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
-                                  : "")
+                                    ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
+                                    : "")
                         );
                     },
 
@@ -270,92 +413,22 @@ export class JSONSchemaInput extends LitElement {
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
 
-            const headerText = document.createElement("span");
-            headerText.innerText = header(name);
-
             const addButton = new Button({
                 size: "small",
             });
 
             addButton.innerText = "Add Item";
 
-            let modal;
-
-            let tempParent = {};
-
-            const itemInfo = info.items;
-            const formProperties = itemInfo.properties;
-
-            let element;
-
             addButton.addEventListener("click", () => {
-                if (modal) modal.remove();
-
-                tempParent[name] = {}; // Wipe previous values
-
-                modal = new Modal({
-                    header: headerText,
-                    footer: submitButton,
-                });
-
-                const div = document.createElement("div");
-                div.style.padding = "25px";
-
-                element = formProperties
-                    ? new JSONSchemaForm({
-                          schema: itemInfo,
-                          results: tempParent[name],
-                          onThrow: this.#onThrow,
-                      })
-                    : new JSONSchemaInput({
-                          info: itemInfo,
-                          validateOnChange: false,
-                          path: this.path,
-                          form: this.form,
-                          onUpdate: (value) => (tempParent[name] = value),
-                      });
-
-                div.append(element);
-
-                modal.append(div);
-
-                addButton.insertAdjacentElement("beforebegin", modal);
-
-                setTimeout(() => modal.toggle(true));
+                this.#createModal({ list, schema: itemSchema });
             });
 
-            const list = new List({
-                items: this.value
-                    ? this.value.map((value) => {
-                          return { value };
-                      })
-                    : [],
+            const list = this.#list = new List({
+                items: this.#mapToList(),
                 onChange: async () => {
                     this.#updateData(fullPath, list.items.length ? list.items.map((o) => o.value) : undefined);
                     if (validateOnChange) await this.#triggerValidation(name, path);
                 },
-            });
-
-            const submitButton = new Button({
-                label: "Submit",
-                primary: true,
-            });
-
-            submitButton.addEventListener("click", async () => {
-                let value = tempParent[name];
-
-                if (formProperties) {
-                    await element.validate();
-                    if (itemInfo?.format) {
-                        let newValue = itemInfo?.format;
-                        for (let key in formProperties)
-                            newValue = newValue.replace(`{${key}}`, value[key] ?? "").trim();
-                        value = newValue;
-                    }
-                }
-
-                list.add({ value });
-                modal.toggle(false);
             });
 
             return html`
@@ -366,14 +439,14 @@ export class JSONSchemaInput extends LitElement {
         }
 
         // Basic enumeration of properties on a select element
-        if (info.enum && info.enum.length) {
-            if (info.strict === false) {
+        if (schema.enum && schema.enum.length) {
+            if (schema.strict === false) {
                 // const category = categories.find(({ test }) => test.test(key))?.value;
 
-                const options = info.enum.map((v) => {
+                const options = schema.enum.map((v) => {
                     return {
                         key: v,
-                        keywords: info.enumKeywords?.[v],
+                        keywords: schema.enumKeywords?.[v],
                     };
                 });
 
@@ -396,19 +469,19 @@ export class JSONSchemaInput extends LitElement {
             return html`
                 <select
                     class="guided--input schema-input"
-                    @input=${(ev) => this.#updateData(fullPath, info.enum[ev.target.value])}
+                    @input=${(ev) => this.#updateData(fullPath, schema.enum[ev.target.value])}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                 >
-                    <option disabled selected value>${info.placeholder ?? "Select an option"}</option>
-                    ${info.enum.map(
-                        (item, i) =>
-                            html`<option value=${i} ?selected=${this.value === item}>
-                                ${info.enumLabels?.[item] ?? item}
+                    <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
+                    ${schema.enum.map(
+                (item, i) =>
+                    html`<option value=${i} ?selected=${this.value === item}>
+                                ${schema.enumLabels?.[item] ?? item}
                             </option>`
-                    )}
+            )}
                 </select>
             `;
-        } else if (info.type === "boolean") {
+        } else if (schema.type === "boolean") {
             return html`<input
                 type="checkbox"
                 class="schema-input"
@@ -416,19 +489,19 @@ export class JSONSchemaInput extends LitElement {
                 ?checked=${this.value ?? false}
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
             />`;
-        } else if (info.type === "string" || info.type === "number" || info.type === "integer") {
-            const isInteger = info.type === "integer";
-            if (isInteger) info.type = "number";
-            const isNumber = info.type === "number";
+        } else if (schema.type === "string" || schema.type === "number" || schema.type === "integer") {
+            const isInteger = schema.type === "integer";
+            if (isInteger) schema.type = "number";
+            const isNumber = schema.type === "number";
 
-            const fileSystemFormat = isFilesystemSelector(name, info.format);
+            const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
-            else if (info.format === "long" || isArray)
+            else if (schema.format === "long" || isArray)
                 return html`<textarea
                     class="guided--input guided--text-area schema-input"
                     type="text"
-                    placeholder="${info.placeholder ?? ""}"
+                    placeholder="${schema.placeholder ?? ""}"
                     style="height: 7.5em; padding-bottom: 20px"
                     maxlength="255"
                     .value="${this.value ?? ""}"
@@ -440,45 +513,45 @@ export class JSONSchemaInput extends LitElement {
             // Handle other string formats
             else {
                 const type =
-                    info.format === "date-time"
+                    schema.format === "date-time"
                         ? "datetime-local"
-                        : info.format ?? (info.type === "string" ? "text" : info.type);
+                        : schema.format ?? (schema.type === "string" ? "text" : schema.type);
                 return html`
                     <input
-                        class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
+                        class="guided--input schema-input ${schema.step === null ? "hideStep" : ""}"
                         type="${type}"
-                        step=${isNumber && info.step ? info.step : ""}
-                        placeholder="${info.placeholder ?? ""}"
+                        step=${isNumber && schema.step ? schema.step : ""}
+                        placeholder="${schema.placeholder ?? ""}"
                         .value="${this.value ?? ""}"
                         @input=${(ev) => {
-                            let value = ev.target.value;
-                            let newValue = value;
+                        let value = ev.target.value;
+                        let newValue = value;
 
-                            // const isBlank = value === '';
+                        // const isBlank = value === '';
 
-                            if (isInteger) newValue = parseInt(value);
-                            else if (isNumber) newValue = parseFloat(value);
+                        if (isInteger) newValue = parseInt(value);
+                        else if (isNumber) newValue = parseFloat(value);
 
-                            if (isNumber) {
-                                if ("min" in info && value < info.min) newValue = info.min;
-                                else if ("max" in info && value > info.max) newValue = info.max;
-                            }
+                        if (isNumber) {
+                            if ("min" in schema && value < schema.min) newValue = schema.min;
+                            else if ("max" in schema && value > schema.max) newValue = schema.max;
+                        }
 
-                            if (info.transform) newValue = info.transform(newValue, this.value, info);
+                        if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
 
-                            // // Do not check patter if value is empty
-                            // if (info.pattern && !isBlank) {
-                            //     const regex = new RegExp(info.pattern)
-                            //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
-                            // }
+                        // // Do not check patter if value is empty
+                        // if (schema.pattern && !isBlank) {
+                        //     const regex = new RegExp(schema.pattern)
+                        //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
+                        // }
 
-                            if (!isNaN(newValue) && newValue !== value) {
-                                ev.target.value = newValue;
-                                value = newValue;
-                            }
+                        if (!isNaN(newValue) && newValue !== value) {
+                            ev.target.value = newValue;
+                            value = newValue;
+                        }
 
-                            this.#updateData(fullPath, value);
-                        }}
+                        this.#updateData(fullPath, value);
+                    }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     />
                 `;
@@ -486,7 +559,7 @@ export class JSONSchemaInput extends LitElement {
         }
 
         // Print out the immutable default value
-        return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pre>`;
+        return html`<pre>${schema.default ? JSON.stringify(schema.default, null, 2) : "No default value"}</pre>`;
     }
 }
 

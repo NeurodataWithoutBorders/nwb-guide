@@ -6,6 +6,7 @@ type ListItemType = {
   key: string,
   content: string,
   value: any,
+  controls: HTMLElement[]
 }
 
 export interface ListProps {
@@ -85,6 +86,12 @@ export class List extends LitElement {
       [data-idx]{
         background: #f0f0f0;
         height: 25px;
+      }
+
+      .controls {  
+        margin-left: 1rem;
+        display: flex;
+        gap: 0.5rem;
       }
 
     `;
@@ -231,12 +238,17 @@ export class List extends LitElement {
       li.append(outerDiv)
       outerDiv.append(div)
 
+      const controlsDiv = document.createElement('div');
+      controlsDiv.classList.add("controls");
+
       let editableElement = document.createElement("span");
 
       let resolvedKey = key;
       const originalValue = resolvedKey;
 
       const isUnordered = !!key
+
+      const isObjectContent = content && typeof content === 'object'
 
       if (isUnordered) {
 
@@ -253,10 +265,13 @@ export class List extends LitElement {
 
         keyEl.innerText = resolvedKey;
         keyEl.style.cursor = "text";
+        div.append(keyEl);
 
-        const sepEl = document.createElement("span");
-        sepEl.innerHTML = "&nbsp;-&nbsp;";
-        div.append(keyEl, sepEl);
+        if (!isObjectContent) {
+          const sepEl = document.createElement("span");
+          sepEl.innerHTML = "&nbsp;-&nbsp;";
+          div.append(sepEl);
+        }
 
         this.object[resolvedKey] = value;
       }
@@ -271,22 +286,26 @@ export class List extends LitElement {
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
-      else li.append(editableElement = content)
+
+      // Skip object contents
+      else if (!isObjectContent) li.append(editableElement = content)
 
 
 
       if (div.innerText) li.title = div.innerText
 
+      if (item.controls || this.editable) outerDiv.append(controlsDiv)
+
+      if (item.controls) controlsDiv.appendChild(...item.controls);
 
       if (this.editable) {
+
         const button = new Button({
             label: "Delete",
             size: "small",
         });
 
-        button.style.marginLeft = "1rem";
-
-        outerDiv.appendChild(button);
+        controlsDiv.appendChild(button);
 
         editableElement.contentEditable = true;
 

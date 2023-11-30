@@ -54,6 +54,7 @@ export class SimpleTable extends LitElement {
 
             :host([loading]) tfoot {
                 display: block;
+                position: relative;
             }
 
             :host([loading]) tfoot td {
@@ -519,7 +520,7 @@ export class SimpleTable extends LitElement {
     updated() {
         this.setAttribute("loading", "");
 
-        const data = this.#getData();
+        const data = this.#getData(); // Always render at least one row
         const cells = data.map((row, i) => row.map((v, j) => this.#createCell(v, { i, j }))).flat();
 
         // Trigger load after a short delay if not deferred
