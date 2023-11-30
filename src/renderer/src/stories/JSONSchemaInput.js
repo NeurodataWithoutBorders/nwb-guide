@@ -121,10 +121,9 @@ export class JSONSchemaInput extends LitElement {
                 const list = el.children[0];
                 el.children[0].items = this.#mapToList({
                     value,
-                    list
-                }) // NOTE: Make sure this is correct
-            }
-            else if (el instanceof Search) el.shadowRoot.querySelector("input").value = value;
+                    list,
+                }); // NOTE: Make sure this is correct
+            } else if (el instanceof Search) el.shadowRoot.querySelector("input").value = value;
             else el.value = value;
         }
 
@@ -138,7 +137,7 @@ export class JSONSchemaInput extends LitElement {
         return true;
     }
 
-    getElement = () => this.shadowRoot.querySelector(".schema-input")
+    getElement = () => this.shadowRoot.querySelector(".schema-input");
 
     #activateTimeoutValidation = (name, path) => {
         this.#clearTimeoutValidation();
@@ -184,10 +183,10 @@ export class JSONSchemaInput extends LitElement {
             ${input}
             <p class="guided--text-input-instructions">
                 ${schema.description
-                ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
-                    ? ""
-                    : "."}`
-                : ""}
+                    ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
+                          ? ""
+                          : "."}`
+                    : ""}
             </p>
         `;
     }
@@ -196,31 +195,29 @@ export class JSONSchemaInput extends LitElement {
 
     #isEditableObject = (schema = this.schema) => schema.type === "object";
 
-
-    #list
-    #mapToList({
-        value = this.value,
-        schema = this.schema,
-        list
-    } = {}) {
-
+    #list;
+    #mapToList({ value = this.value, schema = this.schema, list } = {}) {
         const { path: fullPath } = this;
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
 
-        const isEditableObject = this.#isEditableObject()
+        const isEditableObject = this.#isEditableObject();
         const resolved = isEditableObject ? Object.values(value ?? {}) : value ?? [];
-        let items = resolved ? resolved.map((value) => { return { value } }) : []
-
+        let items = resolved
+            ? resolved.map((value) => {
+                  return { value };
+              })
+            : [];
 
         if (isEditableObject) {
-
             let regex;
-            try { regex = new RegExp(name) } catch (e) { }
+            try {
+                regex = new RegExp(name);
+            } catch (e) {}
 
-            items = Object.entries(this.value)
+            items = Object.entries(this.value);
 
-            if (regex) items = items.filter(([key]) => regex.test(key))
+            if (regex) items = items.filter(([key]) => regex.test(key));
 
             items = items.map(([key, value]) => {
                 return {
@@ -228,37 +225,30 @@ export class JSONSchemaInput extends LitElement {
                     value,
                     controls: [
                         new Button({
-                            label: 'Edit',
+                            label: "Edit",
                             size: "small",
                             onClick: () => {
-
                                 this.#createModal({
                                     key,
                                     schema,
                                     results: value,
-                                    list: list ?? this.#list
-                                })
-                            }
-                        })
-                    ]
-                }
-            })
+                                    list: list ?? this.#list,
+                                });
+                            },
+                        }),
+                    ],
+                };
+            });
         }
 
-        return items
+        return items;
     }
 
-    #schemaElement
-    #modal
+    #schemaElement;
+    #modal;
 
-    async #createModal({
-        key = name,
-        schema,
-        results,
-        list
-    } = {}) {
-
-        const createNewObject = !results
+    async #createModal({ key = name, schema, results, list } = {}) {
+        const createNewObject = !results;
 
         if (this.#modal) this.#modal.remove();
 
@@ -270,10 +260,9 @@ export class JSONSchemaInput extends LitElement {
         const updateTarget = results ?? {};
 
         submitButton.addEventListener("click", async () => {
-
             if (this.#schemaElement instanceof JSONSchemaForm) await this.#schemaElement.validate();
 
-            let value = updateTarget
+            let value = updateTarget;
 
             if (schema?.format && schema.properties) {
                 let newValue = schema?.format;
@@ -290,41 +279,41 @@ export class JSONSchemaInput extends LitElement {
         this.#modal = new Modal({
             header: header(key),
             footer: submitButton,
-            showCloseButton: createNewObject
+            showCloseButton: createNewObject,
         });
 
         const div = document.createElement("div");
         div.style.padding = "25px";
 
-        console.warn('Creating form', name, results, schema, name)
+        console.warn("Creating form", name, results, schema, name);
 
         const isObject = schema.type === "object" || schema.properties; // NOTE: For formatted strings, this is not an object
 
         this.#schemaElement = isObject
             ? new JSONSchemaForm({
-                schema,
-                results: updateTarget,
-                onUpdate: (internalPath, value, forceUpdate) => {
-                    if (createNewObject) updateTarget[key] = value
-                    else {
-                        const path = [key, ...internalPath];
-                        console.log(path, this.path)
-                        this.#updateData(path, value, forceUpdate);
-                    }
-                },
-                onThrow: this.#onThrow,
-            })
+                  schema,
+                  results: updateTarget,
+                  onUpdate: (internalPath, value, forceUpdate) => {
+                      if (createNewObject) updateTarget[key] = value;
+                      else {
+                          const path = [key, ...internalPath];
+                          console.log(path, this.path);
+                          this.#updateData(path, value, forceUpdate);
+                      }
+                  },
+                  onThrow: this.#onThrow,
+              })
             : new JSONSchemaInput({
-                schema,
-                validateOnChange: false,
-                path: this.path,
-                form: this.form,
-                value: updateTarget,
-                onUpdate: (value) => {
-                    if (createNewObject) updateTarget[key] = value
-                    else this.#updateData(key, value, forceUpdate); // NOTE: Untested
-                },
-            });
+                  schema,
+                  validateOnChange: false,
+                  path: this.path,
+                  form: this.form,
+                  value: updateTarget,
+                  onUpdate: (value) => {
+                      if (createNewObject) updateTarget[key] = value;
+                      else this.#updateData(key, value, forceUpdate); // NOTE: Untested
+                  },
+              });
 
         div.append(this.#schemaElement);
 
@@ -391,8 +380,8 @@ export class JSONSchemaInput extends LitElement {
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
-                                    ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
-                                    : "")
+                                  ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
+                                  : "")
                         );
                     },
 
@@ -423,13 +412,13 @@ export class JSONSchemaInput extends LitElement {
                 this.#createModal({ list, schema: itemSchema });
             });
 
-            const list = this.#list = new List({
+            const list = (this.#list = new List({
                 items: this.#mapToList(),
                 onChange: async () => {
                     this.#updateData(fullPath, list.items.length ? list.items.map((o) => o.value) : undefined);
                     if (validateOnChange) await this.#triggerValidation(name, path);
                 },
-            });
+            }));
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
@@ -474,11 +463,11 @@ export class JSONSchemaInput extends LitElement {
                 >
                     <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
                     ${schema.enum.map(
-                (item, i) =>
-                    html`<option value=${i} ?selected=${this.value === item}>
+                        (item, i) =>
+                            html`<option value=${i} ?selected=${this.value === item}>
                                 ${schema.enumLabels?.[item] ?? item}
                             </option>`
-            )}
+                    )}
                 </select>
             `;
         } else if (schema.type === "boolean") {
@@ -524,34 +513,34 @@ export class JSONSchemaInput extends LitElement {
                         placeholder="${schema.placeholder ?? ""}"
                         .value="${this.value ?? ""}"
                         @input=${(ev) => {
-                        let value = ev.target.value;
-                        let newValue = value;
+                            let value = ev.target.value;
+                            let newValue = value;
 
-                        // const isBlank = value === '';
+                            // const isBlank = value === '';
 
-                        if (isInteger) newValue = parseInt(value);
-                        else if (isNumber) newValue = parseFloat(value);
+                            if (isInteger) newValue = parseInt(value);
+                            else if (isNumber) newValue = parseFloat(value);
 
-                        if (isNumber) {
-                            if ("min" in schema && value < schema.min) newValue = schema.min;
-                            else if ("max" in schema && value > schema.max) newValue = schema.max;
-                        }
+                            if (isNumber) {
+                                if ("min" in schema && value < schema.min) newValue = schema.min;
+                                else if ("max" in schema && value > schema.max) newValue = schema.max;
+                            }
 
-                        if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
+                            if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
 
-                        // // Do not check patter if value is empty
-                        // if (schema.pattern && !isBlank) {
-                        //     const regex = new RegExp(schema.pattern)
-                        //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
-                        // }
+                            // // Do not check patter if value is empty
+                            // if (schema.pattern && !isBlank) {
+                            //     const regex = new RegExp(schema.pattern)
+                            //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
+                            // }
 
-                        if (!isNaN(newValue) && newValue !== value) {
-                            ev.target.value = newValue;
-                            value = newValue;
-                        }
+                            if (!isNaN(newValue) && newValue !== value) {
+                                ev.target.value = newValue;
+                                value = newValue;
+                            }
 
-                        this.#updateData(fullPath, value);
-                    }}
+                            this.#updateData(fullPath, value);
+                        }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     />
                 `;

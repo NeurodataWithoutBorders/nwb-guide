@@ -88,7 +88,7 @@ export class List extends LitElement {
         height: 25px;
       }
 
-      .controls {  
+      .controls {
         margin-left: 1rem;
         display: flex;
         gap: 0.5rem;

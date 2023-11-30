@@ -509,7 +509,7 @@ export class JSONSchemaForm extends LitElement {
             value,
             form: this,
             required: isRequired,
-            validateEmptyValue: this.validateEmptyValues
+            validateEmptyValue: this.validateEmptyValues,
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
@@ -530,7 +530,9 @@ export class JSONSchemaForm extends LitElement {
                     ? "conditional"
                     : ""}"
             >
-                <label class="guided--form-label">${(info.title ? unsafeHTML(info.title) : null) ?? header(name)}</label>
+                <label class="guided--form-label"
+                    >${(info.title ? unsafeHTML(info.title) : null) ?? header(name)}</label
+                >
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
@@ -898,7 +900,6 @@ export class JSONSchemaForm extends LitElement {
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
-
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
 
@@ -965,10 +966,10 @@ export class JSONSchemaForm extends LitElement {
             enableToggle.checked = !isDisabled;
 
             const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
-            
+
             if (renderableInside.length) {
-                const ogContext = this
-                const nested = this.#nestedForms[name] = new JSONSchemaForm({
+                const ogContext = this;
+                const nested = (this.#nestedForms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
                     results: { ...nestedResults },
@@ -1000,11 +1001,11 @@ export class JSONSchemaForm extends LitElement {
                         this.checkAllLoaded();
                     },
                     createTable: function (...args) {
-                        return ogContext.createTable.call(this, ...args)
+                        return ogContext.createTable.call(this, ...args);
                     },
                     onOverride: (...args) => this.onOverride(...args),
                     base,
-                });
+                }));
             }
 
             const oldStates = this.#accordions[headerName];
@@ -1014,7 +1015,7 @@ export class JSONSchemaForm extends LitElement {
                 toggleable: hasMany,
                 subtitle: html`<div style="display:flex; align-items: center;">
                     ${explicitlyRequired ? "" : enableToggleContainer}${renderableInside.length
-                        ? `${hasPatternProperties ? 'Dynamic' : renderableInside.length} fields`
+                        ? `${hasPatternProperties ? "Dynamic" : renderableInside.length} fields`
                         : ""}
                 </div>`,
                 content: this.#nestedForms[name],
@@ -1095,17 +1096,12 @@ export class JSONSchemaForm extends LitElement {
         });
 
         if (hasPatternProperties) {
-              
-              const patternProps = Object.entries(schema.patternProperties).map(( [ key, schema ] ) => {
-                    return this.#renderInteractiveElement(key, schema, required, path, results) 
-              })
-    
-              return [
-                  ...rendered,
-                  ...patternProps
-              ]
-        }
+            const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
+                return this.#renderInteractiveElement(key, schema, required, path, results);
+            });
 
+            return [...rendered, ...patternProps];
+        }
 
         return rendered;
     };
