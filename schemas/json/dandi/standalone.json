@@ -1,4 +1,7 @@
 {
+    "order": [
+        "filesystem_paths"
+    ],
     "properties": {
         "filesystem_paths": {
             "type": "array",

@@ -34,8 +34,9 @@ import * as dandi from "dandi";
 
 import keyIcon from "../../assets/key.svg?raw";
 
-import { isStaging, validate, willCreate } from "./utils";
+import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, willCreate } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
+
 
 export async function createDandiset(results = {}) {
     let notification;
@@ -58,6 +59,26 @@ export async function createDandiset(results = {}) {
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
         results,
+        validateOnChange: async (name, parent) => {
+            const value = parent[name];
+
+            if (name === 'nih_award_number') {
+                if (value)return awardNumberValidator(value) || [{ type: 'error', message: AWARD_VALIDATION_FAIL_MESSAGE }]
+                else if (parent['embargo_status']) return [{
+                    type: "error",
+                    message: "You must provide an NIH Award Number to embargo your data."
+                }]
+            }
+        },
+        conditionalRequirements: [
+            {
+                name: "Embargo your Data",
+                properties: [
+                    ["embargo_status"],
+                    ["nih_award_number"],
+                ],
+            },
+        ],
     });
 
     content.append(form);
@@ -84,7 +105,23 @@ export async function createDandiset(results = {}) {
                 const api = new dandi.API({ token: api_key, type: staging ? "staging" : undefined });
                 await api.init();
 
-                const res = await api.create(form.resolved.title, form.resolved.metadata, form.resolved.embargo_status);
+                const metadata = {
+                    description: form.resolved.description,
+                    license: form.resolved.license,
+                }
+
+                if (form.resolved.nih_award_number) {
+                    metadata.contributor = [{
+                        name: "National Institutes of Health (NIH)",
+                        roleName: [
+                            "dcite:Funder"
+                        ],
+                        schemaKey: "Organization",
+                        awardNumber: form.resolved.nih_award_number
+                    }]
+                }
+
+                const res = await api.create(form.resolved.title, metadata, form.resolved.embargo_status);
 
                 const id = res.identifier;
 
@@ -325,6 +362,7 @@ export class UploadsPage extends Page {
 
                         global.save();
                     },
+                    
                     onThrow,
 
                     transformErrors: (e) => {

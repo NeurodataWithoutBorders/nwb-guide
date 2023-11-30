@@ -2,9 +2,8 @@
     "order": [
         "title", 
         "archive",
-        "embargbo_status", 
+        "embargo_status", 
         "description",
-        "study_target",
         "license"
     ],
     "properties": {
@@ -15,7 +14,6 @@
         },
 
         "embargo_status": {
-            "title": "Embargo this Dandiset",
             "type": "boolean",
             "description": "Embargoed Dandisets are hidden from public access until a specific time period has elapsed. Uploading data to the DANDI archive under embargo requires a relevant NIH award number, and the data will be automatically published when the embargo period expires.",
             "default": false
@@ -56,5 +54,5 @@
         }
 
     },
-    "required": ["title", "metadata", "description", "license", "archive"]
+    "required": ["title", "description", "license", "archive"]
 }

@@ -30,3 +30,14 @@ function isNumeric(str: string) {
 }
 
 export const willCreate = (value: string) => !isNumeric(value)
+
+// Regular expression to validate an NIH award number.
+// Based on https://era.nih.gov/files/Deciphering_NIH_Application.pdf
+// and https://era.nih.gov/erahelp/commons/Commons/understandGrantNums.htm
+const NIH_AWARD_REGEX = /^\d \w+ \w{2} \d{6}-\d{2}([A|S|X|P]\d)?$/;
+
+export function awardNumberValidator(awardNumber: string): boolean {
+  return NIH_AWARD_REGEX.test(awardNumber);
+}
+
+export const AWARD_VALIDATION_FAIL_MESSAGE = 'Award number must be properly space-delimited.\n\nExample (exclude quotes):\n"1 R01 CA 123456-01A1"';

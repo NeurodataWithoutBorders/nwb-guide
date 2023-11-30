@@ -919,6 +919,17 @@ export class JSONSchemaForm extends LitElement {
                 else return 0;
             });
 
+        if (schema.order) {
+            sorted.sort(([name], [name2]) => {
+                const index = schema.order.indexOf(name);
+                const index2 = schema.order.indexOf(name2);
+                if (index === -1) return 1;
+                if (index2 === -1) return -1;
+                return index - index2;
+            })
+            console.log('Order Sorted', sorted)
+        }
+
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
         let rendered = finalSort.map((entry) => {
