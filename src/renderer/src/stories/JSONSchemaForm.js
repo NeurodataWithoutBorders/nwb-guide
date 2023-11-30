@@ -703,7 +703,7 @@ export class JSONSchemaForm extends LitElement {
 
         const jsonSchemaErrors = await v
             .validate(parent[name], this.schema.properties[name])
-            .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }))
+            .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }));
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
@@ -721,8 +721,7 @@ export class JSONSchemaForm extends LitElement {
                 ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
                 : []), // Derived Errors
             ...jsonSchemaErrors, // JSON Schema Errors
-        ]
-
+        ];
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
 
@@ -781,8 +780,6 @@ export class JSONSchemaForm extends LitElement {
             }
         }
 
-
-
         // Clear old errors and warnings
         this.#clearMessages(localPath, "errors");
         this.#clearMessages(localPath, "warnings");
@@ -797,20 +794,20 @@ export class JSONSchemaForm extends LitElement {
 
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
-        const resolvedErrors = errors.map((e) => {
-            
-            // Non-Strict Rule
-            if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+        const resolvedErrors = errors
+            .map((e) => {
+                // Non-Strict Rule
+                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
 
-            // Custom Error Transformations
-            if (this.transformErrors) {
-                const res = this.transformErrors(e, externalPath, parent[name]);
-                if (res === false) return;
-            }
+                // Custom Error Transformations
+                if (this.transformErrors) {
+                    const res = this.transformErrors(e, externalPath, parent[name]);
+                    if (res === false) return;
+                }
 
-            return e;
-        })
-        .filter((v) => !!v);
+                return e;
+            })
+            .filter((v) => !!v);
 
         // Track errors and warnings
         this.#nErrors += resolvedErrors.length;

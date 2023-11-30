@@ -90,14 +90,17 @@ export class Main extends LitElement {
 
             // Default Footer Behavior
             if (footer === true || (!("footer" in page) && info.parent)) footer = true; // Allow navigating laterally if there is a next page
-            
+
             // Go to home screen if there is no next page
             if (!info.next) {
-                footer = Object.assign({
-                    exit: false,
-                    onNext: () => this.toRender.page.to("/"),
-                }, footer && typeof footer === "object" ? footer : {});
-            } 
+                footer = Object.assign(
+                    {
+                        exit: false,
+                        onNext: () => this.toRender.page.to("/"),
+                    },
+                    footer && typeof footer === "object" ? footer : {}
+                );
+            }
 
             if (footer === true) footer = {};
             if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Save and Continue";
