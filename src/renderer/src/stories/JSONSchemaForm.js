@@ -926,8 +926,8 @@ export class JSONSchemaForm extends LitElement {
                 if (index === -1) return 1;
                 if (index2 === -1) return -1;
                 return index - index2;
-            })
-            console.log('Order Sorted', sorted)
+            });
+            console.log("Order Sorted", sorted);
         }
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;

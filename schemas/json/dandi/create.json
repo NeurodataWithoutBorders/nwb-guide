@@ -2,7 +2,7 @@
     "order": [
         "title",
         "archive",
-        "embargo_status", 
+        "embargo_status",
         "description",
         "license"
     ],

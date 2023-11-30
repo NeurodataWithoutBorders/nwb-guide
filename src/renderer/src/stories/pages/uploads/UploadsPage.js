@@ -37,7 +37,6 @@ import keyIcon from "../../assets/key.svg?raw";
 import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, willCreate } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
-
 export async function createDandiset(results = {}) {
     let notification;
 
@@ -62,21 +61,22 @@ export async function createDandiset(results = {}) {
         validateOnChange: async (name, parent) => {
             const value = parent[name];
 
-            if (name === 'nih_award_number') {
-                if (value)return awardNumberValidator(value) || [{ type: 'error', message: AWARD_VALIDATION_FAIL_MESSAGE }]
-                else if (parent['embargo_status']) return [{
-                    type: "error",
-                    message: "You must provide an NIH Award Number to embargo your data."
-                }]
+            if (name === "nih_award_number") {
+                if (value)
+                    return awardNumberValidator(value) || [{ type: "error", message: AWARD_VALIDATION_FAIL_MESSAGE }];
+                else if (parent["embargo_status"])
+                    return [
+                        {
+                            type: "error",
+                            message: "You must provide an NIH Award Number to embargo your data.",
+                        },
+                    ];
             }
         },
         conditionalRequirements: [
             {
                 name: "Embargo your Data",
-                properties: [
-                    ["embargo_status"],
-                    ["nih_award_number"],
-                ],
+                properties: [["embargo_status"], ["nih_award_number"]],
             },
         ],
     });
@@ -108,17 +108,17 @@ export async function createDandiset(results = {}) {
                 const metadata = {
                     description: form.resolved.description,
                     license: form.resolved.license,
-                }
+                };
 
                 if (form.resolved.nih_award_number) {
-                    metadata.contributor = [{
-                        name: "National Institutes of Health (NIH)",
-                        roleName: [
-                            "dcite:Funder"
-                        ],
-                        schemaKey: "Organization",
-                        awardNumber: form.resolved.nih_award_number
-                    }]
+                    metadata.contributor = [
+                        {
+                            name: "National Institutes of Health (NIH)",
+                            roleName: ["dcite:Funder"],
+                            schemaKey: "Organization",
+                            awardNumber: form.resolved.nih_award_number,
+                        },
+                    ];
                 }
 
                 const res = await api.create(form.resolved.title, metadata, form.resolved.embargo_status);
@@ -367,7 +367,7 @@ export class UploadsPage extends Page {
 
                         global.save();
                     },
-                    
+
                     onThrow,
 
                     transformErrors: (e) => {
