@@ -5,14 +5,14 @@ import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
 import dandiUploadSchema, { ready, regenerateDandisets } from "../../../../../../../schemas/dandi-upload.schema";
-import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
+import { uploadToDandi } from "../../uploads/UploadsPage.js";
 import { until } from "lit/directives/until.js";
 
 import { Button } from "../../../Button.js";
 
 import keyIcon from "../../../assets/key.svg?raw";
 
-import { validate, willCreate } from "../../uploads/utils";
+import { validate } from "../../uploads/utils";
 import { global } from "../../../../progress/index.js";
 
 import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.json";
@@ -85,12 +85,6 @@ export class GuidedUploadPage extends Page {
             const globalUploadInfo = globalState.upload;
 
             await this.form.validate(); // Will throw an error in the callback
-
-            const possibleTitle = globalUploadInfo.info.dandiset;
-            if (willCreate(globalUploadInfo.info.dandiset)) {
-                await createDandiset.call(this, { title: possibleTitle });
-                await this.save();
-            }
 
             // Catch if Dandiset is already uploaded
             if ("results" in globalUploadInfo) {

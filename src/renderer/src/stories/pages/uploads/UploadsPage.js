@@ -34,7 +34,7 @@ import * as dandi from "dandi";
 
 import keyIcon from "../../assets/key.svg?raw";
 
-import { isStaging, validate } from "./utils";
+import { isStaging, validate, willCreate } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
 export async function createDandiset(results = {}) {
@@ -192,6 +192,12 @@ async function getAPIKey(staging = false) {
 
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const { dandiset } = info;
+
+
+    if (willCreate(dandiset)) {
+        await createDandiset.call(this, { title: dandiset });
+        await this.save();
+    }
 
     const dandiset_id = dandiset;
 
