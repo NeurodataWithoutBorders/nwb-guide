@@ -1,6 +1,6 @@
 {
     "order": [
-        "title", 
+        "title",
         "archive",
         "embargo_status", 
         "description",
