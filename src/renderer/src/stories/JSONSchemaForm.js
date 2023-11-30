@@ -12,7 +12,7 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
-const encode = (str) => btoa(str).replace(/\+|\/|\=/g, '_');
+const encode = (str) => btoa(str).replace(/\+|\/|\=/g, "_");
 
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
