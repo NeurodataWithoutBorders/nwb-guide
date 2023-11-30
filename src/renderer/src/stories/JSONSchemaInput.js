@@ -218,6 +218,7 @@ export class JSONSchemaInput extends LitElement {
             items = Object.entries(this.value);
 
             if (regex) items = items.filter(([key]) => regex.test(key));
+            else items.filter(([key]) => key in schema.properties);
 
             items = items.map(([key, value]) => {
                 return {
@@ -332,6 +333,8 @@ export class JSONSchemaInput extends LitElement {
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
+        const isEditableObject = this.#isEditableObject()
+
         const hasItemsRef = "items" in schema && "$ref" in schema.items;
         if (!("items" in schema)) schema.items = {};
         if (!("type" in schema.items) && !hasItemsRef) schema.items.type = "string";
@@ -352,7 +355,7 @@ export class JSONSchemaInput extends LitElement {
             return el;
         };
 
-        if (isArray || this.#isEditableObject()) {
+        if (isArray || isEditableObject) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
             const itemSchema = this.form ? this.form.getSchema("items", schema) : schema["items"];
@@ -406,7 +409,7 @@ export class JSONSchemaInput extends LitElement {
                 size: "small",
             });
 
-            addButton.innerText = "Add Item";
+            addButton.innerText = `Add ${isEditableObject ? 'Property' : 'Item'}`;
 
             addButton.addEventListener("click", () => {
                 this.#createModal({ list, schema: itemSchema });

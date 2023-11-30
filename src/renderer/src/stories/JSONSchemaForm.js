@@ -836,13 +836,16 @@ export class JSONSchemaForm extends LitElement {
         let isLink = Symbol("isLink");
 
         const hasPatternProperties = !!schema.patternProperties;
+        const hasAdditionalProperties = schema.additionalProperties !== false;
 
         // Filter non-required properties (if specified) and render the sub-schema
         const renderable = this.#getRenderable(schema, required, ignore, path);
         // // Filter non-required properties (if specified) and render the sub-schema
         // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
-        if (renderable.length === 0 && !hasPatternProperties) return html`<div id="empty">${this.emptyMessage}</div>`;
+        const hasProperties = renderable.length > 0 || hasPatternProperties || hasAdditionalProperties;
+
+        if (!hasProperties) return html`<div id="empty">${this.emptyMessage}</div>`;
 
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
@@ -1097,11 +1100,20 @@ export class JSONSchemaForm extends LitElement {
 
         if (hasPatternProperties) {
             const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
-                return this.#renderInteractiveElement(key, schema, required, path, results);
+                return this.#renderInteractiveElement(key, {
+                    ...schema,
+                    title: `Pattern Properties <small><small>${key}</small></small>`
+                }, required, path, results);
             });
-
-            return [...rendered, ...patternProps];
+            
+            rendered = [...rendered, ...patternProps];
         }
+
+        // if (hasAdditionalProperties) {
+        //     const additionalList = this.#renderInteractiveElement('Additional Properties', schema, required, path, results)
+        //     rendered = [...rendered, additionalList];
+        // }
+ 
 
         return rendered;
     };

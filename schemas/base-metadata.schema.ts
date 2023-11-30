@@ -39,6 +39,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     const copy = structuredClone(schema)
 
+    copy.additionalProperties = false
+
     // Add unit to weight
     const subjectProps = copy.properties.Subject.properties
     subjectProps.weight.unit = 'kg'

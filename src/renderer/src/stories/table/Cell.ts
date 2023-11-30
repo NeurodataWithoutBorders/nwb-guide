@@ -39,7 +39,7 @@ export class TableCell extends LitElement {
                 font-size: 13px;
                 height: 100%;
                 max-height:  100px;
-                overflow-y: scroll;
+                overflow-y: auto;
             }
 
             :host > * {
