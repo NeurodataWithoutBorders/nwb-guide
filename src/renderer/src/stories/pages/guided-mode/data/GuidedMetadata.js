@@ -98,7 +98,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.#globalModal.remove();
+        if (this.#globalModal) this.#globalModal.remove();
     }
 
     createForm = ({ subject, session, info }) => {
