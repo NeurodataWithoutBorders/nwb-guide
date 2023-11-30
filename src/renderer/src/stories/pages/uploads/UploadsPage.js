@@ -193,7 +193,6 @@ async function getAPIKey(staging = false) {
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const { dandiset } = info;
 
-
     if (willCreate(dandiset)) {
         await createDandiset.call(this, { title: dandiset });
         await this.save();
