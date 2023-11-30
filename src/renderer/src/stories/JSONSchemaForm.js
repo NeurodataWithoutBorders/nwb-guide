@@ -704,19 +704,6 @@ export class JSONSchemaForm extends LitElement {
         const jsonSchemaErrors = await v
             .validate(parent[name], this.schema.properties[name])
             .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }))
-            .map((e) => {
-                // Non-Strict Rule
-                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
-
-                // Custom Error Transformations
-                if (this.transformErrors) {
-                    const res = this.transformErrors(e, externalPath, parent[name]);
-                    if (res === false) return;
-                }
-
-                return e;
-            })
-            .filter((v) => !!v);
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
@@ -734,7 +721,8 @@ export class JSONSchemaForm extends LitElement {
                 ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
                 : []), // Derived Errors
             ...jsonSchemaErrors, // JSON Schema Errors
-        ];
+        ]
+
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
 
@@ -793,6 +781,8 @@ export class JSONSchemaForm extends LitElement {
             }
         }
 
+
+
         // Clear old errors and warnings
         this.#clearMessages(localPath, "errors");
         this.#clearMessages(localPath, "warnings");
@@ -807,8 +797,23 @@ export class JSONSchemaForm extends LitElement {
 
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
+        const resolvedErrors = errors.map((e) => {
+            
+            // Non-Strict Rule
+            if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+
+            // Custom Error Transformations
+            if (this.transformErrors) {
+                const res = this.transformErrors(e, externalPath, parent[name]);
+                if (res === false) return;
+            }
+
+            return e;
+        })
+        .filter((v) => !!v);
+
         // Track errors and warnings
-        this.#nErrors += errors.length;
+        this.#nErrors += resolvedErrors.length;
         this.#nWarnings += warnings.length;
         this.checkStatus();
 
@@ -818,7 +823,7 @@ export class JSONSchemaForm extends LitElement {
 
         const input = this.getInput(localPath);
 
-        if (isValid && errors.length === 0) {
+        if (isValid && resolvedErrors.length === 0) {
             input.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(externalPath);
@@ -844,7 +849,7 @@ export class JSONSchemaForm extends LitElement {
                 [...path, name]
             );
 
-            errors.forEach((info) => this.#addMessage(localPath, info, "errors"));
+            resolvedErrors.forEach((info) => this.#addMessage(localPath, info, "errors"));
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;

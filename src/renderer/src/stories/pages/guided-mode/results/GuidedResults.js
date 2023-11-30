@@ -8,6 +8,10 @@ export class GuidedResultsPage extends Page {
         super(...args);
     }
 
+    footer = {
+        next: "Complete Conversion",
+    }
+
     render() {
         const { conversion } = this.info.globalState;
 

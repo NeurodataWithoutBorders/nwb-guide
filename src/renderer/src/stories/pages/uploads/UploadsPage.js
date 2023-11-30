@@ -288,13 +288,15 @@ export class UploadsPage extends Page {
             label: defaultButtonMessage,
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
+
+                const files = this.form.resolved.filesystem_paths;
                 await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
 
                 const modal = new Modal({ open: true });
                 modal.header = "DANDI Upload Summary";
-                const summary = new DandiResults({ id: globalState.dandiset });
+                const summary = new DandiResults({ id: globalState.dandiset, files });
                 summary.style.padding = "25px";
                 modal.append(summary);
 
@@ -326,6 +328,10 @@ export class UploadsPage extends Page {
                         global.save();
                     },
                     onThrow,
+
+                    transformErrors: (e) => {
+                        if (e.message === 'Filesystem Paths is a required property.') e.message = 'Please select at least one file or folder to upload.';
+                    },
 
                     validateOnChange: validate,
                 }));
