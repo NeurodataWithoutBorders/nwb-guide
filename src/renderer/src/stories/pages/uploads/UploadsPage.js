@@ -292,7 +292,9 @@ export class UploadsPage extends Page {
 
                 const modal = new Modal({ open: true });
                 modal.header = "DANDI Upload Summary";
-                const summary = new DandiResults({ id: globalState.dandiset, files });
+                const summary = new DandiResults({ id: globalState.dandiset, files: {
+                    subject: files.map(file => { return { file } })
+                } });
                 summary.style.padding = "25px";
                 modal.append(summary);
 

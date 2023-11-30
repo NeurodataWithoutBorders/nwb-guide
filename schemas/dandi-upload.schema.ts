@@ -88,14 +88,14 @@ export const addDandiset = async (info) => {
     info = new Dandiset(info, { type: staging ? "staging" : undefined })
 
     const latestVersionInfo = (info.most_recent_published_version ?? info.draft_version)!
-    const enumLabels = `${latestVersionInfo.name}`
+    const enumLabels = `${id} — ${latestVersionInfo.name}`
 
     const isDraft = latestVersionInfo.version === 'draft'
     const enumCategories = (staging ? 'Staging' : 'Main') + (isDraft ? ' — Draft' : '')
 
     const fullInfo = await info.getInfo({ type: staging ? "staging" : undefined, version: latestVersionInfo.version });
 
-    const enumKeywords = [ `${id}${fullInfo.description ? ` — ${fullInfo.description}` : ''}` ]
+    const enumKeywords = fullInfo.description ? [ fullInfo.description ] : []
 
     const idInfo = {
         id,

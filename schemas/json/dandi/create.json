@@ -1,13 +1,23 @@
 {
-    "order": ["title", "staging", "embargo_status", "metadata"],
+    "order": [
+        "title", 
+        "archive",
+        "embargbo_status", 
+        "description",
+        "study_target",
+        "license"
+    ],
     "properties": {
+
         "title": {
             "type": "string",
-            "description": "A title associated with the Dandiset"
+            "description": "Provide a title for this Dandiset. The title will appear in search results and at the top of the home page for this Dandiset, so make it concise and descriptive"
         },
 
         "embargo_status": {
+            "title": "Embargo this Dandiset",
             "type": "boolean",
+            "description": "Embargoed Dandisets are hidden from public access until a specific time period has elapsed. Uploading data to the DANDI archive under embargo requires a relevant NIH award number, and the data will be automatically published when the embargo period expires.",
             "default": false
         },
 
@@ -21,58 +31,30 @@
             "description": "Which DANDI server to upload to. <br><small><b>Note:</b> The Development Server is recommended for developers, or users learning to use DANDI</small>"
         },
 
-        "metadata": {
-            "type": "object",
-            "order": [
-                "description",
-                "study_target",
-                "license",
-                "protocol",
-                "keywords",
-                "acknowledgement"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "description": "A description of the Dandiset."
-                },
-                "license": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "enum": [
-                            "spdx:CC0-1.0",
-                            "spdx:CC-BY-4.0"
-                        ]
-                    },
-                    "uniqueItems": true,
-                    "description": "Licenses associated with the item. <br><small><b>Note:</b> DANDI only supports a subset of <a href='https://creativecommons.org' target='_blank'>Creative Commons Licenses</a> applicable to datasets</small>"
-                },
-                "keywords": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description": "Keywords used to describe this content."
-                },
+        "description": {
+            "type": "string",
+            "description": "Provide a description for this Dandiset. This will appear prominently under the title in the home page for this Dandiset."
+        },
 
-                "study_target": {
-                    "type": "string",
-                    "description": "Objectives or specific questions of the study."
-                },
-
-                "protocol": {
-                    "type": "string",
-                    "description": "A list of persistent URLs describing the protocol (e.g. protocols.io, or other DOIs)."
-                },
-
-                "acknowledgement": {
-                    "type": "string"
-                }
-
+        "license": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "spdx:CC0-1.0",
+                    "spdx:CC-BY-4.0"
+                ]
             },
-            "required": ["description", "license"]
+            "uniqueItems": true,
+            "description": "Licenses associated with the item. <br><small><b>Note:</b> DANDI only supports a subset of <a href='https://creativecommons.org' target='_blank'>Creative Commons Licenses</a> applicable to datasets</small>"
+        },
+
+        "nih_award_number": {
+            "title": "NIH Award Number",
+            "type": "string",
+            "description": "Provide an NIH award number for this embargoed Dandiset. Note: this can be changed at any time and additional award numbers can be added later."
         }
+
     },
-    "required": ["title", "metadata"]
+    "required": ["title", "metadata", "description", "license", "archive"]
 }

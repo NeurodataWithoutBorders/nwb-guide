@@ -18,18 +18,20 @@ export class DandiResults extends LitElement {
     }
 
     async updated() {
-        const handleId = (str, info) => {
+        const handleClass = (str, info) => {
             let value = info[str];
             if (str === "modified") value = new Date(value).toString();
 
-            const el = this.shadowRoot.querySelector(`#${str}`);
-            el.innerText = value;
+            const els = this.shadowRoot.querySelectorAll(`.${str}`);
+            els.forEach(el => {
+                el.innerText = value;
 
-            if (el.tagName === "A") {
-                if (str === "doi") value = `http://doi.org/${value}`;
-                el.href = value;
-                el.target = "_blank";
-            }
+                if (el.tagName === "A") {
+                    if (str === "doi") value = `http://doi.org/${value}`;
+                    el.href = value;
+                    el.target = "_blank";
+                } 
+            })
         };
 
         const elIds = ["name", "modified"];
@@ -39,14 +41,14 @@ export class DandiResults extends LitElement {
         const type = isStaging(this.id) ? "staging" : undefined;
         const dandiset = await get(this.id, { type });
 
-        otherElIds.forEach((str) => handleId(str, dandiset));
-        elIds.forEach((str) => handleId(str, dandiset.draft_version));
+        otherElIds.forEach((str) => handleClass(str, dandiset));
+        elIds.forEach((str) => handleClass(str, dandiset.draft_version));
 
         const latestVersionInfo = dandiset.most_recent_published_version ?? dandiset.draft_version;
         const info = await dandiset.getInfo({ type, version: latestVersionInfo.version });
 
         const secondElIds = ["description", "url"];
-        secondElIds.forEach((str) => handleId(str, info));
+        secondElIds.forEach((str) => handleClass(str, info));
 
         const publicationEl = this.shadowRoot.querySelector(`#publication`);
         publicationEl.innerHTML = "";
@@ -76,22 +78,20 @@ export class DandiResults extends LitElement {
         return html`
             <div style="text-align: center;">
                 <div style="display: inline-block; width: 100%; text-align: left;">
-                    <h2 style="margin: 0; margin-bottom: 10px;"><span id="name"></span></h2>
-                    <p><span id="description"></span></p>
+                    <h2 style="margin: 0; margin-bottom: 10px;"><span class="name"></span></h2>
+                    <p><span class="description"></span></p>
 
                     <p><b>Identifier:</b> ${this.id}</p>
-                    <p><b>Upload Time:</b> <span id="modified"></span></p>
-                    <p><b>Embargo Status:</b> <span id="embargo_status"></span></p>
+                    <p><b>Upload Time:</b> <span class="modified"></span></p>
+                    <p><b>Embargo Status:</b> <span class="embargo_status"></span></p>
 
-                    <small><b>URL:</b> <a id="url"></a></small><br />
+                    <small><b>URL:</b> <a class="url"></a></small><br />
 
                     <h3 style="padding: 0;">Related Publications</h3>
-                    <hr />
-                    <ol id="publication"></ol>
+                    <ol class="publication"></ol>
 
                     ${this.files
-                        ? html` <h3 style="padding: 0;">Files Uploaded with this Conversion</h3>
-                              <hr />
+                        ? html` <h3 style="padding: 0;">Files Uploaded</h3>
                               <ol>
                                   ${Object.values(this.files)
                                       .map((v) => Object.values(v))
@@ -99,6 +99,9 @@ export class DandiResults extends LitElement {
                                       .map((o) => html`<li>${o.file}</li>`)}
                               </ol>`
                         : ""}
+                    <hr/>
+                    <small>We encourage you to add additional metadata for your Dandiset at <a class="url"></a></small>
+
                 </div>
             </div>
         `;

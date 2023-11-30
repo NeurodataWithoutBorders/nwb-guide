@@ -88,7 +88,7 @@ export function createGlobalFormModal(this: Page, {
     mergeFunction?: Function
 }) {
 
-    return this.createFormModal({
+    return createFormModal({
         header,
         schema,
         propsToIgnore,
