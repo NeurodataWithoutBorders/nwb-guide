@@ -17,7 +17,7 @@ function isNumeric(str: string) {
     if (name === 'dandiset' && value) {
         if (willCreate(value))  return [{
             type: 'warning',
-            message: `Will create a new dandiset <b>${value}</b>`
+            message: `This will create a new dandiset <b>${value}</b>`
         }]
         else if (isNumeric(value)){
             const { enum: enumValue } = dandiUploadSchema.properties.dandiset;
