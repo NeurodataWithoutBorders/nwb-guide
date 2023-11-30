@@ -193,13 +193,10 @@ async function getAPIKey(staging = false) {
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const { dandiset } = info;
 
+    let dandiset_id = dandiset;
 
-    if (willCreate(dandiset)) {
-        await createDandiset.call(this, { title: dandiset });
-        await this.save();
-    }
+    if (willCreate(dandiset)) dandiset_id = (await createDandiset.call(this, { title: dandiset })).identifier;
 
-    const dandiset_id = dandiset;
 
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 

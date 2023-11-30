@@ -11,10 +11,14 @@
             "default": false
         },
 
-        "staging": {
-            "type": "boolean",
-            "default": true,
-            "description": "Create a Dandiset on the development server. <br><small><b>Note:</b> Recommended for developers or users learning to use DANDI</small>"
+        "archive": {
+            "type": "string",
+            "enumLabels": {
+                "staging": "Development Server",
+                "main": "Main Archive"
+            },
+            "enum": ["main", "staging"],
+            "description": "Which DANDI server to upload to. <br><small><b>Note:</b> The Development Server is recommended for developers, or users learning to use DANDI</small>"
         },
 
         "metadata": {
