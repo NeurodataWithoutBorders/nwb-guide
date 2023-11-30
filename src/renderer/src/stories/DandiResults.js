@@ -23,15 +23,15 @@ export class DandiResults extends LitElement {
             if (str === "modified") value = new Date(value).toString();
 
             const els = this.shadowRoot.querySelectorAll(`.${str}`);
-            els.forEach(el => {
+            els.forEach((el) => {
                 el.innerText = value;
 
                 if (el.tagName === "A") {
                     if (str === "doi") value = `http://doi.org/${value}`;
                     el.href = value;
                     el.target = "_blank";
-                } 
-            })
+                }
+            });
         };
 
         const elIds = ["name", "modified"];
@@ -99,9 +99,8 @@ export class DandiResults extends LitElement {
                                       .map((o) => html`<li>${o.file}</li>`)}
                               </ol>`
                         : ""}
-                    <hr/>
+                    <hr />
                     <small>We encourage you to add additional metadata for your Dandiset at <a class="url"></a></small>
-
                 </div>
             </div>
         `;

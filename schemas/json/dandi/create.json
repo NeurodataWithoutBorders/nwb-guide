@@ -1,8 +1,8 @@
 {
     "order": [
-        "title", 
+        "title",
         "archive",
-        "embargbo_status", 
+        "embargbo_status",
         "description",
         "study_target",
         "license"
