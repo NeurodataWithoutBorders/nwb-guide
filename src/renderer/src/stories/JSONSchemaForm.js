@@ -1100,12 +1100,18 @@ export class JSONSchemaForm extends LitElement {
 
         if (hasPatternProperties) {
             const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
-                return this.#renderInteractiveElement(key, {
-                    ...schema,
-                    title: `Pattern Properties <small><small>${key}</small></small>`
-                }, required, path, results);
+                return this.#renderInteractiveElement(
+                    key,
+                    {
+                        ...schema,
+                        title: `Pattern Properties <small><small>${key}</small></small>`,
+                    },
+                    required,
+                    path,
+                    results
+                );
             });
-            
+
             rendered = [...rendered, ...patternProps];
         }
 
@@ -1113,7 +1119,6 @@ export class JSONSchemaForm extends LitElement {
         //     const additionalList = this.#renderInteractiveElement('Additional Properties', schema, required, path, results)
         //     rendered = [...rendered, additionalList];
         // }
- 
 
         return rendered;
     };
