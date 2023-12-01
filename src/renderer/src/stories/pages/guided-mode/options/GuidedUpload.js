@@ -130,8 +130,8 @@ export class GuidedUploadPage extends Page {
                                     await createDandiset.call(this, { title: this.form.resolved.dandiset });
                                     this.requestUpdate();
                                 },
-                            })
-                        ]
+                            }),
+                        ],
                     },
                     onUpdate: () => (this.unsavedUpdates = true),
                     onThrow,
