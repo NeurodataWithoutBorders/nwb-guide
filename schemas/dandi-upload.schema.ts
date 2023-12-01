@@ -60,7 +60,11 @@ export const updateDandisets = async (main = true) => {
     const url = new URL(`dandisets/?user=me`, `https://${staging ? 'api-staging' : 'api'}.dandiarchive.org/api/`)
     return await fetch(url, { headers: { 'Authorization': `token ${token}` } })
         .then(res => res.json())
-        .then(({ results }) => Promise.all(results.map(addDandiset)))
+        .then(({ results }) => results ? Promise.all(results.map(addDandiset)) : [])
+        .catch(e => {
+            console.error(e)
+            return []
+        })
 
 }
 
