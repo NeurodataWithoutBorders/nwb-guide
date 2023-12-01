@@ -5,7 +5,7 @@ import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
 import dandiUploadSchema, { ready, regenerateDandisets } from "../../../../../../../schemas/dandi-upload.schema";
-import { uploadToDandi } from "../../uploads/UploadsPage.js";
+import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
 import { until } from "lit/directives/until.js";
 
 import { Button } from "../../../Button.js";
@@ -119,6 +119,20 @@ export class GuidedUploadPage extends Page {
                 return (this.form = new JSONSchemaForm({
                     schema: dandiUploadSchema,
                     results: state.info,
+                    controls: {
+                        dandiset: [
+                            new Button({
+                                label: "Create New Dandiset",
+                                buttonStyles: {
+                                    width: "max-content",
+                                },
+                                onClick: async () => {
+                                    await createDandiset.call(this, { title: this.form.resolved.dandiset });
+                                    this.requestUpdate();
+                                },
+                            })
+                        ]
+                    },
                     onUpdate: () => (this.unsavedUpdates = true),
                     onThrow,
                     validateOnChange: validate,

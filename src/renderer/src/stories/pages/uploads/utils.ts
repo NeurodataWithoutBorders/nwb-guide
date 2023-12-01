@@ -20,7 +20,7 @@ function isNumeric(str: string) {
 
             if (value.length !== 6) return [{
                 type: 'error',
-                message: `Dandiset ID must be 6 digits.`
+                message: `<b>Invalid ID –</b> Dandiset ID must be 6 digits.`
             }]
 
             const staging = isStaging(value)
@@ -30,12 +30,12 @@ function isNumeric(str: string) {
             if (dandiset.detail) {
                 if (dandiset.detail.includes('Not found')) return [{
                     type: 'error',
-                    message: `This Dandiset does not exist.`
+                    message: `<b>Invalid ID –</b> This Dandiset does not exist.`
                 }]
 
                 if (dandiset.detail.includes('credentials were not provided')) return [{
                     type: 'error',
-                    message: `You do not have access to this Dandiset.`
+                    message: `<b>Authentication error –</b> You do not have access to this Dandiset.`
                 }]
             }
 
@@ -43,14 +43,14 @@ function isNumeric(str: string) {
             const { enum: enumValue } = dandiUploadSchema.properties.dandiset;
             if (enumValue && !enumValue.includes(value)) return [{
                 type: 'error',
-                message: `A Dandiset with this ID does not belong to you.`
+                message: `<b>Dandiset not found –</b> A Dandiset with this ID does not belong to you.`
             }]
 
             return true
         } else {
             return [{
                 type: 'error',
-                message: `<b>Dandiset not found.</b> Create a new Dandiset or enter a valid Dandiset ID.`
+                message: `<b>Dandiset not found –</b> Create a new Dandiset or enter a valid Dandiset ID.`
             }]
         }
     }

@@ -14,7 +14,7 @@ import dandiUploadSchema, {
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: true });
 
-import dandiCreateSchema from "../../../../../../schemas/json/dandi/create.json";
+import dandiCreateSchema from "../../../../../../schemas/dandi-create.schema";
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
@@ -34,7 +34,7 @@ import * as dandi from "dandi";
 
 import keyIcon from "../../assets/key.svg?raw";
 
-import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, willCreate } from "./utils";
+import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
 export async function createDandiset(results = {}) {
@@ -54,10 +54,6 @@ export async function createDandiset(results = {}) {
         padding: "25px",
         paddingBottom: "0px",
     });
-
-    const sanitizedDandiCreateSchema = structuredClone(dandiCreateSchema)
-    delete sanitizedDandiCreateSchema.properties.embargo_status
-    delete sanitizedDandiCreateSchema.properties.nih_award_number
 
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
@@ -363,7 +359,7 @@ export class UploadsPage extends Page {
                                     width: "max-content",
                                 },
                                 onClick: async () => {
-                                    await createDandiset.call(this);
+                                    await createDandiset.call(this, { title: this.form.resolved.dandiset });
                                     this.requestUpdate();
                                 },
                             })
