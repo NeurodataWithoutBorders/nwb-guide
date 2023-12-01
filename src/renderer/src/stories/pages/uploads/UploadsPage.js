@@ -362,8 +362,8 @@ export class UploadsPage extends Page {
                                     await createDandiset.call(this, { title: this.form.resolved.dandiset });
                                     this.requestUpdate();
                                 },
-                            })
-                        ]
+                            }),
+                        ],
                     },
                     sort: ([k1]) => {
                         if (k1 === folderPathKey) return -1;
