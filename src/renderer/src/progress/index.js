@@ -19,32 +19,31 @@ import * as operations from "./operations";
 export * from "./update";
 
 const CRYPTO_VERSION = "0.0.1"; // NOTE: Update to wipe values created using an outdated encryption algorithm
-const CRYPTO_ALGORITHM = 'aes-256-cbc';
+const CRYPTO_ALGORITHM = "aes-256-cbc";
 const IV_LENGTH = 16;
 const KEY_LENGTH = 32;
-const ENCRYPTION_KEY = Buffer.concat([Buffer.from(homeDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH)
+const ENCRYPTION_KEY = Buffer.concat([Buffer.from(homeDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH);
 
 const iv = crypto.randomBytes(IV_LENGTH);
 
 function encode(text) {
     if (!crypto) return text;
     const cipher = crypto.createCipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, iv);
-   
-   const encrypted = cipher.update(text);
-   return CRYPTO_VERSION + Buffer.concat([encrypted, cipher.final()]).toString('hex');
+
+    const encrypted = cipher.update(text);
+    return CRYPTO_VERSION + Buffer.concat([encrypted, cipher.final()]).toString("hex");
 }
 
 // Try to decode the value
 function decode(text) {
-
     if (!crypto || !/[0-9A-Fa-f]{6}/g.test(text)) return text;
     if (text.slice(0, CRYPTO_VERSION.length) !== CRYPTO_VERSION) return undefined;
 
-    text = text.slice(CRYPTO_VERSION.length)
+    text = text.slice(CRYPTO_VERSION.length);
 
     try {
-        let textParts = text.split(':');
-        let encryptedText = Buffer.from(textParts.join(':'), 'hex');
+        let textParts = text.split(":");
+        let encryptedText = Buffer.from(textParts.join(":"), "hex");
         let decipher = crypto.createDecipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, iv);
         let decrypted = decipher.update(encryptedText);
         decrypted = Buffer.concat([decrypted, decipher.final()]);
@@ -58,10 +57,10 @@ function drill(o, callback) {
     if (o && typeof o === "object") {
         const copy = Array.isArray(o) ? [...o] : { ...o };
         for (let k in copy) {
-            const res = drill(copy[k], callback)
+            const res = drill(copy[k], callback);
             if (res) copy[k] = res;
-            else delete copy[k]
-        };
+            else delete copy[k];
+        }
         return copy;
     } else return callback(o);
 }
