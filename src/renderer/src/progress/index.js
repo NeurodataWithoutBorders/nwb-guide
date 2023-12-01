@@ -34,8 +34,6 @@ function encode(text) {
    return CRYPTO_VERSION + Buffer.concat([encrypted, cipher.final()]).toString('hex');
 }
 
-console.log('test', encode('test'), decode(encode('test')))
-
 // Try to decode the value
 function decode(text) {
 
