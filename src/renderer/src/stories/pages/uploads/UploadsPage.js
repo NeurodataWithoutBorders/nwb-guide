@@ -55,6 +55,10 @@ export async function createDandiset(results = {}) {
         paddingBottom: "0px",
     });
 
+    const sanitizedDandiCreateSchema = structuredClone(dandiCreateSchema)
+    delete sanitizedDandiCreateSchema.properties.embargo_status
+    delete sanitizedDandiCreateSchema.properties.nih_award_number
+
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
         results,
@@ -228,9 +232,7 @@ async function getAPIKey(staging = false) {
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
     const { dandiset } = info;
 
-    let dandiset_id = dandiset;
-
-    if (willCreate(dandiset)) dandiset_id = (await createDandiset.call(this, { title: dandiset })).identifier;
+    const dandiset_id = dandiset;
 
     const staging = isStaging(dandiset_id); // Automatically detect staging IDs
 
@@ -353,6 +355,20 @@ export class UploadsPage extends Page {
                 return (this.form = new JSONSchemaForm({
                     results: globalState,
                     schema: dandiSchema,
+                    controls: {
+                        dandiset: [
+                            new Button({
+                                label: "Create New Dandiset",
+                                buttonStyles: {
+                                    width: "max-content",
+                                },
+                                onClick: async () => {
+                                    await createDandiset.call(this);
+                                    this.requestUpdate();
+                                },
+                            })
+                        ]
+                    },
                     sort: ([k1]) => {
                         if (k1 === folderPathKey) return -1;
                     },

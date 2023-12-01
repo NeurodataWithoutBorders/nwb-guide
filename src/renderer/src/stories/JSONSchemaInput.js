@@ -36,6 +36,15 @@ export class JSONSchemaInput extends LitElement {
                 background: rgb(255, 229, 228) !important;
             }
 
+            main { 
+                display: flex;
+            }
+
+            #controls {
+                margin-left: 10px;
+                flex-grow: 1;
+            }
+
             .guided--input {
                 width: 100%;
                 border-radius: 4px;
@@ -100,6 +109,7 @@ export class JSONSchemaInput extends LitElement {
     // parent,
     // path,
     // form,
+    controls = []
     required = false;
     validateOnChange = true;
 
@@ -179,7 +189,9 @@ export class JSONSchemaInput extends LitElement {
         const input = this.#render();
 
         return html`
-            ${input}
+            <main>
+                ${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}
+            </main>
             <p class="guided--text-input-instructions">
                 ${info.description
                     ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "."

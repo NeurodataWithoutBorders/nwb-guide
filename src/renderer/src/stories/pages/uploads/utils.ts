@@ -1,4 +1,5 @@
 
+import { get } from "dandi";
 import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
 
 export const isStaging = (id: string) => parseInt(id) >= 100000;
@@ -11,19 +12,45 @@ function isNumeric(str: string) {
   }
 
 
-  export const validate = (name: string, parent: any) => {
+  export const validate = async (name: string, parent: any) => {
 
     const value = parent[name]
     if (name === 'dandiset' && value) {
-        if (willCreate(value))  return [{
-            type: 'warning',
-            message: `This will create a new dandiset <b>${value}</b>`
-        }]
-        else if (isNumeric(value)){
+        if (isNumeric(value)){
+
+            if (value.length !== 6) return [{
+                type: 'error',
+                message: `Dandiset ID must be 6 digits.`
+            }]
+
+            const staging = isStaging(value)
+
+            const dandiset = await get(value, { type: staging ? "staging" : undefined })
+
+            if (dandiset.detail) {
+                if (dandiset.detail.includes('Not found')) return [{
+                    type: 'error',
+                    message: `This Dandiset does not exist.`
+                }]
+
+                if (dandiset.detail.includes('credentials were not provided')) return [{
+                    type: 'error',
+                    message: `You do not have access to this Dandiset.`
+                }]
+            }
+
+            // NOTE: This may not be thrown anymore with the above detail checks
             const { enum: enumValue } = dandiUploadSchema.properties.dandiset;
             if (enumValue && !enumValue.includes(value)) return [{
                 type: 'error',
-                message: `<b>Dandiset ID Not Found.</b> <br><small>Specify a Title to create a new Dandiset.</small>`
+                message: `A Dandiset with this ID does not belong to you.`
+            }]
+
+            return true
+        } else {
+            return [{
+                type: 'error',
+                message: `<b>Dandiset not found.</b> Create a new Dandiset or enter a valid Dandiset ID.`
             }]
         }
     }

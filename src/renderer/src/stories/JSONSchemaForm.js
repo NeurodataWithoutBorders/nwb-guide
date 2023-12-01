@@ -219,6 +219,8 @@ export class JSONSchemaForm extends LitElement {
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
+        this.controls = props.controls ?? {};
+
         this.transformErrors = props.transformErrors;
 
         this.emptyMessage = props.emptyMessage ?? "No properties to render";
@@ -507,6 +509,7 @@ export class JSONSchemaForm extends LitElement {
             path: localPath,
             value,
             form: this,
+            controls: this.controls[name],
             required: isRequired,
             validateEmptyValue: this.validateEmptyValues,
         });
@@ -927,7 +930,6 @@ export class JSONSchemaForm extends LitElement {
                 if (index2 === -1) return -1;
                 return index - index2;
             });
-            console.log("Order Sorted", sorted);
         }
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
