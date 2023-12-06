@@ -13,8 +13,9 @@ export const appDirectory = homeDirectory ? joinPath(homeDirectory, paths.root) 
 export const guidedProgressFilePath = homeDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
 
 const KEY_LENGTH = 32;
-export const ENCRYPTION_KEY = homeDirectory ? Buffer.concat([Buffer.from(homeDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH) : null;
-
+export const ENCRYPTION_KEY = homeDirectory
+    ? Buffer.concat([Buffer.from(homeDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH)
+    : null;
 
 export const previewSaveFolderPath = homeDirectory
     ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.preview)
