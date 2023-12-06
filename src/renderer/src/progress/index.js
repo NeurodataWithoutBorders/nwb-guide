@@ -6,6 +6,7 @@ import {
     isStorybook,
     appDirectory,
     ENCRYPTION_KEY,
+    ENCRYPTION_IV
 } from "../dependencies/simple.js";
 import { fs, crypto } from "../electron/index.js";
 
@@ -20,13 +21,10 @@ export * from "./update";
 
 const CRYPTO_VERSION = "0.0.1"; // NOTE: Update to wipe values created using an outdated encryption algorithm
 const CRYPTO_ALGORITHM = "aes-256-cbc";
-const IV_LENGTH = 16;
-
-const iv = crypto.randomBytes(IV_LENGTH);
 
 function encode(text) {
     if (!crypto) return text;
-    const cipher = crypto.createCipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, iv);
+    const cipher = crypto.createCipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, ENCRYPTION_IV);
 
     const encrypted = cipher.update(text);
     return CRYPTO_VERSION + Buffer.concat([encrypted, cipher.final()]).toString("hex");
@@ -42,7 +40,7 @@ function decode(text) {
     try {
         let textParts = text.split(":");
         let encryptedText = Buffer.from(textParts.join(":"), "hex");
-        let decipher = crypto.createDecipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, iv);
+        let decipher = crypto.createDecipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, ENCRYPTION_IV);
         let decrypted = decipher.update(encryptedText);
         decrypted = Buffer.concat([decrypted, decipher.final()]);
         return decrypted.toString();
