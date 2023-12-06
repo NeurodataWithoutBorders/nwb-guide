@@ -19,8 +19,6 @@ export const conversionSaveFolderPath = homeDirectory
     ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.conversions)
     : "";
 
-
-
 // Encryption
 const IV_LENGTH = 16;
 const KEY_LENGTH = 32;

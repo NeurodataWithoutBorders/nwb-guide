@@ -6,7 +6,7 @@ import {
     isStorybook,
     appDirectory,
     ENCRYPTION_KEY,
-    ENCRYPTION_IV
+    ENCRYPTION_IV,
 } from "../dependencies/simple.js";
 import { fs, crypto } from "../electron/index.js";
 
