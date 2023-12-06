@@ -5,7 +5,7 @@ import {
     reloadPageToHome,
     isStorybook,
     appDirectory,
-    homeDirectory,
+    ENCRYPTION_KEY,
 } from "../dependencies/simple.js";
 import { fs, crypto } from "../electron/index.js";
 
@@ -21,8 +21,6 @@ export * from "./update";
 const CRYPTO_VERSION = "0.0.1"; // NOTE: Update to wipe values created using an outdated encryption algorithm
 const CRYPTO_ALGORITHM = "aes-256-cbc";
 const IV_LENGTH = 16;
-const KEY_LENGTH = 32;
-const ENCRYPTION_KEY = Buffer.concat([Buffer.from(homeDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH);
 
 const iv = crypto.randomBytes(IV_LENGTH);
 
