@@ -14,6 +14,11 @@ export let path = null;
 export let log = null;
 export let crypto = null;
 
+// Used in tests
+try {
+    crypto = require("crypto");
+} catch {}
+
 if (isElectron) {
     try {
         fs = require("fs-extra"); // File System
