@@ -1,4 +1,5 @@
-import { Dandiset } from 'dandi'
+import { Dandiset, getMine } from 'dandi'
+
 import { global } from '../src/renderer/src/progress'
 import upload from './json/dandi/upload.json' assert { type: "json" }
 import { isStaging } from '../src/renderer/src/stories/pages/uploads/utils'
@@ -57,10 +58,8 @@ export const updateDandisets = async (main = true) => {
 
     if (!token) return []
 
-    const url = new URL(`dandisets/?user=me`, `https://${staging ? 'api-staging' : 'api'}.dandiarchive.org/api/`)
-    return await fetch(url, { headers: { 'Authorization': `token ${token}` } })
-        .then(res => res.json())
-        .then(({ results }) => results ? Promise.all(results.map(addDandiset)) : [])
+    return await getMine({ token, type: staging ? 'staging' : undefined })
+        .then((results) => results ? Promise.all(results.map(addDandiset)) : [])
         .catch(e => {
             console.error(e)
             return []
@@ -89,7 +88,10 @@ export const addDandiset = async (info) => {
     if (!idSchema.enumKeywords) idSchema.enumKeywords = {}
     if (!idSchema.enumCategories) idSchema.enumCategories = {}
 
-    info = new Dandiset(info, { type: staging ? "staging" : undefined })
+
+    const token = global.data.DANDI.api_keys[staging ? "staging_api_key" : "main_api_key"];
+
+    info = new Dandiset(info, { type: staging ? "staging" : undefined, token })
 
     const latestVersionInfo = (info.most_recent_published_version ?? info.draft_version)!
     const enumLabels = `${id} — ${latestVersionInfo.name}`
@@ -97,7 +99,7 @@ export const addDandiset = async (info) => {
     const isDraft = latestVersionInfo.version === 'draft'
     const enumCategories = (staging ? 'Staging' : 'Main') + (isDraft ? ' — Draft' : '')
 
-    const fullInfo = await info.getInfo({ type: staging ? "staging" : undefined, version: latestVersionInfo.version });
+    const fullInfo = await info.getInfo({ version: latestVersionInfo.version });
 
     const enumKeywords = fullInfo.description ? [ fullInfo.description ] : []
 
