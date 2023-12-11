@@ -13,6 +13,11 @@ export let path = null;
 export let log = null;
 export let crypto = null;
 
+// Used in tests
+try {
+    crypto = require("node:crypto");
+} catch {}
+
 if (isElectron) {
     try {
         electron = require("electron");
@@ -20,7 +25,6 @@ if (isElectron) {
         os = require("node:os");
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
-        crypto = require("node:crypto");
         path = require("node:path");
 
         const { url, filepath } = commoners.services.flask;
