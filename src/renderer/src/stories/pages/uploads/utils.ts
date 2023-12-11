@@ -34,8 +34,8 @@ function isNumeric(str: string) {
                 }]
 
                 if (dandiset.detail.includes('credentials were not provided')) return [{
-                    type: 'error',
-                    message: `<b>Authentication error –</b> You do not have access to this Dandiset.`
+                    type: 'warning',
+                    message: `<b>Authentication error –</b> This Dandiset does not appear to be linked to your account.`
                 }]
             }
 
@@ -43,7 +43,7 @@ function isNumeric(str: string) {
             const { enum: enumValue } = dandiUploadSchema.properties.dandiset;
             if (enumValue && !enumValue.includes(value)) return [{
                 type: 'error',
-                message: `<b>Dandiset not found –</b> A Dandiset with this ID does not belong to you.`
+                message: `<b>No Access –</b> This Dandiset does not belong to you.`
             }]
 
             return true
