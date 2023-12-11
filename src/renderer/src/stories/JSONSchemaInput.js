@@ -405,6 +405,8 @@ export class JSONSchemaInput extends LitElement {
                 });
 
                 search.classList.add("schema-input");
+                search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
+
                 return search;
             }
 

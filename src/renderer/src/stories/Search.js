@@ -28,9 +28,7 @@ export class Search extends LitElement {
         document.addEventListener("click", () => {
             if (this.listMode === "click" && this.getAttribute("interacted") === "true") {
                 this.setAttribute("interacted", false);
-                const value = this.shadowRoot.querySelector("input").value;
-                const matched = this.options.find((o) => o.label === value);
-                this.#onSelect(matched ?? { value });
+                this.#onSelect(this.getSelectedOption())
             }
         });
     }
@@ -39,6 +37,12 @@ export class Search extends LitElement {
 
     #isObject(value = this.#value) {
         return value && typeof value === "object";
+    }
+
+    getSelectedOption = () => {
+        const value = ( this.shadowRoot.querySelector("input") ?? this).value;
+        const matched = this.options.find((o) => o.label === value);
+        return matched ?? { value }
     }
 
     get value() {
