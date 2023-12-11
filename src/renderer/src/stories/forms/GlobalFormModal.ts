@@ -59,8 +59,8 @@ export function createFormModal ({
         primary: true,
         onClick: async () => {
             await globalForm.validate()
-            await onSave(globalForm)
-            modal.open = false
+            const res = await onSave(globalForm)
+            if (res !== null) modal.open = false // Allow for aborting
         }
     })
 

@@ -284,6 +284,7 @@ export class UploadsPage extends Page {
 
     #globalModal = null;
 
+    #saveNotification
     connectedCallback() {
         super.connectedCallback();
 
@@ -291,7 +292,15 @@ export class UploadsPage extends Page {
             header: "DANDI API Keys",
             schema: dandiGlobalSchema.properties.api_keys,
             onSave: async (form) => {
+
+                if (this.#saveNotification) this.dismiss(this.#saveNotification)
+
                 const apiKeys = form.resolved;
+                if (!Object.keys(apiKeys).length) {
+                    this.#saveNotification = this.notify("No API keys were provided", "error");
+                    return null
+                }
+
                 merge(apiKeys, global.data.DANDI.api_keys);
                 global.save();
                 await regenerateDandisets();
@@ -391,6 +400,14 @@ export class UploadsPage extends Page {
                 }));
             })
             .catch((e) => html`<p>${e}</p>`);
+
+
+        // Confirm that one api key exists
+        promise.then(() => {
+            const api_keys = global.data.DANDI.api_keys;
+            if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true
+        })
+
 
         return html`
             ${until(
