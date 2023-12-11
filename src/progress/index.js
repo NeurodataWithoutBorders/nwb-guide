@@ -5,7 +5,8 @@ import {
     reloadPageToHome,
     isStorybook,
     appDirectory,
-    homeDirectory,
+    ENCRYPTION_KEY,
+    ENCRYPTION_IV,
 } from "../dependencies/simple.js";
 import { fs, crypto } from "../electron/index.js";
 
@@ -18,32 +19,44 @@ import * as operations from "./operations.js";
 
 export * from "./update.js";
 
-var re = /[0-9A-Fa-f]{6}/g;
+const CRYPTO_VERSION = "0.0.1"; // NOTE: Update to wipe values created using an outdated encryption algorithm
+const CRYPTO_ALGORITHM = "aes-256-cbc";
 
-function encode(message) {
-    if (!crypto) return message;
-    const mykey = crypto.createCipher("aes-128-cbc", homeDirectory);
-    const mystr = mykey.update(message, "utf8", "hex");
-    return mystr + mykey.final("hex");
+function encode(text) {
+    if (!crypto) return text;
+    const cipher = crypto.createCipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, ENCRYPTION_IV);
+
+    const encrypted = cipher.update(text);
+    return CRYPTO_VERSION + Buffer.concat([encrypted, cipher.final()]).toString("hex");
 }
 
 // Try to decode the value
-function decode(message) {
-    if (!crypto || !/[0-9A-Fa-f]{6}/g.test(message)) return message;
+function decode(text) {
+    if (!crypto || !/[0-9A-Fa-f]{6}/g.test(text)) return text;
+    if (text.slice(0, CRYPTO_VERSION.length) !== CRYPTO_VERSION) return undefined;
+
+    text = text.slice(CRYPTO_VERSION.length);
 
     try {
-        const mykey = crypto.createDecipheriv("aes-128-cbc", homeDirectory);
-        const mystr = mykey.update(message, "hex", "utf8");
-        return mystr + mykey.final("utf8");
+        let textParts = text.split(":");
+        let encryptedText = Buffer.from(textParts.join(":"), "hex");
+        let decipher = crypto.createDecipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, ENCRYPTION_IV);
+        let decrypted = decipher.update(encryptedText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
     } catch {
-        return message;
+        return text;
     }
 }
 
 function drill(o, callback) {
     if (o && typeof o === "object") {
         const copy = Array.isArray(o) ? [...o] : { ...o };
-        for (let k in copy) copy[k] = drill(copy[k], callback);
+        for (let k in copy) {
+            const res = drill(copy[k], callback);
+            if (res) copy[k] = res;
+            else delete copy[k];
+        }
         return copy;
     } else return callback(o);
 }
