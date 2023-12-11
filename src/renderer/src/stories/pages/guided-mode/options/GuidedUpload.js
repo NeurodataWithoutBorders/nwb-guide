@@ -48,7 +48,7 @@ export class GuidedUploadPage extends Page {
     };
 
     #globalModal = null;
-    #saveNotification
+    #saveNotification;
 
     connectedCallback() {
         super.connectedCallback();
@@ -59,13 +59,12 @@ export class GuidedUploadPage extends Page {
             onSave: async (form) => {
                 const apiKeys = form.resolved;
 
-                if (this.#saveNotification) this.dismiss(this.#saveNotification)
+                if (this.#saveNotification) this.dismiss(this.#saveNotification);
 
                 if (!Object.keys(apiKeys).length) {
                     this.#saveNotification = this.notify("No API keys were provided", "error");
-                    return null
+                    return null;
                 }
-
 
                 merge(apiKeys, global.data.DANDI.api_keys);
                 global.save();
@@ -150,11 +149,11 @@ export class GuidedUploadPage extends Page {
             })
             .catch((e) => html`<p>${e}</p>`);
 
-            // Confirm that one api key exists
-            promise.then(() => {
-                const api_keys = global.data.DANDI.api_keys;
-                if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true
-            })
+        // Confirm that one api key exists
+        promise.then(() => {
+            const api_keys = global.data.DANDI.api_keys;
+            if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true;
+        });
 
         return html`${until(promise, html`Loading form contents...`)} `;
     }
