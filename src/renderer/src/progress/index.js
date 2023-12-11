@@ -27,14 +27,15 @@ function encode(text) {
     const cipher = crypto.createCipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, ENCRYPTION_IV);
 
     const encrypted = cipher.update(text);
-    return `${CRYPTO_VERSION}:${ENCRYPTION_IV.toString("hex")}:${Buffer.concat([encrypted, cipher.final()]).toString("hex")}`;
+    return `${CRYPTO_VERSION}:${ENCRYPTION_IV.toString("hex")}:${Buffer.concat([encrypted, cipher.final()]).toString(
+        "hex"
+    )}`;
 }
 
 // Try to decode the value
 function decode(text) {
+    const [TEXT_CRYPTO_VERSION, ENCRYPTION_IV_HEX, encrypted] = text.split(":");
 
-    const [ TEXT_CRYPTO_VERSION, ENCRYPTION_IV_HEX, encrypted ] = text.split(":");
-    
     if (text.slice(0, TEXT_CRYPTO_VERSION.length) !== CRYPTO_VERSION) return undefined;
 
     if (!crypto || !/[0-9A-Fa-f]{6}/g.test(encrypted)) return encrypted;
@@ -42,7 +43,7 @@ function decode(text) {
     try {
         let textParts = encrypted.split(":");
         let encryptedText = Buffer.from(textParts.join(":"), "hex");
-        let decipher = crypto.createDecipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY,  Buffer.from(ENCRYPTION_IV_HEX, 'hex'));
+        let decipher = crypto.createDecipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, Buffer.from(ENCRYPTION_IV_HEX, "hex"));
         let decrypted = decipher.update(encryptedText);
         decrypted = Buffer.concat([decrypted, decipher.final()]);
         return decrypted.toString();
