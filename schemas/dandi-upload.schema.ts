@@ -4,6 +4,7 @@ import { global } from '../src/renderer/src/progress'
 import upload from './json/dandi/upload.json' assert { type: "json" }
 import { isStaging } from '../src/renderer/src/stories/pages/uploads/utils'
 import { baseUrl, onServerOpen } from '../src/renderer/src/server/globals'
+import { isStorybook } from '../src/renderer/src/dependencies/simple'
 
 const schema = structuredClone(upload)
 const idSchema = schema.properties.dandiset as any
@@ -30,7 +31,9 @@ onServerOpen(async () => {
         number_of_threads.max = number_of_threads.default = logical / physical;
         setReady.cpus({ number_of_jobs, number_of_threads })
     })
-    .catch(() => {});
+    .catch(() => {
+        if (isStorybook) setReady.cpus({ number_of_jobs: { max: 1, default: 1 }, number_of_threads: { max: 1, default: 1 } })
+    });
 });
 
 // Resolve Dandiset Information Asynchronously
