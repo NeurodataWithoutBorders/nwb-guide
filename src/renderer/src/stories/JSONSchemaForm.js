@@ -314,9 +314,7 @@ export class JSONSchemaForm extends LitElement {
         const hasUpdate = resolvedParent[name] !== value;
 
         const globalValue = this.getGlobalValue(localPath);
-
-        console.warn("Updated data (up to Ophys.Fluorescence...)", localPath, value);
-
+        
         // NOTE: Forms with nested forms will handle their own state updates
         if (this.isUndefined(value)) {
             // Continue to resolve and re-render...
@@ -411,8 +409,11 @@ export class JSONSchemaForm extends LitElement {
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
             if (!message) {
-                if (flaggedInputs.length === 1)
-                    message = `<b>${header(flaggedInputs[0].path.join("."))}</b> is not valid`;
+                if (flaggedInputs.length === 1) {
+                    const path = flaggedInputs[0].path
+                    const schema = this.getSchema(path);
+                    message = `<b>${header(schema.title ?? path.join('.'))}</b> is not valid`;
+                }
                 else message = `${flaggedInputs.length} invalid form values`;
             }
             message += `${
@@ -496,12 +497,12 @@ export class JSONSchemaForm extends LitElement {
         }
 
         const resolved = this.#get(path, schema, ["properties", "patternProperties"], ["patternProperties"]);
-        if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
+        if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
     }
 
-    #renderInteractiveElement = (name, info, required, path = [], value) => {
+    #renderInteractiveElement = (name, info, required, path = [], value, pattern = false) => {
         let isRequired = required[name];
 
         const localPath = [...path, name];
@@ -532,6 +533,7 @@ export class JSONSchemaForm extends LitElement {
             form: this,
             required: isRequired,
             validateEmptyValue: this.validateEmptyValues,
+            pattern: pattern ? name : undefined,
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
@@ -1004,7 +1006,7 @@ export class JSONSchemaForm extends LitElement {
                     },
 
                     required: required[name], // Scoped to the sub-schema
-                    ignore: this.ignore,
+                    ignore: this.ignore[name],
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
@@ -1120,6 +1122,7 @@ export class JSONSchemaForm extends LitElement {
 
         if (hasPatternProperties) {
             const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
+
                 return this.#renderInteractiveElement(
                     key,
                     {
@@ -1128,7 +1131,8 @@ export class JSONSchemaForm extends LitElement {
                     },
                     required,
                     path,
-                    results
+                    results,
+                    true
                 );
             });
 

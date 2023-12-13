@@ -16,9 +16,17 @@ export interface ListProps {
   editable?: boolean,
   unordered?: boolean,
   listStyles?: any
+  transform?: (item: ListItemType) => ListItemType
+}
+
+type ListState = {
+  items: ListItemType[],
+  object: {[x:string]: ListItemType['value']}
 }
 
 export class List extends LitElement {
+
+  transform: ListProps['transform']
 
   static get styles() {
     return css`
@@ -120,7 +128,7 @@ export class List extends LitElement {
       };
     }
 
-    onChange: () => void = () => {}
+    onChange: (updated: ListState, previous: ListState) => void = () => {}
 
     object: {[x:string]: any} = {}
 
@@ -129,11 +137,22 @@ export class List extends LitElement {
     }
 
     #items: ListItemType[] = []
+
     set items(value) {
-      const oldVal = this.#items
-      this.#items = value
-      this.onChange()
-      this.requestUpdate('items', oldVal)
+      const oldList = this.#items
+      this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
+      const oldObject = this.object
+      this.#updateObject()
+
+      this.onChange({
+        items: this.#items,
+        object: this.object
+      },
+      {
+        items: oldList,
+        object: oldObject
+      })
+      this.requestUpdate('items', oldList)
     }
 
     get items() { return this.#items }
@@ -194,6 +213,8 @@ export class List extends LitElement {
       this.editable = props.editable ?? true
       this.unordered = props.unordered ?? false
       this.listStyles = props.listStyles ?? {}
+
+      this.transform = props.transform
 
       if (props.onChange) this.onChange = props.onChange
 
@@ -347,6 +368,33 @@ export class List extends LitElement {
 
     clear = () => {
       this.items = []
+    }
+
+    #updateObject = () => {
+      
+      this.object = {}
+      this.#items.forEach((item, i) => {
+
+        const { key, value } = item;
+
+        const isUnordered = !!key
+        if (isUnordered) {
+          let resolvedKey = key
+
+          // Ensure no duplicate keys
+          let kI = 0;
+          while (resolvedKey in this.object) {
+              i++;
+              resolvedKey = `${key}_${kI}`;
+          }
+
+          this.object[resolvedKey] = value
+        } 
+        
+        else {
+          this.object[i] = value
+        }
+      })
     }
 
     render() {
