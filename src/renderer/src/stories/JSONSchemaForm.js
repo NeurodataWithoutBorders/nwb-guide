@@ -325,7 +325,7 @@ export class JSONSchemaForm extends LitElement {
         const hasUpdate = resolvedParent[name] !== value;
 
         const globalValue = this.getGlobalValue(localPath);
-        
+
         // NOTE: Forms with nested forms will handle their own state updates
         if (this.isUndefined(value)) {
             // Continue to resolve and re-render...
@@ -423,11 +423,10 @@ export class JSONSchemaForm extends LitElement {
             flaggedInputs[0].focus();
             if (!message) {
                 if (flaggedInputs.length === 1) {
-                    const path = flaggedInputs[0].path
+                    const path = flaggedInputs[0].path;
                     const schema = this.getSchema(path);
-                    message = `<b>${header(schema.title ?? path.join('.'))}</b> is not valid`;
-                }
-                else message = `${flaggedInputs.length} invalid form values`;
+                    message = `<b>${header(schema.title ?? path.join("."))}</b> is not valid`;
+                } else message = `${flaggedInputs.length} invalid form values`;
             }
             message += `${
                 this.base.length ? ` in the <b>${this.base.join(".")}</b> section` : ""
@@ -1170,7 +1169,6 @@ export class JSONSchemaForm extends LitElement {
 
         if (hasPatternProperties) {
             const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
-
                 return this.#renderInteractiveElement(
                     key,
                     {

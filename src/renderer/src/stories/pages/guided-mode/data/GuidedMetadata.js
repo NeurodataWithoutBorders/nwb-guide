@@ -170,7 +170,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveResults(subject, session, globalState);
 
-
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
@@ -223,7 +222,6 @@ export class GuidedMetadataPage extends ManagedPage {
             },
             onThrow,
         });
-
 
         return {
             subject,

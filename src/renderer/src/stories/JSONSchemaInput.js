@@ -123,7 +123,6 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value, forceValidate = false) {
-        
         if (!forceValidate) {
             // Update the actual input element
             const el = this.getElement();
@@ -264,22 +263,21 @@ export class JSONSchemaInput extends LitElement {
     #modal;
 
     async #createModal({ key, schema, results, list } = {}) {
-        
         const createNewObject = !results;
 
-        const isPatternProperties = this.pattern
-        const creatNewPatternProperty = isPatternProperties && createNewObject
+        const isPatternProperties = this.pattern;
+        const creatNewPatternProperty = isPatternProperties && createNewObject;
 
-        const schemaCopy = structuredClone(schema)
+        const schemaCopy = structuredClone(schema);
 
         // Add a property name entry to the schema
         if (creatNewPatternProperty) {
             schemaCopy.properties = {
-                __: { title: 'Property Name', type: "string", pattern: this.pattern },
-                ...schemaCopy.properties
-            }
-            schemaCopy.required = [...schemaCopy.required ?? [], '__']
-        } 
+                __: { title: "Property Name", type: "string", pattern: this.pattern },
+                ...schemaCopy.properties,
+            };
+            schemaCopy.required = [...(schemaCopy.required ?? []), "__"];
+        }
 
         if (this.#modal) this.#modal.remove();
 
@@ -302,27 +300,23 @@ export class JSONSchemaInput extends LitElement {
             }
 
             // Skip if not unique
-            if (schemaCopy.uniqueItems && list.items.find((item) => item.value === value)) return this.#modal.toggle(false);
+            if (schemaCopy.uniqueItems && list.items.find((item) => item.value === value))
+                return this.#modal.toggle(false);
 
             // Add to the list
             if (createNewObject) {
-
                 if (creatNewPatternProperty) {
-                    const key = value.__
-                    delete value.__
+                    const key = value.__;
+                    delete value.__;
                     list.add({ key, value });
-                }
-
-                else list.add({ key, value });
-
+                } else list.add({ key, value });
             } else list.requestUpdate();
 
-            
             this.#modal.toggle(false);
         });
 
         this.#modal = new Modal({
-            header: key ? header(key) : 'Property Definition',
+            header: key ? header(key) : "Property Definition",
             footer: submitButton,
             showCloseButton: createNewObject,
         });
@@ -394,8 +388,8 @@ export class JSONSchemaInput extends LitElement {
         if (isArray || isEditableObject) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-            const isPatternProperties = this.pattern
-            
+            const isPatternProperties = this.pattern;
+
             // Provide default item types
             if (!isPatternProperties) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
@@ -407,7 +401,6 @@ export class JSONSchemaInput extends LitElement {
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-
             // Create tables if possible
             else if (itemSchema?.type === "object" && this.form.createTable) {
                 const ignore = this.form?.ignore
@@ -464,11 +457,9 @@ export class JSONSchemaInput extends LitElement {
             const list = (this.#list = new List({
                 items: this.#mapToList(),
                 transform: (item) => {
-
                     if (this.#isEditableObject()) {
+                        const { key, value } = item;
 
-                        const { key, value } = item
-                        
                         item.controls = [
                             new Button({
                                 label: "Edit",
@@ -482,22 +473,18 @@ export class JSONSchemaInput extends LitElement {
                                     });
                                 },
                             }),
-                        ]
-
+                        ];
                     }
-                }, 
+                },
                 onChange: async ({ object, items }, { object: oldObject }) => {
-
                     if (this.pattern) {
-                        const oldKeys = Object.keys(oldObject)
-                        const newKeys = Object.keys(object)
-                        const removedKeys = oldKeys.filter((k) => !newKeys.includes(k))
-                        const updatedKeys = newKeys.filter((k) => oldObject[k] !== object[k])
-                        removedKeys.forEach((k) => this.#updateData([...fullPath.slice(1), k], undefined))
-                        updatedKeys.forEach((k) => this.#updateData([...fullPath.slice(1), k], object[k]))
-                    }
-
-                    else {
+                        const oldKeys = Object.keys(oldObject);
+                        const newKeys = Object.keys(object);
+                        const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
+                        const updatedKeys = newKeys.filter((k) => oldObject[k] !== object[k]);
+                        removedKeys.forEach((k) => this.#updateData([...fullPath.slice(1), k], undefined));
+                        updatedKeys.forEach((k) => this.#updateData([...fullPath.slice(1), k], object[k]));
+                    } else {
                         this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
                     }
 

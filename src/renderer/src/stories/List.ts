@@ -371,7 +371,7 @@ export class List extends LitElement {
     }
 
     #updateObject = () => {
-      
+
       this.object = {}
       this.#items.forEach((item, i) => {
 
@@ -389,8 +389,8 @@ export class List extends LitElement {
           }
 
           this.object[resolvedKey] = value
-        } 
-        
+        }
+
         else {
           this.object[i] = value
         }
