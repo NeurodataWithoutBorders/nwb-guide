@@ -12,7 +12,14 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
-const encode = (str) => btoa(str).replace(/\+|\/|\=/g, "_");
+const encode = (str) => {
+    try {
+        document.querySelector(`#${str}`);
+        return str;
+    } catch {
+        return btoa(str).replace(/\+|\/|\=/g, "_");
+    }
+}
 
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
@@ -263,11 +270,12 @@ export class JSONSchemaForm extends LitElement {
 
         return this.getForm(copy).getTable(tableName);
     };
-    v;
+
     getForm = (path) => {
         if (typeof path === "string") path = path.split(".");
         const form = this.#nestedForms[path[0]];
-        if (!path.length || !form) return this; // No nested form with this name. Returning self.
+        if (!path.length) return this; // No nested form with this name. Returning self
+        if (!form) throw new Error(`Could not find form with name ${path[0]}`);
 
         return form.getForm(path.slice(1));
     };
@@ -306,6 +314,8 @@ export class JSONSchemaForm extends LitElement {
         const hasUpdate = resolvedParent[name] !== value;
 
         const globalValue = this.getGlobalValue(localPath);
+
+        console.warn('Updated data (up to Ophys.Fluorescence...)', localPath, value)
 
         // NOTE: Forms with nested forms will handle their own state updates
         if (this.isUndefined(value)) {
@@ -449,11 +459,24 @@ export class JSONSchemaForm extends LitElement {
         return true;
     };
 
-    #get = (path, object = this.resolved, omitted = []) => {
+    #get = (path, object = this.resolved, omitted = [], skipped = []) => {
         // path = path.slice(this.base.length); // Correct for base path
         if (!path) throw new Error("Path not specified");
         return path.reduce(
-            (acc, curr) => (acc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str]?.[curr])]?.[curr]),
+            (acc, curr, i) => {
+                    const tempAcc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str] && acc[str][curr])]?.[curr]
+                    if (tempAcc) return tempAcc
+                    else {
+                        const level1 = acc?.[skipped.find((str) => acc[str])]
+                        if (level1) {
+                            const got = Object.keys(level1).find((key) => {
+                                const result = this.#get(path.slice(i+1), level1[key], omitted, skipped)
+                                return result
+                            })
+                            if (got) return level1[got]
+                        }
+                    }
+                },
             object
         );
     };
@@ -475,7 +498,7 @@ export class JSONSchemaForm extends LitElement {
             if (indexOf !== -1) path = path.slice(indexOf + 1);
         }
 
-        const resolved = this.#get(path, schema, ["properties", "patternProperties"]);
+        const resolved = this.#get(path, schema, ["properties", "patternProperties"], ["patternProperties"]);
         if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
@@ -694,7 +717,9 @@ export class JSONSchemaForm extends LitElement {
     #isARequiredPropertyString = `is a required property`;
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    triggerValidation = async (name, path = [], checkLinks = true) => {
+    triggerValidation = async (name, path = [], checkLinks = true, input = this.getInput([...path, name])) => {
+
+
         const parent = this.#get(path, this.resolved);
 
         const pathToValidate = [...(this.base ?? []), ...path];
@@ -796,8 +821,6 @@ export class JSONSchemaForm extends LitElement {
         // Show aggregated errors and warnings (if any)
         warnings.forEach((info) => this.#addMessage(localPath, info, "warnings"));
         info.forEach((info) => this.#addMessage(localPath, info, "info"));
-
-        const input = this.getInput(localPath);
 
         if (isValid && errors.length === 0) {
             input.classList.remove("invalid");
@@ -1106,7 +1129,7 @@ export class JSONSchemaForm extends LitElement {
                     key,
                     {
                         ...schema,
-                        title: `Pattern Properties <small><small>${key}</small></small>`,
+                        title: `Pattern Properties <small><small style="font-weight: normal">${key}</small></small>`,
                     },
                     required,
                     path,

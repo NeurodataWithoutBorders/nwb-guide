@@ -142,7 +142,7 @@ export class JSONSchemaInput extends LitElement {
     #activateTimeoutValidation = (name, path) => {
         this.#clearTimeoutValidation();
         this.#validationTimeout = setTimeout(() => {
-            this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
+            this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path, undefined, this) : "";
         }, 1000);
     };
 
@@ -164,7 +164,7 @@ export class JSONSchemaInput extends LitElement {
 
     #triggerValidation = (name, path) => {
         this.#clearTimeoutValidation();
-        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
+        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path, this) : "";
     };
 
     updated() {
@@ -286,20 +286,18 @@ export class JSONSchemaInput extends LitElement {
         const div = document.createElement("div");
         div.style.padding = "25px";
 
-        console.warn("Creating form", name, results, schema, name);
-
         const isObject = schema.type === "object" || schema.properties; // NOTE: For formatted strings, this is not an object
 
         this.#schemaElement = isObject
             ? new JSONSchemaForm({
                   schema,
                   results: updateTarget,
-                  onUpdate: (internalPath, value, forceUpdate) => {
+                  onUpdate: (internalPath, value) => {
                       if (createNewObject) updateTarget[key] = value;
                       else {
                           const path = [key, ...internalPath];
                           console.log(path, this.path);
-                          this.#updateData(path, value, forceUpdate);
+                          this.#updateData(path, value, true);
                       }
                   },
                   onThrow: this.#onThrow,
@@ -312,7 +310,7 @@ export class JSONSchemaInput extends LitElement {
                   value: updateTarget,
                   onUpdate: (value) => {
                       if (createNewObject) updateTarget[key] = value;
-                      else this.#updateData(key, value, forceUpdate); // NOTE: Untested
+                      else this.#updateData(key, value); // NOTE: Untested
                   },
               });
 
