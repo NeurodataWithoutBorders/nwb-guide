@@ -7,7 +7,7 @@ import {
 
 import Swal from 'sweetalert2'
 
-import { activateServer, baseUrl } from './globals.js';
+import { activateServer, baseUrl, statusBar } from './globals.js';
 
 // Check if the Flask server is live
 const serverIsLiveStartup = async () => {
