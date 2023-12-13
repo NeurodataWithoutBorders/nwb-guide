@@ -288,7 +288,7 @@ export class List extends LitElement {
       }
 
       // Skip object contents
-      else if (!isObjectContent) li.append(editableElement = content)
+      else if (content instanceof HTMLElement) li.append(editableElement = content)
 
 
 

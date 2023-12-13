@@ -43,7 +43,7 @@ const propsToIgnore = {
             conversion: true,
             offset: true,
         },
-    }, // Always ignore ophys metadata (for now)
+    },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)
     "ndx-dandi-icephys": true,
