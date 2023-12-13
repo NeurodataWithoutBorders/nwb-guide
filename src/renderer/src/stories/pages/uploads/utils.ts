@@ -25,7 +25,6 @@ function isNumeric(str: string) {
 
             const staging = isStaging(value)
 
-            console.log('Got', value)
             const dandiset = await get(value, { type: staging ? "staging" : undefined })
 
             if (dandiset.detail) {
