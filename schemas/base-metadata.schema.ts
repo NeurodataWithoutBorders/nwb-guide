@@ -57,10 +57,6 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
       subjectProps.species = {
         type: 'string',
-        ...getSpeciesInfo(),
-        items: {
-            type: 'string'
-        },
         strict: false,
         description: 'The species of your subject.'
     }

@@ -36,6 +36,15 @@ export class JSONSchemaInput extends LitElement {
                 background: rgb(255, 229, 228) !important;
             }
 
+            main {
+                display: flex;
+            }
+
+            #controls {
+                margin-left: 10px;
+                flex-grow: 1;
+            }
+
             .guided--input {
                 width: 100%;
                 border-radius: 4px;
@@ -100,7 +109,8 @@ export class JSONSchemaInput extends LitElement {
     // parent,
     // path,
     // form,
-    // patternProperties
+    // pattern
+    controls = [];
     required = false;
     validateOnChange = true;
 
@@ -113,7 +123,8 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value, forceValidate = false) {
-        if (this.value !== value && !forceValidate) {
+        
+        if (!forceValidate) {
             // Update the actual input element
             const el = this.getElement();
             if (el.type === "checkbox") el.checked = value;
@@ -166,7 +177,7 @@ export class JSONSchemaInput extends LitElement {
         this.#activateTimeoutValidation(name, path);
     };
 
-    #triggerValidation = (name, path) => {
+    #triggerValidation = async (name, path) => {
         this.#clearTimeoutValidation();
         return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path, this) : "";
     };
@@ -184,7 +195,7 @@ export class JSONSchemaInput extends LitElement {
         const input = this.#render();
 
         return html`
-            ${input}
+            <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
             <p class="guided--text-input-instructions">
                 ${schema.description
                     ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
@@ -290,6 +301,10 @@ export class JSONSchemaInput extends LitElement {
                 value = newValue;
             }
 
+            // Skip if not unique
+            if (schemaCopy.uniqueItems && list.items.find((item) => item.value === value)) return this.#modal.toggle(false);
+
+            // Add to the list
             if (createNewObject) {
 
                 if (creatNewPatternProperty) {
@@ -302,6 +317,7 @@ export class JSONSchemaInput extends LitElement {
 
             } else list.requestUpdate();
 
+            
             this.#modal.toggle(false);
         });
 
@@ -472,7 +488,6 @@ export class JSONSchemaInput extends LitElement {
                 }, 
                 onChange: async ({ object, items }, { object: oldObject }) => {
 
-                    console.log('Changed', list.object, list.items)
                     if (this.pattern) {
                         const oldKeys = Object.keys(oldObject)
                         const newKeys = Object.keys(object)
@@ -505,13 +520,22 @@ export class JSONSchemaInput extends LitElement {
                 const options = schema.enum.map((v) => {
                     return {
                         key: v,
+                        value: v,
+                        category: schema.enumCategories?.[v],
+                        label: schema.enumLabels?.[v] ?? v,
                         keywords: schema.enumKeywords?.[v],
                     };
                 });
 
                 const search = new Search({
                     options,
-                    value: this.value,
+                    value: {
+                        value: this.value,
+                        key: this.value,
+                        category: info.enumCategories?.[this.value],
+                        label: info.enumLabels?.[this.value],
+                        keywords: info.enumKeywords?.[this.value],
+                    },
                     showAllWhenEmpty: false,
                     listMode: "click",
                     onSelect: async ({ value, key }) => {
@@ -522,6 +546,8 @@ export class JSONSchemaInput extends LitElement {
                 });
 
                 search.classList.add("schema-input");
+                search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
+
                 return search;
             }
 
@@ -592,8 +618,8 @@ export class JSONSchemaInput extends LitElement {
                             else if (isNumber) newValue = parseFloat(value);
 
                             if (isNumber) {
-                                if ("min" in schema && value < schema.min) newValue = schema.min;
-                                else if ("max" in schema && value > schema.max) newValue = schema.max;
+                                if ("min" in schema && newValue < schema.min) newValue = schema.min;
+                                else if ("max" in schema && newValue > schema.max) newValue = schema.max;
                             }
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);

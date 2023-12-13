@@ -107,7 +107,7 @@ def get_cpu_count():
 
 @app.route("/get-recommended-species")
 def get_species():
-    from dandi.metadata import species_map
+    from dandi.metadata.util import species_map
 
     return species_map
 

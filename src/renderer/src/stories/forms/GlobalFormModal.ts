@@ -16,27 +16,25 @@ type IgnorePropsLevel = {
     [x:string]: true | IgnorePropsLevel,
 }
 
-export function createGlobalFormModal(this: Page, {
-    header,
-    schema,
-    propsToIgnore = {},
-    propsToRemove = {},
-    key,
-    hasInstances = false,
-    validateOnChange,
-    mergeFunction = merge
-}: {
+type BaseFormModalOptions = {
     header: string
     schema: any
     propsToIgnore?: IgnorePropsLevel
     propsToRemove?: IgnorePropsLevel
-    key?: string,
-    hasInstances?: boolean
     validateOnChange?: Function,
-    mergeFunction?: Function
+    hasInstances?: boolean
+}
 
-}) {
 
+export function createFormModal ({
+    onSave,
+    header,
+    schema,
+    propsToIgnore = {},
+    propsToRemove = {},
+    validateOnChange,
+    hasInstances = false
+}: BaseFormModalOptions & { onSave: Function }) {
     const modal = new Modal({
         header
     })
@@ -87,10 +85,47 @@ export function createGlobalFormModal(this: Page, {
         primary: true,
         onClick: async () => {
             await globalForm.validate()
+            const res = await onSave(globalForm)
+            if (res !== null) modal.open = false // Allow for aborting
+        }
+    })
+
+    modal.form = globalForm
+
+    modal.footer = saveButton
+
+    modal.append(content)
+    return modal
+}
+
+export function createGlobalFormModal(this: Page, {
+    header,
+    schema,
+    propsToIgnore = {},
+    propsToRemove = {},
+    validateOnChange,
+
+    // Global-specific options
+    key,
+    hasInstances = false,
+    mergeFunction = merge
+}: BaseFormModalOptions & {
+    key?: string,
+    mergeFunction?: Function
+}) {
+
+    return createFormModal({
+        header,
+        schema,
+        propsToIgnore,
+        propsToRemove,
+        validateOnChange,
+        hasInstances,
+        onSave: async ( form ) => {
 
             const cached: any = {}
 
-            const toPass = { project: key ?  {[key]: globalForm.results} : globalForm.results}
+            const toPass = { project: key ?  {[key]: form.results} : form.results}
 
             const forms = (hasInstances ? this.forms :  this.form ? [ { form: this.form }] : []) ?? []
             const tables = (hasInstances ? this.tables : this.table ? [ this.table ] : []) ?? []
@@ -113,15 +148,6 @@ export function createGlobalFormModal(this: Page, {
             })
 
             await save(this) // Save after all updates are made
-
-            modal.open = false
         }
     })
-
-    modal.form = globalForm
-
-    modal.footer = saveButton
-
-    modal.append(content)
-    return modal
 }

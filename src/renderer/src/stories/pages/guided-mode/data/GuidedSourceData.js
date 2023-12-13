@@ -211,7 +211,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.#globalModal.remove();
+        if (this.#globalModal) this.#globalModal.remove();
     }
 
     render() {
