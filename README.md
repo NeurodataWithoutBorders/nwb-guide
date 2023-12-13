@@ -3,7 +3,6 @@
   <h3 align="center">NWB Graphical User Interface for Data Entry</h3>
 </p>
 
-> **Note:** This project is under heavy pre-release development and is not recommended for practical use.
 
 NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.
 
