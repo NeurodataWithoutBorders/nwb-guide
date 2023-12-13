@@ -27,8 +27,8 @@ onServerOpen(async () => {
     .then((res) => res.json())
     .then(({ physical, logical }) => {
         const { number_of_jobs, number_of_threads } = schema.properties.additional_settings.properties as any;
-        number_of_jobs.max = number_of_jobs.default = physical;
-        number_of_threads.max = number_of_threads.default = logical / physical;
+        number_of_jobs.max = physical;
+        number_of_threads.max = logical / physical;
         setReady.cpus({ number_of_jobs, number_of_threads })
     })
     .catch(() => {

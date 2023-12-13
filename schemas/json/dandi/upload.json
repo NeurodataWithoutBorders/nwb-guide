@@ -9,7 +9,7 @@
                 "number_of_jobs": {
                     "type": "integer",
                     "title": "Job Count",
-                    "description": "The number of files to upload in parallel. <br><small><b>Note:</b> If you encounter an error for any selector value, particularly a Segmentation Fault error, try a value of <code>1</code> to run the jobs without parallelization.</small>",
+                    "description": "The number of files to upload in parallel. <br><small><b>⚠️ Use With Caution:</b> Setting this value above one has resulted in unpreditable behaviors (runaway processes, segmentation errors, etc.) on several systems</small>",
                     "min": 1,
                     "default": 1
                 },

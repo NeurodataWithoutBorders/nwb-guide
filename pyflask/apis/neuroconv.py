@@ -131,10 +131,10 @@ class UploadProject(Resource):
 
             upload_options = neuroconv_api.payload
             if "number_of_jobs" not in upload_options:
-                upload_options.update(number_of_jobs=psutil.cpu_count(logical=False))
+                upload_options.update(number_of_jobs=1)
             if "number_of_threads" not in upload_options:
                 upload_options.update(
-                    number_of_threads=psutil.cpu_count(logical=True) / psutil.cpu_count(logical=False)
+                    number_of_threads=1
                 )
 
             return upload_project_to_dandi(**upload_options)
@@ -153,10 +153,10 @@ class UploadFolder(Resource):
 
             upload_options = neuroconv_api.payload
             if "number_of_jobs" not in upload_options:
-                upload_options.update(number_of_jobs=psutil.cpu_count(logical=False))
+                upload_options.update(number_of_jobs=1)
             if "number_of_threads" not in upload_options:
                 upload_options.update(
-                    number_of_threads=psutil.cpu_count(logical=True) / psutil.cpu_count(logical=False)
+                    number_of_threads=1
                 )
 
             return upload_folder_to_dandi(**upload_options)
