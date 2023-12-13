@@ -19,7 +19,7 @@ const encode = (str) => {
     } catch {
         return btoa(str).replace(/\+|\/|\=/g, "_");
     }
-}
+};
 
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
@@ -315,7 +315,7 @@ export class JSONSchemaForm extends LitElement {
 
         const globalValue = this.getGlobalValue(localPath);
 
-        console.warn('Updated data (up to Ophys.Fluorescence...)', localPath, value)
+        console.warn("Updated data (up to Ophys.Fluorescence...)", localPath, value);
 
         // NOTE: Forms with nested forms will handle their own state updates
         if (this.isUndefined(value)) {
@@ -462,23 +462,20 @@ export class JSONSchemaForm extends LitElement {
     #get = (path, object = this.resolved, omitted = [], skipped = []) => {
         // path = path.slice(this.base.length); // Correct for base path
         if (!path) throw new Error("Path not specified");
-        return path.reduce(
-            (acc, curr, i) => {
-                    const tempAcc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str] && acc[str][curr])]?.[curr]
-                    if (tempAcc) return tempAcc
-                    else {
-                        const level1 = acc?.[skipped.find((str) => acc[str])]
-                        if (level1) {
-                            const got = Object.keys(level1).find((key) => {
-                                const result = this.#get(path.slice(i+1), level1[key], omitted, skipped)
-                                return result
-                            })
-                            if (got) return level1[got]
-                        }
-                    }
-                },
-            object
-        );
+        return path.reduce((acc, curr, i) => {
+            const tempAcc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str] && acc[str][curr])]?.[curr];
+            if (tempAcc) return tempAcc;
+            else {
+                const level1 = acc?.[skipped.find((str) => acc[str])];
+                if (level1) {
+                    const got = Object.keys(level1).find((key) => {
+                        const result = this.#get(path.slice(i + 1), level1[key], omitted, skipped);
+                        return result;
+                    });
+                    if (got) return level1[got];
+                }
+            }
+        }, object);
     };
 
     #checkRequiredAfterChange = async (localPath) => {
@@ -718,8 +715,6 @@ export class JSONSchemaForm extends LitElement {
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, path = [], checkLinks = true, input = this.getInput([...path, name])) => {
-
-
         const parent = this.#get(path, this.resolved);
 
         const pathToValidate = [...(this.base ?? []), ...path];
