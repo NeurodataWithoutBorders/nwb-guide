@@ -1,5 +1,7 @@
 import { updateURLParams } from "./src/utils/url";
 
+import * as plugins from "./plugins";
+
 const name = "nwb-guide";
 
 const isSupported = {
@@ -13,6 +15,7 @@ export default {
     icon: "src/assets/img/logo-guide-draft.png",
 
     plugins: {
+        ...plugins,
         dialog: {
             isSupported,
             desktop: {
