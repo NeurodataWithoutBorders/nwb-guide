@@ -9,7 +9,7 @@
                 "number_of_jobs": {
                     "type": "integer",
                     "title": "Job Count",
-                    "description": "The number of files to upload in parallel. <br><small><b>⚠️ Use With Caution:</b> Setting this value above one has resulted in unpreditable behaviors (runaway processes, segmentation errors, etc.) on several systems</small>",
+                    "description": "The number of files to upload in parallel.",
                     "min": 1,
                     "default": 1
                 },
