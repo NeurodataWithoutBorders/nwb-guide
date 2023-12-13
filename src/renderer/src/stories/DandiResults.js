@@ -50,7 +50,7 @@ export class DandiResults extends LitElement {
         const secondElIds = ["description", "url"];
         secondElIds.forEach((str) => handleClass(str, info));
 
-        const publicationEl = this.shadowRoot.querySelector(`#publication`);
+        const publicationEl = this.shadowRoot.querySelector(`.publication`);
         publicationEl.innerHTML = "";
         const publications = (info.relatedResource ?? []).filter((o) => o.relation === "dcite:IsDescribedBy");
 

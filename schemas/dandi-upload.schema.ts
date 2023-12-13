@@ -97,7 +97,7 @@ export const addDandiset = async (info) => {
     const enumLabels = `${id} — ${latestVersionInfo.name}`
 
     const isDraft = latestVersionInfo.version === 'draft'
-    const enumCategories = (staging ? 'Staging' : 'Main') + (isDraft ? ' — Draft' : '')
+    const enumCategories = (isDraft ? 'Drafts — ' : '') + (staging ? 'Staging' : 'Main')
 
     const fullInfo = await info.getInfo({ version: latestVersionInfo.version });
 
