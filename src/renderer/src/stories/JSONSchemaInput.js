@@ -36,6 +36,15 @@ export class JSONSchemaInput extends LitElement {
                 background: rgb(255, 229, 228) !important;
             }
 
+            main {
+                display: flex;
+            }
+
+            #controls {
+                margin-left: 10px;
+                flex-grow: 1;
+            }
+
             .guided--input {
                 width: 100%;
                 border-radius: 4px;
@@ -100,6 +109,7 @@ export class JSONSchemaInput extends LitElement {
     // parent,
     // path,
     // form,
+    controls = [];
     required = false;
     validateOnChange = true;
 
@@ -161,7 +171,7 @@ export class JSONSchemaInput extends LitElement {
         this.#activateTimeoutValidation(name, path);
     };
 
-    #triggerValidation = (name, path) => {
+    #triggerValidation = async (name, path) => {
         this.#clearTimeoutValidation();
         return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
     };
@@ -179,7 +189,7 @@ export class JSONSchemaInput extends LitElement {
         const input = this.#render();
 
         return html`
-            ${input}
+            <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
             <p class="guided--text-input-instructions">
                 ${info.description
                     ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "."
@@ -312,7 +322,7 @@ export class JSONSchemaInput extends LitElement {
 
                 modal.append(div);
 
-                addButton.insertAdjacentElement("beforebegin", modal);
+                document.body.append(modal);
 
                 setTimeout(() => modal.toggle(true));
             });
@@ -324,7 +334,8 @@ export class JSONSchemaInput extends LitElement {
                       })
                     : [],
                 onChange: async () => {
-                    this.#updateData(fullPath, list.items.length ? list.items.map((o) => o.value) : undefined);
+                    const { items } = list;
+                    this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
                     if (validateOnChange) await this.#triggerValidation(name, path);
                 },
             });
@@ -347,7 +358,9 @@ export class JSONSchemaInput extends LitElement {
                     }
                 }
 
-                list.add({ value });
+                if (info.uniqueItems) {
+                    if (!list.items.find((item) => item.value === value)) list.add({ value });
+                } else list.add({ value });
                 modal.toggle(false);
             });
 
@@ -366,13 +379,22 @@ export class JSONSchemaInput extends LitElement {
                 const options = info.enum.map((v) => {
                     return {
                         key: v,
+                        value: v,
+                        category: info.enumCategories?.[v],
+                        label: info.enumLabels?.[v] ?? v,
                         keywords: info.enumKeywords?.[v],
                     };
                 });
 
                 const search = new Search({
                     options,
-                    value: this.value,
+                    value: {
+                        value: this.value,
+                        key: this.value,
+                        category: info.enumCategories?.[this.value],
+                        label: info.enumLabels?.[this.value],
+                        keywords: info.enumKeywords?.[this.value],
+                    },
                     showAllWhenEmpty: false,
                     listMode: "click",
                     onSelect: async ({ value, key }) => {
@@ -383,6 +405,8 @@ export class JSONSchemaInput extends LitElement {
                 });
 
                 search.classList.add("schema-input");
+                search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
+
                 return search;
             }
 
@@ -453,8 +477,8 @@ export class JSONSchemaInput extends LitElement {
                             else if (isNumber) newValue = parseFloat(value);
 
                             if (isNumber) {
-                                if ("min" in info && value < info.min) newValue = info.min;
-                                else if ("max" in info && value > info.max) newValue = info.max;
+                                if ("min" in info && newValue < info.min) newValue = info.min;
+                                if ("max" in info && newValue > info.max) newValue = info.max;
                             }
 
                             if (info.transform) newValue = info.transform(newValue, this.value, info);

@@ -12,6 +12,10 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
+import { Validator } from "jsonschema";
+
+var v = new Validator();
+
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
 };
@@ -215,6 +219,10 @@ export class JSONSchemaForm extends LitElement {
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
+        this.controls = props.controls ?? {};
+
+        this.transformErrors = props.transformErrors;
+
         this.emptyMessage = props.emptyMessage ?? "No properties to render";
 
         this.onlyRequired = props.onlyRequired ?? false;
@@ -263,7 +271,10 @@ export class JSONSchemaForm extends LitElement {
 
         const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
 
-        if (!container) return this.getForm(path[0]).getInput(path.slice(1));
+        if (!container) {
+            if (path.length > 1) return this.getForm(path[0]).getInput(path.slice(1));
+            else return;
+        }
         return container?.querySelector("jsonschema-input");
     };
 
@@ -354,7 +365,9 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    validate = async (resolved) => {
+    validate = async (resolved = this.resolved) => {
+        const result = await v.validate(resolved, this.schema);
+
         // Check if any required inputs are missing
         const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
         const isValid = !requiredButNotSpecified.length;
@@ -496,6 +509,7 @@ export class JSONSchemaForm extends LitElement {
             path: localPath,
             value,
             form: this,
+            controls: this.controls[name],
             required: isRequired,
             validateEmptyValue: this.validateEmptyValues,
         });
@@ -686,28 +700,35 @@ export class JSONSchemaForm extends LitElement {
         const parent = this.#get(path, this.resolved);
 
         const pathToValidate = [...(this.base ?? []), ...path];
+        const localPath = [...path, name]; // Use basePath to augment the validation
+        const externalPath = [...this.base, name];
+        const schema = this.getSchema(localPath);
+
+        const jsonSchemaErrors = await v
+            .validate(parent[name], this.schema.properties[name])
+            .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }));
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
                 ? true
                 : await this.validateOnChange(name, parent, pathToValidate);
 
-        const localPath = [...path, name]; // Use basePath to augment the validation
-        const externalPath = [...this.base, name];
-
         const isRequired = this.#isRequired(localPath);
 
         let warnings = Array.isArray(valid)
             ? valid.filter((info) => info.type === "warning" && (!isRequired || !info.missing))
             : [];
-        const errors = Array.isArray(valid)
-            ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
-            : [];
+
+        const errors = [
+            ...(Array.isArray(valid)
+                ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
+                : []), // Derived Errors
+            ...jsonSchemaErrors, // JSON Schema Errors
+        ];
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
 
         const isUndefined = this.isUndefined(parent[name]);
-        const schema = this.getSchema(localPath);
 
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {
@@ -776,8 +797,23 @@ export class JSONSchemaForm extends LitElement {
 
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
+        const resolvedErrors = errors
+            .map((e) => {
+                // Non-Strict Rule
+                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+
+                // Custom Error Transformations
+                if (this.transformErrors) {
+                    const res = this.transformErrors(e, externalPath, parent[name]);
+                    if (res === false) return;
+                }
+
+                return e;
+            })
+            .filter((v) => !!v);
+
         // Track errors and warnings
-        this.#nErrors += errors.length;
+        this.#nErrors += resolvedErrors.length;
         this.#nWarnings += warnings.length;
         this.checkStatus();
 
@@ -787,7 +823,7 @@ export class JSONSchemaForm extends LitElement {
 
         const input = this.getInput(localPath);
 
-        if (isValid && errors.length === 0) {
+        if (isValid && resolvedErrors.length === 0) {
             input.classList.remove("invalid");
 
             const linkEl = this.#getLinkElement(externalPath);
@@ -813,7 +849,7 @@ export class JSONSchemaForm extends LitElement {
                 [...path, name]
             );
 
-            errors.forEach((info) => this.#addMessage(localPath, info, "errors"));
+            resolvedErrors.forEach((info) => this.#addMessage(localPath, info, "errors"));
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;
@@ -885,6 +921,16 @@ export class JSONSchemaForm extends LitElement {
                 else if (info.properties) return 1;
                 else return 0;
             });
+
+        if (schema.order) {
+            sorted.sort(([name], [name2]) => {
+                const index = schema.order.indexOf(name);
+                const index2 = schema.order.indexOf(name2);
+                if (index === -1) return 1;
+                if (index2 === -1) return -1;
+                return index - index2;
+            });
+        }
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
@@ -964,6 +1010,8 @@ export class JSONSchemaForm extends LitElement {
                         const path = [...localPath, ...internalPath];
                         this.updateData(path, value, forceUpdate);
                     },
+
+                    transformErrors: this.transformErrors,
 
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,

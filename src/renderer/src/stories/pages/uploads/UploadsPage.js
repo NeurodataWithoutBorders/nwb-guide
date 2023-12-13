@@ -6,10 +6,15 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 
 const folderPathKey = "filesystem_paths";
-import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
+import dandiUploadSchema, {
+    addDandiset,
+    ready,
+    regenerateDandisets,
+} from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
+const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: true });
 
-const dandiSchema = merge(dandiStandaloneSchema, merge(dandiUploadSchema, {}, { clone: true }), { arrays: true });
+import dandiCreateSchema from "../../../../../../schemas/dandi-create.schema";
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
@@ -24,31 +29,127 @@ import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { header } from "../../forms/utils";
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
-import { InfoBox } from "../../InfoBox.js";
 
-import { baseUrl, onServerOpen } from "../../../server/globals";
+import * as dandi from "dandi";
 
-export const isStaging = (id) => parseInt(id) >= 100000;
+import keyIcon from "../../assets/key.svg?raw";
 
-export const dandisetInfoContent = html`<span>
-        You can create a new Dandiset on the <a href="http://dandiarchive.org" target="_blank">main DANDI archive</a>.
-        This Dandiset can be fully public or embargoed according to NIH policy. When you create a Dandiset, a permanent
-        ID is automatically assigned to it.
-    </span>
-    <hr />
-    <small
-        >To prevent the production server from being inundated with test Dandisets, we encourage developers to develop
-        against the <a href="http://gui-staging.dandiarchive.org" target="_blank">development server</a>. Note that the
-        development server should not be used to stage your data. All data are uploaded as draft and can be adjusted
-        before publishing on the production server. The development server is primarily used by users learning to use
-        DANDI or by developers.</small
-    > `;
+import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate } from "./utils";
+import { createFormModal } from "../../forms/GlobalFormModal";
 
-export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
-    const { dandiset_id } = info;
+export async function createDandiset(results = {}) {
+    let notification;
 
-    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
+    const notify = (message, type) => {
+        if (notification) this.dismiss(notification);
+        return (notification = this.notify(message, type));
+    };
 
+    const modal = new Modal({
+        header: "Create a Dandiset",
+    });
+
+    const content = document.createElement("div");
+    Object.assign(content.style, {
+        padding: "25px",
+        paddingBottom: "0px",
+    });
+
+    const form = new JSONSchemaForm({
+        schema: dandiCreateSchema,
+        results,
+        validateOnChange: async (name, parent) => {
+            const value = parent[name];
+
+            if (name === "nih_award_number") {
+                if (value)
+                    return awardNumberValidator(value) || [{ type: "error", message: AWARD_VALIDATION_FAIL_MESSAGE }];
+                else if (parent["embargo_status"])
+                    return [
+                        {
+                            type: "error",
+                            message: "You must provide an NIH Award Number to embargo your data.",
+                        },
+                    ];
+            }
+        },
+        conditionalRequirements: [
+            {
+                name: "Embargo your Data",
+                properties: [["embargo_status"], ["nih_award_number"]],
+            },
+        ],
+    });
+
+    content.append(form);
+    modal.append(content);
+
+    modal.onClose = async () => notify("Dandiset was not created.", "error");
+
+    return new Promise((resolve) => {
+        const button = new Button({
+            label: "Create",
+            primary: true,
+            onClick: async () => {
+                await form.validate().catch(() => {
+                    const message = "Please fill out all required fields";
+                    notify("Dandiset was not set", "error");
+                    throw message;
+                });
+
+                const uploadToMain = form.resolved.archive === "main";
+                const staging = !uploadToMain;
+
+                const api_key = await getAPIKey.call(this, staging);
+
+                const api = new dandi.API({ token: api_key, type: staging ? "staging" : undefined });
+                await api.init();
+
+                const metadata = {
+                    description: form.resolved.description,
+                    license: form.resolved.license,
+                };
+
+                if (form.resolved.nih_award_number) {
+                    metadata.contributor = [
+                        {
+                            name: "National Institutes of Health (NIH)",
+                            roleName: ["dcite:Funder"],
+                            schemaKey: "Organization",
+                            awardNumber: form.resolved.nih_award_number,
+                        },
+                    ];
+                }
+
+                const res = await api.create(form.resolved.title, metadata, form.resolved.embargo_status);
+
+                const id = res.identifier;
+
+                notify(`Dandiset <b>${id}</b> was created`, "success");
+
+                await addDandiset(res);
+
+                const input = this.form.getInput(["dandiset"]);
+                input.updateData(id);
+                input.requestUpdate();
+
+                this.save();
+
+                resolve(res);
+            },
+        });
+
+        modal.footer = button;
+
+        modal.open = true;
+
+        document.body.append(modal);
+    }).finally(() => {
+        modal.remove();
+    });
+}
+
+async function getAPIKey(staging = false) {
     const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let api_key = DANDI?.api_keys?.[whichAPIKey];
@@ -121,15 +222,31 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
         });
     }
 
-    const result = await run(
-        type ? `upload/${type}` : "upload",
-        {
-            ...info,
-            staging,
-            api_key,
-        },
-        { title: "Uploading your files to DANDI" }
-    ).catch((e) => {
+    return api_key;
+}
+
+export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
+    const { dandiset } = info;
+
+    const dandiset_id = dandiset;
+
+    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
+
+    const api_key = await getAPIKey.call(this, staging);
+
+    const payload = {
+        dandiset_id,
+        ...info.additional_settings,
+        staging,
+        api_key,
+    };
+
+    if (info.project) payload.project = info.project;
+    else payload.filesystem_paths = info.filesystem_paths;
+
+    const result = await run(type ? `upload/${type}` : "upload", payload, {
+        title: "Uploading your files to DANDI",
+    }).catch((e) => {
         this.notify(e.message, "error");
         throw e;
     });
@@ -149,10 +266,57 @@ export class UploadsPage extends Page {
     header = {
         title: "DANDI Uploads",
         subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
+        controls: [
+            new Button({
+                icon: keyIcon,
+                label: "API Keys",
+                onClick: () => {
+                    this.#globalModal.form.results = structuredClone(global.data.DANDI.api_keys);
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
     };
 
     constructor(...args) {
         super(...args);
+    }
+
+    #globalModal = null;
+
+    #saveNotification;
+    connectedCallback() {
+        super.connectedCallback();
+
+        const modal = (this.#globalModal = createFormModal.call(this, {
+            header: "DANDI API Keys",
+            schema: dandiGlobalSchema.properties.api_keys,
+            onSave: async (form) => {
+                if (this.#saveNotification) this.dismiss(this.#saveNotification);
+
+                const apiKeys = form.resolved;
+                if (!Object.keys(apiKeys).length) {
+                    this.#saveNotification = this.notify("No API keys were provided", "error");
+                    return null;
+                }
+
+                merge(apiKeys, global.data.DANDI.api_keys);
+                global.save();
+                await regenerateDandisets();
+                const input = this.form.getInput(["dandiset "]);
+                input.requestUpdate();
+            },
+            validateOnChange: async (name, parent) => {
+                const value = parent[name];
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+            },
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.#globalModal) this.#globalModal.remove();
     }
 
     render() {
@@ -163,13 +327,22 @@ export class UploadsPage extends Page {
             label: defaultButtonMessage,
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
+
+                const files = this.form.resolved.filesystem_paths;
                 await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
 
                 const modal = new Modal({ open: true });
                 modal.header = "DANDI Upload Summary";
-                const summary = new DandiResults({ id: globalState.dandiset_id });
+                const summary = new DandiResults({
+                    id: globalState.dandiset,
+                    files: {
+                        subject: files.map((file) => {
+                            return { file };
+                        }),
+                    },
+                });
                 summary.style.padding = "25px";
                 modal.append(summary);
 
@@ -179,44 +352,61 @@ export class UploadsPage extends Page {
             },
         });
 
-        const promise = onServerOpen(async () => {
-            await fetch(new URL("cpus", baseUrl))
-                .then((res) => res.json())
-                .then(({ physical, logical }) => {
-                    const { number_of_jobs, number_of_threads } = dandiSchema.properties;
-                    number_of_jobs.max = number_of_jobs.default = physical;
-                    number_of_threads.max = number_of_threads.default = logical / physical;
-                })
-                .catch(() => {});
-
-            // NOTE: API Keys and Dandiset IDs persist across selected project
-            return (this.form = new JSONSchemaForm({
-                results: globalState,
-                schema: dandiSchema,
-                sort: ([k1]) => {
-                    if (k1 === folderPathKey) return -1;
-                },
-                onUpdate: ([id]) => {
-                    if (id === folderPathKey) {
-                        for (let key in dandiSchema.properties) {
-                            const input = this.form.getInput([key]);
-                            if (key !== folderPathKey && input.value) input.updateData(""); // Clear the results of the form
+        const promise = ready.cpus
+            .then(() => ready.dandisets)
+            .then(() => {
+                // NOTE: API Keys and Dandiset IDs persist across selected project
+                return (this.form = new JSONSchemaForm({
+                    results: globalState,
+                    schema: dandiSchema,
+                    controls: {
+                        dandiset: [
+                            new Button({
+                                label: "Create New Dandiset",
+                                buttonStyles: {
+                                    width: "max-content",
+                                },
+                                onClick: async () => {
+                                    await createDandiset.call(this, { title: this.form.resolved.dandiset });
+                                    this.requestUpdate();
+                                },
+                            }),
+                        ],
+                    },
+                    sort: ([k1]) => {
+                        if (k1 === folderPathKey) return -1;
+                    },
+                    onUpdate: ([id]) => {
+                        if (id === folderPathKey) {
+                            const keysToUpdate = ["dandiset"];
+                            keysToUpdate.forEach((k) => {
+                                const input = this.form.getInput([k]);
+                                if (input.value) input.updateData("");
+                            });
                         }
-                    }
 
-                    global.save();
-                },
-                onThrow,
-            }));
+                        global.save();
+                    },
+
+                    onThrow,
+
+                    transformErrors: (e) => {
+                        if (e.message === "Filesystem Paths is a required property.")
+                            e.message = "Please select at least one file or folder to upload.";
+                    },
+
+                    validateOnChange: validate,
+                }));
+            })
+            .catch((e) => html`<p>${e}</p>`);
+
+        // Confirm that one api key exists
+        promise.then(() => {
+            const api_keys = global.data.DANDI.api_keys;
+            if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true;
         });
 
         return html`
-            ${new InfoBox({
-                header: "How do I create a Dandiset?",
-                content: dandisetInfoContent,
-            })}
-            <br />
-            <br />
             ${until(
                 promise.then((form) => {
                     return html`
@@ -225,11 +415,9 @@ export class UploadsPage extends Page {
                         ${button}
                     `;
                 }),
-                html`<p>Waiting to connect to the Flask server...</p>
+                html`<p>Loading form contents...</p>
                     <p />`
             )}
-            <br />
-            <br />
         `;
     }
 }

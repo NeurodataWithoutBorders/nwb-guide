@@ -98,7 +98,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.#globalModal.remove();
+        if (this.#globalModal) this.#globalModal.remove();
     }
 
     createForm = ({ subject, session, info }) => {
@@ -153,6 +153,11 @@ export class GuidedMetadataPage extends ManagedPage {
             ignore: propsToIgnore,
             onOverride: (name) => {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+            },
+
+            transformErrors: (e) => {
+                // JSON Schema Exceptions
+                if (e.message.includes('does not conform to the "date-time" format.')) return false;
             },
 
             conditionalRequirements: [
