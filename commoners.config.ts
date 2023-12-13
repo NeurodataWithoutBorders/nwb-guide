@@ -122,6 +122,13 @@ export default {
                 requestedExecutionLevel: "requireAdministrator",
             },
 
+            nsis: {
+                createDesktopShortcut: "always",
+                oneClick: false,
+                perMachine: false,
+                allowToChangeInstallationDirectory: true
+            },
+
             mac: {
 
                 // Create both M1 and Intel builds
