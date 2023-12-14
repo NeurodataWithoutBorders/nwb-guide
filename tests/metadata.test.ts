@@ -2,20 +2,20 @@ import { describe, expect, test } from 'vitest'
 
 import './commoners'
 
-import { createResults } from '../src/stories/pages/guided-mode/data/utils'
-import { mapSessions } from '../src/stories/pages/utils'
+import { createResults } from '../src/renderer/src/stories/pages/guided-mode/data/utils'
+import { mapSessions } from '../src/renderer/src/stories/pages/utils'
 
 import baseMetadataSchema from '../schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { textToArray } from '../src/stories/forms/utils'
-import { updateResultsFromSubjects } from '../src/stories/pages/guided-mode/setup/utils'
-import { JSONSchemaForm } from '../src/stories/JSONSchemaForm'
+import { textToArray } from '../src/renderer/src/stories/forms/utils'
+import { updateResultsFromSubjects } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
+import { JSONSchemaForm } from '../src/renderer/src/stories/JSONSchemaForm'
 
-import { validateOnChange } from "../src/validation/index.js";
-import { SimpleTable } from '../src/stories/SimpleTable'
+import { validateOnChange } from "../src/renderer/src/validation/index.js";
+import { SimpleTable } from '../src/renderer/src/stories/SimpleTable'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
