@@ -4,7 +4,7 @@
 // Storybook polyfill
 if (!globalThis.commoners && window.location.href.includes("iframe.html")) {
     globalThis.commoners = {
-        target: 'web',
+        target: "web",
         plugins: {},
         services: {},
     };
