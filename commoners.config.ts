@@ -16,6 +16,31 @@ export default {
 
     plugins: {
         ...plugins,
+
+        // Avoid CORS for Dandiset creation
+        allowDANDIRequests: {
+            desktop: {
+                load: ( win ) => {
+
+                    win.webContents.session.webRequest.onBeforeSendHeaders(
+                        (details, callback) => {
+                            callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } })
+                        }
+                    );
+                
+                    win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+                        callback({
+                            responseHeaders: {
+                                'Access-Control-Allow-Origin': ['*'],
+                                ...details.responseHeaders,
+                            },
+                        });
+                    });
+                }
+            }
+        },
+
+        // Support Electron dialog features
         dialog: {
             isSupported,
             desktop: {
@@ -32,6 +57,8 @@ export default {
                 };
             },
         },
+
+        // Show a confirmation dialog when quitting the application
         customUnloadPopup: {
             isSupported,
             desktop: {
@@ -50,6 +77,8 @@ export default {
                 },
             },
         },
+
+        // Allow for opening NWB files from the native file system
         openFile: {
 
             isSupported,
