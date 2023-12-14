@@ -76,5 +76,6 @@
   "bugs": {
     "url": "https://github.com/neurodatawithoutborders/nwb-guide/issues"
   },
-  "homepage": "https://github.com/neurodatawithoutborders/nwb-guide#readme"
+  "homepage": "https://github.com/neurodatawithoutborders/nwb-guide#readme",
+  "main": "/Users/garrettflynn/Documents/GitHub/nwb-guide/.commoners/.temp/main.js"
 }

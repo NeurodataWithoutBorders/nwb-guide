@@ -1,6 +1,6 @@
-import { serverGlobals, resolve } from '../src/server/globals'
+import { serverGlobals, resolve } from '../src/renderer/src/server/globals'
 
-import { header } from '../src/stories/forms/utils'
+import { header } from '../src/renderer/src/stories/forms/utils'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 

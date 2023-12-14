@@ -1,4 +1,4 @@
-import { updateURLParams } from "./src/utils/url";
+import { updateURLParams } from "./src/renderer/utils/url";
 
 import * as plugins from "./plugins";
 
@@ -12,7 +12,7 @@ const isSupported = {
 export default {
     name: "NWB GUIDE",
 
-    icon: "src/assets/img/logo-guide-draft.png",
+    icon: "src/renderer/assets/img/logo-guide-draft.png",
 
     plugins: {
         ...plugins,
@@ -104,7 +104,7 @@ export default {
     },
 
     electron: {
-        splash: "./src/splash-screen.html",
+        splash: "./src/main/splash-screen.html",
         window: {
             minWidth: 1121,
             minHeight: 735,
