@@ -1,9 +1,6 @@
-
-
 export const desktop = {
     preload: function () {
-
-        const { BrowserWindow, Menu, app } = this.electron
+        const { BrowserWindow, Menu, app } = this.electron;
 
         let template = [
             {
@@ -118,10 +115,10 @@ export const desktop = {
                 ],
             },
         ];
-        
+
         function addUpdateMenuItems(items, position) {
             if (process.mas) return;
-        
+
             const version = app.getVersion();
             let updateItems = [
                 {
@@ -129,14 +126,14 @@ export const desktop = {
                     enabled: false,
                 },
             ];
-        
+
             items.splice.apply(items, [position, 0].concat(updateItems));
         }
-        
+
         function findReopenMenuItem() {
             const menu = Menu.getApplicationMenu();
             if (!menu) return;
-        
+
             let reopenMenuItem;
             menu.items.forEach((item) => {
                 if (item.submenu) {
@@ -149,7 +146,7 @@ export const desktop = {
             });
             return reopenMenuItem;
         }
-        
+
         if (process.platform === "darwin") {
             const name = app.getName();
             template.unshift({
@@ -196,7 +193,7 @@ export const desktop = {
                     },
                 ],
             });
-        
+
             // Window menu.
             template[3].submenu.push(
                 {
@@ -207,28 +204,28 @@ export const desktop = {
                     role: "front",
                 }
             );
-        
+
             addUpdateMenuItems(template[0].submenu, 1);
         }
-        
+
         if (process.platform === "win32") {
             const helpMenu = template[template.length - 1].submenu;
             addUpdateMenuItems(helpMenu, 0);
         }
-        
+
         app.on("ready", () => {
             const menu = Menu.buildFromTemplate(template);
             Menu.setApplicationMenu(menu);
         });
-        
+
         app.on("browser-window-created", () => {
             let reopenMenuItem = findReopenMenuItem();
             if (reopenMenuItem) reopenMenuItem.enabled = false;
         });
-        
+
         app.on("window-all-closed", () => {
             let reopenMenuItem = findReopenMenuItem();
             if (reopenMenuItem) reopenMenuItem.enabled = true;
         });
-    }
-}
+    },
+};

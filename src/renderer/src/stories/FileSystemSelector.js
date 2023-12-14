@@ -237,7 +237,8 @@ export class FilesystemSelector extends LitElement {
                                         native: true,
                                     })}`}</span
                           >${this.multiple &&
-                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory") && !globals.dialog))
+                          (this.type === "directory" ||
+                              (isMultipleTypes && this.type.includes("directory") && !globals.dialog))
                               ? html`<br /><small
                                         >Multiple directory support only available using drag-and-drop.</small
                                     >`
