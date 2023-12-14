@@ -234,34 +234,34 @@ export class Accordion extends LitElement {
         const isToggleable = this.content && this.toggleable;
 
         return html`
-                <div
-                    id="dropdown"
-                    class="guided--nav-bar-dropdown ${isToggleable && "toggleable"} ${this.disabled
-                        ? "disabled"
-                        : ""} ${this.status}"
-                    @click=${() => isToggleable && this.toggle()}
-                >
-                    <div class="header">
-                        <span>${this.name}</span>
-                        <small>${this.subtitle}</small>
-                    </div>
-                    ${isToggleable
-                        ? new Chevron({
-                              direction: "right",
-                              color: faColor,
-                              size: faSize,
-                          })
-                        : ""}
+            <div
+                id="dropdown"
+                class="guided--nav-bar-dropdown ${isToggleable && "toggleable"} ${this.disabled
+                    ? "disabled"
+                    : ""} ${this.status}"
+                @click=${() => isToggleable && this.toggle()}
+            >
+                <div class="header">
+                    <span>${this.name}</span>
+                    <small>${this.subtitle}</small>
                 </div>
-                ${this.content
-                    ? html`<div
-                          id="section"
-                          class="content hidden ${this.disabled ? "disabled" : ""}"
-                          style="padding: ${this.contentPadding ?? "25px"}"
-                      >
-                          ${this.content}
-                      </div>`
+                ${isToggleable
+                    ? new Chevron({
+                          direction: "right",
+                          color: faColor,
+                          size: faSize,
+                      })
                     : ""}
+            </div>
+            ${this.content
+                ? html`<div
+                      id="section"
+                      class="content hidden ${this.disabled ? "disabled" : ""}"
+                      style="padding: ${this.contentPadding ?? "25px"}"
+                  >
+                      ${this.content}
+                  </div>`
+                : ""}
         `;
     }
 }
