@@ -163,6 +163,10 @@ export default {
 
             mac: {
 
+                signIgnore: [
+                    '.commoners/.temp/electron/build/flask/nwb-guide/**'
+                ],
+
                 // Create both M1 and Intel builds
                 target: [
                     {
