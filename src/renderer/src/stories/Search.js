@@ -17,7 +17,7 @@ export class Search extends LitElement {
         onSelect,
     } = {}) {
         super();
-        this.value = value;
+        this.#value = value;
         this.options = options;
         this.showAllWhenEmpty = showAllWhenEmpty;
         this.disabledLabel = disabledLabel;
@@ -26,11 +26,32 @@ export class Search extends LitElement {
         if (onSelect) this.onSelect = onSelect;
 
         document.addEventListener("click", () => {
-            if (this.listMode === "click" && this.getAttribute("active") === "true") {
-                this.#onSelect({ value: this.shadowRoot.querySelector("input").value });
-                this.setAttribute("active", false);
+            if (this.listMode === "click" && this.getAttribute("interacted") === "true") {
+                this.setAttribute("interacted", false);
+                this.#onSelect(this.getSelectedOption());
             }
         });
+    }
+
+    #value;
+
+    #isObject(value = this.#value) {
+        return value && typeof value === "object";
+    }
+
+    getSelectedOption = () => {
+        const value = (this.shadowRoot.querySelector("input") ?? this).value;
+        const matched = this.options.find((o) => o.label === value);
+        return matched ?? { value };
+    };
+
+    get value() {
+        return this.#isObject() ? this.#value.value : this.#value;
+    }
+
+    set value(val) {
+        this.#value = val;
+        this.requestUpdate();
     }
 
     static get styles() {
@@ -190,11 +211,16 @@ export class Search extends LitElement {
 
     onSelect = (id, value) => {};
 
+    #displayValue = (option) => {
+        return option?.label ?? option?.value ?? option?.key ?? (this.#isObject(option) ? undefined : option);
+    };
+
     #onSelect = (option) => {
         const input = this.shadowRoot.querySelector("input");
 
         if (this.listMode === "click") {
-            input.value = option.value ?? option.key;
+            input.value = this.#displayValue(option);
+            this.setAttribute("active", false);
             return this.onSelect(option);
         }
 
@@ -248,6 +274,7 @@ export class Search extends LitElement {
         });
 
         this.setAttribute("active", !!toShow.length);
+        this.setAttribute("interacted", true);
     };
 
     render() {
@@ -287,7 +314,10 @@ export class Search extends LitElement {
                     li.classList.add("option");
                     li.setAttribute("hidden", "");
                     if (option.keywords) li.setAttribute("data-keywords", JSON.stringify(option.keywords));
-                    li.addEventListener("click", () => this.#onSelect(option));
+                    li.addEventListener("click", (ev) => {
+                        ev.stopPropagation();
+                        this.#onSelect(option);
+                    });
 
                     if (option.disabled) li.setAttribute("disabled", "");
 
@@ -355,11 +385,13 @@ export class Search extends LitElement {
             this.list.append(element, ...entries);
         });
 
+        const valueToDisplay = this.#displayValue(this.#value);
+
         return html`
     <div class="header" style=${styleMap({
         ...this.headerStyles,
     })}>
-      <input placeholder="Type here to search" value=${this.value} @click=${(ev) => {
+      <input placeholder="Type here to search" value=${valueToDisplay} @click=${(ev) => {
           ev.stopPropagation();
           if (this.listMode === "click") {
               const input = ev.target.value;

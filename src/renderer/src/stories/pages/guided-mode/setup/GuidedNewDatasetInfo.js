@@ -81,7 +81,6 @@ export class GuidedNewDatasetPage extends Page {
 
         const globalState = this.info.globalState;
         if (!globalState.project) globalState.project = {};
-
         this.state = merge(global.data, structuredClone(globalState.project));
 
         this.form = new JSONSchemaForm({
