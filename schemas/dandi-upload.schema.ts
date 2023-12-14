@@ -6,11 +6,16 @@ import { isStaging } from '../src/renderer/src/stories/pages/uploads/utils'
 import { baseUrl, onServerOpen } from '../src/renderer/src/server/globals'
 import { isStorybook } from '../src/renderer/src/dependencies/simple'
 
+
 const schema = structuredClone(upload)
 const idSchema = schema.properties.dandiset as any
 Object.assign(idSchema, {
     strict: false
 })
+
+const additionalSettings = schema.properties.additional_settings.properties as any
+additionalSettings.number_of_jobs.description = additionalSettings.number_of_threads.description = '<b>⚠️</b> Setting this value to more than 1 has resulted in unpredictable behaviors (runaway processes, segmentation faults, etc.) on several systems</small>'
+
 
 const setReady: any = {}
 
@@ -26,9 +31,9 @@ onServerOpen(async () => {
     await fetch(new URL("cpus", baseUrl))
     .then((res) => res.json())
     .then(({ physical, logical }) => {
-        const { number_of_jobs, number_of_threads } = schema.properties.additional_settings.properties as any;
-        number_of_jobs.max = number_of_jobs.default = physical;
-        number_of_threads.max = number_of_threads.default = logical / physical;
+        const { number_of_jobs, number_of_threads } = additionalSettings as any;
+        number_of_jobs.max = physical;
+        number_of_threads.max = logical / physical;
         setReady.cpus({ number_of_jobs, number_of_threads })
     })
     .catch(() => {
