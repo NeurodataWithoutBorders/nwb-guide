@@ -6,8 +6,8 @@ if (!globalThis.commoners && window.location.href.includes("iframe.html")) {
     globalThis.commoners = {
         target: 'web',
         plugins: {},
-        services: {}
-    }
+        services: {},
+    };
 }
 
 export default commoners.target === "desktop";
