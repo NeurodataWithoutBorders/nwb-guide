@@ -4,11 +4,11 @@
 // Storybook polyfill
 if (!globalThis.commoners && window.location.href.includes("iframe.html")) {
     globalThis.commoners = {
-        version: 'Storybook',
-        target: 'web',
+        version: "Storybook",
+        target: "web",
         plugins: {},
-        services: {}
-    }
+        services: {},
+    };
 }
 
 export default commoners.target === "desktop";
