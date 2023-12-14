@@ -14,7 +14,7 @@ Object.assign(idSchema, {
 })
 
 const additionalSettings = schema.properties.additional_settings.properties as any
-additionalSettings.number_of_jobs.description = additionalSettings.number_of_threads.description = '<b>⚠️</b> Setting this value has resulted in unpreditable behaviors (runaway processes, segmentation errors, etc.) on several systems</small>'
+additionalSettings.number_of_jobs.description = additionalSettings.number_of_threads.description = '<b>⚠️</b> Setting this value to more than 1 has resulted in unpredictable behaviors (runaway processes, segmentation faults, etc.) on several systems</small>'
 
 
 const setReady: any = {}
