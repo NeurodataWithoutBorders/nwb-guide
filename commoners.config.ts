@@ -150,6 +150,7 @@ export default {
         },
 
         build: {
+
             win: {
                 requestedExecutionLevel: "requireAdministrator",
             },
@@ -164,7 +165,7 @@ export default {
             mac: {
 
                 signIgnore: [
-                    '.commoners/.temp/electron/build/flask/nwb-guide/**'
+                    '.commoners/.temp/electron/build/flask/nwb-guide/*'
                 ],
 
                 // Create both M1 and Intel builds
