@@ -1,6 +1,7 @@
 
 import { get } from "dandi";
 import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
+import { html } from "lit";
 
 export const isStaging = (id: string) => parseInt(id) >= 100000;
 
@@ -15,6 +16,14 @@ function isNumeric(str: string) {
   export const validate = async (name: string, parent: any) => {
 
     const value = parent[name]
+
+    if (name === 'number_of_jobs' || name === 'number_of_threads') {
+        if (value > 1) return [{
+            type: 'warning',
+            message: `<b>⚠️</b> Increasing the ${name.split('_').join(' ')} may result in unpredictable behaviors.`
+        }]
+    }
+
     if (name === 'dandiset' && value) {
         if (isNumeric(value)){
 
