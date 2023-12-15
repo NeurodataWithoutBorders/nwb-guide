@@ -737,8 +737,8 @@ export class JSONSchemaForm extends LitElement {
         const externalPath = [...this.base, name];
         const schema = this.getSchema(localPath);
         
-        // NOTE: May need to further correct for pattern properties
-        const validateArgs = input.pattern ? [parent, this.schema] : [parent[name], this.schema.properties[name]]
+        // Validate pattern properties only when specified (NOTE: May need some additional exclusions)
+        const validateArgs = input.pattern ? [parent, { patternProperties: { [name]: this.schema.patternProperties[name] } }] : [parent[name], this.schema.properties[name]]
 
         const jsonSchemaErrors = await v
             .validate(...validateArgs)
