@@ -498,6 +498,45 @@ export class JSONSchemaForm extends LitElement {
         if (!isValid) return true;
     };
 
+    // Resolve all references on the schema when set (INTERNAL USE ONLY)
+    #schema
+    replaceRefsWithValue = (schema, path = [], parent) => {
+        const copy = { ...schema }
+
+        if (schema && typeof schema === 'object' && !Array.isArray(schema)) {
+            for (let propName in copy) {
+                const prop = copy[propName]
+                if (prop && typeof prop === 'object' && !Array.isArray(prop)) {
+                    const internalCopy = copy[propName] = { ...prop }
+                    if (internalCopy['$ref']) {
+                        const prevItem = path.slice(-1)[0];
+                        const resolved = parent.properties.definitions?.[prevItem]
+                        copy[propName] = resolved;
+                    } else {
+                        for (let key in internalCopy) {
+                            const fullPath = [...path, propName, key]
+                            internalCopy[key] = this.replaceRefsWithValue(internalCopy[key], fullPath, copy);
+                        }
+                    }
+                }
+            }
+        } 
+
+        else return schema
+
+        return copy
+    }
+
+    set schema(schema) {
+        this.#schema = schema;
+        this.#schema = this.replaceRefsWithValue(schema)
+    }
+
+
+    get schema () {
+        return this.#schema;
+    }
+
     getSchema(path, schema = this.schema) {
         if (typeof path === "string") path = path.split(".");
 
@@ -508,8 +547,9 @@ export class JSONSchemaForm extends LitElement {
             if (indexOf !== -1) path = path.slice(indexOf + 1);
         }
 
+        // NOTE: Refs are now pre-resolved
         const resolved = this.#get(path, schema, ["properties", "patternProperties"], ["patternProperties"]);
-        if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
+        // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;
     }
@@ -729,27 +769,34 @@ export class JSONSchemaForm extends LitElement {
     #isARequiredPropertyString = `is a required property`;
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    triggerValidation = async (name, path = [], checkLinks = true, input = this.getInput([...path, name])) => {
-        const parent = this.#get(path, this.resolved);
+    triggerValidation = async (
+        name, 
+        path = [], 
+        checkLinks = true, 
+        input = this.getInput([...path, name]), 
+        schema = this.getSchema([...path, name]),
+        parent = this.#get(path, this.resolved),
+        {
+            onError,
+            onWarning
+        } = {}
+    ) => {
 
         const pathToValidate = [...(this.base ?? []), ...path];
         const localPath = [...path, name]; // Use basePath to augment the validation
-        const externalPath = [...this.base, name];
-        const schema = this.getSchema(localPath);
+        const externalPath = [...this.base, ...localPath];
         
-        // Validate pattern properties only when specified (NOTE: May need some additional exclusions)
-        const validateArgs = input.pattern ? [parent, { patternProperties: { [name]: this.schema.patternProperties[name] } }] : [parent[name], this.schema.properties[name]]
+        const skipValidation = !this.validateEmptyValues && parent[name] === undefined
+        const validateArgs = input.pattern || skipValidation ? [] : [parent[name], schema]
 
-        const jsonSchemaErrors = await v
-            .validate(...validateArgs)
-            .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }));
+        const jsonSchemaErrors = validateArgs.length === 2 ? await v.validate(...validateArgs).errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` })) : [];
 
         const valid =
-            !this.validateEmptyValues && parent[name] === undefined
+        skipValidation
                 ? true
                 : await this.validateOnChange(name, parent, pathToValidate);
 
-        const isRequired = this.#isRequired(localPath);
+        const isRequired = this.#isRequired(localPath) || input.required;
 
         let warnings = Array.isArray(valid)
             ? valid.filter((info) => info.type === "warning" && (!isRequired || !info.missing))
@@ -787,7 +834,6 @@ export class JSONSchemaForm extends LitElement {
             if (isUndefined) {
                 // Throw at least a basic warning if a non-linked property is required and missing
                 if (!hasLinks && isRequired) {
-                    const schema = this.getSchema(localPath);
 
                     if (this.validateEmptyValues) {
                         errors.push({
@@ -854,8 +900,8 @@ export class JSONSchemaForm extends LitElement {
         this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
-        warnings.forEach((info) => this.#addMessage(localPath, info, "warnings"));
-        info.forEach((info) => this.#addMessage(localPath, info, "info"));
+        warnings.forEach((info) => onWarning ? onWarning(info) : this.#addMessage(localPath, info, "warnings"));
+        info.forEach((info) => onInfo ? onInfo(info) : this.#addMessage(localPath, info, "info"));
 
         if (isValid && resolvedErrors.length === 0) {
             input.classList.remove("invalid");
@@ -883,7 +929,7 @@ export class JSONSchemaForm extends LitElement {
                 [...path, name]
             );
 
-            resolvedErrors.forEach((info) => this.#addMessage(localPath, info, "errors"));
+            resolvedErrors.forEach((info) => onError ? onError(info) : this.#addMessage(localPath, info, "errors"));
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;

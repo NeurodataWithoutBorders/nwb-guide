@@ -149,13 +149,13 @@ export class JSONSchemaInput extends LitElement {
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");
 
-    #activateTimeoutValidation = (name, path) => {
+    #activateTimeoutValidation = (name, path, hooks) => {
         this.#clearTimeoutValidation();
         this.#validationTimeout = setTimeout(() => {
             this.onValidate
                 ? this.onValidate()
                 : this.form
-                  ? this.form.triggerValidation(name, path, undefined, this)
+                  ? this.form.triggerValidation(name, path, undefined, this, undefined, undefined, hooks)
                   : "";
         }, 1000);
     };
@@ -165,7 +165,7 @@ export class JSONSchemaInput extends LitElement {
     };
 
     #validationTimeout = null;
-    #updateData = (fullPath, value, forceUpdate) => {
+    #updateData = (fullPath, value, forceUpdate, hooks) => {
         this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value, forceUpdate) : "";
 
         const path = [...fullPath];
@@ -173,7 +173,7 @@ export class JSONSchemaInput extends LitElement {
 
         this.value = value; // Update the latest value
 
-        this.#activateTimeoutValidation(name, path);
+        this.#activateTimeoutValidation(name, path, hooks);
     };
 
     #triggerValidation = async (name, path) => {
@@ -413,18 +413,38 @@ export class JSONSchemaInput extends LitElement {
 
                     ignore,
 
-                    onUpdate: () => this.#updateData(fullPath, tableMetadata.data, true), // Ensure change propagates to all forms
+                    onUpdate: () => this.#updateData(fullPath, tableMetadata.data, true, { onError: () => {}, onWarning: () => {} }), // Ensure change propagates to all forms
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
-                    validateOnChange: (key, parent, v) => {
-                        return (
-                            validateOnChange &&
+                    validateOnChange: async (key, parent, v) => {
+
+                        const warnings = []
+                        const errors = []
+
+                        const result = 
+                            await (validateOnChange &&
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
-                                  ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
-                                  : "")
-                        );
+                                  ? this.form.triggerValidation(
+                                    key, 
+                                    fullPath, 
+                                    false, 
+                                    this, 
+                                    itemSchema.properties[key], 
+                                    { ...parent, [key]: v },
+                                    {
+                                        onError: (error) => errors.push(error),
+
+                                        onWarning: (warning) => errors.push(warning),
+                                    }
+                                ) // NOTE: No pattern properties support
+                                  : ""))
+                        
+
+                        const returnedValue = errors.length ? errors : (warnings.length ? warnings : result)
+
+                        return returnedValue
                     },
 
                     onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
