@@ -388,8 +388,7 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-
-        // Validate against the entire JSON Schema 
+        // Validate against the entire JSON Schema
         const result = await v.validate(resolved, this.schema);
 
         // Check if any required inputs are missing

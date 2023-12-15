@@ -420,7 +420,7 @@ export class JSONSchemaInput extends LitElement {
                             // willTimeout: false,
                             onError: () => {},
                             onWarning: () => {},
-                        }) // Ensure change propagates to all forms
+                        }); // Ensure change propagates to all forms
                     },
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
