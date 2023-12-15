@@ -413,38 +413,39 @@ export class JSONSchemaInput extends LitElement {
 
                     ignore,
 
-                    onUpdate: () => this.#updateData(fullPath, tableMetadata.data, true, { onError: () => {}, onWarning: () => {} }), // Ensure change propagates to all forms
+                    onUpdate: () =>
+                        this.#updateData(fullPath, tableMetadata.data, true, {
+                            onError: () => {},
+                            onWarning: () => {},
+                        }), // Ensure change propagates to all forms
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: async (key, parent, v) => {
+                        const warnings = [];
+                        const errors = [];
 
-                        const warnings = []
-                        const errors = []
-
-                        const result = 
-                            await (validateOnChange &&
+                        const result = await (validateOnChange &&
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
                                   ? this.form.triggerValidation(
-                                    key, 
-                                    fullPath, 
-                                    false, 
-                                    this, 
-                                    itemSchema.properties[key], 
-                                    { ...parent, [key]: v },
-                                    {
-                                        onError: (error) => errors.push(error),
+                                        key,
+                                        fullPath,
+                                        false,
+                                        this,
+                                        itemSchema.properties[key],
+                                        { ...parent, [key]: v },
+                                        {
+                                            onError: (error) => errors.push(error),
 
-                                        onWarning: (warning) => errors.push(warning),
-                                    }
-                                ) // NOTE: No pattern properties support
-                                  : ""))
-                        
+                                            onWarning: (warning) => errors.push(warning),
+                                        }
+                                    ) // NOTE: No pattern properties support
+                                  : ""));
 
-                        const returnedValue = errors.length ? errors : (warnings.length ? warnings : result)
+                        const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
 
-                        return returnedValue
+                        return returnedValue;
                     },
 
                     onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
