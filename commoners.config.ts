@@ -164,10 +164,6 @@ export default {
 
             mac: {
 
-                signIgnore: [
-                    new RegExp(`${'.commoners/.temp/electron/build/flask/nwb-guide'.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}(/.*)?$`).toString().split('/').slice(1, -1).join('/')
-                ],
-
                 // Create both M1 and Intel builds
                 target: [
                     {
