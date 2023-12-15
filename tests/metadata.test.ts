@@ -117,7 +117,7 @@ test('inter-table updates are triggered', async () => {
     await form.rendered
 
     // Validate that the results are incorrect
-    const errors = await form.validate().catch(() => true).catch(e =>  true)
+    const errors = await form.validate().catch(e =>  { return true })
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
@@ -135,7 +135,7 @@ test('inter-table updates are triggered', async () => {
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate().then(() => false).catch((e) => {
-        console.error(e)
+        console.log('Final', form.results.Ecephys.Electrodes, form.results.Ecephys.ElectrodeGroup)
         return true
     })
     expect(hasErrors).toBe(false) // Is valid

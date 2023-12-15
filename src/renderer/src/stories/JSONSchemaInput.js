@@ -13,6 +13,8 @@ import { capitalize } from "./forms/utils";
 import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const isFilesystemSelector = (name, format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
@@ -141,8 +143,8 @@ export class JSONSchemaInput extends LitElement {
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
 
-        this.#triggerValidation(name, path);
         this.#updateData(fullPath, value);
+        this.#triggerValidation(name, path); // NOTE: Is asynchronous
 
         return true;
     }
@@ -165,7 +167,7 @@ export class JSONSchemaInput extends LitElement {
     };
 
     #validationTimeout = null;
-    #updateData = (fullPath, value, forceUpdate, hooks) => {
+    #updateData = (fullPath, value, forceUpdate, hooks = {}) => {
         this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value, forceUpdate) : "";
 
         const path = [...fullPath];
@@ -173,7 +175,7 @@ export class JSONSchemaInput extends LitElement {
 
         this.value = value; // Update the latest value
 
-        this.#activateTimeoutValidation(name, path, hooks);
+        if (hooks.willTimeout !== false) this.#activateTimeoutValidation(name, path, hooks);
     };
 
     #triggerValidation = async (name, path) => {
@@ -413,11 +415,13 @@ export class JSONSchemaInput extends LitElement {
 
                     ignore,
 
-                    onUpdate: () =>
-                        this.#updateData(fullPath, tableMetadata.data, true, {
+                    onUpdate: () => {
+                        return this.#updateData(fullPath, tableMetadata.data, true, {
+                            // willTimeout: false,
                             onError: () => {},
                             onWarning: () => {},
-                        }), // Ensure change propagates to all forms
+                        }) // Ensure change propagates to all forms
+                    },
 
                     // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: async (key, parent, v) => {

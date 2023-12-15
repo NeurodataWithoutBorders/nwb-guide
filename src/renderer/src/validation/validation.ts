@@ -26,23 +26,21 @@ schema.Ecephys.ElectrodeGroup.device = function (this: JSONSchemaForm, name, par
 
 
 // NOTE: Does this maintain separation between multiple sessions?
-schema.Ecephys.ElectrodeGroup.name = function(this: JSONSchemaForm, name, parent, path, value) {
-    const currentGroups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
+schema.Ecephys.ElectrodeGroup.name = function(this: JSONSchemaForm, _, __, ___, value) {
+    const groups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
 
      // Check if the latest value will be new. Run function after validation
-
-    if (!value || !currentGroups.includes(value)) {
+    if (!value || !groups.includes(value)) {
         return () => {
-            rerender.call(this, ['Ecephys', 'Electrodes'])
+             setTimeout(() => rerender.call(this, ['Ecephys', 'Electrodes'])) // Allow for the updates to occur
         }
     }
 }
 
-schema.Ecephys.Electrodes.group_name = function (this: JSONSchemaForm, name, parent, path) {
+schema.Ecephys.Electrodes.group_name = function (this: JSONSchemaForm, _, __, ___, value) {
 
     const groups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
-
-    if (groups.includes(parent[name])) return true
+    if (groups.includes(value)) return true
     else {
         return [
             {

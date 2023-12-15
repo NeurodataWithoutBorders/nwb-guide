@@ -388,6 +388,8 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+
+        // Validate against the entire JSON Schema 
         const result = await v.validate(resolved, this.schema);
 
         // Check if any required inputs are missing
@@ -779,8 +781,10 @@ export class JSONSchemaForm extends LitElement {
         const localPath = [...path, name]; // Use basePath to augment the validation
         const externalPath = [...this.base, ...localPath];
 
-        const skipValidation = !this.validateEmptyValues && parent[name] === undefined;
-        const validateArgs = input.pattern || skipValidation ? [] : [parent[name], schema];
+        const value = parent[name];
+        // const value = this.#get(path, this.resolved)
+        const skipValidation = !this.validateEmptyValues && value === undefined;
+        const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
         const jsonSchemaErrors =
             validateArgs.length === 2
@@ -789,7 +793,8 @@ export class JSONSchemaForm extends LitElement {
                       .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }))
                 : [];
 
-        const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate);
+        // const jsonSchemaErrors =[]
+        const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
 
         const isRequired = this.#isRequired(localPath) || input.required;
 
