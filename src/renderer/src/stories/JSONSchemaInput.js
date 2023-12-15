@@ -519,9 +519,9 @@ export class JSONSchemaInput extends LitElement {
                     value: {
                         value: this.value,
                         key: this.value,
-                        category: info.enumCategories?.[this.value],
-                        label: info.enumLabels?.[this.value],
-                        keywords: info.enumKeywords?.[this.value],
+                        category: schema.enumCategories?.[this.value],
+                        label: schema.enumLabels?.[this.value],
+                        keywords: schema.enumKeywords?.[this.value],
                     },
                     showAllWhenEmpty: false,
                     listMode: "click",
