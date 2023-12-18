@@ -418,13 +418,12 @@ export class JSONSchemaInput extends LitElement {
 
                     onUpdate: function () {
                         return ogThis.#updateData(fullPath, this.data, true, {
-                            // willTimeout: false,
-                            onError: () => {},
-                            onWarning: () => {},
+                            willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
+                            onError: (e) => e,
+                            onWarning: (e) => e,
                         }); // Ensure change propagates to all forms
                     },
 
-                    // NOTE: This is likely an incorrect declaration of the table validation call
                     validateOnChange: async (path, parent, v, baseSchema = itemSchema) => {
                         const warnings = [];
                         const errors = [];
@@ -448,9 +447,12 @@ export class JSONSchemaInput extends LitElement {
                                         itemPropSchema,
                                         { ...parent, [name]: v },
                                         {
-                                            onError: (error) => errors.push(error),
-
-                                            onWarning: (warning) => errors.push(warning),
+                                            onError: (error) => {
+                                                errors.push(error) // Skip counting errors
+                                            },
+                                            onWarning: (warning) => {
+                                                warnings.push(warning) // Skip counting warnings
+                                            },
                                         }
                                     ) // NOTE: No pattern properties support
                                   : ""));
@@ -472,7 +474,7 @@ export class JSONSchemaInput extends LitElement {
                     onThrow: (...args) => this.#onThrow(...args),
                 };
 
-                const table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
+                const table = this.table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
 
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
