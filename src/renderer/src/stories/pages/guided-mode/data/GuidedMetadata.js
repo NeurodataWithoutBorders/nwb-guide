@@ -149,7 +149,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveResults(subject, session, globalState);
 
-        console.log("results", results, preprocessMetadataSchema(schema))
+        console.log("results", results, preprocessMetadataSchema(schema));
 
         // Create the form
         const form = new JSONSchemaForm({

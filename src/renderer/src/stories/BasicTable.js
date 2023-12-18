@@ -219,9 +219,7 @@ export class BasicTable extends LitElement {
             if (type.includes("int") || type.includes("float")) type = "number";
             if (type.startsWith("bool")) type = "boolean";
             if (type.startsWith("str")) type = "string";
-        } 
-        
-        else type = "string"; // Default to string type
+        } else type = "string"; // Default to string type
 
         // Check if required
         if (!value && "required" in this.schema && this.schema.required.includes(col))

@@ -239,7 +239,7 @@ def is_supported_recording_interface(recording_interface, metadata):
 
     Alpha build release should therefore always return False for this.
     """
-    print(metadata["Ecephys"]["Electrodes"], [ row.get("data_type") for row in metadata["Ecephys"]["Electrodes"] ])
+    print(metadata["Ecephys"]["Electrodes"], [row.get("data_type") for row in metadata["Ecephys"]["Electrodes"]])
     return (
         recording_interface
         and recording_interface.get_electrode_table_json
@@ -289,8 +289,8 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # Delete Ecephys metadata if ElectrodeTable helper function is not available
     elif "Ecephys" in schema["properties"]:
-            print('deleting')
-            schema["properties"].pop("Ecephys", dict())
+        print("deleting")
+        schema["properties"].pop("Ecephys", dict())
 
     return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
 
@@ -418,9 +418,7 @@ def convert_to_nwb(info: dict) -> str:
         info["metadata"].update(Ecephys=dict())
 
     # Ensure Ophys NaN values are resolved
-    resolved_metadata = replace_none_with_nan(
-        info["metadata"], resolve_references(converter.get_metadata_schema())
-    )
+    resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
 
     # Update the first recording interface with Ecephys table data
     # NOTE: This will be refactored after the ndx-probe-interface integration
