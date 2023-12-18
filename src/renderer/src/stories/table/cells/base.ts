@@ -9,12 +9,20 @@ type BaseTableProps = {
     schema: any,
     onOpen: Function,
     onClose: Function,
-    onChange: Function
+    onChange: Function,
+    nestedProps: NestedTableCellProps,
+}
+
+
+type NestedTableCellProps = {
+    validateOnChange?: Function,
 }
 
 export class TableCellBase extends LitElement {
 
     declare value: any
+
+    nestedProps: NestedTableCellProps
 
     // Separate editor and renderer
     #editable: HTMLElement = document.createElement('div')
@@ -63,13 +71,16 @@ export class TableCellBase extends LitElement {
         onOpen,
         onClose,
         onChange,
-        toggle
+        toggle,
+        nestedProps
     }: Partial<BaseTableProps> = {}) {
 
         super()
 
         this.info = info ?? {}
         this.schema = schema ?? {}
+
+        this.nestedProps = nestedProps ?? {}
 
         this.editToggle = toggle ?? (() => {});
 
@@ -129,7 +140,6 @@ export class TableCellBase extends LitElement {
 
             this.onClose()
 
-
             this.setText( current )
         }
 
@@ -140,6 +150,7 @@ export class TableCellBase extends LitElement {
 
     #update(current: any, forceUpdate = false) {
         let value = this.getValue(current)
+
         // NOTE: Forcing change registration for all cells
         if (this.value !== value || forceUpdate) {
             this.value = value
@@ -150,9 +161,8 @@ export class TableCellBase extends LitElement {
     setText(value: any, setOnInput = true) {
         if (setOnInput) [ this.#editor, this.#renderer ].forEach(el => this.setChild(el, value)) // RESETS HISTORY
 
-        if (this.schema.type === 'array') this.#update(value, true) // Ensure array values are not coerced
+        if (this.schema.type === 'array' || this.schema.type === 'object') this.#update(value, true) // Ensure array values are not coerced
         else this.#update(`${value}`) // Coerce to string
-
     }
 
 

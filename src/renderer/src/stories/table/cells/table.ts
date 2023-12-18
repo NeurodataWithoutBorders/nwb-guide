@@ -11,12 +11,14 @@ export class NestedTableEditor extends LitElement {
     info: any
     schema: any
     toggle: any
+    validateOnChange
 
     constructor(props: any) {
         super(props)
         this.schema = props.schema
         this.info = props.info ?? {}
         this.toggle = props.toggle
+        this.validateOnChange = props.validateOnChange
     }
 
     #modal = new Modal({
@@ -45,10 +47,12 @@ export class NestedTableEditor extends LitElement {
 
         document.body.append(div)
 
-
         const table = this.#table = new SimpleTable({
             schema: this.schema.items,
-            data: this.#value
+            data: this.#value,
+            validateOnChange: (path, parent, value, schema) => {
+                if (this.validateOnChange) return this.validateOnChange(value, path, parent, schema) // NOTE: Flipped because usually only value is passed
+            }
         })
 
         table.style.padding = '25px 50px'
@@ -118,7 +122,13 @@ export class NestedTableCell extends TableCellBase {
 
     renderer = new NestedTableRenderer({ value: this.value })
 
-    editor = new NestedTableEditor({ info: this.info, toggle: this.editToggle, value: this.value, schema: this.schema })
+    editor = new NestedTableEditor({
+        info: this.info,
+        toggle: this.editToggle,
+        value: this.value,
+        schema: this.schema,
+        ...this.nestedProps
+    })
 }
 
 customElements.get("nwb-nested-table-cell") || customElements.define("nwb-nested-table-cell", NestedTableCell);

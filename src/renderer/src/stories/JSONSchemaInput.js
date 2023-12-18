@@ -409,40 +409,50 @@ export class JSONSchemaInput extends LitElement {
                     ? getIgnore(this.form?.ignore, [...this.form.base, ...path, name])
                     : {};
 
+                const ogThis = this;
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
 
                     ignore,
 
-                    onUpdate: () => {
-                        return this.#updateData(fullPath, tableMetadata.data, true, {
-                            // willTimeout: false,
-                            onError: () => {},
-                            onWarning: () => {},
+                    onUpdate: function () {
+                        return ogThis.#updateData(fullPath, this.data, true, {
+                            willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
+                            onError: (e) => e,
+                            onWarning: (e) => e,
                         }); // Ensure change propagates to all forms
                     },
 
-                    // NOTE: This is likely an incorrect declaration of the table validation call
-                    validateOnChange: async (key, parent, v) => {
+                    validateOnChange: async (path, parent, v, baseSchema = itemSchema) => {
                         const warnings = [];
                         const errors = [];
+
+                        const name = path.slice(-1)[0];
+                        const completePath = [...fullPath, ...path.slice(0, -1)];
+
+                        const itemPropSchema = path.reduce((acc, key) => {
+                            return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
+                        }, baseSchema);
 
                         const result = await (validateOnChange &&
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
                                   ? this.form.triggerValidation(
-                                        key,
-                                        fullPath,
+                                        name,
+                                        completePath,
                                         false,
                                         this,
-                                        itemSchema.properties[key],
-                                        { ...parent, [key]: v },
+                                        itemPropSchema,
+                                        { ...parent, [name]: v },
                                         {
-                                            onError: (error) => errors.push(error),
-
-                                            onWarning: (warning) => errors.push(warning),
+                                            onError: (error) => {
+                                                errors.push(error) // Skip counting errors
+                                            },
+                                            onWarning: (warning) => {
+                                                warnings.push(warning) // Skip counting warnings
+                                            },
                                         }
                                     ) // NOTE: No pattern properties support
                                   : ""));
@@ -464,7 +474,7 @@ export class JSONSchemaInput extends LitElement {
                     onThrow: (...args) => this.#onThrow(...args),
                 };
 
-                const table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
+                const table = this.table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
 
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }

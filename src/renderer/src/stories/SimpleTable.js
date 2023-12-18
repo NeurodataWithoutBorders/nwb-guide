@@ -12,6 +12,7 @@ import { styleMap } from "lit/directives/style-map.js";
 import "./Button";
 import tippy from "tippy.js";
 import { sortTable } from "./Table";
+import { NestedTableCell } from "./table/cells/table";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -177,7 +178,7 @@ export class SimpleTable extends LitElement {
     } = {}) {
         super();
         this.schema = schema ?? {};
-        this.data = data ?? [];
+        this.#data = data ?? [];
         this.keyColumn = keyColumn;
         this.globals = globals ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
@@ -226,7 +227,11 @@ export class SimpleTable extends LitElement {
             if (key == 8 || key == 46) {
                 const path = this.#getPath(ev);
                 if (path[0] === document.body)
-                    Object.values(this.#selected).forEach((row) => row.forEach((o) => o.setInput("")));
+                    Object.values(this.#selected).forEach((row) => {
+                        row.forEach((o) => {
+                            if (o.type !== 'table') o.setInput("")
+                        })
+                    });
                 return;
             }
 
@@ -268,6 +273,18 @@ export class SimpleTable extends LitElement {
         });
     }
 
+    #data = [];
+    get data() {
+        // Remove empty array entries
+        if (Array.isArray(this.#data)) return this.#data.filter((o) => Object.keys(o).length);
+        else return this.#data;
+    }
+
+    set data(val) {
+        console.warn("Setting data")
+        this.#data = val;
+    }
+
     #selected = {};
     #selecting = false;
     #firstSelected; // TableCell
@@ -285,7 +302,12 @@ export class SimpleTable extends LitElement {
     #getPath = (ev) => ev.path || ev.composedPath();
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
     #getCellFromPath = (path) => {
-        const found = path.find((el) => el instanceof TableCell || el.children?.[0] instanceof TableCell);
+        let inTableCell;
+
+        const found = path.find((el) => {
+            if (el instanceof NestedTableCell) inTableCell = true;
+            return !inTableCell && (el instanceof TableCell || el.children?.[0] instanceof TableCell);
+        });
         if (found instanceof HTMLTableCellElement) return found.children[0];
         else return found;
     };
@@ -331,7 +353,7 @@ export class SimpleTable extends LitElement {
     }
 
     #getRowData(row, cols = this.colHeaders) {
-        const hasRow = row in this.data;
+        const hasRow = row in this.#data;
         return cols.map((col, j) => {
             let value;
             if (col === this.keyColumn) {
@@ -339,7 +361,7 @@ export class SimpleTable extends LitElement {
                 else return "";
             } else
                 value =
-                    (hasRow ? this.data[row][col] : undefined) ??
+                    (hasRow ? this.#data[row][col] : undefined) ??
                     this.globals[col] ??
                     this.schema.properties[col].default ??
                     "";
@@ -347,7 +369,7 @@ export class SimpleTable extends LitElement {
         });
     }
 
-    #getData(rows = Object.keys(this.data), cols = this.colHeaders) {
+    #getData(rows = Object.keys(this.#data), cols = this.colHeaders) {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
@@ -421,11 +443,11 @@ export class SimpleTable extends LitElement {
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
 
                     // Validate with empty values before removing (to trigger any dependent validations)
-                    const cols = this.data[row];
+                    const cols = this.#data[row];
                     Object.keys(cols).map((k) => (cols[k] = ""));
                     if (this.validateOnChange)
                         Object.keys(cols).map((k) => {
-                            const res = this.validateOnChange(k, { ...cols }, cols[k]);
+                            const res = this.validateOnChange([k], { ...cols }, cols[k]);
                             if (typeof res === "function") res();
                         });
 
@@ -554,10 +576,10 @@ export class SimpleTable extends LitElement {
                 return false;
             }
 
-            const rowHeaders = Object.keys(this.data);
+            const rowHeaders = Object.keys(this.#data);
             range.map((i) => {
                 children[i].remove();
-                delete this.data[rowHeaders[row]];
+                delete this.#data[rowHeaders[row]];
                 delete this.#unresolved[row];
                 delete this.#cells[i];
             });
@@ -631,11 +653,11 @@ export class SimpleTable extends LitElement {
         // NOTE: We would like to allow invalid values to mutate the results
         // if (isValid) {
 
-        const isResolved = rowName in this.data;
-        let target = this.data;
+        const isResolved = rowName in this.#data;
+        let target = this.#data;
 
         if (!isResolved) {
-            if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+            if (!this.keyColumn) this.#data[rowName] = {}; // Add new row to array
             else {
                 rowName = row;
                 if (!this.#unresolved[rowName]) this.#unresolved[rowName] = {}; // Ensure row exists
@@ -648,7 +670,7 @@ export class SimpleTable extends LitElement {
             if (value !== rowName) {
                 const old = target[rowName] ?? {};
                 if (value) {
-                    this.data[value] = old; // Allow renaming when different
+                    this.#data[value] = old; // Allow renaming when different
                     delete this.#unresolved[row];
                 } else this.#unresolved[row] = old; // Allow tracking when keyColumn is deleted
 
@@ -665,12 +687,12 @@ export class SimpleTable extends LitElement {
     };
 
     #createCell = (value, info) => {
-        const rowNames = Object.keys(this.data);
+        const rowNames = Object.keys(this.#data);
 
         const fullInfo = {
             ...info,
             col: this.colHeaders[info.j],
-            row: Array.isArray(this.data) ? `${info.i}` : rowNames[info.i],
+            row: Array.isArray(this.#data) ? `${info.i}` : rowNames[info.i],
         };
 
         const schema = this.#schema[fullInfo.col];
@@ -682,16 +704,17 @@ export class SimpleTable extends LitElement {
             },
             value,
             schema,
-            validateOnChange: (value) => {
+            validateOnChange: async (
+                value,
+                path = [],
+                parent = { ...this.#data[fullInfo.row] }, // A copy of the parent
+                schema
+            ) => {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
-                const res = this.validateOnChange
-                    ? this.validateOnChange(
-                          fullInfo.col,
-                          { ...this.data[fullInfo.row] }, // Validate on a copy of the parent
-                          value
-                      )
-                    : true;
+                path = [fullInfo.col, ...path];
+
+                const res = (await this.validateOnChange) ? this.validateOnChange(path, parent, value, schema) : true;
 
                 return res;
             },
@@ -699,6 +722,19 @@ export class SimpleTable extends LitElement {
             onValidate: (info) => {
                 const td = cell.simpleTableInfo.td;
                 if (td) {
+                    const message = info.title;
+                    delete info.title;
+
+                    if (td._tippy) {
+                        td._tippy.destroy();
+                        td.removeAttribute("data-message");
+                    }
+
+                    if (message !== undefined) {
+                        tippy(td, { content: message });
+                        td.setAttribute("data-message", value);
+                    }
+
                     for (let key in info) {
                         const value = info[key];
                         if (value === undefined) td.removeAttribute(key);
@@ -746,7 +782,7 @@ export class SimpleTable extends LitElement {
 
         // Add existing additional / pattern properties to the entries variable if necessary
         if (this.schema.additionalProperties !== false || this.schema.patternProperties) {
-            Object.values(this.data).reduce((acc, v) => {
+            Object.values(this.#data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
                         ? (entries[k] = {
@@ -769,8 +805,8 @@ export class SimpleTable extends LitElement {
         );
 
         // Try to guess the key column if unspecified
-        if (!Array.isArray(this.data) && !this.keyColumn) {
-            const [key, value] = Object.entries(this.data)[0];
+        if (!Array.isArray(this.#data) && !this.keyColumn) {
+            const [key, value] = Object.entries(this.#data)[0];
             const foundKey = Object.keys(value).find((k) => value[k] === key);
             if (foundKey) this.keyColumn = foundKey;
         }

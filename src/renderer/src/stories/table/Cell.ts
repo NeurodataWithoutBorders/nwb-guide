@@ -70,6 +70,8 @@ export class TableCell extends LitElement {
     //         value: { reflect: true }
     //     }
     // }
+    
+    type = 'text'
 
     constructor({ info, value, schema, validateOnChange, onValidate }: TableCellProps) {
         super()
@@ -97,7 +99,20 @@ export class TableCell extends LitElement {
     toggle = (v: boolean) => this.input.toggle(v)
 
     get value() {
-        return this.input ? this.input.getValue() : this.#value
+
+        let v = this.input ? this.input.getValue() : this.#value
+
+        if (this.schema.type === 'number' || this.schema.type === 'integer') {
+            const og = v
+            if (og === '') v = undefined
+            else {
+                if (og === 'NaN' || og === 'None' || og === 'null' || og === 'undefined') v = NaN
+                const possibleValue = Number(og)
+                if (!isNaN(possibleValue)) v = possibleValue
+            }
+        }
+
+        return v
     }
 
     set value(v) {
@@ -127,20 +142,19 @@ export class TableCell extends LitElement {
 
         if (result === false) errors.push({ message: 'Cell is invalid' })
 
-        if (warnings.length) {
-            info.warning = ''
-            info.title = warnings.map((o) => o.message).join("\n");
-        }
-
         if (errors.length) {
             info.error = ''
-            info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+            if (this.type === 'table' && errors.length > 1) info.title = `${errors.length} errors found on this nested table.`
+            else info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+        } else if (warnings.length) {
+            info.warning = ''
+            if (this.type === 'table' && warnings.length > 1) info.title = `${warnings.length} warnings found on this nested table.`
+            else info.title = warnings.map((o) => o.message).join("\n");
         }
 
         this.onValidate(info)
 
         if (typeof result === 'function') result() // Run if returned value is a function
-
 
         return info
     };
@@ -176,10 +190,18 @@ export class TableCell extends LitElement {
 
         if (this.schema.type === "array") {
             const items = this.schema.items
-            if (items && items.type === "object") cls = NestedTableCell
-            else cls = ArrayCell
+            if (items && items.type === "object") {
+                cls = NestedTableCell
+                this.type = "table"
+            } else {
+                cls = ArrayCell
+                this.type = "array"
+            }
         }
-        else if (this.schema.format === "date-time") cls =  DateTimeCell
+        else if (this.schema.format === "date-time") {
+            cls = DateTimeCell
+            this.type = "date-time"
+        }
 
         // Only actually rerender if new class type
         if (cls !== this.#cls) {
@@ -190,7 +212,10 @@ export class TableCell extends LitElement {
                 },
                 toggle: (v) => this.toggle(v),
                 info: this.info,
-                schema: this.schema
+                schema: this.schema,
+                nestedProps: {
+                    validateOnChange: this.validateOnChange,
+                }
             })
         }
 
