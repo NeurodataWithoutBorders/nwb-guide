@@ -73,7 +73,7 @@ export class TableCell extends LitElement {
     //         value: { reflect: true }
     //     }
     // }
-    
+
     type = 'text'
 
     constructor({ info, value, schema, validateOnChange, onValidate }: TableCellProps) {
