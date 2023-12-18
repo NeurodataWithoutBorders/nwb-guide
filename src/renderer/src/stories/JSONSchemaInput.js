@@ -448,10 +448,10 @@ export class JSONSchemaInput extends LitElement {
                                         { ...parent, [name]: v },
                                         {
                                             onError: (error) => {
-                                                errors.push(error) // Skip counting errors
+                                                errors.push(error); // Skip counting errors
                                             },
                                             onWarning: (warning) => {
-                                                warnings.push(warning) // Skip counting warnings
+                                                warnings.push(warning); // Skip counting warnings
                                             },
                                         }
                                     ) // NOTE: No pattern properties support
@@ -474,7 +474,7 @@ export class JSONSchemaInput extends LitElement {
                     onThrow: (...args) => this.#onThrow(...args),
                 };
 
-                const table = this.table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
+                const table = (this.table = this.form.createTable(name, tableMetadata, fullPath)); // Try creating table. Otherwise use nested form
 
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
