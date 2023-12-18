@@ -61,7 +61,7 @@ export class JSONSchemaInput extends LitElement {
             }
 
             .guided--input:disabled {
-                color: dimgray;
+                opacity: 0.5;
                 pointer-events: none;
             }
 
@@ -103,6 +103,18 @@ export class JSONSchemaInput extends LitElement {
                 color: dimgray !important;
                 margin: 0 0 1em;
                 line-height: 1.4285em;
+            }
+
+            .nan-handler {
+                display: flex;
+                align-items: center;
+                margin-left: 5px;
+                white-space: nowrap;
+            }
+
+            .nan-handler label {
+                margin-left: 5px;
+                font-size: 12px;
             }
         `;
     }
@@ -601,6 +613,8 @@ export class JSONSchemaInput extends LitElement {
             if (isInteger) schema.type = "number";
             const isNumber = schema.type === "number";
 
+            const isRequiredNumber = isNumber && this.required
+
             const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
@@ -623,6 +637,8 @@ export class JSONSchemaInput extends LitElement {
                     schema.format === "date-time"
                         ? "datetime-local"
                         : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+
+
                 return html`
                     <input
                         class="guided--input schema-input ${schema.step === null ? "hideStep" : ""}"
@@ -657,10 +673,30 @@ export class JSONSchemaInput extends LitElement {
                                 value = newValue;
                             }
 
+                            if (isRequiredNumber) {
+                                const nanHandler = ev.target.parentNode.querySelector(".nan-handler");
+                                if (!(newValue && Number.isNaN(newValue))) nanHandler.checked = false;
+                            }
+
                             this.#updateData(fullPath, value);
                         }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
-                    />
+                    /> ${isRequiredNumber ? html`<div class="nan-handler"><input 
+                        type="checkbox" 
+                        ?checked=${this.value && Number.isNaN(this.value)} 
+                        @change=${(ev) => {
+                            const siblingInput = ev.target.parentNode.previousElementSibling;
+                            if (ev.target.checked) {
+                                this.#updateData(fullPath, NaN);
+                                siblingInput.setAttribute("disabled", true);
+                            }
+                            else {
+                                siblingInput.removeAttribute("disabled");
+                                const ev = new Event("input");
+                                siblingInput.dispatchEvent(ev);
+                            }
+                        }}
+                    ></input><label>I Don't Know</label></div>` : ""}
                 `;
             }
         }

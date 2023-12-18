@@ -81,6 +81,7 @@ export async function createDandiset(results = {}) {
         ],
     });
 
+
     content.append(form);
     modal.append(content);
 
@@ -355,6 +356,7 @@ export class UploadsPage extends Page {
         const promise = ready.cpus
             .then(() => ready.dandisets)
             .then(() => {
+
                 // NOTE: API Keys and Dandiset IDs persist across selected project
                 return (this.form = new JSONSchemaForm({
                     results: globalState,

@@ -1,9 +1,12 @@
-import { LitElement, css, html } from "lit"
+import { LitElement, css } from "lit"
 import { ArrayCell } from "./cells/array"
 import { NestedTableCell } from "./cells/table"
 
 import { TableCellBase } from "./cells/base"
 import { DateTimeCell } from "./cells/date-time"
+
+
+import { getValue } from './get'
 
 type ValidationResult = {
     title?: string,
@@ -101,18 +104,7 @@ export class TableCell extends LitElement {
     get value() {
 
         let v = this.input ? this.input.getValue() : this.#value
-
-        if (this.schema.type === 'number' || this.schema.type === 'integer') {
-            const og = v
-            if (og === '') v = undefined
-            else {
-                if (og === 'NaN' || og === 'None' || og === 'null' || og === 'undefined') v = NaN
-                const possibleValue = Number(og)
-                if (!isNaN(possibleValue)) v = possibleValue
-            }
-        }
-
-        return v
+        return getValue(v, this.schema)
     }
 
     set value(v) {
