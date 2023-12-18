@@ -269,7 +269,7 @@ export class SimpleTable extends LitElement {
         });
     }
 
-    #data = []
+    #data = [];
     get data() {
         // Remove empty array entries
         if (Array.isArray(this.#data)) return this.#data.filter((o) => Object.keys(o).length);
@@ -297,12 +297,11 @@ export class SimpleTable extends LitElement {
     #getPath = (ev) => ev.path || ev.composedPath();
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
     #getCellFromPath = (path) => {
-
-        let inTableCell
+        let inTableCell;
 
         const found = path.find((el) => {
             if (el instanceof NestedTableCell) inTableCell = true;
-            return !inTableCell && (el instanceof TableCell || el.children?.[0] instanceof TableCell)
+            return !inTableCell && (el instanceof TableCell || el.children?.[0] instanceof TableCell);
         });
         if (found instanceof HTMLTableCellElement) return found.children[0];
         else return found;
@@ -443,7 +442,7 @@ export class SimpleTable extends LitElement {
                     Object.keys(cols).map((k) => (cols[k] = ""));
                     if (this.validateOnChange)
                         Object.keys(cols).map((k) => {
-                            const res = this.validateOnChange([ k ], { ...cols }, cols[k]);
+                            const res = this.validateOnChange([k], { ...cols }, cols[k]);
                             if (typeof res === "function") res();
                         });
 
@@ -679,7 +678,7 @@ export class SimpleTable extends LitElement {
             else target[rowName][header] = value;
         }
 
-        if (cell.interacted) this.onUpdate([ rowName, header ], value);
+        if (cell.interacted) this.onUpdate([rowName, header], value);
     };
 
     #createCell = (value, info) => {
@@ -701,24 +700,16 @@ export class SimpleTable extends LitElement {
             value,
             schema,
             validateOnChange: async (
-                value, 
-                path = [], 
+                value,
+                path = [],
                 parent = { ...this.#data[fullInfo.row] }, // A copy of the parent
                 schema
             ) => {
-
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
-                path = [ fullInfo.col, ...path ];
+                path = [fullInfo.col, ...path];
 
-                const res = await this.validateOnChange
-                    ? this.validateOnChange(
-                          path,
-                          parent,
-                          value,
-                          schema
-                      )
-                    : true;
+                const res = (await this.validateOnChange) ? this.validateOnChange(path, parent, value, schema) : true;
 
                 return res;
             },
@@ -726,22 +717,19 @@ export class SimpleTable extends LitElement {
             onValidate: (info) => {
                 const td = cell.simpleTableInfo.td;
                 if (td) {
-
-                    const message = info.title
-                    delete info.title
-
+                    const message = info.title;
+                    delete info.title;
 
                     if (td._tippy) {
                         td._tippy.destroy();
                         td.removeAttribute("data-message");
                     }
-                    
+
                     if (message !== undefined) {
                         tippy(td, { content: message });
                         td.setAttribute("data-message", value);
                     }
 
-                        
                     for (let key in info) {
                         const value = info[key];
                         if (value === undefined) td.removeAttribute(key);

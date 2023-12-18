@@ -122,10 +122,10 @@ export class NestedTableCell extends TableCellBase {
 
     renderer = new NestedTableRenderer({ value: this.value })
 
-    editor = new NestedTableEditor({ 
-        info: this.info, 
-        toggle: this.editToggle, 
-        value: this.value, 
+    editor = new NestedTableEditor({
+        info: this.info,
+        toggle: this.editToggle,
+        value: this.value,
         schema: this.schema,
         ...this.nestedProps
     })

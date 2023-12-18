@@ -229,7 +229,7 @@ export class BasicTable extends LitElement {
         else if (value !== "" && thisTypeOf !== type)
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange( [ col ], parent, value);
+        else result = this.validateOnChange([col], parent, value);
 
         // Will run synchronously if not a promise result
         return promises.resolve(result, () => {
@@ -268,21 +268,18 @@ export class BasicTable extends LitElement {
                     if (info === true) return;
                     const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
                     if (td) {
-
-                        const message = info.title
-                        delete info.title
+                        const message = info.title;
+                        delete info.title;
 
                         if (td._tippy) {
                             td._tippy.destroy();
                             td.removeAttribute("data-message");
                         }
-                        
 
                         if (message !== undefined) {
                             tippy(td, { content: message });
                             td.setAttribute("data-message", value);
                         }
-
 
                         for (let key in info) {
                             const value = info[key];

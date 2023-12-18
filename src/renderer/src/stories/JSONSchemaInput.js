@@ -409,7 +409,7 @@ export class JSONSchemaInput extends LitElement {
                     ? getIgnore(this.form?.ignore, [...this.form.base, ...path, name])
                     : {};
 
-                    const ogThis = this;
+                const ogThis = this;
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
@@ -433,8 +433,8 @@ export class JSONSchemaInput extends LitElement {
                         const completePath = [...fullPath, ...path.slice(0, -1)];
 
                         const itemPropSchema = path.reduce((acc, key) => {
-                            return acc?.properties?.[key] ?? acc?.items?.properties?.[key]
-                        }, baseSchema)
+                            return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
+                        }, baseSchema);
 
                         const result = await (validateOnChange &&
                             (this.onValidate

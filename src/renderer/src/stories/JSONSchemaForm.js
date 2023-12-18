@@ -790,10 +790,18 @@ export class JSONSchemaForm extends LitElement {
                 ? await v
                       .validate(...validateArgs)
                       .errors.map((e) => {
-                        const propName = e.path.slice(-1)[0] ?? name
-                        const rowName = e.path.slice(-2)[0]
-                        return { type: "error", message: `${typeof propName === "string" ? `${header(propName)}${typeof rowName === 'number' ? ` on Row ${rowName}` : ''}` : `Row ${propName}`} ${e.message}.` }
-                      }).filter(v => !!v)
+                          const propName = e.path.slice(-1)[0] ?? name;
+                          const rowName = e.path.slice(-2)[0];
+                          return {
+                              type: "error",
+                              message: `${
+                                  typeof propName === "string"
+                                      ? `${header(propName)}${typeof rowName === "number" ? ` on Row ${rowName}` : ""}`
+                                      : `Row ${propName}`
+                              } ${e.message}.`,
+                          };
+                      })
+                      .filter((v) => !!v)
                 : [];
 
         // console.log(externalPath.join('.'), jsonSchemaErrors, ...validateArgs)
