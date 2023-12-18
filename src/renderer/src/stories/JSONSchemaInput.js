@@ -613,7 +613,7 @@ export class JSONSchemaInput extends LitElement {
             if (isInteger) schema.type = "number";
             const isNumber = schema.type === "number";
 
-            const isRequiredNumber = isNumber && this.required
+            const isRequiredNumber = isNumber && this.required;
 
             const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -637,7 +637,6 @@ export class JSONSchemaInput extends LitElement {
                     schema.format === "date-time"
                         ? "datetime-local"
                         : schema.format ?? (schema.type === "string" ? "text" : schema.type);
-
 
                 return html`
                     <input
@@ -681,22 +680,24 @@ export class JSONSchemaInput extends LitElement {
                             this.#updateData(fullPath, value);
                         }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
-                    /> ${isRequiredNumber ? html`<div class="nan-handler"><input 
-                        type="checkbox" 
-                        ?checked=${this.value && Number.isNaN(this.value)} 
+                    />
+                    ${isRequiredNumber
+                        ? html`<div class="nan-handler"><input
+                        type="checkbox"
+                        ?checked=${this.value && Number.isNaN(this.value)}
                         @change=${(ev) => {
                             const siblingInput = ev.target.parentNode.previousElementSibling;
                             if (ev.target.checked) {
                                 this.#updateData(fullPath, NaN);
                                 siblingInput.setAttribute("disabled", true);
-                            }
-                            else {
+                            } else {
                                 siblingInput.removeAttribute("disabled");
                                 const ev = new Event("input");
                                 siblingInput.dispatchEvent(ev);
                             }
                         }}
-                    ></input><label>I Don't Know</label></div>` : ""}
+                    ></input><label>I Don't Know</label></div>`
+                        : ""}
                 `;
             }
         }
