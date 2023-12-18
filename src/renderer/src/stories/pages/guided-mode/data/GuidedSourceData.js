@@ -130,15 +130,9 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     const { results: metadata, schema } = result;
 
-                    // Always delete Ecephys if absent ( NOTE: temporarily manually removing from schema on backend...)
-                    const alwaysDelete = ["Ecephys"];
-                    alwaysDelete.forEach((k) => {
-                        if (!metadata[k]) delete info.metadata[k]; // Delete directly on metadata
-                    });
-
-                    for (let key in info.metadata) {
-                        if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
-                    }
+                    // for (let key in info.metadata) {
+                    //     if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
+                    // }
 
                     // Merge metadata results with the generated info
                     merge(metadata, info.metadata);

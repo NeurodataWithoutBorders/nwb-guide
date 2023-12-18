@@ -147,28 +147,9 @@ export class GuidedMetadataPage extends ManagedPage {
         delete schema.properties.NWBFile.properties.source_script;
         delete schema.properties.NWBFile.properties.source_script_file_name;
 
-        // Only include a select group of Ecephys metadata here
-        if ("Ecephys" in schema.properties) {
-            const toInclude = ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"];
-            const ecephysProps = schema.properties.Ecephys.properties;
-            Object.keys(ecephysProps).forEach((k) => (!toInclude.includes(k) ? delete ecephysProps[k] : ""));
-
-            // Change rendering order for electrode table columns
-            const ogElectrodeItemSchema = ecephysProps["Electrodes"].items.properties;
-            const order = ["channel_name", "group_name", "shank_electrode_number"];
-            const sortedProps = Object.keys(ogElectrodeItemSchema).sort((a, b) => {
-                const iA = order.indexOf(a);
-                if (iA === -1) return 1;
-                const iB = order.indexOf(b);
-                if (iB === -1) return -1;
-                return iA - iB;
-            });
-
-            const newElectrodeItemSchema = (ecephysProps["Electrodes"].items.properties = {});
-            sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
-        }
-
         resolveResults(subject, session, globalState);
+
+        console.log("results", results, preprocessMetadataSchema(schema))
 
         // Create the form
         const form = new JSONSchemaForm({

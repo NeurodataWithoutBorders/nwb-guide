@@ -4,6 +4,11 @@ import { header } from '../src/renderer/src/stories/forms/utils'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
+const propsToInclude = {
+    ecephys: ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"]
+}
+
+
 function getSpeciesNameComponents(arr: any[]) {
     const split = arr[arr.length - 1].split(' - ')
     return {
@@ -73,8 +78,17 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     // Override description of keywords
     copy.properties.NWBFile.properties.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
 
-
+    const ecephys = copy.properties.Ecephys
     const ophys = copy.properties.Ophys
+
+    if (ecephys) {
+        // Only include a select group of Ecephys metadata here
+        const ecephysProps = ecephys.properties;
+        Object.keys(ecephysProps).forEach((k) => (!propsToInclude.ecephys.includes(k) ? delete ecephysProps[k] : ""));
+
+        // Change rendering order for electrode table columns
+        ecephysProps["Electrodes"].items.order = ["channel_name", "group_name", "shank_electrode_number"];
+    }
 
     if (ophys) {
 
