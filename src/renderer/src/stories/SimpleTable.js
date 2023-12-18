@@ -229,8 +229,8 @@ export class SimpleTable extends LitElement {
                 if (path[0] === document.body)
                     Object.values(this.#selected).forEach((row) => {
                         row.forEach((o) => {
-                            if (o.type !== 'table') o.setInput("")
-                        })
+                            if (o.type !== "table") o.setInput("");
+                        });
                     });
                 return;
             }
@@ -281,7 +281,7 @@ export class SimpleTable extends LitElement {
     }
 
     set data(val) {
-        console.warn("Setting data")
+        console.warn("Setting data");
         this.#data = val;
     }
 
