@@ -97,7 +97,16 @@ export class TableCell extends LitElement {
     toggle = (v: boolean) => this.input.toggle(v)
 
     get value() {
-        return this.input ? this.input.getValue() : this.#value
+
+        let v = this.input ? this.input.getValue() : this.#value
+
+        if (this.schema.type === 'number' || this.schema.type === 'integer') {
+            const og = v
+            if (og === '') v = undefined
+            else v = Number(v)
+        }
+
+        return v
     }
 
     set value(v) {
@@ -127,14 +136,14 @@ export class TableCell extends LitElement {
 
         if (result === false) errors.push({ message: 'Cell is invalid' })
 
-        if (warnings.length) {
-            info.warning = ''
-            info.title = warnings.map((o) => o.message).join("\n");
-        }
-
         if (errors.length) {
             info.error = ''
-            info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+            if (this.#cls === NestedTableCell) info.title = `${errors.length} errors found on this nested table.`
+            else info.title = errors.map((o) => o.message).join("\n\n"); // Class switching handled automatically
+        } else if (warnings.length) {
+            info.warning = ''
+            if (this.#cls === NestedTableCell) info.title = `${warnings.length} warnings found on this nested table.`
+            else info.title = warnings.map((o) => o.message).join("\n");
         }
 
         this.onValidate(info)
@@ -190,7 +199,10 @@ export class TableCell extends LitElement {
                 },
                 toggle: (v) => this.toggle(v),
                 info: this.info,
-                schema: this.schema
+                schema: this.schema,
+                nestedProps: {
+                    validateOnChange: this.validateOnChange,
+                }
             })
         }
 

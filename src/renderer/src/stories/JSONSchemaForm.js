@@ -789,8 +789,14 @@ export class JSONSchemaForm extends LitElement {
             validateArgs.length === 2
                 ? await v
                       .validate(...validateArgs)
-                      .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }))
+                      .errors.map((e) => {
+                        const propName = e.path.slice(-1)[0] ?? name
+                        const rowName = e.path.slice(-2)[0]
+                        return { type: "error", message: `${typeof propName === "string" ? `${header(propName)}${typeof rowName === 'number' ? ` on Row ${rowName}` : ''}` : `Row ${propName}`} ${e.message}.` }
+                      }).filter(v => !!v)
                 : [];
+
+        // console.log(externalPath.join('.'), jsonSchemaErrors, ...validateArgs)
 
         // const jsonSchemaErrors =[]
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);

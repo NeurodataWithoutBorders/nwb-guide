@@ -282,7 +282,7 @@ export class Table extends LitElement {
                 try {
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
-                              k,
+                              [ k ],
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
                               value
                           )
@@ -606,7 +606,7 @@ export class Table extends LitElement {
             }
 
             if (message) {
-                tippy(cell, { content: message, theme });
+                tippy(cell, { content: message });
                 cell.setAttribute("data-message", message);
             }
         }

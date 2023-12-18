@@ -8,6 +8,7 @@ import * as promises from "../promises";
 
 import "./Button";
 import { sortTable } from "./Table";
+import tippy from "tippy.js";
 
 export class BasicTable extends LitElement {
     static get styles() {
@@ -228,7 +229,7 @@ export class BasicTable extends LitElement {
         else if (value !== "" && thisTypeOf !== type)
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange(col, parent, value);
+        else result = this.validateOnChange( [ col ], parent, value);
 
         // Will run synchronously if not a promise result
         return promises.resolve(result, () => {
@@ -243,14 +244,12 @@ export class BasicTable extends LitElement {
 
             if (result === false) errors.push({ message: "Cell is invalid" });
 
-            if (warnings.length) {
-                info.warning = "";
-                info.title = warnings.map((o) => o.message).join("\n");
-            }
-
             if (errors.length) {
                 info.error = "";
                 info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+            } else if (warnings.length) {
+                info.warning = "";
+                info.title = warnings.map((o) => o.message).join("\n");
             }
 
             if (typeof result === "function") result(); // Run if returned value is a function
@@ -269,6 +268,22 @@ export class BasicTable extends LitElement {
                     if (info === true) return;
                     const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
                     if (td) {
+
+                        const message = info.title
+                        delete info.title
+
+                        if (td._tippy) {
+                            td._tippy.destroy();
+                            td.removeAttribute("data-message");
+                        }
+                        
+
+                        if (message !== undefined) {
+                            tippy(td, { content: message });
+                            td.setAttribute("data-message", value);
+                        }
+
+
                         for (let key in info) {
                             const value = info[key];
                             if (value === undefined) td.removeAttribute(key);
