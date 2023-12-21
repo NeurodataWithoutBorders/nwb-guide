@@ -363,12 +363,10 @@ export class SimpleTable extends LitElement {
                 if (hasRow) value = row;
                 else return "";
             } else {
-
-                value = hasRow ? this.#data[row][col] : undefined
-                if (this.#isUndefined(value)) value = this.globals[col]
-                if (this.#isUndefined(value)) value = this.schema.properties[col].default
-                if (this.#isUndefined(value)) value = ""
-                
+                value = hasRow ? this.#data[row][col] : undefined;
+                if (this.#isUndefined(value)) value = this.globals[col];
+                if (this.#isUndefined(value)) value = this.schema.properties[col].default;
+                if (this.#isUndefined(value)) value = "";
             }
             return value;
         });
@@ -719,11 +717,9 @@ export class SimpleTable extends LitElement {
             ) => {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
-                const res = this.validateOnChange ? await this.validateOnChange([
-                     info.i, 
-                     fullInfo.col, 
-                     ...path 
-                ], parent, value, schema) : true;
+                const res = this.validateOnChange
+                    ? await this.validateOnChange([info.i, fullInfo.col, ...path], parent, value, schema)
+                    : true;
 
                 return res;
             },
@@ -810,7 +806,7 @@ export class SimpleTable extends LitElement {
                 properties: entries,
             },
             this.keyColumn,
-            this.schema.order ?? [ 'name' ] // Specify the order of the columns
+            this.schema.order ?? ["name"] // Specify the order of the columns
         );
 
         // Try to guess the key column if unspecified

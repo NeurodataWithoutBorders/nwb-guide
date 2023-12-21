@@ -238,30 +238,23 @@ export class JSONSchemaInput extends LitElement {
             : [];
 
         if (isEditableObject) {
-
-
-
             items = Object.entries(this.value);
 
-            const isAdditionalProperties = this.#isAdditionalProperties()
+            const isAdditionalProperties = this.#isAdditionalProperties();
 
             if (this.#isPatternProperties()) {
-                const regex = new RegExp(name)
+                const regex = new RegExp(name);
                 items = items.filter(([key]) => regex.test(key));
-            }
-
-            else if (isAdditionalProperties) {
-                const props = Object.keys(schema.properties ?? {})
+            } else if (isAdditionalProperties) {
+                const props = Object.keys(schema.properties ?? {});
                 items = items.filter(([key]) => !props.includes(key));
 
-                const patternProps = Object.keys(schema.patternProperties ?? {})
+                const patternProps = Object.keys(schema.patternProperties ?? {});
                 patternProps.forEach((key) => {
-                    const regex = new RegExp(key)
-                    items = items.filter(([k]) => !regex.test(k))
-                })
-            } 
-
-            else items.filter(([key]) => key in schema.properties)
+                    const regex = new RegExp(key);
+                    items = items.filter(([k]) => !regex.test(k));
+                });
+            } else items.filter(([key]) => key in schema.properties);
 
             items = items.map(([key, value]) => {
                 return {
@@ -291,12 +284,12 @@ export class JSONSchemaInput extends LitElement {
     #schemaElement;
     #modal;
 
-    #isPatternProperties(){
-        return this.pattern && !this.#isAdditionalProperties()
+    #isPatternProperties() {
+        return this.pattern && !this.#isAdditionalProperties();
     }
 
-    #isAdditionalProperties(){
-        return this.pattern === 'additional'
+    #isAdditionalProperties() {
+        return this.pattern === "additional";
     }
 
     async #createModal({ key, schema = {}, results, list } = {}) {
@@ -306,8 +299,8 @@ export class JSONSchemaInput extends LitElement {
         // const additionalProperties = Object.keys(results).filter((key) => !schemaProperties.includes(key));
         // // const additionalElement = html`<label class="guided--form-label">Additional Properties</label><small>Cannot edit additional properties (${additionalProperties}) at this time</small>`
 
-        const isPatternProperties = this.#isPatternProperties()
-        const isAdditionalProperties = this.#isAdditionalProperties()
+        const isPatternProperties = this.#isPatternProperties();
+        const isAdditionalProperties = this.#isAdditionalProperties();
         const creatNewPatternProperty = isPatternProperties && createNewObject;
 
         const schemaCopy = structuredClone(schema);
@@ -401,14 +394,13 @@ export class JSONSchemaInput extends LitElement {
         setTimeout(() => this.#modal.toggle(true));
     }
 
-
-    #getType = (value = this.value) => Array.isArray(value) ? 'array' : typeof value
+    #getType = (value = this.value) => (Array.isArray(value) ? "array" : typeof value);
 
     #render() {
         const { validateOnChange, schema, path: fullPath } = this;
 
         // Do your best to fill in missing schema values
-        if (!('type' in schema)) schema.type = this.#getType()
+        if (!("type" in schema)) schema.type = this.#getType();
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
@@ -436,8 +428,8 @@ export class JSONSchemaInput extends LitElement {
         if (isArray || isEditableObject) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-            const isPatternProperties = this.#isPatternProperties()
-            const isAdditionalProperties = this.#isAdditionalProperties()
+            const isPatternProperties = this.#isPatternProperties();
+            const isAdditionalProperties = this.#isAdditionalProperties();
 
             // Provide default item types
             if (isArray) {
@@ -452,7 +444,6 @@ export class JSONSchemaInput extends LitElement {
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema?.type === "object" && this.form.createTable) {
-
                 const ignore = this.form?.ignore
                     ? getIgnore(this.form?.ignore, [...this.form.base, ...path, name])
                     : {};
@@ -485,8 +476,8 @@ export class JSONSchemaInput extends LitElement {
                             return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
                         }, baseSchema);
 
-                        const result = await (validateOnChange ?
-                            (this.onValidate
+                        const result = await (validateOnChange
+                            ? this.onValidate
                                 ? this.onValidate()
                                 : this.form
                                   ? this.form.triggerValidation(
@@ -505,9 +496,8 @@ export class JSONSchemaInput extends LitElement {
                                             },
                                         }
                                     ) // NOTE: No pattern properties support
-                                  : "") 
-                                  : true
-                    );
+                                  : ""
+                            : true);
 
                         const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
 
@@ -583,7 +573,8 @@ export class JSONSchemaInput extends LitElement {
 
             if (isAdditionalProperties) {
                 addButton.setAttribute("disabled", true);
-                addButton.title = "Additional properties cannot be added at this time—as they don't have a predictable structure.";
+                addButton.title =
+                    "Additional properties cannot be added at this time—as they don't have a predictable structure.";
             }
 
             return html`
