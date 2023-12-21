@@ -105,7 +105,7 @@ schema.Ophys.Device = {
         if (!result.isConfirmed) return null
 
         if (result.isConfirmed) {
-            
+
         }
 
         // Update Dependent Tables

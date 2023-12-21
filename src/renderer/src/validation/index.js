@@ -32,11 +32,9 @@ export async function validateOnChange(name, parent, path, value) {
         // let overridden = false;
         let lastWildcard;
         fullPathNoRows.reduce((acc, key) => {
-
             if (acc && "*" in acc) {
-                if (!acc["*"]&& lastWildcard)
+                if (!acc["*"] && lastWildcard)
                     overridden = true; // Disable if false and a wildcard has already been specified
-                
                 // Otherwise set the last wildcard
                 else {
                     lastWildcard = typeof acc["*"] === "string" ? acc["*"].replace(`{*}`, `${name}`) : acc["*"];
@@ -49,7 +47,6 @@ export async function validateOnChange(name, parent, path, value) {
         if (overridden && functions !== true) lastWildcard = false; // Disable if not promised to exist
         if (lastWildcard) functions = [lastWildcard];
     }
-
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
     if (!Array.isArray(functions)) functions = [functions];
@@ -73,7 +70,6 @@ export async function validateOnChange(name, parent, path, value) {
     });
 
     const res = resolveAll(results, (arr) => {
-
         const flat = arr.flat();
         if (flat.find((res) => res?.message)) {
             return flat
@@ -87,7 +83,7 @@ export async function validateOnChange(name, parent, path, value) {
                 }); // Some of the requests end in errors
         }
 
-        if (flat.some((res) => res === null)) return null
+        if (flat.some((res) => res === null)) return null;
 
         // Allow for providing one function to execute after data update
         const hasFunc = results.find((f) => typeof f === "function");
@@ -96,7 +92,7 @@ export async function validateOnChange(name, parent, path, value) {
         return true;
     });
 
-    return res
+    return res;
 }
 
 export function checkStatus(warnings, errors, items = []) {

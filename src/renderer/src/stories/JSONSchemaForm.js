@@ -780,23 +780,13 @@ export class JSONSchemaForm extends LitElement {
     #isARequiredPropertyString = `is a required property`;
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    triggerValidation = async (
-        name,
-        path = [],
-        checkLinks = true,
-        input,
-        schema,
-        parent,
-        hooks = {}
-    ) => {
-
-        
+    triggerValidation = async (name, path = [], checkLinks = true, input, schema, parent, hooks = {}) => {
         const { onError, onWarning } = hooks;
 
-        const og = path
-        const localPath = [...path, name].filter(str => typeof str === 'string'); // Ignore row information
+        const og = path;
+        const localPath = [...path, name].filter((str) => typeof str === "string"); // Ignore row information
         const externalPath = [...this.base, ...localPath];
-        const pathToValidate = [...this.base, ...path]
+        const pathToValidate = [...this.base, ...path];
 
         if (!input) input = this.getInput(localPath);
         if (!parent) parent = this.#get(path, this.resolved);
@@ -828,7 +818,7 @@ export class JSONSchemaForm extends LitElement {
 
         // const jsonSchemaErrors =[]
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
-        if (valid === null) return null // Skip validation / data change if the value is null
+        if (valid === null) return null; // Skip validation / data change if the value is null
 
         const isRequired = this.#isRequired(localPath) || (!input.table && input.required); // Do not trust required status of table validations
 
