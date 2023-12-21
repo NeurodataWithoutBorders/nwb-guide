@@ -170,8 +170,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveResults(subject, session, globalState);
 
-        console.log("results", results)
-
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
@@ -214,7 +212,9 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             createTable: function (name, metadata, path) {
-                const parentSchema = this.getSchema(path);
+
+                // Do not create tables for patternProperties
+                const parentSchema = this.getSchema(path) ?? {};
                 if (parentSchema.patternProperties) return false;
 
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors

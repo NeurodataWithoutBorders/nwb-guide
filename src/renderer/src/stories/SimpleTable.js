@@ -720,7 +720,7 @@ export class SimpleTable extends LitElement {
             ) => {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
-                const res = (await this.validateOnChange) ? this.validateOnChange([
+                const res = this.validateOnChange ? await this.validateOnChange([
                      info.i, 
                      fullInfo.col, 
                      ...path 
@@ -812,7 +812,7 @@ export class SimpleTable extends LitElement {
                 properties: entries,
             },
             this.keyColumn,
-            this.schema.order
+            this.schema.order ?? [ 'name' ] // Specify the order of the columns
         );
 
         // Try to guess the key column if unspecified

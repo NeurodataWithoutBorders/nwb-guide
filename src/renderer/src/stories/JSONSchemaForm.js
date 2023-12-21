@@ -559,7 +559,7 @@ export class JSONSchemaForm extends LitElement {
         return resolved;
     }
 
-    #renderInteractiveElement = (name, info, required, path = [], value, pattern = false) => {
+    #renderInteractiveElement = (name, info, required, path = [], value, propertyType) => {
         let isRequired = this.#isRequired([...path, name]);
 
         const localPath = [...path, name];
@@ -591,7 +591,7 @@ export class JSONSchemaForm extends LitElement {
             controls: this.controls[name],
             required: isRequired,
             validateEmptyValue: this.validateEmptyValues,
-            pattern: pattern ? name : undefined,
+            pattern: propertyType === 'pattern' ? name : propertyType ?? undefined,
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
@@ -789,20 +789,22 @@ export class JSONSchemaForm extends LitElement {
         hooks = {}
     ) => {
 
-
         const { onError, onWarning } = hooks;
 
-        const og = path
         const localPath = [...path, name].filter(str => typeof str === 'string'); // Ignore row information
         const externalPath = [...this.base, ...localPath];
         const pathToValidate = [...this.base, ...path]
+
+        const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== 'number') !== -1;
+        if (undefinedPathToken) return true // Will be unable to get schema anyways (additionalProperties)
+
 
         if (!input) input = this.getInput(localPath);
         if (!parent) parent = this.#get(path, this.resolved);
         if (!schema) schema = this.getSchema(localPath);
 
         const value = parent[name];
-        // const value = this.#get(path, this.resolved)
+
         const skipValidation = !this.validateEmptyValues && value === undefined;
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
@@ -824,10 +826,7 @@ export class JSONSchemaForm extends LitElement {
 
                         // Allow referring to floats as null (i.e. JSON NaN representation)
                         if (e.message === "is not of a type(s) number") {
-                            if (resolvedValue === null) {
-                                console.error('Throwing out...', externalPath.join('.'))
-                                return;
-                            }
+                            if (resolvedValue === null) return;
                         }
 
 
@@ -1169,7 +1168,6 @@ export class JSONSchemaForm extends LitElement {
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusChange: (status) => {
-                        console.warn("Nested status changed", status);
                         accordion.setStatus(status);
                         this.checkStatus();
                     }, // Forward status changes to the parent form
@@ -1284,17 +1282,20 @@ export class JSONSchemaForm extends LitElement {
                     required,
                     path,
                     results,
-                    true
+                    'pattern'
                 );
             });
 
             rendered = [...rendered, ...patternProps];
         }
 
-        // if (hasAdditionalProperties) {
-        //     const additionalList = this.#renderInteractiveElement('Additional Properties', schema, required, path, results)
-        //     rendered = [...rendered, additionalList];
-        // }
+        if (hasAdditionalProperties) {          
+            const additionalElement = this.#renderInteractiveElement('', {
+                title: `Additional Properties`,
+                ...schema
+            }, required, path, results, 'additional')
+            rendered = [...rendered, additionalElement];
+        }
 
         return rendered;
     };

@@ -238,15 +238,30 @@ export class JSONSchemaInput extends LitElement {
             : [];
 
         if (isEditableObject) {
-            let regex;
-            try {
-                regex = new RegExp(name);
-            } catch (e) {}
+
+
 
             items = Object.entries(this.value);
 
-            if (regex) items = items.filter(([key]) => regex.test(key));
-            else items.filter(([key]) => key in schema.properties);
+            const isAdditionalProperties = this.#isAdditionalProperties()
+
+            if (this.#isPatternProperties()) {
+                const regex = new RegExp(name)
+                items = items.filter(([key]) => regex.test(key));
+            }
+
+            else if (isAdditionalProperties) {
+                const props = Object.keys(schema.properties ?? {})
+                items = items.filter(([key]) => !props.includes(key));
+
+                const patternProps = Object.keys(schema.patternProperties ?? {})
+                patternProps.forEach((key) => {
+                    const regex = new RegExp(key)
+                    items = items.filter(([k]) => !regex.test(k))
+                })
+            } 
+
+            else items.filter(([key]) => key in schema.properties)
 
             items = items.map(([key, value]) => {
                 return {
@@ -259,7 +274,7 @@ export class JSONSchemaInput extends LitElement {
                             onClick: () => {
                                 this.#createModal({
                                     key,
-                                    schema,
+                                    schema: isAdditionalProperties ? undefined : schema,
                                     results: value,
                                     list: list ?? this.#list,
                                 });
@@ -276,10 +291,23 @@ export class JSONSchemaInput extends LitElement {
     #schemaElement;
     #modal;
 
-    async #createModal({ key, schema, results, list } = {}) {
+    #isPatternProperties(){
+        return this.pattern && !this.#isAdditionalProperties()
+    }
+
+    #isAdditionalProperties(){
+        return this.pattern === 'additional'
+    }
+
+    async #createModal({ key, schema = {}, results, list } = {}) {
         const createNewObject = !results;
 
-        const isPatternProperties = this.pattern;
+        // const schemaProperties = Object.keys(schema.properties ?? {});
+        // const additionalProperties = Object.keys(results).filter((key) => !schemaProperties.includes(key));
+        // // const additionalElement = html`<label class="guided--form-label">Additional Properties</label><small>Cannot edit additional properties (${additionalProperties}) at this time</small>`
+
+        const isPatternProperties = this.#isPatternProperties()
+        const isAdditionalProperties = this.#isAdditionalProperties()
         const creatNewPatternProperty = isPatternProperties && createNewObject;
 
         const schemaCopy = structuredClone(schema);
@@ -354,7 +382,7 @@ export class JSONSchemaInput extends LitElement {
               })
             : new JSONSchemaInput({
                   schema: schemaCopy,
-                  validateOnChange: false,
+                  validateOnChange: isAdditionalProperties,
                   path: this.path,
                   form: this.form,
                   value: updateTarget,
@@ -373,8 +401,14 @@ export class JSONSchemaInput extends LitElement {
         setTimeout(() => this.#modal.toggle(true));
     }
 
+
+    #getType = (value = this.value) => Array.isArray(value) ? 'array' : typeof value
+
     #render() {
         const { validateOnChange, schema, path: fullPath } = this;
+
+        // Do your best to fill in missing schema values
+        if (!('type' in schema)) schema.type = this.#getType()
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
@@ -402,13 +436,14 @@ export class JSONSchemaInput extends LitElement {
         if (isArray || isEditableObject) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-            const isPatternProperties = this.pattern;
+            const isPatternProperties = this.#isPatternProperties()
+            const isAdditionalProperties = this.#isAdditionalProperties()
 
             // Provide default item types
-            if (!isPatternProperties) {
+            if (isArray) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
-                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = "string";
+                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value[0]);
             }
 
             const itemSchema = this.form ? this.form.getSchema("items", schema) : schema["items"];
@@ -417,6 +452,7 @@ export class JSONSchemaInput extends LitElement {
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema?.type === "object" && this.form.createTable) {
+
                 const ignore = this.form?.ignore
                     ? getIgnore(this.form?.ignore, [...this.form.base, ...path, name])
                     : {};
@@ -449,7 +485,7 @@ export class JSONSchemaInput extends LitElement {
                             return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
                         }, baseSchema);
 
-                        const result = await (validateOnChange &&
+                        const result = await (validateOnChange ?
                             (this.onValidate
                                 ? this.onValidate()
                                 : this.form
@@ -469,7 +505,9 @@ export class JSONSchemaInput extends LitElement {
                                             },
                                         }
                                     ) // NOTE: No pattern properties support
-                                  : ""));
+                                  : "") 
+                                  : true
+                    );
 
                         const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
 
@@ -505,10 +543,12 @@ export class JSONSchemaInput extends LitElement {
 
             const list = (this.#list = new List({
                 items: this.#mapToList(),
+
+                // Add edit button when new items are added
+                // NOTE: Duplicates some code in #mapToList
                 transform: (item) => {
                     if (this.#isEditableObject()) {
                         const { key, value } = item;
-
                         item.controls = [
                             new Button({
                                 label: "Edit",
@@ -540,6 +580,11 @@ export class JSONSchemaInput extends LitElement {
                     if (validateOnChange) await this.#triggerValidation(name, path);
                 },
             }));
+
+            if (isAdditionalProperties) {
+                addButton.setAttribute("disabled", true);
+                addButton.title = "Additional properties cannot be added at this time—as they don't have a predictable structure.";
+            }
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
