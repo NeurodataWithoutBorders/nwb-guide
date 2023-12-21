@@ -281,7 +281,6 @@ export class SimpleTable extends LitElement {
     }
 
     set data(val) {
-        console.warn("Setting data");
         this.#data = val;
     }
 
@@ -500,8 +499,10 @@ export class SimpleTable extends LitElement {
         this.removeAttribute("waiting");
 
         const scrollRoot = this.shadowRoot.querySelector("table");
+
         // Add cells to body after the initial table render
         const body = this.shadowRoot.querySelector("tbody");
+        body.innerHTML = ""; // Clear existing render
 
         if (!this.#loaded) {
             const tStart = performance.now();
@@ -540,6 +541,7 @@ export class SimpleTable extends LitElement {
     };
 
     updated() {
+
         this.setAttribute("loading", "");
 
         const data = this.#getData(); // Always render at least one row
@@ -712,9 +714,11 @@ export class SimpleTable extends LitElement {
             ) => {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
-                path = [fullInfo.col, ...path];
-
-                const res = (await this.validateOnChange) ? this.validateOnChange(path, parent, value, schema) : true;
+                const res = (await this.validateOnChange) ? this.validateOnChange([
+                     info.i, 
+                     fullInfo.col, 
+                     ...path 
+                ], parent, value, schema) : true;
 
                 return res;
             },
@@ -772,6 +776,7 @@ export class SimpleTable extends LitElement {
     #schema = {};
 
     render() {
+
         this.#updateRendered();
         this.#resetLoadState();
 

@@ -444,6 +444,7 @@ export class JSONSchemaInput extends LitElement {
                         const completePath = [...fullPath, ...path.slice(0, -1)];
 
                         const itemPropSchema = path.reduce((acc, key) => {
+                            if (typeof key === 'number') return acc // Skip row information
                             return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
                         }, baseSchema);
 

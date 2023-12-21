@@ -9,16 +9,18 @@ export function getMessageType(item) {
     return item.type ?? (isErrorImportance.includes(item.importance) ? "error" : "warning");
 }
 
-export function validateOnChange(name, parent, path, value) {
+export async function validateOnChange(name, parent, path, value) {
     let functions = [];
 
     const fullPath = [...path, name];
+
+    const fullPathNoRows = fullPath.filter((key) => typeof key !== "number");
 
     const copy = { ...parent }; // Validate on a copy of the parent
     if (arguments.length > 3) copy[name] = value; // Update value on copy
 
     let lastResolved;
-    functions = fullPath.reduce((acc, key, i) => {
+    functions = fullPathNoRows.reduce((acc, key, i) => {
         if (acc && key in acc) return (lastResolved = acc[key]);
         else return;
     }, validationSchema); // Pass the top level until it runs out
@@ -29,10 +31,13 @@ export function validateOnChange(name, parent, path, value) {
     if (lastResolved !== false && (functions === undefined || functions === true)) {
         // let overridden = false;
         let lastWildcard;
-        fullPath.reduce((acc, key) => {
+        fullPathNoRows.reduce((acc, key) => {
+
             if (acc && "*" in acc) {
-                if (!acc["*"] && lastWildcard)
+                if (!acc["*"]&& lastWildcard)
                     overridden = true; // Disable if false and a wildcard has already been specified
+                
+                // Otherwise set the last wildcard
                 else {
                     lastWildcard = typeof acc["*"] === "string" ? acc["*"].replace(`{*}`, `${name}`) : acc["*"];
                     overridden = false; // Re-enable if a new one is specified below
@@ -44,6 +49,7 @@ export function validateOnChange(name, parent, path, value) {
         if (overridden && functions !== true) lastWildcard = false; // Disable if not promised to exist
         if (lastWildcard) functions = [lastWildcard];
     }
+
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
     if (!Array.isArray(functions)) functions = [functions];
@@ -66,7 +72,8 @@ export function validateOnChange(name, parent, path, value) {
         }
     });
 
-    return resolveAll(results, (arr) => {
+    const res = resolveAll(results, (arr) => {
+
         const flat = arr.flat();
         if (flat.find((res) => res?.message)) {
             return flat
@@ -80,12 +87,16 @@ export function validateOnChange(name, parent, path, value) {
                 }); // Some of the requests end in errors
         }
 
+        if (flat.some((res) => res === null)) return null
+
         // Allow for providing one function to execute after data update
         const hasFunc = results.find((f) => typeof f === "function");
         if (hasFunc) return hasFunc;
 
         return true;
     });
+
+    return res
 }
 
 export function checkStatus(warnings, errors, items = []) {

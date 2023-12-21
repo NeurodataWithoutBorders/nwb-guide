@@ -784,16 +784,23 @@ export class JSONSchemaForm extends LitElement {
         name,
         path = [],
         checkLinks = true,
-        input = this.getInput([...path, name]),
-        schema = this.getSchema([...path, name]),
-        parent = this.#get(path, this.resolved),
+        input,
+        schema,
+        parent,
         hooks = {}
     ) => {
+
+        
         const { onError, onWarning } = hooks;
 
-        const pathToValidate = [...(this.base ?? []), ...path];
-        const localPath = [...path, name]; // Use basePath to augment the validation
+        const og = path
+        const localPath = [...path, name].filter(str => typeof str === 'string'); // Ignore row information
         const externalPath = [...this.base, ...localPath];
+        const pathToValidate = [...this.base, ...path]
+
+        if (!input) input = this.getInput(localPath);
+        if (!parent) parent = this.#get(path, this.resolved);
+        if (!schema) schema = this.getSchema(localPath);
 
         const value = parent[name];
         // const value = this.#get(path, this.resolved)
@@ -821,6 +828,7 @@ export class JSONSchemaForm extends LitElement {
 
         // const jsonSchemaErrors =[]
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
+        if (valid === null) return null // Skip validation / data change if the value is null
 
         const isRequired = this.#isRequired(localPath) || (!input.table && input.required); // Do not trust required status of table validations
 

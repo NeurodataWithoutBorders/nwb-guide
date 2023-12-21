@@ -102,14 +102,15 @@ export class TableCell extends LitElement {
     toggle = (v: boolean) => this.input.toggle(v)
 
     get value() {
-
         let v = this.input ? this.input.getValue() : this.#value
         return getValue(v, this.schema)
     }
 
     set value(v) {
         if (this.input) this.input.set(v ?? '')
-        this.#value = this.input ? this.input.getValue() : v // Ensure value is coerced
+        this.#value = this.input 
+                            ? this.input.getValue() // Ensure all operations are undoable / value is coerced 
+                            : v // Silently set value if not rendered yet
      }
 
     validateOnChange?: ValidationFunction
@@ -119,6 +120,8 @@ export class TableCell extends LitElement {
 
     validate = async (v = this.value) => {
 
+        const prevValue = this.#value
+
         const validator = this.validateOnChange ?? this.#validator
         let result = await validator(v)
         if (result === true) result = this.#validator(v)
@@ -127,6 +130,11 @@ export class TableCell extends LitElement {
             title: undefined,
             warning: undefined,
             error: undefined
+        }
+
+        if (result === null) {
+            this.value = prevValue // NOTE: Calls popup twice
+            return;
         }
 
         const warnings = Array.isArray(result) ? result.filter((info) => info.type === "warning") : [];
@@ -153,8 +161,9 @@ export class TableCell extends LitElement {
 
     setInput(value: any) {
         this.interacted = persistentInteraction
-        if (this.input) this.input.set(value)  // Ensure all operations are undoable
-        else this.#value = value // Silently set value if not rendered yet
+        this.value = value
+        // if (this.input) this.input.set(value)  // Ensure all operations are undoable
+        // else this.#value = value // Silently set value if not rendered yet
     }
 
     #value
@@ -198,9 +207,10 @@ export class TableCell extends LitElement {
         // Only actually rerender if new class type
         if (cls !== this.#cls) {
             this.input = new cls({
-                onChange: () => {
+                onChange: async (v) => {
                     if (this.input.interacted) this.interacted = true
-                    this.validate()
+                    const result = await this.validate()
+                    if (result) this.#value = v
                 },
                 toggle: (v) => this.toggle(v),
                 info: this.info,
