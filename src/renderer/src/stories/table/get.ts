@@ -8,7 +8,7 @@ export const getValue = (value: any, schema: any) => {
         const og = value
         if (og === '') return undefined
         else {
-            if (og === 'NaN' || og === 'None' || og === 'null' || og === 'undefined') return NaN
+            if (og === 'NaN' || og === 'None' || og === 'null') return null
             const possibleValue = Number(og)
             if (!isNaN(possibleValue)) return possibleValue
         }

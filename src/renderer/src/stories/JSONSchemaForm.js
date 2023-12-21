@@ -218,8 +218,8 @@ export class JSONSchemaForm extends LitElement {
     #updateRendered = (force) =>
         force || this.#rendered === true
             ? (this.#rendered = new Promise(
-                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
-              ))
+                (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+            ))
             : this.#rendered;
 
     resolved = {}; // Keep track of actual resolved values—not just what the user provides as results
@@ -412,8 +412,8 @@ export class JSONSchemaForm extends LitElement {
         let message = isValid
             ? ""
             : requiredButNotSpecified.length === 1
-              ? `<b>${header(requiredButNotSpecified[0])}</b> is not defined`
-              : `${requiredButNotSpecified.length} required inputs are not specified properly`;
+                ? `<b>${header(requiredButNotSpecified[0])}</b> is not defined`
+                : `${requiredButNotSpecified.length} required inputs are not specified properly`;
         if (requiredButNotSpecified.length !== nMissingRequired)
             console.warn("Disagreement about the correct error to throw...");
 
@@ -429,9 +429,8 @@ export class JSONSchemaForm extends LitElement {
                     message = `<b>${header(schema.title ?? path.join("."))}</b> is not valid`;
                 } else message = `${flaggedInputs.length} invalid form values`;
             }
-            message += `${
-                this.base.length ? ` in the <b>${this.base.join(".")}</b> section` : ""
-            }. Please check the highlighted fields.`;
+            message += `${this.base.length ? ` in the <b>${this.base.join(".")}</b> section` : ""
+                }. Please check the highlighted fields.`;
         }
 
         if (message) this.throw(message);
@@ -610,8 +609,8 @@ export class JSONSchemaForm extends LitElement {
             <div
                 id=${encode(localPath.join("-"))}
                 class="form-section ${isRequired || isConditional ? "required" : ""} ${isConditional
-                    ? "conditional"
-                    : ""}"
+                ? "conditional"
+                : ""}"
             >
                 <label class="guided--form-label"
                     >${(info.title ? unsafeHTML(info.title) : null) ?? header(name)}</label
@@ -667,10 +666,10 @@ export class JSONSchemaForm extends LitElement {
     };
 
     // Checks missing required properties and throws an error if any are found
-    onInvalid = () => {};
-    onLoaded = () => {};
-    onUpdate = () => {};
-    onOverride = () => {};
+    onInvalid = () => { };
+    onLoaded = () => { };
+    onUpdate = () => { };
+    onOverride = () => { };
 
     // #deleteExtraneousResults = (results, schema) => {
     //     for (let name in results) {
@@ -723,10 +722,10 @@ export class JSONSchemaForm extends LitElement {
         return flattenRecursedValues(res); // Flatten on the last pass
     };
 
-    validateOnChange = () => {};
-    onStatusChange = () => {};
-    onThrow = () => {};
-    createTable = () => {};
+    validateOnChange = () => { };
+    onStatusChange = () => { };
+    onThrow = () => { };
+    createTable = () => { };
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -790,7 +789,7 @@ export class JSONSchemaForm extends LitElement {
         hooks = {}
     ) => {
 
-        
+
         const { onError, onWarning } = hooks;
 
         const og = path
@@ -810,23 +809,40 @@ export class JSONSchemaForm extends LitElement {
         const jsonSchemaErrors =
             validateArgs.length === 2
                 ? await v
-                      .validate(...validateArgs)
-                      .errors.map((e) => {
-                          const propName = e.path.slice(-1)[0] ?? name;
-                          const rowName = e.path.slice(-2)[0];
-                          return {
-                              type: "error",
-                              message: `${
-                                  typeof propName === "string"
-                                      ? `${header(propName)}${typeof rowName === "number" ? ` on Row ${rowName}` : ""}`
-                                      : `Row ${propName}`
-                              } ${e.message}.`,
-                          };
-                      })
-                      .filter((v) => !!v)
+                    .validate(...validateArgs)
+                    .errors.map((e) => {
+                        const propName = e.path.slice(-1)[0] ?? name;
+                        const rowName = e.path.slice(-2)[0];
+
+                        const isRow = typeof rowName === "number"
+
+                        const resolvedValue = e.path.reduce((acc, token) => acc[token], value)
+
+                        // ------------ Exclude Certain Errors ------------
+                        // Non-Strict Rule
+                        if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+
+                        // Allow referring to floats as null (i.e. JSON NaN representation)
+                        if (e.message === "is not of a type(s) number") {
+                            if (resolvedValue === null) {
+                                console.error('Throwing out...', externalPath.join('.'))
+                                return;
+                            }
+                        }
+
+
+
+                        return {
+                            type: "error",
+                            message: `${typeof propName === "string"
+                                    ? `${header(propName)}${isRow ? ` on Row ${rowName}` : ""}`
+                                    : `Row ${propName}`
+                                } ${e.message}.`,
+                        };
+                    })
+                    .filter((v) => !!v)
                 : [];
 
-        // const jsonSchemaErrors =[]
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
         if (valid === null) return null // Skip validation / data change if the value is null
 
@@ -889,9 +905,8 @@ export class JSONSchemaForm extends LitElement {
                 const regex = new RegExp(schema.pattern);
                 if (!regex.test(parent[name])) {
                     errors.push({
-                        message: `${schema.title ?? header(name)} does not match the required pattern (${
-                            schema.pattern
-                        }).`,
+                        message: `${schema.title ?? header(name)} does not match the required pattern (${schema.pattern
+                            }).`,
                         type: "error",
                     });
                 }
@@ -914,12 +929,6 @@ export class JSONSchemaForm extends LitElement {
 
         const resolvedErrors = errors
             .map((e) => {
-                // Non-Strict Rule
-                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
-
-                if (e.message.includes("is not of a type(s) number")) {
-                    if (Number.isNaN(value)) return;
-                }
 
                 // Custom Error Transformations
                 if (this.transformErrors) {
@@ -932,7 +941,6 @@ export class JSONSchemaForm extends LitElement {
             .filter((v) => !!v);
 
         // Track errors and warnings
-
         const updatedWarnings = warnings.map((info) => (onWarning ? onWarning(info) : info)).filter((v) => !!v);
         const updatedErrors = resolvedErrors.map((info) => (onError ? onError(info) : info)).filter((v) => !!v);
 

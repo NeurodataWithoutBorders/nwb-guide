@@ -351,6 +351,10 @@ export class SimpleTable extends LitElement {
         };
     }
 
+    #isUndefined(val) {
+        return val === undefined || val === "";
+    }
+
     #getRowData(row, cols = this.colHeaders) {
         const hasRow = row in this.#data;
         return cols.map((col, j) => {
@@ -358,12 +362,14 @@ export class SimpleTable extends LitElement {
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
                 else return "";
-            } else
-                value =
-                    (hasRow ? this.#data[row][col] : undefined) ??
-                    this.globals[col] ??
-                    this.schema.properties[col].default ??
-                    "";
+            } else {
+
+                value = hasRow ? this.#data[row][col] : undefined
+                if (this.#isUndefined(value)) value = this.globals[col]
+                if (this.#isUndefined(value)) value = this.schema.properties[col].default
+                if (this.#isUndefined(value)) value = ""
+                
+            }
             return value;
         });
     }
@@ -681,7 +687,7 @@ export class SimpleTable extends LitElement {
         }
         // Update data on passed object
         else {
-            if (value == undefined || value === "") target[rowName][header] = undefined;
+            if (this.#isUndefined(value)) target[rowName][header] = undefined;
             else target[rowName][header] = value;
         }
 

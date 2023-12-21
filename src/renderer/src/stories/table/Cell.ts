@@ -79,6 +79,7 @@ export class TableCell extends LitElement {
     constructor({ info, value, schema, validateOnChange, onValidate }: TableCellProps) {
         super()
         this.#value = value
+
         this.schema = schema
         this.info = info
 
@@ -107,7 +108,7 @@ export class TableCell extends LitElement {
     }
 
     set value(v) {
-        if (this.input) this.input.set(v ?? '')
+        if (this.input) this.input.set(v === null  ? v : ( v ?? '' )) // Allow null to be set directly
         this.#value = this.input 
                             ? this.input.getValue() // Ensure all operations are undoable / value is coerced 
                             : v // Silently set value if not rendered yet

@@ -422,6 +422,7 @@ export class JSONSchemaInput extends LitElement {
                     : {};
 
                 const ogThis = this;
+
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
