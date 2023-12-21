@@ -793,7 +793,7 @@ export class JSONSchemaForm extends LitElement {
 
         const localPath = [...path, name].filter(str => typeof str === 'string'); // Ignore row information
         const externalPath = [...this.base, ...localPath];
-        const pathToValidate = [...this.base, ...path]
+        const pathToValidate = [...this.base, ...path];
 
         const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== 'number') !== -1;
         if (undefinedPathToken) return true // Will be unable to get schema anyways (additionalProperties)
@@ -843,7 +843,7 @@ export class JSONSchemaForm extends LitElement {
                 : [];
 
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
-        if (valid === null) return null // Skip validation / data change if the value is null
+        if (valid === null) return null; // Skip validation / data change if the value is null
 
         const isRequired = this.#isRequired(localPath) || (!input.table && input.required); // Do not trust required status of table validations
 

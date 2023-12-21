@@ -547,7 +547,6 @@ export class SimpleTable extends LitElement {
     };
 
     updated() {
-
         this.setAttribute("loading", "");
 
         const data = this.#getData(); // Always render at least one row
@@ -782,7 +781,6 @@ export class SimpleTable extends LitElement {
     #schema = {};
 
     render() {
-
         this.#updateRendered();
         this.#resetLoadState();
 
