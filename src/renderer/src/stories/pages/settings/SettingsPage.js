@@ -28,6 +28,9 @@ import { notyf } from "../../../dependencies/globals.js";
 import { SERVER_FILE_PATH, port } from "../../../electron/index.js";
 
 import saveSVG from "../../assets/save.svg?raw";
+import { baseUrl, subscribeToEvents } from "../../../server/globals";
+import { Modal } from "../../Modal";
+import { ProgressBar } from "../../ProgressBar";
 
 export class SettingsPage extends Page {
     header = {
@@ -85,6 +88,36 @@ export class SettingsPage extends Page {
         return html`
             <p><b>Server Port:</b> ${port}</p>
             <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
+            ${new Button({
+                label: "Test TQDM Progress Bars",
+                size: "small",
+                onClick: async () => {
+
+                    const modal = new Modal()
+                    const progressBar = new ProgressBar({
+                        emptyMessage: "Waiting to start...",
+                    });
+                    progressBar.style.padding = "25px"
+
+                    modal.append(progressBar);
+                    document.body.append(modal);
+
+                    let progressTotal;
+                    const unsubscribe = subscribeToEvents(({ n, total, rate }) => {
+                        progressBar.value = { b: n, tsize: total }
+                        progressTotal = total;
+                    }, 'progress')
+
+                    modal.open = true;
+                    await fetch(new URL('neuroconv/tqdm-test', baseUrl))
+                    unsubscribe();
+
+                    modal.open = false
+                }
+            })
+            }
+            <br>
+            <br>
             ${this.form}
         `;
     }

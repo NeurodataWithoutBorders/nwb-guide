@@ -19,7 +19,7 @@ from manageNeuroconv import (
     inspect_multiple_filesystem_objects,
     upload_project_to_dandi,
     upload_folder_to_dandi,
-    upload_multiple_filesystem_objects_to_dandi,
+    upload_multiple_filesystem_objects_to_dandi
 )
 
 from errorHandlers import notBadRequestException
@@ -259,12 +259,64 @@ class GenerateDataset(Resource):
                 neuroconv_api.abort(500, str(e))
 
 
-# Create an events endpoint
-# announcer.announce('test', 'publish')
+# Create an events endpoint                
+                
+import time
+import asyncio
+from typing import List
+from tqdm import tqdm as base_tqdm
+
+class SSEProgress(base_tqdm):
+    def update(self, n=1, always_callback=False):
+        if super(SSEProgress, self).update(n) or always_callback:
+            event_announcer.announce(self.format_dict, 'progress')
+
+
+# Helper Functions for the Demo
+async def sleep_func(sleep_duration: float = 1) -> float:
+    start_time = time.time()
+    await asyncio.sleep(delay=sleep_duration)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    return elapsed_time
+
+
+async def run_multiple_sleeps(sleep_durations: List[float]) -> List[float]:
+    tasks = []
+    for sleep_duration in sleep_durations:
+        task = asyncio.create_task(sleep_func(sleep_duration=sleep_duration))
+        tasks.append(task)
+
+    event_announcer.announce({
+        'total': len(tasks),
+        'n': 0,
+    }, 'progress')
+
+    actual_sleep_durations = [await f for f in SSEProgress(asyncio.as_completed(tasks), total=len(tasks))]
+
+    event_announcer.announce({
+        'total': len(tasks),
+        'n': len(tasks),
+    }, 'progress')
+
+    return actual_sleep_durations
+
+@neuroconv_api.route("/tqdm-test", methods=["GET"])
+class TQDMTest(Resource):
+    def get(self):
+        import random
+
+        n = 10**5
+        sleep_durations = [random.uniform(0, 5.0) for _ in range(n)]
+        asyncio.run(run_multiple_sleeps(sleep_durations=sleep_durations))
+        return Response()
+
 @neuroconv_api.route("/events", methods=["GET"])
 class Events(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
+
         try:
             return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
 

@@ -10,6 +10,7 @@ from .manage_neuroconv import (
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
     listen_to_neuroconv_events,
+    event_announcer,
     generate_dataset,
     inspect_nwb_file,
     inspect_nwb_folder,

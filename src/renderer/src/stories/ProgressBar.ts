@@ -3,6 +3,7 @@
 import { LitElement, html, css } from 'lit';
 
 export type ProgressProps = {
+    emptyMessage?: string,
     value?: {
         b: number,
         bsize?: number,
@@ -52,19 +53,18 @@ export class ProgressBar extends LitElement {
     }
 
     declare value: any
+    declare emptyMessage: string
 
     constructor(props: ProgressProps = {}) {
         super();
 
+        this.emptyMessage = props.emptyMessage ?? ''
         this.value = props.value ?? {}
-        if (!('b' in this.value)) this.value.b = 0
-        if (!('tsize' in this.value)) this.value.tsize = 0
-
     }
 
     render() {
         const value = this.value.b / this.value.tsize * 100
-        return html`<div><div style="width: ${value}%"></div></div><small>${this.value.b}/${this.value.tsize} ${isNaN(value) ? '' : `(${value.toFixed(0)}%)`}</small>`
+        return html`<div><div style="width: ${value}%"></div></div><small>${isNaN(value) ? this.emptyMessage : `${this.value.b}/${this.value.tsize} (${value.toFixed(0)}%)`}</small>`
     }
 }
 

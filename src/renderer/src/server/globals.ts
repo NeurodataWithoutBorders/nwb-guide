@@ -77,3 +77,18 @@ export const serverGlobals = {
       });
     })
   }
+
+export const events = new EventSource(new URL("neuroconv/events", baseUrl));
+
+export const subscribeToEvents = (callback: Function, type = 'message') => {
+  
+    const progressFn = (event) => {
+        const info = JSON.parse(event.data)
+        callback(info)
+    }
+
+    events.addEventListener(type, progressFn);
+
+    // Return the unsubscribe function
+    return () => events.removeEventListener(type, progressFn);
+}

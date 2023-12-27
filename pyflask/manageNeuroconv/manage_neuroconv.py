@@ -13,7 +13,7 @@ from pathlib import Path
 from sse import MessageAnnouncer
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
 
-announcer = MessageAnnouncer()
+event_announcer = MessageAnnouncer()
 
 
 def replace_nan_with_none(data):
@@ -398,7 +398,7 @@ def convert_to_nwb(info: dict) -> str:
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
     def update_conversion_progress(**kwargs):
-        announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
+        event_announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
 
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
@@ -527,7 +527,7 @@ def upload_project_to_dandi(
 
 # Create an events endpoint
 def listen_to_neuroconv_events():
-    messages = announcer.listen()  # returns a queue.Queue
+    messages = event_announcer.listen()  # returns a queue.Queue
     while True:
         msg = messages.get()  # blocks until a new message arrives
         yield msg
