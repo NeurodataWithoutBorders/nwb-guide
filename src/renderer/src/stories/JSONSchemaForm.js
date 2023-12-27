@@ -560,7 +560,7 @@ export class JSONSchemaForm extends LitElement {
         return resolved;
     }
 
-    #renderInteractiveElement = (name, info, required, path = [], value, pattern = false) => {
+    #renderInteractiveElement = (name, info, required, path = [], value, propertyType) => {
         let isRequired = this.#isRequired([...path, name]);
 
         const localPath = [...path, name];
@@ -592,7 +592,7 @@ export class JSONSchemaForm extends LitElement {
             controls: this.controls[name],
             required: isRequired,
             validateEmptyValue: this.validateEmptyValues,
-            pattern: pattern ? name : undefined,
+            pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
         });
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
@@ -791,12 +791,19 @@ export class JSONSchemaForm extends LitElement {
     ) => {
         const { onError, onWarning } = hooks;
 
-        const pathToValidate = [...(this.base ?? []), ...path];
-        const localPath = [...path, name]; // Use basePath to augment the validation
+        const localPath = [...path, name].filter((str) => typeof str === "string"); // Ignore row information
         const externalPath = [...this.base, ...localPath];
+        const pathToValidate = [...this.base, ...path];
+
+        const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== "number") !== -1;
+        if (undefinedPathToken) return true; // Will be unable to get schema anyways (additionalProperties)
+
+        if (!input) input = this.getInput(localPath);
+        if (!parent) parent = this.#get(path, this.resolved);
+        if (!schema) schema = this.getSchema(localPath);
 
         const value = parent[name];
-        // const value = this.#get(path, this.resolved)
+
         const skipValidation = !this.validateEmptyValues && value === undefined;
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
@@ -807,11 +814,25 @@ export class JSONSchemaForm extends LitElement {
                       .errors.map((e) => {
                           const propName = e.path.slice(-1)[0] ?? name;
                           const rowName = e.path.slice(-2)[0];
+
+                          const isRow = typeof rowName === "number";
+
+                          const resolvedValue = e.path.reduce((acc, token) => acc[token], value);
+
+                          // ------------ Exclude Certain Errors ------------
+                          // Non-Strict Rule
+                          if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+
+                          // Allow referring to floats as null (i.e. JSON NaN representation)
+                          if (e.message === "is not of a type(s) number") {
+                              if (resolvedValue === null) return;
+                          }
+
                           return {
                               type: "error",
                               message: `${
                                   typeof propName === "string"
-                                      ? `${header(propName)}${typeof rowName === "number" ? ` on Row ${rowName}` : ""}`
+                                      ? `${header(propName)}${isRow ? ` on Row ${rowName}` : ""}`
                                       : `Row ${propName}`
                               } ${e.message}.`,
                           };
@@ -819,8 +840,8 @@ export class JSONSchemaForm extends LitElement {
                       .filter((v) => !!v)
                 : [];
 
-        // const jsonSchemaErrors =[]
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
+        if (valid === null) return null; // Skip validation / data change if the value is null
 
         const isRequired = this.#isRequired(localPath) || (!input.table && input.required); // Do not trust required status of table validations
 
@@ -906,13 +927,6 @@ export class JSONSchemaForm extends LitElement {
 
         const resolvedErrors = errors
             .map((e) => {
-                // Non-Strict Rule
-                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
-
-                if (e.message.includes("is not of a type(s) number")) {
-                    if (Number.isNaN(value)) return;
-                }
-
                 // Custom Error Transformations
                 if (this.transformErrors) {
                     const res = this.transformErrors(e, externalPath, parent[name]);
@@ -924,7 +938,6 @@ export class JSONSchemaForm extends LitElement {
             .filter((v) => !!v);
 
         // Track errors and warnings
-
         const updatedWarnings = warnings.map((info) => (onWarning ? onWarning(info) : info)).filter((v) => !!v);
         const updatedErrors = resolvedErrors.map((info) => (onError ? onError(info) : info)).filter((v) => !!v);
 
@@ -1153,7 +1166,6 @@ export class JSONSchemaForm extends LitElement {
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusChange: (status) => {
-                        console.warn("Nested status changed", status);
                         accordion.setStatus(status);
                         this.checkStatus();
                     }, // Forward status changes to the parent form
@@ -1268,17 +1280,27 @@ export class JSONSchemaForm extends LitElement {
                     required,
                     path,
                     results,
-                    true
+                    "pattern"
                 );
             });
 
             rendered = [...rendered, ...patternProps];
         }
 
-        // if (hasAdditionalProperties) {
-        //     const additionalList = this.#renderInteractiveElement('Additional Properties', schema, required, path, results)
-        //     rendered = [...rendered, additionalList];
-        // }
+        if (hasAdditionalProperties) {
+            const additionalElement = this.#renderInteractiveElement(
+                "",
+                {
+                    title: `Additional Properties`,
+                    ...schema,
+                },
+                required,
+                path,
+                results,
+                "additional"
+            );
+            rendered = [...rendered, additionalElement];
+        }
 
         return rendered;
     };

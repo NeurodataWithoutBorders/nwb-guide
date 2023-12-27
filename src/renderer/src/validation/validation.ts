@@ -1,7 +1,8 @@
 import schema from './validation.json'
 import { JSONSchemaForm } from '../stories/JSONSchemaForm.js'
+import Swal from 'sweetalert2'
 
-function rerender (this: JSONSchemaForm, linkedPath: string[]) {
+function rerenderTable (this: JSONSchemaForm, linkedPath: string[]) {
     const element = this.getTable(linkedPath)
     if (element) element.requestUpdate() // Re-render table to show updates
     // if (element) setTimeout(() => {
@@ -32,7 +33,7 @@ schema.Ecephys.ElectrodeGroup.name = function(this: JSONSchemaForm, _, __, ___, 
      // Check if the latest value will be new. Run function after validation
     if (!value || !groups.includes(value)) {
         return () => {
-             setTimeout(() => rerender.call(this, ['Ecephys', 'Electrodes'])) // Allow for the updates to occur
+             setTimeout(() => rerenderTable.call(this, ['Ecephys', 'Electrodes'])) // Allow for the updates to occur
         }
     }
 }
@@ -60,7 +61,7 @@ schema.Ecephys.ElectrodeColumns = {
         if (!name) return true // Allow blank rows
 
         if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
-            const element = rerender.call(this, ['Ecephys', 'Electrodes'])
+            const element = rerenderTable.call(this, ['Ecephys', 'Electrodes'])
             element.schema.properties[name] = {} // Ensure property is present in the schema now
             element.data.forEach(o => name in o ? undefined : o[name] = '') // Set column value as blank if not existent on row
         }
@@ -80,5 +81,61 @@ schema.Ecephys.Electrodes["*"] = function (this: JSONSchemaForm, name, parent, p
         }
     ]
 }
+
+// Ophys
+schema.Ophys.Device = {
+    ['name']: async function (this: JSONSchemaForm, name, parent, path, value) {
+
+        const prevValue = path.reduce((acc, str) => acc[str], this.results)[name]
+
+        if (prevValue === value) return true // No change
+
+        const result = await Swal.fire({
+            title: `Are you sure you want to rename the ${prevValue} device?`,
+            icon: "warning",
+            text: `Changing this may invalidate a lot of properties.`,
+            heightAuto: false,
+            backdrop: "rgba(0,0,0, 0.4)",
+            confirmButtonText: "I understand",
+            showConfirmButton: true,
+            showCancelButton: true,
+            cancelButtonText: "Cancel"
+        })
+
+        if (!result.isConfirmed) return null
+
+        if (result.isConfirmed) {
+
+        }
+
+        // Update Dependent Tables
+        const dependencies = [
+            ['Ophys', 'ImagingPlane']
+        ]
+
+        dependencies.forEach(path => {
+            rerenderTable.call(this, path)
+        })
+
+        return true
+    }
+}
+
+schema.Ophys.ImagingPlane = {
+    device: function (this: JSONSchemaForm, name, parent, path, value) {
+        const devices = this.results.Ophys.Device.map(o => o.name)
+        if (devices.includes(parent[name])) return true
+        else {
+            return [
+                {
+                    message: 'Not a valid device',
+                    type: 'error'
+                }
+            ]
+        }
+
+    }
+}
+
 
 export default schema

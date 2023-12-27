@@ -281,7 +281,6 @@ export class SimpleTable extends LitElement {
     }
 
     set data(val) {
-        console.warn("Setting data");
         this.#data = val;
     }
 
@@ -352,6 +351,10 @@ export class SimpleTable extends LitElement {
         };
     }
 
+    #isUndefined(val) {
+        return val === undefined || val === "";
+    }
+
     #getRowData(row, cols = this.colHeaders) {
         const hasRow = row in this.#data;
         return cols.map((col, j) => {
@@ -359,12 +362,12 @@ export class SimpleTable extends LitElement {
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
                 else return "";
-            } else
-                value =
-                    (hasRow ? this.#data[row][col] : undefined) ??
-                    this.globals[col] ??
-                    this.schema.properties[col].default ??
-                    "";
+            } else {
+                value = hasRow ? this.#data[row][col] : undefined;
+                if (this.#isUndefined(value)) value = this.globals[col];
+                if (this.#isUndefined(value)) value = this.schema.properties[col].default;
+                if (this.#isUndefined(value)) value = "";
+            }
             return value;
         });
     }
@@ -500,8 +503,10 @@ export class SimpleTable extends LitElement {
         this.removeAttribute("waiting");
 
         const scrollRoot = this.shadowRoot.querySelector("table");
+
         // Add cells to body after the initial table render
         const body = this.shadowRoot.querySelector("tbody");
+        body.innerHTML = ""; // Clear existing render
 
         if (!this.#loaded) {
             const tStart = performance.now();
@@ -679,7 +684,7 @@ export class SimpleTable extends LitElement {
         }
         // Update data on passed object
         else {
-            if (value == undefined || value === "") target[rowName][header] = undefined;
+            if (this.#isUndefined(value)) target[rowName][header] = undefined;
             else target[rowName][header] = value;
         }
 
@@ -712,9 +717,9 @@ export class SimpleTable extends LitElement {
             ) => {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
-                path = [fullInfo.col, ...path];
-
-                const res = (await this.validateOnChange) ? this.validateOnChange(path, parent, value, schema) : true;
+                const res = this.validateOnChange
+                    ? await this.validateOnChange([info.i, fullInfo.col, ...path], parent, value, schema)
+                    : true;
 
                 return res;
             },
@@ -801,7 +806,7 @@ export class SimpleTable extends LitElement {
                 properties: entries,
             },
             this.keyColumn,
-            this.schema.order
+            this.schema.order ?? ["name"] // Specify the order of the columns
         );
 
         // Try to guess the key column if unspecified

@@ -61,7 +61,7 @@ export class JSONSchemaInput extends LitElement {
             }
 
             .guided--input:disabled {
-                color: dimgray;
+                opacity: 0.5;
                 pointer-events: none;
             }
 
@@ -103,6 +103,18 @@ export class JSONSchemaInput extends LitElement {
                 color: dimgray !important;
                 margin: 0 0 1em;
                 line-height: 1.4285em;
+            }
+
+            .nan-handler {
+                display: flex;
+                align-items: center;
+                margin-left: 5px;
+                white-space: nowrap;
+            }
+
+            .nan-handler label {
+                margin-left: 5px;
+                font-size: 12px;
             }
         `;
     }
@@ -226,15 +238,23 @@ export class JSONSchemaInput extends LitElement {
             : [];
 
         if (isEditableObject) {
-            let regex;
-            try {
-                regex = new RegExp(name);
-            } catch (e) {}
-
             items = Object.entries(this.value);
 
-            if (regex) items = items.filter(([key]) => regex.test(key));
-            else items.filter(([key]) => key in schema.properties);
+            const isAdditionalProperties = this.#isAdditionalProperties();
+
+            if (this.#isPatternProperties()) {
+                const regex = new RegExp(name);
+                items = items.filter(([key]) => regex.test(key));
+            } else if (isAdditionalProperties) {
+                const props = Object.keys(schema.properties ?? {});
+                items = items.filter(([key]) => !props.includes(key));
+
+                const patternProps = Object.keys(schema.patternProperties ?? {});
+                patternProps.forEach((key) => {
+                    const regex = new RegExp(key);
+                    items = items.filter(([k]) => !regex.test(k));
+                });
+            } else items.filter(([key]) => key in schema.properties);
 
             items = items.map(([key, value]) => {
                 return {
@@ -247,7 +267,7 @@ export class JSONSchemaInput extends LitElement {
                             onClick: () => {
                                 this.#createModal({
                                     key,
-                                    schema,
+                                    schema: isAdditionalProperties ? undefined : schema,
                                     results: value,
                                     list: list ?? this.#list,
                                 });
@@ -264,10 +284,23 @@ export class JSONSchemaInput extends LitElement {
     #schemaElement;
     #modal;
 
-    async #createModal({ key, schema, results, list } = {}) {
+    #isPatternProperties() {
+        return this.pattern && !this.#isAdditionalProperties();
+    }
+
+    #isAdditionalProperties() {
+        return this.pattern === "additional";
+    }
+
+    async #createModal({ key, schema = {}, results, list } = {}) {
         const createNewObject = !results;
 
-        const isPatternProperties = this.pattern;
+        // const schemaProperties = Object.keys(schema.properties ?? {});
+        // const additionalProperties = Object.keys(results).filter((key) => !schemaProperties.includes(key));
+        // // const additionalElement = html`<label class="guided--form-label">Additional Properties</label><small>Cannot edit additional properties (${additionalProperties}) at this time</small>`
+
+        const isPatternProperties = this.#isPatternProperties();
+        const isAdditionalProperties = this.#isAdditionalProperties();
         const creatNewPatternProperty = isPatternProperties && createNewObject;
 
         const schemaCopy = structuredClone(schema);
@@ -342,7 +375,7 @@ export class JSONSchemaInput extends LitElement {
               })
             : new JSONSchemaInput({
                   schema: schemaCopy,
-                  validateOnChange: false,
+                  validateOnChange: isAdditionalProperties,
                   path: this.path,
                   form: this.form,
                   value: updateTarget,
@@ -361,8 +394,13 @@ export class JSONSchemaInput extends LitElement {
         setTimeout(() => this.#modal.toggle(true));
     }
 
+    #getType = (value = this.value) => (Array.isArray(value) ? "array" : typeof value);
+
     #render() {
         const { validateOnChange, schema, path: fullPath } = this;
+
+        // Do your best to fill in missing schema values
+        if (!("type" in schema)) schema.type = this.#getType();
 
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
@@ -390,13 +428,14 @@ export class JSONSchemaInput extends LitElement {
         if (isArray || isEditableObject) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-            const isPatternProperties = this.pattern;
+            const isPatternProperties = this.#isPatternProperties();
+            const isAdditionalProperties = this.#isAdditionalProperties();
 
             // Provide default item types
-            if (!isPatternProperties) {
+            if (isArray) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
-                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = "string";
+                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value[0]);
             }
 
             const itemSchema = this.form ? this.form.getSchema("items", schema) : schema["items"];
@@ -410,6 +449,7 @@ export class JSONSchemaInput extends LitElement {
                     : {};
 
                 const ogThis = this;
+
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
@@ -432,11 +472,12 @@ export class JSONSchemaInput extends LitElement {
                         const completePath = [...fullPath, ...path.slice(0, -1)];
 
                         const itemPropSchema = path.reduce((acc, key) => {
+                            if (typeof key === "number") return acc; // Skip row information
                             return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
                         }, baseSchema);
 
-                        const result = await (validateOnChange &&
-                            (this.onValidate
+                        const result = await (validateOnChange
+                            ? this.onValidate
                                 ? this.onValidate()
                                 : this.form
                                   ? this.form.triggerValidation(
@@ -455,7 +496,8 @@ export class JSONSchemaInput extends LitElement {
                                             },
                                         }
                                     ) // NOTE: No pattern properties support
-                                  : ""));
+                                  : ""
+                            : true);
 
                         const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
 
@@ -491,10 +533,12 @@ export class JSONSchemaInput extends LitElement {
 
             const list = (this.#list = new List({
                 items: this.#mapToList(),
+
+                // Add edit button when new items are added
+                // NOTE: Duplicates some code in #mapToList
                 transform: (item) => {
                     if (this.#isEditableObject()) {
                         const { key, value } = item;
-
                         item.controls = [
                             new Button({
                                 label: "Edit",
@@ -526,6 +570,12 @@ export class JSONSchemaInput extends LitElement {
                     if (validateOnChange) await this.#triggerValidation(name, path);
                 },
             }));
+
+            if (isAdditionalProperties) {
+                addButton.setAttribute("disabled", true);
+                addButton.title =
+                    "Additional properties cannot be added at this time—as they don't have a predictable structure.";
+            }
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
@@ -601,6 +651,8 @@ export class JSONSchemaInput extends LitElement {
             if (isInteger) schema.type = "number";
             const isNumber = schema.type === "number";
 
+            const isRequiredNumber = isNumber && this.required;
+
             const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
@@ -623,6 +675,7 @@ export class JSONSchemaInput extends LitElement {
                     schema.format === "date-time"
                         ? "datetime-local"
                         : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+
                 return html`
                     <input
                         class="guided--input schema-input ${schema.step === null ? "hideStep" : ""}"
@@ -657,10 +710,32 @@ export class JSONSchemaInput extends LitElement {
                                 value = newValue;
                             }
 
+                            if (isRequiredNumber) {
+                                const nanHandler = ev.target.parentNode.querySelector(".nan-handler");
+                                if (!(newValue && Number.isNaN(newValue))) nanHandler.checked = false;
+                            }
+
                             this.#updateData(fullPath, value);
                         }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     />
+                    ${isRequiredNumber
+                        ? html`<div class="nan-handler"><input
+                        type="checkbox"
+                        ?checked=${this.value && Number.isNaN(this.value)}
+                        @change=${(ev) => {
+                            const siblingInput = ev.target.parentNode.previousElementSibling;
+                            if (ev.target.checked) {
+                                this.#updateData(fullPath, NaN);
+                                siblingInput.setAttribute("disabled", true);
+                            } else {
+                                siblingInput.removeAttribute("disabled");
+                                const ev = new Event("input");
+                                siblingInput.dispatchEvent(ev);
+                            }
+                        }}
+                    ></input><label>I Don't Know</label></div>`
+                        : ""}
                 `;
             }
         }

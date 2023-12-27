@@ -148,21 +148,21 @@ export class TableCellBase extends LitElement {
 
     getValue = (input: any = this.value) => input // Process inputs from the editor
 
-    #update(current: any, forceUpdate = false) {
+    #update(current: any, forceUpdate = false, runOnChange = true) {
         let value = this.getValue(current)
 
         // NOTE: Forcing change registration for all cells
         if (this.value !== value || forceUpdate) {
             this.value = value
-            this.onChange(value)
+            if (runOnChange) this.onChange(value)
         }
     }
 
-    setText(value: any, setOnInput = true) {
+    setText(value: any, setOnInput = true, runOnChange = true) {
         if (setOnInput) [ this.#editor, this.#renderer ].forEach(el => this.setChild(el, value)) // RESETS HISTORY
 
-        if (this.schema.type === 'array' || this.schema.type === 'object') this.#update(value, true) // Ensure array values are not coerced
-        else this.#update(`${value}`) // Coerce to string
+        if (this.schema.type === 'array' || this.schema.type === 'object') this.#update(value, true, runOnChange) // Ensure array values are not coerced
+        else this.#update(`${value}`, undefined, runOnChange) // Coerce to string
     }
 
 
@@ -171,19 +171,19 @@ export class TableCellBase extends LitElement {
         document.execCommand(command, show, value)
     }
 
-    set(value: any) {
+    set(value: any, runOnChange = true) {
 
         if (document.execCommand) {
             this.#editable.setAttribute('contenteditable', '')
             this.#editable.focus();
             document.execCommand('selectAll');
             document.execCommand('insertText', false, value);
-            this.setText(value)
+            this.setText(value, undefined, runOnChange)
             this.#editable.blur();
             this.#editable.removeAttribute('contenteditable')
         }
 
-        else this.setText(value) // Ensure value is still set
+        else this.setText(value, undefined, runOnChange) // Ensure value is still set
     }
 
     #render(property: 'renderer' | 'editor') {

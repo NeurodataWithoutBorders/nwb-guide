@@ -8,5 +8,7 @@
       }
   },
 
+  "additionalProperties": false,
+
   "required": ["test_data_directory_path"]
 }
