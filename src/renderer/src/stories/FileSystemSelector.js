@@ -203,7 +203,7 @@ export class FilesystemSelector extends LitElement {
 
         const objectTypeReference = getObjectTypeReferenceString(this.type, this.multiple);
 
-        const ogThis = this
+        const ogThis = this;
 
         return html`
             <div>
@@ -228,33 +228,38 @@ export class FilesystemSelector extends LitElement {
                 >
                     ${resolvedValueDisplay
                         ? html`
-                            ${resolvedValueDisplay}
-                            ${dialog
-                                ? ""
-                                : html`<br /><small
+                              ${resolvedValueDisplay}
+                              ${dialog
+                                  ? ""
+                                  : html`<br /><small
                                             >Cannot get full ${isMultipleTypes ? this.type.join(" / ") : this.type}
                                             path${this.multiple ? "s" : ""} on web distribution</small
                                         >`}
-                        `
+                          `
                         : html`<span
-                                >Drop ${objectTypeReference}
-                                here${isMultipleTypes
-                                    ? ""
-                                    : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
+                                  >Drop ${objectTypeReference}
+                                  here${isMultipleTypes
+                                      ? ""
+                                      : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
                                             native: true,
                                         })}`}</span
-                            >${this.multiple &&
-                            (this.type === "directory" || (isMultipleTypes && this.type.includes("directory") && !dialog))
-                                ? html`<br /><small
+                              >${this.multiple &&
+                              (this.type === "directory" ||
+                                  (isMultipleTypes && this.type.includes("directory") && !dialog))
+                                  ? html`<br /><small
                                             >Multiple directory support only available using drag-and-drop.</small
                                         >`
-                                : ""}`}
+                                  : ""}`}
                 </button>
-                ${this.multiple && this.value.length > 1 ? new List({
-                    items: this.value.map((v) => ({ value: v + 1 })),
-                    editable: false,
-                    onChange: function () { ogThis.value = this.items.map((item) => item.value) },
-                }) : ""}
+                ${this.multiple && this.value.length > 1
+                    ? new List({
+                          items: this.value.map((v) => ({ value: v + 1 })),
+                          editable: false,
+                          onChange: function () {
+                              ogThis.value = this.items.map((item) => item.value);
+                          },
+                      })
+                    : ""}
             </div>
             ${isMultipleTypes
                 ? html`<div id="button-div">
