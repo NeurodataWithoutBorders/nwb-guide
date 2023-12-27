@@ -13,6 +13,7 @@ from manageNeuroconv import (
     convert_to_nwb,
     validate_metadata,
     listen_to_neuroconv_events,
+    event_announcer,
     generate_dataset,
     inspect_nwb_file,
     inspect_nwb_folder,
