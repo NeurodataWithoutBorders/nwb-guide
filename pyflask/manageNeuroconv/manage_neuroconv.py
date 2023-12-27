@@ -397,21 +397,30 @@ def convert_to_nwb(info: dict) -> str:
 
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
-    def update_conversion_progress(**kwargs):
-        event_announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
-
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
         {
-            interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+            interface: {"stub_test": run_stub_test}
             if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
             else {}
             for interface in info["source_data"]
         }
-        if run_stub_test
-        else None
     )
+
+
+    # # NOTE: Requires the new iterator_opts kwarg to be defined in NeuroConv
+    # for interface_name in options:
+    #     available = available_options.get("properties").get(interface_name)
+    #     if available.get("properties", {}).get("iterator_opts"):
+    #         options[interface_name].update({
+    #             "iterator_opts": { 
+    #                 "report_hook": lambda **kwargs: event_announcer.announce(dict(**kwargs, file=nwbfile_path, interface=interface_name), "progress")
+    #             }
+    #         })
+
+    
+        
 
     # Update the first recording interface with Ecephys table data
     # This will be refactored after the ndx-probe-interface integration

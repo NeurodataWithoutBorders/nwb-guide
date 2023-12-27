@@ -92,3 +92,7 @@ export const subscribeToEvents = (callback: Function, type = 'message') => {
     // Return the unsubscribe function
     return () => events.removeEventListener(type, progressFn);
 }
+
+subscribeToEvents((info) => {
+  console.log('Progress Update', info)
+}, 'progress')
