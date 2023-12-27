@@ -2,7 +2,7 @@ import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
-import { merge, randomizeElements, mapSessions } from "./utils.js";
+import { randomizeElements, mapSessions } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
 import { resolveResults } from "./guided-mode/data/utils.js";
@@ -34,11 +34,11 @@ export class Page extends LitElement {
 
     onSet = () => {}; // User-defined function
 
-    set = (info) => {
+    set = (info, rerender = true) => {
         if (info) {
             Object.assign(this.info, info);
             this.onSet();
-            this.requestUpdate();
+            if (rerender) this.requestUpdate();
         }
     };
 
@@ -115,6 +115,30 @@ export class Page extends LitElement {
 
     mapSessions = (callback, data = this.info.globalState) => mapSessions(callback, data);
 
+    async convert({ preview } = {}) {
+        const key = preview ? "preview" : "conversion";
+
+        delete this.info.globalState[key]; // Clear the preview results
+
+        if (preview) {
+            const stubs = await this.runConversions({ stub_test: true }, undefined, {
+                title: "Running stub conversion on all sessions...",
+            });
+            this.info.globalState[key] = { stubs };
+        } else {
+            this.info.globalState[key] = await this.runConversions({}, true, { title: "Running all conversions" });
+        }
+
+        this.unsavedUpdates = true;
+
+        // Indicate conversion has run successfully
+        const { desyncedData } = this.info.globalState;
+        if (desyncedData) {
+            delete desyncedData[key];
+            if (Object.keys(desyncedData).length === 0) delete this.info.globalState.desyncedData;
+        }
+    }
+
     async runConversions(conversionOptions = {}, toRun, options = {}) {
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
@@ -126,24 +150,35 @@ export class Page extends LitElement {
 
         const results = {};
 
-        const popup = await openProgressSwal({ title: `Running conversion`, ...options });
+        if (!("showCancelButton" in options)) {
+            options.showCancelButton = true;
+            options.customClass = { actions: "swal-conversion-actions" };
+        }
+
+        const cancelController = new AbortController();
+
+        const popup = await openProgressSwal({ title: `Running conversion`, ...options }, (result) => {
+            if (!result.isConfirmed) cancelController.abort();
+        });
 
         const isMultiple = toRun.length > 1;
 
         let elements = {};
-        // if (isMultiple) {
         popup.hideLoading();
         const element = popup.getHtmlContainer();
         element.innerText = "";
-        element.style.textAlign = "left";
+        Object.assign(element.style, {
+            textAlign: "left",
+            display: "block",
+        });
+
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
         element.append(progressBar);
         element.insertAdjacentHTML(
             "beforeend",
-            `<small><small><b>Note:</b> This may take a while to complete...</small></small>`
+            `<small><small><b>Note:</b> This may take a while to complete...</small></small><hr style="margin-bottom: 0;">`
         );
-        // }
 
         let completed = 0;
         elements.progress.value = { b: completed, tsize: toRun.length };
@@ -152,7 +187,7 @@ export class Page extends LitElement {
             const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, preview_output_folder, name } = globalState.project;
+            const { conversion_output_folder, name } = globalState.project;
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
@@ -162,7 +197,7 @@ export class Page extends LitElement {
 
             const result = await runConversion(
                 {
-                    output_folder: conversionOptions.stub_test ? preview_output_folder : conversion_output_folder,
+                    output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
@@ -171,9 +206,16 @@ export class Page extends LitElement {
 
                     interfaces: globalState.interfaces,
                 },
-                { swal: popup, ...options }
+                { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((e) => {
-                this.notify(e.message, "error");
+                let message = e.message;
+
+                if (message.includes("The user aborted a request.")) {
+                    this.notify("Conversion was cancelled.", "warning");
+                    throw e;
+                }
+
+                this.notify(message, "error");
                 popup.close();
                 throw e;
             });
@@ -201,7 +243,31 @@ export class Page extends LitElement {
         this.updatePages();
     };
 
-    unsavedUpdates = false; // Track unsaved updates
+    checkSyncState = async (info = this.info, sync = info.sync) => {
+        if (!sync) return;
+
+        const { desyncedData } = info.globalState;
+        if (desyncedData) {
+            return Promise.all(
+                sync.map((k) => {
+                    if (desyncedData[k]) {
+                        if (k === "conversion") return this.convert();
+                        else if (k === "preview") return this.convert({ preview: true });
+                    }
+                })
+            );
+        }
+    };
+
+    #unsaved = false;
+    get unsavedUpdates() {
+        return this.#unsaved;
+    }
+
+    set unsavedUpdates(value) {
+        this.#unsaved = !!value;
+        if (value === "conversions") this.info.globalState.desyncedData = { preview: true, conversion: true };
+    }
 
     // NOTE: Make sure you call this explicitly if a child class overwrites this AND data is updated
     updated() {

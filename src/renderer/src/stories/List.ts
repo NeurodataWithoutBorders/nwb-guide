@@ -26,10 +26,14 @@ export class List extends LitElement {
         overflow: auto;
       }
 
+
       #empty {
-        padding: 20px 10px;
         margin-left: -40px;
         color: gray;
+      }
+
+      :host([unordered]) #empty {
+        margin: 0;
       }
 
       li {
@@ -51,11 +55,16 @@ export class List extends LitElement {
         text-overflow: ellipsis
       }
 
+      :host(:not([unordered])) li {
+        cursor: move;
+      }
+
+
+
       :host([unordered]) ol {
         list-style-type: none;
         display: flex;
         flex-wrap: wrap;
-        margin: 0;
         padding: 0;
       }
 
@@ -67,6 +76,15 @@ export class List extends LitElement {
         justify-content: center;
         display: flex;
         align-items: center;
+      }
+
+      [contenteditable] {
+        cursor: text;
+      }
+
+      [data-idx]{
+        background: #f0f0f0;
+        height: 25px;
       }
 
     `;
@@ -121,6 +139,45 @@ export class List extends LitElement {
 
     declare listStyles: any
 
+    allowDrop = (ev) => ev.preventDefault();
+
+
+    #dragged?: number
+    #placeholder = document.createElement('div')
+
+    drag = (ev, i) => this.#dragged = i
+
+    dragEnter = (ev, i) => {
+       ev.preventDefault();
+        if (this.#dragged !== i) {
+          const item = this.shadowRoot.getElementById(`item-${i}`)
+          this.#placeholder.setAttribute('data-idx', i)
+          item?.insertAdjacentElement('beforebegin',  this.#placeholder)
+        } else {
+          this.#removePlaceholder()
+        }
+    }
+
+    dragExit = (ev, i) => {
+      ev.preventDefault();
+      if (this.#placeholder && i.toString() !== this.#placeholder.getAttribute('data-idx')){
+        this.#removePlaceholder()
+      }
+    }
+
+    drop = (ev, i) => {
+
+      ev.preventDefault();
+      const draggedIdx = this.#dragged as number
+      this.#dragged = undefined
+
+      const movedItem = this.items[draggedIdx]
+      this.items.splice(draggedIdx, 1)
+      this.items.splice(i, 0, movedItem)
+
+      this.items = [...this.items]
+    }
+
 
     constructor(props: ListProps = {}) {
       super();
@@ -139,21 +196,49 @@ export class List extends LitElement {
       this.items = [...this.items, item]
     }
 
+    #removePlaceholder = () => {
+      this.#placeholder.removeAttribute('data-idx')
+      this.#placeholder.remove()
+    }
+
     #renderListItem = (item: ListItemType, i: number) => {
       const { key, value, content = value } = item;
       const li = document.createElement("li");
+      li.id = `item-${i}`;
+
+      if (!this.unordered) {
+        li.draggable = true;
+        li.ondragstart = (ev) => this.drag(ev, i);
+
+        li.ondragend = (ev) => {
+          if (this.#dragged !== undefined) {
+            const idx = this.#placeholder.getAttribute('data-idx')
+            if (idx !== null) this.drop(ev, parseInt(idx))
+            this.#removePlaceholder()
+          }
+        }
+
+        li.ondrop = (ev) => this.drop(ev, i);
+
+        li.ondragover = (ev) => this.dragEnter(ev, i);
+        // li.ondragenter = (ev) => this.dragEnter(ev, i);
+        li.ondragleave = (ev) => this.dragExit(ev, i);
+      }
+
 
       const outerDiv = document.createElement('div')
       const div = document.createElement('div')
       li.append(outerDiv)
       outerDiv.append(div)
 
-      const keyEl = document.createElement("span");
+      let editableElement = document.createElement("span");
 
       let resolvedKey = key;
       const originalValue = resolvedKey;
 
-      if (key) {
+      const isUnordered = !!key
+
+      if (isUnordered) {
 
         this.setAttribute('unordered', '')
 
@@ -164,8 +249,9 @@ export class List extends LitElement {
             resolvedKey = `${originalValue}_${i}`;
         }
 
+        const keyEl = editableElement
+
         keyEl.innerText = resolvedKey;
-        keyEl.contentEditable = true;
         keyEl.style.cursor = "text";
 
         const sepEl = document.createElement("span");
@@ -173,14 +259,19 @@ export class List extends LitElement {
         div.append(keyEl, sepEl);
 
         this.object[resolvedKey] = value;
-      } else this.object[i] = value;
+      }
+
+      else {
+        this.object[i] = value;
+      }
 
       if (typeof content === 'string')  {
-        const valueEl = document.createElement("span");
+          const valueEl = document.createElement("span");
+          if (!key) editableElement = valueEl
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
-      else li.append(content)
+      else li.append(editableElement = content)
 
 
 
@@ -197,25 +288,32 @@ export class List extends LitElement {
 
         outerDiv.appendChild(button);
 
+        editableElement.contentEditable = true;
+
         // Stop enter key from creating new line
-        keyEl.addEventListener("keydown", function (e) {
+        editableElement.onkeydown = (e) => {
             if (e.keyCode === 13) {
-                keyEl.blur();
+              editableElement.blur();
                 return false;
             }
-        });
+        };
 
         const deleteListItem = () => this.delete(i);
 
-        keyEl.addEventListener("blur", () => {
-            const newKey = keyEl.innerText;
-            if (newKey === "") keyEl.innerText = resolvedKey; // Reset to original value
+        editableElement.onblur = () => {
+            const newKey = editableElement.innerText;
+            if (newKey === "") this.delete(i); // Delete if empty
             else {
-                delete this.object[resolvedKey];
-                resolvedKey = newKey;
-                this.object[resolvedKey] = value;
+                  const oKey = isUnordered ? resolvedKey : i;
+                  delete this.object[oKey];
+                  this.object[newKey] = value;
+
+                  if (!isUnordered) {
+                    this.items[i].value = newKey
+                    this.items = [...this.items]
+                  }
             }
-        });
+        };
 
         button.onClick = deleteListItem;
       }

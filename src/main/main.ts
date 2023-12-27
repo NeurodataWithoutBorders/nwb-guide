@@ -34,13 +34,15 @@ const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
 const PYINSTALLER_NAME = "nwb-guide"
 
+const isWindows = process.platform === 'win32'
+
+
 let pyflaskProcess: any = null;
 
 let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
+let serverFilePath = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
 const portRange = 100;
-
-const isWindows = process.platform === 'win32'
 
 let readyQueue: Function[] = []
 
@@ -110,7 +112,7 @@ const pythonIsClosed = (err = globals.python.latestError) => {
  * The resources path is used for Linux and Mac builds and the app.getAppPath() is used for Windows builds.
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
-const getPackagedPath = () => {
+function getPackagedPath () {
   const scriptPath = isWindows ? path.join(__dirname, PY_FLASK_DIST_FOLDER, PYINSTALLER_NAME, `${PYINSTALLER_NAME}.exe`) : path.join(process.resourcesPath, PYFLASK_BUILD_SUBFOLDER_NAME, PYINSTALLER_NAME)
   if (fs.existsSync(scriptPath)) return scriptPath;
 };
@@ -119,7 +121,6 @@ const createPyProc = async () => {
 
   return new Promise(async (resolve, reject) => {
 
-    let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
     await killAllPreviousProcesses();
 
     const defaultPort = PORT as number
@@ -129,7 +130,7 @@ const createPyProc = async () => {
       .then(([freePort]: string[]) => {
         selectedPort = freePort;
 
-        pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
+        pyflaskProcess = (serverFilePath.slice(-3) === '.py') ? child_process.spawn("python", [serverFilePath, freePort], {}) : child_process.spawn(`${serverFilePath}`, [freePort], {});
 
         if (pyflaskProcess != null) {
 
@@ -247,7 +248,23 @@ function initialize() {
       },
     };
 
-    globals.mainWindow = new BrowserWindow(windowOptions);
+    const win = globals.mainWindow = new BrowserWindow(windowOptions);
+
+    // Avoid CORS for Dandiset creation
+    win.webContents.session.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
+      },
+    );
+
+    win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          'Access-Control-Allow-Origin': ['*'],
+          ...details.responseHeaders,
+        },
+      });
+    });
 
 
     // Only create one python process
@@ -272,14 +289,14 @@ function initialize() {
       })
     }
 
-    main.enable(globals.mainWindow.webContents);
+    main.enable(win.webContents);
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) globals.mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  else globals.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) win.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  else win.loadFile(path.join(__dirname, '../renderer/index.html'))
 
-    globals.mainWindow.once("closed", () => {
+    win.once("closed", () => {
       delete globals.mainWindow
     })
 
@@ -295,14 +312,14 @@ function initialize() {
     splash.loadFile(splashHTML)
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
-    globals.mainWindow.once("ready-to-show", () => {
+    win.once("ready-to-show", () => {
 
       setTimeout(function () {
 
         hasBeenOpened = true
 
         splash.close();
-        globals.mainWindow.show();
+        win.show();
         createWindow();
 
         // autoUpdater.checkForUpdatesAndNotify();
@@ -447,6 +464,10 @@ ipcMain.on("resize-window", (event, dir) => {
 
 ipcMain.on("get-port", (event) => {
   event.returnValue = selectedPort;
+});
+
+ipcMain.on("get-server-file-path", (event) => {
+  event.returnValue = serverFilePath;
 });
 
 // Allow the browser to request status if already sent once

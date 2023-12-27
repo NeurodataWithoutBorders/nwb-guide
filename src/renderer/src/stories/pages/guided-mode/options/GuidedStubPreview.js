@@ -16,6 +16,7 @@ export const getStubArray = (stubs) =>
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     header = {
@@ -38,10 +39,9 @@ export class GuidedStubPreviewPage extends Page {
         next: "Run Conversion",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-            delete this.info.globalState.conversion;
-            this.info.globalState.conversion = await this.runConversions({}, true, {
-                title: "Running all conversions",
-            });
+
+            await this.convert();
+
             this.to(1);
         },
     };

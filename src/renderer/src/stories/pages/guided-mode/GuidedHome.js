@@ -144,17 +144,16 @@ export class GuidedHomePage extends Page {
         }
     };
 
-    resume = async (resumeProgressButton) => {
+    resume = (resumeProgressButton) => {
         resumeProgressButton.classList.add("loading");
         const datasetNameToResume =
             resumeProgressButton.parentNode.parentNode.querySelector(".progress-file-name").innerText;
 
         progress.resume.call(this, datasetNameToResume);
+        resumeProgressButton.classList.remove("loading");
     };
 
     async updated() {
-        this.info.globalState = {}; // Reset global state when navigating back to this page
-
         const htmlBase = this.shadowRoot ?? this;
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         const lottieContainer = htmlBase.querySelector("#new-dataset-lottie-container");

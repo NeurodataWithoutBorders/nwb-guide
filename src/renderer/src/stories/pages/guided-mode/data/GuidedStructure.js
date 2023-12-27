@@ -3,10 +3,11 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { Button } from "../../../Button.js";
-import { baseUrl, supportedInterfaces } from "../../../../globals.js";
+import { supportedInterfaces } from "../../../../globals.js";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
+import { baseUrl } from "../../../../server/globals";
 
 const defaultEmptyMessage = "No interfaces selected";
 
@@ -27,8 +28,8 @@ export class GuidedStructurePage extends Page {
 
         // Handle Search Bar Interactions
         this.search.list.style.position = "unset";
-        this.search.onSelect = (...args) => {
-            this.list.add(...args);
+        this.search.onSelect = (item) => {
+            this.list.add(item);
             this.searchModal.toggle(false);
         };
 
@@ -46,11 +47,14 @@ export class GuidedStructurePage extends Page {
 
     search = new Search({
         disabledLabel: "Not supported",
+        headerStyles: {
+            padding: "15px",
+        },
     });
 
     list = new List({
         emptyMessage: defaultEmptyMessage,
-        onChange: () => (this.unsavedUpdates = true),
+        onChange: () => (this.unsavedUpdates = "conversions"),
     });
 
     addButton = new Button();
@@ -81,6 +85,16 @@ export class GuidedStructurePage extends Page {
 
     beforeSave = async () => {
         this.info.globalState.interfaces = { ...this.list.object };
+
+        // Remove extra interfaces from results
+        if (this.info.globalState.results) {
+            this.mapSessions(({ info }) => {
+                Object.keys(info.source_data).forEach((key) => {
+                    if (!this.info.globalState.interfaces[key]) delete info.source_data[key];
+                });
+            });
+        }
+
         await this.save(undefined, false); // Interrim save, in case the schema request fails
         await this.getSchema();
     };
@@ -139,11 +153,12 @@ export class GuidedStructurePage extends Page {
         // Reset list
         this.list.style.display = "inline-block";
         this.list.clear();
-        this.addButton.style.display = "block";
         this.addButton.setAttribute("hidden", "");
 
         return html`
-            <div style="width: 100%; text-align: center;">${this.list} ${this.addButton}</div>
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                ${this.list} ${this.addButton}
+            </div>
             ${this.searchModal}
         `;
     }

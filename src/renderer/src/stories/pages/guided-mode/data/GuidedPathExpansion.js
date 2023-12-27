@@ -2,7 +2,6 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 // For Multi-Select Form
-import { notyf } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { OptionalSection } from "../../../OptionalSection.js";
 import { run } from "../options/utils.js";
@@ -15,6 +14,7 @@ import { CodeBlock } from "../../../CodeBlock.js";
 import { List } from "../../../List";
 import { fs } from "../../../../electron/index.js";
 import { joinPath } from "../../../../globals.js";
+import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
 const exampleFileStructure = `mylab/
     ¦   Subjects/
@@ -37,8 +37,8 @@ const exampleFileStructure = `mylab/
 const exampleFormatPath =
     "Subjects/{subject_id}/{session_start_time:%Y-%m-%d}/{session_id}/raw_video_data/leftCamera.raw.{}.mp4";
 
-const pathExpansionInfoBox = new InfoBox({
-    header: "How do I use a Python format string for path expansion?",
+const infoBox = new InfoBox({
+    header: "How do I use a Python format string to locate my files?",
     content: html`
         <div>
             <p>
@@ -87,8 +87,6 @@ const pathExpansionInfoBox = new InfoBox({
     `,
 });
 
-pathExpansionInfoBox.style.margin = "10px 0px";
-
 function getFiles(dir) {
     const dirents = fs.readdirSync(dir, { withFileTypes: true });
     let entries = [];
@@ -111,47 +109,61 @@ export class GuidedPathExpansionPage extends Page {
     };
 
     beforeSave = async () => {
+        const keepExistingData = this.dataManagementForm.resolved.keep_existing_data;
+        this.localState.keep_existing_data = keepExistingData;
+
         const globalState = this.info.globalState;
         merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
         const hidden = this.optional.hidden;
         globalState.structure.state = !hidden;
 
-        // Force single subject/session
         if (hidden) {
-            const source_data = {};
-            for (let key in globalState.interfaces) source_data[key] = {};
+            // Force single subject/session if not keeping existing data
+            if (!keepExistingData || !globalState.results) {
+                const existingMetadata =
+                    globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
 
-            const existingMetadata =
-                globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
+                const existingSourceData =
+                    globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
 
-            globalState.results = {
-                [this.altInfo.subject_id]: {
-                    [this.altInfo.session_id]: {
-                        source_data,
-                        metadata: {
-                            NWBFile: {
-                                session_id: this.altInfo.session_id,
-                                ...(existingMetadata?.NWBFile ?? {}),
-                            },
-                            Subject: {
-                                subject_id: this.altInfo.subject_id,
-                                ...(existingMetadata?.Subject ?? {}),
+                const source_data = {};
+                for (let key in globalState.interfaces) {
+                    const existing = existingSourceData?.[key];
+                    if (existing) source_data[key] = existing ?? {};
+                }
+
+                globalState.results = {
+                    [this.altInfo.subject_id]: {
+                        [this.altInfo.session_id]: {
+                            source_data,
+                            metadata: {
+                                NWBFile: {
+                                    session_id: this.altInfo.session_id,
+                                    ...(existingMetadata?.NWBFile ?? {}),
+                                },
+                                Subject: {
+                                    subject_id: this.altInfo.subject_id,
+                                    ...(existingMetadata?.Subject ?? {}),
+                                },
                             },
                         },
                     },
-                },
-            };
+                };
+            }
         }
 
         // Otherwise use path expansion to merge into existing subjects
         else if (!hidden && hidden !== undefined) {
             const structure = globalState.structure.results;
 
+            await this.form.validate();
+
             const finalStructure = {};
             for (let key in structure) {
                 const entry = { ...structure[key] };
                 const fstring = entry.format_string_path;
+                if (!fstring) continue;
                 if (fstring.split(".").length > 1) entry.file_path = fstring;
                 else entry.folder_path = fstring;
                 delete entry.format_string_path;
@@ -173,17 +185,30 @@ export class GuidedPathExpansionPage extends Page {
             // Save an overall results object organized by subject and session
             merge({ results }, globalState);
 
-            // // NOTE: Current behavior is to ONLY add new results, not remove old ones
-            // // If we'd like, we could label sessions as user-defined so they never clear
+            const globalResults = globalState.results;
 
-            // // Remove previous results that are no longer present
-            // const globalResults = this.info.globalState.results
-            // for (let sub in globalResults) {
-            //   for (let ses in globalResults[sub]) {
-            //     if (!results[sub]?.[ses]) delete globalResults[sub]?.[ses]
-            //   }
-            //   if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]
-            // }
+            if (!keepExistingData) {
+                for (let sub in globalResults) {
+                    const subRef = results[sub];
+                    if (!subRef) delete globalResults[sub]; // Delete removed subjects
+                    else {
+                        for (let ses in globalResults[sub]) {
+                            const sesRef = subRef[ses];
+
+                            if (!sesRef) delete globalResults[sub][ses]; // Delete removed sessions
+                            else {
+                                const globalSesRef = globalResults[sub][ses];
+
+                                for (let name in globalSesRef.source_data) {
+                                    if (!sesRef.source_data[name]) delete globalSesRef.source_data[name]; // Delete removed interfaces
+                                }
+                            }
+                        }
+
+                        if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]; // Delete empty subjects
+                    }
+                }
+            }
         }
     };
 
@@ -193,7 +218,7 @@ export class GuidedPathExpansionPage extends Page {
             await this.save(); // Save in case the request fails
 
             if (!this.optional.toggled) {
-                const message = "Please select a path expansion option.";
+                const message = "Please select an option.";
                 this.notify(message, "error");
                 throw new Error(message);
             }
@@ -225,21 +250,25 @@ export class GuidedPathExpansionPage extends Page {
     //   }
     // })
 
-    optional = new OptionalSection({
-        header: "Would you like to locate data programmatically?",
-        description: pathExpansionInfoBox,
-        onChange: () => (this.unsavedUpdates = true),
-        // altContent: this.altForm,
-    });
-
     localState = {};
 
     render() {
-        const structureState = (this.localState = merge(this.info.globalState.structure, { results: {} }));
+        this.optional = new OptionalSection({
+            header: "Will you locate your files programmatically?",
+            description: infoBox,
+            onChange: () => (this.unsavedUpdates = "conversions"),
+            // altContent: this.altForm,
+        });
+
+        const structureState = (this.localState = merge(this.info.globalState.structure, {
+            results: {},
+            keep_existing_data: true,
+        }));
 
         const state = structureState.state;
-        if (state !== undefined) this.optional.state = state;
-        else pathExpansionInfoBox.open = true; // Open the info box if no option has been selected
+
+        this.optional.state = state;
+        if (state === undefined) infoBox.open = true; // Open the info box if no option has been selected
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {} };
@@ -252,19 +281,36 @@ export class GuidedPathExpansionPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
             onThrow,
+            validateEmptyValues: false,
+
+            // NOTE: These are custom coupled form inputs
+            onUpdate: (path, value) => {
+                this.unsavedUpdates = "conversions";
+
+                const parentPath = [...path];
+                const name = parentPath.pop();
+
+                if (name === "base_directory") {
+                    form.getInput([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
+                    const input = form.getInput([...parentPath, "format_string_path"]);
+                    if (input.value) input.updateData(input.value, true);
+                }
+            },
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
-                if (fs) {
-                    if (name === "base_directory") {
-                        // for (const f of getFiles(value)) {
-                        //     console.log(f);
-                        //   }
-                        // const res = getFiles(value);
 
-                        const input = form.getInput([...parentPath, "format_string_path"]);
-                        console.log(input);
-                        input.updateData(input.value);
-                    } else if (name === "format_string_path") {
+                if (fs) {
+                    const baseDir = form.getInput([...parentPath, "base_directory"]);
+                    if (name === "format_string_path") {
+                        if (value && baseDir && !baseDir.value) {
+                            return [
+                                {
+                                    message: html`A base directory must be provided to locate your files.`,
+                                    type: "error",
+                                },
+                            ];
+                        }
+
                         const base_directory = [...parentPath, "base_directory"].reduce(
                             (acc, key) => acc[key],
                             this.form.resolved
@@ -289,16 +335,14 @@ export class GuidedPathExpansionPage extends Page {
                             for (let ses in results[sub]) {
                                 const source_data = results[sub][ses].source_data[interfaceName];
                                 const path = source_data.file_path ?? source_data.folder_path;
-                                resolved.push(path);
+                                resolved.push(path.slice(base_directory.length + 1));
                             }
                         }
-
-                        console.log("Metadata Results for", interfaceName, results);
 
                         return [
                             {
                                 message: html` <h4 style="margin: 0;">Source Files Found</h4>
-                                    <small><i>Inspect the Developer Console to preview the metadata results</i></small>
+                                    <small>${base_directory}</small>
                                     <small
                                         >${new List({
                                             items: resolved.map((path) => {
@@ -311,8 +355,6 @@ export class GuidedPathExpansionPage extends Page {
                                 type: "info",
                             },
                         ];
-
-                        // console.log('Updated format string', value, resolved)
                     }
                 }
             },
@@ -322,11 +364,25 @@ export class GuidedPathExpansionPage extends Page {
 
         this.optional.style.paddingTop = "10px";
 
-        this.optional.append(pathExpansionInfoBox, form);
+        this.dataManagementForm = new JSONSchemaForm({
+            results: { keep_existing_data: structureState.keep_existing_data },
+            onUpdate: () => (this.unsavedUpdates = "conversions"),
+            schema: {
+                type: "object",
+                properties: {
+                    keep_existing_data: {
+                        type: "boolean",
+                        description: "Maintain data for subjects / sessions that are not located.",
+                    },
+                },
+            },
+        });
+
+        this.optional.append(form);
 
         form.style.width = "100%";
 
-        return this.optional;
+        return html`${this.dataManagementForm}${this.optional}`;
     }
 }
 
