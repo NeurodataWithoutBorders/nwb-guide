@@ -270,7 +270,7 @@ export class GuidedPathExpansionPage extends Page {
         if (state === undefined) infoBox.open = true; // Open the info box if no option has been selected
 
         // Require properties for all sources
-        const generatedSchema = { type: "object", properties: {} };
+        const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
         for (let key in this.info.globalState.interfaces)
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
         structureState.schema = generatedSchema;
@@ -368,6 +368,7 @@ export class GuidedPathExpansionPage extends Page {
             onUpdate: () => (this.unsavedUpdates = "conversions"),
             schema: {
                 type: "object",
+                additionalProperties: false,
                 properties: {
                     keep_existing_data: {
                         type: "boolean",

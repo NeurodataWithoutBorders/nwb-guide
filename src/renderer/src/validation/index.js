@@ -70,6 +70,13 @@ export async function validateOnChange(name, parent, path, value) {
     });
 
     const res = resolveAll(results, (arr) => {
+
+        arr = arr.map((v, i) => {
+            const func = functions[i];
+            if (typeof func === "function") return v;
+            else return v === null ? undefined : v;
+        })
+        
         const flat = arr.flat();
         if (flat.find((res) => res?.message)) {
             return flat
