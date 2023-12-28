@@ -23,7 +23,7 @@ const encode = (str) => {
 
 import { Validator } from "jsonschema";
 
-var v = new Validator();
+var validator = new Validator();
 
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
@@ -387,9 +387,48 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
+    validateSchema = async (resolved, schema, name) => {
+        return await validator
+        .validate(resolved, schema)
+        .errors.map((e) => {
+
+            const propName = e.path.slice(-1)[0] ?? name ?? e.property;
+            const rowName = e.path.slice(-2)[0];
+
+            const isRow = typeof rowName === "number";
+
+            const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
+
+            // ------------ Exclude Certain Errors ------------
+            // Non-Strict Rule
+            if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+
+            // Allow referring to floats as null (i.e. JSON NaN representation)
+            if (e.message === "is not of a type(s) number") {
+                if (resolvedValue === null) return;
+            }
+
+            return {
+                type: "error",
+                message: `${
+                    typeof propName === "string"
+                        ? `${header(propName)}${isRow ? ` on Row ${rowName}` : ""}`
+                        : `Row ${propName}`
+                } ${e.message}.`,
+            };
+        })
+        .filter((v) => !!v)
+    }
+
     validate = async (resolved = this.resolved) => {
+
         // Validate against the entire JSON Schema
-        const result = await v.validate(resolved, this.schema);
+        const copy = structuredClone(resolved);
+        delete copy.__disabled
+
+        const result = await this.validateSchema(copy, this.schema);
+
+        const resolvedErrors = this.#resolveErrors(result, this.base, resolved)
 
         // Check if any required inputs are missing
         const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
@@ -398,11 +437,17 @@ export class JSONSchemaForm extends LitElement {
         // Check if all inputs are valid
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
 
+        if (resolvedErrors.length) {
+            const len = resolvedErrors.length;
+            if (len === 1) this.throw(resolvedErrors[0].message);
+            else this.throw(`${len} JSON Schema errors on this form.`);
+        }
+
         const allErrors = Array.from(flaggedInputs)
-            .map((el) => {
-                return Array.from(el.nextElementSibling.children).map((li) => li.message);
-            })
-            .flat();
+                .map((el) => {
+                    return Array.from(el.nextElementSibling.children).map((li) => li.message);
+                }).flat()
+
 
         const nMissingRequired = allErrors.reduce((acc, curr) => {
             return (acc += curr.includes(this.#isARequiredPropertyString) ? 1 : 0);
@@ -645,8 +690,8 @@ export class JSONSchemaForm extends LitElement {
         let invalid = [];
 
         for (let name in requirements) {
-            let isRequired = requirements[name];
-
+            let isRequired = this.#isRequired(name, requirements)
+            
             if (this.#accordions[name]?.disabled) continue; // Skip disabled accordions
 
             // // NOTE: Uncomment to block checking requirements inside optional properties
@@ -759,10 +804,10 @@ export class JSONSchemaForm extends LitElement {
         ).reduce((a, b) => a && b, true);
     };
 
-    #isRequired = (path) => {
+    #isRequired = (path, requirements = this.#requirements) => {
         if (typeof path === "string") path = path.split("-");
         // path = path.slice(this.base.length); // Remove base path
-        let res = path.reduce((obj, key) => obj?.[key], this.#requirements);
+        let res = path.reduce((obj, key) => obj?.[key], requirements);
         if (typeof res === "object") res = res[selfRequiredSymbol];
         return res;
     };
@@ -778,6 +823,21 @@ export class JSONSchemaForm extends LitElement {
     }
 
     #isARequiredPropertyString = `is a required property`;
+
+    #resolveErrors = (errors, externalPath, parent) => {
+       return errors
+            .map((e) => {
+                // Custom Error Transformations
+                if (this.transformErrors) {
+                    const name = externalPath.slice(-1)[0];
+                    const res = this.transformErrors(e, externalPath, parent[name]);
+                    if (res === false) return;
+                }
+
+                return e;
+            })
+            .filter((v) => !!v);
+    }
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (
@@ -809,38 +869,11 @@ export class JSONSchemaForm extends LitElement {
 
         const jsonSchemaErrors =
             validateArgs.length === 2
-                ? await v
-                      .validate(...validateArgs)
-                      .errors.map((e) => {
-                          const propName = e.path.slice(-1)[0] ?? name;
-                          const rowName = e.path.slice(-2)[0];
-
-                          const isRow = typeof rowName === "number";
-
-                          const resolvedValue = e.path.reduce((acc, token) => acc[token], value);
-
-                          // ------------ Exclude Certain Errors ------------
-                          // Non-Strict Rule
-                          if (schema.strict === false && e.message.includes("is not one of enum values")) return;
-
-                          // Allow referring to floats as null (i.e. JSON NaN representation)
-                          if (e.message === "is not of a type(s) number") {
-                              if (resolvedValue === null) return;
-                          }
-
-                          return {
-                              type: "error",
-                              message: `${
-                                  typeof propName === "string"
-                                      ? `${header(propName)}${isRow ? ` on Row ${rowName}` : ""}`
-                                      : `Row ${propName}`
-                              } ${e.message}.`,
-                          };
-                      })
-                      .filter((v) => !!v)
+                ? await this.validateSchema(...validateArgs, name)
                 : [];
 
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
+
         if (valid === null) return null; // Skip validation / data change if the value is null
 
         const isRequired = this.#isRequired(localPath) || (!input.table && input.required); // Do not trust required status of table validations
@@ -925,17 +958,7 @@ export class JSONSchemaForm extends LitElement {
 
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
-        const resolvedErrors = errors
-            .map((e) => {
-                // Custom Error Transformations
-                if (this.transformErrors) {
-                    const res = this.transformErrors(e, externalPath, parent[name]);
-                    if (res === false) return;
-                }
-
-                return e;
-            })
-            .filter((v) => !!v);
+        const resolvedErrors = this.#resolveErrors(errors, externalPath, parent)
 
         // Track errors and warnings
         const updatedWarnings = warnings.map((info) => (onWarning ? onWarning(info) : info)).filter((v) => !!v);
@@ -1140,6 +1163,12 @@ export class JSONSchemaForm extends LitElement {
             const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
 
             if (renderableInside.length) {
+
+                const allIgnore = this.ignore["*"] ?? {};
+                const ignore = this.ignore[name] ?? {}
+                if (ignore["*"]) ignore["*"] = { ...allIgnore, ...ignore["*"] }
+                else ignore["*"] = allIgnore
+
                 const ogContext = this;
                 const nested = (this.#nestedForms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
@@ -1155,7 +1184,7 @@ export class JSONSchemaForm extends LitElement {
                     transformErrors: this.transformErrors,
 
                     required: required[name], // Scoped to the sub-schema
-                    ignore: this.ignore[name],
+                    ignore,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
