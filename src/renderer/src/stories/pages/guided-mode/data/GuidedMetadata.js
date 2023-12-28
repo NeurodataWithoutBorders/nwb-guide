@@ -94,7 +94,7 @@ export class GuidedMetadataPage extends ManagedPage {
             formProps: {
                 showPath: true,
                 validateOnChange,
-            }
+            },
         }));
         document.body.append(modal);
     }
@@ -171,20 +171,16 @@ export class GuidedMetadataPage extends ManagedPage {
                         ["Subject", "age"],
                         ["Subject", "date_of_birth"],
                     ],
-                    validate: true
+                    validate: true,
                 },
                 {
                     name: "Institutional Info",
                     properties: [
                         ["NWBFile", "institution"],
-                        ["NWBFile", "lab"]
+                        ["NWBFile", "lab"],
                     ],
-                }
+                },
             ],
-
-            
-
-
 
             // deferLoading: true,
             onLoaded: () => {

@@ -311,7 +311,7 @@ export class UploadsPage extends Page {
                     const value = parent[name];
                     if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
                 },
-            }
+            },
         }));
         document.body.append(modal);
     }

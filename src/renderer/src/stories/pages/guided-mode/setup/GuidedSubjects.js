@@ -89,7 +89,7 @@ export class GuidedSubjectsPage extends Page {
                 validateOnChange: (key, parent, path) => {
                     return validateOnChange(key, parent, ["Subject", ...path]);
                 },
-            }
+            },
         }));
         document.body.append(modal);
     }

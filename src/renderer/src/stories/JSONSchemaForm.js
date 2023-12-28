@@ -205,7 +205,7 @@ export class JSONSchemaForm extends LitElement {
 
     base = [];
     #nestedForms = {};
-    inputs = []
+    inputs = [];
 
     tables = {};
     #nErrors = 0;
@@ -535,7 +535,7 @@ export class JSONSchemaForm extends LitElement {
             validateEmptyValue: this.validateEmptyValues,
         });
 
-        this.inputs.push(interactiveInput)
+        this.inputs.push(interactiveInput);
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
@@ -556,7 +556,14 @@ export class JSONSchemaForm extends LitElement {
                     : ""}"
             >
                 <label class="guided--form-label">${info.title ?? header(name)} </label>
-                ${this.showPath ? html`  <small>${externalPath.slice(0, -1).map(str => header(str ?? '')).join('.')}</small>` : ''}
+                ${this.showPath
+                    ? html` <small
+                          >${externalPath
+                              .slice(0, -1)
+                              .map((str) => header(str ?? ""))
+                              .join(".")}</small
+                      >`
+                    : ""}
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
@@ -669,16 +676,16 @@ export class JSONSchemaForm extends LitElement {
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
-        const group  = this.#getGroup(args);
+        const group = this.#getGroup(args);
         if (!group) return;
         return group.validate ? group : undefined;
-    }
+    };
 
     #getGroup = (args) => {
         if (typeof args === "string") args = args.split("-");
         const group = this.groups.find((linked) => linked.properties.find((link) => link.join("-") === args.join("-")));
-        return group
-    }
+        return group;
+    };
 
     #applyToLinkedProperties = (fn, externalPath) => {
         const links = this.#getLink(externalPath)?.properties;
@@ -890,8 +897,6 @@ export class JSONSchemaForm extends LitElement {
     #accordions = {};
 
     #render = (schema, results, required = {}, path = []) => {
-
-        
         let isLink = Symbol("isLink");
         // Filter non-required properties (if specified) and render the sub-schema
         const renderable = this.#getRenderable(schema, required, path);
@@ -951,7 +956,7 @@ export class JSONSchemaForm extends LitElement {
 
                 if (e1[isLink] || e2[isLink]) return 0;
 
-                if (info2.properties && info.properties)  return 0
+                if (info2.properties && info.properties) return 0;
                 else if (info2.properties) return -1;
                 else if (info.properties) return 1;
                 else return 0;
@@ -1190,7 +1195,7 @@ export class JSONSchemaForm extends LitElement {
     #resetLoadState() {
         this.#loaded = false;
         this.nLoaded = 0;
-        this.inputs = []
+        this.inputs = [];
     }
 
     // Check if everything is internally rendered

@@ -33,7 +33,7 @@ export class Search extends LitElement {
             this.setAttribute("interacted", false);
             this.#onSelect(this.getSelectedOption());
         }
-    }
+    };
 
     #value;
 
@@ -403,11 +403,11 @@ export class Search extends LitElement {
           const input = ev.target.value;
           this.#populate(input);
       }}
-      
+
       @blur=${(ev) => {
-            this.submit();
-        }}
-      
+          this.submit();
+      }}
+
       ></input>
       ${unsafeHTML(searchSVG)}
     </div>
