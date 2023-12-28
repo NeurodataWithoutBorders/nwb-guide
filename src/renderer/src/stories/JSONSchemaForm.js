@@ -51,9 +51,13 @@ const componentCSS = `
     .guided--form-label {
       display: block;
       width: 100%;
-      margin: 1.45rem 0 0.45rem 0;
+      margin-top: 1.45rem;
       color: black;
       font-weight: 600;
+    }
+
+    jsonschema-input {
+        margin-top: 0.45rem;
     }
 
     .form-section:first-child .guided--form-label {
@@ -123,7 +127,7 @@ const componentCSS = `
     }
 
   .required label:after {
-    content: " *";
+    content: "*";
     color: #ff0033;
 
   }
@@ -161,6 +165,10 @@ const componentCSS = `
     [disabled]{
         opacity: 0.5;
         pointer-events: none;
+    }
+
+    small {
+        font-size: 0.8em;
     }
 `;
 
@@ -220,6 +228,8 @@ export class JSONSchemaForm extends LitElement {
         this.dialogOptions = props.dialogOptions;
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
+
+        this.showPath = props.showPath ?? false;
 
         this.controls = props.controls ?? {};
 
@@ -536,7 +546,8 @@ export class JSONSchemaForm extends LitElement {
                     ? "conditional"
                     : ""}"
             >
-                <label class="guided--form-label">${info.title ?? header(name)}</label>
+                <label class="guided--form-label">${info.title ?? header(name)} </label>
+                ${this.showPath ? html`  <small>${externalPath.slice(0, -1).map(str => header(str ?? '')).join('.')}</small>` : ''}
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
@@ -893,11 +904,13 @@ export class JSONSchemaForm extends LitElement {
 
             // Sort alphabetically
             .sort(([name], [name2]) => {
-                if (name.toLowerCase() < name2.toLowerCase()) {
-                    return -1;
-                }
-                if (name.toLowerCase() > name2.toLowerCase()) {
+                const header1 = header(name);
+                const header2 = header(name2);
+                if (header1.toLowerCase() < header2.toLowerCase()) {
                     return 1;
+                }
+                if (header1.toLowerCase() > header2.toLowerCase()) {
+                    return -1;
                 }
                 return 0;
             })
@@ -939,6 +952,7 @@ export class JSONSchemaForm extends LitElement {
         }
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
+        console.log(sorted)
 
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
@@ -982,7 +996,7 @@ export class JSONSchemaForm extends LitElement {
                 style: "margin-right: 10px; pointer-events:all;",
             });
 
-            const headerName = header(name);
+            const headerName = header(info.title ?? name);
 
             const renderableInside = this.#getRenderable(info, required[name], localPath, true);
 
@@ -1021,6 +1035,7 @@ export class JSONSchemaForm extends LitElement {
 
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,
+                    showPath: this.showPath,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,

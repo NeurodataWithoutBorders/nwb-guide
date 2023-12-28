@@ -239,6 +239,10 @@ export class Accordion extends LitElement {
         return state;
     };
 
+    updated() {
+        console.log(this)
+    }
+
     render() {
         const isToggleable = this.content && this.toggleable;
 
