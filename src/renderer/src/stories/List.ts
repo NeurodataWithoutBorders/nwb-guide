@@ -61,7 +61,7 @@ export class List extends LitElement {
 
 
       ol:not(:has(li)) {
-        margin-top: 0;
+        margin: 0px;
       }
 
 
@@ -345,7 +345,7 @@ export class List extends LitElement {
 
       return html`
       <ol style=${styleMap(this.listStyles)}>
-        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<li id="empty">${emptyMessage}</li>`}
       </ol>`
     }
   }
