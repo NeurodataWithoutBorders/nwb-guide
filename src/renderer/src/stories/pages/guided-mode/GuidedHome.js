@@ -7,10 +7,6 @@ import * as progress from "../../../progress/index.js";
 import { newDataset } from "../../../../assets/lotties/index.js";
 
 export class GuidedHomePage extends Page {
-    header = {
-        title: "Your Conversions",
-        subtitle: "Start new conversions and resume existing ones.",
-    };
 
     constructor(...args) {
         super(...args);
@@ -183,12 +179,8 @@ export class GuidedHomePage extends Page {
     render() {
         return html`
             <div id="curate-new-home" style="display:flex; flex-direction:column; align-items: center">
-                <p>
-                    The NWB GUIDE walks users step-by-step through all the requirements for converting their data to the
-                    NWB format and uploading datasets to the DANDI Archive. Each stage is designed to conveniently guide
-                    users through the conversion process and include all necessary information such that no prior
-                    knowledge of the NWB data standard is required.
-                </p>
+                <h3>Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br /></h3>
+
 
                 <div class="container--dashed" @click="${() => this.to(1)}">
                     <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>

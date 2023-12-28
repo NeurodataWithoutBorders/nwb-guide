@@ -97,12 +97,8 @@ style="margin-right: 30px; margin-bottom: -5px"
 `;
 
 const pages = {
-    "/": new GettingStartedPage({
+    "/": new GuidedHomePage({
         label: "Home",
-        icon: overviewIcon,
-    }),
-    conversion: new GuidedHomePage({
-        label: "Conversions",
         icon: guidedIcon,
         pages: {
             start: new GuidedStartPage({
