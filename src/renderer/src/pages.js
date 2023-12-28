@@ -100,6 +100,7 @@ const pages = {
     "/": new GettingStartedPage({
         label: "Home",
         icon: overviewIcon,
+        hidden: true
     }),
     conversion: new GuidedHomePage({
         label: "Conversions",

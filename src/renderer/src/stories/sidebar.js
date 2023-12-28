@@ -139,7 +139,9 @@ export class Sidebar extends LitElement {
           <div class="sidebar-header">
               ${
                   logoNoName
-                      ? html` <img id="button-soda-big-icon" class="nav-center-logo-image" src="${this.logo}" /> `
+                      ? html` <img id="button-soda-big-icon" class="nav-center-logo-image" src="${this.logo}" @click=${
+                        () => this.select("/")
+                      }/> `
                       : ""
               }
                 ${hasName ? html`<h1 style="margin-bottom: 0;">${this.name}</h1>` : ""}
@@ -168,6 +170,8 @@ export class Sidebar extends LitElement {
                         const info = page.info ?? {};
                         const label = info.label ?? id;
                         const icon = info.icon ?? "";
+
+                        if (info.hidden) return;
 
                         const a = document.createElement("a");
                         a.setAttribute("data-id", id);

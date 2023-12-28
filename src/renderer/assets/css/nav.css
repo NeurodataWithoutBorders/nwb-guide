@@ -107,6 +107,10 @@ a[data-toggle="collapse"] {
     padding-bottom: 0px;
 }
 
+#main-nav .sidebar-header img {
+    cursor: pointer;
+}
+
 #main-nav .sidebar-body {
     display: flex;
     flex-direction: column;
@@ -115,6 +119,15 @@ a[data-toggle="collapse"] {
     margin-top: 15px;
     border-top: 1px solid #d5d5d5;
     flex-grow: 1;
+}
+
+#main-nav .sidebar-body > *:last-child {
+    /* margin-top: 50px; */
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    position: sticky;
+    bottom: 0;
+    background: var(--color-sidebar);
 }
 
 #main-nav ul.components {
