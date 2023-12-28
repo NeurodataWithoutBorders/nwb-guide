@@ -107,11 +107,25 @@ a[data-toggle="collapse"] {
     padding-bottom: 0px;
 }
 
+#main-nav .sidebar-header img {
+    cursor: pointer;
+}
+
 #main-nav .sidebar-body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow-y: auto;
+    margin-top: 15px;
     flex-grow: 1;
+}
+
+#main-nav .sidebar-body > *:last-child {
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    position: sticky;
+    bottom: 0;
+    background: var(--color-sidebar);
 }
 
 #main-nav ul.components {
