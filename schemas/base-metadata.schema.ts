@@ -63,6 +63,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     nwbProps.related_publications.description = "Provide a PMID, DOI, URL, etc. for each publication."
     nwbProps.related_publications.items.description = "Provide a PMID, DOI, URL, etc."
 
+    nwbProps.keywords.items.description = "Provide a single keyword (e.g. Neural circuits, V1, etc.)"
+
     // Resolve species suggestions
     resolve(serverGlobals.species, (res) => {
         const info = getSpeciesInfo(res)
