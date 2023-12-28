@@ -240,7 +240,7 @@ export class JSONSchemaForm extends LitElement {
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
 
-        this.conditionalRequirements = props.conditionalRequirements ?? []; // NOTE: We assume properties only belong to one conditional requirement group
+        this.groups = props.groups ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
         this.validateEmptyValues = props.validateEmptyValues ?? true;
 
@@ -660,10 +660,16 @@ export class JSONSchemaForm extends LitElement {
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
-        return this.conditionalRequirements.find((linked) =>
-            linked.properties.find((link) => link.join("-") === args.join("-"))
-        );
-    };
+        const group  = this.#getGroup(args);
+        if (!group) return;
+        return group.validate ? group : undefined;
+    }
+
+    #getGroup = (args) => {
+        if (typeof args === "string") args = args.split("-");
+        const group = this.groups.find((linked) => linked.properties.find((link) => link.join("-") === args.join("-")));
+        return group
+    }
 
     #applyToLinkedProperties = (fn, externalPath) => {
         const links = this.#getLink(externalPath)?.properties;
@@ -698,8 +704,8 @@ export class JSONSchemaForm extends LitElement {
         return res;
     };
 
-    #getLinkElement = (externalPath) => {
-        const link = this.#getLink(externalPath);
+    #getGroupElement = (externalPath) => {
+        const link = this.#getGroup(externalPath);
         if (!link) return;
         return this.shadowRoot.querySelector(`[data-name="${link.name}"]`);
     };
@@ -838,11 +844,12 @@ export class JSONSchemaForm extends LitElement {
 
         const input = this.getInput(localPath);
 
+        const groupEl = this.#getGroupElement(externalPath);
+
         if (isValid && resolvedErrors.length === 0) {
             input.classList.remove("invalid");
 
-            const linkEl = this.#getLinkElement(externalPath);
-            if (linkEl) linkEl.classList.remove("required", "conditional");
+            if (groupEl) groupEl.classList.remove("required", "conditional");
 
             await this.#applyToLinkedProperties((path, element) => {
                 element.classList.remove("required", "conditional"); // Links manage their own error and validity states, but only one needs to be valid
@@ -855,8 +862,7 @@ export class JSONSchemaForm extends LitElement {
             // Add new invalid classes and errors
             input.classList.add("invalid");
 
-            const linkEl = this.#getLinkElement(externalPath);
-            if (linkEl) linkEl.classList.add("required", "conditional");
+            if (groupEl) groupEl.classList.add("required", "conditional");
 
             // Only add the conditional class for linked elements
             await this.#applyToLinkedProperties(
@@ -887,8 +893,7 @@ export class JSONSchemaForm extends LitElement {
 
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
-            const link = this.#getLink(externalPath); // Use the base path to find a link
-
+            const link = this.#getGroup(externalPath); // Use the base path to find a link
             if (link) {
                 if (!acc.find(([_, info]) => info === link)) {
                     const entry = [link.name, link];
@@ -953,7 +958,6 @@ export class JSONSchemaForm extends LitElement {
         }
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
-        console.log(sorted)
 
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
@@ -1042,7 +1046,7 @@ export class JSONSchemaForm extends LitElement {
                     onlyRequired: this.onlyRequired,
                     showLevelOverride: this.showLevelOverride,
                     deferLoading: this.deferLoading,
-                    conditionalRequirements: this.conditionalRequirements,
+                    groups: this.groups,
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,

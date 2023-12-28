@@ -73,7 +73,7 @@ export async function createDandiset(results = {}) {
                     ];
             }
         },
-        conditionalRequirements: [
+        groups: [
             {
                 name: "Embargo your Data",
                 properties: [["embargo_status"], ["nih_award_number"]],

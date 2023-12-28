@@ -105,7 +105,7 @@ Linked.args = {
         },
         required: ["required"],
     },
-    conditionalRequirements: [
+    groups: [
         {
             name: "Subject Age",
             properties: [["age"], ["date_of_birth"]],

@@ -164,15 +164,27 @@ export class GuidedMetadataPage extends ManagedPage {
                 if (e.message.includes('does not conform to the "date-time" format.')) return false;
             },
 
-            conditionalRequirements: [
+            groups: [
                 {
                     name: "Subject Age",
                     properties: [
                         ["Subject", "age"],
                         ["Subject", "date_of_birth"],
                     ],
+                    validate: true
                 },
+                {
+                    name: "Institutional Info",
+                    properties: [
+                        ["NWBFile", "institution"],
+                        ["NWBFile", "lab"]
+                    ],
+                }
             ],
+
+            
+
+
 
             // deferLoading: true,
             onLoaded: () => {
