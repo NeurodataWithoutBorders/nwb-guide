@@ -13,6 +13,7 @@ import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
 import { Validator } from "jsonschema";
+import { successHue, warningHue, errorHue } from "./globals";
 
 var v = new Validator();
 
@@ -98,18 +99,26 @@ const componentCSS = `
       font-weight: bold;
     }
 
-    .link.required::after {
-      box-sizing: border-box;
-      display: block;
-      width: 10px;
-      height: 10px;
-      background: #ff3d64;
-      border-radius: 50%;
-      position: absolute;
-      top: 0;
-      right: 0;
-      content: '';
-      margin: 15px;
+    .link::after {
+        box-sizing: border-box;
+        display: block;
+        width: 10px;
+        height: 10px;
+        background: hsl(${successHue}, 100%, 70%) !important;
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        content: '';
+        margin: 15px;
+      }
+
+    .link.error::after {
+        background: hsl(${errorHue}, 100%, 70%) !important;
+    }
+
+    .link.warning::after {
+        background: hsl(${warningHue}, 100%, 70%) !important;
     }
 
     hr {
@@ -846,10 +855,13 @@ export class JSONSchemaForm extends LitElement {
 
         const groupEl = this.#getGroupElement(externalPath);
 
+        if (groupEl) {
+            groupEl.classList[resolvedErrors.length ? "add" : "remove"]("error");
+            groupEl.classList[warnings.length ? "add" : "remove"]("warning");
+        }
+
         if (isValid && resolvedErrors.length === 0) {
             input.classList.remove("invalid");
-
-            if (groupEl) groupEl.classList.remove("required", "conditional");
 
             await this.#applyToLinkedProperties((path, element) => {
                 element.classList.remove("required", "conditional"); // Links manage their own error and validity states, but only one needs to be valid
@@ -861,8 +873,6 @@ export class JSONSchemaForm extends LitElement {
         } else {
             // Add new invalid classes and errors
             input.classList.add("invalid");
-
-            if (groupEl) groupEl.classList.add("required", "conditional");
 
             // Only add the conditional class for linked elements
             await this.#applyToLinkedProperties(

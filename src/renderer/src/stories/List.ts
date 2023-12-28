@@ -61,7 +61,7 @@ export class List extends LitElement {
 
 
       ol:not(:has(li)) {
-        margin: 0;
+        margin-top: 0;
       }
 
 
