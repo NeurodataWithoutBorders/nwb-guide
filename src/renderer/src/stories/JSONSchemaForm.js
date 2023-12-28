@@ -188,6 +188,8 @@ export class JSONSchemaForm extends LitElement {
 
     base = [];
     #nestedForms = {};
+    inputs = []
+
     tables = {};
     #nErrors = 0;
     #nWarnings = 0;
@@ -513,6 +515,8 @@ export class JSONSchemaForm extends LitElement {
             required: isRequired,
             validateEmptyValue: this.validateEmptyValues,
         });
+
+        this.inputs.push(interactiveInput)
 
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
@@ -859,6 +863,8 @@ export class JSONSchemaForm extends LitElement {
     #accordions = {};
 
     #render = (schema, results, required = {}, path = []) => {
+
+        
         let isLink = Symbol("isLink");
         // Filter non-required properties (if specified) and render the sub-schema
         const renderable = this.#getRenderable(schema, required, path);
@@ -1154,6 +1160,7 @@ export class JSONSchemaForm extends LitElement {
     #resetLoadState() {
         this.#loaded = false;
         this.nLoaded = 0;
+        this.inputs = []
     }
 
     // Check if everything is internally rendered

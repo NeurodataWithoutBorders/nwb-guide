@@ -116,7 +116,7 @@ const pages = {
             }),
 
             structure: new GuidedStructurePage({
-                title: "Data Formats",
+                title: "Provide Data Formats",
                 label: "Data formats",
                 section: sections[0],
             }),
@@ -134,7 +134,7 @@ const pages = {
             }),
 
             sourcedata: new GuidedSourceDataPage({
-                title: "Source Data",
+                title: "Source Data Information",
                 label: "Source data",
                 section: sections[1],
             }),
