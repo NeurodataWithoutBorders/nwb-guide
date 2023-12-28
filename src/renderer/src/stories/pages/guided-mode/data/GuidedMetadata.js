@@ -91,7 +91,10 @@ export class GuidedMetadataPage extends ManagedPage {
                 merge(globalResolved, globals);
                 return resolveGlobalOverrides(this.subject, globals);
             },
-            validateOnChange,
+            formProps: {
+                showPath: true,
+                validateOnChange,
+            }
         }));
         document.body.append(modal);
     }

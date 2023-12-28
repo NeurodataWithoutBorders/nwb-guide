@@ -60,6 +60,10 @@ export class List extends LitElement {
       }
 
 
+      ol:not(:has(li)) {
+        margin: 0;
+      }
+
 
       :host([unordered]) ol {
         list-style-type: none;

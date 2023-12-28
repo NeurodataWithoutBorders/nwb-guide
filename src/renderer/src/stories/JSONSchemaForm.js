@@ -51,17 +51,17 @@ const componentCSS = `
     .guided--form-label {
       display: block;
       width: 100%;
-      margin-top: 1.45rem;
+      margin: 1.45rem 0 0 0;
       color: black;
       font-weight: 600;
     }
 
-    jsonschema-input {
-        margin-top: 0.45rem;
-    }
-
     .form-section:first-child .guided--form-label {
       margin-top: 0;
+    }
+
+    jsonschema-input {
+        margin-top: 0.5rem;
     }
 
     .guided--form-label {
@@ -907,10 +907,10 @@ export class JSONSchemaForm extends LitElement {
                 const header1 = header(name);
                 const header2 = header(name2);
                 if (header1.toLowerCase() < header2.toLowerCase()) {
-                    return 1;
+                    return -1;
                 }
                 if (header1.toLowerCase() > header2.toLowerCase()) {
-                    return -1;
+                    return 1;
                 }
                 return 0;
             })
@@ -936,7 +936,8 @@ export class JSONSchemaForm extends LitElement {
 
                 if (e1[isLink] || e2[isLink]) return 0;
 
-                if (info2.properties) return -1;
+                if (info2.properties && info.properties)  return 0
+                else if (info2.properties) return -1;
                 else if (info.properties) return 1;
                 else return 0;
             });

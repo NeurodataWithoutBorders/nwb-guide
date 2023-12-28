@@ -238,11 +238,7 @@ export class Accordion extends LitElement {
         else if (this.disabled) return false; // Force closed if disabled
         return state;
     };
-
-    updated() {
-        console.log(this)
-    }
-
+    
     render() {
         const isToggleable = this.content && this.toggleable;
 
