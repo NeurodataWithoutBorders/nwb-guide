@@ -290,7 +290,6 @@ export class JSONSchemaForm extends LitElement {
 
     getInput = (path) => {
         if (typeof path === "string") path = path.split(".");
-
         const container = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
 
         if (!container) {
@@ -844,9 +843,9 @@ export class JSONSchemaForm extends LitElement {
         name,
         path = [],
         checkLinks = true,
-        input = this.getInput([...path, name]),
-        schema = this.getSchema([...path, name]),
-        parent = this.#get(path, this.resolved),
+        input,
+        schema,
+        parent,
         hooks = {}
     ) => {
         const { onError, onWarning } = hooks;
