@@ -139,9 +139,14 @@ export class Sidebar extends LitElement {
           <div class="sidebar-header">
               ${
                   logoNoName
-                      ? html` <img id="button-soda-big-icon" class="nav-center-logo-image" src="${this.logo}" @click=${
-                        () => this.select("/")
-                      }/> `
+                      ? html`
+                            <img
+                                id="button-soda-big-icon"
+                                class="nav-center-logo-image"
+                                src="${this.logo}"
+                                @click=${() => this.select("/")}
+                            />
+                        `
                       : ""
               }
                 ${hasName ? html`<h1 style="margin-bottom: 0;">${this.name}</h1>` : ""}
