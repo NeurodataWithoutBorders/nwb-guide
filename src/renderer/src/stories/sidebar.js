@@ -164,7 +164,6 @@ export class Sidebar extends LitElement {
 
                     const groups = {};
 
-
                     Object.entries(this.pages).forEach(([id, page]) => {
                         const info = page.info ?? {};
                         const label = info.label ?? id;
@@ -185,12 +184,12 @@ export class Sidebar extends LitElement {
                         parent.append(a);
                     });
 
-                    const bottomGroup = groups["bottom"]
-                    delete groups["bottom"]
+                    const bottomGroup = groups["bottom"];
+                    delete groups["bottom"];
 
                     for (let key in groups) {
-                        const group = groups[key]
-                        const title = document.createElement("h4")
+                        const group = groups[key];
+                        const title = document.createElement("h4");
                         Object.assign(title.style, {
                             color: "gray",
                             fontSize: "14px",
@@ -198,12 +197,12 @@ export class Sidebar extends LitElement {
                             borderBottom: "1px solid #ccc",
                             margin: 0,
                             marginBottom: "10px",
-                        })
-                        title.innerHTML = header(key)
-                        group.prepend(title)
+                        });
+                        title.innerHTML = header(key);
+                        group.prepend(title);
                     }
 
-                    ul.append(...Object.values(groups))
+                    ul.append(...Object.values(groups));
 
                     return [ul, bottomGroup];
                 })()}
