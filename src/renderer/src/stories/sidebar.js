@@ -197,6 +197,9 @@ export class Sidebar extends LitElement {
                         parent.append(li);
                     });
 
+                    const bottomGroup = groups["bottom"];
+                    delete groups["bottom"];
+
                     for (let key in groups) {
                         const group = groups[key];
                         const title = document.createElement("h4");
@@ -211,9 +214,6 @@ export class Sidebar extends LitElement {
                         title.innerHTML = header(key);
                         group.prepend(title);
                     }
-
-                    const bottomGroup = groups["Configuration"];
-                    delete groups["Configuration"];
 
                     ul.append(...Object.values(groups));
 

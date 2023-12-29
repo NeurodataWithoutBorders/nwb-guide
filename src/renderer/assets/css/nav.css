@@ -118,12 +118,14 @@ a[data-toggle="collapse"] {
     overflow-y: hidden;
     margin-top: 15px;
     flex-grow: 1;
-    border-top: 1px solid #dcdcdc;
+    border-top: 1px solid #8f8f8f;
 }
 
 #main-nav .sidebar-body > *:last-child {
     background: var(--color-sidebar);
-    border-top: 1px solid #dcdcdc;
+    padding: 3px;
+    padding-top: 8px;
+    border-top: 1px solid #8f8f8f;
 }
 
 #main-nav .sidebar-body > *:last-child h4 {
