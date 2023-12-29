@@ -37,7 +37,7 @@ dashboard.logo = logo;
 dashboard.name = "NWB GUIDE";
 dashboard.renderNameInSidebar = false;
 
-const resourcesGroup = 'Resources'
+const resourcesGroup = "Resources";
 
 const overviewIcon = `
 <svg
