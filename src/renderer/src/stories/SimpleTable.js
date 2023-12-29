@@ -163,7 +163,7 @@ export class SimpleTable extends LitElement {
     constructor({
         schema,
         data,
-        template,
+        globals,
         keyColumn,
         validateOnChange,
         validateEmptyCells,
@@ -178,7 +178,7 @@ export class SimpleTable extends LitElement {
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
-        this.template = template ?? {};
+        this.globals = globals ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.deferLoading = deferLoading ?? false;
         this.maxHeight = maxHeight ?? "";
@@ -334,7 +334,7 @@ export class SimpleTable extends LitElement {
             } else
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
-                    this.template[col] ??
+                    this.globals[col] ??
                     this.schema.properties[col].default ??
                     "";
             return value;
@@ -631,11 +631,11 @@ export class SimpleTable extends LitElement {
         }
         // Update data on passed object
         else {
-            if (value == undefined || value === "") delete target[rowName][header];
+            if (value == undefined || value === "") target[rowName][header] = undefined;
             else target[rowName][header] = value;
         }
 
-        if (cell.interacted) this.onUpdate(rowName, header, value);
+        if (cell.interacted) this.onUpdate([rowName, header], value);
     };
 
     #createCell = (value, info) => {

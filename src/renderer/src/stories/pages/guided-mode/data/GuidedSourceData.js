@@ -3,14 +3,31 @@ import { isStorybook } from "../../../../dependencies/globals.js";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
-import { baseUrl } from "../../../../globals.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils.js";
-import getSourceDataSchema from "../../../../../../../schemas/source-data.schema";
+import { merge, sanitize } from "../../utils.js";
+import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
+
+import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { header } from "../../../forms/utils";
+import { Button } from "../../../Button.js";
+
+import globalIcon from "../../../assets/global.svg?raw";
+
+import { baseUrl } from "../../../../server/globals";
+
+const propsToIgnore = [
+    "verbose",
+    "es_key",
+    "exclude_shanks",
+    "load_sync_channel",
+    "stream_id", // NOTE: May be desired for other interfaces
+    "nsx_override",
+];
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     beforeSave = () => {
@@ -18,8 +35,18 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     header = {
+        controls: [
+            new Button({
+                icon: globalIcon,
+                label: "Edit Global Source Data",
+                onClick: () => {
+                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
         subtitle:
-            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required",
+            "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
     };
 
     footer = {
@@ -52,13 +79,15 @@ export class GuidedSourceDataPage extends ManagedPage {
             });
 
             await Promise.all(
-                this.mapSessions(async ({ subject, session, info }) => {
+                Object.values(this.forms).map(async ({ subject, session, form }) => {
+                    const info = this.info.globalState.results[subject][session];
+
                     // NOTE: This clears all user-defined results
                     const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            source_data: info.source_data,
+                            source_data: sanitize(structuredClone(form.resolved)), // Use resolved values, including global source data
                             interfaces: this.info.globalState.interfaces,
                         }),
                     })
@@ -75,29 +104,40 @@ export class GuidedSourceDataPage extends ManagedPage {
                     if (isStorybook) return;
 
                     if (result.message) {
-                        const [
-                            type,
-                            text = `<small><pre>${result.traceback
-                                .trim()
-                                .split("\n")
-                                .slice(-2)[0]
-                                .trim()}</pre></small>`,
-                        ] = result.message.split(":");
+                        const [type, ...splitText] = result.message.split(":");
+                        const text = splitText.length
+                            ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
+                            : `<small><pre>${result.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`;
+
                         const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
                         this.notify(message, "error");
                         throw result;
                     }
 
+                    const { results: metadata, schema } = result;
+
+                    // Always delete Ecephys if absent ( NOTE: temporarily manually removing from schema on backend...)
+                    const alwaysDelete = ["Ecephys"];
+                    alwaysDelete.forEach((k) => {
+                        if (!metadata[k]) delete info.metadata[k]; // Delete directly on metadata
+                    });
+
+                    for (let key in info.metadata) {
+                        if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
+                    }
+
                     // Merge metadata results with the generated info
-                    merge(result.results, info.metadata);
+                    merge(metadata, info.metadata);
 
                     // Mirror structure with metadata schema
-                    const schema = this.info.globalState.schema;
-                    if (!schema.metadata) schema.metadata = {};
-                    if (!schema.metadata[subject]) schema.metadata[subject] = {};
-                    schema.metadata[subject][session] = result.schema;
+                    const schemaGlobal = this.info.globalState.schema;
+                    if (!schemaGlobal.metadata) schemaGlobal.metadata = {};
+                    if (!schemaGlobal.metadata[subject]) schemaGlobal.metadata[subject] = {};
+                    schemaGlobal.metadata[subject][session] = schema;
                 })
             );
+
+            await this.save(undefined, false); // Just save new raw values
 
             this.to(1);
         },
@@ -109,26 +149,23 @@ export class GuidedSourceDataPage extends ManagedPage {
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
 
-        const schemaResolved = getSourceDataSchema(schema);
-
         const form = new JSONSchemaForm({
             identifier: instanceId,
-            mode: "accordion",
-            schema: schemaResolved,
+            schema: preprocessSourceDataSchema(schema),
             results: info.source_data,
-            ignore: [
-                "verbose",
-                "es_key",
-                "exclude_shanks",
-                "load_sync_channel",
-                "stream_id", // NOTE: May be desired for other interfaces
-                "nsx_override",
-            ],
+            emptyMessage: "No source data required for this session.",
+            ignore: propsToIgnore,
+            globals: this.info.globalState.project.SourceData,
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+            },
             // onlyRequired: true,
-            onUpdate: () => (this.unsavedUpdates = true),
+            onUpdate: () => (this.unsavedUpdates = "conversions"),
             onStatusChange: (state) => this.manager.updateState(instanceId, state),
             onThrow,
         });
+
+        form.style.height = "100%";
 
         return {
             subject,
@@ -137,8 +174,32 @@ export class GuidedSourceDataPage extends ManagedPage {
         };
     };
 
+    #globalModal = null;
+
+    connectedCallback() {
+        super.connectedCallback();
+        const modal = (this.#globalModal = createGlobalFormModal.call(this, {
+            header: "Global Source Data",
+            propsToRemove: [
+                ...propsToIgnore,
+                "folder_path",
+                "file_path",
+                // NOTE: Still keeping plural path specifications for now
+            ],
+            key: "SourceData",
+            schema: this.info.globalState.schema.source_data,
+            hasInstances: true,
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.#globalModal) this.#globalModal.remove();
+    }
+
     render() {
-        this.localState = { results: merge(this.info.globalState.results, {}) };
+        this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState);
 

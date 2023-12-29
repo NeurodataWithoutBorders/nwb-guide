@@ -33,6 +33,13 @@ import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/g
 import DeepLabCutInterfaceSchema from "../../../../../../schemas/json/generated/DeepLabCutInterface.json";
 import SLEAPInterfaceSchema from "../../../../../../schemas/json/generated/SLEAPInterface.json";
 import FicTracDataInterfaceSchema from "../../../../../../schemas/json/generated/FicTracDataInterface.json";
+import AudioInterfaceSchema from "../../../../../../schemas/json/generated/AudioInterface.json";
+import MiniscopeBehaviorInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeBehaviorInterface.json";
+import EDFRecordingInterfaceSchema from "../../../../../../schemas/json/generated/EDFRecordingInterface.json";
+import SpikeGLXConverterPipeSchema from "../../../../../../schemas/json/generated/SpikeGLXConverterPipe.json";
+import BrukerTiffSinglePlaneConverterSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneConverter.json";
+import BrukerTiffMultiPlaneConverterSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneConverter.json";
+import MiniscopeConverterSchema from "../../../../../../schemas/json/generated/MiniscopeConverter.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -111,6 +118,19 @@ globalStateCopy.schema.source_data.properties.DeepLabCutInterface =
 globalStateCopy.schema.source_data.properties.SLEAPInterface = SLEAPInterfaceSchema.properties.SLEAPInterface;
 globalStateCopy.schema.source_data.properties.FicTracDataInterface =
     FicTracDataInterfaceSchema.properties.FicTracDataInterface;
+globalStateCopy.schema.source_data.properties.AudioInterface = AudioInterfaceSchema.properties.AudioInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeBehaviorInterface =
+    MiniscopeBehaviorInterfaceSchema.properties.MiniscopeBehaviorInterface;
+globalStateCopy.schema.source_data.properties.EDFRecordingInterface =
+    EDFRecordingInterfaceSchema.properties.EDFRecordingInterface;
+globalStateCopy.schema.source_data.properties.SpikeGLXConverterPipe =
+    SpikeGLXConverterPipeSchema.properties.SpikeGLXConverterPipe;
+globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneConverter =
+    BrukerTiffSinglePlaneConverterSchema.properties.BrukerTiffSinglePlaneConverter;
+globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneConverter =
+    BrukerTiffMultiPlaneConverterSchema.properties.BrukerTiffMultiPlaneConverter;
+globalStateCopy.schema.source_data.properties.MiniscopeConverter =
+    MiniscopeConverterSchema.properties.MiniscopeConverter;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -327,3 +347,45 @@ const FicTracDataInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 FicTracDataInterfaceGlobalCopy.interfaces.interface = FicTracDataInterface;
 FicTracDataInterfaceGlobalCopy.schema.source_data = FicTracDataInterfaceSchema;
 FicTracDataInterface.args = { activePage, globalState: FicTracDataInterfaceGlobalCopy };
+
+export const AudioInterface = PageTemplate.bind({});
+const AudioInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+AudioInterfaceGlobalCopy.interfaces.interface = AudioInterface;
+AudioInterfaceGlobalCopy.schema.source_data = AudioInterfaceSchema;
+AudioInterface.args = { activePage, globalState: AudioInterfaceGlobalCopy };
+
+export const MiniscopeBehaviorInterface = PageTemplate.bind({});
+const MiniscopeBehaviorInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeBehaviorInterfaceGlobalCopy.interfaces.interface = MiniscopeBehaviorInterface;
+MiniscopeBehaviorInterfaceGlobalCopy.schema.source_data = MiniscopeBehaviorInterfaceSchema;
+MiniscopeBehaviorInterface.args = { activePage, globalState: MiniscopeBehaviorInterfaceGlobalCopy };
+
+export const EDFRecordingInterface = PageTemplate.bind({});
+const EDFRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+EDFRecordingInterfaceGlobalCopy.interfaces.interface = EDFRecordingInterface;
+EDFRecordingInterfaceGlobalCopy.schema.source_data = EDFRecordingInterfaceSchema;
+EDFRecordingInterface.args = { activePage, globalState: EDFRecordingInterfaceGlobalCopy };
+
+export const SpikeGLXConverterPipe = PageTemplate.bind({});
+const SpikeGLXConverterPipeGlobalCopy = JSON.parse(JSON.stringify(globalState));
+SpikeGLXConverterPipeGlobalCopy.interfaces.interface = SpikeGLXConverterPipe;
+SpikeGLXConverterPipeGlobalCopy.schema.source_data = SpikeGLXConverterPipeSchema;
+SpikeGLXConverterPipe.args = { activePage, globalState: SpikeGLXConverterPipeGlobalCopy };
+
+export const BrukerTiffSinglePlaneConverter = PageTemplate.bind({});
+const BrukerTiffSinglePlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffSinglePlaneConverterGlobalCopy.interfaces.interface = BrukerTiffSinglePlaneConverter;
+BrukerTiffSinglePlaneConverterGlobalCopy.schema.source_data = BrukerTiffSinglePlaneConverterSchema;
+BrukerTiffSinglePlaneConverter.args = { activePage, globalState: BrukerTiffSinglePlaneConverterGlobalCopy };
+
+export const BrukerTiffMultiPlaneConverter = PageTemplate.bind({});
+const BrukerTiffMultiPlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffMultiPlaneConverterGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneConverter;
+BrukerTiffMultiPlaneConverterGlobalCopy.schema.source_data = BrukerTiffMultiPlaneConverterSchema;
+BrukerTiffMultiPlaneConverter.args = { activePage, globalState: BrukerTiffMultiPlaneConverterGlobalCopy };
+
+export const MiniscopeConverter = PageTemplate.bind({});
+const MiniscopeConverterGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeConverterGlobalCopy.interfaces.interface = MiniscopeConverter;
+MiniscopeConverterGlobalCopy.schema.source_data = MiniscopeConverterSchema;
+MiniscopeConverter.args = { activePage, globalState: MiniscopeConverterGlobalCopy };

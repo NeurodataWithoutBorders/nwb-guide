@@ -8,6 +8,10 @@
     /* src: local('Source Code Pro'), local('SourceCodePro'), url(fonts/SourceCodePro-Regular.ttf) format('truetype'); */
 }
 
+.swal-conversion-actions {
+    margin-top: 0px !important;
+}
+
 /*  Notfy */
 .notyf__toast {
     max-width: 40vw !important;
@@ -15,6 +19,15 @@
 
 .notyf__message {
     word-break: break-all;
+}
+
+/* Tippy */
+.tippy-box[data-theme~="error"] {
+    background-color: hsl(0, 100%, 70%);
+}
+
+.tippy-box[data-theme~="warning"] {
+    background-color: hsl(57, 100%, 70%);
 }
 
 /* Global ---------------------------- */

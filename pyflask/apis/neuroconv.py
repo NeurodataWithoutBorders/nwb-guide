@@ -6,6 +6,7 @@ from flask import Response
 
 from manageNeuroconv import (
     get_all_interface_info,
+    get_all_converter_info,
     locate_data,
     get_source_schema,
     get_metadata_schema,
@@ -16,7 +17,7 @@ from manageNeuroconv import (
     inspect_nwb_file,
     inspect_nwb_folder,
     inspect_multiple_filesystem_objects,
-    upload_to_dandi,
+    upload_project_to_dandi,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
 )
@@ -40,7 +41,13 @@ class AllInterfaces(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
         try:
-            return get_all_interface_info()
+            # return get_all_interface_info()
+            # return get_all_converter_info()
+
+            return {
+                **get_all_interface_info(),
+                **get_all_converter_info(),
+            }
         except Exception as e:
             if notBadRequestException(e):
                 neuroconv_api.abort(500, str(e))
@@ -116,11 +123,19 @@ class Validate(Resource):
 
 
 @neuroconv_api.route("/upload/project")
-class Upload(Resource):
+class UploadProject(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return upload_to_dandi(**neuroconv_api.payload)
+            import psutil
+
+            upload_options = neuroconv_api.payload
+            if "number_of_jobs" not in upload_options:
+                upload_options.update(number_of_jobs=1)
+            if "number_of_threads" not in upload_options:
+                upload_options.update(number_of_threads=1)
+
+            return upload_project_to_dandi(**upload_options)
 
         except Exception as e:
             if notBadRequestException(e):
@@ -128,11 +143,19 @@ class Upload(Resource):
 
 
 @neuroconv_api.route("/upload/folder")
-class Upload(Resource):
+class UploadFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return upload_folder_to_dandi(**neuroconv_api.payload)
+            import psutil
+
+            upload_options = neuroconv_api.payload
+            if "number_of_jobs" not in upload_options:
+                upload_options.update(number_of_jobs=1)
+            if "number_of_threads" not in upload_options:
+                upload_options.update(number_of_threads=1)
+
+            return upload_folder_to_dandi(**upload_options)
 
         except Exception as e:
             if notBadRequestException(e):

@@ -3,14 +3,7 @@ import { JSONSchemaForm } from "./JSONSchemaForm";
 export default {
     title: "Components/JSON Schema Form",
     // Set controls
-    argTypes: {
-        mode: {
-            options: ["default", "accordion"],
-            control: {
-                type: "select",
-            },
-        },
-    },
+    argTypes: {},
 };
 
 const Template = (args) => new JSONSchemaForm(args);
@@ -53,7 +46,6 @@ Default.args = {
 
 export const Nested = Template.bind({});
 Nested.args = {
-    mode: "accordion",
     results: {
         name: "name",
         ignored: true,

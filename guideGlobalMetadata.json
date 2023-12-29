@@ -34,6 +34,13 @@
         "DeepLabCutInterface",
         "SLEAPInterface",
         "FicTracDataInterface",
+        "AudioInterface",
+        "MiniscopeBehaviorInterface",
+        "EDFRecordingInterface",
+        "SpikeGLXConverterPipe",
+        "BrukerTiffSinglePlaneConverter",
+        "BrukerTiffMultiPlaneConverter",
+        "MiniscopeConverter",
         "CellExplorerRecordingInterface"
     ]
 }
