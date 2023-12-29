@@ -203,7 +203,7 @@ export class FilesystemSelector extends LitElement {
 
         const objectTypeReference = getObjectTypeReferenceString(this.type, this.multiple);
 
-        const ogThis = this;
+        const instanceThis = this;
 
         return html`
             <div>
@@ -253,10 +253,10 @@ export class FilesystemSelector extends LitElement {
                 </button>
                 ${this.multiple && this.value.length > 1
                     ? new List({
-                          items: this.value.map((v) => ({ value: v + 1 })),
+                          items: this.value.map((v) => ({ value: v })),
                           editable: false,
                           onChange: function () {
-                              ogThis.value = this.items.map((item) => item.value);
+                              instanceThis.value = this.items.map((item) => item.value);
                           },
                       })
                     : ""}
