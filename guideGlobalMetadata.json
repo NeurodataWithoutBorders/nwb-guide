@@ -29,6 +29,7 @@
         "PlexonRecordingInterface",
         "PlexonSortingInterface",
         "AxonaRecordingInterface",
+        "VideoInterface",
         "NeuralynxRecordingInterface",
         "AlphaOmegaRecordingInterface",
         "DeepLabCutInterface",
