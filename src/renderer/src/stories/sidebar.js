@@ -72,7 +72,7 @@ export class Sidebar extends LitElement {
         // Actually click the item
         let selectedItem = this.#selected
             ? (this.shadowRoot ?? this).querySelector(`ul[data-id='${this.#selected}']`)
-            : (this.shadowRoot ?? this).querySelector("ul").children[0];
+            : (this.shadowRoot ?? this).querySelector("ul").querySelector("a");
         if (this.initialize && selectedItem) selectedItem.click();
         else if (this.#selected) this.selectItem(this.#selected); // Visually select the item
 
@@ -187,14 +187,16 @@ export class Sidebar extends LitElement {
                         const li = document.createElement("li");
                         li.append(a);
 
+                        if (info.hidden) {
+                            li.style.display = "none";
+                        }
+
+
                         const parent = info.group
                             ? groups[info.group] ?? (groups[info.group] = document.createElement("div"))
                             : ul;
-                        parent.append(a);
+                        parent.append(li);
                     });
-
-                    const bottomGroup = groups["bottom"];
-                    delete groups["bottom"];
 
                     for (let key in groups) {
                         const group = groups[key];
@@ -210,6 +212,9 @@ export class Sidebar extends LitElement {
                         title.innerHTML = header(key);
                         group.prepend(title);
                     }
+
+                    const bottomGroup = groups["Configuration"];
+                    delete groups["Configuration"];
 
                     ul.append(...Object.values(groups));
 
