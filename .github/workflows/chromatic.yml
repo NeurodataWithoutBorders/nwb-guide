@@ -7,11 +7,13 @@ on:
 
 jobs:
   test:
-    if: github.event.action == 'workflow_dispatch' || (github.event.action == 'pull_request_review' && github.event.review.state == 'approved')
+    # if: github.event.action == 'workflow_dispatch' || (github.event.action == 'pull_request_review' && github.event.review.state == 'approved')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - run: npm ci
+      - run: |
+          echo "${{ github.event.action }}"
+          npm ci
       - uses: chromaui/action@v1
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
