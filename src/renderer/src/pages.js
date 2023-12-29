@@ -37,7 +37,7 @@ dashboard.logo = logo;
 dashboard.name = "NWB GUIDE";
 dashboard.renderNameInSidebar = false;
 
-const helpGroup = 'Help'
+const helpGroup = "Help";
 
 const overviewIcon = `
 <svg
@@ -210,7 +210,7 @@ const pages = {
     settings: new SettingsPage({
         label: "Settings",
         icon: settingsIcon,
-        group: 'Configuration',
+        group: "Configuration",
     }),
 };
 

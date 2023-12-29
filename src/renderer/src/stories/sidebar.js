@@ -191,7 +191,6 @@ export class Sidebar extends LitElement {
                             li.style.display = "none";
                         }
 
-
                         const parent = info.group
                             ? groups[info.group] ?? (groups[info.group] = document.createElement("div"))
                             : ul;
