@@ -41,6 +41,7 @@
         "SpikeGLXConverterPipe",
         "BrukerTiffSinglePlaneConverter",
         "BrukerTiffMultiPlaneConverter",
-        "MiniscopeConverter"
+        "MiniscopeConverter",
+        "CellExplorerRecordingInterface"
     ]
 }
