@@ -1,11 +1,10 @@
-import { updateURLParams } from "../../utils/url.js";
 import isElectron from "./check.js";
 
 export { isElectron };
 
 export let port = 4242;
 export let SERVER_FILE_PATH = "";
-export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
+export let electron = {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
 export let remote = {};
@@ -16,35 +15,23 @@ export let crypto = null;
 
 // Used in tests
 try {
-    crypto = require("crypto");
+    crypto = require("node:crypto");
 } catch {}
 
 if (isElectron) {
     try {
+        electron = require("electron");
         fs = require("fs-extra"); // File System
-        os = require("os");
-        crypto = require("crypto");
-        remote = require("@electron/remote");
-        app = remote.app;
-
-        electron.ipcRenderer.on("fileOpened", (info, filepath) => {
-            updateURLParams({ file: filepath });
-            const dashboard = document.querySelector("nwb-dashboard");
-            const activePage = dashboard.getAttribute("activePage");
-            if (activePage === "preview") dashboard.requestUpdate();
-            else dashboard.setAttribute("activePage", "preview");
-        });
-
-        ["log", "warn", "error"].forEach((method) =>
-            electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args))
-        );
-
-        port = electron.ipcRenderer.sendSync("get-port");
+        os = require("node:os");
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
-        SERVER_FILE_PATH = electron.ipcRenderer.sendSync("get-server-file-path");
+        path = require("node:path");
 
-        path = require("path");
+        const { url, filepath } = commoners.services.flask;
+
+        port = new URL(url).port;
+
+        SERVER_FILE_PATH = filepath;
     } catch (e) {
         console.error("Electron API access failed —", e);
     }

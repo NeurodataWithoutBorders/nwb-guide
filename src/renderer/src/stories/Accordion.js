@@ -55,16 +55,7 @@ export class Accordion extends LitElement {
                 margin: 10px;
             }
 
-            .guided--nav-bar-section {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: flex-start;
-                width: 100%;
-                height: 100%;
-            }
-
-            .guided--nav-bar-section > * {
+            :host > * {
                 padding: 0px 10px;
             }
 
@@ -243,58 +234,36 @@ export class Accordion extends LitElement {
         const isToggleable = this.content && this.toggleable;
 
         return html`
-            <div class="guided--nav-bar-section">
-                <div
-                    id="dropdown"
-                    class="guided--nav-bar-dropdown ${isToggleable && "toggleable"} ${this.disabled
-                        ? "disabled"
-                        : ""} ${this.status}"
-                    @click=${() => isToggleable && this.toggle()}
-                >
-                    <div class="header">
-                        <span>${this.name}</span>
-                        <small>${this.subtitle}</small>
-                    </div>
-                    ${isToggleable
-                        ? new Chevron({
-                              direction: "right",
-                              color: faColor,
-                              size: faSize,
-                          })
-                        : ""}
+            <div
+                id="dropdown"
+                class="guided--nav-bar-dropdown ${isToggleable && "toggleable"} ${this.disabled
+                    ? "disabled"
+                    : ""} ${this.status}"
+                @click=${() => isToggleable && this.toggle()}
+            >
+                <div class="header">
+                    <span>${this.name}</span>
+                    <small>${this.subtitle}</small>
                 </div>
-                ${this.content
-                    ? html`<div
-                          id="section"
-                          class="content hidden ${this.disabled ? "disabled" : ""}"
-                          style="padding: ${this.contentPadding ?? "25px"}"
-                      >
-                          ${this.content}
-                      </div>`
+                ${isToggleable
+                    ? new Chevron({
+                          direction: "right",
+                          color: faColor,
+                          size: faSize,
+                      })
                     : ""}
             </div>
+            ${this.content
+                ? html`<div
+                      id="section"
+                      class="content hidden ${this.disabled ? "disabled" : ""}"
+                      style="padding: ${this.contentPadding ?? "25px"}"
+                  >
+                      ${this.content}
+                  </div>`
+                : ""}
         `;
     }
 }
 
 customElements.get("nwb-accordion") || customElements.define("nwb-accordion", Accordion);
-
-// Object.entries(info.pages).map(([id, state]) => {
-
-//   return html`<div
-//     data-section="${sectionName}"
-//     class="
-//       guided--nav-bar-section-page
-//       hidden
-//       ${state.visited ? " completed" : " not-completed"}
-//       ${state.active ? "active" : ""}"f
-//     "
-//     @click=${() => this.onClick(id)}
-//   >
-//     <div class="guided--nav-bar-section-page-title">
-//       ${state.pageLabel ?? id}
-//     </div>
-//   </div>
-// </div>
-// `
-// })

@@ -1,8 +1,7 @@
 """The primary Flask server for the Python backend."""
-import sys
 import json
 import multiprocessing
-from os import kill, getpid
+from os import kill, getpid, getenv
 from os.path import isabs
 
 from signal import SIGINT
@@ -126,9 +125,12 @@ class Shutdown(Resource):
 
 
 if __name__ == "__main__":
-    port = sys.argv[len(sys.argv) - 1]
-    if port.isdigit():
-        api.logger.info(f"Starting server on port {port}")
-        app.run(host="127.0.0.1", port=port)
+    env_port = getenv("PORT")
+    PORT = int(env_port) if env_port else 8080
+    HOST = getenv("HOST") or "localhost"
+
+    if PORT:
+        api.logger.info(f"Starting server. Port: {PORT}. Host: {HOST}")
+        app.run(host=HOST, port=PORT)
     else:
-        raise Exception("No port provided for the NWB GUIDE backend.")
+        raise Exception(f"No port provided for the NWB GUIDE backend: {env_port}.")

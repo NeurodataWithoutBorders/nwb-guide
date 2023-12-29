@@ -1,4 +1,7 @@
 import { expect, test } from 'vitest'
+
+import './commoners'
+
 import { updateAppProgress, updateFile, rename } from '../src/renderer/src/progress/update'
 import { get } from '../src/renderer/src/progress'
 import { remove } from '../src/renderer/src/progress/operations'

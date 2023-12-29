@@ -1,7 +1,12 @@
 import { LitElement, css, html } from "lit";
 
-import { fs, remote } from "../electron/index";
-const { dialog } = remote;
+import { fs } from "../electron/index";
+
+const globals = {
+    get dialog() {
+        return commoners.plugins.dialog;
+    },
+};
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
     if (Array.isArray(type))
@@ -10,7 +15,7 @@ function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
             .join(" / ")}`;
 
     const isDir = type === "directory";
-    return multiple && (!isDir || (isDir && !native) || dialog)
+    return multiple && (!isDir || (isDir && !native) || globals.dialog)
         ? type === "directory"
             ? "directories"
             : "files"
@@ -91,8 +96,6 @@ export class FilesystemSelector extends LitElement {
         this.value = props.value ?? "";
         this.dialogOptions = props.dialogOptions ?? {};
         this.onChange = props.onChange ?? (() => {});
-        this.dialogType = props.dialogType ?? "showOpenDialog";
-
         this.addEventListener("change", () => this.onChange(this.value));
     }
 
@@ -118,11 +121,9 @@ export class FilesystemSelector extends LitElement {
             options.properties.push("multiSelections");
 
         this.classList.add("active");
-        const result = await dialog[this.dialogType](options);
-
+        const result = globals.dialog.showOpenDialogSync(options);
         this.classList.remove("active");
-        if (result.canceled) return [];
-        return result;
+        return result ?? [];
     };
 
     #checkType = (value) => {
@@ -157,10 +158,10 @@ export class FilesystemSelector extends LitElement {
     };
 
     async selectFormat(type = this.type) {
-        if (dialog) {
+        if (globals.dialog) {
             const results = await this.#useElectronDialog(type);
             // const path = file.filePath ?? file.filePaths?.[0];
-            this.#handleFiles(results.filePath ?? results.filePaths, type);
+            this.#handleFiles(results, type);
         } else {
             let handles = await (type === "directory"
                 ? window.showDirectoryPicker()
@@ -221,7 +222,7 @@ export class FilesystemSelector extends LitElement {
                 ${resolvedValueDisplay
                     ? html`
                           ${resolvedValueDisplay}
-                          ${dialog
+                          ${globals.dialog
                               ? ""
                               : html`<br /><small
                                         >Cannot get full ${isMultipleTypes ? this.type.join(" / ") : this.type}
@@ -236,7 +237,8 @@ export class FilesystemSelector extends LitElement {
                                         native: true,
                                     })}`}</span
                           >${this.multiple &&
-                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory") && !dialog))
+                          (this.type === "directory" ||
+                              (isMultipleTypes && this.type.includes("directory") && !globals.dialog))
                               ? html`<br /><small
                                         >Multiple directory support only available using drag-and-drop.</small
                                     >`

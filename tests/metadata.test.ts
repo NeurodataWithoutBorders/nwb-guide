@@ -1,4 +1,7 @@
 import { describe, expect, test } from 'vitest'
+
+import './commoners'
+
 import { createResults } from '../src/renderer/src/stories/pages/guided-mode/data/utils'
 import { mapSessions } from '../src/renderer/src/stories/pages/utils'
 

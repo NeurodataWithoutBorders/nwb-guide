@@ -28,7 +28,7 @@ for interface in data["supported_interfaces"]:
         outfile.write(json.dumps(schema, indent=4))
 
 
-sourceDataStoryPath = Path("src/renderer/src/stories/pages/guided-mode/SourceData.stories.js")
+sourceDataStoryPath = Path("src/stories/pages/guided-mode/SourceData.stories.js")
 
 importCode = "\n".join(map(lambda arr: f"import {arr[0]}Schema from '../../../../../../{arr[1]}'", paths.items()))
 storyCode = "\n".join(

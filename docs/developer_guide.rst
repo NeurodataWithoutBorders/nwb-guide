@@ -81,13 +81,13 @@ You can now run the following command to start the application using Electron.
 
 Repo Structure
 --------------
-1. **src/renderer/src** - Contains all the source code for the frontend
+1. **src** - Contains all the source code for the frontend
     - `index.js` - The entry point for the application
     - `pages.js` - The main code that controls which pages are rendered and how they are linked together
     - `stories` - Contains all the Web Components and related Storybook stories
     - `electron` - Contains all the Electron-related code to enable conditional inclusion for development mode
-2. **src/renderer/assets** - Contains all the frontend-facing assets (e.g. images, css, etc.)
-3. **pyflask** - Contains all the source code for the backend
+    - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
+2. **pyflask** - Contains all the source code for the backend
 
 
 

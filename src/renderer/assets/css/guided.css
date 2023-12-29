@@ -19,16 +19,6 @@
     align-items: center;
 }
 
-.guided--nav-bar-section {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
-    height: 100%;
-    border-radius: 5px;
-}
-
 .guided--nav-bar-dropdown {
     min-height: 40px;
     width: 100%;

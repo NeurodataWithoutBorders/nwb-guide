@@ -24,7 +24,7 @@ import { run } from "../guided-mode/options/utils.js";
 import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
 
-import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
+import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json" assert { type: "json" };
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { header } from "../../forms/utils";
 
