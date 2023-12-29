@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v1
       - run: |
           echo "${{ github.event.action }}"
-          npm ci
+          # npm ci
       - uses: chromaui/action@v1
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
