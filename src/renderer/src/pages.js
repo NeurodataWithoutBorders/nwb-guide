@@ -210,7 +210,7 @@ const pages = {
     settings: new SettingsPage({
         label: "Settings",
         icon: settingsIcon,
-        group: 'Configuration',
+        group: "Configuration",
     }),
 };
 
