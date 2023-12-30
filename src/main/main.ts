@@ -234,8 +234,8 @@ function initialize() {
     const windowOptions = {
       minWidth: 1121,
       minHeight: 735,
-      width: 1121,
-      height: 735,
+      width: 1280,
+      height: 800,
       center: true,
       show: false,
       icon,
