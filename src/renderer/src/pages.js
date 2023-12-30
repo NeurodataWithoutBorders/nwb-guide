@@ -107,7 +107,7 @@ const pages = {
     conversion: new GuidedHomePage({
         label: "Conversions",
         icon: guidedIcon,
-        group: "Workflow",
+        group: "Workflows",
         pages: {
             start: new GuidedStartPage({
                 label: "Start",
@@ -180,17 +180,17 @@ const pages = {
     inspect: new InspectPage({
         label: "Inspect",
         icon: inspectIcon,
-        group: "Workflow",
+        group: "Workflows",
     }),
     preview: new PreviewPage({
         label: "Neurosift",
         icon: neurosiftIcon,
-        group: "Workflow",
+        group: "Workflows",
     }),
     uploads: new UploadsPage({
         label: "Uploads",
         icon: uploadIcon,
-        group: "Workflow",
+        group: "Workflows",
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",
