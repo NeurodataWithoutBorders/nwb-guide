@@ -420,6 +420,9 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+
+        console.log('Resolved', resolved)
+        
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
@@ -998,14 +1001,14 @@ export class JSONSchemaForm extends LitElement {
         let isLink = Symbol("isLink");
 
         const hasPatternProperties = !!schema.patternProperties;
-        const hasAdditionalProperties = schema.additionalProperties !== false;
+        const allowAdditionalProperties = schema.additionalProperties !== false;
 
         // Filter non-required properties (if specified) and render the sub-schema
         const renderable = this.#getRenderable(schema, required, ignore, path);
         // // Filter non-required properties (if specified) and render the sub-schema
         // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
-        const hasProperties = renderable.length > 0 || hasPatternProperties || hasAdditionalProperties;
+        const hasProperties = renderable.length > 0 || hasPatternProperties || allowAdditionalProperties;
 
         if (!hasProperties) return html`<div id="empty">${this.emptyMessage}</div>`;
 
@@ -1300,13 +1303,14 @@ export class JSONSchemaForm extends LitElement {
             rendered = [...rendered, ...patternProps];
         }
 
-        if (hasAdditionalProperties) {
+        const additionalPropPattern = "additional"
+        const additionalProps = getEditableItems(results, additionalPropPattern, { schema })
 
-            const pattern = "additional"
-            const shouldRender = getEditableItems(results, pattern, { schema })
+        // Render additional properties
+        if (allowAdditionalProperties) {
 
             // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
-            if (!shouldRender.length) return rendered
+            if (!additionalProps.length) return rendered
 
             const additionalElement = this.#renderInteractiveElement(
                 "",
@@ -1317,9 +1321,16 @@ export class JSONSchemaForm extends LitElement {
                 required,
                 path,
                 results,
-                pattern
+                additionalPropPattern
             );
             return [...rendered, additionalElement];
+        } 
+        
+        // Delete additional properties off the final results
+        else {
+            additionalProps.forEach(({ key }) => {
+                delete results[key]
+            })
         }
 
         return rendered;
