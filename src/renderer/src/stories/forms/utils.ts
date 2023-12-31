@@ -14,7 +14,12 @@ export const textToArray = (value: string) => value.split("\n")
                                             .filter((str) => str) // Only keep strings that are not empty
 
 
-    export const replaceRefsWithValue = (schema: { [x:string]: any }, path = [], parent: { [x:string]: any }) => {
+    export const replaceRefsWithValue = (
+        schema: any, 
+        path: string[] = [], 
+        parent: { [x:string]: any } = schema
+    ) => {
+
         const copy = { ...schema };
 
         if (schema && typeof schema === "object" && !Array.isArray(schema)) {
@@ -34,7 +39,12 @@ export const textToArray = (value: string) => value.split("\n")
                     }
                 }
             }
-        } else return schema;
 
-        return copy;
+            return copy as { [x:string]: any }
+        } 
+
+        console.log(schema)
+        
+        
+        return schema;
     }
