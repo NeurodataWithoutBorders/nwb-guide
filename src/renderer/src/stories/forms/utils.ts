@@ -15,8 +15,8 @@ export const textToArray = (value: string) => value.split("\n")
 
 
     export const replaceRefsWithValue = (
-        schema: any, 
-        path: string[] = [], 
+        schema: any,
+        path: string[] = [],
         parent: { [x:string]: any } = schema
     ) => {
 
@@ -42,7 +42,7 @@ export const textToArray = (value: string) => value.split("\n")
             }
 
             return copy as { [x:string]: any }
-        }         
-        
+        }
+
         return schema;
     }
