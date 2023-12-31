@@ -17,11 +17,7 @@ const isEditableObject = (schema) => schema.type === "object";
 const isAdditionalProperties = (pattern) => pattern === "additional";
 const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
-export const getEditableItems = (
-    value, 
-    pattern,
-    { name, schema } = {}
-) => {
+export const getEditableItems = (value, pattern, { name, schema } = {}) => {
     let items = Object.entries(value);
 
     const allowAdditionalProperties = isAdditionalProperties(pattern);
@@ -38,14 +34,14 @@ export const getEditableItems = (
             const regex = new RegExp(key);
             items = items.filter(([k]) => !regex.test(k));
         });
-    } 
-    
-    else items.filter(([key]) => key in schema.properties);
+    } else items.filter(([key]) => key in schema.properties);
 
-    items = items.filter(([key]) => !key.includes('__')); // Remove secret properties
+    items = items.filter(([key]) => !key.includes("__")); // Remove secret properties
 
-    return items.map(([key, value]) => { return { key, value } })
-}
+    return items.map(([key, value]) => {
+        return { key, value };
+    });
+};
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -264,9 +260,9 @@ export class JSONSchemaInput extends LitElement {
         const canAddProperties = isEditableObject(this.schema);
 
         if (canAddProperties) {
-            const editable =  getEditableItems(this.value, this.pattern, { name, schema })
-            console.log(editable)
-           return editable.map(({ key, value }) => {
+            const editable = getEditableItems(this.value, this.pattern, { name, schema });
+            console.log(editable);
+            return editable.map(({ key, value }) => {
                 return {
                     key,
                     value,
@@ -416,7 +412,7 @@ export class JSONSchemaInput extends LitElement {
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
-        const canAddProperties = isEditableObject(this.schema)
+        const canAddProperties = isEditableObject(this.schema);
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
