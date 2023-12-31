@@ -1301,12 +1301,11 @@ export class JSONSchemaForm extends LitElement {
         }
 
         if (hasAdditionalProperties) {
-
-            const pattern = "additional"
-            const shouldRender = getEditableItems(results, pattern, { schema })
+            const pattern = "additional";
+            const shouldRender = getEditableItems(results, pattern, { schema });
 
             // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
-            if (!shouldRender.length) return rendered
+            if (!shouldRender.length) return rendered;
 
             const additionalElement = this.#renderInteractiveElement(
                 "",
