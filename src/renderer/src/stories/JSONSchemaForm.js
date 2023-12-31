@@ -4,7 +4,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { header } from "./forms/utils";
+import { header, replaceRefsWithValue } from "./forms/utils";
 import { resolve } from "../promises";
 import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
@@ -554,34 +554,10 @@ export class JSONSchemaForm extends LitElement {
 
     // Resolve all references on the schema when set (INTERNAL USE ONLY)
     #schema;
-    replaceRefsWithValue = (schema, path = [], parent) => {
-        const copy = { ...schema };
-
-        if (schema && typeof schema === "object" && !Array.isArray(schema)) {
-            for (let propName in copy) {
-                const prop = copy[propName];
-                if (prop && typeof prop === "object" && !Array.isArray(prop)) {
-                    const internalCopy = (copy[propName] = { ...prop });
-                    if (internalCopy["$ref"]) {
-                        const prevItem = path.slice(-1)[0];
-                        const resolved = parent.properties.definitions?.[prevItem];
-                        copy[propName] = resolved;
-                    } else {
-                        for (let key in internalCopy) {
-                            const fullPath = [...path, propName, key];
-                            internalCopy[key] = this.replaceRefsWithValue(internalCopy[key], fullPath, copy);
-                        }
-                    }
-                }
-            }
-        } else return schema;
-
-        return copy;
-    };
 
     set schema(schema) {
         this.#schema = schema;
-        this.#schema = this.replaceRefsWithValue(schema);
+        this.#schema = replaceRefsWithValue(schema);
     }
 
     get schema() {

@@ -1,6 +1,6 @@
 import { serverGlobals, resolve } from '../src/renderer/src/server/globals'
 
-import { header } from '../src/renderer/src/stories/forms/utils'
+import { header, replaceRefsWithValue } from '../src/renderer/src/stories/forms/utils'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
@@ -37,7 +37,7 @@ function getSpeciesInfo(species: any[][] = []) {
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
-    const copy = structuredClone(schema)
+    const copy = replaceRefsWithValue(structuredClone(schema))
 
     copy.additionalProperties = false
 
