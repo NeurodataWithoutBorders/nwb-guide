@@ -9,7 +9,7 @@ import { resolve } from "../promises";
 import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
 
-import { JSONSchemaInput } from "./JSONSchemaInput";
+import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
 const encode = (str) => {
@@ -1126,8 +1126,6 @@ export class JSONSchemaForm extends LitElement {
 
             const headerName = header(name);
 
-            const isRequired = this.#isRequired(localPath);
-
             const renderableInside = this.#getRenderable(info, required[name], ignore, localPath, true);
 
             const __disabled = this.results.__disabled ?? (this.results.__disabled = {});
@@ -1303,6 +1301,13 @@ export class JSONSchemaForm extends LitElement {
         }
 
         if (hasAdditionalProperties) {
+
+            const pattern = "additional"
+            const shouldRender = getEditableItems(results, pattern, { schema })
+
+            // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
+            if (!shouldRender.length) return rendered
+
             const additionalElement = this.#renderInteractiveElement(
                 "",
                 {
@@ -1312,9 +1317,9 @@ export class JSONSchemaForm extends LitElement {
                 required,
                 path,
                 results,
-                "additional"
+                pattern
             );
-            rendered = [...rendered, additionalElement];
+            return [...rendered, additionalElement];
         }
 
         return rendered;
