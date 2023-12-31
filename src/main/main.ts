@@ -231,11 +231,14 @@ function initialize() {
 
     if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
 
+    const minHeight = 800;
+    const minWidth = 1280;
+    
     const windowOptions = {
-      minWidth: 1121,
-      minHeight: 735,
-      width: 1280,
-      height: 800,
+      minWidth,
+      minHeight,
+      width: minWidth,
+      height: minHeight,
       center: true,
       show: false,
       icon,
