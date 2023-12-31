@@ -233,7 +233,7 @@ function initialize() {
 
     const minHeight = 800;
     const minWidth = 1280;
-    
+
     const windowOptions = {
       minWidth,
       minHeight,
