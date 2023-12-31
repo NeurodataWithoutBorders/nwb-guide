@@ -295,7 +295,7 @@ export class Table extends LitElement {
             };
 
             let instanceThis = this;
-            const isRequired = this.isRequired(k);
+            const required = isRequired(k, this.schema);
 
             const validator = async function (value, callback) {
                 const validateEmptyCells = instanceThis.validateEmptyCells;
@@ -333,7 +333,7 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (!value && isRequired) {
+                if (!value && required) {
                     instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         this.row,
