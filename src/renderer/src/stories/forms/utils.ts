@@ -20,9 +20,10 @@ export const textToArray = (value: string) => value.split("\n")
         parent: { [x:string]: any } = schema
     ) => {
 
-        const copy = { ...schema };
-
         if (schema && typeof schema === "object" && !Array.isArray(schema)) {
+
+            const copy = { ...schema };
+
             for (let propName in copy) {
                 const prop = copy[propName];
                 if (prop && typeof prop === "object" && !Array.isArray(prop)) {
@@ -41,10 +42,7 @@ export const textToArray = (value: string) => value.split("\n")
             }
 
             return copy as { [x:string]: any }
-        } 
-
-        console.log(schema)
-        
+        }         
         
         return schema;
     }
