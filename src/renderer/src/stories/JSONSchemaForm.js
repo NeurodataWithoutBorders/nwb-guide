@@ -420,9 +420,8 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+        console.log("Resolved", resolved);
 
-        console.log('Resolved', resolved)
-        
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
@@ -1303,14 +1302,13 @@ export class JSONSchemaForm extends LitElement {
             rendered = [...rendered, ...patternProps];
         }
 
-        const additionalPropPattern = "additional"
-        const additionalProps = getEditableItems(results, additionalPropPattern, { schema })
+        const additionalPropPattern = "additional";
+        const additionalProps = getEditableItems(results, additionalPropPattern, { schema });
 
         // Render additional properties
         if (allowAdditionalProperties) {
-
             // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
-            if (!additionalProps.length) return rendered
+            if (!additionalProps.length) return rendered;
 
             const additionalElement = this.#renderInteractiveElement(
                 "",
@@ -1324,13 +1322,13 @@ export class JSONSchemaForm extends LitElement {
                 additionalPropPattern
             );
             return [...rendered, additionalElement];
-        } 
-        
+        }
+
         // Delete additional properties off the final results
         else {
             additionalProps.forEach(({ key }) => {
-                delete results[key]
-            })
+                delete results[key];
+            });
         }
 
         return rendered;
