@@ -63,9 +63,6 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     copy.properties.NWBFile.title = 'General Metadata'
     const nwbProps = copy.properties.NWBFile.properties
-    nwbProps.related_publications.description = "Provide a DOI for each publication."
-    nwbProps.related_publications.items.description = "Provide a DOI"
-
     nwbProps.keywords.items.description = "Provide a single keyword (e.g. Neural circuits, V1, etc.)"
 
     // Resolve species suggestions
@@ -75,10 +72,14 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     })
 
     // Ensure experimenter schema has custom structure
-    copy.properties.NWBFile.properties.experimenter = baseMetadataSchema.properties.NWBFile.properties.experimenter
+    nwbProps.experimenter = baseMetadataSchema.properties.NWBFile.properties.experimenter
+
+    // Ensure related_publications schema has custom structure
+    nwbProps.related_publications = baseMetadataSchema.properties.NWBFile.properties.related_publications
+
 
     // Override description of keywords
-    copy.properties.NWBFile.properties.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
+    nwbProps.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
 
 
 
