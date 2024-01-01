@@ -395,6 +395,13 @@ def convert_to_nwb(info: dict) -> str:
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
+
+    for interface_name, interface_class_name in info["interfaces"].items():
+        if (interface_class_name == 'VideoInterface' or interface_class_name == 'AudioInterface'):
+            interface_source_data = info["source_data"][interface_name]
+            interface_source_data["file_paths"] = list(map(lambda path: os.path.relpath(path, resolved_output_path), interface_source_data["file_paths"]))
+
+
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
     def update_conversion_progress(**kwargs):
