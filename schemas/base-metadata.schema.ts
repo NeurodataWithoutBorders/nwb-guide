@@ -63,8 +63,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     copy.properties.NWBFile.title = 'General Metadata'
     const nwbProps = copy.properties.NWBFile.properties
-    nwbProps.related_publications.description = "Provide a PMID, DOI, URL, etc. for each publication."
-    nwbProps.related_publications.items.description = "Provide a PMID, DOI, URL, etc."
+    nwbProps.related_publications.description = "Provide a DOI for each publication."
+    nwbProps.related_publications.items.description = "Provide a DOI"
 
     nwbProps.keywords.items.description = "Provide a single keyword (e.g. Neural circuits, V1, etc.)"
 
