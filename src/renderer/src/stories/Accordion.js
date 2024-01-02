@@ -196,19 +196,19 @@ export class Accordion extends LitElement {
     }
 
     setStatus = (status) => {
-        const el = this.shadowRoot.getElementById("dropdown");
-        el.classList.remove("error", "warning", "valid");
-        el.classList.add(status);
+        const dropdownElement = this.shadowRoot.getElementById("dropdown");
+        dropdownElement.classList.remove("error", "warning", "valid");
+        dropdownElement.classList.add(status);
         this.status = status;
     };
 
     onClick = () => {}; // Set by the user
 
-    #updateClass = (name, el, force) => {
-        if (force === undefined) el.classList.toggle(name);
+    #updateClass = (name, element, force) => {
+        if (force === undefined) element.classList.toggle(name);
         else {
-            if (force) el.classList.remove(name);
-            else el.classList.add(name);
+            if (force) element.classList.remove(name);
+            else element.classList.add(name);
         }
     };
 

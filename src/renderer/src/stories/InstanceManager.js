@@ -218,9 +218,9 @@ export class InstanceManager extends LitElement {
     updated = () => {
         const selected = Array.from(this.shadowRoot.querySelectorAll("[selected]"));
         if (selected.length > 0)
-            selected.slice(1).forEach((el) => {
-                const instance = el.getAttribute("data-instance");
-                el.removeAttribute("selected");
+            selected.slice(1).forEach((element) => {
+                const instance = element.getAttribute("data-instance");
+                element.removeAttribute("selected");
                 this.shadowRoot.querySelector(`div[data-instance="${instance}"]`).setAttribute("hidden", "");
             });
 
@@ -268,9 +268,9 @@ export class InstanceManager extends LitElement {
         this.requestUpdate();
     }
 
-    #hideAll(element) {
-        Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((el) => {
-            if (el !== element) el.hidden = true;
+    #hideAll(chosenInstanceElement) {
+        Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((instanceElement) => {
+            if (instanceElement !== chosenInstanceElement) instanceElement.hidden = true;
         });
     }
 
@@ -337,14 +337,14 @@ export class InstanceManager extends LitElement {
 
                     const instances = Array.from(this.shadowRoot.querySelectorAll("div[data-instance]"));
 
-                    const element = instances.find((el) => el.getAttribute("data-instance") === this.#selected);
+                    const selectedInstanceElement = instances.find((instanceElement) => instanceElement.getAttribute("data-instance") === this.#selected);
 
-                    if (element) {
-                        element.hidden = false;
-                        this.#hideAll(element);
+                    if (selectedInstanceElement) {
+                        selectedInstanceElement.hidden = false;
+                        this.#hideAll(selectedInstanceElement);
 
-                        this.#items.forEach((el) => {
-                            if (el !== item) el.removeAttribute("selected");
+                        this.#items.forEach((element) => {
+                            if (element !== item) element.removeAttribute("selected");
                         });
                     }
 
@@ -428,18 +428,18 @@ export class InstanceManager extends LitElement {
                     <div class="controls">
                         <span id="selectedName"></span>
                         <div>
-                            ${this.controls.map((o) => {
+                            ${this.controls.map(({ name, icon, primary, onClick }) => {
                                 return html`<nwb-button
                                     size="small"
-                                    icon=${o.icon}
-                                    .primary=${o.primary ?? false}
+                                    icon=${icon}
+                                    .primary=${primary ?? false}
                                     @click=${function () {
-                                        const el = this.shadowRoot.querySelector(
+                                        const activeContentElement = this.shadowRoot.querySelector(
                                             "#instance-display > div:not([hidden])"
                                         );
-                                        o.onClick.call(this, el.getAttribute("data-instance"), el);
+                                        onClick.call(this, activeContentElement.getAttribute("data-instance"), activeContentElement);
                                     }}
-                                    >${o.name}</nwb-button
+                                    >${name}</nwb-button
                                 >`;
                             })}
                         </div>

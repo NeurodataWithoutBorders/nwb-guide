@@ -270,7 +270,7 @@ export class Search extends LitElement {
         });
 
         this.#sortedCategories.forEach(({ entries, element }) => {
-            if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length)
+            if (entries.reduce((acc, entryElement) => acc + entryElement.hasAttribute("hidden"), 0) === entries.length)
                 element.setAttribute("hidden", "");
             else element.removeAttribute("hidden");
         });
@@ -371,7 +371,7 @@ export class Search extends LitElement {
 
                     return li;
                 })
-                .filter((el) => el);
+                .filter((itemEl) => itemEl);
 
             this.list.append(...itemEls);
         }

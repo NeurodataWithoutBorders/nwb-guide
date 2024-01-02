@@ -22,14 +22,14 @@ export class DandiResults extends LitElement {
             let value = info[str];
             if (str === "modified") value = new Date(value).toString();
 
-            const els = this.shadowRoot.querySelectorAll(`.${str}`);
-            els.forEach((el) => {
-                el.innerText = value;
+            const elements = this.shadowRoot.querySelectorAll(`.${str}`);
+            elements.forEach((element) => {
+                element.innerText = value;
 
-                if (el.tagName === "A") {
+                if (element.tagName === "A") {
                     if (str === "doi") value = `http://doi.org/${value}`;
-                    el.href = value;
-                    el.target = "_blank";
+                    element.href = value;
+                    element.target = "_blank";
                 }
             });
         };

@@ -59,17 +59,17 @@ Primary.args = {
     controls: [
         {
             name: "Preview",
-            onClick: function (key, el) {
-                const parent = el.parentNode;
+            onClick: function (key, contentElement) {
+                const parent = contentElement.parentNode;
                 const modal = new Modal({
                     header: "Preview",
                     open: true,
                     onClose: () => {
                         modal.remove();
-                        parent.append(el);
+                        parent.append(contentElement);
                     },
                 });
-                modal.append(el);
+                modal.append(contentElement);
                 document.body.appendChild(modal);
             },
         },

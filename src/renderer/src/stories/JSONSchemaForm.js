@@ -397,8 +397,8 @@ export class JSONSchemaForm extends LitElement {
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
 
         const allErrors = Array.from(flaggedInputs)
-            .map((el) => {
-                return Array.from(el.nextElementSibling.children).map((li) => li.message);
+            .map((inputElement) => {
+                return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
             })
             .flat();
 
@@ -444,27 +444,6 @@ export class JSONSchemaForm extends LitElement {
         } catch (e) {
             this.throw(e.message);
         }
-
-        // NOTE: Ensure user is aware of any warnings before moving on
-        // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
-
-        // if (this.#nWarnings) {
-        //   const warningText = activeWarnings.reduce((acc, children) => [...acc, ...children.map(el => el.innerText)], [])
-        //   const result = await Swal.fire({
-        //     title: `Are you sure you would like to submit your metadata with ${this.#nWarnings} warnings?`,
-        //     html: `<small><ol style="text-align: left;">${warningText.map(v => `<li>${v}</li>`).join('')}</ol></small>`,
-        //     icon: "warning",
-        //     heightAuto: false,
-        //     showCancelButton: true,
-        //     confirmButtonColor: "#3085d6",
-        //     cancelButtonColor: "#d33",
-        //     confirmButtonText: "Complete Metadata Entry",
-        //     cancelButtonText: "Cancel",
-        //     focusCancel: true,
-        //   });
-
-        //   if (!result.isConfirmed) throw new Error('User cancelled metadata submission')
-        // }
 
         return true;
     };
@@ -536,17 +515,6 @@ export class JSONSchemaForm extends LitElement {
         });
 
         this.inputs.push(interactiveInput);
-
-        // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
-
-        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
-        // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
-        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("filesystem-selector") ?? []);
-        // const allInputs = [...inputs, ...fileInputs];
-        // const filtered = filter ? allInputs.filter(filter) : allInputs;
-        // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
-
-        // console.log(interactiveInput)
 
         return html`
             <div

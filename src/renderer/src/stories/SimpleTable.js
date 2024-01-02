@@ -209,7 +209,7 @@ export class SimpleTable extends LitElement {
         this.addEventListener("copy", (ev) => {
             ev.preventDefault();
             const tsv = Object.values(this.#selected)
-                .map((arr) => arr.map((el) => el.value).join("\t"))
+                .map((arr) => arr.map((inputEl) => inputEl.value).join("\t"))
                 .join("\n");
 
             ev.clipboardData.setData("text/plain", tsv);
@@ -272,14 +272,14 @@ export class SimpleTable extends LitElement {
             this.#firstSelected = null;
         }
 
-        Object.values(this.#selected).forEach((arr) => arr.forEach((el) => el.parentNode.removeAttribute("selected")));
+        Object.values(this.#selected).forEach((arr) => arr.forEach((cellElement) => cellElement.parentNode.removeAttribute("selected")));
         this.#selected = {};
     };
 
     #getPath = (ev) => ev.path || ev.composedPath();
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
     #getCellFromPath = (path) => {
-        const found = path.find((el) => el instanceof TableCell || el.children?.[0] instanceof TableCell);
+        const found = path.find((element) => element instanceof TableCell || element.children?.[0] instanceof TableCell);
         if (found instanceof HTMLTableCellElement) return found.children[0];
         else return found;
     };

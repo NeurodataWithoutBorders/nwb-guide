@@ -249,7 +249,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 {
                     name: "Preview",
                     primary: true,
-                    onClick: async (key, el) => {
+                    onClick: async (key) => {
                         const { subject, session } = getInfoFromId(key);
 
                         const results = await this.runConversions(

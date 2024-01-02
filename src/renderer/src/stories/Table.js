@@ -602,7 +602,7 @@ export class Table extends LitElement {
         const root = this.getRootNode().body ?? this.getRootNode();
         this.#root = root;
         const stylesheets = Array.from(root.querySelectorAll("style"));
-        const exists = (this.stylesheet = stylesheets.find((el) => styleSymbol in el));
+        const exists = (this.stylesheet = stylesheets.find((stylesheet) => styleSymbol in stylesheet));
 
         if (exists) exists[styleSymbol]++;
         else {
