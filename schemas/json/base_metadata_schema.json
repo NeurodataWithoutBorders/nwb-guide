@@ -90,11 +90,11 @@
           "description": "Provide a DOI for each publication.",
           "items": {
             "type": "string",
-            "format": "doi:{doi}",
+            "format": "{doi}",
             "properties": {
               "doi": {
                 "title": "DOI",
-                "pattern": "^\\b(10[.][0-9]{4,}(?:[.][0-9]+)*\\/(?:(?![\"&\\'<>])\\S)+)\\b$",
+                "pattern": "^(doi:|http:\/\/dx\\.doi\\.org/|https:\/\/doi\\.org\/)\\b(10[.][0-9]{4,}(?:[.][0-9]+)*\\/(?:(?![\"&\\'<>])\\S)+)\\b$",
                 "type": "string",
                 "description": "Provide your publication formatted as a digital object identifier (DOI), e.g., doi:10.1038/nn.1234."
               }
