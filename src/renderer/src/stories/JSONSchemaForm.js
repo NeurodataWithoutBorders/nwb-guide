@@ -973,8 +973,6 @@ export class JSONSchemaForm extends LitElement {
         updatedWarnings.forEach((info) => (onWarning ? "" : this.#addMessage(localPath, info, "warnings")));
         info.forEach((info) => (onInfo ? onInfo(info) : this.#addMessage(localPath, info, "info")));
 
-        const input = this.getInput(localPath);
-
         const groupEl = this.#getGroupElement(externalPath);
 
         if (groupEl) {
