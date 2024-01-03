@@ -21,7 +21,7 @@ const encode = (str) => {
     }
 };
 
-const provideNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`
+const provideNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
@@ -427,7 +427,7 @@ export class JSONSchemaForm extends LitElement {
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === 'NaN') return;
+                    if (resolvedValue === "NaN") return;
                     else e.message = `${e.message}. ${provideNaNMessage}`;
                 }
 
@@ -444,7 +444,6 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
@@ -920,7 +919,9 @@ export class JSONSchemaForm extends LitElement {
                 if (!hasLinks && isRequired) {
                     if (this.validateEmptyValues) {
                         errors.push({
-                            message: `${schema.title ?? header(name)} ${this.#isARequiredPropertyString}. ${schema.type === 'number' ? provideNaNMessage : ''}`,
+                            message: `${schema.title ?? header(name)} ${this.#isARequiredPropertyString}. ${
+                                schema.type === "number" ? provideNaNMessage : ""
+                            }`,
                             type: "error",
                             missing: true,
                         });
