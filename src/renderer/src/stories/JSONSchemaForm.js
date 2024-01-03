@@ -13,6 +13,7 @@ import { JSONSchemaInput } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
 import { Validator } from "jsonschema";
+import { successHue, warningHue, errorHue } from "./globals";
 
 var v = new Validator();
 
@@ -51,13 +52,17 @@ const componentCSS = `
     .guided--form-label {
       display: block;
       width: 100%;
-      margin: 1.45rem 0 0.45rem 0;
+      margin: 1.45rem 0 0 0;
       color: black;
       font-weight: 600;
     }
 
     .form-section:first-child .guided--form-label {
       margin-top: 0;
+    }
+
+    jsonschema-input {
+        margin-top: 0.5rem;
     }
 
     .guided--form-label {
@@ -94,18 +99,26 @@ const componentCSS = `
       font-weight: bold;
     }
 
-    .link.required::after {
-      box-sizing: border-box;
-      display: block;
-      width: 10px;
-      height: 10px;
-      background: #ff3d64;
-      border-radius: 50%;
-      position: absolute;
-      top: 0;
-      right: 0;
-      content: '';
-      margin: 15px;
+    .link::after {
+        box-sizing: border-box;
+        display: block;
+        width: 10px;
+        height: 10px;
+        background: hsl(${successHue}, 100%, 70%) !important;
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        content: '';
+        margin: 15px;
+      }
+
+    .link.error::after {
+        background: hsl(${errorHue}, 100%, 70%) !important;
+    }
+
+    .link.warning::after {
+        background: hsl(${warningHue}, 100%, 70%) !important;
     }
 
     hr {
@@ -123,7 +136,7 @@ const componentCSS = `
     }
 
   .required label:after {
-    content: " *";
+    content: "*";
     color: #ff0033;
 
   }
@@ -162,6 +175,10 @@ const componentCSS = `
         opacity: 0.5;
         pointer-events: none;
     }
+
+    small {
+        font-size: 0.8em;
+    }
 `;
 
 document.addEventListener("dragover", (e) => {
@@ -188,6 +205,8 @@ export class JSONSchemaForm extends LitElement {
 
     base = [];
     #nestedForms = {};
+    inputs = [];
+
     tables = {};
     #nErrors = 0;
     #nWarnings = 0;
@@ -219,6 +238,8 @@ export class JSONSchemaForm extends LitElement {
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
+        this.showPath = props.showPath ?? false;
+
         this.controls = props.controls ?? {};
 
         this.transformErrors = props.transformErrors;
@@ -228,7 +249,7 @@ export class JSONSchemaForm extends LitElement {
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
 
-        this.conditionalRequirements = props.conditionalRequirements ?? []; // NOTE: We assume properties only belong to one conditional requirement group
+        this.groups = props.groups ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
         this.validateEmptyValues = props.validateEmptyValues ?? true;
 
@@ -514,6 +535,8 @@ export class JSONSchemaForm extends LitElement {
             validateEmptyValue: this.validateEmptyValues,
         });
 
+        this.inputs.push(interactiveInput);
+
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
         // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
@@ -532,7 +555,15 @@ export class JSONSchemaForm extends LitElement {
                     ? "conditional"
                     : ""}"
             >
-                <label class="guided--form-label">${info.title ?? header(name)}</label>
+                <label class="guided--form-label">${info.title ?? header(name)} </label>
+                ${this.showPath
+                    ? html` <small
+                          >${externalPath
+                              .slice(0, -1)
+                              .map((str) => header(str ?? ""))
+                              .join(".")}</small
+                      >`
+                    : ""}
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
@@ -645,9 +676,15 @@ export class JSONSchemaForm extends LitElement {
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
-        return this.conditionalRequirements.find((linked) =>
-            linked.properties.find((link) => link.join("-") === args.join("-"))
-        );
+        const group = this.#getGroup(args);
+        if (!group) return;
+        return group.validate ? group : undefined;
+    };
+
+    #getGroup = (args) => {
+        if (typeof args === "string") args = args.split("-");
+        const group = this.groups.find((linked) => linked.properties.find((link) => link.join("-") === args.join("-")));
+        return group;
     };
 
     #applyToLinkedProperties = (fn, externalPath) => {
@@ -683,8 +720,8 @@ export class JSONSchemaForm extends LitElement {
         return res;
     };
 
-    #getLinkElement = (externalPath) => {
-        const link = this.#getLink(externalPath);
+    #getGroupElement = (externalPath) => {
+        const link = this.#getGroup(externalPath);
         if (!link) return;
         return this.shadowRoot.querySelector(`[data-name="${link.name}"]`);
     };
@@ -823,11 +860,15 @@ export class JSONSchemaForm extends LitElement {
 
         const input = this.getInput(localPath);
 
+        const groupEl = this.#getGroupElement(externalPath);
+
+        if (groupEl) {
+            groupEl.classList[resolvedErrors.length ? "add" : "remove"]("error");
+            groupEl.classList[warnings.length ? "add" : "remove"]("warning");
+        }
+
         if (isValid && resolvedErrors.length === 0) {
             input.classList.remove("invalid");
-
-            const linkEl = this.#getLinkElement(externalPath);
-            if (linkEl) linkEl.classList.remove("required", "conditional");
 
             await this.#applyToLinkedProperties((path, element) => {
                 element.classList.remove("required", "conditional"); // Links manage their own error and validity states, but only one needs to be valid
@@ -839,9 +880,6 @@ export class JSONSchemaForm extends LitElement {
         } else {
             // Add new invalid classes and errors
             input.classList.add("invalid");
-
-            const linkEl = this.#getLinkElement(externalPath);
-            if (linkEl) linkEl.classList.add("required", "conditional");
 
             // Only add the conditional class for linked elements
             await this.#applyToLinkedProperties(
@@ -870,8 +908,7 @@ export class JSONSchemaForm extends LitElement {
 
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
-            const link = this.#getLink(externalPath); // Use the base path to find a link
-
+            const link = this.#getGroup(externalPath); // Use the base path to find a link
             if (link) {
                 if (!acc.find(([_, info]) => info === link)) {
                     const entry = [link.name, link];
@@ -887,10 +924,12 @@ export class JSONSchemaForm extends LitElement {
 
             // Sort alphabetically
             .sort(([name], [name2]) => {
-                if (name.toLowerCase() < name2.toLowerCase()) {
+                const header1 = header(name);
+                const header2 = header(name2);
+                if (header1.toLowerCase() < header2.toLowerCase()) {
                     return -1;
                 }
-                if (name.toLowerCase() > name2.toLowerCase()) {
+                if (header1.toLowerCase() > header2.toLowerCase()) {
                     return 1;
                 }
                 return 0;
@@ -917,7 +956,8 @@ export class JSONSchemaForm extends LitElement {
 
                 if (e1[isLink] || e2[isLink]) return 0;
 
-                if (info2.properties) return -1;
+                if (info2.properties && info.properties) return 0;
+                else if (info2.properties) return -1;
                 else if (info.properties) return 1;
                 else return 0;
             });
@@ -976,7 +1016,7 @@ export class JSONSchemaForm extends LitElement {
                 style: "margin-right: 10px; pointer-events:all;",
             });
 
-            const headerName = header(name);
+            const headerName = header(info.title ?? name);
 
             const renderableInside = this.#getRenderable(info, required[name], localPath, true);
 
@@ -1015,12 +1055,13 @@ export class JSONSchemaForm extends LitElement {
 
                     required: required[name], // Scoped to the sub-schema
                     ignore: this.ignore,
+                    showPath: this.showPath,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
                     showLevelOverride: this.showLevelOverride,
                     deferLoading: this.deferLoading,
-                    conditionalRequirements: this.conditionalRequirements,
+                    groups: this.groups,
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
@@ -1154,6 +1195,7 @@ export class JSONSchemaForm extends LitElement {
     #resetLoadState() {
         this.#loaded = false;
         this.nLoaded = 0;
+        this.inputs = [];
     }
 
     // Check if everything is internally rendered

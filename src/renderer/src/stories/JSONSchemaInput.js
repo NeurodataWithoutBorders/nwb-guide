@@ -21,6 +21,25 @@ const isFilesystemSelector = (name, format) => {
     return ["file", "directory"].includes(format) ? format : null; // Handle file and directory formats
 };
 
+function getFirstFocusableElement(element) {
+    const root = element.shadowRoot || element;
+    const focusableElements = getKeyboardFocusableElements(root);
+    if (focusableElements.length === 0) {
+        for (let child of root.children) {
+            const focusableElement = getFirstFocusableElement(child);
+            if (focusableElement) return focusableElement;
+        }
+    }
+    return focusableElements[0];
+}
+
+function getKeyboardFocusableElements(element = document) {
+    const root = element.shadowRoot || element;
+    return [
+        ...root.querySelectorAll('a[href], button, input, textarea, select, details,[tabindex]:not([tabindex="-1"])'),
+    ].filter((el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"));
+}
+
 export class JSONSchemaInput extends LitElement {
     static get styles() {
         return css`
@@ -201,6 +220,31 @@ export class JSONSchemaInput extends LitElement {
     }
 
     #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
+
+    #handleNextInput = (idx) => {
+        const next = this.form.inputs[idx];
+        if (next) {
+            const el = getFirstFocusableElement(next);
+            if (el) {
+                if (el.tagName === "BUTTON") return this.#handleNextInput(idx + 1);
+                el.focus();
+                // if (el.tagName === 'INPUT') return
+                // else el.blur()
+            }
+        }
+    };
+
+    #moveToNextInput = (ev) => {
+        if (ev.key === "Enter") {
+            ev.preventDefault();
+            if (this.form) {
+                const idx = this.form.inputs.findIndex((input) => input === this);
+                this.#handleNextInput(idx + 1);
+            }
+
+            ev.target.blur();
+        }
+    };
 
     #render() {
         const { validateOnChange, info, path: fullPath } = this;
@@ -407,6 +451,8 @@ export class JSONSchemaInput extends LitElement {
                 search.classList.add("schema-input");
                 search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
 
+                search.addEventListener("keydown", this.#moveToNextInput);
+
                 return search;
             }
 
@@ -415,6 +461,7 @@ export class JSONSchemaInput extends LitElement {
                     class="guided--input schema-input"
                     @input=${(ev) => this.#updateData(fullPath, info.enum[ev.target.value])}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
+                    @keydown=${this.#moveToNextInput}
                 >
                     <option disabled selected value>${info.placeholder ?? "Select an option"}</option>
                     ${info.enum.map(
@@ -453,6 +500,7 @@ export class JSONSchemaInput extends LitElement {
                         this.#updateData(fullPath, ev.target.value);
                     }}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
+                    @keydown=${this.#moveToNextInput}
                 ></textarea>`;
             // Handle other string formats
             else {
@@ -497,6 +545,7 @@ export class JSONSchemaInput extends LitElement {
                             this.#updateData(fullPath, value);
                         }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
+                        @keydown=${this.#moveToNextInput}
                     />
                 `;
             }
