@@ -88,7 +88,7 @@ schema.Ophys.Device = {
 
         const row = path.reduce((acc, str) => acc[str], this.results)
         if (!row) return true
-        
+
         const prevValue = row[name]
 
         if (prevValue === value) return true // No change
