@@ -657,7 +657,9 @@ export class JSONSchemaForm extends LitElement {
                     ? "conditional"
                     : ""}"
             >
-                <label class="guided--form-label">${(info.title ? unsafeHTML(info.title) : null) ?? header(name)} </label>
+                <label class="guided--form-label"
+                    >${(info.title ? unsafeHTML(info.title) : null) ?? header(name)}
+                </label>
                 ${this.showPath
                     ? html` <small
                           >${externalPath
@@ -666,7 +668,6 @@ export class JSONSchemaForm extends LitElement {
                               .join(".")}</small
                       >`
                     : ""}
-
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>

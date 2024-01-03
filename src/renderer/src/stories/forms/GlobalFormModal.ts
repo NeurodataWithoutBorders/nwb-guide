@@ -105,7 +105,7 @@ export function createGlobalFormModal(this: Page, {
 
     propsToRemove = {},
     formProps,
-  
+
     // Global-specific options
     key,
     hasInstances = false,
