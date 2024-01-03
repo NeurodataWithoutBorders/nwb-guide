@@ -37,6 +37,8 @@ dashboard.logo = logo;
 dashboard.name = "NWB GUIDE";
 dashboard.renderNameInSidebar = false;
 
+const resourcesGroup = "Resources";
+
 const overviewIcon = `
 <svg
     style="margin-right: 30px; margin-bottom: -5px"
@@ -100,21 +102,25 @@ const pages = {
     "/": new GettingStartedPage({
         label: "Home",
         icon: overviewIcon,
+        hidden: true,
     }),
     conversion: new GuidedHomePage({
         label: "Conversions",
         icon: guidedIcon,
+        group: "Workflows",
         pages: {
             start: new GuidedStartPage({
                 label: "Start",
             }),
+
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
                 section: sections[0],
             }),
+
             structure: new GuidedStructurePage({
-                title: "Data Formats",
+                title: "Provide Data Formats",
                 label: "Data formats",
                 section: sections[0],
             }),
@@ -132,7 +138,7 @@ const pages = {
             }),
 
             sourcedata: new GuidedSourceDataPage({
-                title: "Source Data",
+                title: "Source Data Information",
                 label: "Source data",
                 section: sections[1],
             }),
@@ -147,18 +153,21 @@ const pages = {
                 title: "Inspector Report",
                 label: "Inspect files",
                 section: sections[2],
+                sync: ["preview"],
             }),
 
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
                 label: "Preview files",
                 section: sections[2],
+                sync: ["preview"],
             }),
 
             upload: new GuidedUploadPage({
                 title: "DANDI Upload Options",
                 label: "Upload to DANDI",
                 section: sections[3],
+                sync: ["conversion"],
             }),
 
             review: new GuidedResultsPage({
@@ -171,26 +180,32 @@ const pages = {
     inspect: new InspectPage({
         label: "Inspect",
         icon: inspectIcon,
+        group: "Workflows",
     }),
     preview: new PreviewPage({
         label: "Neurosift",
         icon: neurosiftIcon,
+        group: "Workflows",
     }),
     uploads: new UploadsPage({
         label: "Uploads",
         icon: uploadIcon,
+        group: "Workflows",
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",
         icon: tutorialIcon,
+        group: resourcesGroup,
     }),
     docs: new DocumentationPage({
         label: "Documentation",
         icon: documentationIcon,
+        group: resourcesGroup,
     }),
     contact: new ContactPage({
         label: "Contact Us",
         icon: contactIcon,
+        group: resourcesGroup,
     }),
     settings: new SettingsPage({
         label: "Settings",

@@ -8,7 +8,7 @@
 
 .guided--nav {
     min-height: 100vh;
-    width: 220px;
+    min-width: 220px;
     margin: 0px !important;
     /* position: fixed; */
     background-color: var(--color-border);
@@ -812,7 +812,8 @@ h1.guided--text-sub-step {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    padding: 10px;
+    padding: 20px 10px;
+    margin: 5px;
     border: 1px dashed #ccc;
     border-radius: 5px;
 }

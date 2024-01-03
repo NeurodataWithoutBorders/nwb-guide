@@ -10,12 +10,12 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
         .filter(([_, value]) => value.properties)
         .map(([key, value]) => {
             const optionsCopy = { ...options };
+
             if (optionsCopy.required && optionsCopy.required[key])
                 optionsCopy.required = {
                     [key]: optionsCopy.required[key],
                 };
-            // Only bring requirements from the current page
-            else delete optionsCopy.required;
+            else delete optionsCopy.required; // Only bring requirements from the current page
 
             const page = new GuidedFormPage(
                 transformationCallback({
@@ -25,12 +25,13 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
                     globalStatePath,
                     formOptions: {
                         ...optionsCopy,
-                        schema: { properties: { [key]: value } },
+                        schema: {
+                            properties: { [key]: value },
+                            required: [key],
+                        },
                     },
                 })
             );
-
-            delete schema.properties[key];
 
             if (optionsCopy.ignore && optionsCopy.ignore.includes(key)) return null;
             return page;
@@ -72,7 +73,7 @@ export class GuidedFormPage extends Page {
             ? this.info.globalStatePath.reduce((acc, key) => acc[key] ?? (acc[key] = {}), this.info.globalState)
             : {};
 
-        const results = (this.localState = merge({ [key]: temp[key] ?? (temp[key] = {}) }, {})); // Keep a local copy of the results
+        const results = (this.localState = structuredClone({ [key]: temp[key] ?? (temp[key] = {}) })); // Keep a local copy of the results
 
         const form = (this.form = new JSONSchemaForm({
             ...this.info.formOptions,

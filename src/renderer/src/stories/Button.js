@@ -1,9 +1,11 @@
 import { LitElement, html, css } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 export class Button extends LitElement {
-    constructor({ primary, label, color = null, size, onClick, buttonStyles } = {}) {
+    constructor({ icon = null, primary, label, color = null, size, onClick, buttonStyles } = {}) {
         super();
+        this.icon = icon;
         this.label = label;
         this.primary = primary;
         this.color = color;
@@ -18,10 +20,6 @@ export class Button extends LitElement {
                 display: inline-block;
             }
 
-            .button-icon {
-                margin-right: 10px;
-            }
-
             .storybook-button {
                 padding: 10px 15px;
                 font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -29,9 +27,22 @@ export class Button extends LitElement {
                 border: 0;
                 border-radius: 5px;
                 cursor: pointer;
-                display: inline-block;
                 line-height: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
+
+            .with-icon {
+                margin-left: 10px;
+            }
+
+            svg {
+                margin: 0px !important;
+                width: auto;
+                height: 20px;
+            }
+
             .storybook-button--primary {
                 color: white;
                 background-color: hsl(190, 60%, 36%);
@@ -76,7 +87,6 @@ export class Button extends LitElement {
     render() {
         const mode = this.primary ? "storybook-button--primary" : "storybook-button--secondary";
 
-        console.log;
         return html`
             <button
                 type="button"
@@ -89,8 +99,16 @@ export class Button extends LitElement {
                 )}
                 @click=${this.onClick}
             >
-                ${this.icon ? html`<span class="button-icon">${this.icon}</span>` : ""}
-                <slot>${this.label ?? ""}</slot>
+                ${this.icon
+                    ? html`<span class="button-icon"
+                          >${this.icon instanceof HTMLElement ? this.icon : unsafeHTML(this.icon)}</span
+                      >`
+                    : ""}
+                <slot
+                    >${this.label
+                        ? html`<span class="button-label ${this.icon ? "with-icon" : ""}">${this.label}</span>`
+                        : ""}</slot
+                >
             </button>
         `;
     }

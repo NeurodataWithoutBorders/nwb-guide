@@ -4,6 +4,7 @@ import isElectron from "./check.js";
 export { isElectron };
 
 export let port = 4242;
+export let SERVER_FILE_PATH = "";
 export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 export let fs = null;
 export let os = null;
@@ -12,6 +13,11 @@ export let app = null;
 export let path = null;
 export let log = null;
 export let crypto = null;
+
+// Used in tests
+try {
+    crypto = require("crypto");
+} catch {}
 
 if (isElectron) {
     try {
@@ -35,6 +41,8 @@ if (isElectron) {
 
         port = electron.ipcRenderer.sendSync("get-port");
         console.log("User OS:", os.type(), os.platform(), "version:", os.release());
+
+        SERVER_FILE_PATH = electron.ipcRenderer.sendSync("get-server-file-path");
 
         path = require("path");
     } catch (e) {

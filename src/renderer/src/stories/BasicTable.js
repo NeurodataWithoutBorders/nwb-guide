@@ -154,7 +154,7 @@ export class BasicTable extends LitElement {
             } else
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
-                    // this.template[col] ??
+                    // this.globals[col] ??
                     this.schema.properties[col].default ??
                     "";
             return value;

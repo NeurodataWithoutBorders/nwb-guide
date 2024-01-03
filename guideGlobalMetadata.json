@@ -29,8 +29,21 @@
         "PlexonRecordingInterface",
         "PlexonSortingInterface",
         "AxonaRecordingInterface",
+        "VideoInterface",
         "NeuralynxRecordingInterface",
         "Suite2pSegmentationInterface",
-        "AlphaOmegaRecordingInterface"
+        "AlphaOmegaRecordingInterface",
+        "AlphaOmegaRecordingInterface",
+        "DeepLabCutInterface",
+        "SLEAPInterface",
+        "FicTracDataInterface",
+        "AudioInterface",
+        "MiniscopeBehaviorInterface",
+        "EDFRecordingInterface",
+        "SpikeGLXConverterPipe",
+        "BrukerTiffSinglePlaneConverter",
+        "BrukerTiffMultiPlaneConverter",
+        "MiniscopeConverter",
+        "CellExplorerRecordingInterface"
     ]
 }

@@ -1,5 +1,4 @@
 import { html } from "lit";
-import lottie from "lottie-web";
 import { column1Lottie, column2Lottie, column3Lottie } from "../../../../assets/lotties/overview-lotties.js";
 import { Page } from "../Page.js";
 
@@ -22,7 +21,7 @@ export class GettingStartedPage extends Page {
 
     render() {
         return html`
-            <section class="standalone-section">
+            <section class="getting-started">
                 <h3>Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br /></h3>
 
                 <div class="overview-card-layout grid h-auto w-full grid-cols-3 gap-6">
@@ -79,12 +78,6 @@ export class GettingStartedPage extends Page {
                             </svg>
                         </i>
                     </button>
-                </div>
-                <div style="display: flex; justify-content: center">
-                    <div
-                        class="flex w-full items-center justify-center pb-2"
-                        style="justify-content: center; display: flex; align-items: center"
-                    ></div>
                 </div>
             </section>
         `;

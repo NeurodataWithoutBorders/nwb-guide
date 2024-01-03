@@ -4,12 +4,13 @@ import {
     errorHue,
     successHue,
     warningHue,
+    issueHue
 } from "../globals";
 
 export type StatusIndicatorProps = {
     label: string | any,
     value?: string
-    status?: boolean
+    status?: boolean | string
 }
 
 export const StatusIndicatorPropKeys = ['label', 'value', 'status']
@@ -56,6 +57,10 @@ export class StatusIndicator extends LitElement {
             div.pending {
                 background: hsl( ${warningHue}, 100%, 60%);
             }
+
+            div.issue {
+                background: hsl( ${issueHue}, 100%, 65%);
+            }
         `;
     }
 
@@ -65,7 +70,7 @@ export class StatusIndicator extends LitElement {
 
     static get properties() {
         return {
-            status: { type: Boolean, reflect: true },
+            status: { reflect: true },
             value: { type: String, reflect: true }
         }
     }
@@ -76,7 +81,7 @@ export class StatusIndicator extends LitElement {
     }
 
     render() {
-        return html`<b>${this.label}</b>${this.value != undefined ? html`<small>${this.value}</small>` : html`<div class="${this.status === false ? 'fail' : (this.status ? 'success' : 'pending')}"></div>`}`;
+        return html`<b>${this.label}</b>${this.value != undefined ? html`<small>${this.value}</small>` : html`<div class="${typeof this.status === 'string' ? this.status : (this.status === false ? 'fail' : (this.status ? 'success' : 'pending'))}"></div>`}`;
     }
 }
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-from neuroconv import datainterfaces, NWBConverter
+from neuroconv import converters, datainterfaces, NWBConverter
 
 filepath = Path("guideGlobalMetadata.json")
 generatedJSONSchemaPath = Path("schemas", "json", "generated")
@@ -16,7 +16,7 @@ for interface in data["supported_interfaces"]:
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
-            custom_name: getattr(datainterfaces, interface_name)
+            custom_name: getattr(datainterfaces, interface_name, getattr(converters, interface_name, None))
             for custom_name, interface_name in interface_class_dict.items()
         }
 

@@ -38,21 +38,6 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
 
         // Attach node to DOM, by appending it to the container holding the table
         this.hot.rootElement.appendChild(this.DATETIME);
-
-        // // Immediately transfers the CopyPastePlugin FocusableWrapper element to the WC Shadow Root
-        const copyPastePlugin = this.hot.getPlugin("copyPaste");
-        const ogFn = copyPastePlugin.getOrCreateFocusableElement.bind(copyPastePlugin);
-        copyPastePlugin.getOrCreateFocusableElement = () => {
-            const res = ogFn();
-            const focusable = copyPastePlugin.focusableElement.getFocusableElement();
-            const root = this.hot.rootElement.getRootNode();
-            focusable.style.position = "absolute";
-            focusable.style.opacity = "0";
-            focusable.style.pointerEvents = "none";
-            copyPastePlugin.getOrCreateFocusableElement = ogFn;
-            root.append(focusable);
-            return res;
-        };
     }
 
     getValue() {
@@ -94,18 +79,20 @@ class ArrayEditor extends Handsontable.editors.TextEditor {
 
     getValue() {
         const value = super.getValue();
+
         if (!value) return [];
         else {
             const split = value
                 .split(",")
                 .map((str) => str.trim())
                 .filter((str) => str);
+
             return this.cellProperties.uniqueItems ? Array.from(new Set(split)) : split; // Only unique values
         }
     }
 
     setValue(newValue) {
-        if (Array.isArray(newValue)) return newValue.join(",");
+        if (Array.isArray(newValue)) newValue = newValue.join(",");
         super.setValue(newValue);
     }
 }
