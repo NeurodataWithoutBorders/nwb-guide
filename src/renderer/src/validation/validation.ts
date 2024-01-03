@@ -87,6 +87,7 @@ schema.Ophys.Device = {
     ['name']: async function (this: JSONSchemaForm, name, parent, path, value) {
 
         const row = path.reduce((acc, str) => acc[str], this.results)
+
         if (!row) return true
         
         const prevValue = row[name]
@@ -96,7 +97,7 @@ schema.Ophys.Device = {
         const result = await Swal.fire({
             title: `Are you sure you want to rename the ${prevValue} device?`,
             icon: "warning",
-            text: `Changing this may invalidate a lot of properties.`,
+            text: `We will attempt to auto-update your Ophys devices to reflect this.`,
             heightAuto: false,
             backdrop: "rgba(0,0,0, 0.4)",
             confirmButtonText: "I understand",
@@ -107,16 +108,23 @@ schema.Ophys.Device = {
 
         if (!result.isConfirmed) return null
 
-        if (result.isConfirmed) {
-
-        }
-
         // Update Dependent Tables
         const dependencies = [
-            ['Ophys', 'ImagingPlane']
+            ['Ophys', 'ImagingPlane'],
+            ['Ophys', 'OnePhotonSeries'],
+            ['Ophys', 'TwoPhotonSeries']
         ]
 
         dependencies.forEach(path => {
+            const table = this.getTable(path)
+            if (table) {
+                const data = table.data
+                data.forEach(row => {
+                    if (row.device === prevValue) row.device = value
+                })
+                table.data = data
+            }
+
             rerenderTable.call(this, path)
         })
 
