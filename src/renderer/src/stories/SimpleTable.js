@@ -435,6 +435,7 @@ export class SimpleTable extends LitElement {
                 label: "Add Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
+                    if (!cell) return this.addRow(); // No cell selected
                     const { i } = cell.simpleTableInfo;
                     this.addRow(i); //2) // TODO: Support adding more than one row
                 },
@@ -443,6 +444,8 @@ export class SimpleTable extends LitElement {
                 label: "Remove Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
+                    if (!cell) return; // No cell selected
+                    
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
 
                     // Validate with empty values before removing (to trigger any dependent validations)
@@ -570,17 +573,13 @@ export class SimpleTable extends LitElement {
         const count = Math.abs(nRows);
         const range = Array.from({ length: count }, (_, i) => row + i);
 
-        const children = Array.from(this.shadowRoot.querySelector("tbody").children);
+        const bodyEl = this.shadowRoot.querySelector("tbody")
+        const children = Array.from(bodyEl.children);
 
         const isPositive = Math.sign(nRows) === 1;
 
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
-            if (children.length - count < 1) {
-                this.onThrow("You must have at least one row");
-                return false;
-            }
-
             const rowHeaders = Object.keys(this.#data);
             range.map((i) => {
                 children[i].remove();
@@ -612,8 +611,10 @@ export class SimpleTable extends LitElement {
                 const data = this.#getRowData(); // Get information for an undefined row
                 const newRow = document.createElement("tr");
                 newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
-                latest.insertAdjacentElement("afterend", newRow);
-                latest = newRow;
+
+                if (latest)latest.insertAdjacentElement("afterend", newRow);
+                else bodyEl.append(newRow);
+
                 return this.getRow(i);
             });
 
