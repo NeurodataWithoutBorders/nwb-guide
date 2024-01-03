@@ -73,7 +73,7 @@ export async function createDandiset(results = {}) {
                     ];
             }
         },
-        conditionalRequirements: [
+        groups: [
             {
                 name: "Embargo your Data",
                 properties: [["embargo_status"], ["nih_award_number"]],
@@ -306,9 +306,11 @@ export class UploadsPage extends Page {
                 const input = this.form.getInput(["dandiset "]);
                 input.requestUpdate();
             },
-            validateOnChange: async (name, parent) => {
-                const value = parent[name];
-                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+            formProps: {
+                validateOnChange: async (name, parent) => {
+                    const value = parent[name];
+                    if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+                },
             },
         }));
         document.body.append(modal);

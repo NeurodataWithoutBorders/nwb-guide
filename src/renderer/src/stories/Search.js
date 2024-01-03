@@ -25,13 +25,15 @@ export class Search extends LitElement {
         this.headerStyles = headerStyles;
         if (onSelect) this.onSelect = onSelect;
 
-        document.addEventListener("click", () => {
-            if (this.listMode === "click" && this.getAttribute("interacted") === "true") {
-                this.setAttribute("interacted", false);
-                this.#onSelect(this.getSelectedOption());
-            }
-        });
+        document.addEventListener("click", () => this.submit());
     }
+
+    submit = () => {
+        if (this.listMode === "click" && this.getAttribute("interacted") === "true") {
+            this.setAttribute("interacted", false);
+            this.#onSelect(this.getSelectedOption());
+        }
+    };
 
     #value;
 
@@ -400,7 +402,13 @@ export class Search extends LitElement {
       }} @input=${(ev) => {
           const input = ev.target.value;
           this.#populate(input);
-      }}></input>
+      }}
+
+      @blur=${(ev) => {
+          this.submit();
+      }}
+
+      ></input>
       ${unsafeHTML(searchSVG)}
     </div>
     ${this.list}

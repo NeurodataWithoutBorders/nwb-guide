@@ -91,7 +91,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 merge(globalResolved, globals);
                 return resolveGlobalOverrides(this.subject, globals);
             },
-            validateOnChange,
+            formProps: {
+                validateOnChange,
+            },
         }));
         document.body.append(modal);
     }
@@ -160,12 +162,20 @@ export class GuidedMetadataPage extends ManagedPage {
                 if (e.message.includes('does not conform to the "date-time" format.')) return false;
             },
 
-            conditionalRequirements: [
+            groups: [
                 {
                     name: "Subject Age",
                     properties: [
                         ["Subject", "age"],
                         ["Subject", "date_of_birth"],
+                    ],
+                    validate: true,
+                },
+                {
+                    name: "Institutional Info",
+                    properties: [
+                        ["NWBFile", "institution"],
+                        ["NWBFile", "lab"],
                     ],
                 },
             ],
