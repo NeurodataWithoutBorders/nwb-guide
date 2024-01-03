@@ -445,7 +445,7 @@ export class SimpleTable extends LitElement {
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
                     if (!cell) return; // No cell selected
-                    
+
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
 
                     // Validate with empty values before removing (to trigger any dependent validations)
@@ -573,7 +573,7 @@ export class SimpleTable extends LitElement {
         const count = Math.abs(nRows);
         const range = Array.from({ length: count }, (_, i) => row + i);
 
-        const bodyEl = this.shadowRoot.querySelector("tbody")
+        const bodyEl = this.shadowRoot.querySelector("tbody");
         const children = Array.from(bodyEl.children);
 
         const isPositive = Math.sign(nRows) === 1;
@@ -612,7 +612,7 @@ export class SimpleTable extends LitElement {
                 const newRow = document.createElement("tr");
                 newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
 
-                if (latest)latest.insertAdjacentElement("afterend", newRow);
+                if (latest) latest.insertAdjacentElement("afterend", newRow);
                 else bodyEl.append(newRow);
 
                 return this.getRow(i);
