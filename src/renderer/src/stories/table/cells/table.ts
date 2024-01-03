@@ -35,18 +35,6 @@ export class NestedTableEditor extends LitElement {
 
         if (this.#table) this.#table.remove()
 
-
-        const div = document.createElement('div')
-        Object.assign(div.style, {
-            width: `${10}px`,
-            height: `${10}px`,
-            position: 'absolute',
-            zIndex: 1000,
-            background: 'red'
-        })
-
-        document.body.append(div)
-
         const table = this.#table = new SimpleTable({
             schema: this.schema.items,
             data: this.#value,
