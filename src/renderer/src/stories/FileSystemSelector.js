@@ -172,7 +172,7 @@ export class FilesystemSelector extends LitElement {
                 : window.showOpenFilePicker({ multiple: this.multiple })
             ).catch(() => []); // Call using the same options
 
-            const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
+            const result = Array.isArray(handles) ? handles.map(({ name }) => name) : handles.name;
             this.#handleFiles(result, type);
         }
     }

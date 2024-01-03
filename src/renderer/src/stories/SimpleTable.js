@@ -220,7 +220,7 @@ export class SimpleTable extends LitElement {
             if (key == 8 || key == 46) {
                 const path = this.#getPath(ev);
                 if (path[0] === document.body)
-                    Object.values(this.#selected).forEach((row) => row.forEach((o) => o.setInput("")));
+                    Object.values(this.#selected).forEach((row) => row.forEach((cell) => cell.setInput("")));
                 return;
             }
 
@@ -558,10 +558,10 @@ export class SimpleTable extends LitElement {
 
         const afterIdx = row + count;
         const after = children.slice(afterIdx);
-        after.forEach((o, i) => {
+        after.forEach((element, i) => {
             const pos = afterIdx + i + nRows;
             this.#cells[pos] = ogCells[afterIdx + i];
-            Array.from(o.children).forEach((o) => (o.children[0].simpleTableInfo.i = pos)); // Increment position
+            Array.from(element.children).forEach((element) => (element.children[0].simpleTableInfo.i = pos)); // Increment position
         });
 
         if (isPositive) {

@@ -71,11 +71,11 @@ export function validateOnChange(name, parent, path, value) {
         if (flat.find((res) => res?.message)) {
             return flat
                 .filter((res) => res?.message)
-                .map((o) => {
+                .map((messageInfo) => {
                     return {
-                        message: o.message,
-                        type: getMessageType(o),
-                        missing: o.missing ?? o.message.includes("is missing"), // Indicates that the field is missing
+                        message: messageInfo.message,
+                        type: getMessageType(messageInfo),
+                        missing: messageInfo.missing ?? messageInfo.message.includes("is missing"), // Indicates that the field is missing
                     };
                 }); // Some of the requests end in errors
         }

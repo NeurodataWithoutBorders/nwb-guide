@@ -52,24 +52,24 @@ function decode(text) {
     }
 }
 
-function drill(o, callback) {
-    if (o && typeof o === "object") {
-        const copy = Array.isArray(o) ? [...o] : { ...o };
+function drill(object, callback) {
+    if (object && typeof object === "object") {
+        const copy = Array.isArray(object) ? [...object] : { ...object };
         for (let k in copy) {
             const res = drill(copy[k], callback);
             if (res) copy[k] = res;
             else delete copy[k];
         }
         return copy;
-    } else return callback(o);
+    } else return callback(object);
 }
 
-function encodeObject(o) {
-    return drill(o, (value) => (typeof value === "string" ? encode(value) : value));
+function encodeObject(object) {
+    return drill(object, (value) => (typeof value === "string" ? encode(value) : value));
 }
 
-function decodeObject(o) {
-    return drill(o, (value) => (typeof value === "string" ? decode(value) : value));
+function decodeObject(object) {
+    return drill(object, (value) => (typeof value === "string" ? decode(value) : value));
 }
 
 class GlobalAppConfig {

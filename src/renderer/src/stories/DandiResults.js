@@ -52,17 +52,17 @@ export class DandiResults extends LitElement {
 
         const publicationEl = this.shadowRoot.querySelector(`.publication`);
         publicationEl.innerHTML = "";
-        const publications = (info.relatedResource ?? []).filter((o) => o.relation === "dcite:IsDescribedBy");
+        const publications = (info.relatedResource ?? []).filter(({ relation }) => relation === "dcite:IsDescribedBy");
 
         if (publications.length)
             publicationEl.append(
                 ...(await Promise.all(
-                    publications.map(async (o) => {
+                    publications.map(async ({ identifier }) => {
                         const li = document.createElement("li");
                         const { message } = await fetch(
-                            `http://api.crossref.org/works${new URL(o.identifier).pathname}`
+                            `http://api.crossref.org/works${new URL(identifier).pathname}`
                         ).then((res) => res.json());
-                        li.innerHTML = `${message.author.map((o) => `${o.family}, ${o.given[0]}.`).join(", ")} (${
+                        li.innerHTML = `${message.author.map(({ family, given }) => `${family}, ${given[0]}.`).join(", ")} (${
                             message.created["date-parts"][0][0]
                         }). ${message.title[0]}. <i>${message["container-title"]}</i>, <i>${message.volume}</i>(${
                             message.issue
@@ -94,9 +94,9 @@ export class DandiResults extends LitElement {
                         ? html` <h3 style="padding: 0;">Files Uploaded</h3>
                               <ol>
                                   ${Object.values(this.files)
-                                      .map((v) => Object.values(v))
+                                      .map((item) => Object.values(item))
                                       .flat()
-                                      .map((o) => html`<li>${o.file}</li>`)}
+                                      .map(({ file }) => html`<li>${file}</li>`)}
                               </ol>`
                         : ""}
                     <hr />

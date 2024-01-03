@@ -122,7 +122,7 @@ export class List extends LitElement {
     object: {[x:string]: any} = {}
 
     get array() {
-      return this.items.map(o => o.value)
+      return this.items.map(item => item.value)
     }
 
     #items: ListItemType[] = []

@@ -43,7 +43,7 @@ export class Search extends LitElement {
 
     getSelectedOption = () => {
         const value = (this.shadowRoot.querySelector("input") ?? this).value;
-        const matched = this.options.find((o) => o.label === value);
+        const matched = this.options.find((item) => item.label === value);
         return matched ?? { value };
     };
 
@@ -293,10 +293,10 @@ export class Search extends LitElement {
         this.list.appendChild(slot);
 
         if (this.options) {
-            const options = this.options.map((o) => {
+            const options = this.options.map((item) => {
                 return {
-                    label: o.key,
-                    ...o,
+                    label: item.key,
+                    ...item,
                 };
             });
 

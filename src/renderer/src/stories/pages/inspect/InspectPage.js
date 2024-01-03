@@ -37,7 +37,7 @@ export class InspectPage extends Page {
 
         if (!result.length) return this.notify("No messages received from the NWB Inspector");
 
-        const items = truncateFilePaths(result, getSharedPath(result.map((o) => o.file_path)));
+        const items = truncateFilePaths(result, getSharedPath(result.map((item) => item.file_path)));
 
         const list = new InspectorList({ items });
         list.style.padding = "25px";

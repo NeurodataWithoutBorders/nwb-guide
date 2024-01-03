@@ -37,21 +37,21 @@ const instances = {
     },
 };
 
-const convertToElement = (_, o) => {
+const convertToElement = (_, object) => {
     const div = document.createElement("div");
-    div.innerHTML = `${JSON.stringify(o)}`;
+    div.innerHTML = `${JSON.stringify(object)}`;
     return div;
 };
 
-const drillObjects = (o) => {
-    const keys = Object.keys(o);
+const drillObjects = (object) => {
+    const keys = Object.keys(object);
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        const value = o[key];
+        const value = object[key];
         if (typeof value === "object") drillObjects(value);
-        else o[key] = convertToElement(key, value);
+        else object[key] = convertToElement(key, value);
     }
-    return o;
+    return object;
 };
 
 Primary.args = {

@@ -17,8 +17,8 @@ import { successHue, warningHue, errorHue } from "./globals";
 
 var validator = new Validator();
 
-const isObject = (o) => {
-    return o && typeof o === "object" && !Array.isArray(o);
+const isObject = (item) => {
+    return item && typeof item === "object" && !Array.isArray(item);
 };
 
 const selfRequiredSymbol = Symbol();
@@ -603,9 +603,9 @@ export class JSONSchemaForm extends LitElement {
 
         const flattenRecursedValues = (arr) => {
             const newArr = [];
-            arr.forEach((o) => {
-                if (isArrayOfArrays(o)) newArr.push(...o);
-                else newArr.push(o);
+            arr.forEach((item) => {
+                if (isArrayOfArrays(item)) newArr.push(...item);
+                else newArr.push(item);
             });
 
             return newArr;
@@ -632,7 +632,7 @@ export class JSONSchemaForm extends LitElement {
                 if (!this.onlyRequired) return isRenderable(key, value);
                 return false;
             })
-            .filter((o) => !!o);
+            .filter((result) => !!result);
 
         return flattenRecursedValues(res); // Flatten on the last pass
     };
@@ -798,7 +798,7 @@ export class JSONSchemaForm extends LitElement {
             valid === true ||
             valid == undefined ||
             isFunction ||
-            (Array.isArray(valid) && !valid.find((o) => o.type === "error"));
+            (Array.isArray(valid) && !valid.find((error) => error.type === "error"));
 
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
@@ -1069,15 +1069,15 @@ export class JSONSchemaForm extends LitElement {
             accordion.id = name; // assign name to accordion id
 
             // Set enable / disable behavior
-            const addDisabled = (name, o) => {
-                if (!o.__disabled) o.__disabled = {};
+            const addDisabled = (name, parentObject) => {
+                if (!parentObject.__disabled) parentObject.__disabled = {};
 
                 // Do not overwrite cache of disabled values (with globals, for instance)
-                if (o.__disabled[name]) {
+                if (parentObject.__disabled[name]) {
                     if (isGlobalEffect) return;
                 }
 
-                o.__disabled[name] = o[name] ?? (o[name] = {}); // Track disabled values (or at least something)
+                parentObject.__disabled[name] = parentObject[name] ?? (parentObject[name] = {}); // Track disabled values (or at least something)
             };
 
             const disable = () => {
@@ -1169,7 +1169,7 @@ export class JSONSchemaForm extends LitElement {
     // Check if everything is internally rendered
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
-            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.tables)].map((o) => o.rendered))
+            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.tables)].map(({ rendered }) => rendered))
         );
         return isRendered;
     }

@@ -92,9 +92,9 @@ export class ContextMenu extends LitElement{
     render () {
         return html`
         <ul class="menu">
-            ${this.items.map((o) => html`<li class="share" @click=${() => {
-                if (o.onclick) o.onclick(this.#activePath)
-            }}><a href="#">${o.icon ?? ''}${o.label}</a></li>`)}
+            ${this.items.map(({ onclick , icon, label }) => html`<li class="share" @click=${() => {
+                if (onclick) onclick(this.#activePath)
+            }}><a href="#">${icon ?? ''}${label}</a></li>`)}
         </ul>
         `
     }

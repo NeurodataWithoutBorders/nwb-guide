@@ -14,8 +14,8 @@ export const randomizeElements = (array, count) => {
     return result;
 };
 
-const isObject = (o) => {
-    return o && typeof o === "object" && !Array.isArray(o);
+const isObject = (item) => {
+    return item && typeof item === "object" && !Array.isArray(item);
 };
 
 export const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
@@ -29,15 +29,15 @@ export const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
 
 export const isPrivate = (k) => k.slice(0, 2) === "__";
 
-export const sanitize = (o, condition = isPrivate) => {
-    if (isObject(o)) {
-        for (const [k, value] of Object.entries(o)) {
-            if (condition(k, value)) delete o[k];
+export const sanitize = (item, condition = isPrivate) => {
+    if (isObject(item)) {
+        for (const [k, value] of Object.entries(item)) {
+            if (condition(k, value)) delete item[k];
             else sanitize(value, condition);
         }
     }
 
-    return o;
+    return item;
 };
 
 export function merge(toMerge = {}, target = {}, mergeOptions = {}) {

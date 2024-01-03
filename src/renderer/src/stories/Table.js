@@ -563,11 +563,11 @@ export class Table extends LitElement {
             let message = "";
             let theme = "";
             if (warnings.length) {
-                (theme = "warning"), (message = warnings.map((o) => o.message).join("\n"));
+                (theme = "warning"), (message = warnings.map((error) => error.message).join("\n"));
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                (theme = "error"), (message = errors.map((o) => o.message).join("\n")); // Class switching handled automatically
+                (theme = "error"), (message = errors.map((error) => error.message).join("\n")); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
             if (theme) cell.setAttribute(theme, "");

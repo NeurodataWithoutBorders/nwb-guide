@@ -117,12 +117,12 @@ export class TableCell extends LitElement {
 
         if (warnings.length) {
             info.warning = ''
-            info.title = warnings.map((o) => o.message).join("\n");
+            info.title = warnings.map(({ message }) => message).join("\n");
         }
 
         if (errors.length) {
             info.error = ''
-            info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+            info.title = errors.map(({ message }) => message).join("\n"); // Class switching handled automatically
         }
 
         this.onValidate(info)

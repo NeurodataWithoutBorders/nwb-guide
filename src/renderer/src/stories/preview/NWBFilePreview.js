@@ -25,18 +25,18 @@ export function getSharedPath(array) {
 }
 
 export function truncateFilePaths(items, basepath) {
-    return items.map((o) => {
-        o = { ...o };
-        o.file_path = o.file_path
+    return items.map((item) => {
+        item = { ...item };
+        item.file_path = item.file_path
             .replace(`${basepath}/`, "") // Mac
             .replace(`${basepath}\\`, ""); // Windows
-        return o;
+        return item;
     });
 }
 
-export const removeFilePaths = (arr) => {
-    return arr.map((o) => {
-        const copy = { ...o };
+export const removeFilePaths = (items) => {
+    return items.map((item) => {
+        const copy = { ...item };
         delete copy.file_path;
         return copy;
     });
@@ -160,7 +160,7 @@ export class NWBFilePreview extends LitElement {
                                       : await (async () =>
                                             truncateFilePaths(
                                                 await run("inspect_folder", { path, ...options }, { title: title + "s" }),
-                                                getSharedPath(fileArr.map((o) => o.info.file))
+                                                getSharedPath(fileArr.map(({ info }) => info.file))
                                             ))();
 
                                   const list = new InspectorList({
