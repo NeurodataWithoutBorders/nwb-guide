@@ -516,6 +516,17 @@ export class JSONSchemaForm extends LitElement {
 
         this.inputs.push(interactiveInput);
 
+        // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
+
+        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
+        // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
+        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("filesystem-selector") ?? []);
+        // const allInputs = [...inputs, ...fileInputs];
+        // const filtered = filter ? allInputs.filter(filter) : allInputs;
+        // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
+
+        // console.log(interactiveInput)
+
         return html`
             <div
                 id=${localPath.join("-")}
