@@ -165,6 +165,10 @@ export class JSONSchemaInput extends LitElement {
                 margin-left: 5px;
                 font-size: 12px;
             }
+
+            .schema-input.list {
+                width: 100%;
+            }
         `;
     }
 
