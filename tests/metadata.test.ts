@@ -18,7 +18,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-var v = new Validator();
+var validator = new Validator();
 
 describe('metadata is specified correctly', () => {
 
@@ -29,7 +29,7 @@ describe('metadata is specified correctly', () => {
         baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
 
         const result = mapSessions(info => createResults(info, globalState), globalState)
-        const res = v.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
+        const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
 })

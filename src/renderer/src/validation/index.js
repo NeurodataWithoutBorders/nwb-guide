@@ -62,7 +62,7 @@ export function validateOnChange(name, parent, path, value) {
                 }),
             })
                 .then((res) => res.json())
-                .catch((e) => {}); // Let failed fetch succeed
+                .catch(() => {}); // Let failed fetch succeed
         }
     });
 

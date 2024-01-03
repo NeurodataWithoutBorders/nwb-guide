@@ -15,7 +15,7 @@ import { InspectorListItem } from "./preview/inspector/InspectorList";
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
 
-var v = new Validator();
+var validator = new Validator();
 
 const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
@@ -387,7 +387,7 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-        const result = await v.validate(resolved, this.schema);
+        const result = await validator.validate(resolved, this.schema);
 
         // Check if any required inputs are missing
         const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
@@ -620,9 +620,9 @@ export class JSONSchemaForm extends LitElement {
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
                 if (
-                    this.ignore.find((v) => {
-                        if (typeof v === "string") return v === key;
-                        else return v.test(key);
+                    this.ignore.find((keyToIgnore) => {
+                        if (typeof keyToIgnore === "string") return keyToIgnore === key;
+                        else return keyToIgnore.test(key);
                     })
                 )
                     return false;

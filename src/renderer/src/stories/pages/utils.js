@@ -27,13 +27,13 @@ export const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
     }
 };
 
-export const isPrivate = (k, v) => k.slice(0, 2) === "__";
+export const isPrivate = (k) => k.slice(0, 2) === "__";
 
 export const sanitize = (o, condition = isPrivate) => {
     if (isObject(o)) {
-        for (const [k, v] of Object.entries(o)) {
-            if (condition(k, v)) delete o[k];
-            else sanitize(v, condition);
+        for (const [k, value] of Object.entries(o)) {
+            if (condition(k, value)) delete o[k];
+            else sanitize(value, condition);
         }
     }
 
@@ -42,27 +42,27 @@ export const sanitize = (o, condition = isPrivate) => {
 
 export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
     // Deep merge objects
-    for (const [k, v] of Object.entries(toMerge)) {
-        const targetV = target[k];
+    for (const [k, value] of Object.entries(toMerge)) {
+        const targetValue = target[k];
         // if (isPrivate(k)) continue;
-        if (mergeOpts.arrays && Array.isArray(v) && Array.isArray(targetV))
-            target[k] = [...targetV, ...v]; // Merge array entries together
-        else if (v === undefined) {
+        if (mergeOpts.arrays && Array.isArray(value) && Array.isArray(targetValue))
+            target[k] = [...targetValue, ...value]; // Merge array entries together
+        else if (value === undefined) {
             delete target[k]; // Remove matched values
             // if (mergeOpts.remove !== false) delete target[k]; // Remove matched values
-        } else if (isObject(v)) {
-            if (isObject(targetV)) target[k] = merge(v, targetV, mergeOpts);
+        } else if (isObject(value)) {
+            if (isObject(targetValue)) target[k] = merge(value, targetValue, mergeOpts);
             else {
-                if (mergeOpts.clone) target[k] = merge(v, {}, mergeOpts); // Replace primitive values
-                else target[k] = v; // Replace object values
+                if (mergeOpts.clone) target[k] = merge(value, {}, mergeOpts); // Replace primitive values
+                else target[k] = value; // Replace object values
             }
-        } else target[k] = v; // Replace primitive values
+        } else target[k] = value; // Replace primitive values
     }
 
     return target;
 }
 
-export function mapSessions(callback = (v) => v, globalState) {
+export function mapSessions(callback = (value) => value, globalState) {
     return Object.entries(globalState.results)
         .map(([subject, sessions]) => {
             return Object.entries(sessions).map(([session, info], i) => callback({ subject, session, info }, i));

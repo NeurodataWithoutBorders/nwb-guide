@@ -65,11 +65,11 @@ function drill(o, callback) {
 }
 
 function encodeObject(o) {
-    return drill(o, (v) => (typeof v === "string" ? encode(v) : v));
+    return drill(o, (value) => (typeof value === "string" ? encode(value) : value));
 }
 
 function decodeObject(o) {
-    return drill(o, (v) => (typeof v === "string" ? decode(v) : v));
+    return drill(o, (value) => (typeof value === "string" ? decode(value) : value));
 }
 
 class GlobalAppConfig {
