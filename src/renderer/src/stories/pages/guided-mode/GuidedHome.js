@@ -179,10 +179,11 @@ export class GuidedHomePage extends Page {
     render() {
         return html`
             <div id="curate-new-home" style="display:flex; flex-direction:column; align-items: center">
-                <h3>Your one-stop tool for converting and uploading NWB datasets to the DANDI Archive!<br /></h3>
+                <h2>Welcome to NWB GUIDE!</h2>
+                <h3>Your one-stop tool for converting data to NWB and uploading it to the DANDI Archive.<br /></h3>
 
 
-                <div class="container--dashed" @click="${() => this.to(1)}">
+                <div class="create-button" @click="${() => this.to(1)}">
                     <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
                     <h2 class="guided--text-sub-step" style="width: 100%;">Create a new conversion pipeline</h2>
                 </div>
