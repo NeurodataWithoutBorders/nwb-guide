@@ -456,7 +456,7 @@ export class JSONSchemaInput extends LitElement {
         // Do your best to fill in missing schema values
         if (!("type" in schema)) schema.type = this.#getType();
 
-        const resolvedFullPath = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath]
+        const resolvedFullPath = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const path = [...resolvedFullPath];
         const name = path.splice(-1)[0];
 
@@ -492,15 +492,17 @@ export class JSONSchemaInput extends LitElement {
 
             addButton.innerText = `Add ${canAddProperties ? "Property" : "Item"}`;
 
-            const buttonDiv = document.createElement('div')
-            Object.assign(buttonDiv.style, {  width: 'fit-content' })
-            buttonDiv.append(addButton)
+            const buttonDiv = document.createElement("div");
+            Object.assign(buttonDiv.style, { width: "fit-content" });
+            buttonDiv.append(addButton);
 
             const disableButton = ({ message, submessage }) => {
                 addButton.setAttribute("disabled", true);
-                tippy(buttonDiv, { content: `<div style="padding: 10px;">${message} <br><small>${submessage}</small></div>`, allowHTML: true })
-            }
-
+                tippy(buttonDiv, {
+                    content: `<div style="padding: 10px;">${message} <br><small>${submessage}</small></div>`,
+                    allowHTML: true,
+                });
+            };
 
             // Provide default item types
             if (isArray) {
@@ -515,12 +517,11 @@ export class JSONSchemaInput extends LitElement {
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema?.type === "object" && this.form.createTable) {
-
                 const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, resolvedFullPath) : {};
 
                 const ogThis = this;
 
-                function commonUpdateFunction (path, value = this.data) {
+                function commonUpdateFunction(path, value = this.data) {
                     return ogThis.#updateData(path, value, true, {
                         willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
                         onError: (e) => e,
@@ -529,7 +530,6 @@ export class JSONSchemaInput extends LitElement {
                 }
 
                 const commonValidationFunction = async (tableBasePath, path, parent, v, baseSchema = itemSchema) => {
-
                     const warnings = [];
                     const errors = [];
 
@@ -545,7 +545,7 @@ export class JSONSchemaInput extends LitElement {
                         ? this.onValidate
                             ? this.onValidate()
                             : this.form
-                            ? this.form.triggerValidation(
+                              ? this.form.triggerValidation(
                                     name,
                                     completePath,
                                     false,
@@ -561,13 +561,13 @@ export class JSONSchemaInput extends LitElement {
                                         },
                                     }
                                 ) // NOTE: No pattern properties support
-                            : ""
+                              : ""
                         : true);
 
                     const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
 
                     return returnedValue;
-                }
+                };
 
                 const commonTableMetadata = {
                     onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
@@ -580,26 +580,26 @@ export class JSONSchemaInput extends LitElement {
                         }
                     },
                     onThrow: (...args) => this.#onThrow(...args),
-                }
+                };
 
-                const createNestedTable = (propName, value) => { 
+                const createNestedTable = (propName, value) => {
                     const property_key = Math.random().toString(36).substring(7);
 
                     const rowData = Object.entries(value).map(([key, value]) => {
-                       return {[property_key]: key, ...value}
-                    })
+                        return { [property_key]: key, ...value };
+                    });
 
                     const schemaCopy = structuredClone(itemSchema);
-                    if (!schemaCopy.properties) schemaCopy.properties = {}
-                    if (!schemaCopy.required) schemaCopy.required = []
-                    schemaCopy.properties[property_key] = { title: 'Property Key', type: 'string', pattern: name }
-                    schemaCopy.order = [ property_key ]
-                    schemaCopy.required.push(property_key)
+                    if (!schemaCopy.properties) schemaCopy.properties = {};
+                    if (!schemaCopy.required) schemaCopy.required = [];
+                    schemaCopy.properties[property_key] = { title: "Property Key", type: "string", pattern: name };
+                    schemaCopy.order = [property_key];
+                    schemaCopy.required.push(property_key);
 
-                    const resultPath = [...path, propName]
-                    const schemaPath = [...resolvedFullPath, propName]
+                    const resultPath = [...path, propName];
+                    const schemaPath = [...resolvedFullPath, propName];
 
-                    const allRemovedKeys = new Set()
+                    const allRemovedKeys = new Set();
 
                     const tableMetadata = {
                         schema: schemaCopy,
@@ -607,69 +607,69 @@ export class JSONSchemaInput extends LitElement {
                         ignore: this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}, // According to schema
 
                         onUpdate: function () {
-
                             const oldKeys = Object.keys(value);
 
                             const result = this.data.reduce((acc, row) => {
-                                const key = row[property_key]
+                                const key = row[property_key];
                                 if (key) {
-                                    const copy = {...row}
-                                    delete copy[property_key]
-                                    acc[key] = copy
+                                    const copy = { ...row };
+                                    delete copy[property_key];
+                                    acc[key] = copy;
                                 }
-                                return acc
-                            }, {})
+                                return acc;
+                            }, {});
 
                             const newKeys = Object.keys(result);
                             const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
-                            removedKeys.forEach(key => allRemovedKeys.add(key))
-                            newKeys.forEach(key => allRemovedKeys.delete(key))
-                            allRemovedKeys.forEach(key => result[key] = undefined)
-                                                        
-                            return commonUpdateFunction.call(this, resultPath, result) // According to 
+                            removedKeys.forEach((key) => allRemovedKeys.add(key));
+                            newKeys.forEach((key) => allRemovedKeys.delete(key));
+                            allRemovedKeys.forEach((key) => (result[key] = undefined));
+
+                            return commonUpdateFunction.call(this, resultPath, result); // According to
                         },
 
-                        validateOnChange: ( path, parent, v ) => commonValidationFunction(schemaPath, path, parent, v, schemaCopy),
+                        validateOnChange: (path, parent, v) =>
+                            commonValidationFunction(schemaPath, path, parent, v, schemaCopy),
 
-                        ...commonTableMetadata
-                    }
+                        ...commonTableMetadata,
+                    };
 
                     const table = (this.table = this.form.createTable(propName, tableMetadata, resolvedFullPath)); // Try creating table. Otherwise use nested form
                     if (table) {
                         return html`
                             <h3>${header(propName)}</h3>
-                            ${this.form.tables[`${resolvedFullPath.slice(-1)[0]}.${propName}`] = table === true ? new BasicTable(tableMetadata) : table}
-                        `
+                            ${(this.form.tables[`${resolvedFullPath.slice(-1)[0]}.${propName}`] =
+                                table === true ? new BasicTable(tableMetadata) : table)}
+                        `;
                     }
-                }
-
+                };
 
                 // Possibly multiple tables
                 if (isEditableObject(this.schema)) {
-                    
-                    const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce((acc, { key, value }) => {
-                        acc[key] = value;
-                        return acc;
-                    }, {})
+                    const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce(
+                        (acc, { key, value }) => {
+                            acc[key] = value;
+                            return acc;
+                        },
+                        {}
+                    );
 
-
-                    const tables = Object.entries(data).map(([patternPropName, patternPropValue]) => createNestedTable(patternPropName, patternPropValue)).filter(value => !!value)
+                    const tables = Object.entries(data)
+                        .map(([patternPropName, patternPropValue]) =>
+                            createNestedTable(patternPropName, patternPropValue)
+                        )
+                        .filter((value) => !!value);
 
                     if (tables.length) {
-                        disableButton({ 
-                            message: "New top-level pattern properties cannot be added at this time.", 
-                            submessage: "They need a unique key to be specified." 
-                        })
+                        disableButton({
+                            message: "New top-level pattern properties cannot be added at this time.",
+                            submessage: "They need a unique key to be specified.",
+                        });
 
-                        return html`
-                            <div style="width: 100%;">
-                                ${tables}
-                                ${buttonDiv}
-                            </div>
-                        `
+                        return html` <div style="width: 100%;">${tables} ${buttonDiv}</div> `;
                     }
-                } 
-                
+                }
+
                 // Normal table parsing
 
                 const tableMetadata = {
@@ -679,19 +679,18 @@ export class JSONSchemaInput extends LitElement {
                     ignore,
 
                     onUpdate: function () {
-                        return commonUpdateFunction.call(this, fullPath)
+                        return commonUpdateFunction.call(this, fullPath);
                     },
 
                     validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
 
-                    ...commonTableMetadata
+                    ...commonTableMetadata,
                 };
 
                 const table = (this.table = this.form.createTable(name, tableMetadata, fullPath)); // Try creating table. Otherwise use nested form
 
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
-
 
             const list = (this.#list = new List({
                 items: this.#mapToList(),
@@ -733,10 +732,11 @@ export class JSONSchemaInput extends LitElement {
                 },
             }));
 
-            if (allowAdditionalProperties) disableButton({
-                message: "Additional properties cannot be added at this time.", 
-                submessage: "They don't have a predictable structure."
-            })
+            if (allowAdditionalProperties)
+                disableButton({
+                    message: "Additional properties cannot be added at this time.",
+                    submessage: "They don't have a predictable structure.",
+                });
 
             addButton.addEventListener("click", () => {
                 this.#createModal({ list, schema: allowPatternProperties ? schema : itemSchema });

@@ -1325,7 +1325,6 @@ export class JSONSchemaForm extends LitElement {
         const additionalPropPattern = "additional";
         const additionalProps = getEditableItems(results, additionalPropPattern, { schema });
 
-
         // Render additional properties
         if (allowAdditionalProperties) {
             // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group

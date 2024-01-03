@@ -223,7 +223,6 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             createTable: function (name, metadata, path) {
-                
                 // // Do not create tables for patternProperties (OLD)
                 // const parentSchema = this.getSchema(path) ?? {};
                 // if (parentSchema.patternProperties) return false

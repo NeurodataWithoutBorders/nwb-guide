@@ -626,11 +626,11 @@ export class SimpleTable extends LitElement {
                 return this.getRow(i);
             });
 
-            this.onUpdate([], this.data)
+            this.onUpdate([], this.data);
             return mapped;
         }
 
-        this.onUpdate([], this.data)
+        this.onUpdate([], this.data);
     }
 
     #renderHeader = (str, { title, description }) => {
