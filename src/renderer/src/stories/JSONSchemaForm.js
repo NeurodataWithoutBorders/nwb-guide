@@ -1180,7 +1180,9 @@ export class JSONSchemaForm extends LitElement {
     // Check if everything is internally rendered
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
-            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.tables)].map(({ rendered }) => rendered))
+            Promise.all(
+                [...Object.values(this.#nestedForms), ...Object.values(this.tables)].map(({ rendered }) => rendered)
+            )
         );
         return isRendered;
     }

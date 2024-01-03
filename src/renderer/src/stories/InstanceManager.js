@@ -337,7 +337,9 @@ export class InstanceManager extends LitElement {
 
                     const instances = Array.from(this.shadowRoot.querySelectorAll("div[data-instance]"));
 
-                    const selectedInstanceElement = instances.find((instanceElement) => instanceElement.getAttribute("data-instance") === this.#selected);
+                    const selectedInstanceElement = instances.find(
+                        (instanceElement) => instanceElement.getAttribute("data-instance") === this.#selected
+                    );
 
                     if (selectedInstanceElement) {
                         selectedInstanceElement.hidden = false;
@@ -437,7 +439,11 @@ export class InstanceManager extends LitElement {
                                         const activeContentElement = this.shadowRoot.querySelector(
                                             "#instance-display > div:not([hidden])"
                                         );
-                                        onClick.call(this, activeContentElement.getAttribute("data-instance"), activeContentElement);
+                                        onClick.call(
+                                            this,
+                                            activeContentElement.getAttribute("data-instance"),
+                                            activeContentElement
+                                        );
                                     }}
                                     >${name}</nwb-button
                                 >`;

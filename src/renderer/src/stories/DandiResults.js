@@ -62,11 +62,11 @@ export class DandiResults extends LitElement {
                         const { message } = await fetch(
                             `http://api.crossref.org/works${new URL(identifier).pathname}`
                         ).then((res) => res.json());
-                        li.innerHTML = `${message.author.map(({ family, given }) => `${family}, ${given[0]}.`).join(", ")} (${
-                            message.created["date-parts"][0][0]
-                        }). ${message.title[0]}. <i>${message["container-title"]}</i>, <i>${message.volume}</i>(${
-                            message.issue
-                        }), ${message.page}. doi:${message.DOI}`;
+                        li.innerHTML = `${message.author
+                            .map(({ family, given }) => `${family}, ${given[0]}.`)
+                            .join(", ")} (${message.created["date-parts"][0][0]}). ${message.title[0]}. <i>${
+                            message["container-title"]
+                        }</i>, <i>${message.volume}</i>(${message.issue}), ${message.page}. doi:${message.DOI}`;
                         return li;
                     })
                 ))

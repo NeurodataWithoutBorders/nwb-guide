@@ -37,7 +37,10 @@ function getKeyboardFocusableElements(element = document) {
     const root = element.shadowRoot || element;
     return [
         ...root.querySelectorAll('a[href], button, input, textarea, select, details,[tabindex]:not([tabindex="-1"])'),
-    ].filter((focusableElement) => !focusableElement.hasAttribute("disabled") && !focusableElement.getAttribute("aria-hidden"));
+    ].filter(
+        (focusableElement) =>
+            !focusableElement.hasAttribute("disabled") && !focusableElement.getAttribute("aria-hidden")
+    );
 }
 
 export class JSONSchemaInput extends LitElement {
@@ -146,7 +149,7 @@ export class JSONSchemaInput extends LitElement {
             const inputElement = this.getElement();
             if (inputElement.type === "checkbox") inputElement.checked = value;
             else if (inputElement.classList.contains("list"))
-            inputElement.children[0].items = value
+                inputElement.children[0].items = value
                     ? value.map((value) => {
                           return { value };
                       })

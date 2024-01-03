@@ -159,7 +159,11 @@ export class NWBFilePreview extends LitElement {
                                         ) // Inspect the first file
                                       : await (async () =>
                                             truncateFilePaths(
-                                                await run("inspect_folder", { path, ...options }, { title: title + "s" }),
+                                                await run(
+                                                    "inspect_folder",
+                                                    { path, ...options },
+                                                    { title: title + "s" }
+                                                ),
                                                 getSharedPath(fileArr.map(({ info }) => info.file))
                                             ))();
 

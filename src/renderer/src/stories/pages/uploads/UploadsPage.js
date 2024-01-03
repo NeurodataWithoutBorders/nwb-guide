@@ -394,7 +394,7 @@ export class UploadsPage extends Page {
 
                     transformErrors: (error) => {
                         if (error.message === "Filesystem Paths is a required property.")
-                        error.message = "Please select at least one file or folder to upload.";
+                            error.message = "Please select at least one file or folder to upload.";
                     },
 
                     validateOnChange: validate,
