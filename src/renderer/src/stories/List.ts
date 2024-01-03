@@ -357,8 +357,6 @@ export class List extends LitElement {
                     this.items = [...this.items]
                   }
             }
-
-            this.onChange() // Register that the object has changed
         };
 
         button.onClick = deleteListItem;
