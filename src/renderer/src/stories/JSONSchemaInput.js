@@ -497,9 +497,7 @@ export class JSONSchemaInput extends LitElement {
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema?.type === "object" && this.form.createTable) {
-                const ignore = this.form?.ignore
-                    ? getIgnore(this.form?.ignore, [...path, name])
-                    : {};
+                const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, [...path, name]) : {};
 
                 const ogThis = this;
 
