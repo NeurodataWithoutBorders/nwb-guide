@@ -85,8 +85,10 @@ export class GuidedSubjectsPage extends Page {
             header: "Global Subject Metadata",
             key: "Subject",
             schema: preprocessMetadataSchema(undefined, true).properties.Subject,
-            validateOnChange: (key, parent, path) => {
-                return validateOnChange(key, parent, ["Subject", ...path]);
+            formProps: {
+                validateOnChange: (key, parent, path) => {
+                    return validateOnChange(key, parent, ["Subject", ...path]);
+                },
             },
         }));
         document.body.append(modal);

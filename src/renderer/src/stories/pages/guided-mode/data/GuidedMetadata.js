@@ -118,7 +118,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 merge(globalResolved, globals);
                 return resolveGlobalOverrides(this.subject, globals);
             },
-            validateOnChange,
+            formProps: {
+                validateOnChange,
+            },
         }));
         document.body.append(modal);
     }
@@ -188,12 +190,20 @@ export class GuidedMetadataPage extends ManagedPage {
                 if (e.message.includes('not allowed to have the additional property "Ecephys".')) return false; // NOTE: Remove after including Ecephys metadata
             },
 
-            conditionalRequirements: [
+            groups: [
                 {
                     name: "Subject Age",
                     properties: [
                         ["Subject", "age"],
                         ["Subject", "date_of_birth"],
+                    ],
+                    validate: true,
+                },
+                {
+                    name: "Institutional Info",
+                    properties: [
+                        ["NWBFile", "institution"],
+                        ["NWBFile", "lab"],
                     ],
                 },
             ],

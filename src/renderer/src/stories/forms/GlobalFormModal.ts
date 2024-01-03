@@ -21,7 +21,10 @@ type BaseFormModalOptions = {
     schema: any
     propsToIgnore?: IgnorePropsLevel
     propsToRemove?: IgnorePropsLevel
-    validateOnChange?: Function,
+    formProps: {
+        validateOnChange?: Function,
+        [key: string]: any
+    },
     hasInstances?: boolean
 }
 
@@ -30,9 +33,8 @@ export function createFormModal ({
     onSave,
     header,
     schema,
-    propsToIgnore = {},
     propsToRemove = {},
-    validateOnChange,
+    formProps,
     hasInstances = false
 }: BaseFormModalOptions & { onSave: Function }) {
     const modal = new Modal({
@@ -71,9 +73,8 @@ export function createFormModal ({
         validateEmptyValues: false,
         schema: schemaCopy,
         emptyMessage: "No properties to edit globally.",
-        ignore: propsToIgnore,
         onThrow,
-        validateOnChange
+        ...formProps
     })
 
     content.append(globalForm)
@@ -101,10 +102,10 @@ export function createFormModal ({
 export function createGlobalFormModal(this: Page, {
     header,
     schema,
-    propsToIgnore = {},
-    propsToRemove = {},
-    validateOnChange,
 
+    propsToRemove = {},
+    formProps,
+  
     // Global-specific options
     key,
     hasInstances = false,
@@ -117,9 +118,8 @@ export function createGlobalFormModal(this: Page, {
     return createFormModal({
         header,
         schema,
-        propsToIgnore,
         propsToRemove,
-        validateOnChange,
+        formProps,
         hasInstances,
         onSave: async ( form ) => {
 
