@@ -280,7 +280,7 @@ export class JSONSchemaInput extends LitElement {
 
         if (canAddProperties) {
             const editable = getEditableItems(this.value, this.pattern, { name, schema });
-            console.log(editable);
+
             return editable.map(({ key, value }) => {
                 return {
                     key,
@@ -292,7 +292,7 @@ export class JSONSchemaInput extends LitElement {
                             onClick: () => {
                                 this.#createModal({
                                     key,
-                                    schema: allowAdditionalProperties ? undefined : schema,
+                                    schema: isAdditionalProperties(this.pattern) ? undefined : schema,
                                     results: value,
                                     list: list ?? this.#list,
                                 });
