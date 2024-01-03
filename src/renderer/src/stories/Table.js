@@ -401,7 +401,7 @@ export class Table extends LitElement {
                 }
 
                 if (span._tippy) span._tippy.destroy();
-                tippy(span, { content: `${desc}` });
+                tippy(span, { content: `${desc}`, allowHTML: true });
             }
         };
 
@@ -606,7 +606,7 @@ export class Table extends LitElement {
             }
 
             if (message) {
-                tippy(cell, { content: message });
+                tippy(cell, { content: message, allowHTML: true });
                 cell.setAttribute("data-message", message);
             }
         }

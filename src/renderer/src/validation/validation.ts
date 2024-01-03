@@ -86,7 +86,10 @@ schema.Ecephys.Electrodes["*"] = function (this: JSONSchemaForm, name, parent, p
 schema.Ophys.Device = {
     ['name']: async function (this: JSONSchemaForm, name, parent, path, value) {
 
-        const prevValue = path.reduce((acc, str) => acc[str], this.results)[name]
+        const row = path.reduce((acc, str) => acc[str], this.results)
+        if (!row) return true
+        
+        const prevValue = row[name]
 
         if (prevValue === value) return true // No change
 

@@ -639,7 +639,7 @@ export class SimpleTable extends LitElement {
             span.classList.add("info");
             span.innerText = "ℹ️";
             div.append(span);
-            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}` });
+            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}`, allowHTML: true });
         }
 
         return header;
@@ -737,7 +737,7 @@ export class SimpleTable extends LitElement {
                     }
 
                     if (message !== undefined) {
-                        tippy(td, { content: message });
+                        tippy(td, { content: message, allowHTML: true });
                         td.setAttribute("data-message", value);
                     }
 

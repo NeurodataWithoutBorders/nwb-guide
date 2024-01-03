@@ -76,7 +76,7 @@ def replace_none_with_nan(json_object, json_schema):
             for key, value in obj.items():
                 if key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
-                    if prop_schema.get("type") == "number" and value is None:
+                    if prop_schema.get("type") == "number" and (value is None or value == 'NaN'):
                         obj[
                             key
                         ] = (
