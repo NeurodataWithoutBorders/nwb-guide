@@ -40,20 +40,20 @@ export const sanitize = (o, condition = isPrivate) => {
     return o;
 };
 
-export function merge(toMerge = {}, target = {}, mergeOpts = {}) {
+export function merge(toMerge = {}, target = {}, mergeOptions = {}) {
     // Deep merge objects
     for (const [k, value] of Object.entries(toMerge)) {
         const targetValue = target[k];
         // if (isPrivate(k)) continue;
-        if (mergeOpts.arrays && Array.isArray(value) && Array.isArray(targetValue))
+        if (mergeOptions.arrays && Array.isArray(value) && Array.isArray(targetValue))
             target[k] = [...targetValue, ...value]; // Merge array entries together
         else if (value === undefined) {
             delete target[k]; // Remove matched values
-            // if (mergeOpts.remove !== false) delete target[k]; // Remove matched values
+            // if (mergeOptions.remove !== false) delete target[k]; // Remove matched values
         } else if (isObject(value)) {
-            if (isObject(targetValue)) target[k] = merge(value, targetValue, mergeOpts);
+            if (isObject(targetValue)) target[k] = merge(value, targetValue, mergeOptions);
             else {
-                if (mergeOpts.clone) target[k] = merge(value, {}, mergeOpts); // Replace primitive values
+                if (mergeOptions.clone) target[k] = merge(value, {}, mergeOptions); // Replace primitive values
                 else target[k] = value; // Replace object values
             }
         } else target[k] = value; // Replace primitive values

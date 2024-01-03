@@ -74,7 +74,7 @@ export class GuidedInspectorPage extends Page {
         const { globalState } = this.info;
         const { stubs, inspector } = globalState.preview;
 
-        const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
+        const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
 
         const fileArr = Object.entries(stubs)
@@ -100,7 +100,7 @@ export class GuidedInspectorPage extends Page {
                             removeFilePaths(
                                 (globalState.preview.inspector = await run(
                                     "inspect_file",
-                                    { nwbfile_path: fileArr[0].info.file, ...opts },
+                                    { nwbfile_path: fileArr[0].info.file, ...options },
                                     { title }
                                 ))
                             );
@@ -116,7 +116,7 @@ export class GuidedInspectorPage extends Page {
                             inspector ??
                             (globalState.preview.inspector = await run(
                                 "inspect_folder",
-                                { path, ...opts },
+                                { path, ...options },
                                 { title: title + "s" }
                             ));
 
