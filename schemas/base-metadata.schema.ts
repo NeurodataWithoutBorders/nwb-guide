@@ -88,14 +88,19 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ophys) {
 
-        const getProp = (name: string, base = true) => base ? ophys.properties[name] : ophys.properties.definitions?.[name]
+        const getProp = (name: string) => ophys.properties[name]
 
-        if (getProp("TwoPhotonSeries")) getProp("TwoPhotonSeries").items.order = [
-            "name",
-            "description",
-            "scan_line_rate",
-            "field_of_view"
-        ]
+        if (getProp("TwoPhotonSeries")) {
+            const tpsItemSchema = getProp("TwoPhotonSeries").items
+            tpsItemSchema.order = [
+                "name",
+                "description",
+                "scan_line_rate",
+                "field_of_view"
+            ]
+
+            tpsItemSchema.properties.pmt_gain.title =  'Photomultiplier Gain'
+        }
 
 
         if (getProp("ImagingPlane")) {
@@ -115,14 +120,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     Object.entries(copy.properties).forEach(([key, value]) => {
 
-        const defs = value.properties.definitions ?? {}
-
         Object.entries(value.properties).forEach(([k, v]) => {
 
-            if (k ==='definitions') return
-
             //  Uniformly grab definitions
-           const ref = defs[k] ?? v.items ?? v
+           const ref = v.items ?? v
            if (!ref.properties) return
            Object.keys(ref.properties).forEach(k => {
                 const info = ref.properties[k]

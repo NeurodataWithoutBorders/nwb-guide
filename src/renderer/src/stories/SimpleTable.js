@@ -621,14 +621,14 @@ export class SimpleTable extends LitElement {
         }
     }
 
-    #renderHeader = (str, { description }) => {
+    #renderHeader = (str, { title, description }) => {
         const header = document.createElement("th");
 
         // Inner Content
         const div = document.createElement("div");
         div.classList.add("relative");
         const span = document.createElement("span");
-        span.innerHTML = str;
+        span.innerHTML = title ?? str;
         div.append(span);
         header.append(div);
 
