@@ -12,6 +12,7 @@ import { Modal } from "./Modal";
 import { capitalize } from "./forms/utils";
 import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
+import tippy from "tippy.js";
 
 const isEditableObject = (schema) => schema.type === "object";
 const isAdditionalProperties = (pattern) => pattern === "additional";
@@ -455,7 +456,8 @@ export class JSONSchemaInput extends LitElement {
         // Do your best to fill in missing schema values
         if (!("type" in schema)) schema.type = this.#getType();
 
-        const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
+        const resolvedFullPath = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath]
+        const path = [...resolvedFullPath];
         const name = path.splice(-1)[0];
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
@@ -484,6 +486,22 @@ export class JSONSchemaInput extends LitElement {
             const allowPatternProperties = isPatternProperties(this.pattern);
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
 
+            const addButton = new Button({
+                size: "small",
+            });
+
+            addButton.innerText = `Add ${canAddProperties ? "Property" : "Item"}`;
+
+            const buttonDiv = document.createElement('div')
+            Object.assign(buttonDiv.style, {  width: 'fit-content' })
+            buttonDiv.append(addButton)
+
+            const disableButton = ({ message, submessage }) => {
+                addButton.setAttribute("disabled", true);
+                tippy(buttonDiv, { content: `<div style="padding: 10px;">${message} <br><small>${submessage}</small></div>`, allowHTML: true })
+            }
+
+
             // Provide default item types
             if (isArray) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
@@ -497,64 +515,61 @@ export class JSONSchemaInput extends LitElement {
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema?.type === "object" && this.form.createTable) {
-                const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, [...path, name]) : {};
+
+                const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, resolvedFullPath) : {};
 
                 const ogThis = this;
 
-                const tableMetadata = {
-                    schema: itemSchema,
-                    data: this.value,
+                function commonUpdateFunction (path, value = this.data) {
+                    return ogThis.#updateData(path, value, true, {
+                        willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
+                        onError: (e) => e,
+                        onWarning: (e) => e,
+                    }); // Ensure change propagates to all forms
+                }
 
-                    ignore,
+                const commonValidationFunction = async (tableBasePath, path, parent, v, baseSchema = itemSchema) => {
 
-                    onUpdate: function () {
-                        return ogThis.#updateData(fullPath, this.data, true, {
-                            willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
-                            onError: (e) => e,
-                            onWarning: (e) => e,
-                        }); // Ensure change propagates to all forms
-                    },
+                    const warnings = [];
+                    const errors = [];
 
-                    validateOnChange: async (path, parent, v, baseSchema = itemSchema) => {
-                        const warnings = [];
-                        const errors = [];
+                    const name = path.slice(-1)[0];
+                    const completePath = [...tableBasePath, ...path.slice(0, -1)];
 
-                        const name = path.slice(-1)[0];
-                        const completePath = [...fullPath, ...path.slice(0, -1)];
+                    const itemPropSchema = path.reduce((acc, key) => {
+                        if (typeof key === "number") return acc; // Skip row information
+                        return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
+                    }, baseSchema);
 
-                        const itemPropSchema = path.reduce((acc, key) => {
-                            if (typeof key === "number") return acc; // Skip row information
-                            return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
-                        }, baseSchema);
+                    const result = await (validateOnChange
+                        ? this.onValidate
+                            ? this.onValidate()
+                            : this.form
+                            ? this.form.triggerValidation(
+                                    name,
+                                    completePath,
+                                    false,
+                                    this,
+                                    itemPropSchema,
+                                    { ...parent, [name]: v },
+                                    {
+                                        onError: (error) => {
+                                            errors.push(error); // Skip counting errors
+                                        },
+                                        onWarning: (warning) => {
+                                            warnings.push(warning); // Skip counting warnings
+                                        },
+                                    }
+                                ) // NOTE: No pattern properties support
+                            : ""
+                        : true);
 
-                        const result = await (validateOnChange
-                            ? this.onValidate
-                                ? this.onValidate()
-                                : this.form
-                                  ? this.form.triggerValidation(
-                                        name,
-                                        completePath,
-                                        false,
-                                        this,
-                                        itemPropSchema,
-                                        { ...parent, [name]: v },
-                                        {
-                                            onError: (error) => {
-                                                errors.push(error); // Skip counting errors
-                                            },
-                                            onWarning: (warning) => {
-                                                warnings.push(warning); // Skip counting warnings
-                                            },
-                                        }
-                                    ) // NOTE: No pattern properties support
-                                  : ""
-                            : true);
+                    const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
 
-                        const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
+                    return returnedValue;
+                }
 
-                        return returnedValue;
-                    },
-
+                const commonTableMetadata = {
                     onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
                     validateEmptyCells: this.form?.validateEmptyValues,
                     deferLoading: this.form?.deferLoading,
@@ -565,6 +580,111 @@ export class JSONSchemaInput extends LitElement {
                         }
                     },
                     onThrow: (...args) => this.#onThrow(...args),
+                }
+
+                const createNestedTable = (propName, value) => { 
+                    const property_key = Math.random().toString(36).substring(7);
+
+                    const rowData = Object.entries(value).map(([key, value]) => {
+                       return {[property_key]: key, ...value}
+                    })
+
+                    const schemaCopy = structuredClone(itemSchema);
+                    if (!schemaCopy.properties) schemaCopy.properties = {}
+                    if (!schemaCopy.required) schemaCopy.required = []
+                    schemaCopy.properties[property_key] = { title: 'Property Key', type: 'string', pattern: name }
+                    schemaCopy.order = [ property_key ]
+                    schemaCopy.required.push(property_key)
+
+                    const resultPath = [...path, propName]
+                    const schemaPath = [...resolvedFullPath, propName]
+
+                    const allRemovedKeys = new Set()
+
+                    const tableMetadata = {
+                        schema: schemaCopy,
+                        data: rowData,
+                        ignore: this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}, // According to schema
+
+                        onUpdate: function () {
+
+                            const oldKeys = Object.keys(value);
+
+                            const result = this.data.reduce((acc, row) => {
+                                const key = row[property_key]
+                                if (key) {
+                                    const copy = {...row}
+                                    delete copy[property_key]
+                                    acc[key] = copy
+                                }
+                                return acc
+                            }, {})
+
+                            const newKeys = Object.keys(result);
+                            const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
+                            removedKeys.forEach(key => allRemovedKeys.add(key))
+                            newKeys.forEach(key => allRemovedKeys.delete(key))
+                            allRemovedKeys.forEach(key => result[key] = undefined)
+                                                        
+                            return commonUpdateFunction.call(this, resultPath, result) // According to 
+                        },
+
+                        validateOnChange: ( path, parent, v ) => commonValidationFunction(schemaPath, path, parent, v, schemaCopy),
+
+                        ...commonTableMetadata
+                    }
+
+                    const table = (this.table = this.form.createTable(propName, tableMetadata, resolvedFullPath)); // Try creating table. Otherwise use nested form
+                    if (table) {
+                        return html`
+                            <h3>${header(propName)}</h3>
+                            ${this.form.tables[`${resolvedFullPath.slice(-1)[0]}.${propName}`] = table === true ? new BasicTable(tableMetadata) : table}
+                        `
+                    }
+                }
+
+
+                // Possibly multiple tables
+                if (isEditableObject(this.schema)) {
+                    
+                    const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce((acc, { key, value }) => {
+                        acc[key] = value;
+                        return acc;
+                    }, {})
+
+
+                    const tables = Object.entries(data).map(([patternPropName, patternPropValue]) => createNestedTable(patternPropName, patternPropValue)).filter(value => !!value)
+
+                    if (tables.length) {
+                        disableButton({ 
+                            message: "New top-level pattern properties cannot be added at this time.", 
+                            submessage: "They need a unique key to be specified." 
+                        })
+
+                        return html`
+                            <div style="width: 100%;">
+                                ${tables}
+                                ${buttonDiv}
+                            </div>
+                        `
+                    }
+                } 
+                
+                // Normal table parsing
+
+                const tableMetadata = {
+                    schema: itemSchema,
+                    data: this.value,
+
+                    ignore,
+
+                    onUpdate: function () {
+                        return commonUpdateFunction.call(this, fullPath)
+                    },
+
+                    validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
+
+                    ...commonTableMetadata
                 };
 
                 const table = (this.table = this.form.createTable(name, tableMetadata, fullPath)); // Try creating table. Otherwise use nested form
@@ -572,15 +692,6 @@ export class JSONSchemaInput extends LitElement {
                 if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
             }
 
-            const addButton = new Button({
-                size: "small",
-            });
-
-            addButton.innerText = `Add ${canAddProperties ? "Property" : "Item"}`;
-
-            addButton.addEventListener("click", () => {
-                this.#createModal({ list, schema: allowPatternProperties ? schema : itemSchema });
-            });
 
             const list = (this.#list = new List({
                 items: this.#mapToList(),
@@ -622,15 +733,18 @@ export class JSONSchemaInput extends LitElement {
                 },
             }));
 
-            if (allowAdditionalProperties) {
-                addButton.setAttribute("disabled", true);
-                addButton.title =
-                    "Additional properties cannot be added at this time—as they don't have a predictable structure.";
-            }
+            if (allowAdditionalProperties) disableButton({
+                message: "Additional properties cannot be added at this time.", 
+                submessage: "They don't have a predictable structure."
+            })
+
+            addButton.addEventListener("click", () => {
+                this.#createModal({ list, schema: allowPatternProperties ? schema : itemSchema });
+            });
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
-                    ${list} ${addButton}
+                    ${list} ${buttonDiv}
                 </div>
             `;
         }

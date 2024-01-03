@@ -150,6 +150,14 @@ export class SimpleTable extends LitElement {
                 font-size: 80%;
                 font-family: ${unsafeCSS(emojiFontFamily)};
             }
+
+            h3 {
+                margin: 0;
+                padding: 10px;
+                background: black;
+                color: white;
+                border-radius-top: 5px;
+            }
         `;
     }
 
@@ -618,8 +626,11 @@ export class SimpleTable extends LitElement {
                 return this.getRow(i);
             });
 
+            this.onUpdate([], this.data)
             return mapped;
         }
+
+        this.onUpdate([], this.data)
     }
 
     #renderHeader = (str, { title, description }) => {
