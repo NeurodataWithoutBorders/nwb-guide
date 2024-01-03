@@ -30,9 +30,9 @@ export class InspectPage extends Page {
             "inspect",
             { paths: value },
             { title: "Inspecting selected filesystem entries." }
-        ).catch((e) => {
-            this.notify(e.message, "error");
-            throw e;
+        ).catch((error) => {
+            this.notify(error.message, "error");
+            throw error;
         });
 
         if (!result.length) return this.notify("No messages received from the NWB Inspector");

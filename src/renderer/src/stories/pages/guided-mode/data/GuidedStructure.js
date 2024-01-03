@@ -126,7 +126,7 @@ export class GuidedStructurePage extends Page {
                     }; // Has label and keywords property already
                 })
             )
-            .catch((e) => console.error(e));
+            .catch((error) => console.error(error));
 
         this.list.emptyMessage = defaultEmptyMessage;
 

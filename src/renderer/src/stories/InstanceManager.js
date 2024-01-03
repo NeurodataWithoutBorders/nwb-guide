@@ -186,8 +186,8 @@ export class InstanceManager extends LitElement {
             const input = this.shadowRoot.querySelector("#new-info input");
             input.focus();
 
-            const mousePress = (e) => {
-                if (!e.composedPath().includes(newInfoDiv)) {
+            const mousePress = (mousePressEvent) => {
+                if (!mousePressEvent.composedPath().includes(newInfoDiv)) {
                     this.#onKeyDone();
                     document.removeEventListener("pointerdown", mousePress);
                 }
@@ -401,8 +401,8 @@ export class InstanceManager extends LitElement {
 
                       // Trigger new update
                       this.requestUpdate();
-                  } catch (e) {
-                      notify(e.message, "error");
+                  } catch (error) {
+                      notify(error.message, "error");
                   }
                   input.value = "";
               }

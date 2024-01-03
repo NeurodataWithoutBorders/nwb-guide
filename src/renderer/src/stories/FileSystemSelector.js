@@ -70,9 +70,9 @@ const componentCSS = css`
     }
 `;
 
-document.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+document.addEventListener("dragover", (dragOverEvent) => {
+    dragOverEvent.preventDefault();
+    dragOverEvent.stopPropagation();
 });
 
 export class FilesystemSelector extends LitElement {
@@ -170,7 +170,7 @@ export class FilesystemSelector extends LitElement {
             let handles = await (type === "directory"
                 ? window.showDirectoryPicker()
                 : window.showOpenFilePicker({ multiple: this.multiple })
-            ).catch((e) => []); // Call using the same options
+            ).catch(() => []); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
             this.#handleFiles(result, type);

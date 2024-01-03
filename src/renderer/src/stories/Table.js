@@ -261,7 +261,7 @@ export class Table extends LitElement {
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
 
                     return this.#handleValidationResult(valid, row, prop);
-                } catch (e) {
+                } catch {
                     return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
                 }
             };
@@ -517,7 +517,7 @@ export class Table extends LitElement {
 
         table.addHook("afterCreateRow", (index, amount) => {
             nRows += amount;
-            const physicalRows = Array.from({ length: amount }, (e, i) => index + i);
+            const physicalRows = Array.from({ length: amount }, (_, i) => index + i);
             physicalRows.forEach((row) => this.#setRow(row, this.#getRowData(row)));
         });
 

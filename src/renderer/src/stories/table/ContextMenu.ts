@@ -70,7 +70,7 @@ export class ContextMenu extends LitElement{
 
         document.addEventListener('click', () => this.#hide()) // Hide at the last step of any click
         document.addEventListener('contextmenu', () => this.#hide())
-        this.target.addEventListener('contextmenu', (e) => this.#open(e))
+        this.target.addEventListener('contextmenu', (contextEvent) => this.#open(contextEvent))
     }
 
     #hide() {
@@ -80,13 +80,13 @@ export class ContextMenu extends LitElement{
 
     #activePath: HTMLElement[] | null = null
 
-    #open(e: MouseEvent) {
-        e.preventDefault()
-        e.stopPropagation()
-        this.#activePath = e.path || e.composedPath()
+    #open(mouseEvent: MouseEvent) {
+        mouseEvent.preventDefault()
+        mouseEvent.stopPropagation()
+        this.#activePath = mouseEvent.path || mouseEvent.composedPath()
         this.style.display = 'block';
-        this.style.left = e.pageX + "px";
-        this.style.top = e.pageY + "px";
+        this.style.left = mouseEvent.pageX + "px";
+        this.style.top = mouseEvent.pageY + "px";
     }
 
     render () {

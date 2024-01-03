@@ -181,9 +181,9 @@ const componentCSS = `
     }
 `;
 
-document.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+document.addEventListener("dragover", (dragEvent) => {
+    dragEvent.preventDefault();
+    dragEvent.stopPropagation();
 });
 
 export class JSONSchemaForm extends LitElement {
@@ -441,8 +441,8 @@ export class JSONSchemaForm extends LitElement {
 
         try {
             for (let key in this.tables) await this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
-        } catch (e) {
-            this.throw(e.message);
+        } catch (error) {
+            this.throw(error.message);
         }
 
         return true;
@@ -711,7 +711,7 @@ export class JSONSchemaForm extends LitElement {
 
         const jsonSchemaErrors = await v
             .validate(parent[name], this.schema.properties[name])
-            .errors.map((e) => ({ type: "error", message: `${header(name)} ${e.message}.` }));
+            .errors.map((error) => ({ type: "error", message: `${header(name)} ${error.message}.` }));
 
         const valid =
             !this.validateEmptyValues && parent[name] === undefined
@@ -803,17 +803,17 @@ export class JSONSchemaForm extends LitElement {
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
         const resolvedErrors = errors
-            .map((e) => {
+            .map((error) => {
                 // Non-Strict Rule
-                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+                if (schema.strict === false && error.message.includes("is not one of enum values")) return;
 
                 // Custom Error Transformations
                 if (this.transformErrors) {
-                    const res = this.transformErrors(e, externalPath, parent[name]);
+                    const res = this.transformErrors(error, externalPath, parent[name]);
                     if (res === false) return;
                 }
 
-                return e;
+                return error;
             })
             .filter((v) => !!v);
 
@@ -1102,9 +1102,9 @@ export class JSONSchemaForm extends LitElement {
                 this.checkStatus();
             };
 
-            enableToggle.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const { checked } = e.target;
+            enableToggle.addEventListener("click", (clickEvent) => {
+                clickEvent.stopPropagation();
+                const { checked } = clickEvent.target;
 
                 // Reset parameters on interaction
                 isGlobalEffect = false;

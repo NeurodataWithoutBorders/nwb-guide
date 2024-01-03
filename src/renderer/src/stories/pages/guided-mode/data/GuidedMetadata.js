@@ -157,9 +157,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
 
-            transformErrors: (e) => {
+            transformErrors: (error) => {
                 // JSON Schema Exceptions
-                if (e.message.includes('does not conform to the "date-time" format.')) return false;
+                if (error.message.includes('does not conform to the "date-time" format.')) return false;
             },
 
             groups: [

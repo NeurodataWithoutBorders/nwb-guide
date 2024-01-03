@@ -295,8 +295,8 @@ export class List extends LitElement {
         editableElement.contentEditable = true;
 
         // Stop enter key from creating new line
-        editableElement.onkeydown = (e) => {
-            if (e.keyCode === 13) {
+        editableElement.onkeydown = (keyDownEvent) => {
+            if (keyDownEvent.keyCode === 13) {
               editableElement.blur();
                 return false;
             }
