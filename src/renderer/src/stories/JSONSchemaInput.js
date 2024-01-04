@@ -3,7 +3,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
-import { header } from "./forms/utils";
+import { header, tempPropertyKey } from "./forms/utils";
 
 import { Button } from "./Button";
 import { List } from "./List";
@@ -13,6 +13,7 @@ import { capitalize } from "./forms/utils";
 import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
+
 
 const isEditableObject = (schema) => schema.type === "object";
 const isAdditionalProperties = (pattern) => pattern === "additional";
@@ -519,25 +520,30 @@ export class JSONSchemaInput extends LitElement {
             else if (itemSchema?.type === "object" && this.form.createTable) {
                 const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, resolvedFullPath) : {};
 
-                const ogThis = this;
+                const instanceThis = this;
 
                 function commonUpdateFunction(path, value = this.data) {
-                    return ogThis.#updateData(path, value, true, {
+                    return instanceThis.#updateData(path, value, true, {
                         willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
                         onError: (e) => e,
                         onWarning: (e) => e,
                     }); // Ensure change propagates to all forms
                 }
 
-                const commonValidationFunction = async (tableBasePath, path, parent, v, baseSchema = itemSchema) => {
+                const commonValidationFunction = async (tableBasePath, path, parent, newValue, baseSchema = itemSchema, skip = 0) => {
                     const warnings = [];
                     const errors = [];
 
                     const name = path.slice(-1)[0];
                     const completePath = [...tableBasePath, ...path.slice(0, -1)];
 
-                    const itemPropSchema = path.reduce((acc, key) => {
-                        if (typeof key === "number") return acc; // Skip row information
+                    const toIterate = path.slice(skip);
+
+                    const itemPropSchema = toIterate.reduce((acc, key) => {
+                        // if (acc?.patternProperties) {
+                        //     const pattern = Object.keys(acc.patternProperties).find((pattern) => new RegExp(pattern).test(key));
+                        //     if (pattern) return acc.patternProperties[pattern];
+                        // }
                         return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
                     }, baseSchema);
 
@@ -551,7 +557,7 @@ export class JSONSchemaInput extends LitElement {
                                     false,
                                     this,
                                     itemPropSchema,
-                                    { ...parent, [name]: v },
+                                    { ...parent, [name]: newValue },
                                     {
                                         onError: (error) => {
                                             errors.push(error); // Skip counting errors
@@ -583,37 +589,43 @@ export class JSONSchemaInput extends LitElement {
                 };
 
                 const createNestedTable = (propName, value) => {
-                    const property_key = Math.random().toString(36).substring(7);
 
                     const rowData = Object.entries(value).map(([key, value]) => {
-                        return { [property_key]: key, ...value };
+                        return { [tempPropertyKey]: key, ...value };
                     });
 
                     const schemaCopy = structuredClone(itemSchema);
                     if (!schemaCopy.properties) schemaCopy.properties = {};
                     if (!schemaCopy.required) schemaCopy.required = [];
-                    schemaCopy.properties[property_key] = { title: "Property Key", type: "string", pattern: name };
-                    schemaCopy.order = [property_key];
-                    schemaCopy.required.push(property_key);
+                    schemaCopy.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
+                    schemaCopy.order = [tempPropertyKey];
+                    schemaCopy.required.push(tempPropertyKey);
 
                     const resultPath = [...path, propName];
                     const schemaPath = [...resolvedFullPath, propName];
 
                     const allRemovedKeys = new Set();
 
+                    const keyAlreadyExists = (key) => Object.keys(value).includes(key)
+
+
+                    let previousValidValues = {}
+
                     const tableMetadata = {
                         schema: schemaCopy,
                         data: rowData,
                         ignore: this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}, // According to schema
 
-                        onUpdate: function () {
+                        onUpdate: function (path, newValue) {
                             const oldKeys = Object.keys(value);
 
+                            if (path.slice(-1)[0] === tempPropertyKey && keyAlreadyExists(newValue)) return // Do not overwrite existing keys
+
                             const result = this.data.reduce((acc, row) => {
-                                const key = row[property_key];
+                                const key = row[tempPropertyKey];
                                 if (key) {
                                     const copy = { ...row };
-                                    delete copy[property_key];
+                                    delete copy[tempPropertyKey];
                                     acc[key] = copy;
                                 }
                                 return acc;
@@ -628,9 +640,35 @@ export class JSONSchemaInput extends LitElement {
                             return commonUpdateFunction.call(this, resultPath, result); // According to
                         },
 
-                        validateOnChange: (path, parent, v) =>
-                            commonValidationFunction(schemaPath, path, parent, v, schemaCopy),
+                        validateOnChange: function (path, parent, newValue){
 
+                            const rowIdx = path[0]
+                            const currentKey = this.data[rowIdx][tempPropertyKey]
+                            const updatedPath = [ this.data[rowIdx][tempPropertyKey], ...path.slice(1) ]; // Replace row with key
+
+                            const resolvedKey = previousValidValues[rowIdx] ?? currentKey
+
+                            // Do not overwrite existing keys
+                            if (path.slice(-1)[0] === tempPropertyKey && resolvedKey !== newValue) {
+
+                                if (keyAlreadyExists(newValue)) {
+
+
+                                    if (!previousValidValues[rowIdx]) previousValidValues[rowIdx] = resolvedKey
+
+                                    return [
+                                        {
+                                            message: `Key already exists.<br><small>This value is still ${resolvedKey}.</small>`,
+                                            type: "error", 
+                                        }
+                                    ]
+                                } 
+                                
+                                else delete previousValidValues[rowIdx]
+                            }
+
+                            return commonValidationFunction(resultPath, updatedPath, parent, newValue, schemaCopy, 1)
+                        },
                         ...commonTableMetadata,
                     };
 
@@ -682,7 +720,7 @@ export class JSONSchemaInput extends LitElement {
                         return commonUpdateFunction.call(this, fullPath);
                     },
 
-                    validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
+                    validateOnChange: (...args) => commonValidationFunction(fullPath, ...args, 1),
 
                     ...commonTableMetadata,
                 };

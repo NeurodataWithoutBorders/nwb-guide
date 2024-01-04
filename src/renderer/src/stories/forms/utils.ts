@@ -1,6 +1,8 @@
 const toCapitalizeAll = ['nwb', 'api', 'id']
 const toCapitalizeNone = ['or', 'and']
 
+export const tempPropertyKey = Math.random().toString(36).substring(7);
+
 export const capitalize = (str: string) => {
     const lowerCase = str.toLowerCase()
     return toCapitalizeAll.includes(lowerCase) ? str.toUpperCase() : (toCapitalizeNone.includes(lowerCase) ? lowerCase : str[0].toUpperCase() + str.slice(1))

@@ -1,6 +1,7 @@
 import schema from './validation.json'
 import { JSONSchemaForm } from '../stories/JSONSchemaForm.js'
 import Swal from 'sweetalert2'
+import { tempPropertyKey } from '../stories/forms/utils'
 
 function rerenderTable (this: JSONSchemaForm, linkedPath: string[]) {
     const element = this.getTable(linkedPath)
@@ -12,7 +13,11 @@ function rerenderTable (this: JSONSchemaForm, linkedPath: string[]) {
 }
 
 const isNotUnique = (key, currentValue, rows, idx) => {
-    const isUnique = rows.filter((o, i) => o[key] === currentValue && i !== idx).length === 0
+
+    const array = Array.isArray(rows) ? rows : Object.values(rows)
+    idx = Array.isArray(rows) ? idx : Object.keys(rows).indexOf(idx)
+
+    const isUnique = array.filter((o, i) => o[key] === currentValue && i !== idx).length === 0
 
     if (!isUnique) return [
         {
@@ -111,6 +116,30 @@ schema.Ecephys.Electrodes["*"] = function (this: JSONSchemaForm, name, parent, p
     ]
 }
 
+function ensureUnique(this: JSONSchemaForm, name, parent, path, value) {
+    const { 
+        values, 
+        value: row 
+    } = get(this.results, path)
+    
+    if (!row) return true // Allow blank rows
+
+    const rows = values.slice(-1)[0]
+    const idx = path.slice(-1)[0]
+    const isUniqueError = isNotUnique(name, value, rows, idx)
+    if (isUniqueError) return isUniqueError
+
+    return true
+}
+
+schema.Ophys = {
+    '*': {
+        '**': {
+            ['name']: ensureUnique,
+        }
+    }
+}
+
 // Ophys
 schema.Ophys.Device = {
     ['name']: async function (this: JSONSchemaForm, name, parent, path, value) {
@@ -132,7 +161,6 @@ schema.Ophys.Device = {
         if (prevValue === value || prevValue === undefined) return true // No change
 
         const prevUniqueError = isNotUnique(name, prevValue, rows, idx)
-        console.log(prevUniqueError)
         if (prevUniqueError) return true // Register as valid
 
         const result = await Swal.fire({
