@@ -186,7 +186,7 @@ export class SimpleTable extends LitElement {
     } = {}) {
         super();
         this.schema = schema ?? {};
-        this.#keyColumn = keyColumn
+        this.#keyColumn = keyColumn;
         this.data = data ?? [];
 
         this.globals = globals ?? {};
@@ -282,11 +282,11 @@ export class SimpleTable extends LitElement {
         });
     }
 
-    #keyColumn
+    #keyColumn;
     #data = [];
     get data() {
         // Remove empty array entries
-        if (Array.isArray(this.#data)) return this.#data //.filter((o) => Object.keys(o).length);
+        if (Array.isArray(this.#data)) return this.#data; //.filter((o) => Object.keys(o).length);
         else return this.#data;
     }
 
@@ -709,12 +709,12 @@ export class SimpleTable extends LitElement {
     #createCell = (value, info) => {
         const rowNames = Object.keys(this.#data);
 
-        const row = Array.isArray(this.#data) ? info.i : rowNames[info.i]
+        const row = Array.isArray(this.#data) ? info.i : rowNames[info.i];
 
         const fullInfo = {
             ...info,
             col: this.colHeaders[info.j],
-            row: `${row}`
+            row: `${row}`,
         };
 
         const schema = this.#schema[fullInfo.col];
@@ -723,9 +723,10 @@ export class SimpleTable extends LitElement {
         const cell = new TableCell({
             info: {
                 title: header(
-                    fullInfo.col === tempPropertyValueKey 
-                    ? 'Property' // outerParent[tempPropertyKey] // NOTE: For new rows, this will be unresolved at instantiation
-                    : fullInfo.col),
+                    fullInfo.col === tempPropertyValueKey
+                        ? "Property" // outerParent[tempPropertyKey] // NOTE: For new rows, this will be unresolved at instantiation
+                        : fullInfo.col
+                ),
                 col: this.colHeaders[info.j],
             },
             value,
