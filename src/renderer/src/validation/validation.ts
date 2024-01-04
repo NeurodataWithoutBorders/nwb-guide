@@ -11,6 +11,35 @@ function rerenderTable (this: JSONSchemaForm, linkedPath: string[]) {
     return element
 }
 
+const isNotUnique = (key, currentValue, rows, idx) => {
+    const isUnique = rows.filter((o, i) => o[key] === currentValue && i !== idx).length === 0
+
+    if (!isUnique) return [
+        {
+            message: `Not a unique ${key}`,
+            type: 'error'
+        }
+    ]
+
+}
+
+const get = (object: any, path: string[]) => {
+    const values: any[] = []
+
+    const name = path.slice(-1)[0]
+    const finalValue = path.slice(0, -1).reduce((acc, str) => {
+        values.push(acc[str])
+        return acc[str]
+    }, object)
+
+
+
+    return {
+        value: finalValue[name],
+        values
+    }
+}
+
 // Specify JavaScript-side validation
 schema.Ecephys.ElectrodeGroup.device = function (this: JSONSchemaForm, name, parent, path) {
     const devices = this.results.Ecephys.Device.map(o => o.name)
@@ -86,13 +115,25 @@ schema.Ecephys.Electrodes["*"] = function (this: JSONSchemaForm, name, parent, p
 schema.Ophys.Device = {
     ['name']: async function (this: JSONSchemaForm, name, parent, path, value) {
 
-        const row = path.reduce((acc, str) => acc[str], this.results)
+        const { 
+            values, 
+            value: row 
+        } = get(this.results, path)
+        
+        if (!row) return true // Allow blank rows
 
-        if (!row) return true
+        const rows = values.slice(-1)[0]
+        const idx = path.slice(-1)[0]
+        const isUniqueError = isNotUnique(name, value, rows, idx)
+        if (isUniqueError) return isUniqueError
 
         const prevValue = row[name]
+        
+        if (prevValue === value || prevValue === undefined) return true // No change
 
-        if (prevValue === value) return true // No change
+        const prevUniqueError = isNotUnique(name, prevValue, rows, idx)
+        console.log(prevUniqueError)
+        if (prevUniqueError) return true // Register as valid
 
         const result = await Swal.fire({
             title: `Are you sure you want to rename the ${prevValue} device?`,
