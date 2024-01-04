@@ -284,7 +284,7 @@ export class SimpleTable extends LitElement {
     #data = [];
     get data() {
         // Remove empty array entries
-        if (Array.isArray(this.#data)) return this.#data //.filter((o) => Object.keys(o).length);
+        if (Array.isArray(this.#data)) return this.#data; //.filter((o) => Object.keys(o).length);
         else return this.#data;
     }
 

@@ -115,11 +115,11 @@ schema.Ecephys.Electrodes["*"] = function (this: JSONSchemaForm, name, parent, p
 schema.Ophys.Device = {
     ['name']: async function (this: JSONSchemaForm, name, parent, path, value) {
 
-        const { 
-            values, 
-            value: row 
+        const {
+            values,
+            value: row
         } = get(this.results, path)
-        
+
         if (!row) return true // Allow blank rows
 
         const rows = values.slice(-1)[0]
@@ -128,7 +128,7 @@ schema.Ophys.Device = {
         if (isUniqueError) return isUniqueError
 
         const prevValue = row[name]
-        
+
         if (prevValue === value || prevValue === undefined) return true // No change
 
         const prevUniqueError = isNotUnique(name, prevValue, rows, idx)
