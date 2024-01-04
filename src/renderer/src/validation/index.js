@@ -14,7 +14,7 @@ export async function validateOnChange(name, parent, path, value) {
 
     const fullPath = [...path, name];
 
-    const toIterate = fullPath //fullPathNoRows // fullPath
+    const toIterate = fullPath; //fullPathNoRows // fullPath
 
     const copy = { ...parent }; // Validate on a copy of the parent
     if (arguments.length > 3) copy[name] = value; // Update value on copy
@@ -32,34 +32,27 @@ export async function validateOnChange(name, parent, path, value) {
         // let overridden = false;
         let lastWildcard;
         toIterate.reduce((acc, key) => {
-
             if (acc && "*" in acc) {
                 if (acc["*"] === false && lastWildcard)
                     overridden = true; // Disable if false and a wildcard has already been specified
-
                 // Otherwise set the last wildcard
                 else {
-                    
                     lastWildcard = typeof acc["*"] === "string" ? acc["*"].replace(`{*}`, `${name}`) : acc["*"];
 
                     overridden = false; // Re-enable if a new one is specified below
                 }
-            } else if (lastWildcard && typeof lastWildcard === "object"){
-
-                    const newWildcard = lastWildcard[key] ?? lastWildcard["*"] ?? lastWildcard["**"] ?? (acc && acc["**"]) // Drill wildcard objects once resolved
-                    // Prioritize continuation of last wildcard
-                    if (newWildcard) lastWildcard = newWildcard; 
+            } else if (lastWildcard && typeof lastWildcard === "object") {
+                const newWildcard = lastWildcard[key] ?? lastWildcard["*"] ?? lastWildcard["**"] ?? (acc && acc["**"]); // Drill wildcard objects once resolved
+                // Prioritize continuation of last wildcard
+                if (newWildcard) lastWildcard = newWildcard;
             }
 
-
             return acc?.[key];
-
         }, validationSchema);
 
-
         if (overridden && functions !== true) lastWildcard = false; // Disable if not promised to exist
-        
-        if (typeof lastWildcard === 'function') functions = [lastWildcard];
+
+        if (typeof lastWildcard === "function") functions = [lastWildcard];
     }
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field

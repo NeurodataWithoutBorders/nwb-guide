@@ -14,7 +14,6 @@ import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
 
-
 const isEditableObject = (schema) => schema.type === "object";
 const isAdditionalProperties = (pattern) => pattern === "additional";
 const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
@@ -530,7 +529,14 @@ export class JSONSchemaInput extends LitElement {
                     }); // Ensure change propagates to all forms
                 }
 
-                const commonValidationFunction = async (tableBasePath, path, parent, newValue, baseSchema = itemSchema, skip = 0) => {
+                const commonValidationFunction = async (
+                    tableBasePath,
+                    path,
+                    parent,
+                    newValue,
+                    baseSchema = itemSchema,
+                    skip = 0
+                ) => {
                     const warnings = [];
                     const errors = [];
 
@@ -589,7 +595,6 @@ export class JSONSchemaInput extends LitElement {
                 };
 
                 const createNestedTable = (propName, value) => {
-
                     const rowData = Object.entries(value).map(([key, value]) => {
                         return { [tempPropertyKey]: key, ...value };
                     });
@@ -606,10 +611,9 @@ export class JSONSchemaInput extends LitElement {
 
                     const allRemovedKeys = new Set();
 
-                    const keyAlreadyExists = (key) => Object.keys(value).includes(key)
+                    const keyAlreadyExists = (key) => Object.keys(value).includes(key);
 
-
-                    let previousValidValues = {}
+                    let previousValidValues = {};
 
                     const tableMetadata = {
                         schema: schemaCopy,
@@ -619,7 +623,7 @@ export class JSONSchemaInput extends LitElement {
                         onUpdate: function (path, newValue) {
                             const oldKeys = Object.keys(value);
 
-                            if (path.slice(-1)[0] === tempPropertyKey && keyAlreadyExists(newValue)) return // Do not overwrite existing keys
+                            if (path.slice(-1)[0] === tempPropertyKey && keyAlreadyExists(newValue)) return; // Do not overwrite existing keys
 
                             const result = this.data.reduce((acc, row) => {
                                 const key = row[tempPropertyKey];
@@ -640,34 +644,28 @@ export class JSONSchemaInput extends LitElement {
                             return commonUpdateFunction.call(this, resultPath, result); // According to
                         },
 
-                        validateOnChange: function (path, parent, newValue){
+                        validateOnChange: function (path, parent, newValue) {
+                            const rowIdx = path[0];
+                            const currentKey = this.data[rowIdx][tempPropertyKey];
+                            const updatedPath = [this.data[rowIdx][tempPropertyKey], ...path.slice(1)]; // Replace row with key
 
-                            const rowIdx = path[0]
-                            const currentKey = this.data[rowIdx][tempPropertyKey]
-                            const updatedPath = [ this.data[rowIdx][tempPropertyKey], ...path.slice(1) ]; // Replace row with key
-
-                            const resolvedKey = previousValidValues[rowIdx] ?? currentKey
+                            const resolvedKey = previousValidValues[rowIdx] ?? currentKey;
 
                             // Do not overwrite existing keys
                             if (path.slice(-1)[0] === tempPropertyKey && resolvedKey !== newValue) {
-
                                 if (keyAlreadyExists(newValue)) {
-
-
-                                    if (!previousValidValues[rowIdx]) previousValidValues[rowIdx] = resolvedKey
+                                    if (!previousValidValues[rowIdx]) previousValidValues[rowIdx] = resolvedKey;
 
                                     return [
                                         {
                                             message: `Key already exists.<br><small>This value is still ${resolvedKey}.</small>`,
-                                            type: "error", 
-                                        }
-                                    ]
-                                } 
-                                
-                                else delete previousValidValues[rowIdx]
+                                            type: "error",
+                                        },
+                                    ];
+                                } else delete previousValidValues[rowIdx];
                             }
 
-                            return commonValidationFunction(resultPath, updatedPath, parent, newValue, schemaCopy, 1)
+                            return commonValidationFunction(resultPath, updatedPath, parent, newValue, schemaCopy, 1);
                         },
                         ...commonTableMetadata,
                     };
