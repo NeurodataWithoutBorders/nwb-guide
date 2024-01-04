@@ -380,6 +380,9 @@ export class JSONSchemaForm extends LitElement {
 
     #clearMessages = (localPath, type) => {
         if (Array.isArray(localPath)) localPath = localPath.join("-"); // Convert array to string
+
+        if (!localPath.length) return
+        
         const container = this.shadowRoot.querySelector(`#${encode(localPath)} .${type}`);
 
         if (container) {

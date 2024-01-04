@@ -1,6 +1,6 @@
 import { LitElement, css } from "lit"
 import { ArrayCell } from "./cells/array"
-import { NestedTableCell } from "./cells/table"
+import { NestedInputCell } from "./cells/input"
 
 import { TableCellBase } from "./cells/base"
 import { DateTimeCell } from "./cells/date-time"
@@ -193,7 +193,7 @@ export class TableCell extends LitElement {
         if (this.schema.type === "array") {
             const items = this.schema.items
             if (items && items.type === "object") {
-                cls = NestedTableCell
+                cls = NestedInputCell
                 this.type = "table"
             } else {
                 cls = ArrayCell
@@ -203,6 +203,9 @@ export class TableCell extends LitElement {
         else if (this.schema.format === "date-time") {
             cls = DateTimeCell
             this.type = "date-time"
+        } else if (this.schema.type === "object") {
+            cls = NestedInputCell
+            this.type = "table"
         }
 
         // Only actually rerender if new class type

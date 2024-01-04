@@ -3,7 +3,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
-import { header, tempPropertyKey } from "./forms/utils";
+import { header, tempPropertyKey, tempPropertyValueKey } from "./forms/utils";
 
 import { Button } from "./Button";
 import { List } from "./List";
@@ -14,7 +14,10 @@ import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
 
-const isEditableObject = (schema) => schema.type === "object";
+
+// Schema or value indicates editable object
+const isEditableObject = (schema, value) => schema.type === "object" || (value && typeof value === 'object' && !Array.isArray(value))
+;
 const isAdditionalProperties = (pattern) => pattern === "additional";
 const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
@@ -35,7 +38,9 @@ export const getEditableItems = (value, pattern, { name, schema } = {}) => {
             const regex = new RegExp(key);
             items = items.filter(([k]) => !regex.test(k));
         });
-    } else items.filter(([key]) => key in schema.properties);
+    } 
+    
+    else if (schema.properties) items = items.filter(([key]) => key in schema.properties);
 
     items = items.filter(([key]) => !key.includes("__")); // Remove secret properties
 
@@ -222,7 +227,7 @@ export class JSONSchemaInput extends LitElement {
         this.#validationTimeout = setTimeout(() => {
             this.onValidate
                 ? this.onValidate()
-                : this.form
+                : this.form?.triggerValidation
                   ? this.form.triggerValidation(name, path, undefined, this, undefined, undefined, hooks)
                   : "";
         }, 1000);
@@ -234,7 +239,7 @@ export class JSONSchemaInput extends LitElement {
 
     #validationTimeout = null;
     #updateData = (fullPath, value, forceUpdate, hooks = {}) => {
-        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value, forceUpdate) : "";
+        this.onUpdate ? this.onUpdate(value) : this.form?.updateData ? this.form.updateData(fullPath, value, forceUpdate) : "";
 
         const path = [...fullPath];
         const name = path.splice(-1)[0];
@@ -246,7 +251,7 @@ export class JSONSchemaInput extends LitElement {
 
     #triggerValidation = async (name, path) => {
         this.#clearTimeoutValidation();
-        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path, this) : "";
+        return this.onValidate ? this.onValidate() : this.form?.triggerValidation ? this.form.triggerValidation(name, path, this) : "";
     };
 
     updated() {
@@ -281,7 +286,7 @@ export class JSONSchemaInput extends LitElement {
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
 
-        const canAddProperties = isEditableObject(this.schema);
+        const canAddProperties = isEditableObject(this.schema, this.value);
 
         if (canAddProperties) {
             const editable = getEditableItems(this.value, this.pattern, { name, schema });
@@ -441,7 +446,7 @@ export class JSONSchemaInput extends LitElement {
     #moveToNextInput = (ev) => {
         if (ev.key === "Enter") {
             ev.preventDefault();
-            if (this.form) {
+            if (this.form?.inputs) {
                 const idx = this.form.inputs.findIndex((input) => input === this);
                 this.#handleNextInput(idx + 1);
             }
@@ -462,7 +467,7 @@ export class JSONSchemaInput extends LitElement {
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
-        const canAddProperties = isEditableObject(this.schema);
+        const canAddProperties = isEditableObject(this.schema, this.value);
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
@@ -511,7 +516,7 @@ export class JSONSchemaInput extends LitElement {
                 if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value?.[0]);
             }
 
-            const itemSchema = this.form ? this.form.getSchema("items", schema) : schema["items"];
+            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -556,7 +561,7 @@ export class JSONSchemaInput extends LitElement {
                     const result = await (validateOnChange
                         ? this.onValidate
                             ? this.onValidate()
-                            : this.form
+                            : this.form?.triggerValidation
                               ? this.form.triggerValidation(
                                     name,
                                     completePath,
@@ -582,40 +587,120 @@ export class JSONSchemaInput extends LitElement {
                 };
 
                 const commonTableMetadata = {
-                    onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
+                    onStatusChange: () => this.form?.checkStatus && this.form.checkStatus(), // Check status on all elements
                     validateEmptyCells: this.form?.validateEmptyValues,
                     deferLoading: this.form?.deferLoading,
                     onLoaded: () => {
                         if (this.form) {
-                            this.form.nLoaded++;
-                            this.form.checkAllLoaded();
+                            if (this.form.nLoaded)this.form.nLoaded++;
+                            if (this.form.checkAllLoaded) this.form.checkAllLoaded();
                         }
                     },
                     onThrow: (...args) => this.#onThrow(...args),
                 };
 
-                const createNestedTable = (propName, value) => {
-                    const rowData = Object.entries(value).map(([key, value]) => {
-                        return { [tempPropertyKey]: key, ...value };
-                    });
+                const addPropertyKeyToSchema = (schema) => {
+                    const schemaCopy = structuredClone(schema);
 
-                    const schemaCopy = structuredClone(itemSchema);
+
                     if (!schemaCopy.properties) schemaCopy.properties = {};
                     if (!schemaCopy.required) schemaCopy.required = [];
+
                     schemaCopy.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
                     schemaCopy.order = [tempPropertyKey];
+
                     schemaCopy.required.push(tempPropertyKey);
 
-                    const resultPath = [...path, propName];
-                    const schemaPath = [...resolvedFullPath, propName];
+                    if (!schema['items']) {
+                        
+                        const resolvedItemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
+                        if (!resolvedItemSchema) return schemaCopy
+
+                        delete schemaCopy.patternProperties
+
+                        schemaCopy.properties[tempPropertyValueKey] = {
+                            type: 'array',
+                            items: resolvedItemSchema.properties ? addPropertyKeyToSchema(itemSchema) : itemSchema,
+                            title: "Property Value",
+                            __generated: true
+                        };
+
+                        schemaCopy.required.push(tempPropertyValueKey);
+                    }
+
+                    if (schemaCopy.__generated) return schemaCopy['items'] // Only return the relevant items for tables in nested tables
+                
+
+                    return schemaCopy
+
+                }
+
+
+                const createNestedTable = (id, value, { 
+                    name: propName = id, 
+                    schema = itemSchema
+                } = {}) => {
+
+
+                    const schemaCopy = addPropertyKeyToSchema(schema)
+
+                    const resultPath = [...path];
+
+                    const schemaPath = [...resolvedFullPath];
+
+                    const rowData = Object.entries(value).map(([key, value]) => {
+                        return !schema['items'] ? {[tempPropertyKey]: key, [tempPropertyValueKey]: value } : { [tempPropertyKey]: key, ...value };
+                    });
+
+                    if (propName) {
+                        resultPath.push(propName);
+                        schemaPath.push(propName);
+                    }
+
 
                     const allRemovedKeys = new Set();
 
                     const keyAlreadyExists = (key) => Object.keys(value).includes(key);
 
-                    let previousValidValues = {};
+                    const previousValidValues = {};
+
+                    function resolvePath(path, target) {
+                        return path.map((key, i) => {
+                            const ogKey = key
+                            const nextKey = path[i + 1]
+                            if (key === tempPropertyKey) key = target[tempPropertyKey]
+                            if (nextKey === tempPropertyKey) key = []
+
+                            target = target[ogKey] ?? {}
+
+                            if (nextKey === tempPropertyValueKey) return target[tempPropertyKey] // Grab next property key
+                            if (key === tempPropertyValueKey) return []
+
+                            return key
+                        }).flat()
+                    }
+
+                    function setValueOnAccumulator(row, acc) {
+                        const key = row[tempPropertyKey];
+
+                        if (!key) return acc
+
+                        if (tempPropertyValueKey in row) {
+                            const propValue = row[tempPropertyValueKey];
+                            if (Array.isArray(propValue)) acc[key] = propValue.reduce((acc, row) =>  setValueOnAccumulator(row, acc), {})
+                            else acc[key] = propValue;
+                        }
+                        else {
+                            const copy = { ...row };
+                            delete copy[tempPropertyKey];
+                            acc[key] = copy;
+                        }
+
+                        return acc
+                    }
 
                     const tableMetadata = {
+                        keyColumn: tempPropertyKey,
                         schema: schemaCopy,
                         data: rowData,
                         ignore: this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}, // According to schema
@@ -625,15 +710,7 @@ export class JSONSchemaInput extends LitElement {
 
                             if (path.slice(-1)[0] === tempPropertyKey && keyAlreadyExists(newValue)) return; // Do not overwrite existing keys
 
-                            const result = this.data.reduce((acc, row) => {
-                                const key = row[tempPropertyKey];
-                                if (key) {
-                                    const copy = { ...row };
-                                    delete copy[tempPropertyKey];
-                                    acc[key] = copy;
-                                }
-                                return acc;
-                            }, {});
+                            const result = this.data.reduce((acc, row) =>  setValueOnAccumulator(row, acc), {});
 
                             const newKeys = Object.keys(result);
                             const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
@@ -641,15 +718,19 @@ export class JSONSchemaInput extends LitElement {
                             newKeys.forEach((key) => allRemovedKeys.delete(key));
                             allRemovedKeys.forEach((key) => (result[key] = undefined));
 
-                            return commonUpdateFunction.call(this, resultPath, result); // According to
+
+                            // const resolvedPath = resolvePath(path, this.data)
+                            return commonUpdateFunction.call(this, [], result); // Update all table data
                         },
 
                         validateOnChange: function (path, parent, newValue) {
-                            const rowIdx = path[0];
-                            const currentKey = this.data[rowIdx][tempPropertyKey];
-                            const updatedPath = [this.data[rowIdx][tempPropertyKey], ...path.slice(1)]; // Replace row with key
 
-                            const resolvedKey = previousValidValues[rowIdx] ?? currentKey;
+                            const rowIdx = path[0]
+                            const currentKey = this.data[rowIdx]?.[tempPropertyKey]
+
+                            const updatedPath = resolvePath(path, this.data)
+
+                            const resolvedKey = previousValidValues[rowIdx] ?? currentKey
 
                             // Do not overwrite existing keys
                             if (path.slice(-1)[0] === tempPropertyKey && resolvedKey !== newValue) {
@@ -665,23 +746,23 @@ export class JSONSchemaInput extends LitElement {
                                 } else delete previousValidValues[rowIdx];
                             }
 
-                            return commonValidationFunction(resultPath, updatedPath, parent, newValue, schemaCopy, 1);
+                            return commonValidationFunction([], updatedPath, parent, newValue, schemaCopy, 1)
                         },
                         ...commonTableMetadata,
                     };
+ 
 
-                    const table = (this.table = this.form.createTable(propName, tableMetadata, resolvedFullPath)); // Try creating table. Otherwise use nested form
-                    if (table) {
-                        return html`
-                            <h3>${header(propName)}</h3>
-                            ${(this.form.tables[`${resolvedFullPath.slice(-1)[0]}.${propName}`] =
-                                table === true ? new BasicTable(tableMetadata) : table)}
-                        `;
-                    }
+                    const table = this.form.createTable(id, tableMetadata, resolvedFullPath); // Try creating table. Otherwise use nested form
+                    return table
                 };
 
+
+
                 // Possibly multiple tables
-                if (isEditableObject(this.schema)) {
+                if (isEditableObject(schema, this.value)) {
+
+                    
+                    // One table with nested tables for each property
                     const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce(
                         (acc, { key, value }) => {
                             acc[key] = value;
@@ -690,24 +771,11 @@ export class JSONSchemaInput extends LitElement {
                         {}
                     );
 
-                    const tables = Object.entries(data)
-                        .map(([patternPropName, patternPropValue]) =>
-                            createNestedTable(patternPropName, patternPropValue)
-                        )
-                        .filter((value) => !!value);
-
-                    if (tables.length) {
-                        disableButton({
-                            message: "New top-level pattern properties cannot be added at this time.",
-                            submessage: "They need a unique key to be specified.",
-                        });
-
-                        return html` <div style="width: 100%;">${tables} ${buttonDiv}</div> `;
-                    }
+                    const table = createNestedTable(name, data, { schema })
+                    return table
                 }
 
                 // Normal table parsing
-
                 const tableMetadata = {
                     schema: itemSchema,
                     data: this.value,
@@ -725,7 +793,12 @@ export class JSONSchemaInput extends LitElement {
 
                 const table = (this.table = this.form.createTable(name, tableMetadata, fullPath)); // Try creating table. Otherwise use nested form
 
-                if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
+                if (table) {
+                    const tableEl = table === true ? new BasicTable(tableMetadata) : table;
+                    const tables = this.form?.tables
+                    if (tables) tables[name]  = tableEl
+                    return tableEl
+                }
             }
 
             const list = (this.#list = new List({

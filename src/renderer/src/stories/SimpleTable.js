@@ -1,5 +1,5 @@
 import { LitElement, css, html, unsafeCSS } from "lit";
-import { header } from "./forms/utils";
+import { header, tempPropertyKey, tempPropertyValueKey } from "./forms/utils";
 import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
@@ -12,7 +12,7 @@ import { styleMap } from "lit/directives/style-map.js";
 import "./Button";
 import tippy from "tippy.js";
 import { sortTable } from "./Table";
-import { NestedTableCell } from "./table/cells/table";
+import { NestedInputCell } from "./table/cells/input";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -186,8 +186,9 @@ export class SimpleTable extends LitElement {
     } = {}) {
         super();
         this.schema = schema ?? {};
-        this.#data = data ?? [];
-        this.keyColumn = keyColumn;
+        this.#keyColumn = keyColumn
+        this.data = data ?? [];
+
         this.globals = globals ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.deferLoading = deferLoading ?? false;
@@ -281,15 +282,17 @@ export class SimpleTable extends LitElement {
         });
     }
 
+    #keyColumn
     #data = [];
     get data() {
         // Remove empty array entries
-        if (Array.isArray(this.#data)) return this.#data; //.filter((o) => Object.keys(o).length);
+        if (Array.isArray(this.#data)) return this.#data //.filter((o) => Object.keys(o).length);
         else return this.#data;
     }
 
     set data(val) {
         this.#data = val;
+        this.keyColumn = Array.isArray(this.#data) ? undefined : this.#keyColumn ?? "Property Key";
     }
 
     #selected = {};
@@ -309,11 +312,11 @@ export class SimpleTable extends LitElement {
     #getPath = (ev) => ev.path || ev.composedPath();
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
     #getCellFromPath = (path) => {
-        let inTableCell;
+        let inInputCell;
 
         const found = path.find((el) => {
-            if (el instanceof NestedTableCell) inTableCell = true;
-            return !inTableCell && (el instanceof TableCell || el.children?.[0] instanceof TableCell);
+            if (el instanceof NestedInputCell) inInputCell = true;
+            return !inInputCell && (el instanceof TableCell || el.children?.[0] instanceof TableCell);
         });
         if (found instanceof HTMLTableCellElement) return found.children[0];
         else return found;
@@ -373,7 +376,7 @@ export class SimpleTable extends LitElement {
             } else {
                 value = hasRow ? this.#data[row][col] : undefined;
                 if (this.#isUndefined(value)) value = this.globals[col];
-                if (this.#isUndefined(value)) value = this.schema.properties[col].default;
+                if (this.#isUndefined(value)) value = this.schema.properties?.[col]?.default;
                 if (this.#isUndefined(value)) value = "";
             }
             return value;
@@ -706,10 +709,12 @@ export class SimpleTable extends LitElement {
     #createCell = (value, info) => {
         const rowNames = Object.keys(this.#data);
 
+        const row = Array.isArray(this.#data) ? info.i : rowNames[info.i]
+
         const fullInfo = {
             ...info,
             col: this.colHeaders[info.j],
-            row: Array.isArray(this.#data) ? `${info.i}` : rowNames[info.i],
+            row: `${row}`
         };
 
         const schema = this.#schema[fullInfo.col];
@@ -717,6 +722,10 @@ export class SimpleTable extends LitElement {
         // Track the cell renderer
         const cell = new TableCell({
             info: {
+                title: header(
+                    fullInfo.col === tempPropertyValueKey 
+                    ? 'Property' // outerParent[tempPropertyKey] // NOTE: For new rows, this will be unresolved at instantiation
+                    : fullInfo.col),
                 col: this.colHeaders[info.j],
             },
             value,
@@ -730,7 +739,7 @@ export class SimpleTable extends LitElement {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
                 const res = this.validateOnChange
-                    ? await this.validateOnChange([info.i, fullInfo.col, ...path], parent, value, schema)
+                    ? await this.validateOnChange([row, fullInfo.col, ...path], parent, value, schema)
                     : true;
 
                 return res;

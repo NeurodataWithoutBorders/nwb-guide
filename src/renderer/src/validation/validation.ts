@@ -1,7 +1,6 @@
 import schema from './validation.json'
 import { JSONSchemaForm } from '../stories/JSONSchemaForm.js'
 import Swal from 'sweetalert2'
-import { tempPropertyKey } from '../stories/forms/utils'
 
 function rerenderTable (this: JSONSchemaForm, linkedPath: string[]) {
     const element = this.getTable(linkedPath)
@@ -40,7 +39,7 @@ const get = (object: any, path: string[]) => {
 
 
     return {
-        value: finalValue[name],
+        value: finalValue?.[name],
         values
     }
 }
