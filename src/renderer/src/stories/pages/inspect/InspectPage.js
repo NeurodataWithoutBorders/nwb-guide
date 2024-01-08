@@ -15,8 +15,8 @@ export class InspectPage extends Page {
     }
 
     header = {
-        title: "NWB Inspector Report",
-        subtitle: "This page allows you to inspect NWB files using the NWB Inspector.",
+        title: "NWB File Validation",
+        subtitle: "Inspect NWB files using the NWB Inspector.",
     };
 
     showReport = async (value) => {

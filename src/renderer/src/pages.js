@@ -38,7 +38,6 @@ dashboard.name = "NWB GUIDE";
 dashboard.renderNameInSidebar = false;
 
 const resourcesGroup = "Resources";
-const workflowGroup = "Workflows";
 
 const guidedIcon = `
 <svg
@@ -84,9 +83,8 @@ style="margin-right: 30px; margin-bottom: -5px"
 
 const pages = {
     "/": new GuidedHomePage({
-        label: "Conversions",
+        label: "Convert",
         icon: guidedIcon,
-        group: workflowGroup,
         pages: {
             start: new GuidedStartPage({
                 label: "Start",
@@ -156,20 +154,17 @@ const pages = {
             }),
         },
     }),
-    inspect: new InspectPage({
-        label: "Inspect",
+    validate: new InspectPage({
+        label: "Validate",
         icon: inspectIcon,
-        group: workflowGroup,
     }),
-    preview: new PreviewPage({
-        label: "Neurosift",
+    explore: new PreviewPage({
+        label: "Explore",
         icon: neurosiftIcon,
-        group: workflowGroup,
     }),
     uploads: new UploadsPage({
-        label: "Uploads",
+        label: "Upload",
         icon: uploadIcon,
-        group: workflowGroup,
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",

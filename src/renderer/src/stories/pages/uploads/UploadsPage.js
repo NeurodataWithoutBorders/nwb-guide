@@ -264,8 +264,8 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
 export class UploadsPage extends Page {
     header = {
-        title: "DANDI Uploads",
-        subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
+        title: "NWB File Uploads",
+        subtitle: "Upload folders and individual NWB files to the DANDI Archive.",
         controls: [
             new Button({
                 icon: keyIcon,
