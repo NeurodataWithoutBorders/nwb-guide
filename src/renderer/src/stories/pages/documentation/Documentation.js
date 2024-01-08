@@ -21,22 +21,22 @@ export class DocumentationPage extends Page {
 
         startLottie(doc_lottie, docu_lottie);
         const svg = doc_lottie.querySelector("svg");
-        console.log(svg)
-        svg.setAttribute('viewBox', "50 100 300 200")
-        
-        doc_lottie.style.marginBottom = "20px"
+        console.log(svg);
+        svg.setAttribute("viewBox", "50 100 300 200");
+
+        doc_lottie.style.marginBottom = "20px";
 
         const container = (this.shadowRoot ?? this).querySelector(".document-content");
-        container.style.height = "200px"
+        container.style.height = "200px";
     }
 
     render() {
         return html`
             <p>
-                The NWB GUIDE walks users step-by-step through all the requirements for converting their data to the
-                NWB format and uploading datasets to the DANDI Archive. Each stage is designed to conveniently guide
-                users through the conversion process and include all necessary information such that no prior
-                knowledge of the NWB data standard is required.
+                The NWB GUIDE walks users step-by-step through all the requirements for converting their data to the NWB
+                format and uploading datasets to the DANDI Archive. Each stage is designed to conveniently guide users
+                through the conversion process and include all necessary information such that no prior knowledge of the
+                NWB data standard is required.
             </p>
             <div class="documentation_container">
                 <div class="document_container">

@@ -7,7 +7,6 @@ import * as progress from "../../../progress/index.js";
 import { newDataset } from "../../../../assets/lotties/index.js";
 
 export class GuidedHomePage extends Page {
-
     constructor(...args) {
         super(...args);
     }
@@ -181,7 +180,6 @@ export class GuidedHomePage extends Page {
             <div id="curate-new-home" style="display:flex; flex-direction:column; align-items: center">
                 <h2>Welcome to NWB GUIDE!</h2>
                 <h3>Your one-stop tool for converting data to NWB and uploading it to the DANDI Archive.<br /></h3>
-
 
                 <div class="create-button" @click="${() => this.to(1)}">
                     <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>

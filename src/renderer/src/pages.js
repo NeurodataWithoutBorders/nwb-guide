@@ -159,17 +159,17 @@ const pages = {
     inspect: new InspectPage({
         label: "Inspect",
         icon: inspectIcon,
-        group: workflowGroup
+        group: workflowGroup,
     }),
     preview: new PreviewPage({
         label: "Neurosift",
         icon: neurosiftIcon,
-        group: workflowGroup
+        group: workflowGroup,
     }),
     uploads: new UploadsPage({
         label: "Uploads",
         icon: uploadIcon,
-        group: workflowGroup
+        group: workflowGroup,
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",
