@@ -720,7 +720,7 @@ export class JSONSchemaForm extends LitElement {
         const externalPath = [...this.base, name];
         const schema = this.getSchema(localPath);
 
-        const jsonSchemaErrors = await v
+        const jsonSchemaErrors = await validator
             .validate(parent[name], this.schema.properties[name])
             .errors.map((error) => ({ type: "error", message: `${header(name)} ${error.message}.` }));
 
