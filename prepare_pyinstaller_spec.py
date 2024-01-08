@@ -17,11 +17,11 @@ lines.insert(6, "sys.setrecursionlimit(sys.getrecursionlimit() * 5)\n")
 lines.insert(7, "\n")
 lines.insert(8, "import scipy\n")
 
-hiddenImportIdx = lines.index("hiddenimports = []\n")
+hidden_import_index = lines.index("hiddenimports = []\n")
 
 lines[
-    hiddenImportIdx
-] = "hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]\n\n"
+    hidden_import_index
+] = "hiddenimports = [ 'email_validator', *collect_submodules('h5py'), *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]\n\n"
 
 
 # Originally this was a separate `npm` command per platform to account for CLI syntax differences between ; and :
