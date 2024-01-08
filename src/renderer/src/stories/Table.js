@@ -266,20 +266,20 @@ export class Table extends LitElement {
                 }
             };
 
-            let ogThis = this;
+            let instanceThis = this;
             const isRequired = this.isRequired(k);
 
             const validator = async function (value, callback) {
-                const validateEmptyCells = ogThis.validateEmptyCells;
+                const validateEmptyCells = instanceThis.validateEmptyCells;
                 const willValidate =
                     validateEmptyCells === true ||
                     (Array.isArray(validateEmptyCells) && validateEmptyCells.includes(k));
 
-                value = ogThis.#getValue(value, colInfo);
+                value = instanceThis.#getValue(value, colInfo);
 
                 // Clear empty values if not validated
                 if (!value && !willValidate) {
-                    ogThis.#handleValidationResult(
+                    instanceThis.#handleValidationResult(
                         [], // Clear errors
                         this.row,
                         this.col
@@ -288,9 +288,9 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (value && k === ogThis.keyColumn && unresolved[this.row]) {
-                    if (value in ogThis.data) {
-                        ogThis.#handleValidationResult(
+                if (value && k === instanceThis.keyColumn && unresolved[this.row]) {
+                    if (value in instanceThis.data) {
+                        instanceThis.#handleValidationResult(
                             [{ message: `${header(k)} already exists`, type: "error" }],
                             this.row,
                             this.col
@@ -306,7 +306,7 @@ export class Table extends LitElement {
                 }
 
                 if (!value && isRequired) {
-                    ogThis.#handleValidationResult(
+                    instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         this.row,
                         this.col

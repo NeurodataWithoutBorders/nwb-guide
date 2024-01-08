@@ -118,10 +118,11 @@ a[data-toggle="collapse"] {
     overflow-y: auto;
     margin-top: 15px;
     flex-grow: 1;
+    border-top: 1px solid #8f8f8f;
 }
 
 #main-nav .sidebar-body > *:last-child {
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #8f8f8f;
     padding-top: 10px;
     position: sticky;
     bottom: 0;
@@ -129,11 +130,25 @@ a[data-toggle="collapse"] {
 }
 
 #main-nav ul.components {
+    background: var(--color-sidebar);
+    padding: 3px;
+    padding-top: 8px;
+}
+
+#main-nav .sidebar-body > *:last-child h4 {
+    margin-top: 0px !important;
+}
+
+#main-nav .sidebar-body li {
     list-style: none;
+}
+
+#main-nav ul {
     padding-right: 10px;
     padding-left: 3px;
     margin-right: 0;
-    margin-top: 10px;
+    margin-bottom: 0;
+    overflow-y: auto;
 }
 
 #main-nav ul p {
