@@ -12,11 +12,10 @@ from PyInstaller.utils.hooks import collect_all
 
 datas = [('./paths.config.json', '.'), ('./package.json', '.')]
 binaries = []
-hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]
+hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs'),
+                  'h5py.defs', 'h5py.utils', 'h5py.h5ac', 'h5py._proxy' ]
 
 datas += collect_data_files('jsonschema_specifications')
-tmp_ret = collect_all('h5py.defs')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('dandi')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('keyrings')
