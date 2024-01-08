@@ -23,7 +23,7 @@ const propsToIgnore = [
     "stream_id", // NOTE: May be desired for other interfaces
     "nsx_override",
     "combined",
-    "plane_no"
+    "plane_no",
 ];
 
 export class GuidedSourceDataPage extends ManagedPage {
