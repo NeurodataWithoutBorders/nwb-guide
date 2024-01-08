@@ -284,7 +284,8 @@ export class Table extends LitElement {
                         ? await this.validateOnChange(
                               [k],
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
-                              value
+                              value,
+                              info.properties[k]
                           )
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
 

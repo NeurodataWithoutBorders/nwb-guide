@@ -229,7 +229,7 @@ export class BasicTable extends LitElement {
         else if (value !== "" && thisTypeOf !== type)
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange([col], parent, value);
+        else result = this.validateOnChange([col], parent, value, this.schema.properties[col]);
 
         // Will run synchronously if not a promise result
         return promises.resolve(result, () => {
