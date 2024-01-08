@@ -179,11 +179,20 @@ export class GuidedHomePage extends Page {
         return html`
             <div id="curate-new-home" style="display:flex; flex-direction:column; align-items: center">
                 <div style="padding-bottom: 20px;">
-                    <h3 style="margin-bottom: 0; padding-bottom: 0;">Your one-stop tool for converting data to NWB and uploading it to the DANDI Archive.</h3>
-                    <small>Don't know where to go next? Learn more about the NWB GUIDE <a href="" @click="${(clickEvent) => {
-                        clickEvent.preventDefault()
-                        this.to('docs')
-                    }}">here</a>.</small>
+                    <h3 style="margin-bottom: 0; padding-bottom: 0;">
+                        Your one-stop tool for converting data to NWB and uploading it to the DANDI Archive.
+                    </h3>
+                    <small
+                        >Don't know where to go next? Learn more about the NWB GUIDE
+                        <a
+                            href=""
+                            @click="${(clickEvent) => {
+                                clickEvent.preventDefault();
+                                this.to("docs");
+                            }}"
+                            >here</a
+                        >.</small
+                    >
                 </div>
 
                 <div class="create-button" @click="${() => this.to(1)}">
