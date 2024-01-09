@@ -5,9 +5,7 @@ channels:
 dependencies:
   - python = 3.9.17
   - nodejs = 18.16.1
-  - PyInstaller = 5.13.0
-  # pin pyinstaller hooks as temp fix for https://github.com/NeurodataWithoutBorders/nwb-guide/issues/559
-  - pyinstaller-hooks-contrib = 2023.11
+  - PyInstaller = 6.3.0
   - pywin32 = 303
   - git = 2.20.1
   - setuptools = 58.0.4

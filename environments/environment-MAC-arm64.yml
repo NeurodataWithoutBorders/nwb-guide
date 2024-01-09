@@ -4,9 +4,7 @@ channels:
   - defaults
 dependencies:
   - python = 3.9.18
-  - PyInstaller = 5.13.0
-  # pin pyinstaller hooks as temp fix for https://github.com/NeurodataWithoutBorders/nwb-guide/issues/559
-  - pyinstaller-hooks-contrib = 2023.11
+  - PyInstaller = 6.3.0
   - nodejs = 18.16.1
   - numcodecs = 0.11.0
   - lxml = 4.9.3  # pypi build fails due to x64/arm64 mismatch so install from conda-forge
