@@ -39,8 +39,6 @@ export class NestedEditor extends LitElement {
 
         const data = this.#value || (this.schema.type === 'array' ? [] : (this.schema.type === 'object' ? {} : this.schema.default))
 
-        console.log('Schema',  modal.header, this.schema)
-
         const input = this.#input = new JSONSchemaInput({
             schema: this.schema,
             value: data,

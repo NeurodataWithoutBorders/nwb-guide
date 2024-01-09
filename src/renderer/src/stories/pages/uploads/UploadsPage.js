@@ -129,7 +129,7 @@ export async function createDandiset(results = {}) {
 
                 await addDandiset(res);
 
-                const input = this.form.getInput(["dandiset"]);
+                const input = this.form.getFormElement(["dandiset"]);
                 input.updateData(id);
                 input.requestUpdate();
 
@@ -303,7 +303,7 @@ export class UploadsPage extends Page {
                 merge(apiKeys, global.data.DANDI.api_keys);
                 global.save();
                 await regenerateDandisets();
-                const input = this.form.getInput(["dandiset "]);
+                const input = this.form.getFormElement(["dandiset "]);
                 input.requestUpdate();
             },
             formProps: {
@@ -382,7 +382,7 @@ export class UploadsPage extends Page {
                         if (id === folderPathKey) {
                             const keysToUpdate = ["dandiset"];
                             keysToUpdate.forEach((k) => {
-                                const input = this.form.getInput([k]);
+                                const input = this.form.getFormElement([k]);
                                 if (input.value) input.updateData("");
                             });
                         }

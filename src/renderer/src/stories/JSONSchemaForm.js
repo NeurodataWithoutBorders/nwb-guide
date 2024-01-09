@@ -291,37 +291,36 @@ export class JSONSchemaForm extends LitElement {
         if (props.base) this.base = props.base;
     }
 
-    getTable = (path) => {
+
+    // Get the form element defined by the path (stops before table cells)
+    getFormElement = (path, { forms = true, tables = true, inputs = true } = {}) => {
         if (typeof path === "string") path = path.split(".");
+        if (!path.length) return this
 
-        if (path.length === 1) return this.tables[path[0]]; // return table if accessible
+        const name = path[0];
+        const updatedPath = path.slice(1)
 
-        const copy = [...path];
-        const tableName = copy.pop();
 
-        return this.getForm(copy).getTable(tableName);
-    };
+        const form = this.#nestedForms[name] // Check forms
+        if (!form) {
+            const table = this.tables[name] // Check tables
+            if (table && tables) return table // Skip table cells
+        } 
+        
+        else if (!updatedPath.length && forms) return form
 
-    getForm = (path) => {
-        if (typeof path === "string") path = path.split(".");
-        const form = this.#nestedForms[path[0]];
-        if (!path.length) return this; // No nested form with this name. Returning self
-        if (!form) throw new Error(`Could not find form with name ${path[0]}`);
+        // Check Inputs
+        // const inputContainer = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
+        // if (inputContainer && inputs) return inputContainer.querySelector("jsonschema-input");;
 
-        return form.getForm(path.slice(1));
-    };
+        const foundInput = this.inputs[path.join(".")] // Check Inputs
+        if (foundInput && inputs) return foundInput;
 
-    getInput = (path) => {
-        if (typeof path === "string") path = path.split(".");
 
-        const container = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
+        // Check Nested Form Inputs
+        return form?.getFormElement(updatedPath, { forms, tables, inputs });
 
-        if (!container) {
-            if (path.length > 1) return this.getForm(path[0]).getInput(path.slice(1));
-            else return;
-        }
-        return container?.querySelector("jsonschema-input");
-    };
+    }
 
     #requirements = {};
 
@@ -354,7 +353,7 @@ export class JSONSchemaForm extends LitElement {
             // Continue to resolve and re-render...
             if (globalValue) {
                 value = resolvedParent[name] = globalValue;
-                const input = this.getInput(localPath);
+                const input = this.getFormElement(localPath);
                 if (input) {
                     input.updateData(globalValue);
                     this.onOverride(name, globalValue, path);
@@ -447,6 +446,7 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
@@ -641,8 +641,7 @@ export class JSONSchemaForm extends LitElement {
             pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
         });
 
-        this.inputs.push(interactiveInput);
-
+        this.inputs[localPath.join("-")] = interactiveInput;
         // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
 
         // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
@@ -867,7 +866,7 @@ export class JSONSchemaForm extends LitElement {
         const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== "number") !== -1;
         if (undefinedPathToken) return true; // Will be unable to get schema anyways (additionalProperties)
 
-        if (!input) input = this.getInput(localPath);
+        if (!input) input = this.getFormElement(localPath, { forms: false, tables: false });
         if (!parent) parent = this.#get(path, this.resolved);
         if (!schema) schema = this.getSchema(localPath);
 
@@ -998,6 +997,7 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
+
             // Add new invalid classes and errors
             input.classList.add("invalid");
 
@@ -1391,7 +1391,7 @@ export class JSONSchemaForm extends LitElement {
     #resetLoadState() {
         this.#loaded = false;
         this.nLoaded = 0;
-        this.inputs = [];
+        this.inputs = {};
     }
 
     // Check if everything is internally rendered

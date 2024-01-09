@@ -436,7 +436,7 @@ export class JSONSchemaInput extends LitElement {
     #getType = (value = this.value) => (Array.isArray(value) ? "array" : typeof value);
 
     #handleNextInput = (idx) => {
-        const next = this.form.inputs[idx];
+        const next = Object.values(this.form.inputs)[idx];
         if (next) {
             const el = getFirstFocusableElement(next);
             if (el) {
@@ -452,7 +452,7 @@ export class JSONSchemaInput extends LitElement {
         if (ev.key === "Enter") {
             ev.preventDefault();
             if (this.form?.inputs) {
-                const idx = this.form.inputs.findIndex((input) => input === this);
+                const idx = Object.values(this.form.inputs).findIndex((input) => input === this);
                 this.#handleNextInput(idx + 1);
             }
 

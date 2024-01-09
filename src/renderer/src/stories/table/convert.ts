@@ -19,9 +19,6 @@ export const getValue = (value: any, schema: any) => {
             if (!isNaN(possibleValue)) return possibleValue
         }
 
-        console.log('Returning', value)
-
-
     }
 
     return value

@@ -290,8 +290,8 @@ export class GuidedPathExpansionPage extends Page {
                 const name = parentPath.pop();
 
                 if (name === "base_directory") {
-                    form.getInput([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
-                    const input = form.getInput([...parentPath, "format_string_path"]);
+                    form.getFormElement([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
+                    const input = form.getFormElement([...parentPath, "format_string_path"]);
                     if (input.value) input.updateData(input.value, true);
                 }
             },
@@ -299,7 +299,7 @@ export class GuidedPathExpansionPage extends Page {
                 const value = parent[name];
 
                 if (fs) {
-                    const baseDir = form.getInput([...parentPath, "base_directory"]);
+                    const baseDir = form.getFormElement([...parentPath, "base_directory"]);
                     if (name === "format_string_path") {
                         if (value && baseDir && !baseDir.value) {
                             return [
