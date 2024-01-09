@@ -371,7 +371,7 @@ export class Search extends LitElement {
 
                     return li;
                 })
-                .filter((itemEl) => itemEl);
+                .filter((itemElement) => itemElement);
 
             this.list.append(...itemEls);
         }

@@ -209,7 +209,7 @@ export class SimpleTable extends LitElement {
         this.addEventListener("copy", (ev) => {
             ev.preventDefault();
             const tsv = Object.values(this.#selected)
-                .map((arr) => arr.map((inputEl) => inputEl.value).join("\t"))
+                .map((arr) => arr.map((inputElement) => inputElement.value).join("\t"))
                 .join("\n");
 
             ev.clipboardData.setData("text/plain", tsv);
