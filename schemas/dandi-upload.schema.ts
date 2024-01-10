@@ -68,8 +68,8 @@ export const updateDandisets = async (main = true) => {
 
     return await getMine({ token, type: staging ? 'staging' : undefined })
         .then((results) => results ? Promise.all(results.map(addDandiset)) : [])
-        .catch(e => {
-            console.error(e)
+        .catch(error => {
+            console.error(error)
             return []
         })
 

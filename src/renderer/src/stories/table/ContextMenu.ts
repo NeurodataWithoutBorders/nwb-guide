@@ -70,7 +70,7 @@ export class ContextMenu extends LitElement{
 
         document.addEventListener('click', () => this.#hide()) // Hide at the last step of any click
         document.addEventListener('contextmenu', () => this.#hide())
-        this.target.addEventListener('contextmenu', (e) => this.#open(e))
+        this.target.addEventListener('contextmenu', (contextEvent) => this.#open(contextEvent))
     }
 
     #hide() {
@@ -80,21 +80,21 @@ export class ContextMenu extends LitElement{
 
     #activePath: HTMLElement[] | null = null
 
-    #open(e: MouseEvent) {
-        e.preventDefault()
-        e.stopPropagation()
-        this.#activePath = e.path || e.composedPath()
+    #open(mouseEvent: MouseEvent) {
+        mouseEvent.preventDefault()
+        mouseEvent.stopPropagation()
+        this.#activePath = mouseEvent.path || mouseEvent.composedPath()
         this.style.display = 'block';
-        this.style.left = e.pageX + "px";
-        this.style.top = e.pageY + "px";
+        this.style.left = mouseEvent.pageX + "px";
+        this.style.top = mouseEvent.pageY + "px";
     }
 
     render () {
         return html`
         <ul class="menu">
-            ${this.items.map((o) => html`<li class="share" @click=${() => {
-                if (o.onclick) o.onclick(this.#activePath)
-            }}><a href="#">${o.icon ?? ''}${o.label}</a></li>`)}
+            ${this.items.map(({ onclick , icon, label }) => html`<li class="share" @click=${() => {
+                if (onclick) onclick(this.#activePath)
+            }}><a href="#">${icon ?? ''}${label}</a></li>`)}
         </ul>
         `
     }

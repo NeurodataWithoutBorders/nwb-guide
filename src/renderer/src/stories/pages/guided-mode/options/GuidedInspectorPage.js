@@ -18,12 +18,12 @@ import { getMessageType } from "../../../../validation/index.js";
 import { InfoBox } from "../../../InfoBox";
 
 const filter = (list, toFilter) => {
-    return list.filter((o) => {
+    return list.filter((item) => {
         return Object.entries(toFilter)
             .map(([key, strOrArray]) => {
                 return Array.isArray(strOrArray)
-                    ? strOrArray.map((str) => o[key].includes(str))
-                    : o[key].includes(strOrArray);
+                    ? strOrArray.map((str) => item[key].includes(str))
+                    : item[key].includes(strOrArray);
             })
             .flat()
             .every(Boolean);
@@ -50,7 +50,7 @@ export class GuidedInspectorPage extends Page {
                 @click=${() =>
                     shell
                         ? shell.showItemInFolder(
-                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((o) => o.file))
+                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file))
                           )
                         : ""}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
@@ -63,8 +63,8 @@ export class GuidedInspectorPage extends Page {
     };
 
     getStatus = (list) => {
-        return list.reduce((acc, o) => {
-            const res = getMessageType(o);
+        return list.reduce((acc, messageInfo) => {
+            const res = getMessageType(messageInfo);
             if (acc === "error") return acc;
             else return res;
         }, "valid");
@@ -74,7 +74,7 @@ export class GuidedInspectorPage extends Page {
         const { globalState } = this.info;
         const { stubs, inspector } = globalState.preview;
 
-        const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
+        const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
 
         const fileArr = Object.entries(stubs)
@@ -100,7 +100,7 @@ export class GuidedInspectorPage extends Page {
                             removeFilePaths(
                                 (globalState.preview.inspector = await run(
                                     "inspect_file",
-                                    { nwbfile_path: fileArr[0].info.file, ...opts },
+                                    { nwbfile_path: fileArr[0].info.file, ...options },
                                     { title }
                                 ))
                             );
@@ -111,12 +111,12 @@ export class GuidedInspectorPage extends Page {
                     }
 
                     const items = await (async () => {
-                        const path = getSharedPath(fileArr.map((o) => o.info.file));
+                        const path = getSharedPath(fileArr.map(({ info }) => info.file));
                         const report =
                             inspector ??
                             (globalState.preview.inspector = await run(
                                 "inspect_folder",
-                                { path, ...opts },
+                                { path, ...options },
                                 { title: title + "s" }
                             ));
 
@@ -148,7 +148,7 @@ export class GuidedInspectorPage extends Page {
 
                     Object.keys(instances).forEach((subLabel) => {
                         const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
-                        const path = getSharedPath(subItems.map((o) => o.file_path));
+                        const path = getSharedPath(subItems.map((item) => item.file_path));
                         const filtered = truncateFilePaths(subItems, path);
 
                         const display = () => new InspectorList({ items: filtered, emptyMessage });

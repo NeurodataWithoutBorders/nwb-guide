@@ -24,9 +24,9 @@ const sortList = (items) => {
 
 const aggregateMessages = (items) => {
     let messages = {};
-    items.forEach((o) => {
-        if (!messages[o.message]) messages[o.message] = [];
-        messages[o.message].push(o);
+    items.forEach((item) => {
+        if (!messages[item.message]) messages[item.message] = [];
+        messages[item.message].push(item);
     });
     return messages;
 };
@@ -47,7 +47,7 @@ export class InspectorList extends List {
         const { items } = props;
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
-            aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
+            aggregate.files = [aggregate.file_path, ...items.map(({ file_path }) => file_path)];
             return aggregate;
         });
 
@@ -55,8 +55,8 @@ export class InspectorList extends List {
             editable: false,
             unordered: true,
             ...props,
-            items: sortList(aggregatedItems).map((o) => {
-                const item = new InspectorListItem(o);
+            items: sortList(aggregatedItems).map((itemProps) => {
+                const item = new InspectorListItem(itemProps);
                 item.style.flexGrow = "1";
                 return { content: item };
             }),

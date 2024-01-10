@@ -612,14 +612,14 @@ def inspect_nwb_folder(payload):
 
     try:
         messages = list(inspect_all(**kwargs))
-    except PicklingError as e:
-        if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(e):
+    except PicklingError as exception:
+        if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(exception):
             del kwargs["n_jobs"]
             messages = list(inspect_all(**kwargs))
         else:
-            raise e
-    except Exception as e:
-        raise e
+            raise exception
+    except Exception as exception:
+        raise exception
 
     return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
 

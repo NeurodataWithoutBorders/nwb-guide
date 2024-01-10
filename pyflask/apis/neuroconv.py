@@ -48,10 +48,10 @@ class AllInterfaces(Resource):
                 **get_all_interface_info(),
                 **get_all_converter_info(),
             }
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
-            raise e
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
+            raise exception
 
 
 @neuroconv_api.route("/schema")
@@ -60,9 +60,9 @@ class Schemas(Resource):
     def post(self):
         try:
             return get_source_schema(neuroconv_api.payload)
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/locate")
@@ -71,9 +71,9 @@ class Locate(Resource):
     def post(self):
         try:
             return locate_data(neuroconv_api.payload)
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/metadata")
@@ -83,9 +83,9 @@ class Metadata(Resource):
         # try:
         return get_metadata_schema(neuroconv_api.payload.get("source_data"), neuroconv_api.payload.get("interfaces"))
 
-    # except Exception as e:
-    #     if notBadRequestException(e):
-    #         neuroconv_api.abort(500, str(e))
+    # except Exception as exception:
+    #     if notBadRequestException(exception):
+    #         neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/convert")
@@ -95,9 +95,9 @@ class Convert(Resource):
         try:
             return convert_to_nwb(neuroconv_api.payload)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 validate_parser = neuroconv_api.parser()
@@ -117,9 +117,9 @@ class Validate(Resource):
             args = validate_parser.parse_args()
             return validate_metadata(args.get("parent"), args.get("function_name"))
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload/project")
@@ -137,9 +137,9 @@ class UploadProject(Resource):
 
             return upload_project_to_dandi(**upload_options)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload/folder")
@@ -157,9 +157,9 @@ class UploadFolder(Resource):
 
             return upload_folder_to_dandi(**upload_options)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload")
@@ -180,9 +180,9 @@ class Upload(Resource):
             else:
                 return upload_multiple_filesystem_objects_to_dandi(**neuroconv_api.payload)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect_file")
@@ -191,9 +191,9 @@ class InspectNWBFile(Resource):
     def post(self):
         try:
             return inspect_nwb_file(neuroconv_api.payload)
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect_folder")
@@ -203,9 +203,9 @@ class InspectNWBFolder(Resource):
         try:
             return inspect_nwb_folder(neuroconv_api.payload)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect")
@@ -226,9 +226,9 @@ class InspectNWBFolder(Resource):
             else:
                 return inspect_multiple_filesystem_objects(paths)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/html")
@@ -242,9 +242,9 @@ class NWBToHTML(Resource):
                 html = io.read()._repr_html_()
             return html
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/generate_dataset")
@@ -254,9 +254,9 @@ class GenerateDataset(Resource):
         try:
             return generate_dataset(**neuroconv_api.payload)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 # Create an events endpoint
@@ -268,6 +268,6 @@ class Events(Resource):
         try:
             return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))

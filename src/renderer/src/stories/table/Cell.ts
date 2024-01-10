@@ -88,9 +88,9 @@ export class TableCell extends LitElement {
         return this.input ? this.input.getValue() : this.#value
     }
 
-    set value(v) {
-        if (this.input) this.input.set(v ?? '')
-        this.#value = this.input ? this.input.getValue() : v // Ensure value is coerced
+    set value(value) {
+        if (this.input) this.input.set(value ?? '')
+        this.#value = this.input ? this.input.getValue() : value // Ensure value is coerced
      }
 
     validateOnChange?: ValidationFunction
@@ -98,11 +98,11 @@ export class TableCell extends LitElement {
 
     #validator: ValidationFunction = () => true
 
-    validate = async (v = this.value) => {
+    validate = async (value = this.value) => {
 
         const validator = this.validateOnChange ?? this.#validator
-        let result = await validator(v)
-        if (result === true) result = this.#validator(v)
+        let result = await validator(value)
+        if (result === true) result = this.#validator(value)
 
         let info: ValidationResult = {
             title: undefined,
@@ -117,12 +117,12 @@ export class TableCell extends LitElement {
 
         if (warnings.length) {
             info.warning = ''
-            info.title = warnings.map((o) => o.message).join("\n");
+            info.title = warnings.map(({ message }) => message).join("\n");
         }
 
         if (errors.length) {
             info.error = ''
-            info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+            info.title = errors.map(({ message }) => message).join("\n"); // Class switching handled automatically
         }
 
         this.onValidate(info)

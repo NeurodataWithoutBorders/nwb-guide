@@ -110,7 +110,7 @@ export class TableCellBase extends LitElement {
     }
 
     setText(value: any, setOnInput = true) {
-        if (setOnInput) [ this.#editor, this.#renderer ].forEach(el => this.setChild(el, value)) // RESETS HISTORY
+        if (setOnInput) [ this.#editor, this.#renderer ].forEach(element => this.setChild(element, value)) // RESETS HISTORY
         this.#update(`${value}`) // Coerce to string
     }
 
@@ -143,22 +143,22 @@ export class TableCellBase extends LitElement {
     // Initialize values
     firstUpdated() {
         const elements = [ this.#editor, this.#renderer ]
-        elements.forEach(el => this.setChild(el))
+        elements.forEach(element => this.setChild(element))
     }
 
-    setChild = (el: HTMLElement, value = this.value) => {
-        if (el) {
-            if ('value' in el) el.value = value // Directly set test (no setValue method)
+    setChild = (element: HTMLElement, value = this.value) => {
+        if (element) {
+            if ('value' in element) element.value = value // Directly set test (no setValue method)
             else {
-                if (el.innerText !== value) {
-                    el.innerText = value // No history
+                if (element.innerText !== value) {
+                    element.innerText = value // No history
                 }
             }
         }
         return value
     }
 
-    getElementValue = (el: HTMLElement) => el.value || el.innerText
+    getElementValue = (element: HTMLElement) => element.value || element.innerText
 
     render() {
 
