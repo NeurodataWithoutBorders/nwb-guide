@@ -183,7 +183,7 @@ export class GuidedHomePage extends Page {
                         Your one-stop tool for converting data to NWB and uploading it to the DANDI Archive.
                     </h3>
                     <small
-                        >Don't know where to go next? 
+                        >Don't know where to go next?
                         <a
                             href=""
                             @click="${(clickEvent) => {
