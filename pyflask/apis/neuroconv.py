@@ -268,9 +268,25 @@ from typing import List
 from tqdm import tqdm as base_tqdm
 
 class SSEProgress(base_tqdm):
+
+    def __init__(self, *args, **kwargs):
+        super(SSEProgress, self).__init__(*args, **kwargs)
+        self.callbacks = {}
+
     def update(self, n=1, always_callback=False):
         if super(SSEProgress, self).update(n) or always_callback:
-            event_announcer.announce(self.format_dict, 'progress')
+            for callback in self.callbacks.values():
+                callback(self.format_dict)
+
+
+    def subscribe(self, callback):
+        import uuid
+        callback_id = uuid.uuid4()
+        self.callbacks[callback_id] = callback
+        return callback_id
+    
+    def unsubscribe(self, callback_id):
+        del self.callbacks[callback_id]
 
 
 # Helper Functions for the Demo
@@ -294,12 +310,18 @@ async def run_multiple_sleeps(sleep_durations: List[float]) -> List[float]:
         'n': 0,
     }, 'progress')
 
-    actual_sleep_durations = [await f for f in SSEProgress(asyncio.as_completed(tasks), total=len(tasks))]
+    progress_bar = SSEProgress(asyncio.as_completed(tasks), total=len(tasks))
+    callback_id = progress_bar.subscribe(lambda x: event_announcer.announce(x, 'progress'))
+
+    actual_sleep_durations = [await f for f in progress_bar]
 
     event_announcer.announce({
         'total': len(tasks),
         'n': len(tasks),
     }, 'progress')
+
+    progress_bar.unsubscribe(callback_id)
+
 
     return actual_sleep_durations
 
