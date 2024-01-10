@@ -190,9 +190,7 @@ export class GuidedHomePage extends Page {
                                 clickEvent.preventDefault();
                                 this.to("docs");
                             }}"
-                            >Learn more about the NWB GUIDE.</a
-                        >.</small
-                    >
+                            >Learn more about the NWB GUIDE.</a></small>
                 </div>
 
                 <div class="create-button" @click="${() => this.to(1)}">
