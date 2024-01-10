@@ -149,7 +149,7 @@ export class GuidedUploadPage extends Page {
                     validateOnChange: validate,
                 }));
             })
-            .catch((e) => html`<p>${e}</p>`);
+            .catch((error) => html`<p>${error}</p>`);
 
         // Confirm that one api key exists
         promise.then(() => {

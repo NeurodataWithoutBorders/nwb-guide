@@ -10,7 +10,7 @@ const { shell } = electron;
 
 export const getStubArray = (stubs) =>
     Object.values(stubs)
-        .map((o) => Object.values(o))
+        .map((item) => Object.values(item))
         .flat();
 
 export class GuidedStubPreviewPage extends Page {
@@ -27,7 +27,7 @@ export class GuidedStubPreviewPage extends Page {
                 @click=${() =>
                     shell
                         ? shell.showItemInFolder(
-                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((o) => o.file))
+                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((item) => item.file))
                           )
                         : ""}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button

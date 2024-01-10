@@ -75,11 +75,11 @@ export class NavigationSidebar extends LitElement {
 
     onClick = () => {}; // Set by the user
 
-    #updateClass = (name, el, force) => {
-        if (force === undefined) el.classList.toggle(name);
+    #updateClass = (name, element, force) => {
+        if (force === undefined) element.classList.toggle(name);
         else {
-            if (force) el.classList.remove(name);
-            else el.classList.add(name);
+            if (force) element.classList.remove(name);
+            else element.classList.add(name);
         }
     };
 

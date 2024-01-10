@@ -32,8 +32,8 @@ export class StatusBar extends LitElement {
     #items: StatusBarProps['items'] = []
     indicators: StatusIndicator[] = []
 
-    set items(v: StatusBarProps['items']){
-        this.#items = v.map(o => { return {...o} })
+    set items(value: StatusBarProps['items']){
+        this.#items = value.map(item => { return {...item} })
 
     }
 
@@ -47,7 +47,7 @@ export class StatusBar extends LitElement {
     }
 
     render() {
-        this.indicators = this.items.map(o => new StatusIndicator(o))
+        this.indicators = this.items.map(item => new StatusIndicator(item))
         this.indicators.forEach((indicator, i) => {
             const item = this.items[i]
             StatusIndicatorPropKeys.forEach(key => Object.defineProperty(item, key, {get: () => indicator[key], set: (v) => indicator[key] = v}))

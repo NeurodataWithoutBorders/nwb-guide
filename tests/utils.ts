@@ -14,7 +14,7 @@ export function createMockGlobalState() {
         subjects: {
             subject_id: {
                 subject_id: 'subject_id', // Is always brought down here...
-                sessions: Array.from({length: 10}, (e, i) => `00${i}`)
+                sessions: Array.from({length: 10}, (_, i) => `00${i}`)
             },
         },
         results: {

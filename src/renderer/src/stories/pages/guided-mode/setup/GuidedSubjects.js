@@ -36,9 +36,9 @@ export class GuidedSubjectsPage extends Page {
     beforeSave = () => {
         try {
             this.table.validate();
-        } catch (e) {
-            this.notify(e.message, "error");
-            throw e;
+        } catch (error) {
+            this.notify(error.message, "error");
+            throw error;
         }
 
         // Delete old subjects before merging
