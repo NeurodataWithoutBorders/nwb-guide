@@ -9,6 +9,6 @@ export default {
 
 export const Default = PageTemplate.bind({});
 Default.args = {
-    activePage: "conversion/metadata",
+    activePage: "//metadata",
     globalState,
 };
