@@ -70,7 +70,7 @@ export default {{
     }}
 }};
 
-const activePage = "conversion/sourcedata"
+const activePage = "//sourcedata"
 
 
 const globalStateCopy = JSON.parse(JSON.stringify(globalState))
