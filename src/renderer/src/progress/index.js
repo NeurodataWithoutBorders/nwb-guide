@@ -120,10 +120,31 @@ export const getEntries = () => {
     return progressFiles.filter((path) => path.slice(-5) === ".json");
 };
 
+const oldConversionsPath = "conversion";
+const convertOldPath = (path) => {
+    if (path && path.slice(0, oldConversionsPath.length) === oldConversionsPath)
+        return `/${path.slice(oldConversionsPath.length)}`;
+    else return path;
+};
+
+const transformProgressFile = (progressFile) => {
+    progressFile["page-before-exit"] = convertOldPath(progressFile["page-before-exit"]);
+    Object.values(progressFile.sections).forEach((section) => {
+        const pages = {};
+        Object.entries(section.pages).forEach(([page, value]) => {
+            pages[convertOldPath(page)] = value;
+        });
+        section.pages = pages;
+    });
+
+    return progressFile;
+};
 export const getAll = (progressFiles) => {
     return progressFiles.map((progressFile) => {
         let progressFilePath = joinPath(guidedProgressFilePath, progressFile);
-        return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
+        return transformProgressFile(
+            JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath))
+        );
     });
 };
 
@@ -134,6 +155,7 @@ export const getCurrentProjectName = () => {
 
 export const get = (name) => {
     if (!name) {
+        console.error("No name provided to get()");
         const params = new URLSearchParams(location.search);
         const projectName = params.get("project");
         if (!projectName) {
@@ -155,18 +177,16 @@ export const get = (name) => {
     let progressFilePath = joinPath(guidedProgressFilePath, name + ".json");
 
     const exists = fs ? fs.existsSync(progressFilePath) : localStorage.getItem(progressFilePath) !== null;
-    return exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {};
+    return transformProgressFile(
+        exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {}
+    );
 };
 
-const oldConversionsPath = "conversion";
 export function resume(name) {
     const global = this ? this.load(name) : get(name);
 
     let commandToResume = global["page-before-exit"] || "//start";
     updateURLParams({ project: name });
-
-    if (commandToResume.slice(0, oldConversionsPath.length) === oldConversionsPath)
-        commandToResume = `/${commandToResume.slice(oldConversionsPath.length)}`;
 
     if (this) this.onTransition(commandToResume);
 
