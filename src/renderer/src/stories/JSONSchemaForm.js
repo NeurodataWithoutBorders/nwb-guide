@@ -250,36 +250,30 @@ export class JSONSchemaForm extends LitElement {
         if (props.base) this.base = props.base;
     }
 
-
     // Get the form element defined by the path (stops before table cells)
     getFormElement = (path, { forms = true, tables = true, inputs = true } = {}) => {
         if (typeof path === "string") path = path.split(".");
-        if (!path.length) return this
+        if (!path.length) return this;
 
         const name = path[0];
-        const updatedPath = path.slice(1)
+        const updatedPath = path.slice(1);
 
-
-        const form = this.#nestedForms[name] // Check forms
+        const form = this.#nestedForms[name]; // Check forms
         if (!form) {
-            const table = this.tables[name] // Check tables
-            if (table && tables) return table // Skip table cells
-        } 
-        
-        else if (!updatedPath.length && forms) return form
+            const table = this.tables[name]; // Check tables
+            if (table && tables) return table; // Skip table cells
+        } else if (!updatedPath.length && forms) return form;
 
         // Check Inputs
         // const inputContainer = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
         // if (inputContainer && inputs) return inputContainer.querySelector("jsonschema-input");;
 
-        const foundInput = this.inputs[path.join(".")] // Check Inputs
+        const foundInput = this.inputs[path.join(".")]; // Check Inputs
         if (foundInput && inputs) return foundInput;
-
 
         // Check Nested Form Inputs
         return form?.getFormElement(updatedPath, { forms, tables, inputs });
-
-    }
+    };
 
     #requirements = {};
 
@@ -405,7 +399,6 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
@@ -580,7 +573,7 @@ export class JSONSchemaForm extends LitElement {
             pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
             renderTable: this.renderTable,
             renderCustomHTML: this.renderCustomHTML,
-            showLabel: true
+            showLabel: true,
         });
 
         this.inputs[localPath.join("-")] = interactiveInput;
@@ -596,10 +589,7 @@ export class JSONSchemaForm extends LitElement {
         // console.log(interactiveInput)
 
         return html`
-            <div
-                id=${encode(localPath.join("-"))}
-                class="form-section"
-            >
+            <div id=${encode(localPath.join("-"))} class="form-section">
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
@@ -927,7 +917,6 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
-
             // Add new invalid classes and errors
             input.classList.add("invalid");
 

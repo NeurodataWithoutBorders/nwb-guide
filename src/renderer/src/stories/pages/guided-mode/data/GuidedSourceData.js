@@ -15,7 +15,6 @@ import globalIcon from "../../../assets/global.svg?raw";
 
 import { baseUrl } from "../../../../server/globals";
 
-
 const propsToIgnore = {
     "*": {
         verbose: true,

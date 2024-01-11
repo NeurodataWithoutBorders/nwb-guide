@@ -49,7 +49,7 @@ schema.Ecephys.ElectrodeGroup = {
     ["*"]: {
         name: function (this: JSONSchemaForm, _, __, ___, value) {
             const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name)
-        
+
                 // Check if the latest value will be new. Run function after validation
             if (!value || !groups.includes(value)) {
                 return () => {
@@ -57,7 +57,7 @@ schema.Ecephys.ElectrodeGroup = {
                 }
             }
         },
-        
+
         device: function (this: JSONSchemaForm, name, parent, path) {
             const devices = this.results.Ecephys.Device.map(({ name }) => name)
             if (devices.includes(parent[name])) return true
@@ -155,21 +155,21 @@ schema.Ophys.Device = {
                 values,
                 value: row
             } = get(this.results, path)
-        
+
             if (!row) return true // Allow blank rows
-    
+
             const rows = values.slice(-1)[0]
             const idx = path.slice(-1)[0]
             const isUniqueError = isNotUnique(name, value, rows, idx)
             if (isUniqueError) return isUniqueError
-    
+
             const prevValue = row[name]
-    
+
             if (prevValue === value || prevValue === undefined) return true // No change
-    
+
             const prevUniqueError = isNotUnique(name, prevValue, rows, idx)
             if (prevUniqueError) return true // Register as valid
-    
+
             const result = await Swal.fire({
                 title: `Are you sure you want to rename the ${prevValue} device?`,
                 icon: "warning",
@@ -181,16 +181,16 @@ schema.Ophys.Device = {
                 showCancelButton: true,
                 cancelButtonText: "Cancel"
             })
-    
+
             if (!result.isConfirmed) return null
-    
+
             // Update Dependent Tables
             const dependencies = [
                 ['Ophys', 'ImagingPlane'],
                 ['Ophys', 'OnePhotonSeries'],
                 ['Ophys', 'TwoPhotonSeries']
             ]
-    
+
             dependencies.forEach(path => {
                 const table = this.getFormElement(path)
                 if (table) {
@@ -200,10 +200,10 @@ schema.Ophys.Device = {
                     })
                     table.data = data
                 }
-    
+
                 rerenderTable.call(this, path)
             })
-    
+
             return true
         }
 

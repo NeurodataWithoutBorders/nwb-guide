@@ -56,7 +56,13 @@ const propsToIgnore = {
 };
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
-import { JSONSchemaInput, createTable, getEditableItems, isEditableObject, isPatternProperties } from "../../../JSONSchemaInput.js";
+import {
+    JSONSchemaInput,
+    createTable,
+    getEditableItems,
+    isEditableObject,
+    isPatternProperties,
+} from "../../../JSONSchemaInput.js";
 import { html } from "lit";
 
 const getInfoFromId = (key) => {
@@ -174,11 +180,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveResults(subject, session, globalState);
 
-        const patternPropsToRetitle = [
-            'Ophys.Fluorescence',
-            'Ophys.DfOverF',
-            'Ophys.SegmentationImages'
-        ]
+        const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
         const customSymbol = Symbol("custom");
 
@@ -233,27 +235,25 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
-
                 if (isPatternProperties(this.pattern)) {
-                    if (patternPropsToRetitle.includes(this.form.base.join('.'))) {
+                    if (patternPropsToRetitle.includes(this.form.base.join("."))) {
+                        const schemaCopy = { ...inputSchema };
+                        inputSchema.title = "Plane Metadata<hr>";
 
-                            const schemaCopy = { ...inputSchema };
-                            inputSchema.title = 'Plane Metadata<hr>';
+                        // One table with nested tables for each property
+                        const data = getEditableItems(this.value, this.pattern, { name, schema: this.schema }).reduce(
+                            (acc, { key, value }) => {
+                                acc[key] = value;
+                                return acc;
+                            },
+                            {}
+                        );
 
-                            // One table with nested tables for each property
-                            const data = getEditableItems(this.value, this.pattern, { name, schema: this.schema }).reduce(
-                                (acc, { key, value }) => {
-                                    acc[key] = value;
-                                    return acc;
-                                },
-                                {}
-                            );
+                        const nProps = Object.keys(data).length;
 
-                            const nProps = Object.keys(data).length;
-
-                            return Object.entries(data).map(([ name, value ]) => {
-                                return Object.entries(schemaCopy.patternProperties).map(([ pattern, schema ]) => {
-
+                        return Object.entries(data)
+                            .map(([name, value]) => {
+                                return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
                                     const mockInput = {
                                         schema: {
                                             type: "object",
@@ -261,32 +261,32 @@ export class GuidedMetadataPage extends ManagedPage {
                                         },
                                         renderTable: this.renderTable,
                                         value: value,
-                                        pattern: pattern
-                                    }
+                                        pattern: pattern,
+                                    };
 
                                     return html`
-                                    <div style="width: 100%;">
-                                        ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ''}
-                                        ${createTable.call(mockInput, [...localPath], {
-                                            forceItems: true,
-                                            onUpdate: (localPath, value) => onUpdate([ name, ...localPath ], value, true, {
-                                                willTimeout: false,
-                                                onError: (e) => e,
-                                                onWarning: (e) => e,
-                                            }),
-                                            onThrow: onThrow,
-                                        })}
-                                    </div>
-                                    `
-                                })
-                            }).flat()
-
+                                        <div style="width: 100%;">
+                                            ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ""}
+                                            ${createTable.call(mockInput, [...localPath], {
+                                                forceItems: true,
+                                                onUpdate: (localPath, value) =>
+                                                    onUpdate([name, ...localPath], value, true, {
+                                                        willTimeout: false,
+                                                        onError: (e) => e,
+                                                        onWarning: (e) => e,
+                                                    }),
+                                                onThrow: onThrow,
+                                            })}
+                                        </div>
+                                    `;
+                                });
+                            })
+                            .flat();
                     }
                 }
             },
 
             renderTable: function (name, metadata) {
-
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
                 if (name !== "Electrodes") return new SimpleTable(metadata);
                 else return true; // All other tables are handled by the default behavior

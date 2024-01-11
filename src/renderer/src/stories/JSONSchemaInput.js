@@ -1,4 +1,3 @@
-
 import { LitElement, css, html } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
@@ -15,14 +14,7 @@ import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
 
-
-
-export function createTable(fullPath, {
-    onUpdate,
-    onThrow,
-    forceItems = false
-}){
-
+export function createTable(fullPath, { onUpdate, onThrow, forceItems = false }) {
     const path = [...fullPath];
     const name = path.splice(-1)[0];
     const schema = this.schema;
@@ -107,9 +99,7 @@ export function createTable(fullPath, {
         schemaRef.required.push(tempPropertyKey);
 
         if (!schema["items"]) {
-            const resolvedItemSchema = this.form?.getSchema
-                ? this.form.getSchema("items", schema)
-                : schema["items"];
+            const resolvedItemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
             if (!resolvedItemSchema) return schemaRef;
 
             delete schemaRef.patternProperties;
@@ -240,21 +230,17 @@ export function createTable(fullPath, {
             ...commonTableMetadata,
         };
 
-        const table = this.renderTable(id, tableMetadata, fullPath); 
-        return table // Try rendering as a nested table with a fake property key (otherwise use nested forms)
+        const table = this.renderTable(id, tableMetadata, fullPath);
+        return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
     };
 
     // Possibly multiple tables
     if (isEditableObject(schema, this.value)) {
-        
         // One table with nested tables for each property
-        const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce(
-            (acc, { key, value }) => {
-                acc[key] = value;
-                return acc;
-            },
-            {}
-        );
+        const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce((acc, { key, value }) => {
+            acc[key] = value;
+            return acc;
+        }, {});
 
         const table = createNestedTable(name, data, { schema });
         if (table) return table;
@@ -285,10 +271,6 @@ export function createTable(fullPath, {
         return tableEl;
     }
 }
-
-
-
-
 
 // Schema or value indicates editable object
 export const isEditableObject = (schema, value) =>
@@ -461,12 +443,12 @@ export class JSONSchemaInput extends LitElement {
                 color: black;
                 font-weight: 600;
                 font-size: 1.2em !important;
-              }
-              
+            }
+
             .guided--form-label.centered {
                 text-align: center;
             }
-        
+
             .guided--form-label.header {
                 font-size: 1.5em !important;
             }
@@ -475,11 +457,11 @@ export class JSONSchemaInput extends LitElement {
                 content: " *";
                 color: #ff0033;
             }
-            
+
             :host(:not([validateemptyvalue])) .required label:after {
                 color: gray;
             }
-            
+
             .required.conditional label:after {
                 color: transparent;
             }
@@ -492,7 +474,6 @@ export class JSONSchemaInput extends LitElement {
                 padding: 0;
                 margin-bottom: 1em;
             }
-          
         `;
     }
 
@@ -502,7 +483,6 @@ export class JSONSchemaInput extends LitElement {
             validateEmptyValue: { type: Boolean, reflect: true },
         };
     }
-
 
     // schema,
     // parent,
@@ -600,19 +580,29 @@ export class JSONSchemaInput extends LitElement {
         const input = this.#render();
 
         return html`
-            <div class="${this.required || this.conditional ? "required" : ""} ${this.conditional
-                ? "conditional"
-                : ""}">
-            
-                ${this.showLabel ? html`<label class="guided--form-label">${(schema.title ? unsafeHTML(schema.title) : null) ?? header(this.path.slice(-1)[0])}` : ''}
+            <div class="${this.required || this.conditional ? "required" : ""} ${
+                this.conditional ? "conditional" : ""
+            }">
+
+                ${
+                    this.showLabel
+                        ? html`<label class="guided--form-label"
+                              >${(schema.title ? unsafeHTML(schema.title) : null) ??
+                              header(this.path.slice(-1)[0])}</label
+                          >`
+                        : ""
+                }
                 </label>
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
                 <p class="guided--text-input-instructions">
-                    ${schema.description
-                        ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
-                            ? ""
-                            : "."}`
-                        : ""}
+                    ${
+                        schema.description
+                            ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] ===
+                              "."
+                                  ? ""
+                                  : "."}`
+                            : ""
+                    }
                 </p>
             </div>
         `;
@@ -809,11 +799,13 @@ export class JSONSchemaInput extends LitElement {
 
         const canAddProperties = isEditableObject(this.schema, this.value);
 
-        if (this.renderCustomHTML){
-            const custom = this.renderCustomHTML(name, schema, path, { onUpdate: this.#updateData, onThrow: this.#onThrow });
+        if (this.renderCustomHTML) {
+            const custom = this.renderCustomHTML(name, schema, path, {
+                onUpdate: this.#updateData,
+                onThrow: this.#onThrow,
+            });
             if (custom) return custom;
         }
-
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
@@ -864,28 +856,26 @@ export class JSONSchemaInput extends LitElement {
 
             const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
 
-
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema?.type === "object" && this.renderTable) {
-
                 const instanceThis = this;
 
-                function updateFunction (path, value = this.data) {
+                function updateFunction(path, value = this.data) {
                     return instanceThis.#updateData(path, value, true, {
                         willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
                         onError: (e) => e,
                         onWarning: (e) => e,
-                    })
+                    });
                 }
 
                 const table = createTable.call(this, resolvedFullPath, {
                     onUpdate: updateFunction,
-                    onThrow: this.#onThrow
+                    onThrow: this.#onThrow,
                 }); // Ensure change propagates
 
-                if (table) return table
+                if (table) return table;
             }
 
             const list = (this.#list = new List({
