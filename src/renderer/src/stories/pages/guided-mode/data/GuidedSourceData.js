@@ -15,15 +15,6 @@ import globalIcon from "../../../assets/global.svg?raw";
 
 import { baseUrl } from "../../../../server/globals";
 
-// const propsToIgnore = [
-//     "verbose",
-//     "es_key",
-//     "exclude_shanks",
-//     "load_sync_channel",
-//     "stream_id", // NOTE: May be desired for other interfaces
-//     "nsx_override",
-// ];
-
 const propsToIgnore = {
     "*": {
         verbose: true,
@@ -32,6 +23,8 @@ const propsToIgnore = {
         load_sync_channel: true,
         stream_id: true, // NOTE: May be desired for other interfaces
         nsx_override: true,
+        combined: true,
+        plane_no: true,
     },
 };
 
@@ -103,11 +96,11 @@ export class GuidedSourceDataPage extends ManagedPage {
                         }),
                     })
                         .then((res) => res.json())
-                        .catch((e) => {
+                        .catch((error) => {
                             Swal.close();
                             stillFireSwal = false;
-                            this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
-                            throw e;
+                            this.notify(`<b>Critical Error:</b> ${error.message}`, "error", 4000);
+                            throw error;
                         });
 
                     Swal.close();
@@ -115,14 +108,11 @@ export class GuidedSourceDataPage extends ManagedPage {
                     if (isStorybook) return;
 
                     if (result.message) {
-                        const [
-                            type,
-                            text = `<small><pre>${result.traceback
-                                .trim()
-                                .split("\n")
-                                .slice(-2)[0]
-                                .trim()}</pre></small>`,
-                        ] = result.message.split(":");
+                        const [type, ...splitText] = result.message.split(":");
+                        const text = splitText.length
+                            ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
+                            : `<small><pre>${result.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`;
+
                         const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
                         this.notify(message, "error");
                         throw result;

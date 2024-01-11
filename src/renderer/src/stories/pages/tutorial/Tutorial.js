@@ -127,9 +127,9 @@ export class TutorialPage extends Page {
 
                               const { output_directory } = await run("generate_dataset", state, {
                                   title: "Generating tutorial data",
-                              }).catch((e) => {
-                                  this.notify(e.message, "error");
-                                  throw e;
+                              }).catch((error) => {
+                                  this.notify(error.message, "error");
+                                  throw error;
                               });
 
                               this.notify("Tutorial data successfully generated!");

@@ -69,6 +69,10 @@ export class List extends LitElement {
       }
 
 
+      ol:not(:has(li)) {
+        margin: 0px;
+      }
+
 
       :host([unordered]) ol {
         list-style-type: none;
@@ -133,7 +137,7 @@ export class List extends LitElement {
     object: {[x:string]: any} = {}
 
     get array() {
-      return this.items.map(o => o.value)
+      return this.items.map(item => item.value)
     }
 
     #items: ListItemType[] = []
@@ -331,8 +335,8 @@ export class List extends LitElement {
         editableElement.contentEditable = true;
 
         // Stop enter key from creating new line
-        editableElement.onkeydown = (e) => {
-            if (e.keyCode === 13) {
+        editableElement.onkeydown = (keyDownEvent) => {
+            if (keyDownEvent.keyCode === 13) {
               editableElement.blur();
                 return false;
             }
@@ -408,7 +412,7 @@ export class List extends LitElement {
 
       return html`
       <ol style=${styleMap(this.listStyles)}>
-        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<li id="empty">${emptyMessage}</li>`}
       </ol>`
     }
   }

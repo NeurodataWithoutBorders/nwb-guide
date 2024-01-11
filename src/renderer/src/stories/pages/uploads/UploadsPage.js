@@ -73,7 +73,7 @@ export async function createDandiset(results = {}) {
                     ];
             }
         },
-        conditionalRequirements: [
+        groups: [
             {
                 name: "Embargo your Data",
                 properties: [["embargo_status"], ["nih_award_number"]],
@@ -129,7 +129,7 @@ export async function createDandiset(results = {}) {
 
                 await addDandiset(res);
 
-                const input = this.form.getInput(["dandiset"]);
+                const input = this.form.getFormElement(["dandiset"]);
                 input.updateData(id);
                 input.requestUpdate();
 
@@ -246,9 +246,9 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
     const result = await run(type ? `upload/${type}` : "upload", payload, {
         title: "Uploading your files to DANDI",
-    }).catch((e) => {
-        this.notify(e.message, "error");
-        throw e;
+    }).catch((error) => {
+        this.notify(error.message, "error");
+        throw error;
     });
 
     if (result)
@@ -264,8 +264,8 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
 export class UploadsPage extends Page {
     header = {
-        title: "DANDI Uploads",
-        subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
+        title: "NWB File Uploads",
+        subtitle: "Upload folders and individual NWB files to the DANDI Archive.",
         controls: [
             new Button({
                 icon: keyIcon,
@@ -303,12 +303,14 @@ export class UploadsPage extends Page {
                 merge(apiKeys, global.data.DANDI.api_keys);
                 global.save();
                 await regenerateDandisets();
-                const input = this.form.getInput(["dandiset "]);
+                const input = this.form.getFormElement(["dandiset "]);
                 input.requestUpdate();
             },
-            validateOnChange: async (name, parent) => {
-                const value = parent[name];
-                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+            formProps: {
+                validateOnChange: async (name, parent) => {
+                    const value = parent[name];
+                    if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+                },
             },
         }));
         document.body.append(modal);
@@ -380,7 +382,7 @@ export class UploadsPage extends Page {
                         if (id === folderPathKey) {
                             const keysToUpdate = ["dandiset"];
                             keysToUpdate.forEach((k) => {
-                                const input = this.form.getInput([k]);
+                                const input = this.form.getFormElement([k]);
                                 if (input.value) input.updateData("");
                             });
                         }
@@ -390,15 +392,15 @@ export class UploadsPage extends Page {
 
                     onThrow,
 
-                    transformErrors: (e) => {
-                        if (e.message === "Filesystem Paths is a required property.")
-                            e.message = "Please select at least one file or folder to upload.";
+                    transformErrors: (error) => {
+                        if (error.message === "Filesystem Paths is a required property.")
+                            error.message = "Please select at least one file or folder to upload.";
                     },
 
                     validateOnChange: validate,
                 }));
             })
-            .catch((e) => html`<p>${e}</p>`);
+            .catch((error) => html`<p>${error}</p>`);
 
         // Confirm that one api key exists
         promise.then(() => {

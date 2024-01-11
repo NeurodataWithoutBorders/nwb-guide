@@ -87,9 +87,19 @@
         },
         "related_publications": {
           "type": "array",
+          "description": "Provide a DOI for each publication.",
           "items": {
-            "title": "related publication",
-            "type": "string"
+            "type": "string",
+            "format": "{doi}",
+            "properties": {
+              "doi": {
+                "title": "DOI",
+                "pattern": "^(doi:|http:\/\/dx\\.doi\\.org/|https:\/\/doi\\.org\/)\\b(10[.][0-9]{4,}(?:[.][0-9]+)*\\/(?:(?![\"&\\'<>])\\S)+)\\b$",
+                "type": "string",
+                "description": "Provide your publication formatted as a digital object identifier (DOI), e.g., doi:10.1038/nn.1234 or https://doi.org/10.1038/nn.1234."
+              }
+            },
+            "required": [ "doi" ]
           }
         },
         "slices": {

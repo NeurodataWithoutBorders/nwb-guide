@@ -1,5 +1,5 @@
 import { LitElement, css, html, unsafeCSS } from "lit";
-import { header } from "./forms/utils";
+import { header, tempPropertyKey, tempPropertyValueKey } from "./forms/utils";
 import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
@@ -12,7 +12,7 @@ import { styleMap } from "lit/directives/style-map.js";
 import "./Button";
 import tippy from "tippy.js";
 import { sortTable } from "./Table";
-import { NestedTableCell } from "./table/cells/table";
+import { NestedInputCell } from "./table/cells/input";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -150,6 +150,14 @@ export class SimpleTable extends LitElement {
                 font-size: 80%;
                 font-family: ${unsafeCSS(emojiFontFamily)};
             }
+
+            h3 {
+                margin: 0;
+                padding: 10px;
+                background: black;
+                color: white;
+                border-radius-top: 5px;
+            }
         `;
     }
 
@@ -178,8 +186,9 @@ export class SimpleTable extends LitElement {
     } = {}) {
         super();
         this.schema = schema ?? {};
-        this.#data = data ?? [];
-        this.keyColumn = keyColumn;
+        this.#keyColumn = keyColumn;
+        this.data = data ?? [];
+
         this.globals = globals ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.deferLoading = deferLoading ?? false;
@@ -216,7 +225,7 @@ export class SimpleTable extends LitElement {
         this.addEventListener("copy", (ev) => {
             ev.preventDefault();
             const tsv = Object.values(this.#selected)
-                .map((arr) => arr.map((el) => el.value).join("\t"))
+                .map((arr) => arr.map((inputElement) => inputElement.value).join("\t"))
                 .join("\n");
 
             ev.clipboardData.setData("text/plain", tsv);
@@ -228,8 +237,8 @@ export class SimpleTable extends LitElement {
                 const path = this.#getPath(ev);
                 if (path[0] === document.body)
                     Object.values(this.#selected).forEach((row) => {
-                        row.forEach((o) => {
-                            if (o.type !== "table") o.setInput("");
+                        row.forEach((row) => {
+                            if (row.type !== "table") row.setInput("");
                         });
                     });
                 return;
@@ -273,15 +282,17 @@ export class SimpleTable extends LitElement {
         });
     }
 
+    #keyColumn;
     #data = [];
     get data() {
         // Remove empty array entries
-        if (Array.isArray(this.#data)) return this.#data.filter((o) => Object.keys(o).length);
+        if (Array.isArray(this.#data)) return this.#data; //.filter((o) => Object.keys(o).length);
         else return this.#data;
     }
 
     set data(val) {
         this.#data = val;
+        this.keyColumn = Array.isArray(this.#data) ? undefined : this.#keyColumn ?? "Property Key";
     }
 
     #selected = {};
@@ -294,18 +305,20 @@ export class SimpleTable extends LitElement {
             this.#firstSelected = null;
         }
 
-        Object.values(this.#selected).forEach((arr) => arr.forEach((el) => el.parentNode.removeAttribute("selected")));
+        Object.values(this.#selected).forEach((arr) =>
+            arr.forEach((cellElement) => cellElement.parentNode.removeAttribute("selected"))
+        );
         this.#selected = {};
     };
 
     #getPath = (ev) => ev.path || ev.composedPath();
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
     #getCellFromPath = (path) => {
-        let inTableCell;
+        let inInputCell;
 
-        const found = path.find((el) => {
-            if (el instanceof NestedTableCell) inTableCell = true;
-            return !inTableCell && (el instanceof TableCell || el.children?.[0] instanceof TableCell);
+        const found = path.find((element) => {
+            if (element instanceof NestedInputCell) inInputCell = true;
+            return !inInputCell && (element instanceof TableCell || element.children?.[0] instanceof TableCell);
         });
         if (found instanceof HTMLTableCellElement) return found.children[0];
         else return found;
@@ -365,7 +378,7 @@ export class SimpleTable extends LitElement {
             } else {
                 value = hasRow ? this.#data[row][col] : undefined;
                 if (this.#isUndefined(value)) value = this.globals[col];
-                if (this.#isUndefined(value)) value = this.schema.properties[col].default;
+                if (this.#isUndefined(value)) value = this.schema.properties?.[col]?.default;
                 if (this.#isUndefined(value)) value = "";
             }
             return value;
@@ -435,6 +448,7 @@ export class SimpleTable extends LitElement {
                 label: "Add Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
+                    if (!cell) return this.addRow(); // No cell selected
                     const { i } = cell.simpleTableInfo;
                     this.addRow(i); //2) // TODO: Support adding more than one row
                 },
@@ -443,6 +457,8 @@ export class SimpleTable extends LitElement {
                 label: "Remove Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
+                    if (!cell) return; // No cell selected
+
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
 
                     // Validate with empty values before removing (to trigger any dependent validations)
@@ -570,17 +586,13 @@ export class SimpleTable extends LitElement {
         const count = Math.abs(nRows);
         const range = Array.from({ length: count }, (_, i) => row + i);
 
-        const children = Array.from(this.shadowRoot.querySelector("tbody").children);
+        const bodyEl = this.shadowRoot.querySelector("tbody");
+        const children = Array.from(bodyEl.children);
 
         const isPositive = Math.sign(nRows) === 1;
 
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
-            if (children.length - count < 1) {
-                this.onThrow("You must have at least one row");
-                return false;
-            }
-
             const rowHeaders = Object.keys(this.#data);
             range.map((i) => {
                 children[i].remove();
@@ -595,10 +607,10 @@ export class SimpleTable extends LitElement {
 
         const afterIdx = row + count;
         const after = children.slice(afterIdx);
-        after.forEach((o, i) => {
+        after.forEach((element, i) => {
             const pos = afterIdx + i + nRows;
             this.#cells[pos] = ogCells[afterIdx + i];
-            Array.from(o.children).forEach((o) => (o.children[0].simpleTableInfo.i = pos)); // Increment position
+            Array.from(element.children).forEach((element) => (element.children[0].simpleTableInfo.i = pos)); // Increment position
         });
 
         if (isPositive) {
@@ -612,23 +624,28 @@ export class SimpleTable extends LitElement {
                 const data = this.#getRowData(); // Get information for an undefined row
                 const newRow = document.createElement("tr");
                 newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
-                latest.insertAdjacentElement("afterend", newRow);
-                latest = newRow;
+
+                if (latest) latest.insertAdjacentElement("afterend", newRow);
+                else bodyEl.append(newRow);
+
                 return this.getRow(i);
             });
 
+            this.onUpdate([], this.data);
             return mapped;
         }
+
+        this.onUpdate([], this.data);
     }
 
-    #renderHeader = (str, { description }) => {
+    #renderHeader = (str, { title, description }) => {
         const header = document.createElement("th");
 
         // Inner Content
         const div = document.createElement("div");
         div.classList.add("relative");
         const span = document.createElement("span");
-        span.innerHTML = str;
+        span.innerHTML = title ?? str;
         div.append(span);
         header.append(div);
 
@@ -638,7 +655,7 @@ export class SimpleTable extends LitElement {
             span.classList.add("info");
             span.innerText = "ℹ️";
             div.append(span);
-            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}` });
+            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}`, allowHTML: true });
         }
 
         return header;
@@ -694,10 +711,12 @@ export class SimpleTable extends LitElement {
     #createCell = (value, info) => {
         const rowNames = Object.keys(this.#data);
 
+        const row = Array.isArray(this.#data) ? info.i : rowNames[info.i];
+
         const fullInfo = {
             ...info,
             col: this.colHeaders[info.j],
-            row: Array.isArray(this.#data) ? `${info.i}` : rowNames[info.i],
+            row: `${row}`,
         };
 
         const schema = this.#schema[fullInfo.col];
@@ -705,6 +724,11 @@ export class SimpleTable extends LitElement {
         // Track the cell renderer
         const cell = new TableCell({
             info: {
+                title: header(
+                    fullInfo.col === tempPropertyValueKey
+                        ? "Property" // outerParent[tempPropertyKey] // NOTE: For new rows, this will be unresolved at instantiation
+                        : fullInfo.col
+                ),
                 col: this.colHeaders[info.j],
             },
             value,
@@ -718,7 +742,7 @@ export class SimpleTable extends LitElement {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
                 const res = this.validateOnChange
-                    ? await this.validateOnChange([info.i, fullInfo.col, ...path], parent, value, schema)
+                    ? await this.validateOnChange([row, fullInfo.col, ...path], parent, value, schema)
                     : true;
 
                 return res;
@@ -736,7 +760,7 @@ export class SimpleTable extends LitElement {
                     }
 
                     if (message !== undefined) {
-                        tippy(td, { content: message });
+                        tippy(td, { content: message, allowHTML: true });
                         td.setAttribute("data-message", value);
                     }
 

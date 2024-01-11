@@ -207,17 +207,17 @@ export class Page extends LitElement {
                     interfaces: globalState.interfaces,
                 },
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
-            ).catch((e) => {
-                let message = e.message;
+            ).catch((error) => {
+                let message = error.message;
 
                 if (message.includes("The user aborted a request.")) {
                     this.notify("Conversion was cancelled.", "warning");
-                    throw e;
+                    throw error;
                 }
 
                 this.notify(message, "error");
                 popup.close();
-                throw e;
+                throw error;
             });
 
             completed++;

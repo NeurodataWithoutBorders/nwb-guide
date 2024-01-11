@@ -1,6 +1,6 @@
 import { serverGlobals, resolve } from '../src/renderer/src/server/globals'
 
-import { header } from '../src/renderer/src/stories/forms/utils'
+import { header, replaceRefsWithValue } from '../src/renderer/src/stories/forms/utils'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
@@ -42,7 +42,7 @@ function getSpeciesInfo(species: any[][] = []) {
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
-    const copy = structuredClone(schema)
+    const copy = replaceRefsWithValue(structuredClone(schema))
 
     copy.additionalProperties = false
 
@@ -66,6 +66,12 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         description: 'The species of your subject.'
     }
 
+    // copy.order = ['NWBFile', 'Subject']
+
+    copy.properties.NWBFile.title = 'General Metadata'
+    const nwbProps = copy.properties.NWBFile.properties
+    nwbProps.keywords.items.description = "Provide a single keyword (e.g. Neural circuits, V1, etc.)"
+
     // Resolve species suggestions
     resolve(serverGlobals.species, (res) => {
         const info = getSpeciesInfo(res)
@@ -73,10 +79,14 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     })
 
     // Ensure experimenter schema has custom structure
-    copy.properties.NWBFile.properties.experimenter = baseMetadataSchema.properties.NWBFile.properties.experimenter
+    nwbProps.experimenter = baseMetadataSchema.properties.NWBFile.properties.experimenter
+
+    // Ensure related_publications schema has custom structure
+    nwbProps.related_publications = baseMetadataSchema.properties.NWBFile.properties.related_publications
+
 
     // Override description of keywords
-    copy.properties.NWBFile.properties.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
+    nwbProps.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
 
     const ecephys = copy.properties.Ecephys
     const ophys = copy.properties.Ophys
@@ -92,14 +102,19 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ophys) {
 
-        const getProp = (name: string, base = true) => base ? ophys.properties[name] : ophys.properties.definitions?.[name]
+        const getProp = (name: string) => ophys.properties[name]
 
-        if (getProp("TwoPhotonSeries")) getProp("TwoPhotonSeries").items.order = [
-            "name",
-            "description",
-            "scan_line_rate",
-            "field_of_view"
-        ]
+        if (getProp("TwoPhotonSeries")) {
+            const tpsItemSchema = getProp("TwoPhotonSeries").items
+            tpsItemSchema.order = [
+                "name",
+                "description",
+                "scan_line_rate",
+                "field_of_view"
+            ]
+
+            tpsItemSchema.properties.pmt_gain.title =  'Photomultiplier Gain'
+        }
 
 
         if (getProp("ImagingPlane")) {
@@ -119,14 +134,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     Object.entries(copy.properties).forEach(([key, value]) => {
 
-        const defs = value.properties.definitions ?? {}
-
         Object.entries(value.properties).forEach(([k, v]) => {
 
-            if (k ==='definitions') return
-
             //  Uniformly grab definitions
-           const ref = defs[k] ?? v.items ?? v
+           const ref = v.items ?? v
            if (!ref.properties) return
            Object.keys(ref.properties).forEach(k => {
                 const info = ref.properties[k]

@@ -284,30 +284,31 @@ export class Table extends LitElement {
                         ? await this.validateOnChange(
                               [k],
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
-                              value
+                              value,
+                              info.properties[k]
                           )
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
 
                     return this.#handleValidationResult(valid, row, prop);
-                } catch (e) {
+                } catch {
                     return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
                 }
             };
 
-            let ogThis = this;
+            let instanceThis = this;
             const required = isRequired(k, this.schema);
 
             const validator = async function (value, callback) {
-                const validateEmptyCells = ogThis.validateEmptyCells;
+                const validateEmptyCells = instanceThis.validateEmptyCells;
                 const willValidate =
                     validateEmptyCells === true ||
                     (Array.isArray(validateEmptyCells) && validateEmptyCells.includes(k));
 
-                value = ogThis.#getValue(value, colInfo);
+                value = instanceThis.#getValue(value, colInfo);
 
                 // Clear empty values if not validated
                 if (!value && !willValidate) {
-                    ogThis.#handleValidationResult(
+                    instanceThis.#handleValidationResult(
                         [], // Clear errors
                         this.row,
                         this.col
@@ -316,9 +317,9 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (value && k === ogThis.keyColumn && unresolved[this.row]) {
-                    if (value in ogThis.data) {
-                        ogThis.#handleValidationResult(
+                if (value && k === instanceThis.keyColumn && unresolved[this.row]) {
+                    if (value in instanceThis.data) {
+                        instanceThis.#handleValidationResult(
                             [{ message: `${header(k)} already exists`, type: "error" }],
                             this.row,
                             this.col
@@ -334,7 +335,7 @@ export class Table extends LitElement {
                 }
 
                 if (!value && required) {
-                    ogThis.#handleValidationResult(
+                    instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         this.row,
                         this.col
@@ -401,7 +402,7 @@ export class Table extends LitElement {
                 }
 
                 if (span._tippy) span._tippy.destroy();
-                tippy(span, { content: `${desc}` });
+                tippy(span, { content: `${desc}`, allowHTML: true });
             }
         };
 
@@ -545,7 +546,7 @@ export class Table extends LitElement {
 
         table.addHook("afterCreateRow", (index, amount) => {
             nRows += amount;
-            const physicalRows = Array.from({ length: amount }, (e, i) => index + i);
+            const physicalRows = Array.from({ length: amount }, (_, i) => index + i);
             physicalRows.forEach((row) => this.#setRow(row, this.#getRowData(row)));
         });
 
@@ -591,11 +592,11 @@ export class Table extends LitElement {
             let message = "";
             let theme = "";
             if (warnings.length) {
-                (theme = "warning"), (message = warnings.map((o) => o.message).join("\n"));
+                (theme = "warning"), (message = warnings.map((error) => error.message).join("\n"));
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                (theme = "error"), (message = errors.map((o) => o.message).join("\n")); // Class switching handled automatically
+                (theme = "error"), (message = errors.map((error) => error.message).join("\n")); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
             if (theme) cell.setAttribute(theme, "");
@@ -606,7 +607,7 @@ export class Table extends LitElement {
             }
 
             if (message) {
-                tippy(cell, { content: message });
+                tippy(cell, { content: message, allowHTML: true });
                 cell.setAttribute("data-message", message);
             }
         }
@@ -630,7 +631,7 @@ export class Table extends LitElement {
         const root = this.getRootNode().body ?? this.getRootNode();
         this.#root = root;
         const stylesheets = Array.from(root.querySelectorAll("style"));
-        const exists = (this.stylesheet = stylesheets.find((el) => styleSymbol in el));
+        const exists = (this.stylesheet = stylesheets.find((stylesheet) => styleSymbol in stylesheet));
 
         if (exists) exists[styleSymbol]++;
         else {

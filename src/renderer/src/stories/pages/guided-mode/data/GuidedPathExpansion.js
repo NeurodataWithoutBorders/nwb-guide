@@ -169,9 +169,9 @@ export class GuidedPathExpansionPage extends Page {
                 finalStructure[key] = entry;
             }
 
-            const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((e) => {
-                this.notify(e.message, "error");
-                throw e;
+            const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
+                this.notify(error.message, "error");
+                throw error;
             });
 
             const subjects = Object.keys(results);
@@ -290,8 +290,8 @@ export class GuidedPathExpansionPage extends Page {
                 const name = parentPath.pop();
 
                 if (name === "base_directory") {
-                    form.getInput([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
-                    const input = form.getInput([...parentPath, "format_string_path"]);
+                    form.getFormElement([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
+                    const input = form.getFormElement([...parentPath, "format_string_path"]);
                     if (input.value) input.updateData(input.value, true);
                 }
             },
@@ -299,7 +299,7 @@ export class GuidedPathExpansionPage extends Page {
                 const value = parent[name];
 
                 if (fs) {
-                    const baseDir = form.getInput([...parentPath, "base_directory"]);
+                    const baseDir = form.getFormElement([...parentPath, "base_directory"]);
                     if (name === "format_string_path") {
                         if (value && baseDir && !baseDir.value) {
                             return [
@@ -323,10 +323,12 @@ export class GuidedPathExpansionPage extends Page {
 
                         const interfaceName = parentPath.slice(-1)[0];
 
-                        const results = await run(`locate`, { [interfaceName]: entry }, { swal: false }).catch((e) => {
-                            this.notify(e.message, "error");
-                            throw e;
-                        });
+                        const results = await run(`locate`, { [interfaceName]: entry }, { swal: false }).catch(
+                            (error) => {
+                                this.notify(error.message, "error");
+                                throw error;
+                            }
+                        );
 
                         const resolved = [];
 

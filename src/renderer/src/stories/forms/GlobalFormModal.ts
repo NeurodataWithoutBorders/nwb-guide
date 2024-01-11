@@ -21,7 +21,10 @@ type BaseFormModalOptions = {
     schema: any
     propsToIgnore?: IgnorePropsLevel
     propsToRemove?: IgnorePropsLevel
-    validateOnChange?: Function,
+    formProps: {
+        validateOnChange?: Function,
+        [key: string]: any
+    },
     hasInstances?: boolean
 }
 
@@ -30,9 +33,8 @@ export function createFormModal ({
     onSave,
     header,
     schema,
-    propsToIgnore = {},
     propsToRemove = {},
-    validateOnChange,
+    formProps,
     hasInstances = false
 }: BaseFormModalOptions & { onSave: Function }) {
     const modal = new Modal({
@@ -71,9 +73,8 @@ export function createFormModal ({
         validateEmptyValues: false,
         schema: schemaCopy,
         emptyMessage: "No properties to edit globally.",
-        ignore: propsToIgnore,
         onThrow,
-        validateOnChange
+        ...formProps
     })
 
     content.append(globalForm)
@@ -101,9 +102,9 @@ export function createFormModal ({
 export function createGlobalFormModal(this: Page, {
     header,
     schema,
-    propsToIgnore = {},
+
     propsToRemove = {},
-    validateOnChange,
+    formProps,
 
     // Global-specific options
     key,
@@ -117,9 +118,8 @@ export function createGlobalFormModal(this: Page, {
     return createFormModal({
         header,
         schema,
-        propsToIgnore,
         propsToRemove,
-        validateOnChange,
+        formProps,
         hasInstances,
         onSave: async ( form ) => {
 
@@ -130,20 +130,20 @@ export function createGlobalFormModal(this: Page, {
             const forms = (hasInstances ? this.forms :  this.form ? [ { form: this.form }] : []) ?? []
             const tables = (hasInstances ? this.tables : this.table ? [ this.table ] : []) ?? []
 
-            const mergeOpts = {
+            const mergeOptions = {
                 // remove: false
             }
 
             forms.forEach(formInfo => {
                 const { subject, form } = formInfo
-                const result = cached[subject] ?? (cached[subject] = mergeFunction.call(formInfo, toPass, this.info.globalState, mergeOpts))
+                const result = cached[subject] ?? (cached[subject] = mergeFunction.call(formInfo, toPass, this.info.globalState, mergeOptions))
                 form.globals = structuredClone(key ?  result.project[key]: result)
             })
 
 
             tables.forEach(table => {
                 const subject = null
-                const result = cached[subject] ?? (cached[subject] = mergeFunction(toPass, this.info.globalState, mergeOpts))
+                const result = cached[subject] ?? (cached[subject] = mergeFunction(toPass, this.info.globalState, mergeOptions))
                 table.globals = structuredClone( key ?  result.project[key]: result)
             })
 

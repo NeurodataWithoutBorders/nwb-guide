@@ -14,13 +14,13 @@ export async function validateOnChange(name, parent, path, value) {
 
     const fullPath = [...path, name];
 
-    const fullPathNoRows = fullPath.filter((key) => typeof key !== "number");
+    const toIterate = fullPath; //fullPathNoRows // fullPath
 
     const copy = { ...parent }; // Validate on a copy of the parent
     if (arguments.length > 3) copy[name] = value; // Update value on copy
 
     let lastResolved;
-    functions = fullPathNoRows.reduce((acc, key, i) => {
+    functions = toIterate.reduce((acc, key, i) => {
         if (acc && key in acc) return (lastResolved = acc[key]);
         else return;
     }, validationSchema); // Pass the top level until it runs out
@@ -31,21 +31,28 @@ export async function validateOnChange(name, parent, path, value) {
     if (lastResolved !== false && (functions === undefined || functions === true)) {
         // let overridden = false;
         let lastWildcard;
-        fullPathNoRows.reduce((acc, key) => {
+        toIterate.reduce((acc, key) => {
             if (acc && "*" in acc) {
-                if (!acc["*"] && lastWildcard)
+                if (acc["*"] === false && lastWildcard)
                     overridden = true; // Disable if false and a wildcard has already been specified
                 // Otherwise set the last wildcard
                 else {
                     lastWildcard = typeof acc["*"] === "string" ? acc["*"].replace(`{*}`, `${name}`) : acc["*"];
+
                     overridden = false; // Re-enable if a new one is specified below
                 }
+            } else if (lastWildcard && typeof lastWildcard === "object") {
+                const newWildcard = lastWildcard[key] ?? lastWildcard["*"] ?? lastWildcard["**"] ?? (acc && acc["**"]); // Drill wildcard objects once resolved
+                // Prioritize continuation of last wildcard
+                if (newWildcard) lastWildcard = newWildcard;
             }
+
             return acc?.[key];
         }, validationSchema);
 
         if (overridden && functions !== true) lastWildcard = false; // Disable if not promised to exist
-        if (lastWildcard) functions = [lastWildcard];
+
+        if (typeof lastWildcard === "function") functions = [lastWildcard];
     }
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
@@ -65,7 +72,7 @@ export async function validateOnChange(name, parent, path, value) {
                 }),
             })
                 .then((res) => res.json())
-                .catch((e) => {}); // Let failed fetch succeed
+                .catch(() => {}); // Let failed fetch succeed
         }
     });
 
@@ -80,11 +87,11 @@ export async function validateOnChange(name, parent, path, value) {
         if (flat.find((res) => res?.message)) {
             return flat
                 .filter((res) => res?.message)
-                .map((o) => {
+                .map((messageInfo) => {
                     return {
-                        message: o.message,
-                        type: getMessageType(o),
-                        missing: o.missing ?? o.message.includes("is missing"), // Indicates that the field is missing
+                        message: messageInfo.message,
+                        type: getMessageType(messageInfo),
+                        missing: messageInfo.missing ?? messageInfo.message.includes("is missing"), // Indicates that the field is missing
                     };
                 }); // Some of the requests end in errors
         }

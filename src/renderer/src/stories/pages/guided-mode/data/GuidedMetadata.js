@@ -56,6 +56,14 @@ const propsToIgnore = {
 };
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
+import {
+    JSONSchemaInput,
+    createTable,
+    getEditableItems,
+    isEditableObject,
+    isPatternProperties,
+} from "../../../JSONSchemaInput.js";
+import { html } from "lit";
 
 const getInfoFromId = (key) => {
     let [subject, session] = key.split("/");
@@ -118,7 +126,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 merge(globalResolved, globals);
                 return resolveGlobalOverrides(this.subject, globals);
             },
-            validateOnChange,
+            formProps: {
+                validateOnChange,
+            },
         }));
         document.body.append(modal);
     }
@@ -149,7 +159,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveResults(subject, session, globalState);
 
-        console.log("results", results, preprocessMetadataSchema(schema));
+        const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
         // Create the form
         const form = new JSONSchemaForm({
@@ -163,18 +173,26 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
 
-            transformErrors: (e, externalPath, parent) => {
+            transformErrors: (error) => {
                 // JSON Schema Exceptions
-                if (e.message.includes('does not conform to the "date-time" format.')) return false;
-                if (e.message.includes('not allowed to have the additional property "Ecephys".')) return false; // NOTE: Remove after including Ecephys metadata
+                if (error.message.includes('does not conform to the "date-time" format.')) return false;
+                if (error.message.includes('not allowed to have the additional property "Ecephys".')) return false; // NOTE: Remove after including Ecephys metadata
             },
 
-            conditionalRequirements: [
+            groups: [
                 {
                     name: "Subject Age",
                     properties: [
                         ["Subject", "age"],
                         ["Subject", "date_of_birth"],
+                    ],
+                    validate: true,
+                },
+                {
+                    name: "Institutional Info",
+                    properties: [
+                        ["NWBFile", "institution"],
+                        ["NWBFile", "lab"],
                     ],
                 },
             ],
@@ -193,11 +211,59 @@ export class GuidedMetadataPage extends ManagedPage {
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
-            createTable: function (name, metadata, path) {
-                // Do not create tables for patternProperties
-                const parentSchema = this.getSchema(path) ?? {};
-                if (parentSchema.patternProperties) return false;
+            renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
+                if (isPatternProperties(this.pattern)) {
+                    if (patternPropsToRetitle.includes(this.form.base.join("."))) {
+                        const schemaCopy = { ...inputSchema };
+                        inputSchema.title = "Plane Metadata<hr>";
 
+                        // One table with nested tables for each property
+                        const data = getEditableItems(this.value, this.pattern, { name, schema: this.schema }).reduce(
+                            (acc, { key, value }) => {
+                                acc[key] = value;
+                                return acc;
+                            },
+                            {}
+                        );
+
+                        const nProps = Object.keys(data).length;
+
+                        return Object.entries(data)
+                            .map(([name, value]) => {
+                                return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
+                                    const mockInput = {
+                                        schema: {
+                                            type: "object",
+                                            items: schema,
+                                        },
+                                        renderTable: this.renderTable,
+                                        value: value,
+                                        pattern: pattern,
+                                    };
+
+                                    return html`
+                                        <div style="width: 100%;">
+                                            ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ""}
+                                            ${createTable.call(mockInput, [...localPath], {
+                                                forceItems: true,
+                                                onUpdate: (localPath, value) =>
+                                                    onUpdate([name, ...localPath], value, true, {
+                                                        willTimeout: false,
+                                                        onError: (e) => e,
+                                                        onWarning: (e) => e,
+                                                    }),
+                                                onThrow: onThrow,
+                                            })}
+                                        </div>
+                                    `;
+                                });
+                            })
+                            .flat();
+                    }
+                }
+            },
+
+            renderTable: function (name, metadata) {
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
                 if (name !== "Electrodes") return new SimpleTable(metadata);
                 else return true; // All other tables are handled by the default behavior
@@ -252,7 +318,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 {
                     name: "Preview",
                     primary: true,
-                    onClick: async (key, el) => {
+                    onClick: async (key) => {
                         const { subject, session } = getInfoFromId(key);
 
                         const results = await this.runConversions(

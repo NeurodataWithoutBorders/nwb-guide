@@ -186,7 +186,7 @@ export class BasicTable extends LitElement {
         if (len === 1) message = errors[0].title || "Error found";
         else if (len) {
             message = `${len} errors exist on this table.`;
-            console.error(Array.from(errors).map((o) => o.title));
+            console.error(Array.from(errors).map((error) => error.title));
         }
 
         if (message) throw new Error(message);
@@ -229,7 +229,7 @@ export class BasicTable extends LitElement {
         else if (value !== "" && thisTypeOf !== type)
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange([col], parent, value);
+        else result = this.validateOnChange([col], parent, value, this.schema.properties[col]);
 
         // Will run synchronously if not a promise result
         return promises.resolve(result, () => {
@@ -246,10 +246,10 @@ export class BasicTable extends LitElement {
 
             if (errors.length) {
                 info.error = "";
-                info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+                info.title = errors.map((o) => error.message).join("\n"); // Class switching handled automatically
             } else if (warnings.length) {
                 info.warning = "";
-                info.title = warnings.map((o) => o.message).join("\n");
+                info.title = warnings.map((o) => warning.message).join("\n");
             }
 
             if (typeof result === "function") result(); // Run if returned value is a function
@@ -277,7 +277,7 @@ export class BasicTable extends LitElement {
                         }
 
                         if (message !== undefined) {
-                            tippy(td, { content: message });
+                            tippy(td, { content: message, allowHTML: true });
                             td.setAttribute("data-message", value);
                         }
 
