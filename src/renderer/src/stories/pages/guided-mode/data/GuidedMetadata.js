@@ -182,8 +182,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
-        const customSymbol = Symbol("custom");
-
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
