@@ -348,7 +348,10 @@ function getKeyboardFocusableElements(element = document) {
     const root = element.shadowRoot || element;
     return [
         ...root.querySelectorAll('a[href], button, input, textarea, select, details,[tabindex]:not([tabindex="-1"])'),
-    ].filter((el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"));
+    ].filter(
+        (focusableElement) =>
+            !focusableElement.hasAttribute("disabled") && !focusableElement.getAttribute("aria-hidden")
+    );
 }
 
 export class JSONSchemaInput extends LitElement {
@@ -522,16 +525,16 @@ export class JSONSchemaInput extends LitElement {
     updateData(value, forceValidate = false) {
         if (!forceValidate) {
             // Update the actual input element
-            const el = this.getElement();
-            if (el.type === "checkbox") el.checked = value;
-            else if (el.classList.contains("list")) {
-                const list = el.children[0];
-                el.children[0].items = this.#mapToList({
+            const inputElement = this.getElement();
+            if (inputElement.type === "checkbox") inputElement.checked = value;
+            else if (inputElement.classList.contains("list")) {
+                const list = inputElement.children[0];
+                inputElement.children[0].items = this.#mapToList({
                     value,
                     list,
                 }); // NOTE: Make sure this is correct
-            } else if (el instanceof Search) el.shadowRoot.querySelector("input").value = value;
-            else el.value = value;
+            } else if (inputElement instanceof Search) inputElement.shadowRoot.querySelector("input").value = value;
+            else inputElement.value = value;
         }
 
         const { path: fullPath } = this;
@@ -587,10 +590,8 @@ export class JSONSchemaInput extends LitElement {
     };
 
     updated() {
-        const el = this.getElement();
-        if (el) {
-            el.dispatchEvent(new Event("change"));
-        }
+        const inputElement = this.getElement();
+        if (inputElement) inputElement.dispatchEvent(new Event("change"));
     }
 
     render() {
@@ -774,12 +775,10 @@ export class JSONSchemaInput extends LitElement {
     #handleNextInput = (idx) => {
         const next = Object.values(this.form.inputs)[idx];
         if (next) {
-            const el = getFirstFocusableElement(next);
-            if (el) {
-                if (el.tagName === "BUTTON") return this.#handleNextInput(idx + 1);
-                el.focus();
-                // if (el.tagName === 'INPUT') return
-                // else el.blur()
+            const firstFocusableElement = getFirstFocusableElement(next);
+            if (firstFocusableElement) {
+                if (firstFocusableElement.tagName === "BUTTON") return this.#handleNextInput(idx + 1);
+                firstFocusableElement.focus();
             }
         }
     };
@@ -818,7 +817,7 @@ export class JSONSchemaInput extends LitElement {
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
-            const el = new FilesystemSelector({
+            const filesystemSelectorElement = new FilesystemSelector({
                 type: format,
                 value: this.value,
                 onSelect: (filePath) => this.#updateData(fullPath, filePath),
@@ -828,8 +827,8 @@ export class JSONSchemaInput extends LitElement {
                 dialogType: this.form?.dialogType,
                 multiple: isArray,
             });
-            el.classList.add("schema-input");
-            return el;
+            filesystemSelectorElement.classList.add("schema-input");
+            return filesystemSelectorElement;
         };
 
         if (isArray || canAddProperties) {

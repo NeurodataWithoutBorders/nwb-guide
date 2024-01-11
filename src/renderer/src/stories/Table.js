@@ -290,7 +290,7 @@ export class Table extends LitElement {
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
 
                     return this.#handleValidationResult(valid, row, prop);
-                } catch (e) {
+                } catch {
                     return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
                 }
             };
@@ -546,7 +546,7 @@ export class Table extends LitElement {
 
         table.addHook("afterCreateRow", (index, amount) => {
             nRows += amount;
-            const physicalRows = Array.from({ length: amount }, (e, i) => index + i);
+            const physicalRows = Array.from({ length: amount }, (_, i) => index + i);
             physicalRows.forEach((row) => this.#setRow(row, this.#getRowData(row)));
         });
 
@@ -592,11 +592,11 @@ export class Table extends LitElement {
             let message = "";
             let theme = "";
             if (warnings.length) {
-                (theme = "warning"), (message = warnings.map((o) => o.message).join("\n"));
+                (theme = "warning"), (message = warnings.map((error) => error.message).join("\n"));
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                (theme = "error"), (message = errors.map((o) => o.message).join("\n")); // Class switching handled automatically
+                (theme = "error"), (message = errors.map((error) => error.message).join("\n")); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
             if (theme) cell.setAttribute(theme, "");
@@ -631,7 +631,7 @@ export class Table extends LitElement {
         const root = this.getRootNode().body ?? this.getRootNode();
         this.#root = root;
         const stylesheets = Array.from(root.querySelectorAll("style"));
-        const exists = (this.stylesheet = stylesheets.find((el) => styleSymbol in el));
+        const exists = (this.stylesheet = stylesheets.find((stylesheet) => styleSymbol in stylesheet));
 
         if (exists) exists[styleSymbol]++;
         else {

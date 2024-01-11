@@ -28,8 +28,8 @@ import { successHue, warningHue, errorHue } from "./globals";
 
 var validator = new Validator();
 
-const isObject = (o) => {
-    return o && typeof o === "object" && !Array.isArray(o);
+const isObject = (item) => {
+    return item && typeof item === "object" && !Array.isArray(item);
 };
 
 export const getIgnore = (o, path) => {
@@ -164,9 +164,9 @@ const componentCSS = `
     }
 `;
 
-document.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+document.addEventListener("dragover", (dragEvent) => {
+    dragEvent.preventDefault();
+    dragEvent.stopPropagation();
 });
 
 export class JSONSchemaForm extends LitElement {
@@ -428,8 +428,8 @@ export class JSONSchemaForm extends LitElement {
         }
 
         const allErrors = Array.from(flaggedInputs)
-            .map((el) => {
-                return Array.from(el.nextElementSibling.children).map((li) => li.message);
+            .map((inputElement) => {
+                return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
             })
             .flat();
 
@@ -475,9 +475,9 @@ export class JSONSchemaForm extends LitElement {
         for (let key in this.tables) {
             try {
                 this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
-            } catch (e) {
+            } catch (error) {
                 const title = this.tables[key].schema.title;
-                const message = e.message.replace(
+                const message = error.message.replace(
                     "this table",
                     `the <b>${header(title ?? [...this.base, key].join("."))}</b> table`
                 );
@@ -485,27 +485,6 @@ export class JSONSchemaForm extends LitElement {
                 break;
             }
         }
-
-        // NOTE: Ensure user is aware of any warnings before moving on
-        // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
-
-        // if (this.#nWarnings) {
-        //   const warningText = activeWarnings.reduce((acc, children) => [...acc, ...children.map(el => el.innerText)], [])
-        //   const result = await Swal.fire({
-        //     title: `Are you sure you would like to submit your metadata with ${this.#nWarnings} warnings?`,
-        //     html: `<small><ol style="text-align: left;">${warningText.map(v => `<li>${v}</li>`).join('')}</ol></small>`,
-        //     icon: "warning",
-        //     heightAuto: false,
-        //     showCancelButton: true,
-        //     confirmButtonColor: "#3085d6",
-        //     cancelButtonColor: "#d33",
-        //     confirmButtonText: "Complete Metadata Entry",
-        //     cancelButtonText: "Cancel",
-        //     focusCancel: true,
-        //   });
-
-        //   if (!result.isConfirmed) throw new Error('User cancelled metadata submission')
-        // }
 
         return true;
     };
@@ -692,9 +671,9 @@ export class JSONSchemaForm extends LitElement {
 
         const flattenRecursedValues = (arr) => {
             const newArr = [];
-            arr.forEach((o) => {
-                if (isArrayOfArrays(o)) newArr.push(...o);
-                else newArr.push(o);
+            arr.forEach((item) => {
+                if (isArrayOfArrays(item)) newArr.push(...item);
+                else newArr.push(item);
             });
 
             return newArr;
@@ -723,7 +702,7 @@ export class JSONSchemaForm extends LitElement {
                 if (!this.onlyRequired) return isRenderable(key, value);
                 return false;
             })
-            .filter((o) => !!o);
+            .filter((result) => !!result);
 
         return flattenRecursedValues(res); // Flatten on the last pass
     };
@@ -912,7 +891,7 @@ export class JSONSchemaForm extends LitElement {
             valid === true ||
             valid == undefined ||
             isFunction ||
-            (Array.isArray(valid) && !valid.find((o) => o.type === "error"));
+            (Array.isArray(valid) && !valid.find((error) => error.type === "error"));
 
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
@@ -1193,15 +1172,15 @@ export class JSONSchemaForm extends LitElement {
             accordion.id = name; // assign name to accordion id
 
             // Set enable / disable behavior
-            const addDisabled = (name, o) => {
-                if (!o.__disabled) o.__disabled = {};
+            const addDisabled = (name, parentObject) => {
+                if (!parentObject.__disabled) parentObject.__disabled = {};
 
                 // Do not overwrite cache of disabled values (with globals, for instance)
-                if (o.__disabled[name]) {
+                if (parentObject.__disabled[name]) {
                     if (isGlobalEffect) return;
                 }
 
-                o.__disabled[name] = o[name] ?? (o[name] = {}); // Track disabled values (or at least something)
+                parentObject.__disabled[name] = parentObject[name] ?? (parentObject[name] = {}); // Track disabled values (or at least something)
             };
 
             const disable = () => {
@@ -1226,9 +1205,9 @@ export class JSONSchemaForm extends LitElement {
                 this.checkStatus();
             };
 
-            enableToggle.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const { checked } = e.target;
+            enableToggle.addEventListener("click", (clickEvent) => {
+                clickEvent.stopPropagation();
+                const { checked } = clickEvent.target;
 
                 // Reset parameters on interaction
                 isGlobalEffect = false;
@@ -1349,7 +1328,9 @@ export class JSONSchemaForm extends LitElement {
     // Check if everything is internally rendered
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
-            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.tables)].map((o) => o.rendered))
+            Promise.all(
+                [...Object.values(this.#nestedForms), ...Object.values(this.tables)].map(({ rendered }) => rendered)
+            )
         );
         return isRendered;
     }

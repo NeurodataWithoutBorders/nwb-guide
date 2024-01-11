@@ -194,10 +194,10 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
 
-            transformErrors: (e, externalPath, parent) => {
+            transformErrors: (error) => {
                 // JSON Schema Exceptions
-                if (e.message.includes('does not conform to the "date-time" format.')) return false;
-                if (e.message.includes('not allowed to have the additional property "Ecephys".')) return false; // NOTE: Remove after including Ecephys metadata
+                if (error.message.includes('does not conform to the "date-time" format.')) return false;
+                if (error.message.includes('not allowed to have the additional property "Ecephys".')) return false; // NOTE: Remove after including Ecephys metadata
             },
 
             groups: [
@@ -341,7 +341,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 {
                     name: "Preview",
                     primary: true,
-                    onClick: async (key, el) => {
+                    onClick: async (key) => {
                         const { subject, session } = getInfoFromId(key);
 
                         const results = await this.runConversions(

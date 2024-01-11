@@ -39,23 +39,6 @@ dashboard.renderNameInSidebar = false;
 
 const resourcesGroup = "Resources";
 
-const overviewIcon = `
-<svg
-    style="margin-right: 30px; margin-bottom: -5px"
-    width="20px"
-    height="20px"
-    viewBox="0 0 16 16"
-    class="bi bi-caret-right-square-fill"
-    fill="white"
-    xmlns="http://www.w3.org/2000/svg"
->
-<path
-    fill-rule="evenodd"
-    d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.5 10a.5.5 0 0 0 .832.374l4.5-4a.5.5 0 0 0 0-.748l-4.5-4A.5.5 0 0 0 5.5 4v8z"
-></path>
-</svg>
-`;
-
 const guidedIcon = `
 <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -99,15 +82,9 @@ style="margin-right: 30px; margin-bottom: -5px"
 `;
 
 const pages = {
-    "/": new GettingStartedPage({
-        label: "Home",
-        icon: overviewIcon,
-        hidden: true,
-    }),
-    conversion: new GuidedHomePage({
-        label: "Conversions",
+    "/": new GuidedHomePage({
+        label: "Convert",
         icon: guidedIcon,
-        group: "Workflows",
         pages: {
             start: new GuidedStartPage({
                 label: "Start",
@@ -177,20 +154,17 @@ const pages = {
             }),
         },
     }),
-    inspect: new InspectPage({
-        label: "Inspect",
+    validate: new InspectPage({
+        label: "Validate",
         icon: inspectIcon,
-        group: "Workflows",
     }),
-    preview: new PreviewPage({
-        label: "Neurosift",
+    explore: new PreviewPage({
+        label: "Explore",
         icon: neurosiftIcon,
-        group: "Workflows",
     }),
     uploads: new UploadsPage({
-        label: "Uploads",
+        label: "Upload",
         icon: uploadIcon,
-        group: "Workflows",
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",

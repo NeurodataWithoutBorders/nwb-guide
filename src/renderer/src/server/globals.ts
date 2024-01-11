@@ -7,7 +7,7 @@ import wifiSVG from "../stories/assets/wifi.svg?raw";
 // Base Request URL for Python Server
 export const baseUrl = `http://127.0.0.1:${port}`;
 
-const isPromise = (o) => typeof o === 'object' && typeof o.then === 'function'
+const isPromise = (object) => object && typeof object === 'object' && typeof object.then === 'function'
 
 export const resolve = (object, callback) => {
   if (isPromise(object)) {

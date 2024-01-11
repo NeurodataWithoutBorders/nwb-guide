@@ -117,7 +117,7 @@ export class Main extends LitElement {
                     if (pages.length > 1) {
                         const capsulesProps = {
                             n: pages.length,
-                            selected: pages.map((o) => o.pageLabel).indexOf(page.info.label),
+                            selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
                         };
 
                         capsules = new GuidedCapsules(capsulesProps);

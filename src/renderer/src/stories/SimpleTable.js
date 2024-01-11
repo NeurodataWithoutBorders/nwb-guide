@@ -225,7 +225,7 @@ export class SimpleTable extends LitElement {
         this.addEventListener("copy", (ev) => {
             ev.preventDefault();
             const tsv = Object.values(this.#selected)
-                .map((arr) => arr.map((el) => el.value).join("\t"))
+                .map((arr) => arr.map((inputElement) => inputElement.value).join("\t"))
                 .join("\n");
 
             ev.clipboardData.setData("text/plain", tsv);
@@ -237,8 +237,8 @@ export class SimpleTable extends LitElement {
                 const path = this.#getPath(ev);
                 if (path[0] === document.body)
                     Object.values(this.#selected).forEach((row) => {
-                        row.forEach((o) => {
-                            if (o.type !== "table") o.setInput("");
+                        row.forEach((row) => {
+                            if (row.type !== "table") row.setInput("");
                         });
                     });
                 return;
@@ -305,7 +305,9 @@ export class SimpleTable extends LitElement {
             this.#firstSelected = null;
         }
 
-        Object.values(this.#selected).forEach((arr) => arr.forEach((el) => el.parentNode.removeAttribute("selected")));
+        Object.values(this.#selected).forEach((arr) =>
+            arr.forEach((cellElement) => cellElement.parentNode.removeAttribute("selected"))
+        );
         this.#selected = {};
     };
 
@@ -314,9 +316,9 @@ export class SimpleTable extends LitElement {
     #getCellFromPath = (path) => {
         let inInputCell;
 
-        const found = path.find((el) => {
-            if (el instanceof NestedInputCell) inInputCell = true;
-            return !inInputCell && (el instanceof TableCell || el.children?.[0] instanceof TableCell);
+        const found = path.find((element) => {
+            if (element instanceof NestedInputCell) inInputCell = true;
+            return !inInputCell && (element instanceof TableCell || element.children?.[0] instanceof TableCell);
         });
         if (found instanceof HTMLTableCellElement) return found.children[0];
         else return found;
@@ -605,10 +607,10 @@ export class SimpleTable extends LitElement {
 
         const afterIdx = row + count;
         const after = children.slice(afterIdx);
-        after.forEach((o, i) => {
+        after.forEach((element, i) => {
             const pos = afterIdx + i + nRows;
             this.#cells[pos] = ogCells[afterIdx + i];
-            Array.from(o.children).forEach((o) => (o.children[0].simpleTableInfo.i = pos)); // Increment position
+            Array.from(element.children).forEach((element) => (element.children[0].simpleTableInfo.i = pos)); // Increment position
         });
 
         if (isPositive) {

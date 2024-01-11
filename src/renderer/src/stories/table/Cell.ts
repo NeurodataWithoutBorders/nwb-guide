@@ -107,11 +107,11 @@ export class TableCell extends LitElement {
         return getValue(v, this.schema)
     }
 
-    set value(v) {
-        if (this.input) this.input.set(renderValue(v, this.schema)) // Allow null to be set directly
+    set value(value) {
+        if (this.input) this.input.set(renderValue(value, this.schema)) // Allow null to be set directly
         this.#value = this.input
                             ? this.input.getValue() // Ensure all operations are undoable / value is coerced
-                            : v // Silently set value if not rendered yet
+                            : value // Silently set value if not rendered yet
      }
 
     validateOnChange?: ValidationFunction
@@ -119,13 +119,13 @@ export class TableCell extends LitElement {
 
     #validator: ValidationFunction = () => true
 
-    validate = async (v = this.value) => {
+    validate = async (value = this.value) => {
 
         const prevValue = this.#value
 
         const validator = this.validateOnChange ?? this.#validator
-        let result = await validator(v)
-        if (result === true) result = this.#validator(v)
+        let result = await validator(value)
+        if (result === true) result = this.#validator(value)
 
         let info: ValidationResult = {
             title: undefined,
@@ -146,11 +146,11 @@ export class TableCell extends LitElement {
         if (errors.length) {
             info.error = ''
             if (this.type === 'table' && errors.length > 1) info.title = `${errors.length} errors found on this nested table.`
-            else info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+            else info.title = errors.map(({ message }) => message).join("\n"); // Class switching handled automatically
         } else if (warnings.length) {
             info.warning = ''
             if (this.type === 'table' && warnings.length > 1) info.title = `${warnings.length} warnings found on this nested table.`
-            else info.title = warnings.map((o) => o.message).join("\n");
+            else info.title = warnings.map(({ message }) => message).join("\n");
         }
 
         this.onValidate(info)

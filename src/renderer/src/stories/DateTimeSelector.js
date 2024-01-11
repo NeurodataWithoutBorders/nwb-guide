@@ -37,7 +37,7 @@ export class DateTimeSelector extends LitElement {
         this.input = document.createElement("input");
         this.input.type = "datetime-local";
 
-        this.addEventListener("click", (e) => {
+        this.addEventListener("click", () => {
             this.input.focus();
             this.input.showPicker();
         });

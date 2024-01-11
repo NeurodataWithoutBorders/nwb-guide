@@ -15,14 +15,6 @@ import globalIcon from "../../../assets/global.svg?raw";
 
 import { baseUrl } from "../../../../server/globals";
 
-// const propsToIgnore = [
-//     "verbose",
-//     "es_key",
-//     "exclude_shanks",
-//     "load_sync_channel",
-//     "stream_id", // NOTE: May be desired for other interfaces
-//     "nsx_override",
-// ];
 
 const propsToIgnore = {
     "*": {
@@ -32,6 +24,8 @@ const propsToIgnore = {
         load_sync_channel: true,
         stream_id: true, // NOTE: May be desired for other interfaces
         nsx_override: true,
+        combined: true,
+        plane_no: true,
     },
 };
 
@@ -103,11 +97,11 @@ export class GuidedSourceDataPage extends ManagedPage {
                         }),
                     })
                         .then((res) => res.json())
-                        .catch((e) => {
+                        .catch((error) => {
                             Swal.close();
                             stillFireSwal = false;
-                            this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
-                            throw e;
+                            this.notify(`<b>Critical Error:</b> ${error.message}`, "error", 4000);
+                            throw error;
                         });
 
                     Swal.close();

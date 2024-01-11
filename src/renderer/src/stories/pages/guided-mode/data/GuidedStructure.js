@@ -126,12 +126,12 @@ export class GuidedStructurePage extends Page {
                     }; // Has label and keywords property already
                 })
             )
-            .catch((e) => console.error(e));
+            .catch((error) => console.error(error));
 
         this.list.emptyMessage = defaultEmptyMessage;
 
         for (const [key, name] of Object.entries(interfaces)) {
-            let found = this.search.options?.find((o) => o.value === name);
+            let found = this.search.options?.find((item) => item.value === name);
 
             // If not found, spoof based on the key and names provided previously
             if (!found) {

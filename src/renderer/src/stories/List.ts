@@ -137,7 +137,7 @@ export class List extends LitElement {
     object: {[x:string]: any} = {}
 
     get array() {
-      return this.items.map(o => o.value)
+      return this.items.map(item => item.value)
     }
 
     #items: ListItemType[] = []
@@ -335,8 +335,8 @@ export class List extends LitElement {
         editableElement.contentEditable = true;
 
         // Stop enter key from creating new line
-        editableElement.onkeydown = (e) => {
-            if (e.keyCode === 13) {
+        editableElement.onkeydown = (keyDownEvent) => {
+            if (keyDownEvent.keyCode === 13) {
               editableElement.blur();
                 return false;
             }

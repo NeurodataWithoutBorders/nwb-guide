@@ -48,7 +48,7 @@ const get = (object: any, path: string[]) => {
 schema.Ecephys.ElectrodeGroup = {
     ["*"]: {
         name: function (this: JSONSchemaForm, _, __, ___, value) {
-            const groups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
+            const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name)
         
                 // Check if the latest value will be new. Run function after validation
             if (!value || !groups.includes(value)) {
@@ -59,7 +59,7 @@ schema.Ecephys.ElectrodeGroup = {
         },
         
         device: function (this: JSONSchemaForm, name, parent, path) {
-            const devices = this.results.Ecephys.Device.map(o => o.name)
+            const devices = this.results.Ecephys.Device.map(({ name }) => name)
             if (devices.includes(parent[name])) return true
             else {
                 return [
@@ -79,7 +79,7 @@ schema.Ecephys.Electrodes = {
         // Label columns as invalid if not registered on the ElectrodeColumns table
         // NOTE: If not present in the schema, these are not being rendered...
         ['*']: function (this: JSONSchemaForm, name, parent, path) {
-            if (!this.results.Ecephys.ElectrodeColumns.find((o: any) => o.name === name)) return [
+            if (!this.results.Ecephys.ElectrodeColumns.find((row: any) => row.name === name)) return [
                 {
                     message: 'Not a valid column',
                     type: 'error'
@@ -89,7 +89,7 @@ schema.Ecephys.Electrodes = {
 
         group_name: function (this: JSONSchemaForm, _, __, ___, value) {
 
-            const groups = this.results.Ecephys.ElectrodeGroup.map(o => o.name)
+            const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name)
             if (groups.includes(value)) return true
             else {
                 return [
@@ -109,18 +109,15 @@ schema.Ecephys.ElectrodeColumns = {
     ['*']: {
         ['*']: function (this: JSONSchemaForm, prop, parent, path) {
 
-            const name = parent['name']
-            if (!name) return true // Allow blank rows
-    
-            if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
-                const element = rerenderTable.call(this, ['Ecephys', 'Electrodes'])
-                element.schema.properties[name] = {} // Ensure property is present in the schema now
-                element.data.forEach(o => name in o ? undefined : o[name] = '') // Set column value as blank if not existent on row
-            }
-    
-            this.schema.properties.Ecephys.properties.Electrodes.items.properties[name][prop] = parent[prop] // Update the actual schema for this (e.g. to update visible descriptions)
-            return true
+        const name = parent['name']
+        if (!name) return true // Allow blank rows
+
+        if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
+            const element = rerender.call(this, ['Ecephys', 'Electrodes'])
+            element.schema.properties[name] = {} // Ensure property is present in the schema now
+            element.data.forEach(row => name in row ? undefined : row[name] = '') // Set column value as blank if not existent on row
         }
+    }
     }
 }
 

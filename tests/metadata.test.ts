@@ -18,7 +18,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-var v = new Validator();
+var validator = new Validator();
 
 describe('metadata is specified correctly', () => {
 
@@ -29,7 +29,7 @@ describe('metadata is specified correctly', () => {
         baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
 
         const result = mapSessions(info => createResults(info, globalState), globalState)
-        const res = v.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
+        const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
 })
@@ -117,7 +117,7 @@ test('inter-table updates are triggered', async () => {
     await form.rendered
 
     // Validate that the results are incorrect
-    const errors = await form.validate().catch(e =>  { return true })
+    const errors = await form.validate().catch(() => true).catch(() =>  true)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
@@ -187,7 +187,7 @@ test('changes are resolved correctly', async () => {
 
     // Validate that the results are incorrect
     let errors = false
-    await form.validate().catch(e => errors = true)
+    await form.validate().catch(()=> errors = true)
     expect(errors).toBe(true) // Is invalid
 
     const input1 = form.getFormElement(['v0'])
@@ -199,7 +199,7 @@ test('changes are resolved correctly', async () => {
     input3.updateData('test')
 
     // Validate that the new structure is correct
-    const hasErrors = await form.validate(form.results).then(res => false).catch(e => true)
+    const hasErrors = await form.validate(form.results).then(res => false).catch(() => true)
 
     expect(hasErrors).toBe(false) // Is valid
 })

@@ -43,7 +43,7 @@ export class Search extends LitElement {
 
     getSelectedOption = () => {
         const value = (this.shadowRoot.querySelector("input") ?? this).value;
-        const matched = this.options.find((o) => o.label === value);
+        const matched = this.options.find((item) => item.label === value);
         return matched ?? { value };
     };
 
@@ -270,7 +270,7 @@ export class Search extends LitElement {
         });
 
         this.#sortedCategories.forEach(({ entries, element }) => {
-            if (entries.reduce((acc, el) => acc + el.hasAttribute("hidden"), 0) === entries.length)
+            if (entries.reduce((acc, entryElement) => acc + entryElement.hasAttribute("hidden"), 0) === entries.length)
                 element.setAttribute("hidden", "");
             else element.removeAttribute("hidden");
         });
@@ -293,10 +293,10 @@ export class Search extends LitElement {
         this.list.appendChild(slot);
 
         if (this.options) {
-            const options = this.options.map((o) => {
+            const options = this.options.map((item) => {
                 return {
-                    label: o.key,
-                    ...o,
+                    label: item.key,
+                    ...item,
                 };
             });
 
@@ -312,16 +312,16 @@ export class Search extends LitElement {
                     else if (b.disabled) return -1;
                 }) // Sort with the disabled options at the bottom
                 .map((option) => {
-                    const li = document.createElement("li");
-                    li.classList.add("option");
-                    li.setAttribute("hidden", "");
-                    if (option.keywords) li.setAttribute("data-keywords", JSON.stringify(option.keywords));
-                    li.addEventListener("click", (ev) => {
+                    const listItemElement = document.createElement("li");
+                    listItemElement.classList.add("option");
+                    listItemElement.setAttribute("hidden", "");
+                    if (option.keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
+                    listItemElement.addEventListener("click", (ev) => {
                         ev.stopPropagation();
                         this.#onSelect(option);
                     });
 
-                    if (option.disabled) li.setAttribute("disabled", "");
+                    if (option.disabled) listItemElement.setAttribute("disabled", "");
 
                     const container = document.createElement("div");
 
@@ -351,7 +351,7 @@ export class Search extends LitElement {
                         container.appendChild(keywords);
                     }
 
-                    li.append(container);
+                    listItemElement.append(container);
 
                     if (option.category) {
                         let category = this.categories[option.category];
@@ -365,13 +365,13 @@ export class Search extends LitElement {
                             };
                         }
 
-                        this.categories[option.category].entries.push(li);
+                        this.categories[option.category].entries.push(listItemElement);
                         return;
                     }
 
-                    return li;
+                    return listItemElement;
                 })
-                .filter((el) => el);
+                .filter((listItemElement) => listItemElement);
 
             this.list.append(...itemEls);
         }
