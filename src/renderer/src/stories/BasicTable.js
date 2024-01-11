@@ -278,7 +278,7 @@ export class BasicTable extends LitElement {
 
                         if (message !== undefined) {
                             tippy(td, { content: message, allowHTML: true });
-                            td.setAttribute("data-message", value);
+                            td.setAttribute("data-message", message);
                         }
 
                         for (let key in info) {
