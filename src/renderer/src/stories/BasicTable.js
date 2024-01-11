@@ -246,10 +246,10 @@ export class BasicTable extends LitElement {
 
             if (errors.length) {
                 info.error = "";
-                info.title = errors.map((o) => error.message).join("\n"); // Class switching handled automatically
+                info.title = errors.map((error) => error.message).join("\n"); // Class switching handled automatically
             } else if (warnings.length) {
                 info.warning = "";
-                info.title = warnings.map((o) => warning.message).join("\n");
+                info.title = warnings.map((warning) => warning.message).join("\n");
             }
 
             if (typeof result === "function") result(); // Run if returned value is a function
