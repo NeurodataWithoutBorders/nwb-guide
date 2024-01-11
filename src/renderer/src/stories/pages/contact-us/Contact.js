@@ -15,7 +15,7 @@ export class ContactPage extends Page {
     }
 
     updated() {
-        let contact_lottie_container = (this ?? this.shadowRoot).querySelector("#contact-us-lottie");
+        let contact_lottie_container = (this.shadowRoot ?? this).querySelector("#contact-us-lottie");
         startLottie(contact_lottie_container, contact_lottie);
     }
 

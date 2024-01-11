@@ -158,11 +158,15 @@ export const get = (name) => {
     return exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {};
 };
 
+const oldConversionsPath = "conversion";
 export function resume(name) {
     const global = this ? this.load(name) : get(name);
 
-    const commandToResume = global["page-before-exit"] || "conversion/start";
+    let commandToResume = global["page-before-exit"] || "//start";
     updateURLParams({ project: name });
+
+    if (commandToResume.slice(0, oldConversionsPath.length) === oldConversionsPath)
+        commandToResume = `/${commandToResume.slice(oldConversionsPath.length)}`;
 
     if (this) this.onTransition(commandToResume);
 
