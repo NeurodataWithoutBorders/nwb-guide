@@ -177,7 +177,8 @@ export class GuidedMetadataPage extends ManagedPage {
                 // JSON Schema Exceptions
                 if (error.message.includes('does not conform to the "date-time" format.')) return false;
                 if (error.message.includes('not allowed to have the additional property "Ecephys".')) return false; // NOTE: Remove after including Ecephys metadata
-                if (error.message.includes('not allowed to have the additional property "ElectricalSeriesAP')) return false; // NOTE: Remove after including Icephys metadata
+                if (error.message.includes('not allowed to have the additional property "ElectricalSeriesAP'))
+                    return false; // NOTE: Remove after including Icephys metadata
             },
 
             groups: [
