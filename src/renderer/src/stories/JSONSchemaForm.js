@@ -72,32 +72,8 @@ const componentCSS = `
       line-height: 1.4285em;
     }
 
-    .guided--form-label {
-      display: block;
-      width: 100%;
-      margin: 1.45rem 0 0 0;
-      color: black;
-      font-weight: 600;
-    }
-
-    .form-section:first-child .guided--form-label {
-      margin-top: 0;
-    }
-
-    jsonschema-input {
-        margin-top: 0.5rem;
-    }
-
-    .guided--form-label {
-      font-size: 1.2em !important;
-    }
-
-    .guided--form-label.centered {
-      text-align: center;
-    }
-
-    .guided--form-label.header {
-      font-size: 1.5em !important;
+    *:first-child jsonschema-input {
+      margin: 0;
     }
 
     .link {
@@ -158,28 +134,12 @@ const componentCSS = `
         color: DimGray;
     }
 
-  .required label:after {
-    content: "*";
-    color: #ff0033;
-
-  }
-
-  :host(:not([validateemptyvalues])) .required label:after {
-    color: gray;
-
-  }
-
-
-  .required.conditional label:after {
-    color: transparent;
-  }
-
-  h4 {
-    margin: 0;
-    margin-bottom: 5px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid gainsboro;
-  }
+    h4 {
+        margin: 0;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid gainsboro;
+    }
 
     .guided--text-input-instructions {
         font-size: 13px;
@@ -261,8 +221,6 @@ export class JSONSchemaForm extends LitElement {
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
-        this.showPath = props.showPath ?? false;
-
         this.controls = props.controls ?? {};
 
         this.transformErrors = props.transformErrors;
@@ -283,7 +241,8 @@ export class JSONSchemaForm extends LitElement {
         if (props.onThrow) this.onThrow = props.onThrow;
         if (props.onLoaded) this.onLoaded = props.onLoaded;
         if (props.onUpdate) this.onUpdate = props.onUpdate;
-        if (props.createTable) this.createTable = props.createTable;
+        if (props.renderTable) this.renderTable = props.renderTable;
+        if (props.renderCustomHTML) this.renderCustomHTML = props.renderCustomHTML;
         if (props.onOverride) this.onOverride = props.onOverride;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
@@ -637,8 +596,12 @@ export class JSONSchemaForm extends LitElement {
             form: this,
             controls: this.controls[name],
             required: isRequired,
+            conditional: isConditional,
             validateEmptyValue: this.validateEmptyValues,
             pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
+            renderTable: this.renderTable,
+            renderCustomHTML: this.renderCustomHTML,
+            showLabel: true
         });
 
         this.inputs[localPath.join("-")] = interactiveInput;
@@ -656,21 +619,8 @@ export class JSONSchemaForm extends LitElement {
         return html`
             <div
                 id=${encode(localPath.join("-"))}
-                class="form-section ${isRequired || isConditional ? "required" : ""} ${isConditional
-                    ? "conditional"
-                    : ""}"
+                class="form-section"
             >
-                <label class="guided--form-label"
-                    >${(info.title ? unsafeHTML(info.title) : null) ?? header(name)}
-                </label>
-                ${this.showPath
-                    ? html` <small
-                          >${externalPath
-                              .slice(0, -1)
-                              .map((str) => header(str ?? ""))
-                              .join(".")}</small
-                      >`
-                    : ""}
                 ${interactiveInput}
                 <div class="errors"></div>
                 <div class="warnings"></div>
@@ -781,7 +731,8 @@ export class JSONSchemaForm extends LitElement {
     validateOnChange = () => {};
     onStatusChange = () => {};
     onThrow = () => {};
-    createTable = () => {};
+    renderTable = () => {};
+    renderCustomHTML = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
@@ -1030,7 +981,6 @@ export class JSONSchemaForm extends LitElement {
         const hasProperties = renderable.length > 0 || hasPatternProperties || allowAdditionalProperties;
 
         if (!hasProperties) return html`<div id="empty">${this.emptyMessage}</div>`;
-
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
             const link = this.#getGroup(externalPath); // Use the base path to find a link
@@ -1193,7 +1143,6 @@ export class JSONSchemaForm extends LitElement {
 
                     required: required[name], // Scoped to the sub-schema
                     ignore,
-                    showPath: this.showPath,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
@@ -1212,8 +1161,11 @@ export class JSONSchemaForm extends LitElement {
                         this.nLoaded++;
                         this.checkAllLoaded();
                     },
-                    createTable: function (...args) {
-                        return ogContext.createTable.call(this, ...args);
+                    renderCustomHTML: function (...args) {
+                        return ogContext.renderCustomHTML.call(this, ...args);
+                    },
+                    renderTable: function (...args) {
+                        return ogContext.renderTable.call(this, ...args);
                     },
                     onOverride: (...args) => this.onOverride(...args),
                     base,

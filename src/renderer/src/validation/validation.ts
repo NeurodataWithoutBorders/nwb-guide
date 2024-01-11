@@ -158,9 +158,7 @@ schema.Ophys.Device = {
                 values,
                 value: row
             } = get(this.results, path)
-    
-            console.log('row', values, row)
-    
+        
             if (!row) return true // Allow blank rows
     
             const rows = values.slice(-1)[0]

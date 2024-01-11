@@ -1,3 +1,4 @@
+
 import { LitElement, css, html } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
@@ -14,11 +15,286 @@ import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
 
+
+
+export function createTable(fullPath, {
+    onUpdate,
+    onThrow,
+    forceItems = false
+}){
+
+    const path = [...fullPath];
+    const name = path.splice(-1)[0];
+    const schema = this.schema;
+    const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
+    const validateOnChange = this.validateOnChange;
+
+    const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : {};
+
+    const commonValidationFunction = async (
+        tableBasePath,
+        path,
+        parent,
+        newValue,
+        baseSchema = itemSchema,
+        skip = 0
+    ) => {
+        const warnings = [];
+        const errors = [];
+
+        const name = path.slice(-1)[0];
+        const completePath = [...tableBasePath, ...path.slice(0, -1)];
+
+        const toIterate = path.slice(skip);
+
+        const itemPropSchema = toIterate.reduce((acc, key) => {
+            return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
+        }, baseSchema);
+
+        const result = await (validateOnChange
+            ? this.onValidate
+                ? this.onValidate()
+                : this.form?.triggerValidation
+                  ? this.form.triggerValidation(
+                        name,
+                        completePath,
+                        false,
+                        this,
+                        itemPropSchema,
+                        { ...parent, [name]: newValue },
+                        {
+                            onError: (error) => {
+                                errors.push(error); // Skip counting errors
+                            },
+                            onWarning: (warning) => {
+                                warnings.push(warning); // Skip counting warnings
+                            },
+                        }
+                    ) // NOTE: No pattern properties support
+                  : ""
+            : true);
+
+        const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
+
+        return returnedValue;
+    };
+
+    const commonTableMetadata = {
+        onStatusChange: () => this.form?.checkStatus && this.form.checkStatus(), // Check status on all elements
+        validateEmptyCells: this.validateEmptyValue,
+        deferLoading: this.form?.deferLoading,
+        onLoaded: () => {
+            if (this.form) {
+                if (this.form.nLoaded) this.form.nLoaded++;
+                if (this.form.checkAllLoaded) this.form.checkAllLoaded();
+            }
+        },
+        onThrow: (...args) => onThrow(...args),
+    };
+
+    const addPropertyKeyToSchema = (schema) => {
+        const schemaCopy = structuredClone(schema);
+
+        const schemaRef = forceItems ? schemaCopy["items"] : schemaCopy;
+
+        if (!schemaRef.properties) schemaRef.properties = {};
+        if (!schemaRef.required) schemaRef.required = [];
+
+        schemaRef.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
+        if (!schemaRef.order) schemaRef.order = [];
+        schemaRef.order.unshift(tempPropertyKey);
+
+        schemaRef.required.push(tempPropertyKey);
+
+        if (!schema["items"]) {
+            const resolvedItemSchema = this.form?.getSchema
+                ? this.form.getSchema("items", schema)
+                : schema["items"];
+            if (!resolvedItemSchema) return schemaRef;
+
+            delete schemaRef.patternProperties;
+
+            schemaRef.properties[tempPropertyValueKey] = {
+                type: "array",
+                items: resolvedItemSchema.properties ? addPropertyKeyToSchema(itemSchema) : itemSchema,
+                title: "Property Value",
+                __generated: true,
+            };
+
+            schemaRef.required.push(tempPropertyValueKey);
+        }
+
+        if (schemaRef.__generated) return schemaRef["items"]; // Only return the relevant items for tables in nested tables
+
+        return schemaRef;
+    };
+
+    const createNestedTable = (id, value, { name: propName = id, schema = itemSchema } = {}) => {
+        const schemaCopy = addPropertyKeyToSchema(schema);
+
+        const resultPath = [...path];
+
+        const schemaPath = [...fullPath];
+
+        const rowData = Object.entries(value).map(([key, value]) => {
+            return !schema["items"]
+                ? { [tempPropertyKey]: key, [tempPropertyValueKey]: value }
+                : { [tempPropertyKey]: key, ...value };
+        });
+
+        if (propName) {
+            resultPath.push(propName);
+            schemaPath.push(propName);
+        }
+
+        const allRemovedKeys = new Set();
+
+        const keyAlreadyExists = (key) => Object.keys(value).includes(key);
+
+        const previousValidValues = {};
+
+        function resolvePath(path, target) {
+            return path
+                .map((key, i) => {
+                    const ogKey = key;
+                    const nextKey = path[i + 1];
+                    if (key === tempPropertyKey) key = target[tempPropertyKey];
+                    if (nextKey === tempPropertyKey) key = [];
+
+                    target = target[ogKey] ?? {};
+
+                    if (nextKey === tempPropertyValueKey) return target[tempPropertyKey]; // Grab next property key
+                    if (key === tempPropertyValueKey) return [];
+
+                    return key;
+                })
+                .flat();
+        }
+
+        function setValueOnAccumulator(row, acc) {
+            const key = row[tempPropertyKey];
+
+            if (!key) return acc;
+
+            if (tempPropertyValueKey in row) {
+                const propValue = row[tempPropertyValueKey];
+                if (Array.isArray(propValue))
+                    acc[key] = propValue.reduce((acc, row) => setValueOnAccumulator(row, acc), {});
+                else acc[key] = propValue;
+            } else {
+                const copy = { ...row };
+                delete copy[tempPropertyKey];
+                acc[key] = copy;
+            }
+
+            return acc;
+        }
+
+        const tableMetadata = {
+            keyColumn: tempPropertyKey,
+            schema: schemaCopy,
+            data: rowData,
+            ignore: this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}, // According to schema
+
+            onUpdate: function (path, newValue) {
+                const oldKeys = Object.keys(value);
+
+                if (path.slice(-1)[0] === tempPropertyKey && keyAlreadyExists(newValue)) return; // Do not overwrite existing keys
+
+                const result = this.data.reduce((acc, row) => setValueOnAccumulator(row, acc), {});
+
+                const newKeys = Object.keys(result);
+                const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
+                removedKeys.forEach((key) => allRemovedKeys.add(key));
+                newKeys.forEach((key) => allRemovedKeys.delete(key));
+                allRemovedKeys.forEach((key) => (result[key] = undefined));
+
+                // const resolvedPath = resolvePath(path, this.data)
+                return onUpdate.call(this, [], result); // Update all table data
+            },
+
+            validateOnChange: function (path, parent, newValue) {
+                const rowIdx = path[0];
+                const currentKey = this.data[rowIdx]?.[tempPropertyKey];
+
+                const updatedPath = resolvePath(path, this.data);
+
+                const resolvedKey = previousValidValues[rowIdx] ?? currentKey;
+
+                // Do not overwrite existing keys
+                if (path.slice(-1)[0] === tempPropertyKey && resolvedKey !== newValue) {
+                    if (keyAlreadyExists(newValue)) {
+                        if (!previousValidValues[rowIdx]) previousValidValues[rowIdx] = resolvedKey;
+
+                        return [
+                            {
+                                message: `Key already exists.<br><small>This value is still ${resolvedKey}.</small>`,
+                                type: "error",
+                            },
+                        ];
+                    } else delete previousValidValues[rowIdx];
+                }
+
+                return commonValidationFunction([], updatedPath, parent, newValue, schemaCopy, 1);
+            },
+            ...commonTableMetadata,
+        };
+
+        const table = this.renderTable(id, tableMetadata, fullPath); 
+        return table // Try rendering as a nested table with a fake property key (otherwise use nested forms)
+    };
+
+    // Possibly multiple tables
+    if (isEditableObject(schema, this.value)) {
+        
+        // One table with nested tables for each property
+        const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce(
+            (acc, { key, value }) => {
+                acc[key] = value;
+                return acc;
+            },
+            {}
+        );
+
+        const table = createNestedTable(name, data, { schema });
+        if (table) return table;
+    }
+
+    // Normal table parsing
+    const tableMetadata = {
+        schema: itemSchema,
+        data: this.value,
+
+        ignore,
+
+        onUpdate: function () {
+            return onUpdate.call(this, fullPath);
+        },
+
+        validateOnChange: (...args) => commonValidationFunction(fullPath, ...args, 1),
+
+        ...commonTableMetadata,
+    };
+
+    const table = (this.table = this.renderTable(name, tableMetadata, path)); // Try creating table. Otherwise use nested form
+
+    if (table) {
+        const tableEl = table === true ? new BasicTable(tableMetadata) : table;
+        const tables = this.form?.tables;
+        if (tables) tables[name] = tableEl;
+        return tableEl;
+    }
+}
+
+
+
+
+
 // Schema or value indicates editable object
-const isEditableObject = (schema, value) =>
+export const isEditableObject = (schema, value) =>
     schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value));
 const isAdditionalProperties = (pattern) => pattern === "additional";
-const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
+export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
 export const getEditableItems = (value, pattern, { name, schema } = {}) => {
     let items = Object.entries(value);
@@ -83,6 +359,7 @@ export class JSONSchemaInput extends LitElement {
             }
 
             :host {
+                margin-top: 1.45rem;
                 display: block;
             }
 
@@ -92,6 +369,7 @@ export class JSONSchemaInput extends LitElement {
 
             main {
                 display: flex;
+                margin-top: 0.5rem;
             }
 
             #controls {
@@ -172,14 +450,63 @@ export class JSONSchemaInput extends LitElement {
             .schema-input.list {
                 width: 100%;
             }
+
+            .guided--form-label {
+                display: block;
+                width: 100%;
+                margin: 0;
+                color: black;
+                font-weight: 600;
+                font-size: 1.2em !important;
+              }
+              
+            .guided--form-label.centered {
+                text-align: center;
+            }
+        
+            .guided--form-label.header {
+                font-size: 1.5em !important;
+            }
+
+            .required label:after {
+                content: " *";
+                color: #ff0033;
+            }
+            
+            :host(:not([validateemptyvalue])) .required label:after {
+                color: gray;
+            }
+            
+            .required.conditional label:after {
+                color: transparent;
+            }
+
+            hr {
+                display: block;
+                height: 1px;
+                border: 0;
+                border-top: 1px solid #ccc;
+                padding: 0;
+                margin-bottom: 1em;
+            }
+          
         `;
     }
+
+    static get properties() {
+        return {
+            schema: { type: Object, reflect: false },
+            validateEmptyValue: { type: Boolean, reflect: true },
+        };
+    }
+
 
     // schema,
     // parent,
     // path,
     // form,
     // pattern
+    // showLabel
     controls = [];
     required = false;
     validateOnChange = true;
@@ -272,14 +599,21 @@ export class JSONSchemaInput extends LitElement {
         const input = this.#render();
 
         return html`
-            <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
-            <p class="guided--text-input-instructions">
-                ${schema.description
-                    ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
-                          ? ""
-                          : "."}`
-                    : ""}
-            </p>
+            <div class="${this.required || this.conditional ? "required" : ""} ${this.conditional
+                ? "conditional"
+                : ""}">
+            
+                ${this.showLabel ? html`<label class="guided--form-label">${(schema.title ? unsafeHTML(schema.title) : null) ?? header(this.path.slice(-1)[0])}` : ''}
+                </label>
+                <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
+                <p class="guided--text-input-instructions">
+                    ${schema.description
+                        ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
+                            ? ""
+                            : "."}`
+                        : ""}
+                </p>
+            </div>
         `;
     }
 
@@ -410,6 +744,7 @@ export class JSONSchemaInput extends LitElement {
                           this.#updateData(path, value, true); // Live updates
                       }
                   },
+                  renderTable: this.renderTable,
                   onThrow: this.#onThrow,
               })
             : new JSONSchemaInput({
@@ -418,6 +753,7 @@ export class JSONSchemaInput extends LitElement {
                   path: this.path,
                   form: this.form,
                   value: updateTarget,
+                  renderTable: this.renderTable,
                   onUpdate: (value) => {
                       if (createNewObject) updateTarget[key] = value;
                       else this.#updateData(key, value); // NOTE: Untested
@@ -474,6 +810,12 @@ export class JSONSchemaInput extends LitElement {
 
         const canAddProperties = isEditableObject(this.schema, this.value);
 
+        if (this.renderCustomHTML){
+            const custom = this.renderCustomHTML(name, schema, path, { onUpdate: this.#updateData, onThrow: this.#onThrow });
+            if (custom) return custom;
+        }
+
+
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
             const el = new FilesystemSelector({
@@ -523,275 +865,28 @@ export class JSONSchemaInput extends LitElement {
 
             const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
 
+
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
-            else if (itemSchema?.type === "object" && this.form.createTable) {
-                const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, resolvedFullPath) : {};
+            else if (itemSchema?.type === "object" && this.renderTable) {
 
                 const instanceThis = this;
 
-                function commonUpdateFunction(path, value = this.data) {
+                function updateFunction (path, value = this.data) {
                     return instanceThis.#updateData(path, value, true, {
                         willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
                         onError: (e) => e,
                         onWarning: (e) => e,
-                    }); // Ensure change propagates to all forms
+                    })
                 }
 
-                const commonValidationFunction = async (
-                    tableBasePath,
-                    path,
-                    parent,
-                    newValue,
-                    baseSchema = itemSchema,
-                    skip = 0
-                ) => {
-                    const warnings = [];
-                    const errors = [];
+                const table = createTable.call(this, resolvedFullPath, {
+                    onUpdate: updateFunction,
+                    onThrow: this.#onThrow
+                }); // Ensure change propagates
 
-                    const name = path.slice(-1)[0];
-                    const completePath = [...tableBasePath, ...path.slice(0, -1)];
-
-                    const toIterate = path.slice(skip);
-
-                    const itemPropSchema = toIterate.reduce((acc, key) => {
-                        // if (acc?.patternProperties) {
-                        //     const pattern = Object.keys(acc.patternProperties).find((pattern) => new RegExp(pattern).test(key));
-                        //     if (pattern) return acc.patternProperties[pattern];
-                        // }
-                        return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
-                    }, baseSchema);
-
-                    const result = await (validateOnChange
-                        ? this.onValidate
-                            ? this.onValidate()
-                            : this.form?.triggerValidation
-                              ? this.form.triggerValidation(
-                                    name,
-                                    completePath,
-                                    false,
-                                    this,
-                                    itemPropSchema,
-                                    { ...parent, [name]: newValue },
-                                    {
-                                        onError: (error) => {
-                                            errors.push(error); // Skip counting errors
-                                        },
-                                        onWarning: (warning) => {
-                                            warnings.push(warning); // Skip counting warnings
-                                        },
-                                    }
-                                ) // NOTE: No pattern properties support
-                              : ""
-                        : true);
-
-                    const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
-
-                    return returnedValue;
-                };
-
-                const commonTableMetadata = {
-                    onStatusChange: () => this.form?.checkStatus && this.form.checkStatus(), // Check status on all elements
-                    validateEmptyCells: this.form?.validateEmptyValues,
-                    deferLoading: this.form?.deferLoading,
-                    onLoaded: () => {
-                        if (this.form) {
-                            if (this.form.nLoaded) this.form.nLoaded++;
-                            if (this.form.checkAllLoaded) this.form.checkAllLoaded();
-                        }
-                    },
-                    onThrow: (...args) => this.#onThrow(...args),
-                };
-
-                const addPropertyKeyToSchema = (schema) => {
-                    const schemaCopy = structuredClone(schema);
-
-                    if (!schemaCopy.properties) schemaCopy.properties = {};
-                    if (!schemaCopy.required) schemaCopy.required = [];
-
-                    schemaCopy.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
-                    schemaCopy.order = [tempPropertyKey];
-
-                    schemaCopy.required.push(tempPropertyKey);
-
-                    if (!schema["items"]) {
-                        const resolvedItemSchema = this.form?.getSchema
-                            ? this.form.getSchema("items", schema)
-                            : schema["items"];
-                        if (!resolvedItemSchema) return schemaCopy;
-
-                        delete schemaCopy.patternProperties;
-
-                        schemaCopy.properties[tempPropertyValueKey] = {
-                            type: "array",
-                            items: resolvedItemSchema.properties ? addPropertyKeyToSchema(itemSchema) : itemSchema,
-                            title: "Property Value",
-                            __generated: true,
-                        };
-
-                        schemaCopy.required.push(tempPropertyValueKey);
-                    }
-
-                    if (schemaCopy.__generated) return schemaCopy["items"]; // Only return the relevant items for tables in nested tables
-
-                    return schemaCopy;
-                };
-
-                const createNestedTable = (id, value, { name: propName = id, schema = itemSchema } = {}) => {
-                    const schemaCopy = addPropertyKeyToSchema(schema);
-
-                    const resultPath = [...path];
-
-                    const schemaPath = [...resolvedFullPath];
-
-                    const rowData = Object.entries(value).map(([key, value]) => {
-                        return !schema["items"]
-                            ? { [tempPropertyKey]: key, [tempPropertyValueKey]: value }
-                            : { [tempPropertyKey]: key, ...value };
-                    });
-
-                    if (propName) {
-                        resultPath.push(propName);
-                        schemaPath.push(propName);
-                    }
-
-                    const allRemovedKeys = new Set();
-
-                    const keyAlreadyExists = (key) => Object.keys(value).includes(key);
-
-                    const previousValidValues = {};
-
-                    function resolvePath(path, target) {
-                        return path
-                            .map((key, i) => {
-                                const ogKey = key;
-                                const nextKey = path[i + 1];
-                                if (key === tempPropertyKey) key = target[tempPropertyKey];
-                                if (nextKey === tempPropertyKey) key = [];
-
-                                target = target[ogKey] ?? {};
-
-                                if (nextKey === tempPropertyValueKey) return target[tempPropertyKey]; // Grab next property key
-                                if (key === tempPropertyValueKey) return [];
-
-                                return key;
-                            })
-                            .flat();
-                    }
-
-                    function setValueOnAccumulator(row, acc) {
-                        const key = row[tempPropertyKey];
-
-                        if (!key) return acc;
-
-                        if (tempPropertyValueKey in row) {
-                            const propValue = row[tempPropertyValueKey];
-                            if (Array.isArray(propValue))
-                                acc[key] = propValue.reduce((acc, row) => setValueOnAccumulator(row, acc), {});
-                            else acc[key] = propValue;
-                        } else {
-                            const copy = { ...row };
-                            delete copy[tempPropertyKey];
-                            acc[key] = copy;
-                        }
-
-                        return acc;
-                    }
-
-                    const tableMetadata = {
-                        keyColumn: tempPropertyKey,
-                        schema: schemaCopy,
-                        data: rowData,
-                        ignore: this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}, // According to schema
-
-                        onUpdate: function (path, newValue) {
-                            const oldKeys = Object.keys(value);
-
-                            if (path.slice(-1)[0] === tempPropertyKey && keyAlreadyExists(newValue)) return; // Do not overwrite existing keys
-
-                            const result = this.data.reduce((acc, row) => setValueOnAccumulator(row, acc), {});
-
-                            const newKeys = Object.keys(result);
-                            const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
-                            removedKeys.forEach((key) => allRemovedKeys.add(key));
-                            newKeys.forEach((key) => allRemovedKeys.delete(key));
-                            allRemovedKeys.forEach((key) => (result[key] = undefined));
-
-                            // const resolvedPath = resolvePath(path, this.data)
-                            return commonUpdateFunction.call(this, [], result); // Update all table data
-                        },
-
-                        validateOnChange: function (path, parent, newValue) {
-                            const rowIdx = path[0];
-                            const currentKey = this.data[rowIdx]?.[tempPropertyKey];
-
-                            const updatedPath = resolvePath(path, this.data);
-
-                            const resolvedKey = previousValidValues[rowIdx] ?? currentKey;
-
-                            // Do not overwrite existing keys
-                            if (path.slice(-1)[0] === tempPropertyKey && resolvedKey !== newValue) {
-                                if (keyAlreadyExists(newValue)) {
-                                    if (!previousValidValues[rowIdx]) previousValidValues[rowIdx] = resolvedKey;
-
-                                    return [
-                                        {
-                                            message: `Key already exists.<br><small>This value is still ${resolvedKey}.</small>`,
-                                            type: "error",
-                                        },
-                                    ];
-                                } else delete previousValidValues[rowIdx];
-                            }
-
-                            return commonValidationFunction([], updatedPath, parent, newValue, schemaCopy, 1);
-                        },
-                        ...commonTableMetadata,
-                    };
-
-                    const table = this.form.createTable(id, tableMetadata, resolvedFullPath); // Try creating table. Otherwise use nested form
-                    return table;
-                };
-
-                // Possibly multiple tables
-                if (isEditableObject(schema, this.value)) {
-                    // One table with nested tables for each property
-                    const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce(
-                        (acc, { key, value }) => {
-                            acc[key] = value;
-                            return acc;
-                        },
-                        {}
-                    );
-
-                    const table = createNestedTable(name, data, { schema });
-                    return table;
-                }
-
-                // Normal table parsing
-                const tableMetadata = {
-                    schema: itemSchema,
-                    data: this.value,
-
-                    ignore,
-
-                    onUpdate: function () {
-                        return commonUpdateFunction.call(this, fullPath);
-                    },
-
-                    validateOnChange: (...args) => commonValidationFunction(fullPath, ...args, 1),
-
-                    ...commonTableMetadata,
-                };
-
-                const table = (this.table = this.form.createTable(name, tableMetadata, fullPath)); // Try creating table. Otherwise use nested form
-
-                if (table) {
-                    const tableEl = table === true ? new BasicTable(tableMetadata) : table;
-                    const tables = this.form?.tables;
-                    if (tables) tables[name] = tableEl;
-                    return tableEl;
-                }
+                if (table) return table
             }
 
             const list = (this.#list = new List({

@@ -46,9 +46,7 @@ export class NestedEditor extends LitElement {
             validateOnChange: (path, parent, value, schema) => {
                 if (this.validateOnChange) return this.validateOnChange(value, path, parent, schema) // NOTE: Flipped because usually only value is passed
             },
-            form: {
-                createTable: (name, metadata, path) => new SimpleTable(metadata), // If possible to render as a table, do so
-            }
+            renderTable: (name, metadata, path) => new SimpleTable(metadata) // NOTE: Would be most ideal to have a reference to the containing input...
         })
 
         input.style.padding = '25px 50px'
