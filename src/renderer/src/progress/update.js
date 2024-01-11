@@ -28,7 +28,7 @@ export const updateAppProgress = (
     dataOrProjectName = {},
     projectName = typeof dataOrProjectName === "string" ? dataOrProjectName : undefined
 ) => {
-    const transitionOffPipeline = pageId && pageId.slice(0, 2) !== '//'
+    const transitionOffPipeline = pageId && pageId.slice(0, 2) !== "//";
 
     if (transitionOffPipeline) {
         updateURLParams({ project: undefined });
