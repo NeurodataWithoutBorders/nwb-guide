@@ -129,7 +129,7 @@ const convertOldPath = (path) => {
 
 const transformProgressFile = (progressFile) => {
     progressFile["page-before-exit"] = convertOldPath(progressFile["page-before-exit"]);
-    Object.values(progressFile.sections).forEach((section) => {
+    Object.values(progressFile.sections ?? {}).forEach((section) => {
         const pages = {};
         Object.entries(section.pages).forEach(([page, value]) => {
             pages[convertOldPath(page)] = value;
