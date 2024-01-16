@@ -1,6 +1,4 @@
 # Follows pattern
-# base_data_path: <base path on system; common folder in which ephy_testing_data + ophys_testing_data are found>
-#
 # pipelines:
 #   pipeline_name:
 #     DataInterfaceName:
