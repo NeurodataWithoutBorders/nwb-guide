@@ -1,0 +1,9 @@
+{
+    "properties": {
+        "testing_data_folder": {
+            "type": "string",
+            "format": "directory",
+            "description": "Common folder where GIN testing data (e.g. ephy_testing_data, ophys_testing_data) can be found"
+        }
+    }
+}

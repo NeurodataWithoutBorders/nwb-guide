@@ -4,11 +4,90 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
 import projectGlobalSchema from "../../../../../../schemas/json/project/globals.json" assert { type: "json" };
+import guideGlobalSchema from "../../../../../../schemas/json/globals.json" assert { type: "json" };
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
 
+import { Button } from "../../Button.js";
+import { global, save } from "../../../progress/index.js";
+import { merge, setUndefinedIfNotDeclared } from "../utils.js";
+
+import { notyf } from "../../../dependencies/globals.js";
+import { SERVER_FILE_PATH, fs, path, port, remote } from "../../../electron/index.js";
+
+import saveSVG from "../../assets/save.svg?raw";
+
+import { header } from "../../forms/utils";
+import yaml from 'js-yaml'
+
+const propertiesToTransform = [ "folder_path", "file_path" ]
+
+function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
+
+
+    const subjectId = 'mouse1'
+    const sessions = [ 'session1' ]
+
+    const resolvedSourceData = structuredClone(sourceData); 
+    Object.values(resolvedSourceData).forEach((info) => {
+        propertiesToTransform.forEach((property) => {
+            if (info[property]) info[property] = path.join(rootFolder, info[property])
+        })
+    })
+
+    save({
+        info: {
+            globalState: {
+                project: {
+                    name: header(name),
+                    initialized: true
+                },
+
+                // provide data for all supported interfaces
+                interfaces: Object.keys(resolvedSourceData).reduce((acc, key) => {
+                    acc[key] = `${key}`;
+                    return acc;
+                }, {}),
+
+                structure: {
+                    keep_existing_data: true,
+                    state: false
+                },
+
+                results: {
+                    [subjectId]: sessions.reduce((acc, sessionId) => {
+                        acc[subjectId] = {
+                            metadata: {
+                                Subject:{
+                                    subject_id: subjectId
+                                },
+                                NWBFile: {
+                                    session_id: sessionId
+                                }
+                            },
+                            source_data: resolvedSourceData
+                        }
+                        return acc;
+                    }, {})
+                },
+
+                subjects: {
+                    [subjectId]: {
+                      sessions: sessions,
+                      sex: "M",
+                      species: "Mus musculus",
+                      age: "P30D"
+                    }
+                  }
+            },
+        },
+    });
+
+
+}
+
 const schema = merge(
-    projectGlobalSchema,
+    merge(projectGlobalSchema, guideGlobalSchema),
     {
         properties: {
             DANDI: dandiGlobalSchema,
@@ -19,15 +98,6 @@ const schema = merge(
         arrays: true,
     }
 );
-
-import { Button } from "../../Button.js";
-import { global } from "../../../progress/index.js";
-import { merge, setUndefinedIfNotDeclared } from "../utils.js";
-
-import { notyf } from "../../../dependencies/globals.js";
-import { SERVER_FILE_PATH, port } from "../../../electron/index.js";
-
-import saveSVG from "../../assets/save.svg?raw";
 
 export class SettingsPage extends Page {
     header = {
@@ -85,6 +155,31 @@ export class SettingsPage extends Page {
         return html`
             <p><b>Server Port:</b> ${port}</p>
             <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
+            ${new Button({
+                label: 'Select YAML File to Generate Pipelines',
+                onClick: async () => {
+
+                    const  { testing_data_folder } = this.form.results
+
+                    if (!testing_data_folder) return this.#openNotyf(`Please specify a testing data folder before attempting to generate pipelines.`, "error");
+
+                    const result = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
+
+                    if (result.canceled) return;
+
+                    const filepath = result.filePaths[0];
+                    const { pipelines = {} } = yaml.load(fs.readFileSync(filepath, 'utf8'));
+
+                    const pipelineNames = Object.keys(pipelines)
+                    const nPipelines = pipelineNames.length;
+                    pipelineNames.reverse().forEach(name => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder))
+
+                    const filename = path.basename(filepath);
+
+                    this.#openNotyf(`<h4 style="margin: 0px;">Generated ${nPipelines} pipelines</h4><small>From ${filename}</small>`, "success");
+                },
+            })}
+            <hr><br>
             ${this.form}
         `;
     }
