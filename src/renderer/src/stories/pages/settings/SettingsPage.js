@@ -18,29 +18,27 @@ import { SERVER_FILE_PATH, fs, path, port, remote } from "../../../electron/inde
 import saveSVG from "../../assets/save.svg?raw";
 
 import { header } from "../../forms/utils";
-import yaml from 'js-yaml'
+import yaml from "js-yaml";
 
-const propertiesToTransform = [ "folder_path", "file_path" ]
+const propertiesToTransform = ["folder_path", "file_path"];
 
 function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
+    const subjectId = "mouse1";
+    const sessions = ["session1"];
 
-
-    const subjectId = 'mouse1'
-    const sessions = [ 'session1' ]
-
-    const resolvedSourceData = structuredClone(sourceData); 
+    const resolvedSourceData = structuredClone(sourceData);
     Object.values(resolvedSourceData).forEach((info) => {
         propertiesToTransform.forEach((property) => {
-            if (info[property]) info[property] = path.join(rootFolder, info[property])
-        })
-    })
+            if (info[property]) info[property] = path.join(rootFolder, info[property]);
+        });
+    });
 
     save({
         info: {
             globalState: {
                 project: {
                     name: header(name),
-                    initialized: true
+                    initialized: true,
                 },
 
                 // provide data for all supported interfaces
@@ -51,39 +49,37 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
 
                 structure: {
                     keep_existing_data: true,
-                    state: false
+                    state: false,
                 },
 
                 results: {
                     [subjectId]: sessions.reduce((acc, sessionId) => {
                         acc[subjectId] = {
                             metadata: {
-                                Subject:{
-                                    subject_id: subjectId
+                                Subject: {
+                                    subject_id: subjectId,
                                 },
                                 NWBFile: {
-                                    session_id: sessionId
-                                }
+                                    session_id: sessionId,
+                                },
                             },
-                            source_data: resolvedSourceData
-                        }
+                            source_data: resolvedSourceData,
+                        };
                         return acc;
-                    }, {})
+                    }, {}),
                 },
 
                 subjects: {
                     [subjectId]: {
-                      sessions: sessions,
-                      sex: "M",
-                      species: "Mus musculus",
-                      age: "P30D"
-                    }
-                  }
+                        sessions: sessions,
+                        sex: "M",
+                        species: "Mus musculus",
+                        age: "P30D",
+                    },
+                },
             },
         },
     });
-
-
 }
 
 const schema = merge(
@@ -156,30 +152,39 @@ export class SettingsPage extends Page {
             <p><b>Server Port:</b> ${port}</p>
             <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
             ${new Button({
-                label: 'Select YAML File to Generate Pipelines',
+                label: "Select YAML File to Generate Pipelines",
                 onClick: async () => {
+                    const { testing_data_folder } = this.form.results;
 
-                    const  { testing_data_folder } = this.form.results
+                    if (!testing_data_folder)
+                        return this.#openNotyf(
+                            `Please specify a testing data folder before attempting to generate pipelines.`,
+                            "error"
+                        );
 
-                    if (!testing_data_folder) return this.#openNotyf(`Please specify a testing data folder before attempting to generate pipelines.`, "error");
-
-                    const result = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
+                    const result = await remote.dialog.showOpenDialog({ properties: ["openFile"] });
 
                     if (result.canceled) return;
 
                     const filepath = result.filePaths[0];
-                    const { pipelines = {} } = yaml.load(fs.readFileSync(filepath, 'utf8'));
+                    const { pipelines = {} } = yaml.load(fs.readFileSync(filepath, "utf8"));
 
-                    const pipelineNames = Object.keys(pipelines)
+                    const pipelineNames = Object.keys(pipelines);
                     const nPipelines = pipelineNames.length;
-                    pipelineNames.reverse().forEach(name => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder))
+                    pipelineNames
+                        .reverse()
+                        .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
 
                     const filename = path.basename(filepath);
 
-                    this.#openNotyf(`<h4 style="margin: 0px;">Generated ${nPipelines} pipelines</h4><small>From ${filename}</small>`, "success");
+                    this.#openNotyf(
+                        `<h4 style="margin: 0px;">Generated ${nPipelines} pipelines</h4><small>From ${filename}</small>`,
+                        "success"
+                    );
                 },
             })}
-            <hr><br>
+            <hr />
+            <br />
             ${this.form}
         `;
     }
