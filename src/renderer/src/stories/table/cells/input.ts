@@ -39,12 +39,18 @@ export class NestedEditor extends LitElement {
 
         const data = this.#value || (this.schema.type === 'array' ? [] : (this.schema.type === 'object' ? {} : this.schema.default))
 
+        const schema = this.schema
+
         const input = this.#input = new JSONSchemaInput({
-            schema: this.schema,
+            schema,
             value: data,
-            path: [ this.info.col ],
-            validateOnChange: (path, parent, value, schema) => {
-                if (this.validateOnChange) return this.validateOnChange(value, path, parent, schema) // NOTE: Flipped because usually only value is passed
+            path: [],
+            form: {
+                triggerValidation: (name, completePath, _, __, schema, parent) => {
+                    const path = [ ...completePath, name ] 
+                    const value = parent[name]
+                    if (this.validateOnChange) return this.validateOnChange(value, path, parent) // NOTE: Flipped because usually only value is passed
+                }
             },
             renderTable: (name, metadata, path) => new SimpleTable(metadata) // NOTE: Would be most ideal to have a reference to the containing input...
         })

@@ -792,6 +792,7 @@ export class JSONSchemaForm extends LitElement {
 
         const value = parent[name];
 
+
         const skipValidation = !this.validateEmptyValues && value === undefined;
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
