@@ -19,7 +19,6 @@ import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils.js";
 import { Modal } from "../../../Modal";
 
-
 const propsToIgnore = [
     "verbose",
     "es_key",
@@ -225,8 +224,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                     name: "Check Alignment",
                     primary: true,
                     onClick: async (id) => {
-
-                        const { globalState } = this.info
+                        const { globalState } = this.info;
 
                         const { subject, session } = getInfoFromId(id);
 
@@ -234,42 +232,44 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         const sessionInfo = {
                             interfaces: globalState.interfaces,
-                            source_data: merge(globalState.project.SourceData, souceCopy)
+                            source_data: merge(globalState.project.SourceData, souceCopy),
                         };
-                
-                        const results = await run("alignment", sessionInfo, { swal: false })
-                        
+
+                        const results = await run("alignment", sessionInfo, { swal: false });
+
                         const modal = new Modal({
                             header: `Alignment Preview: ${subject}/${session}`,
-                        })
-                
+                        });
+
                         document.body.append(modal);
-                
+
                         const content = document.createElement("div");
                         Object.assign(content.style, {
                             display: "flex",
                             flexDirection: "column",
                             gap: "20px",
                             padding: "20px",
-                        })
-                
+                        });
+
                         modal.append(content);
-                
-                        const flatTimes = Object.values(results).flat().filter((timestamp) => !isNaN(timestamp));
+
+                        const flatTimes = Object.values(results)
+                            .flat()
+                            .filter((timestamp) => !isNaN(timestamp));
                         const minTime = Math.min(...flatTimes);
                         const maxTime = Math.max(...flatTimes);
-                
+
                         const normalizeTime = (time) => (time - minTime) / (maxTime - minTime);
                         const normalizeTimePct = (time) => `${normalizeTime(time) * 100}%`;
-                
+
                         for (let name in results) {
                             const container = document.createElement("div");
                             const label = document.createElement("label");
                             label.innerText = name;
-                            container.append(label)
-                
+                            container.append(label);
+
                             const data = results[name];
-                
+
                             const barContainer = document.createElement("div");
                             Object.assign(barContainer.style, {
                                 height: "10px",
@@ -277,12 +277,9 @@ export class GuidedSourceDataPage extends ManagedPage {
                                 marginTop: "5px",
                                 border: "1px solid lightgray",
                                 position: "relative",
-                            })
-                
-                            if (data.length) {
+                            });
 
-                
-                
+                            if (data.length) {
                                 const firstTime = data[0];
                                 const lastTime = data[data.length - 1];
 
@@ -290,36 +287,35 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                                 const firstTimePct = normalizeTimePct(firstTime);
                                 const lastTimePct = normalizeTimePct(lastTime);
-                
+
                                 const width = `calc(${lastTimePct} - ${firstTimePct})`;
-                
+
                                 const bar = document.createElement("div");
-                
+
                                 Object.assign(bar.style, {
                                     position: "absolute",
-                
+
                                     left: firstTimePct,
                                     width: width,
-                                    height: '100%',
-                                    background: 'blue',
-                                })
-                
+                                    height: "100%",
+                                    background: "blue",
+                                });
+
                                 barContainer.append(bar);
                             } else {
-                                barContainer.style.background = 'repeating-linear-gradient(45deg, lightgray, lightgray 10px, white 10px, white 20px)'
+                                barContainer.style.background =
+                                    "repeating-linear-gradient(45deg, lightgray, lightgray 10px, white 10px, white 20px)";
                             }
-                
-                            container.append(barContainer)
-                
-                             
+
+                            container.append(barContainer);
+
                             content.append(container);
                         }
-                
-                        modal.open = true;
 
-                    }
+                        modal.open = true;
+                    },
                 },
-            ]
+            ],
             // onAdded: (path) => {
 
             //   let details = this.getDetails(path)

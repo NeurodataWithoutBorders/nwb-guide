@@ -20,7 +20,7 @@ from manageNeuroconv import (
     upload_project_to_dandi,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
-    get_interface_alignment
+    get_interface_alignment,
 )
 
 from errorHandlers import notBadRequestException
