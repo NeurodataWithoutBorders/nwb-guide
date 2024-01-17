@@ -262,7 +262,10 @@ export class JSONSchemaInput extends LitElement {
             const filesystemSelectorElement = new FilesystemSelector({
                 type: format,
                 value: this.value,
-                onSelect: (filePath) => this.#updateData(fullPath, filePath),
+                onSelect: (paths) => {
+                    const value = paths.length ? paths : undefined;
+                    this.#updateData(fullPath, value);
+                },
                 onChange: (filePath) => validateOnChange && this.#triggerValidation(name, path),
                 onThrow: (...args) => this.#onThrow(...args),
                 dialogOptions: this.form?.dialogOptions,

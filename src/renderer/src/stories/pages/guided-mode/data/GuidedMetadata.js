@@ -5,7 +5,7 @@ import { ManagedPage } from "./ManagedPage.js";
 import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
-import { resolveGlobalOverrides, resolveResults } from "./utils.js";
+import { resolveGlobalOverrides, resolveMetadata } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
@@ -143,7 +143,7 @@ export class GuidedMetadataPage extends ManagedPage {
             sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
         }
 
-        resolveResults(subject, session, globalState);
+        resolveMetadata(subject, session, globalState);
 
         // Create the form
         const form = new JSONSchemaForm({
