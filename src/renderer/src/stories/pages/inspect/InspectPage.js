@@ -42,9 +42,29 @@ export class InspectPage extends Page {
         const list = new InspectorList({ items });
         list.style.padding = "25px";
 
+        // const buttons = document.createElement('div')
+        // buttons.style.display = 'flex'
+        // buttons.style.gap = '10px'
+        
+        const downloadButton = new Button({
+            label: 'Download Report',
+            primary: true,
+            onClick: () => {
+                const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'nwb-inspector-report.json'
+                a.click()
+                URL.revokeObjectURL(url)
+            }
+        })
+        
         const modal = new Modal({
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
+            controls: [ downloadButton ],
         });
+
         modal.append(list);
         document.body.append(modal);
 

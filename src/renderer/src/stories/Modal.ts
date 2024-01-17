@@ -13,6 +13,7 @@ export interface ModalProps {
   width?: string
   height?: string
   closeText?: string
+  controls?: HTMLElement[]
 }
 
 export class Modal extends LitElement {
@@ -101,6 +102,11 @@ export class Modal extends LitElement {
   pointer-events: all;
 }
 
+.modal-controls {
+  display: flex;
+  gap: 10px;
+}
+
     `;
   }
 
@@ -142,11 +148,13 @@ export class Modal extends LitElement {
     declare footer: ModalProps['footer']
     onClose: ModalProps['onClose']
     onOpen: ModalProps['onOpen']
+
     declare showCloseButton: ModalProps['showCloseButton']
     declare width: ModalProps['width']
     declare height: ModalProps['height']
 
     declare closeText: ModalProps['closeText']
+    declare controls: ModalProps['controls']
 
     constructor(props: ModalProps = {}) {
       super();
@@ -158,6 +166,7 @@ export class Modal extends LitElement {
       this.onOpen = props.onOpen
       this.showCloseButton = props.showCloseButton ?? true
       this.closeText = props.closeText
+      this.controls = props.controls
 
       this.width = props.width
       this.height = props.height
@@ -181,7 +190,11 @@ export class Modal extends LitElement {
         <div class="modal-content ${this.open ? 'open' : ''}" style="${this.width ? `width: ${this.width};` : ''} ${this.height ? `height: ${this.height};` : ''}">
           <div class="modal-header">
               <span title="${this.header}">${this.header}</span>
-              ${this.showCloseButton ? html`<nwb-button secondary size="extra-small" @click="${this.toggle}">${this.closeText ?? 'Close'}</nwb-button>` : ''}
+              <div class="modal-controls">
+              ${ this.controls }
+              ${ this.showCloseButton ? html`<nwb-button secondary @click="${this.toggle}">${this.closeText ?? 'Close'}</nwb-button>` : '' }
+              </div>
+              
             </div>
             <div class="modal-body">
               <slot>No content</slot>
