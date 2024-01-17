@@ -5,7 +5,6 @@ import * as puppeteer from 'puppeteer'
 
 import { spawn } from 'child_process'
 import { electronDebugPort } from './globals'
-import { s } from 'vitest/dist/reporters-5f784f42'
 
 export const sharePort = 1234
 
@@ -36,7 +35,7 @@ export const connect = () => {
     });
 
 
-    await sleep(5 * 1000) // Wait for five seconds for Electron to open
+    await sleep(10 * 1000) // Wait for five seconds for Electron to open
 
     const browserURL = `http://localhost:${electronDebugPort}`
     const browser = output.browser = await puppeteer.launch({ headless: 'new' })
