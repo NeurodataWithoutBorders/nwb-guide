@@ -15,6 +15,14 @@ export function populateWithProjectMetadata(info, globalState) {
     return copy;
 }
 
+export const getInfoFromId = (key) => {
+    let [subject, session] = key.split("/");
+    if (subject.startsWith("sub-")) subject = subject.slice(4);
+    if (session.startsWith("ses-")) session = session.slice(4);
+
+    return { subject, session };
+};
+
 export function resolveGlobalOverrides(subject, globalState) {
     const subjectMetadataCopy = { ...globalState.subjects[subject] };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata
@@ -58,7 +66,7 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 }
 
 // Explicitly resolve the results for a particular session (from both GUIDE-defined globals and the NWB Schema)
-export function resolveResults(subject, session, globalState) {
+export function resolveMetadata(subject, session, globalState) {
     const overrides = resolveGlobalOverrides(subject, globalState); // Unique per-subject (but not sessions)
     const metadata = globalState.results[subject][session].metadata;
     const results = structuredClone(metadata); // Copy the metadata results from the form

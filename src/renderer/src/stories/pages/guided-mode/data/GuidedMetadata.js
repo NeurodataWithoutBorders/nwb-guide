@@ -5,7 +5,7 @@ import { ManagedPage } from "./ManagedPage.js";
 import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
-import { resolveGlobalOverrides, resolveResults } from "./utils.js";
+import { resolveGlobalOverrides, resolveMetadata, getInfoFromId } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
@@ -29,14 +29,6 @@ const propsToIgnore = [
 ];
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
-
-const getInfoFromId = (key) => {
-    let [subject, session] = key.split("/");
-    if (subject.startsWith("sub-")) subject = subject.slice(4);
-    if (session.startsWith("ses-")) session = session.slice(4);
-
-    return { subject, session };
-};
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
@@ -143,7 +135,7 @@ export class GuidedMetadataPage extends ManagedPage {
             sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
         }
 
-        resolveResults(subject, session, globalState);
+        resolveMetadata(subject, session, globalState);
 
         // Create the form
         const form = new JSONSchemaForm({
