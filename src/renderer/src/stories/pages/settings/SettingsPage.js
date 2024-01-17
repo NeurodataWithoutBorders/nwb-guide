@@ -21,7 +21,6 @@ import { header } from "../../forms/utils";
 
 import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
 
-
 const propertiesToTransform = ["folder_path", "file_path"];
 
 function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
@@ -164,7 +163,7 @@ export class SettingsPage extends Page {
                             "error"
                         );
 
-                    const { pipelines = {} } = testingSuiteYaml
+                    const { pipelines = {} } = testingSuiteYaml;
 
                     const pipelineNames = Object.keys(pipelines);
                     const nPipelines = pipelineNames.length;
@@ -172,10 +171,7 @@ export class SettingsPage extends Page {
                         .reverse()
                         .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
 
-                    this.#openNotyf(
-                        `Generated ${nPipelines} test pipelines`,
-                        "success"
-                    );
+                    this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
                 },
             })}
             <hr />
