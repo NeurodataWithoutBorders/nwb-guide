@@ -58,7 +58,7 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 }
 
 // Explicitly resolve the results for a particular session (from both GUIDE-defined globals and the NWB Schema)
-export function resolveResults(subject, session, globalState) {
+export function resolveMetadata(subject, session, globalState) {
     const overrides = resolveGlobalOverrides(subject, globalState); // Unique per-subject (but not sessions)
     const metadata = globalState.results[subject][session].metadata;
     const results = structuredClone(metadata); // Copy the metadata results from the form

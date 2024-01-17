@@ -2,10 +2,10 @@ import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
-import { randomizeElements, mapSessions } from "./utils.js";
+import { randomizeElements, mapSessions, merge } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
-import { resolveResults } from "./guided-mode/data/utils.js";
+import { resolveMetadata } from "./guided-mode/data/utils.js";
 import Swal from "sweetalert2";
 
 export class Page extends LitElement {
@@ -187,12 +187,17 @@ export class Page extends LitElement {
             const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, name } = globalState.project;
+            const { conversion_output_folder, name, SourceData } = globalState.project;
+
+            const sessionResults = globalState.results[subject][session]
+
+            const sourceDataCopy = structuredClone(sessionResults.source_data);
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
-                ...globalState.results[subject][session],
-                metadata: resolveResults(subject, session, globalState),
+                ...sessionResults,
+                metadata: resolveMetadata(subject, session, globalState),
+                source_data: merge(SourceData, sourceDataCopy)
             };
 
             const result = await runConversion(
