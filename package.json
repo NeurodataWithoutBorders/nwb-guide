@@ -159,6 +159,7 @@
   "devDependencies": {
     "@electron-toolkit/utils": "^2.0.1",
     "@electron/notarize": "^2.2.0",
+    "@modyfi/vite-plugin-yaml": "^1.0.4",
     "@storybook/addon-essentials": "^7.0.0-beta.62",
     "@storybook/addon-links": "^7.0.0-beta.62",
     "@storybook/blocks": "^7.0.0-beta.62",

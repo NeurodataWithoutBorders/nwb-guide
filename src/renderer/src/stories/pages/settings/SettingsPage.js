@@ -13,12 +13,14 @@ import { global, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
-import { SERVER_FILE_PATH, fs, path, port, remote } from "../../../electron/index.js";
+import { SERVER_FILE_PATH, fs, path, port } from "../../../electron/index.js";
 
 import saveSVG from "../../assets/save.svg?raw";
 
 import { header } from "../../forms/utils";
-import yaml from "js-yaml";
+
+import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
+
 
 const propertiesToTransform = ["folder_path", "file_path"];
 
@@ -152,7 +154,7 @@ export class SettingsPage extends Page {
             <p><b>Server Port:</b> ${port}</p>
             <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
             ${new Button({
-                label: "Select YAML File to Generate Pipelines",
+                label: "Generate Test Pipelines",
                 onClick: async () => {
                     const { testing_data_folder } = this.form.results;
 
@@ -162,12 +164,7 @@ export class SettingsPage extends Page {
                             "error"
                         );
 
-                    const result = await remote.dialog.showOpenDialog({ properties: ["openFile"] });
-
-                    if (result.canceled) return;
-
-                    const filepath = result.filePaths[0];
-                    const { pipelines = {} } = yaml.load(fs.readFileSync(filepath, "utf8"));
+                    const { pipelines = {} } = testingSuiteYaml
 
                     const pipelineNames = Object.keys(pipelines);
                     const nPipelines = pipelineNames.length;
@@ -175,10 +172,8 @@ export class SettingsPage extends Page {
                         .reverse()
                         .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
 
-                    const filename = path.basename(filepath);
-
                     this.#openNotyf(
-                        `<h4 style="margin: 0px;">Generated ${nPipelines} pipelines</h4><small>From ${filename}</small>`,
+                        `Generated ${nPipelines} test pipelines`,
                         "success"
                     );
                 },
