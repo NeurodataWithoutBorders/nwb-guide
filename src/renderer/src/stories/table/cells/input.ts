@@ -101,7 +101,7 @@ export class NestedRenderer extends BaseRenderer {
     }
 
     render() {
-        return html`<small>Click to view cell</small>`
+        return html`<small>Double-click to view cell</small>`
     }
 }
 

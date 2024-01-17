@@ -180,6 +180,8 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
             return acc;
         }
 
+
+        
         const tableMetadata = {
             keyColumn: tempPropertyKey,
             schema: schemaCopy,
@@ -251,7 +253,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         schema: itemSchema,
         data: this.value,
 
-        ignore,
+        ignore: ignore?.[name], // According to schema
 
         onUpdate: function () {
             return onUpdate.call(this, fullPath);
