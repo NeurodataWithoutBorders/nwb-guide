@@ -315,7 +315,7 @@ export class Search extends LitElement {
                     const listItemElement = document.createElement("li");
                     listItemElement.classList.add("option");
                     listItemElement.setAttribute("hidden", "");
-                    listItemElement.setAttribute("tabindex", -1)
+                    listItemElement.setAttribute("tabindex", -1);
                     if (option.keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
                     listItemElement.addEventListener("click", (clickEvent) => {
                         clickEvent.stopPropagation();
@@ -395,21 +395,21 @@ export class Search extends LitElement {
         ...this.headerStyles,
     })}>
       <input placeholder="Type here to search" value=${valueToDisplay} @click=${(clickEvent) => {
-        clickEvent.stopPropagation();
+          clickEvent.stopPropagation();
           if (this.listMode === "click") {
               const input = clickEvent.target.value;
               this.#populate(input);
           }
-      }} 
-      
+      }}
+
       @input=${(inputEvent) => {
           const input = inputEvent.target.value;
           this.#populate(input);
       }}
 
       @blur=${(blurEvent) => {
-        if (blurEvent.relatedTarget.classList.contains("option")) return;
-        this.submit()
+          if (blurEvent.relatedTarget.classList.contains("option")) return;
+          this.submit();
       }}
 
       ></input>
