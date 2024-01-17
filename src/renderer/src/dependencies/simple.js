@@ -8,7 +8,7 @@ export const reloadPageToHome = () => {
 }; // Clear all query params
 
 // Filesystem Management
-const root = process.env.VITEST ? joinPath(paths.root, '.test') : paths.root
+const root = process.env.VITEST ? joinPath(paths.root, ".test") : paths.root;
 export const homeDirectory = app?.getPath("home") ?? "";
 export const appDirectory = homeDirectory ? joinPath(homeDirectory, root) : "";
 export const guidedProgressFilePath = homeDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
