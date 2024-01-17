@@ -180,8 +180,6 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
             return acc;
         }
 
-
-        
         const tableMetadata = {
             keyColumn: tempPropertyKey,
             schema: schemaCopy,
