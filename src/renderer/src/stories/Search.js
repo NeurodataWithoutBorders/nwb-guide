@@ -315,9 +315,10 @@ export class Search extends LitElement {
                     const listItemElement = document.createElement("li");
                     listItemElement.classList.add("option");
                     listItemElement.setAttribute("hidden", "");
+                    listItemElement.setAttribute("tabindex", -1)
                     if (option.keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
-                    listItemElement.addEventListener("click", (ev) => {
-                        ev.stopPropagation();
+                    listItemElement.addEventListener("click", (clickEvent) => {
+                        clickEvent.stopPropagation();
                         this.#onSelect(option);
                     });
 
@@ -393,19 +394,22 @@ export class Search extends LitElement {
     <div class="header" style=${styleMap({
         ...this.headerStyles,
     })}>
-      <input placeholder="Type here to search" value=${valueToDisplay} @click=${(ev) => {
-          ev.stopPropagation();
+      <input placeholder="Type here to search" value=${valueToDisplay} @click=${(clickEvent) => {
+        clickEvent.stopPropagation();
           if (this.listMode === "click") {
-              const input = ev.target.value;
+              const input = clickEvent.target.value;
               this.#populate(input);
           }
-      }} @input=${(ev) => {
-          const input = ev.target.value;
+      }} 
+      
+      @input=${(inputEvent) => {
+          const input = inputEvent.target.value;
           this.#populate(input);
       }}
 
-      @blur=${(ev) => {
-          this.submit();
+      @blur=${(blurEvent) => {
+        if (blurEvent.relatedTarget.classList.contains("option")) return;
+        this.submit()
       }}
 
       ></input>
