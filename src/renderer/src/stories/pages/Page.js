@@ -189,7 +189,7 @@ export class Page extends LitElement {
 
             const { conversion_output_folder, name, SourceData } = globalState.project;
 
-            const sessionResults = globalState.results[subject][session]
+            const sessionResults = globalState.results[subject][session];
 
             const sourceDataCopy = structuredClone(sessionResults.source_data);
 
@@ -197,7 +197,7 @@ export class Page extends LitElement {
             const sessionInfo = {
                 ...sessionResults,
                 metadata: resolveMetadata(subject, session, globalState),
-                source_data: merge(SourceData, sourceDataCopy)
+                source_data: merge(SourceData, sourceDataCopy),
             };
 
             const result = await runConversion(
