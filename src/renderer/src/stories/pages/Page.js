@@ -197,7 +197,7 @@ export class Page extends LitElement {
             const sessionInfo = {
                 ...sessionResults,
                 metadata: resolveMetadata(subject, session, globalState),
-                // source_data: merge(SourceData, sourceDataCopy)
+                source_data: merge(SourceData, sourceDataCopy)
             };
 
             const result = await runConversion(
