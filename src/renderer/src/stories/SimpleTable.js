@@ -733,6 +733,7 @@ export class SimpleTable extends LitElement {
             },
             value,
             schema,
+            ignore: this.ignore,
             validateOnChange: async (
                 value,
                 path = [],

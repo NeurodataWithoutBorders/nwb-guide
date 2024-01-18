@@ -76,7 +76,7 @@ export class TableCell extends LitElement {
 
     type = 'text'
 
-    constructor({ info, value, schema, validateOnChange, onValidate }: TableCellProps) {
+    constructor({ info, value, schema, validateOnChange, ignore, onValidate }: TableCellProps) {
         super()
         this.#value = value
 
@@ -84,6 +84,7 @@ export class TableCell extends LitElement {
         this.info = info
 
         if (validateOnChange) this.validateOnChange = validateOnChange
+        if (ignore) this.ignore = ignore
 
         if (onValidate) this.onValidate = onValidate
 
@@ -115,6 +116,8 @@ export class TableCell extends LitElement {
      }
 
     validateOnChange?: ValidationFunction
+    ignore?: { [key: string]: boolean } = {}
+    
     onValidate: OnValidateFunction = () => {}
 
     #validator: ValidationFunction = () => true
@@ -221,6 +224,7 @@ export class TableCell extends LitElement {
                 schema: this.schema,
                 nestedProps: {
                     validateOnChange: this.validateOnChange,
+                    ignore: this.ignore
                 }
             })
         }

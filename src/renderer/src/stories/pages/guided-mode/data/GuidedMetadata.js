@@ -19,8 +19,15 @@ import { Button } from "../../../Button.js";
 import globalIcon from "../../../assets/global.svg?raw";
 
 const imagingPlaneKey = "imaging_plane";
+
 const propsToIgnore = {
     Ophys: {
+
+        // NOTE: Get this to work
+        '*': {
+            starting_time: true,
+            rate: true
+        },
         ImagingPlane: {
             [imagingPlaneKey]: true,
             manifold: true,
@@ -31,8 +38,6 @@ const propsToIgnore = {
             [imagingPlaneKey]: true,
             format: true,
             starting_frame: true,
-            starting_time: true,
-            rate: true,
             control: true,
             control_description: true,
             comments: true,
@@ -42,7 +47,7 @@ const propsToIgnore = {
             unit: true,
             conversion: true,
             offset: true,
-        },
+        }
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)

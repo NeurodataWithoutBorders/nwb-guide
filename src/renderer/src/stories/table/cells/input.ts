@@ -14,12 +14,14 @@ export class NestedEditor extends LitElement {
     schema: any
     toggle: any
     validateOnChange
+    ignore: any
 
     constructor(props: any) {
         super(props)
         this.schema = props.schema
         this.info = props.info ?? {}
         this.toggle = props.toggle
+        this.ignore = props.ignore
         this.validateOnChange = props.validateOnChange
     }
 
@@ -41,10 +43,13 @@ export class NestedEditor extends LitElement {
 
         const schema = this.schema
 
+        console.error('FIX THIS', this.ignore)
+        
         const input = this.#input = new JSONSchemaInput({
             schema,
             value: data,
             path: [],
+            ignore: this.ignore,
             form: {
                 triggerValidation: (name, completePath, _, __, schema, parent) => {
                     const path = [ ...completePath, name ] 
