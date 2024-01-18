@@ -52,7 +52,7 @@ export class NestedEditor extends LitElement {
             ignore: this.ignore,
             form: {
                 triggerValidation: (name, completePath, _, __, schema, parent) => {
-                    const path = [ ...completePath, name ] 
+                    const path = [ ...completePath, name ]
                     const value = parent[name]
                     if (this.validateOnChange) return this.validateOnChange(value, path, parent) // NOTE: Flipped because usually only value is passed
                 }

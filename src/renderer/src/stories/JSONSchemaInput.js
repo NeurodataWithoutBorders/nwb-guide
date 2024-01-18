@@ -38,7 +38,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         const completePath = [...tableBasePath, ...path.slice(0, -1)];
 
         // const toIterate = path.slice(skip);
-        const toIterate = path.filter(value => typeof value === 'string')
+        const toIterate = path.filter((value) => typeof value === "string");
 
         const itemPropSchema = toIterate.reduce((acc, key) => {
             return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
@@ -315,7 +315,7 @@ export const getEditableItems = (value, pattern, { name, schema } = {}) => {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isFilesystemSelector = (name = '', format) => {
+const isFilesystemSelector = (name = "", format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
     const matched = name.match(/(.+_)?(.+)_paths?/);
