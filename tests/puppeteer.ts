@@ -19,6 +19,8 @@ type BrowserTestOutput = {
   browser?: puppeteer.Browser,
 }
 
+const sleepBeforeQuery = 10 * 1000 // Wait for five seconds for Electron to open
+
 export const connect = () => {
 
 
@@ -35,7 +37,7 @@ export const connect = () => {
     });
 
 
-    await sleep(10 * 1000) // Wait for five seconds for Electron to open
+    await sleep(sleepBeforeQuery) // Wait for five seconds for Electron to open
 
     const browserURL = `http://localhost:${electronDebugPort}`
     const browser = output.browser = await puppeteer.launch({ headless: 'new' })
@@ -46,14 +48,12 @@ export const connect = () => {
     delete output.browser
     delete output.page
 
-    await sleep(1000)
-
     // Connect to browser WS Endpoint
     const browserWSEndpoint = endpoint.replace('localhost', '0.0.0.0')
     output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null })
     const pages = await output.browser.pages()
     output.page = pages[0]
-  })
+  }, sleepBeforeQuery + 1000)
 
   afterAll(async () => {
     if (output.browser) await output.browser.close() // Will also exit the Electron instance
