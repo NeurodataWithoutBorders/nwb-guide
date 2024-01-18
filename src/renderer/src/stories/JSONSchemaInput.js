@@ -181,10 +181,8 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
             return acc;
         }
 
-
-        
-        const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}
-        console.error('Nested Ignore (2)', schemaPath, nestedIgnore, this.form)
+        const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
+        console.error("Nested Ignore (2)", schemaPath, nestedIgnore, this.form);
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
@@ -253,7 +251,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
     }
 
     const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : ignore?.[name];
-    console.log('Nested Ignore', name, nestedIgnore)
+    console.log("Nested Ignore", name, nestedIgnore);
 
     // Normal table parsing
     const tableMetadata = {

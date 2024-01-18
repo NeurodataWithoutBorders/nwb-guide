@@ -117,7 +117,7 @@ export class TableCell extends LitElement {
 
     validateOnChange?: ValidationFunction
     ignore?: { [key: string]: boolean } = {}
-    
+
     onValidate: OnValidateFunction = () => {}
 
     #validator: ValidationFunction = () => true

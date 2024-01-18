@@ -22,11 +22,10 @@ const imagingPlaneKey = "imaging_plane";
 
 const propsToIgnore = {
     Ophys: {
-
         // NOTE: Get this to work
-        '*': {
+        "*": {
             starting_time: true,
-            rate: true
+            rate: true,
         },
         ImagingPlane: {
             [imagingPlaneKey]: true,
@@ -47,7 +46,7 @@ const propsToIgnore = {
             unit: true,
             conversion: true,
             offset: true,
-        }
+        },
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)
