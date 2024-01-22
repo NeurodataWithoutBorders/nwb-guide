@@ -58,12 +58,12 @@ class NWBPreviewInstance extends LitElement {
         return isOnline
             ? new Neurosift({ url: getURLFromFilePath(this.file, this.project), fullscreen: false })
             : until(
-                  (async () => {
-                      const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
-                      return unsafeHTML(htmlRep);
-                  })(),
-                  html`<small>Loading HTML representation...</small>`
-              );
+                (async () => {
+                    const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
+                    return unsafeHTML(htmlRep);
+                })(),
+                html`<small>Loading HTML representation...</small>`
+            );
     }
 }
 
@@ -126,59 +126,67 @@ export class NWBFilePreview extends LitElement {
             <div style="display: flex; height: 100%;">
                 <div style="flex-grow: 1;">
                     ${(() => {
-                        if (onlyFirstFile) return new NWBPreviewInstance(fileArr[0].info, this.project);
-                        else {
-                            const _instances = fileArr.map(this.createInstance);
+                if (onlyFirstFile) return new NWBPreviewInstance(fileArr[0].info, this.project);
+                else {
+                    const _instances = fileArr.map(this.createInstance);
 
-                            const instances = _instances.reduce((acc, { subject, session, display }) => {
-                                if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
-                                acc[`sub-${subject}`][`ses-${session}`] = display;
-                                return acc;
-                            }, {});
+                    const instances = _instances.reduce((acc, { subject, session, display }) => {
+                        if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
+                        acc[`sub-${subject}`][`ses-${session}`] = display;
+                        return acc;
+                    }, {});
 
-                            return new InstanceManager({ instances });
-                        }
-                    })()}
+                    return new InstanceManager({ instances });
+                }
+            })()}
                 </div>
                 ${this.inspect
-                    ? html`<div id="inspect">
+                ? html`<div id="inspect">
                           <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
                           ${until(
-                              (async () => {
-                                  const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
+                    (async () => {
+                        const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
 
-                                  const title = "Inspecting your file";
+                        const title = "Inspecting your file";
 
-                                  const items = onlyFirstFile
-                                      ? removeFilePaths(
-                                            await run(
-                                                "inspect_file",
-                                                { nwbfile_path: fileArr[0].info.file, ...options },
-                                                { title }
-                                            )
-                                        ) // Inspect the first file
-                                      : await (async () =>
-                                            truncateFilePaths(
-                                                await run(
-                                                    "inspect_folder",
-                                                    { path, ...options },
-                                                    { title: title + "s" }
-                                                ),
-                                                getSharedPath(fileArr.map(({ info }) => info.file))
-                                            ))();
+                        const report = onlyFirstFile 
 
-                                  const list = new InspectorList({
-                                      items: items,
-                                      listStyles: { minWidth: "300px", maxWidth: "350px" },
-                                      emptyMessage: "No issues found.",
-                                  });
-                                  list.style.padding = "10px";
-                                  return list;
-                              })(),
-                              html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
-                          )}
+                        ? await run(
+                            "inspect_file",
+                            { nwbfile_path: fileArr[0].info.file, ...options },
+                            { title }
+                        ) // Inspect the first file
+                        
+                        : await run(
+                            "inspect_folder",
+                            { path, ...options },
+                            { title: title + "s" }
+                        ) // Inspect the folder
+
+                        const result = onlyFirstFile
+                            ? {
+                                ...report,
+                                messages: removeFilePaths(report.messages),
+                            } 
+                            : {
+                                ...report, 
+                                messages: truncateFilePaths(report.messages, getSharedPath(fileArr.map(({ info }) => info.file)))
+                            }
+
+                        const items = result.messages
+
+                        const list = new InspectorList({
+                            items: items,
+                            listStyles: { minWidth: "300px", maxWidth: "350px" },
+                            emptyMessage: "No issues found.",
+                        });
+                        list.style.padding = "10px";
+                        return list;
+                    })(),
+                    html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
+                )}
                       </div>`
-                    : ""}
+                : ""}
             </div>`;
     }
 }
