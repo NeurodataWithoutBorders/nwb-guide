@@ -22,7 +22,7 @@ export class InspectPage extends Page {
 
     inspect = async (paths, kwargs = {}, options = {}) => {
         const result = await run(
-            'inspect',
+            "inspect",
             { paths, ...kwargs },
             { title: "Inspecting selected filesystem entries.", ...options }
         ).catch((error) => {
@@ -30,14 +30,14 @@ export class InspectPage extends Page {
             throw error;
         });
 
-        if (typeof result === 'string') return result
+        if (typeof result === "string") return result;
 
-        const { messages } = result
+        const { messages } = result;
 
         if (!messages.length) return this.notify("No messages received from the NWB Inspector");
 
-        return result
-    }
+        return result;
+    };
 
     showReport = async (value) => {
         if (!value) {
@@ -46,9 +46,9 @@ export class InspectPage extends Page {
             throw new Error(message);
         }
 
-        const result = await this.inspect(value)
+        const result = await this.inspect(value);
 
-        const messages = result.messages
+        const messages = result.messages;
 
         const items = truncateFilePaths(messages, getSharedPath(messages.map((item) => item.file_path)));
 
@@ -58,27 +58,28 @@ export class InspectPage extends Page {
         // const buttons = document.createElement('div')
         // buttons.style.display = 'flex'
         // buttons.style.gap = '10px'
-        
+
         const downloadJSONButton = new Button({
-            label: 'Download JSON',
+            label: "Download JSON",
             primary: true,
-            onClick: () => download('nwb-inspector-report.json', {
-                header: result.header,
-                messages: result.messages
-            })
-        })
+            onClick: () =>
+                download("nwb-inspector-report.json", {
+                    header: result.header,
+                    messages: result.messages,
+                }),
+        });
 
         const downloadTextButton = new Button({
-            label: 'Download Text',
+            label: "Download Text",
             primary: true,
             onClick: async () => {
-                download('nwb-inspector-report.txt', result.text)
-            }
-        })
-        
+                download("nwb-inspector-report.txt", result.text);
+            },
+        });
+
         const modal = new Modal({
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
-            controls: [ downloadJSONButton, downloadTextButton ],
+            controls: [downloadJSONButton, downloadTextButton],
         });
 
         modal.append(list);

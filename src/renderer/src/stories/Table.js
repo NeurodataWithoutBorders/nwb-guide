@@ -444,7 +444,8 @@ export class Table extends LitElement {
                 let target = this.data;
 
                 if (!isResolved) {
-                    if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+                    if (!this.keyColumn)
+                        this.data[rowName] = {}; // Add new row to array
                     else {
                         rowName = row;
                         if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists

@@ -194,7 +194,7 @@ export class Modal extends LitElement {
               ${ this.controls }
               ${ this.showCloseButton ? html`<nwb-button secondary @click="${this.toggle}">${this.closeText ?? 'Close'}</nwb-button>` : '' }
               </div>
-              
+
             </div>
             <div class="modal-body">
               <slot>No content</slot>

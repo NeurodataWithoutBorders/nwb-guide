@@ -217,7 +217,7 @@ class InspectNWBFolder(Resource):
         try:
             paths = neuroconv_api.payload["paths"]
 
-            kwargs = { **neuroconv_api.payload }
+            kwargs = {**neuroconv_api.payload}
             del kwargs["paths"]
 
             if len(paths) == 1:

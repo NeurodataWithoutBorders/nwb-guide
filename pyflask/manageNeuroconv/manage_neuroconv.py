@@ -589,27 +589,23 @@ def inspect_nwb_file(payload):
                 "check_data_orientation",
             ],  # TODO: remove when metadata control is exposed
             config=load_config(filepath_or_keyword="dandi"),
-            **payload
+            **payload,
         )
     )
 
-    if (payload.get('format') == 'text'):
-        return '\n'.join(format_messages(messages=messages))
+    if payload.get("format") == "text":
+        return "\n".join(format_messages(messages=messages))
 
     header = get_report_header()
     header["NWBInspector_version"] = str(header["NWBInspector_version"])
-    json_report = dict(
-        header=header, 
-        messages=messages,
-        text='\n'.join(format_messages(messages=messages))
-    )
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
 
     return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
 def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all, load_config
-    from nwbinspector.inspector_tools import format_messages ,get_report_header
+    from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
@@ -620,7 +616,7 @@ def inspect_nwb_folder(payload):
             "check_data_orientation",
         ],  # TODO: remove when metadata control is exposed
         config=load_config(filepath_or_keyword="dandi"),
-            **payload
+        **payload,
     )
 
     try:
@@ -633,14 +629,10 @@ def inspect_nwb_folder(payload):
             raise exception
     except Exception as exception:
         raise exception
-    
+
     header = get_report_header()
     header["NWBInspector_version"] = str(header["NWBInspector_version"])
-    json_report = dict(
-        header=header, 
-        messages=messages,
-        text='\n'.join(format_messages(messages=messages))
-    )
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
 
     return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 

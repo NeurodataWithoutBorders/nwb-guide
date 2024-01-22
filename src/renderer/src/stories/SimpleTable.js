@@ -613,7 +613,8 @@ export class SimpleTable extends LitElement {
         let target = this.data;
 
         if (!isResolved) {
-            if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+            if (!this.keyColumn)
+                this.data[rowName] = {}; // Add new row to array
             else {
                 rowName = row;
                 if (!this.#unresolved[rowName]) this.#unresolved[rowName] = {}; // Ensure row exists

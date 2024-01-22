@@ -20,7 +20,6 @@ import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
 
-
 const filter = (list, toFilter) => {
     return list.filter((item) => {
         return Object.entries(toFilter)
@@ -48,15 +47,15 @@ export class GuidedInspectorPage extends Page {
 
     headerButtons = [
         new Button({
-            label: 'JSON',
-            primary: true
+            label: "JSON",
+            primary: true,
         }),
 
         new Button({
-            label: 'Text',
-            primary: true
-        })
-    ]
+            label: "Text",
+            primary: true,
+        }),
+    ];
 
     header = {
         subtitle: `The NWB Inspector has scanned your files for adherence to <a target="_blank" href="https://nwbinspector.readthedocs.io/en/dev/best_practices/best_practices_index.html">best practices</a>.`,
@@ -89,15 +88,15 @@ export class GuidedInspectorPage extends Page {
     };
 
     updated() {
-        const [ downloadJSONButton, downloadTextButton ] = this.headerButtons
+        const [downloadJSONButton, downloadTextButton] = this.headerButtons;
 
-        downloadJSONButton.onClick = () => download('nwb-inspector-report.json', {
-            header: this.report.header,
-            messages: this.report.messages
-        })
+        downloadJSONButton.onClick = () =>
+            download("nwb-inspector-report.json", {
+                header: this.report.header,
+                messages: this.report.messages,
+            });
 
-        downloadTextButton.onClick = () => download('nwb-inspector-report.txt', this.report.text)
-
+        downloadTextButton.onClick = () => download("nwb-inspector-report.txt", this.report.text);
     }
 
     render() {
@@ -125,22 +124,19 @@ export class GuidedInspectorPage extends Page {
             ${until(
                 (async () => {
                     if (fileArr.length <= 1) {
-
-
-                        this.report = inspector
+                        this.report = inspector;
 
                         if (!this.report) {
                             const result = await run(
                                 "inspect_file",
                                 { nwbfile_path: fileArr[0].info.file, ...options },
                                 { title }
-                            )
+                            );
 
                             this.report = globalState.preview.inspector = {
                                 ...result,
                                 messages: removeFilePaths(result.messages),
-                            }
-                            
+                            };
                         }
 
                         if (!inspector) await this.save();
@@ -152,24 +148,19 @@ export class GuidedInspectorPage extends Page {
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
 
-                    this.report = inspector
+                    this.report = inspector;
                     if (!this.report) {
-                        const result = await run(
-                            "inspect_folder",
-                            { path, ...options },
-                            { title: title + "s" }
-                        );
+                        const result = await run("inspect_folder", { path, ...options }, { title: title + "s" });
                         this.report = globalState.preview.inspector = {
                             ...result,
                             messages: truncateFilePaths(result.messages, path),
-                        }
+                        };
                     }
 
                     if (!inspector) await this.save();
 
                     const messages = this.report.messages;
                     const items = truncateFilePaths(messages, path);
-
 
                     const _instances = fileArr.map(({ subject, session, info }) => {
                         const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
@@ -215,7 +206,7 @@ export class GuidedInspectorPage extends Page {
                     };
 
                     const manager = new InstanceManager({
-                        instances: allInstances
+                        instances: allInstances,
                     });
 
                     return manager;
