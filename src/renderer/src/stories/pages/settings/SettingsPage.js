@@ -89,11 +89,11 @@ const schema = merge(
         properties: {
             DANDI: {
                 title: "DANDI Settings",
-                ...dandiGlobalSchema
+                ...dandiGlobalSchema,
             },
             developer: {
                 title: "Developer Settings",
-                ...developerGlobalSchema
+                ...developerGlobalSchema,
             },
         },
         required: ["DANDI"],
@@ -140,7 +140,6 @@ export class SettingsPage extends Page {
         this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
-
     render() {
         this.localState = structuredClone(global.data);
 
@@ -156,7 +155,6 @@ export class SettingsPage extends Page {
             },
             onThrow,
         });
-
 
         const generatePipelineButton = new Button({
             label: "Generate Test Pipelines",
@@ -179,13 +177,13 @@ export class SettingsPage extends Page {
 
                 this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
             },
-        })
+        });
 
         setTimeout(() => {
             const testFolderInput = this.form.getInput(["developer", "testing_data_folder"]);
-            console.log(testFolderInput)
+            console.log(testFolderInput);
             testFolderInput.after(generatePipelineButton);
-        }, 100)
+        }, 100);
 
         return html`
             <p><b>Server Port:</b> ${port}</p>
