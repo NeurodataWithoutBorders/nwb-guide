@@ -15,7 +15,6 @@ import { Search } from "./Search";
 import tippy from "tippy.js";
 
 export function createTable(fullPath, { onUpdate, onThrow, forceItems = false }) {
-
     const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
 
@@ -269,7 +268,6 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         ...commonTableMetadata,
     };
 
-
     const table = (this.table = this.renderTable(name, tableMetadata, path)); // Try creating table. Otherwise use nested form
 
     if (table) {
@@ -283,8 +281,6 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 // Schema or value indicates editable object
 export const isEditableObject = (schema, value) =>
     schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value));
-
-
 
 export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);

@@ -60,7 +60,12 @@ const propsToIgnore = {
 };
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
-import { createTable, getEditableItems, isPatternProperties, isAdditionalProperties } from "../../../JSONSchemaInput.js";
+import {
+    createTable,
+    getEditableItems,
+    isPatternProperties,
+    isAdditionalProperties,
+} from "../../../JSONSchemaInput.js";
 import { html } from "lit";
 
 const getInfoFromId = (key) => {
@@ -178,15 +183,9 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveMetadata(subject, session, globalState);
 
-        const additionalPropertiesToRetitle = [
-            "Ophys.ImageSegmentation",
-        ]
+        const additionalPropertiesToRetitle = ["Ophys.ImageSegmentation"];
 
-        const patternPropsToRetitle = [
-            "Ophys.Fluorescence", 
-            "Ophys.DfOverF", 
-            "Ophys.SegmentationImages"
-        ];
+        const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
         // Create the form
         const form = new JSONSchemaForm({
@@ -243,10 +242,8 @@ export class GuidedMetadataPage extends ManagedPage {
 
                 const isAdditional = isAdditionalProperties(this.pattern);
                 const isPattern = isPatternProperties(this.pattern);
-                
 
                 if (isAdditional || isPattern) {
-
                     // One table with nested tables for each property
                     const data = getEditableItems(this.value, this.pattern, { name, schema: this.schema }).reduce(
                         (acc, { key, value }) => {
@@ -262,16 +259,14 @@ export class GuidedMetadataPage extends ManagedPage {
 
                     if (additionalPropertiesToRetitle.includes(this.form.base.join("."))) {
                         inputSchema.title = "";
-                        
-                        return Object.entries(data)
-                        .map(([name, value]) => {
 
+                        return Object.entries(data).map(([name, value]) => {
                             const mockInput = {
                                 schema: {
                                     type: "array",
                                     items: {
                                         type: "object",
-                                        additionalProperties: true
+                                        additionalProperties: true,
                                     },
                                 },
                                 renderTable: this.renderTable,
@@ -281,35 +276,31 @@ export class GuidedMetadataPage extends ManagedPage {
                                 },
                             };
 
-
                             const table = createTable.call(mockInput, [...localPath], {
                                 onUpdate: (localPath, value) => {
                                     onUpdate([name, ...localPath], value, true, {
                                         willTimeout: false,
                                         onError: (e) => e,
                                         onWarning: (e) => e,
-                                    })
+                                    });
                                 },
                                 onThrow: onThrow,
-                            })
+                            });
 
                             return html`
                                 <div style="width: 100%;">
-                                <h3>${header(name)}</h3>
+                                    <h3>${header(name)}</h3>
                                     ${table}
                                 </div>
                             `;
-
-                        })
+                        });
                     }
-                      
+
                     if (patternPropsToRetitle.includes(this.form.base.join("."))) {
-                        
                         inputSchema.title = "Plane Metadata<hr>";
 
                         return Object.entries(data)
                             .map(([name, value]) => {
-
                                 const createNestedTable = (value, pattern, schema) => {
                                     const mockInput = {
                                         schema: {
@@ -339,39 +330,35 @@ export class GuidedMetadataPage extends ManagedPage {
                                             })}
                                         </div>
                                     `;
-                                }
+                                };
 
                                 if (isAdditional) {
-                                    console.warn(value)
+                                    console.warn(value);
                                     const data = value.reduce((acc, item) => {
-                                        const name = item.name
+                                        const name = item.name;
                                         acc[name] = item;
                                         return acc;
-                                    }, {})
-                                    console.error(data)
+                                    }, {});
+                                    console.error(data);
                                     return createNestedTable(data, undefined, {
                                         type: "object",
                                         items: {
                                             type: "object",
-                                            additionalProperties: true
-                                        }
-                                    })
+                                            additionalProperties: true,
+                                        },
+                                    });
                                 }
 
-
                                 return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
-                                    return createNestedTable(value, pattern, schema)
+                                    return createNestedTable(value, pattern, schema);
                                 });
                             })
                             .flat();
-
-
                     }
                 }
             },
 
             renderTable: function (name, metadata) {
-
                 const updatedSchema = structuredClone(metadata.schema);
 
                 if (updatedSchema.additionalProperties !== true) updatedSchema.additionalProperties = false; // Indicate all additional properties are false (if not true)
