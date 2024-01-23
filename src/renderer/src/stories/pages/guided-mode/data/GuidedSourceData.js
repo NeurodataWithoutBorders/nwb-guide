@@ -235,7 +235,10 @@ export class GuidedSourceDataPage extends ManagedPage {
                             source_data: merge(globalState.project.SourceData, souceCopy),
                         };
 
-                        const results = await run("alignment", sessionInfo, { swal: false });
+                        const results = await run("alignment", sessionInfo, {
+                            title: "Checking Alignment",
+                            message: "Please wait...",
+                        });
 
                         const modal = new Modal({
                             header: `Alignment Preview: ${subject}/${session}`,
