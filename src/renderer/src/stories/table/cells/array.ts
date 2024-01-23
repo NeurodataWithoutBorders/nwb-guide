@@ -44,7 +44,7 @@ export class ArrayRenderer extends BaseRenderer {
     render() {
         return html`
             <ul>
-                ${parseArray(this.value).map(v => html`<li>${v}</li>`)}
+                ${parseArray(this.value).map(value => html`<li>${value}</li>`)}
             </ul>
         `
     }

@@ -246,9 +246,9 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
     const result = await run(type ? `upload/${type}` : "upload", payload, {
         title: "Uploading your files to DANDI",
-    }).catch((e) => {
-        this.notify(e.message, "error");
-        throw e;
+    }).catch((error) => {
+        this.notify(error.message, "error");
+        throw error;
     });
 
     if (result)
@@ -264,8 +264,8 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
 export class UploadsPage extends Page {
     header = {
-        title: "DANDI Uploads",
-        subtitle: "This page allows you to upload folders with NWB files to the DANDI Archive.",
+        title: "NWB File Uploads",
+        subtitle: "Upload folders and individual NWB files to the DANDI Archive.",
         controls: [
             new Button({
                 icon: keyIcon,
@@ -392,15 +392,15 @@ export class UploadsPage extends Page {
 
                     onThrow,
 
-                    transformErrors: (e) => {
-                        if (e.message === "Filesystem Paths is a required property.")
-                            e.message = "Please select at least one file or folder to upload.";
+                    transformErrors: (error) => {
+                        if (error.message === "Filesystem Paths is a required property.")
+                            error.message = "Please select at least one file or folder to upload.";
                     },
 
                     validateOnChange: validate,
                 }));
             })
-            .catch((e) => html`<p>${e}</p>`);
+            .catch((error) => html`<p>${error}</p>`);
 
         // Confirm that one api key exists
         promise.then(() => {

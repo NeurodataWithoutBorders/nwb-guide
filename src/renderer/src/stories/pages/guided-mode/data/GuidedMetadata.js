@@ -5,7 +5,7 @@ import { ManagedPage } from "./ManagedPage.js";
 import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
-import { resolveGlobalOverrides, resolveResults } from "./utils.js";
+import { resolveGlobalOverrides, resolveMetadata } from "./utils.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
@@ -143,7 +143,7 @@ export class GuidedMetadataPage extends ManagedPage {
             sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
         }
 
-        resolveResults(subject, session, globalState);
+        resolveMetadata(subject, session, globalState);
 
         // Create the form
         const form = new JSONSchemaForm({
@@ -157,9 +157,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
 
-            transformErrors: (e) => {
+            transformErrors: (error) => {
                 // JSON Schema Exceptions
-                if (e.message.includes('does not conform to the "date-time" format.')) return false;
+                if (error.message.includes('does not conform to the "date-time" format.')) return false;
             },
 
             groups: [
@@ -249,7 +249,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 {
                     name: "Preview",
                     primary: true,
-                    onClick: async (key, el) => {
+                    onClick: async (key) => {
                         const { subject, session } = getInfoFromId(key);
 
                         const results = await this.runConversions(

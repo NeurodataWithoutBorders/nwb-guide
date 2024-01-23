@@ -7,11 +7,6 @@ import * as progress from "../../../progress/index.js";
 import { newDataset } from "../../../../assets/lotties/index.js";
 
 export class GuidedHomePage extends Page {
-    header = {
-        title: "Your Conversions",
-        subtitle: "Start new conversions and resume existing ones.",
-    };
-
     constructor(...args) {
         super(...args);
     }
@@ -183,14 +178,24 @@ export class GuidedHomePage extends Page {
     render() {
         return html`
             <div id="curate-new-home" style="display:flex; flex-direction:column; align-items: center">
-                <p>
-                    The NWB GUIDE walks users step-by-step through all the requirements for converting their data to the
-                    NWB format and uploading datasets to the DANDI Archive. Each stage is designed to conveniently guide
-                    users through the conversion process and include all necessary information such that no prior
-                    knowledge of the NWB data standard is required.
-                </p>
+                <div style="padding-bottom: 20px;">
+                    <h3 style="margin-bottom: 0; padding-bottom: 0;">
+                        Your one-stop tool for converting data to NWB and uploading it to the DANDI Archive.
+                    </h3>
+                    <small
+                        >Don't know where to go next?
+                        <a
+                            href=""
+                            @click="${(clickEvent) => {
+                                clickEvent.preventDefault();
+                                this.to("docs");
+                            }}"
+                            >Learn more about the NWB GUIDE</a
+                        >.</small
+                    >
+                </div>
 
-                <div class="container--dashed" @click="${() => this.to(1)}">
+                <div class="create-button" @click="${() => this.to(1)}">
                     <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
                     <h2 class="guided--text-sub-step" style="width: 100%;">Create a new conversion pipeline</h2>
                 </div>

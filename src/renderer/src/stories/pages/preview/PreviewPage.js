@@ -7,8 +7,8 @@ import { baseUrl } from "../../../server/globals";
 
 export class PreviewPage extends Page {
     header = {
-        title: "Neurosift File Visualization",
-        subtitle: "Explore your NWB file using Neurosift.",
+        title: "NWB File Exploration",
+        subtitle: "Visualize your NWB file using Neurosift.",
     };
 
     constructor(...args) {

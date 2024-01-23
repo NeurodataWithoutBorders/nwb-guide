@@ -52,24 +52,24 @@ function decode(text) {
     }
 }
 
-function drill(o, callback) {
-    if (o && typeof o === "object") {
-        const copy = Array.isArray(o) ? [...o] : { ...o };
+function drill(object, callback) {
+    if (object && typeof object === "object") {
+        const copy = Array.isArray(object) ? [...object] : { ...object };
         for (let k in copy) {
             const res = drill(copy[k], callback);
             if (res) copy[k] = res;
             else delete copy[k];
         }
         return copy;
-    } else return callback(o);
+    } else return callback(object);
 }
 
-function encodeObject(o) {
-    return drill(o, (v) => (typeof v === "string" ? encode(v) : v));
+function encodeObject(object) {
+    return drill(object, (value) => (typeof value === "string" ? encode(value) : value));
 }
 
-function decodeObject(o) {
-    return drill(o, (v) => (typeof v === "string" ? decode(v) : v));
+function decodeObject(object) {
+    return drill(object, (value) => (typeof value === "string" ? decode(value) : value));
 }
 
 class GlobalAppConfig {
@@ -120,10 +120,31 @@ export const getEntries = () => {
     return progressFiles.filter((path) => path.slice(-5) === ".json");
 };
 
+const oldConversionsPath = "conversion";
+const convertOldPath = (path) => {
+    if (path && path.slice(0, oldConversionsPath.length) === oldConversionsPath)
+        return `/${path.slice(oldConversionsPath.length)}`;
+    else return path;
+};
+
+const transformProgressFile = (progressFile) => {
+    progressFile["page-before-exit"] = convertOldPath(progressFile["page-before-exit"]);
+    Object.values(progressFile.sections ?? {}).forEach((section) => {
+        const pages = {};
+        Object.entries(section.pages).forEach(([page, value]) => {
+            pages[convertOldPath(page)] = value;
+        });
+        section.pages = pages;
+    });
+
+    return progressFile;
+};
 export const getAll = (progressFiles) => {
     return progressFiles.map((progressFile) => {
         let progressFilePath = joinPath(guidedProgressFilePath, progressFile);
-        return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
+        return transformProgressFile(
+            JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath))
+        );
     });
 };
 
@@ -134,6 +155,7 @@ export const getCurrentProjectName = () => {
 
 export const get = (name) => {
     if (!name) {
+        console.error("No name provided to get()");
         const params = new URLSearchParams(location.search);
         const projectName = params.get("project");
         if (!projectName) {
@@ -155,13 +177,15 @@ export const get = (name) => {
     let progressFilePath = joinPath(guidedProgressFilePath, name + ".json");
 
     const exists = fs ? fs.existsSync(progressFilePath) : localStorage.getItem(progressFilePath) !== null;
-    return exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {};
+    return transformProgressFile(
+        exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {}
+    );
 };
 
 export function resume(name) {
     const global = this ? this.load(name) : get(name);
 
-    const commandToResume = global["page-before-exit"] || "conversion/start";
+    let commandToResume = global["page-before-exit"] || "//start";
     updateURLParams({ project: name });
 
     if (this) this.onTransition(commandToResume);

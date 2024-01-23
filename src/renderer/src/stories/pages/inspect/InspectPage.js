@@ -8,6 +8,7 @@ import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { Modal } from "../../Modal";
 import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.js";
 import { InspectorList } from "../../preview/inspector/InspectorList.js";
+import { download } from "./utils.js";
 
 export class InspectPage extends Page {
     constructor(...args) {
@@ -15,8 +16,27 @@ export class InspectPage extends Page {
     }
 
     header = {
-        title: "NWB Inspector Report",
-        subtitle: "This page allows you to inspect NWB files using the NWB Inspector.",
+        title: "NWB File Validation",
+        subtitle: "Inspect NWB files using the NWB Inspector.",
+    };
+
+    inspect = async (paths, kwargs = {}, options = {}) => {
+        const result = await run(
+            "inspect",
+            { paths, ...kwargs },
+            { title: "Inspecting selected filesystem entries.", ...options }
+        ).catch((error) => {
+            this.notify(error.message, "error");
+            throw error;
+        });
+
+        if (typeof result === "string") return result;
+
+        const { messages } = result;
+
+        if (!messages.length) return this.notify("No messages received from the NWB Inspector");
+
+        return result;
     };
 
     showReport = async (value) => {
@@ -26,25 +46,42 @@ export class InspectPage extends Page {
             throw new Error(message);
         }
 
-        const result = await run(
-            "inspect",
-            { paths: value },
-            { title: "Inspecting selected filesystem entries." }
-        ).catch((e) => {
-            this.notify(e.message, "error");
-            throw e;
-        });
+        const result = await this.inspect(value);
 
-        if (!result.length) return this.notify("No messages received from the NWB Inspector");
+        const messages = result.messages;
 
-        const items = truncateFilePaths(result, getSharedPath(result.map((o) => o.file_path)));
+        const items = truncateFilePaths(messages, getSharedPath(messages.map((item) => item.file_path)));
 
         const list = new InspectorList({ items });
         list.style.padding = "25px";
 
+        // const buttons = document.createElement('div')
+        // buttons.style.display = 'flex'
+        // buttons.style.gap = '10px'
+
+        const downloadJSONButton = new Button({
+            label: "JSON",
+            primary: true,
+            onClick: () =>
+                download("nwb-inspector-report.json", {
+                    header: result.header,
+                    messages: result.messages,
+                }),
+        });
+
+        const downloadTextButton = new Button({
+            label: "Text",
+            primary: true,
+            onClick: async () => {
+                download("nwb-inspector-report.txt", result.text);
+            },
+        });
+
         const modal = new Modal({
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
+            controls: [downloadJSONButton, downloadTextButton],
         });
+
         modal.append(list);
         document.body.append(modal);
 

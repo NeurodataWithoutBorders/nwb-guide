@@ -13,7 +13,7 @@ export class ManagedPage extends Page {
             const sesSplit = path[1].split("-");
             details.subject = subSplit.length === 2 ? subSplit[1] : subSplit[0];
             details.session = sesSplit.length === 2 ? sesSplit[1] : sesSplit[0];
-        } catch (e) {
+        } catch (error) {
             throw new Error("Path must have {subject}/{session} form.");
         }
         return details;

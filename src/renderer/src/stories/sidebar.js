@@ -176,6 +176,8 @@ export class Sidebar extends LitElement {
                         const label = info.label ?? id;
                         const icon = info.icon ?? "";
 
+                        if (info.hidden) return;
+
                         const a = document.createElement("a");
                         a.setAttribute("data-id", id);
                         a.href = "#";

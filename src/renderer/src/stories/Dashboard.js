@@ -119,11 +119,11 @@ export class Dashboard extends LitElement {
             return pushState.apply(window.history, arguments);
         };
 
-        window.onpushstate = window.onpopstate = (e) => {
-            if (e.state) {
-                const titleString = e.state.title ?? e.state.label;
+        window.onpushstate = window.onpopstate = (popEvent) => {
+            if (popEvent.state) {
+                const titleString = popEvent.state.title ?? popEvent.state.label;
                 document.title = `${titleString} - ${this.name}`;
-                const page = this.pagesById[e.state.page]; // ?? this.pagesById[this.#activatePage]
+                const page = this.pagesById[popEvent.state.page]; // ?? this.pagesById[this.#activatePage]
                 if (!page) return;
                 if (page === this.#active) return; // Do not rerender current page
                 this.setMain(page);

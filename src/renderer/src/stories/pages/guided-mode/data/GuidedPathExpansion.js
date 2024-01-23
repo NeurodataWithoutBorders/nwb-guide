@@ -170,9 +170,9 @@ export class GuidedPathExpansionPage extends Page {
                 finalStructure[key] = entry;
             }
 
-            const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((e) => {
-                this.notify(e.message, "error");
-                throw e;
+            const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
+                this.notify(error.message, "error");
+                throw error;
             });
 
             const subjects = Object.keys(results);
@@ -190,12 +190,14 @@ export class GuidedPathExpansionPage extends Page {
             if (!keepExistingData) {
                 for (let sub in globalResults) {
                     const subRef = results[sub];
-                    if (!subRef) delete globalResults[sub]; // Delete removed subjects
+                    if (!subRef)
+                        delete globalResults[sub]; // Delete removed subjects
                     else {
                         for (let ses in globalResults[sub]) {
                             const sesRef = subRef[ses];
 
-                            if (!sesRef) delete globalResults[sub][ses]; // Delete removed sessions
+                            if (!sesRef)
+                                delete globalResults[sub][ses]; // Delete removed sessions
                             else {
                                 const globalSesRef = globalResults[sub][ses];
 
@@ -324,10 +326,12 @@ export class GuidedPathExpansionPage extends Page {
 
                         const interfaceName = parentPath.slice(-1)[0];
 
-                        const results = await run(`locate`, { [interfaceName]: entry }, { swal: false }).catch((e) => {
-                            this.notify(e.message, "error");
-                            throw e;
-                        });
+                        const results = await run(`locate`, { [interfaceName]: entry }, { swal: false }).catch(
+                            (error) => {
+                                this.notify(error.message, "error");
+                                throw error;
+                            }
+                        );
 
                         const resolved = [];
 

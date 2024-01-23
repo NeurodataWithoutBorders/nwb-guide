@@ -94,11 +94,11 @@ export class GuidedSourceDataPage extends ManagedPage {
                         }),
                     })
                         .then((res) => res.json())
-                        .catch((e) => {
+                        .catch((error) => {
                             Swal.close();
                             stillFireSwal = false;
-                            this.notify(`<b>Critical Error:</b> ${e.message}`, "error", 4000);
-                            throw e;
+                            this.notify(`<b>Critical Error:</b> ${error.message}`, "error", 4000);
+                            throw error;
                         });
 
                     Swal.close();
