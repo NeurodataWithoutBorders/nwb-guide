@@ -7,7 +7,7 @@ import { Modal } from "../../../Modal";
 import { validateOnChange } from "../../../../validation/index.js";
 import { resolveGlobalOverrides, resolveMetadata } from "./utils.js";
 import Swal from "sweetalert2";
-import { SimpleTable } from "../../../SimpleTable.js";
+import { SimpleTable } from "../../../SimpleTable";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
@@ -60,7 +60,7 @@ const propsToIgnore = {
 };
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
-import { createTable, getEditableItems, isPatternProperties } from "../../../JSONSchemaInput.js";
+import { createTable, getEditableItems, isPatternProperties, isAdditionalProperties } from "../../../JSONSchemaInput.js";
 import { html } from "lit";
 
 const getInfoFromId = (key) => {
@@ -178,7 +178,15 @@ export class GuidedMetadataPage extends ManagedPage {
 
         resolveMetadata(subject, session, globalState);
 
-        const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
+        const additionalPropertiesToRetitle = [
+            "Ophys.ImageSegmentation",
+        ]
+
+        const patternPropsToRetitle = [
+            "Ophys.Fluorescence", 
+            "Ophys.DfOverF", 
+            "Ophys.SegmentationImages"
+        ];
 
         // Create the form
         const form = new JSONSchemaForm({
@@ -233,33 +241,83 @@ export class GuidedMetadataPage extends ManagedPage {
             renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
                 if (name === "TwoPhotonSeries" && (!this.value || !this.value.length)) return null;
 
-                if (isPatternProperties(this.pattern)) {
+                const isAdditional = isAdditionalProperties(this.pattern);
+                const isPattern = isPatternProperties(this.pattern);
+                
+
+                if (isAdditional || isPattern) {
+
+                    // One table with nested tables for each property
+                    const data = getEditableItems(this.value, this.pattern, { name, schema: this.schema }).reduce(
+                        (acc, { key, value }) => {
+                            acc[key] = value;
+                            return acc;
+                        },
+                        {}
+                    );
+
+                    const nProps = Object.keys(data).length;
+
+                    const schemaCopy = { ...inputSchema };
+
+                    if (additionalPropertiesToRetitle.includes(this.form.base.join("."))) {
+                        inputSchema.title = "";
+                        
+                        return Object.entries(data)
+                        .map(([name, value]) => {
+
+                            const mockInput = {
+                                schema: {
+                                    type: "array",
+                                    items: {
+                                        type: "object",
+                                        additionalProperties: true
+                                    },
+                                },
+                                renderTable: this.renderTable,
+                                value,
+                                form: {
+                                    ignore: this.form.ignore,
+                                },
+                            };
+
+
+                            const table = createTable.call(mockInput, [...localPath], {
+                                onUpdate: (localPath, value) => {
+                                    onUpdate([name, ...localPath], value, true, {
+                                        willTimeout: false,
+                                        onError: (e) => e,
+                                        onWarning: (e) => e,
+                                    })
+                                },
+                                onThrow: onThrow,
+                            })
+
+                            return html`
+                                <div style="width: 100%;">
+                                <h3>${header(name)}</h3>
+                                    ${table}
+                                </div>
+                            `;
+
+                        })
+                    }
+                      
                     if (patternPropsToRetitle.includes(this.form.base.join("."))) {
-                        const schemaCopy = { ...inputSchema };
+                        
                         inputSchema.title = "Plane Metadata<hr>";
-
-                        // One table with nested tables for each property
-                        const data = getEditableItems(this.value, this.pattern, { name, schema: this.schema }).reduce(
-                            (acc, { key, value }) => {
-                                acc[key] = value;
-                                return acc;
-                            },
-                            {}
-                        );
-
-                        const nProps = Object.keys(data).length;
 
                         return Object.entries(data)
                             .map(([name, value]) => {
-                                return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
-                                    // NOTE: No name can be passed into createTable without side effects...
+
+                                const createNestedTable = (value, pattern, schema) => {
                                     const mockInput = {
                                         schema: {
                                             type: "object",
                                             items: schema,
                                         },
                                         renderTable: this.renderTable,
-                                        value: value,
+                                        value,
                                         pattern: pattern,
                                         form: {
                                             ignore: this.form.ignore,
@@ -281,17 +339,43 @@ export class GuidedMetadataPage extends ManagedPage {
                                             })}
                                         </div>
                                     `;
+                                }
+
+                                if (isAdditional) {
+                                    console.warn(value)
+                                    const data = value.reduce((acc, item) => {
+                                        const name = item.name
+                                        acc[name] = item;
+                                        return acc;
+                                    }, {})
+                                    console.error(data)
+                                    return createNestedTable(data, undefined, {
+                                        type: "object",
+                                        items: {
+                                            type: "object",
+                                            additionalProperties: true
+                                        }
+                                    })
+                                }
+
+
+                                return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
+                                    return createNestedTable(value, pattern, schema)
                                 });
                             })
                             .flat();
+
+
                     }
                 }
             },
 
             renderTable: function (name, metadata) {
-                // Ignore all additional properties—even if specified in the data
+
                 const updatedSchema = structuredClone(metadata.schema);
-                updatedSchema.additionalProperties = false;
+
+                if (updatedSchema.additionalProperties !== true) updatedSchema.additionalProperties = false; // Indicate all additional properties are false (if not true)
+
                 metadata.schema = updatedSchema;
 
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors

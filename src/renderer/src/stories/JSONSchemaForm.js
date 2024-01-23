@@ -21,6 +21,8 @@ const encode = (str) => {
     }
 };
 
+const additionalPropPattern = "additional";
+
 const provideNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
 
 import { Validator } from "jsonschema";
@@ -1243,11 +1245,11 @@ export class JSONSchemaForm extends LitElement {
             rendered = [...rendered, ...patternProps];
         }
 
-        const additionalPropPattern = "additional";
         const additionalProps = getEditableItems(results, additionalPropPattern, { schema });
 
         // Render additional properties
         if (allowAdditionalProperties) {
+            
             // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
             if (!additionalProps.length) return rendered;
 
@@ -1262,7 +1264,9 @@ export class JSONSchemaForm extends LitElement {
                 results,
                 additionalPropPattern
             );
+
             return [...rendered, additionalElement];
+
         }
 
         // Delete additional properties off the final results

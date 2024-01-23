@@ -15,6 +15,7 @@ import { Search } from "./Search";
 import tippy from "tippy.js";
 
 export function createTable(fullPath, { onUpdate, onThrow, forceItems = false }) {
+
     const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
 
@@ -260,13 +261,14 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         ignore: nestedIgnore, // According to schema
 
         onUpdate: function () {
-            return onUpdate.call(this, fullPath);
+            return onUpdate.call(this, fullPath, this.data); // Update all table data
         },
 
         validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
 
         ...commonTableMetadata,
     };
+
 
     const table = (this.table = this.renderTable(name, tableMetadata, path)); // Try creating table. Otherwise use nested form
 
@@ -281,7 +283,10 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 // Schema or value indicates editable object
 export const isEditableObject = (schema, value) =>
     schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value));
-const isAdditionalProperties = (pattern) => pattern === "additional";
+
+
+
+export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
 export const getEditableItems = (value, pattern, { name, schema } = {}) => {
@@ -309,8 +314,6 @@ export const getEditableItems = (value, pattern, { name, schema } = {}) => {
         return { key, value };
     });
 };
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isFilesystemSelector = (name = "", format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
