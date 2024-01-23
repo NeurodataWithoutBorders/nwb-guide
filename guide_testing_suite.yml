@@ -15,5 +15,5 @@ pipelines:
       folder_path: ephy_testing_data/phy/phy_example_0
 
   SpikeGLX-v1-SingleProbe-AP:
-    SpikeGLXDataInterface:
+    SpikeGLXRecordingInterface:
       file_path: ephy_testing_data/spikeglx/Noise4Sam_g0/Noise4Sam_g0_imec0/Noise4Sam_g0_t0.imec0.ap.bin

@@ -4,7 +4,7 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
 import projectGlobalSchema from "../../../../../../schemas/json/project/globals.json" assert { type: "json" };
-import guideGlobalSchema from "../../../../../../schemas/json/globals.json" assert { type: "json" };
+import developerGlobalSchema from "../../../../../../schemas/json/developer/globals.json" assert { type: "json" };
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
 
@@ -84,10 +84,17 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
 }
 
 const schema = merge(
-    merge(projectGlobalSchema, guideGlobalSchema),
+    projectGlobalSchema,
     {
         properties: {
-            DANDI: dandiGlobalSchema,
+            DANDI: {
+                title: "DANDI Settings",
+                ...dandiGlobalSchema
+            },
+            developer: {
+                title: "Developer Settings",
+                ...developerGlobalSchema
+            },
         },
         required: ["DANDI"],
     },
@@ -133,6 +140,7 @@ export class SettingsPage extends Page {
         this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
+
     render() {
         this.localState = structuredClone(global.data);
 
@@ -149,31 +157,39 @@ export class SettingsPage extends Page {
             onThrow,
         });
 
+
+        const generatePipelineButton = new Button({
+            label: "Generate Test Pipelines",
+            onClick: async () => {
+                const { testing_data_folder } = this.form.results.developer ?? {};
+
+                if (!testing_data_folder)
+                    return this.#openNotyf(
+                        `Please specify a testing data folder in the Developer section before attempting to generate pipelines.`,
+                        "error"
+                    );
+
+                const { pipelines = {} } = testingSuiteYaml;
+
+                const pipelineNames = Object.keys(pipelines);
+                const nPipelines = pipelineNames.length;
+                pipelineNames
+                    .reverse()
+                    .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
+
+                this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
+            },
+        })
+
+        setTimeout(() => {
+            const testFolderInput = this.form.getInput(["developer", "testing_data_folder"]);
+            console.log(testFolderInput)
+            testFolderInput.after(generatePipelineButton);
+        }, 100)
+
         return html`
             <p><b>Server Port:</b> ${port}</p>
             <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
-            ${new Button({
-                label: "Generate Test Pipelines",
-                onClick: async () => {
-                    const { testing_data_folder } = this.form.results;
-
-                    if (!testing_data_folder)
-                        return this.#openNotyf(
-                            `Please specify a testing data folder before attempting to generate pipelines.`,
-                            "error"
-                        );
-
-                    const { pipelines = {} } = testingSuiteYaml;
-
-                    const pipelineNames = Object.keys(pipelines);
-                    const nPipelines = pipelineNames.length;
-                    pipelineNames
-                        .reverse()
-                        .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
-
-                    this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
-                },
-            })}
             <hr />
             <br />
             ${this.form}
