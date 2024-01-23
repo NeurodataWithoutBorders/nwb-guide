@@ -6,6 +6,7 @@ import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
 import { resolveGlobalOverrides, resolveMetadata, getInfoFromId } from "./utils.js";
+
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";

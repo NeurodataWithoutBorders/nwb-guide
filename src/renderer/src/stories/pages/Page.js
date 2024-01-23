@@ -66,7 +66,8 @@ export class Page extends LitElement {
                 transition === 1 && // Only ensure save for standard forward progression
                 !this.info.states.saved)
         ) {
-            if (transition === 1) await this.save(); // Save before a single forward transition
+            if (transition === 1)
+                await this.save(); // Save before a single forward transition
             else {
                 await Swal.fire({
                     title: "You have unsaved data on this page.",
@@ -144,7 +145,8 @@ export class Page extends LitElement {
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
         // Filter the sessions to run
-        if (typeof original === "number") toRun = randomizeElements(toRun, original); // Grab a random set of sessions
+        if (typeof original === "number")
+            toRun = randomizeElements(toRun, original); // Grab a random set of sessions
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
