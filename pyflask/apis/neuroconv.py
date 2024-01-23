@@ -217,11 +217,14 @@ class InspectNWBFolder(Resource):
         try:
             paths = neuroconv_api.payload["paths"]
 
+            kwargs = {**neuroconv_api.payload}
+            del kwargs["paths"]
+
             if len(paths) == 1:
                 if isfile(paths[0]):
-                    return inspect_nwb_file({"nwbfile_path": paths[0]})
+                    return inspect_nwb_file({"nwbfile_path": paths[0], **kwargs})
                 else:
-                    return inspect_nwb_folder({"path": paths[0]})
+                    return inspect_nwb_folder({"path": paths[0], **kwargs})
 
             else:
                 return inspect_multiple_filesystem_objects(paths)

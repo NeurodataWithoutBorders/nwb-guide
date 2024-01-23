@@ -579,6 +579,7 @@ def generate_dataset(test_data_directory_path: str):
 
 def inspect_nwb_file(payload):
     from nwbinspector import inspect_nwbfile, load_config
+    from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     messages = list(
@@ -592,11 +593,19 @@ def inspect_nwb_file(payload):
         )
     )
 
-    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+    if payload.get("format") == "text":
+        return "\n".join(format_messages(messages=messages))
+
+    header = get_report_header()
+    header["NWBInspector_version"] = str(header["NWBInspector_version"])
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+
+    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
 def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all, load_config
+    from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
@@ -621,7 +630,11 @@ def inspect_nwb_folder(payload):
     except Exception as exception:
         raise exception
 
-    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+    header = get_report_header()
+    header["NWBInspector_version"] = str(header["NWBInspector_version"])
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+
+    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
 def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
