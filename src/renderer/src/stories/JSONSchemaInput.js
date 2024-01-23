@@ -24,14 +24,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 
     const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : {};
 
-    const commonValidationFunction = async (
-        tableBasePath,
-        path,
-        parent,
-        newValue,
-        itemPropSchema
-    ) => {
-        
+    const commonValidationFunction = async (tableBasePath, path, parent, newValue, itemPropSchema) => {
         const warnings = [];
         const errors = [];
 
