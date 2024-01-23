@@ -24,14 +24,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 
     const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : {};
 
-    const commonValidationFunction = async (
-        tableBasePath,
-        path,
-        parent,
-        newValue,
-        itemPropSchema,
-        skip = 0
-    ) => {
+    const commonValidationFunction = async (tableBasePath, path, parent, newValue, itemPropSchema, skip = 0) => {
         const warnings = [];
         const errors = [];
 
@@ -222,8 +215,11 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
                 }
 
                 const toIterate = updatedPath.filter((value) => typeof value === "string");
-                
-                const itemPropsSchema = toIterate.reduce((acc, key) => acc?.properties?.[key] ?? acc?.items?.properties?.[key], schemaCopy);
+
+                const itemPropsSchema = toIterate.reduce(
+                    (acc, key) => acc?.properties?.[key] ?? acc?.items?.properties?.[key],
+                    schemaCopy
+                );
 
                 return commonValidationFunction([], updatedPath, parent, newValue, itemPropsSchema, 1);
             },
