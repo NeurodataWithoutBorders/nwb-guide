@@ -60,7 +60,7 @@ export class InspectPage extends Page {
         // buttons.style.gap = '10px'
 
         const downloadJSONButton = new Button({
-            label: "Download JSON",
+            label: "JSON",
             primary: true,
             onClick: () =>
                 download("nwb-inspector-report.json", {
@@ -70,7 +70,7 @@ export class InspectPage extends Page {
         });
 
         const downloadTextButton = new Button({
-            label: "Download Text",
+            label: "Text",
             primary: true,
             onClick: async () => {
                 download("nwb-inspector-report.txt", result.text);
