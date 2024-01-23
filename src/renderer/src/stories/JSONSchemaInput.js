@@ -15,8 +15,10 @@ import { Search } from "./Search";
 import tippy from "tippy.js";
 
 export function createTable(fullPath, { onUpdate, onThrow, forceItems = false }) {
-    const path = [...fullPath];
-    const name = path.splice(-1)[0];
+
+    const name = fullPath.slice(-1)[0]
+    const path = fullPath.slice(0, -1);
+    
     const schema = this.schema;
     const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
     const validateOnChange = this.validateOnChange;
@@ -182,7 +184,6 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         }
 
         const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
-        console.error("Nested Ignore (2)", schemaPath, nestedIgnore, this.form);
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
@@ -250,8 +251,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         if (table) return table;
     }
 
-    const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : ignore?.[name];
-    console.log("Nested Ignore", name, nestedIgnore);
+    const nestedIgnore = getIgnore(ignore, fullPath)
 
     // Normal table parsing
     const tableMetadata = {
@@ -586,6 +586,8 @@ export class JSONSchemaInput extends LitElement {
 
         const input = this.#render();
 
+        if (input === null) return null; // Hide rendering
+
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
                 this.conditional ? "conditional" : ""
@@ -811,7 +813,7 @@ export class JSONSchemaInput extends LitElement {
                 onUpdate: this.#updateData,
                 onThrow: this.#onThrow,
             });
-            if (custom) return custom;
+            if (custom || custom === null) return custom;
         }
 
         // Handle file and directory formats

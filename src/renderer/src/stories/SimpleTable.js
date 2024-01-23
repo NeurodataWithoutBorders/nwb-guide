@@ -13,6 +13,7 @@ import "./Button";
 import tippy from "tippy.js";
 import { sortTable } from "./Table";
 import { NestedInputCell } from "./table/cells/input";
+import { getIgnore } from "./JSONSchemaForm";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -723,6 +724,8 @@ export class SimpleTable extends LitElement {
 
         const schema = this.#schema[fullInfo.col];
 
+        const ignore = getIgnore(this.ignore, [ fullInfo.col ]);
+
         // Track the cell renderer
         const cell = new TableCell({
             info: {
@@ -735,7 +738,7 @@ export class SimpleTable extends LitElement {
             },
             value,
             schema,
-            ignore: this.ignore,
+            ignore,
             validateOnChange: async (
                 value,
                 path = [],

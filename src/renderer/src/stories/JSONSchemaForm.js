@@ -1091,10 +1091,8 @@ export class JSONSchemaForm extends LitElement {
             const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
 
             if (renderableInside.length) {
-                const allIgnore = this.ignore["*"] ?? {};
-                const ignore = this.ignore[name] ?? {};
-                if (ignore["*"]) ignore["*"] = { ...allIgnore, ...ignore["*"] };
-                else ignore["*"] = allIgnore;
+
+                const ignore = getIgnore(this.ignore, name)
 
                 const ogContext = this;
                 const nested = (this.#nestedForms[name] = new JSONSchemaForm({

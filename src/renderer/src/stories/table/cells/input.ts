@@ -43,14 +43,13 @@ export class NestedEditor extends LitElement {
 
         const schema = this.schema
 
-        console.error('FIX THIS', this.ignore)
 
         const input = this.#input = new JSONSchemaInput({
             schema,
             value: data,
             path: [],
-            ignore: this.ignore,
             form: {
+                ignore: this.ignore,
                 triggerValidation: (name, completePath, _, __, schema, parent) => {
                     const path = [ ...completePath, name ]
                     const value = parent[name]

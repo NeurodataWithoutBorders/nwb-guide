@@ -109,7 +109,16 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
                 "name",
                 "description",
                 "device",
-                "optical_channel"
+                "optical_channel",
+                "excitation_lambda",
+                "indicator",
+                "location",
+                "reference_frame",
+                "imaging_rate",
+                'grid_spacing',
+                "grid_spacing_unit",
+                "origin_coords",
+                'origin_coords_unit'
             ]
 
             imagingPlane.items.properties.optical_channel.items.order = ["name", "description"]
