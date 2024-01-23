@@ -29,14 +29,15 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         path,
         parent,
         newValue,
-        itemPropSchema,
-        skip = 0
+        itemPropSchema
     ) => {
         const warnings = [];
         const errors = [];
 
+
         const name = path.slice(-1)[0];
         const completePath = [...tableBasePath, ...path.slice(0, -1)];
+
         const result = await (validateOnChange
             ? this.onValidate
                 ? this.onValidate()

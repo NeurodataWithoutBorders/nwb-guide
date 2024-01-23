@@ -800,6 +800,10 @@ export class SimpleTable extends LitElement {
 
         td.ondblclick = () => cell.toggle(true);
 
+        cell.addEventListener('blur', () => {
+            this.#clearSelected(); // NOTE: May now make other clearSelected calls redundant
+        })
+
         td.appendChild(cell);
         return td;
     };

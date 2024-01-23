@@ -228,6 +228,9 @@ export class TableCell extends LitElement {
                     ignore: this.ignore
                 }
             })
+
+            // Forward blur events
+            this.input.addEventListener('blur', () =>  this.dispatchEvent(new Event('blur')))
         }
 
         this.#cls = cls

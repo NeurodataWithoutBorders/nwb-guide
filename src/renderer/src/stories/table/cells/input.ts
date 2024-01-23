@@ -53,7 +53,7 @@ export class NestedEditor extends LitElement {
                 triggerValidation: (name, completePath, _, __, schema, parent) => {
                     const path = [ ...completePath, name ]
                     const value = parent[name]
-                    if (this.validateOnChange) return this.validateOnChange(value, path, parent) // NOTE: Flipped because usually only value is passed
+                    if (this.validateOnChange) return this.validateOnChange(value, path, parent, schema) // NOTE: Flipped because usually only value is passed
                 }
             },
             renderTable: (name, metadata, path) => new SimpleTable(metadata) // NOTE: Would be most ideal to have a reference to the containing input...

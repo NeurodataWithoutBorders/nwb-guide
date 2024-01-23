@@ -41,7 +41,7 @@ const propsToIgnore = {
             control_description: true,
             comments: true,
             resolution: true,
-            dimension: true,
+            // dimension: true,
             device: true,
             unit: true,
             conversion: true,

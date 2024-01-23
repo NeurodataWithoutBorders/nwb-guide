@@ -93,7 +93,9 @@ export class TableCellBase extends LitElement {
             if (ev.inputType.includes('history')) this.setText(this.#editable.innerText) // Catch undo / redo}
         })
 
-        this.#editable.addEventListener('blur', () => this.#editable.removeAttribute('contenteditable'))
+        this.#editable.addEventListener('blur', () => {
+            this.#editable.removeAttribute('contenteditable')
+        })
 
     }
 
@@ -111,6 +113,18 @@ export class TableCellBase extends LitElement {
         if (state) {
 
             this.setAttribute('editing', '')
+
+            const listenForEnter = (ev: KeyboardEvent) => {
+                if (ev.key === 'Enter') {
+                    ev.preventDefault()
+                    ev.stopPropagation()
+                    this.#editable.blur()
+                    this.removeEventListener('keydown', listenForEnter)
+                    this.toggle(false)
+                }
+            }
+
+            this.addEventListener('keydown', listenForEnter)
 
             if (this.#editor === this.#editable) {
                 this.#editable.setAttribute('contenteditable', '')
