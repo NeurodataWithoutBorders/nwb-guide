@@ -31,9 +31,9 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         newValue,
         itemPropSchema
     ) => {
+        
         const warnings = [];
         const errors = [];
-
 
         const name = path.slice(-1)[0];
         const completePath = [...tableBasePath, ...path.slice(0, -1)];
@@ -223,8 +223,11 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
                 }
 
                 const toIterate = updatedPath.filter((value) => typeof value === "string");
-                
-                const itemPropsSchema = toIterate.reduce((acc, key) => acc?.properties?.[key] ?? acc?.items?.properties?.[key], schemaCopy);
+
+                const itemPropsSchema = toIterate.reduce(
+                    (acc, key) => acc?.properties?.[key] ?? acc?.items?.properties?.[key],
+                    schemaCopy
+                );
 
                 return commonValidationFunction([], updatedPath, parent, newValue, itemPropsSchema, 1);
             },
