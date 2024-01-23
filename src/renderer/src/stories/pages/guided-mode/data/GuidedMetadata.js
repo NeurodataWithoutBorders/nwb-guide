@@ -60,11 +60,7 @@ const propsToIgnore = {
 };
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
-import {
-    createTable,
-    getEditableItems,
-    isPatternProperties,
-} from "../../../JSONSchemaInput.js";
+import { createTable, getEditableItems, isPatternProperties } from "../../../JSONSchemaInput.js";
 import { html } from "lit";
 
 const getInfoFromId = (key) => {
@@ -235,11 +231,9 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
-
-                if (name === "TwoPhotonSeries" && (!this.value || !this.value.length)) return null
+                if (name === "TwoPhotonSeries" && (!this.value || !this.value.length)) return null;
 
                 if (isPatternProperties(this.pattern)) {
-
                     if (patternPropsToRetitle.includes(this.form.base.join("."))) {
                         const schemaCopy = { ...inputSchema };
                         inputSchema.title = "Plane Metadata<hr>";
@@ -258,7 +252,6 @@ export class GuidedMetadataPage extends ManagedPage {
                         return Object.entries(data)
                             .map(([name, value]) => {
                                 return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
-
                                     // NOTE: No name can be passed into createTable without side effects...
                                     const mockInput = {
                                         schema: {
@@ -269,8 +262,8 @@ export class GuidedMetadataPage extends ManagedPage {
                                         value: value,
                                         pattern: pattern,
                                         form: {
-                                            ignore: this.form.ignore
-                                        }
+                                            ignore: this.form.ignore,
+                                        },
                                     };
 
                                     return html`
@@ -296,12 +289,11 @@ export class GuidedMetadataPage extends ManagedPage {
             },
 
             renderTable: function (name, metadata) {
-
                 // Ignore all additional properties—even if specified in the data
                 const updatedSchema = structuredClone(metadata.schema);
                 updatedSchema.additionalProperties = false;
                 metadata.schema = updatedSchema;
-                
+
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
                 if (name !== "Electrodes") return new SimpleTable(metadata);
                 else return true; // All other tables are handled by the default behavior

@@ -724,7 +724,7 @@ export class SimpleTable extends LitElement {
 
         const schema = this.#schema[fullInfo.col];
 
-        const ignore = getIgnore(this.ignore, [ fullInfo.col ]);
+        const ignore = getIgnore(this.ignore, [fullInfo.col]);
 
         // Track the cell renderer
         const cell = new TableCell({

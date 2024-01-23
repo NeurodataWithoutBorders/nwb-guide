@@ -15,10 +15,9 @@ import { Search } from "./Search";
 import tippy from "tippy.js";
 
 export function createTable(fullPath, { onUpdate, onThrow, forceItems = false }) {
-
-    const name = fullPath.slice(-1)[0]
+    const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
-    
+
     const schema = this.schema;
     const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
     const validateOnChange = this.validateOnChange;
@@ -251,7 +250,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         if (table) return table;
     }
 
-    const nestedIgnore = getIgnore(ignore, fullPath)
+    const nestedIgnore = getIgnore(ignore, fullPath);
 
     // Normal table parsing
     const tableMetadata = {
