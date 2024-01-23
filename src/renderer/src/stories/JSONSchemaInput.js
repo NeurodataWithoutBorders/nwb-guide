@@ -30,7 +30,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         path,
         parent,
         newValue,
-        baseSchema = itemSchema,
+        itemPropSchema,
         skip = 0
     ) => {
         const warnings = [];
@@ -38,14 +38,6 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 
         const name = path.slice(-1)[0];
         const completePath = [...tableBasePath, ...path.slice(0, -1)];
-
-        // const toIterate = path.slice(skip);
-        const toIterate = path.filter((value) => typeof value === "string");
-
-        const itemPropSchema = toIterate.reduce((acc, key) => {
-            return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
-        }, baseSchema);
-
         const result = await (validateOnChange
             ? this.onValidate
                 ? this.onValidate()
@@ -230,7 +222,11 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
                     } else delete previousValidValues[rowIdx];
                 }
 
-                return commonValidationFunction([], updatedPath, parent, newValue, schemaCopy, 1);
+                const toIterate = updatedPath.filter((value) => typeof value === "string");
+                
+                const itemPropsSchema = toIterate.reduce((acc, key) => acc?.properties?.[key] ?? acc?.items?.properties?.[key], schemaCopy);
+
+                return commonValidationFunction([], updatedPath, parent, newValue, itemPropsSchema, 1);
             },
             ...commonTableMetadata,
         };

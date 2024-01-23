@@ -21,6 +21,7 @@ type OnValidateFunction = (info: ValidationResult) => void
 type TableCellProps = {
     value: string,
     info: { col: string }
+    ignore: { [key: string]: boolean },
     schema: {[key: string]: any},
     validateOnChange?: ValidationFunction,
     onValidate?: OnValidateFunction,

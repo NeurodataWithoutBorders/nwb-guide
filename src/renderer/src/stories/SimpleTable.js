@@ -743,12 +743,12 @@ export class SimpleTable extends LitElement {
                 value,
                 path = [],
                 parent = { ...this.#data[fullInfo.row] }, // A copy of the parent
-                schema
+                innerSchema = schema
             ) => {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
                 const res = this.validateOnChange
-                    ? await this.validateOnChange([row, fullInfo.col, ...path], parent, value, schema)
+                    ? await this.validateOnChange([row, fullInfo.col, ...path], parent, value, innerSchema)
                     : true;
 
                 return res;
