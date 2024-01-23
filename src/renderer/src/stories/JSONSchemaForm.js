@@ -684,7 +684,8 @@ export class JSONSchemaForm extends LitElement {
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore["*"]?.[key]) return false; // Skip all properties with this name
+                if (this.ignore["*"]?.[key])
+                    return false; // Skip all properties with this name
                 else if (this.ignore[key] === true) return false; // Skip this property
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);

@@ -286,7 +286,8 @@ export class SimpleTable extends LitElement {
     #data = [];
     get data() {
         // Remove empty array entries
-        if (Array.isArray(this.#data)) return this.#data; //.filter((o) => Object.keys(o).length);
+        if (Array.isArray(this.#data))
+            return this.#data; //.filter((o) => Object.keys(o).length);
         else return this.#data;
     }
 
@@ -679,7 +680,8 @@ export class SimpleTable extends LitElement {
         let target = this.#data;
 
         if (!isResolved) {
-            if (!this.keyColumn) this.#data[rowName] = {}; // Add new row to array
+            if (!this.keyColumn)
+                this.#data[rowName] = {}; // Add new row to array
             else {
                 rowName = row;
                 if (!this.#unresolved[rowName]) this.#unresolved[rowName] = {}; // Ensure row exists
