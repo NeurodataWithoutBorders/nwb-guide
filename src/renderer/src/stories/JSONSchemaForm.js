@@ -1249,7 +1249,6 @@ export class JSONSchemaForm extends LitElement {
 
         // Render additional properties
         if (allowAdditionalProperties) {
-            
             // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
             if (!additionalProps.length) return rendered;
 
@@ -1266,7 +1265,6 @@ export class JSONSchemaForm extends LitElement {
             );
 
             return [...rendered, additionalElement];
-
         }
 
         // Delete additional properties off the final results
