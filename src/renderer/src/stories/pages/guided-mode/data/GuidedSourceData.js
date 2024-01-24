@@ -244,14 +244,13 @@ export class GuidedSourceDataPage extends ManagedPage {
                         const header = document.createElement("div");
                         const h2 = document.createElement("h2");
                         Object.assign(h2.style, {
-                            marginBottom: '10px'
-                        })
-                        h2.innerText = `Alignment Preview: ${subject}/${session}`
-                        const warning = document.createElement('small')
-                        warning.innerHTML = '<b>Warning:</b> This is just a preview. We do not currently have the features implemented to change the alignment of your interfaces.'
-                        header.append(h2, warning)
-
-
+                            marginBottom: "10px",
+                        });
+                        h2.innerText = `Alignment Preview: ${subject}/${session}`;
+                        const warning = document.createElement("small");
+                        warning.innerHTML =
+                            "<b>Warning:</b> This is just a preview. We do not currently have the features implemented to change the alignment of your interfaces.";
+                        header.append(h2, warning);
 
                         const modal = new Modal({
                             header,
