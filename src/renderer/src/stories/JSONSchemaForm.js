@@ -388,7 +388,7 @@ export class JSONSchemaForm extends LitElement {
                     else e.message = `${e.message}. ${provideNaNMessage}`;
                 }
 
-                const prevHeader = name ? header(name) : 'Row'
+                const prevHeader = name ? header(name) : "Row";
 
                 return {
                     type: "error",
