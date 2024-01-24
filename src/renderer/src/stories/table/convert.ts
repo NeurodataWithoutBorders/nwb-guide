@@ -1,5 +1,5 @@
 export const renderValue = (value: any, schema: any) => {
-    
+
     if (schema.type === 'number' || schema.type === 'integer') {
         if (value === null) return ''
     }
