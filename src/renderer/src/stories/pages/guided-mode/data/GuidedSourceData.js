@@ -241,8 +241,8 @@ export class GuidedSourceDataPage extends ManagedPage {
                             message: "Please wait...",
                         });
 
-                        const header = document.createElement('div')
-                        const h2 = document.createElement('h2')
+                        const header = document.createElement("div");
+                        const h2 = document.createElement("h2");
                         Object.assign(h2.style, {
                             marginBottom: '10px'
                         })
@@ -254,7 +254,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
 
                         const modal = new Modal({
-                            header
+                            header,
                         });
 
                         document.body.append(modal);
@@ -269,11 +269,12 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         modal.append(content);
 
-                        const flatTimes = Object.values(results).map(interfaceTimestamps => {
-                            [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]]
-                        })
-                        .flat()
-                        .filter((timestamp) => !isNaN(timestamp));
+                        const flatTimes = Object.values(results)
+                            .map((interfaceTimestamps) => {
+                                [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]];
+                            })
+                            .flat()
+                            .filter((timestamp) => !isNaN(timestamp));
 
                         const minTime = Math.min(...flatTimes);
                         const maxTime = Math.max(...flatTimes);
