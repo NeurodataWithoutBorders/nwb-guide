@@ -298,7 +298,7 @@ export class Table extends LitElement {
                               [k],
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
                               value,
-                              info.properties[k]
+                              info
                           )
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
 
