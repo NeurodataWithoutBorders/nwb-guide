@@ -35,7 +35,7 @@ export class TableCellBase extends LitElement {
     static get styles() {
         return css`
 
-            #editable {
+            .editable {
                 padding: 5px 10px;
                 pointer-events: none;
             }
@@ -45,14 +45,15 @@ export class TableCellBase extends LitElement {
                 cursor: text;
             }
 
-             .editor, :host([editing]) .renderer {
+            #editor, :host([editing]) .renderer {
                 opacity: 0;
                 pointer-events: none;
-                position: absolute;
+                display: none;
             }
 
-            .renderer, :host([editing]) .editor {
+            .renderer, :host([editing]) #editor {
                 position: relative;
+                display: unset;
                 pointer-events: all;
                 opacity: 1;
             }
@@ -229,33 +230,22 @@ export class TableCellBase extends LitElement {
 
         this.interacted = false
 
-        this.#editable.id = 'editable'
+        this.#editable.classList.add('editable')
 
         const editor = this.#editor = this.#render('editor')
         const renderer = this.#renderer = this.#render('renderer')
+        
 
         this.addEventListener('blur', (ev) => {
             ev.stopPropagation()
             this.toggle(false)
         })
 
+        
 
         if (!editor || !renderer || renderer === editor) return editor || renderer
-        // else {
-        //     const container = document.createElement('div')
-        //     const rendererContainer = document.createElement('div')
-        //     rendererContainer.classList.add('renderer')
-        //     rendererContainer.append(renderer)
 
-        //     const editorContainer = document.createElement('div')
-        //     editorContainer.classList.add('renderer')
-        //     editorContainer.append(renderer)
-
-        //     container.append(renderer, editor)
-        //     return container
-        // }
-
-        return html`<div class="renderer">${renderer}</div><div class="editor">${editor}</div>`
+        return html`<div class="renderer">${renderer}</div><div id="editor">${editor}</div>`
     }
 }
 

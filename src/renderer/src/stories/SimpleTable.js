@@ -238,8 +238,8 @@ export class SimpleTable extends LitElement {
                 const path = this.#getPath(ev);
                 if (path[0] === document.body)
                     Object.values(this.#selected).forEach((row) => {
-                        row.forEach((row) => {
-                            if (row.type !== "table") row.setInput("");
+                        row.forEach((cell) => {
+                            if (cell.type !== "table") cell.setInput("");
                         });
                     });
                 return;
