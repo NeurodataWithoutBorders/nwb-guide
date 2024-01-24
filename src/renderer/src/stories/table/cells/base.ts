@@ -234,14 +234,14 @@ export class TableCellBase extends LitElement {
 
         const editor = this.#editor = this.#render('editor')
         const renderer = this.#renderer = this.#render('renderer')
-        
+
 
         this.addEventListener('blur', (ev) => {
             ev.stopPropagation()
             this.toggle(false)
         })
 
-        
+
 
         if (!editor || !renderer || renderer === editor) return editor || renderer
 
