@@ -189,7 +189,7 @@ export class Modal extends LitElement {
       <nwb-overlay .open=${this.open}>
         <div class="modal-content ${this.open ? 'open' : ''}" style="${this.width ? `width: ${this.width};` : ''} ${this.height ? `height: ${this.height};` : ''}">
           <div class="modal-header">
-              <span title="${this.header}">${this.header}</span>
+              ${(this.header && this.header instanceof HTMLElement) ? this.header : html`span title="${this.header}">${this.header}</span>`}
               <div class="modal-controls">
               ${ this.controls }
               ${ this.showCloseButton ? html`<nwb-button secondary @click="${this.toggle}">${this.closeText ?? 'Close'}</nwb-button>` : '' }

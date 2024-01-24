@@ -15,6 +15,14 @@ export function populateWithProjectMetadata(info, globalState) {
     return copy;
 }
 
+export const getInfoFromId = (key) => {
+    let [subject, session] = key.split("/");
+    if (subject.startsWith("sub-")) subject = subject.slice(4);
+    if (session.startsWith("ses-")) session = session.slice(4);
+
+    return { subject, session };
+};
+
 export function resolveGlobalOverrides(subject, globalState) {
     const subjectMetadataCopy = { ...globalState.subjects[subject] };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata

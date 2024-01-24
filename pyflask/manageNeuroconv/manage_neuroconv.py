@@ -371,6 +371,27 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
 
+def get_interface_alignment(info: dict) -> dict:
+    converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
+
+    timestamps = {}
+    for name, interface in converter.data_interface_objects.items():
+        # Run interface.get_timestamps if it has the method
+        if hasattr(interface, "get_timestamps"):
+            try:
+                interface_timestamps = interface.get_timestamps()
+                if len(interface_timestamps) == 1:
+                    interface_timestamps = interface_timestamps[0]  # Correct for video interface nesting
+                timestamps[name] = interface_timestamps.tolist()
+
+            except Exception:
+                timestamps[name] = []
+        else:
+            timestamps[name] = []
+
+    return timestamps
+
+
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
