@@ -169,11 +169,10 @@ export class SimpleTable extends LitElement {
             : this.rendered;
     rendered = this.#updateRendered(true);
 
-
     #onUpdate = (...args) => {
-        this.onUpdate(...args)
-        if (this.#context) this.#updateContextMenuRendering()
-    }
+        this.onUpdate(...args);
+        if (this.#context) this.#updateContextMenuRendering();
+    };
 
     constructor({
         schema,
@@ -293,8 +292,7 @@ export class SimpleTable extends LitElement {
     #data = [];
     get data() {
         // Remove empty array entries
-        if (Array.isArray(this.#data))
-            return this.#data.filter((o) => Object.keys(o).length);
+        if (Array.isArray(this.#data)) return this.#data.filter((o) => Object.keys(o).length);
         else return this.#data;
     }
 
@@ -451,27 +449,26 @@ export class SimpleTable extends LitElement {
     getRow = (i) => Object.values(this.#cells[i]);
 
     #updateContextMenuRendering = () => {
-        const { minItems, maxItems } = this.schema
+        const { minItems, maxItems } = this.schema;
 
-        if ( minItems || maxItems ) {
-            const nRows = this.data.length
-            const addRowButton = this.#context.shadowRoot.querySelector('#add-row')
-            const removeRowButton = this.#context.shadowRoot.querySelector('#remove-row')
+        if (minItems || maxItems) {
+            const nRows = this.data.length;
+            const addRowButton = this.#context.shadowRoot.querySelector("#add-row");
+            const removeRowButton = this.#context.shadowRoot.querySelector("#remove-row");
 
-            removeRowButton.removeAttribute('disabled')
-            addRowButton.removeAttribute('disabled')
+            removeRowButton.removeAttribute("disabled");
+            addRowButton.removeAttribute("disabled");
 
-            if (nRows <= minItems) removeRowButton.setAttribute('disabled', '')
-            
-            if (nRows >= maxItems) addRowButton.setAttribute('disabled', '')
-        
+            if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
+
+            if (nRows >= maxItems) addRowButton.setAttribute("disabled", "");
         }
-    }
+    };
 
     #menuOptions = {
         row: {
             add: {
-                id:"add-row",
+                id: "add-row",
                 label: "Add Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
@@ -481,7 +478,7 @@ export class SimpleTable extends LitElement {
                 },
             },
             remove: {
-                id:"remove-row",
+                id: "remove-row",
                 label: "Remove Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
@@ -506,7 +503,7 @@ export class SimpleTable extends LitElement {
 
         column: {
             add: {
-                id:"add-column",
+                id: "add-column",
                 label: "Add Column",
                 onclick: (path) => {
                     console.log("add column");
@@ -514,7 +511,7 @@ export class SimpleTable extends LitElement {
                 },
             },
             remove: {
-                id:"remove-column",
+                id: "remove-column",
                 label: "Remove Column",
                 onclick: (path) => {
                     console.log("remove column");
@@ -527,11 +524,10 @@ export class SimpleTable extends LitElement {
     generateContextMenu(options) {
         const items = [];
 
+        const { minItems, maxItems } = this.schema;
+        const nRows = this.data.length;
 
-        const { minItems, maxItems } = this.schema
-        const nRows = this.data.length
-        
-        const noRowEdits = minItems && maxItems && minItems === maxItems && nRows === minItems && nRows === maxItems
+        const noRowEdits = minItems && maxItems && minItems === maxItems && nRows === minItems && nRows === maxItems;
 
         if (!noRowEdits) {
             if (options.row?.add) items.push(this.#menuOptions.row.add);
@@ -542,13 +538,12 @@ export class SimpleTable extends LitElement {
         if (options.column?.remove) items.push(this.#menuOptions.column.remove);
 
         if (items.length) {
-
             this.#context = new ContextMenu({
                 target: this.shadowRoot.querySelector("table"),
                 items,
             });
 
-            this.#context.updated = () => this.#updateContextMenuRendering() // Run when done rendering
+            this.#context.updated = () => this.#updateContextMenuRendering(); // Run when done rendering
 
             document.body.append(this.#context); // Insert context menu
         }
@@ -853,26 +848,24 @@ export class SimpleTable extends LitElement {
 
     #schema = {};
 
-    #itemSchema = {}
-    #itemProps = {}
+    #itemSchema = {};
+    #itemProps = {};
 
-    get schema () {
-        return this.#schema
+    get schema() {
+        return this.#schema;
     }
 
-    set schema(schema){
-        this.#schema = schema
-        this.#itemSchema = this.#schema.items
-        this.#itemProps = { ...this.#itemSchema.properties }
+    set schema(schema) {
+        this.#schema = schema;
+        this.#itemSchema = this.#schema.items;
+        this.#itemProps = { ...this.#itemSchema.properties };
     }
 
     render() {
-        
         this.#updateRendered();
         this.#resetLoadState();
 
         const entries = this.#itemProps
-
 
         // Add existing additional / pattern properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties !== false || this.#itemSchema.patternProperties) {
@@ -888,10 +881,9 @@ export class SimpleTable extends LitElement {
             }, entries);
         }
 
+        // Ignore any additions in the ignore configuration
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
-
-        console.error('Items', entries, this.ignore, this.schema)
 
         // Sort Columns by Key Column and Requirement
         this.colHeaders = sortTable(

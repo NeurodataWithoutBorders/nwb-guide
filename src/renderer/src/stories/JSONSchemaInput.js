@@ -73,7 +73,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     };
 
     const addPropertyKeyToSchema = (schema) => {
-
         const schemaCopy = structuredClone(schema);
 
         const schemaItemsRef = schemaCopy["items"]
@@ -91,7 +90,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     };
 
     const createNestedTable = (id, value, { name: propName = id, nestedSchema = schema } = {}) => {
-
         const schemaCopy = addPropertyKeyToSchema(nestedSchema);
 
         const resultPath = [...path];
@@ -102,8 +100,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         const rowData = Object.entries(value).map(([key, value]) => {
             return !schemaCopy["items"]
                 ? { [tempPropertyKey]: key, [tempPropertyValueKey]: value }
-                : 
-                { [tempPropertyKey]: key, ...value };
+                : { [tempPropertyKey]: key, ...value };
         });
 
         if (propName) {
@@ -159,8 +156,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         merge(overrides.ignore, nestedIgnore)
 
         merge(overrides.schema, schemaCopy, { arrays: true })
-
-        console.log('Ignoring', this.path, nestedIgnore, this.value, overrides)
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,

@@ -35,48 +35,45 @@ export function resolveGlobalOverrides(subject, globalState) {
     return overrides;
 }
 
-const isPatternResult = Symbol('ispatternresult')
+const isPatternResult = Symbol("ispatternresult");
 
-export function resolveFromPath (path, target) {
+export function resolveFromPath(path, target) {
     return path.reduce((acc, key) => {
-        if (!acc) return
-        if (acc[isPatternResult]) return acc
-        if (key in acc) return acc[key]
+        if (!acc) return;
+        if (acc[isPatternResult]) return acc;
+        if (key in acc) return acc[key];
         else {
-            const items = getEditableItems(acc, true, { name: key })
-            const object = items.reduce((acc, {key, value}) => acc[key] = value, {})
-            object[isPatternResult] = true
-            return object
+            const items = getEditableItems(acc, true, { name: key });
+            const object = items.reduce((acc, { key, value }) => (acc[key] = value), {});
+            object[isPatternResult] = true;
+            return object;
         }
-    }, target)
-
+    }, target);
 }
 
-export function drillSchemaProperties(schema={}, callback, target, path = [], inPatternProperties = false) {
+export function drillSchemaProperties(schema = {}, callback, target, path = [], inPatternProperties = false) {
+    const properties = schema.properties ?? {};
 
-    const properties = schema.properties ?? {}
-
-    const patternProperties = schema.patternProperties ?? {}
+    const patternProperties = schema.patternProperties ?? {};
 
     for (let regexp in patternProperties) {
         const info = patternProperties[regexp];
-        const updatedPath = [...path, regexp]
-        callback(updatedPath, info, undefined, true)
+        const updatedPath = [...path, regexp];
+        callback(updatedPath, info, undefined, true);
         drillSchemaProperties(info, callback, undefined, updatedPath, true);
     }
 
     for (let name in properties) {
         const info = properties[name];
 
-        const updatedPath = [...path, name]
+        const updatedPath = [...path, name];
 
-        callback(updatedPath, info, target)
+        callback(updatedPath, info, target);
 
         drillSchemaProperties(info, callback, target?.[name], updatedPath, inPatternProperties);
     }
 
     return schema;
-
 }
 
 export function resolveProperties(properties = {}, target, globals = {}) {

@@ -116,7 +116,7 @@ export class GuidedSubjectsPage extends Page {
         this.table = new Table({
             schema: {
                 type: "array",
-                items: getSubjectSchema()
+                items: getSubjectSchema(),
             },
             data: subjects,
             globals: this.info.globalState.project.Subject,
