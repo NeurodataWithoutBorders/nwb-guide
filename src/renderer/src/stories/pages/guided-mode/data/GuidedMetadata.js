@@ -5,7 +5,8 @@ import { ManagedPage } from "./ManagedPage.js";
 import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
-import { resolveGlobalOverrides, resolveMetadata } from "./utils.js";
+import { resolveGlobalOverrides, resolveMetadata, getInfoFromId } from "./utils.js";
+
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable";
 import { onThrow } from "../../../../errors";
@@ -67,14 +68,6 @@ import {
     isAdditionalProperties,
 } from "../../../JSONSchemaInput.js";
 import { html } from "lit";
-
-const getInfoFromId = (key) => {
-    let [subject, session] = key.split("/");
-    if (subject.startsWith("sub-")) subject = subject.slice(4);
-    if (session.startsWith("ses-")) session = session.slice(4);
-
-    return { subject, session };
-};
 
 export class GuidedMetadataPage extends ManagedPage {
     constructor(...args) {
