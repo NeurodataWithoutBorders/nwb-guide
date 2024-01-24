@@ -256,7 +256,8 @@ export class SimpleTable extends LitElement {
             if ((keyDownEvent.metaKey || keyDownEvent.ctrlKey || keyDownEvent.shiftKey) && !keyDownEvent.key) return;
 
             // Undo / Redo
-            if ((isMac ? keyDownEvent.metaKey : keyDownEvent.ctrlKey) && keyDownEvent.key === "z") return this.#clearSelected();
+            if ((isMac ? keyDownEvent.metaKey : keyDownEvent.ctrlKey) && keyDownEvent.key === "z")
+                return this.#clearSelected();
 
             if (this.#firstSelected) {
                 const path = this.#getPath(keyDownEvent);
