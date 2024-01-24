@@ -73,51 +73,37 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
     };
 
     const addPropertyKeyToSchema = (schema) => {
+
         const schemaCopy = structuredClone(schema);
 
-        const schemaRef = forceItems ? schemaCopy["items"] : schemaCopy;
+        const schemaItemsRef = schemaCopy["items"]//forceItems ? schemaCopy["items"] : schemaCopy;
 
-        if (!schemaRef.properties) schemaRef.properties = {};
-        if (!schemaRef.required) schemaRef.required = [];
+        if (!schemaItemsRef.properties) schemaItemsRef.properties = {};
+        if (!schemaItemsRef.required) schemaItemsRef.required = [];
 
-        schemaRef.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
-        if (!schemaRef.order) schemaRef.order = [];
-        schemaRef.order.unshift(tempPropertyKey);
+        schemaItemsRef.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
+        if (!schemaItemsRef.order) schemaItemsRef.order = [];
+        schemaItemsRef.order.unshift(tempPropertyKey);
 
-        schemaRef.required.push(tempPropertyKey);
+        schemaItemsRef.required.push(tempPropertyKey);
 
-        if (!schema["items"]) {
-            const resolvedItemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
-            if (!resolvedItemSchema) return schemaRef;
-
-            delete schemaRef.patternProperties;
-
-            schemaRef.properties[tempPropertyValueKey] = {
-                type: "array",
-                items: resolvedItemSchema.properties ? addPropertyKeyToSchema(itemSchema) : itemSchema,
-                title: "Property Value",
-                __generated: true,
-            };
-
-            schemaRef.required.push(tempPropertyValueKey);
-        }
-
-        if (schemaRef.__generated) return schemaRef["items"]; // Only return the relevant items for tables in nested tables
-
-        return schemaRef;
+        return schemaCopy;
     };
 
-    const createNestedTable = (id, value, { name: propName = id, schema = itemSchema } = {}) => {
-        const schemaCopy = addPropertyKeyToSchema(schema);
+    const createNestedTable = (id, value, { name: propName = id, nestedSchema = schema } = {}) => {
+
+        const schemaCopy = addPropertyKeyToSchema(nestedSchema);
 
         const resultPath = [...path];
 
         const schemaPath = [...fullPath];
 
+        // THIS IS AN ISSUE
         const rowData = Object.entries(value).map(([key, value]) => {
-            return !schema["items"]
+            return !schemaCopy["items"]
                 ? { [tempPropertyKey]: key, [tempPropertyValueKey]: value }
-                : { [tempPropertyKey]: key, ...value };
+                : 
+                { [tempPropertyKey]: key, ...value };
         });
 
         if (propName) {
@@ -169,6 +155,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         }
 
         const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
+
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
@@ -247,7 +234,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 
     // Normal table parsing
     const tableMetadata = {
-        schema: itemSchema,
+        schema,
         data: this.value,
 
         ignore: nestedIgnore, // According to schema

@@ -169,6 +169,12 @@ export class SimpleTable extends LitElement {
             : this.rendered;
     rendered = this.#updateRendered(true);
 
+
+    #onUpdate = (...args) => {
+        this.onUpdate(...args)
+        if (this.#context) this.#updateContextMenuRendering()
+    }
+
     constructor({
         schema,
         data,
@@ -288,7 +294,7 @@ export class SimpleTable extends LitElement {
     get data() {
         // Remove empty array entries
         if (Array.isArray(this.#data))
-            return this.#data; //.filter((o) => Object.keys(o).length);
+            return this.#data.filter((o) => Object.keys(o).length);
         else return this.#data;
     }
 
@@ -380,7 +386,7 @@ export class SimpleTable extends LitElement {
             } else {
                 value = hasRow ? this.#data[row][col] : undefined;
                 if (this.#isUndefined(value)) value = this.globals[col];
-                if (this.#isUndefined(value)) value = this.schema.properties?.[col]?.default;
+                if (this.#isUndefined(value)) value = this.#itemSchema.properties?.[col]?.default;
                 if (this.#isUndefined(value)) value = "";
             }
             return value;
@@ -444,9 +450,28 @@ export class SimpleTable extends LitElement {
     addRow = (anchorRow = this.#cells.length - 1, n) => this.#updateRows(anchorRow, 1)[0];
     getRow = (i) => Object.values(this.#cells[i]);
 
+    #updateContextMenuRendering = () => {
+        const { minItems, maxItems } = this.schema
+
+        if ( minItems || maxItems ) {
+            const nRows = this.data.length
+            const addRowButton = this.#context.shadowRoot.querySelector('#add-row')
+            const removeRowButton = this.#context.shadowRoot.querySelector('#remove-row')
+
+            removeRowButton.removeAttribute('disabled')
+            addRowButton.removeAttribute('disabled')
+
+            if (nRows <= minItems) removeRowButton.setAttribute('disabled', '')
+            
+            if (nRows >= maxItems) addRowButton.setAttribute('disabled', '')
+        
+        }
+    }
+
     #menuOptions = {
         row: {
             add: {
+                id:"add-row",
                 label: "Add Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
@@ -456,6 +481,7 @@ export class SimpleTable extends LitElement {
                 },
             },
             remove: {
+                id:"remove-row",
                 label: "Remove Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
@@ -480,6 +506,7 @@ export class SimpleTable extends LitElement {
 
         column: {
             add: {
+                id:"add-column",
                 label: "Add Column",
                 onclick: (path) => {
                     console.log("add column");
@@ -487,6 +514,7 @@ export class SimpleTable extends LitElement {
                 },
             },
             remove: {
+                id:"remove-column",
                 label: "Remove Column",
                 onclick: (path) => {
                     console.log("remove column");
@@ -498,17 +526,32 @@ export class SimpleTable extends LitElement {
 
     generateContextMenu(options) {
         const items = [];
-        if (options.row?.add) items.push(this.#menuOptions.row.add);
-        if (options.row?.remove) items.push(this.#menuOptions.row.remove);
+
+
+        const { minItems, maxItems } = this.schema
+        const nRows = this.data.length
+        
+        const noRowEdits = minItems && maxItems && minItems === maxItems && nRows === minItems && nRows === maxItems
+
+        if (!noRowEdits) {
+            if (options.row?.add) items.push(this.#menuOptions.row.add);
+            if (options.row?.remove) items.push(this.#menuOptions.row.remove);
+        }
+
         if (options.column?.add) items.push(this.#menuOptions.column.add);
         if (options.column?.remove) items.push(this.#menuOptions.column.remove);
 
-        this.#context = new ContextMenu({
-            target: this.shadowRoot.querySelector("table"),
-            items,
-        });
+        if (items.length) {
 
-        document.body.append(this.#context); // Insert context menu
+            this.#context = new ContextMenu({
+                target: this.shadowRoot.querySelector("table"),
+                items,
+            });
+
+            this.#context.updated = () => this.#updateContextMenuRendering() // Run when done rendering
+
+            document.body.append(this.#context); // Insert context menu
+        }
     }
 
     #loaded = false;
@@ -633,11 +676,11 @@ export class SimpleTable extends LitElement {
                 return this.getRow(i);
             });
 
-            this.onUpdate([], this.data);
+            this.#onUpdate([], this.data);
             return mapped;
         }
 
-        this.onUpdate([], this.data);
+        this.#onUpdate([], this.data);
     }
 
     #renderHeader = (str, { title, description }) => {
@@ -708,7 +751,7 @@ export class SimpleTable extends LitElement {
             else target[rowName][header] = value;
         }
 
-        if (cell.interacted) this.onUpdate([rowName, header], value);
+        if (cell.interacted) this.#onUpdate([rowName, header], value);
     };
 
     #createCell = (value, info) => {
@@ -722,7 +765,7 @@ export class SimpleTable extends LitElement {
             row: `${row}`,
         };
 
-        const schema = this.#schema[fullInfo.col];
+        const schema = this.#itemProps[fullInfo.col];
 
         const ignore = getIgnore(this.ignore, [fullInfo.col]);
 
@@ -810,17 +853,30 @@ export class SimpleTable extends LitElement {
 
     #schema = {};
 
+    #itemSchema = {}
+    #itemProps = {}
+
+    get schema () {
+        return this.#schema
+    }
+
+    set schema(schema){
+        this.#schema = schema
+        this.#itemSchema = this.#schema.items
+        this.#itemProps = { ...this.#itemSchema.properties }
+    }
+
     render() {
+        
         this.#updateRendered();
         this.#resetLoadState();
 
-        const entries = (this.#schema = { ...this.schema.properties });
-
+        const entries = this.#itemProps
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional / pattern properties to the entries variable if necessary
-        if (this.schema.additionalProperties !== false || this.schema.patternProperties) {
+        if (this.#itemSchema.additionalProperties !== false || this.#itemSchema.patternProperties) {
             Object.values(this.#data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
@@ -836,11 +892,11 @@ export class SimpleTable extends LitElement {
         // Sort Columns by Key Column and Requirement
         this.colHeaders = sortTable(
             {
-                ...this.schema,
+                ...this.#itemSchema,
                 properties: entries,
             },
             this.keyColumn,
-            this.schema.order ?? ["name"] // Specify the order of the columns
+            this.#itemSchema.order ?? ["name"] // Specify the order of the columns
         );
 
         // Try to guess the key column if unspecified

@@ -21,7 +21,7 @@ export const textToArray = (value: string) => value.split("\n")
     export const replaceRefsWithValue = (
         schema: any,
         path: string[] = [],
-        parent: { [x:string]: any } = schema
+        parent: { [x:string]: any } = structuredClone(schema)
     ) => {
 
         if (schema && typeof schema === "object" && !Array.isArray(schema)) {
@@ -44,6 +44,8 @@ export const textToArray = (value: string) => value.split("\n")
                     }
                 }
             }
+
+            if (parent.properties) delete parent.properties.definitions // Delete definitions when complete
 
             return copy as { [x:string]: any }
         }

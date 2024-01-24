@@ -131,6 +131,22 @@ export class BasicTable extends LitElement {
         if (onLoaded) this.onLoaded = onLoaded;
     }
 
+
+    #schema = {}
+    #itemSchema = {}
+    #itemProps = {}
+
+    get schema() {
+        return this.#schema
+    }
+
+    set schema(schema) {
+        this.#schema = schema
+        this.#itemSchema = schema.items
+        this.#itemProps = {...this.#itemSchema.properties}
+    }
+
+
     #rendered;
     #updateRendered = (force) =>
         force || this.rendered === true
@@ -139,7 +155,7 @@ export class BasicTable extends LitElement {
     rendered = this.#updateRendered(true);
 
     #renderHeaderContent = (str) => {
-        const required = this.schema.required ? this.schema.required.includes(str) : false;
+        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(str) : false;
         if (required) return html`<div class="relative"><span required>${header(str)}</span></div>`;
         return html`<div class="relative"><span>${header(str)}</span></div>`;
     };
@@ -160,7 +176,7 @@ export class BasicTable extends LitElement {
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
                     // this.globals[col] ??
-                    this.schema.properties[col].default ??
+                    this.#itemSchema.properties[col].default ??
                     "";
             return value;
         });
@@ -202,7 +218,7 @@ export class BasicTable extends LitElement {
 
         let result;
 
-        const propInfo = this.schema.properties[col] ?? {};
+        const propInfo = this.#itemProps[col] ?? {};
         let thisTypeOf = typeof value;
         let ogType;
         let type = (ogType = propInfo.type || propInfo.data_type);
@@ -223,13 +239,13 @@ export class BasicTable extends LitElement {
         }
 
         // Check if required
-        if (!value && "required" in this.schema && this.schema.required.includes(col))
+        if (!value && "required" in this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
         // If not required, check matching types for values that are defined
         else if (value !== "" && thisTypeOf !== type)
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange([col], parent, value, this.schema.properties[col]);
+        else result = this.validateOnChange([col], parent, value, this.#itemProps[col]);
 
         // Will run synchronously if not a promise result
         return promises.resolve(result, () => {
@@ -343,7 +359,7 @@ export class BasicTable extends LitElement {
             const cols = structuredData[row];
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
             Object.entries(cols).forEach(([key, value]) =>
-                key in this.schema.properties ? (latest[key] = value) : ""
+                key in this.#itemProps ? (latest[key] = value) : ""
             ); // Only include data from schema
         });
 
@@ -354,13 +370,12 @@ export class BasicTable extends LitElement {
     render() {
         this.#updateRendered();
 
-        const entries = { ...this.schema.properties };
-
+        const entries = this.#itemProps;
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional properties to the entries variable if necessary
-        if (this.schema.additionalProperties) {
+        if (this.#itemSchema.additionalProperties) {
             Object.values(this.data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
@@ -379,11 +394,11 @@ export class BasicTable extends LitElement {
             this.colHeaders =
                 sortTable(
                     {
-                        ...this.schema,
+                        ...this.#itemSchema,
                         properties: entries,
                     },
                     this.keyColumn,
-                    this.schema.order
+                    this.#itemSchema.order
                 ));
 
         // Try to guess the key column if unspecified
