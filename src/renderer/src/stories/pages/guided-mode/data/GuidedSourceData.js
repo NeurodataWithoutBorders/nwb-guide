@@ -275,7 +275,6 @@ export class GuidedSourceDataPage extends ManagedPage {
                         .flat()
                         .filter((timestamp) => !isNaN(timestamp));
 
-
                         const minTime = Math.min(...flatTimes);
                         const maxTime = Math.max(...flatTimes);
 
