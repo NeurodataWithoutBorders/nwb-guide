@@ -388,12 +388,14 @@ export class JSONSchemaForm extends LitElement {
                     else e.message = `${e.message}. ${provideNaNMessage}`;
                 }
 
+                const prevHeader = name ? header(name) : 'Row'
+
                 return {
                     type: "error",
                     message: `${
                         typeof propName === "string"
-                            ? `${header(propName)}${isRow ? ` on Row ${rowName}` : ""}`
-                            : `Row ${propName}`
+                            ? `${header(propName)}${isRow ? ` on ${prevHeader} ${rowName}` : ""}`
+                            : `${prevHeader} ${propName}`
                     } ${e.message}.`,
                 };
             })
