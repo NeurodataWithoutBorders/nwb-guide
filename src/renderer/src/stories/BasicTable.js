@@ -131,21 +131,19 @@ export class BasicTable extends LitElement {
         if (onLoaded) this.onLoaded = onLoaded;
     }
 
-
-    #schema = {}
-    #itemSchema = {}
-    #itemProps = {}
+    #schema = {};
+    #itemSchema = {};
+    #itemProps = {};
 
     get schema() {
-        return this.#schema
+        return this.#schema;
     }
 
     set schema(schema) {
-        this.#schema = schema
-        this.#itemSchema = schema.items
-        this.#itemProps = {...this.#itemSchema.properties}
+        this.#schema = schema;
+        this.#itemSchema = schema.items;
+        this.#itemProps = { ...this.#itemSchema.properties };
     }
-
 
     #rendered;
     #updateRendered = (force) =>
@@ -358,9 +356,7 @@ export class BasicTable extends LitElement {
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
-            Object.entries(cols).forEach(([key, value]) =>
-                key in this.#itemProps ? (latest[key] = value) : ""
-            ); // Only include data from schema
+            Object.entries(cols).forEach(([key, value]) => (key in this.#itemProps ? (latest[key] = value) : "")); // Only include data from schema
         });
 
         this.onUpdate(null, null, value); // Update the whole table

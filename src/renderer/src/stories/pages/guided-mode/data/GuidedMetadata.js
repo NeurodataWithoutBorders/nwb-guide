@@ -5,7 +5,13 @@ import { ManagedPage } from "./ManagedPage.js";
 import { Modal } from "../../../Modal";
 
 import { validateOnChange } from "../../../../validation/index.js";
-import { resolveGlobalOverrides, resolveMetadata, getInfoFromId, drillSchemaProperties, resolveFromPath } from "./utils.js";
+import {
+    resolveGlobalOverrides,
+    resolveMetadata,
+    getInfoFromId,
+    drillSchemaProperties,
+    resolveFromPath,
+} from "./utils.js";
 
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable";
@@ -180,31 +186,34 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
-        const resolvedSchema = preprocessMetadataSchema(schema)
-        const ophys = resolvedSchema.properties.Ophys
+        const resolvedSchema = preprocessMetadataSchema(schema);
+        const ophys = resolvedSchema.properties.Ophys;
         if (ophys) {
-
             // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
-            drillSchemaProperties(resolvedSchema, (path, schema, target, isPatternProperties) => {
-                if (path[0] === 'Ophys') {
-                    const name = path.slice(-1)[0]
-                    
-                    if (isPatternProperties) {
-                        schema.minItems = schema.maxItems = Object.values(resolveFromPath(path, results)).length
-                        return
-                    }
+            drillSchemaProperties(
+                resolvedSchema,
+                (path, schema, target, isPatternProperties) => {
+                    if (path[0] === "Ophys") {
+                        const name = path.slice(-1)[0];
 
-                    if (schema.type === 'array') {
-                        if (
-                            name !== 'Device' 
-                            && (target && name in target) // Skip unresolved deep in pattern properties
-                        ) {
-                            schema.minItems = schema.maxItems = target[name].length
+                        if (isPatternProperties) {
+                            schema.minItems = schema.maxItems = Object.values(resolveFromPath(path, results)).length;
+                            return;
+                        }
+
+                        if (schema.type === "array") {
+                            if (
+                                name !== "Device" &&
+                                target &&
+                                name in target // Skip unresolved deep in pattern properties
+                            ) {
+                                schema.minItems = schema.maxItems = target[name].length;
+                            }
                         }
                     }
-                }
-            }, results)
-
+                },
+                results
+            );
         }
 
         // Create the form
@@ -322,7 +331,6 @@ export class GuidedMetadataPage extends ManagedPage {
                         return Object.entries(data)
                             .map(([name, value]) => {
                                 const createNestedTable = (value, pattern, schema) => {
-
                                     const mockInput = {
                                         schema: {
                                             type: "object",
@@ -330,7 +338,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
                                             // Transfer a subset of item schema values
                                             minItems: schema.minItems,
-                                            maxItems: schema.maxItems
+                                            maxItems: schema.maxItems,
                                         },
 
                                         renderTable: this.renderTable,

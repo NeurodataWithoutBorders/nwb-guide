@@ -73,10 +73,9 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
     };
 
     const addPropertyKeyToSchema = (schema) => {
-
         const schemaCopy = structuredClone(schema);
 
-        const schemaItemsRef = schemaCopy["items"]//forceItems ? schemaCopy["items"] : schemaCopy;
+        const schemaItemsRef = schemaCopy["items"]; //forceItems ? schemaCopy["items"] : schemaCopy;
 
         if (!schemaItemsRef.properties) schemaItemsRef.properties = {};
         if (!schemaItemsRef.required) schemaItemsRef.required = [];
@@ -91,7 +90,6 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
     };
 
     const createNestedTable = (id, value, { name: propName = id, nestedSchema = schema } = {}) => {
-
         const schemaCopy = addPropertyKeyToSchema(nestedSchema);
 
         const resultPath = [...path];
@@ -102,8 +100,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         const rowData = Object.entries(value).map(([key, value]) => {
             return !schemaCopy["items"]
                 ? { [tempPropertyKey]: key, [tempPropertyValueKey]: value }
-                : 
-                { [tempPropertyKey]: key, ...value };
+                : { [tempPropertyKey]: key, ...value };
         });
 
         if (propName) {
@@ -155,7 +152,6 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         }
 
         const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
-
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,

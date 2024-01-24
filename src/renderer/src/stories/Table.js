@@ -201,19 +201,18 @@ export class Table extends LitElement {
     onOverride = () => {};
     onThrow = () => {};
 
-
-    #schema = {}
-    #itemSchema = {}
-    #itemProps = {}
+    #schema = {};
+    #itemSchema = {};
+    #itemProps = {};
 
     get schema() {
-        return this.#schema
+        return this.#schema;
     }
 
     set schema(schema) {
-        this.#schema = schema
-        this.#itemSchema = schema.items
-        this.#itemProps = {...this.#itemSchema.properties}
+        this.#schema = schema;
+        this.#itemSchema = schema.items;
+        this.#itemProps = { ...this.#itemSchema.properties };
     }
 
     updated() {
