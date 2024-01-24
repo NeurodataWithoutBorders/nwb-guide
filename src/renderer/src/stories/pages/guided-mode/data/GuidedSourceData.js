@@ -256,10 +256,10 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         modal.append(content);
 
-                        const flatTimes = Object.values(results).map(interfaceTimestamps => [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]])
+                        const flatTimes = Object.values(results)
+                            .map((interfaceTimestamps) => [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]])
                             .flat()
                             .filter((timestamp) => !isNaN(timestamp));
-
 
                         const minTime = Math.min(...flatTimes);
                         const maxTime = Math.max(...flatTimes);
