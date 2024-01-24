@@ -75,7 +75,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const addPropertyKeyToSchema = (schema) => {
         const schemaCopy = structuredClone(schema);
 
-        const schemaItemsRef = schemaCopy["items"]
+        const schemaItemsRef = schemaCopy["items"];
 
         if (!schemaItemsRef.properties) schemaItemsRef.properties = {};
         if (!schemaItemsRef.required) schemaItemsRef.required = [];
@@ -153,9 +153,9 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
 
-        merge(overrides.ignore, nestedIgnore)
+        merge(overrides.ignore, nestedIgnore);
 
-        merge(overrides.schema, schemaCopy, { arrays: true })
+        merge(overrides.schema, schemaCopy, { arrays: true });
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
@@ -218,16 +218,18 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
     };
 
-    const schemaCopy = structuredClone(schema)
-
+    const schemaCopy = structuredClone(schema);
 
     // Possibly multiple tables
     if (isEditableObject(schema, this.value)) {
         // One table with nested tables for each property
-        const data = getEditableItems(this.value, this.pattern, { name, schema: schemaCopy }).reduce((acc, { key, value }) => {
-            acc[key] = value;
-            return acc;
-        }, {});
+        const data = getEditableItems(this.value, this.pattern, { name, schema: schemaCopy }).reduce(
+            (acc, { key, value }) => {
+                acc[key] = value;
+                return acc;
+            },
+            {}
+        );
 
         const table = createNestedTable(name, data, { schema });
         if (table) return table;
@@ -235,12 +237,11 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
     const nestedIgnore = getIgnore(ignore, fullPath);
 
-    Object.assign(nestedIgnore, overrides.ignore ?? {})
+    Object.assign(nestedIgnore, overrides.ignore ?? {});
 
-    merge(overrides.ignore, nestedIgnore)
+    merge(overrides.ignore, nestedIgnore);
 
-    merge(overrides.schema, schemaCopy, { arrays: true })
-
+    merge(overrides.schema, schemaCopy, { arrays: true });
 
     // Normal table parsing
     const tableMetadata = {
