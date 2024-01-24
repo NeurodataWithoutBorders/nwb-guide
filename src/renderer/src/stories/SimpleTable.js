@@ -210,37 +210,39 @@ export class SimpleTable extends LitElement {
         if (onThrow) this.onThrow = onThrow;
         if (onUpdate) this.onUpdate = onUpdate;
 
-        this.onmousedown = (ev) => {
-            ev.stopPropagation();
+        this.onmousedown = (pointerDownEvent) => {
+            pointerDownEvent.stopPropagation();
             this.#clearSelected();
             this.#selecting = true;
-            const cell = this.#getCellFromEvent(ev);
+            const cell = this.#getCellFromEvent(pointerDownEvent);
             if (cell) this.#selectCells(cell);
         };
 
-        this.onmouseup = (ev) => (this.#selecting = false);
+        this.onmouseup = () => (this.#selecting = false);
 
         document.addEventListener("onmouseup", this.onmouseup);
 
-        document.addEventListener("mousedown", (ev) => {
-            const path = this.#getPath(ev);
+        document.addEventListener("mousedown", (pointerDownEvent) => {
+            const path = this.#getPath(pointerDownEvent);
             if (!path.includes(this)) this.#clearSelected();
         });
 
         // Handle Copy-Paste Commands
-        this.addEventListener("copy", (ev) => {
-            ev.preventDefault();
+        this.addEventListener("copy", (copyEvent) => {
+            copyEvent.stopPropagation();
+            copyEvent.preventDefault();
+
             const tsv = Object.values(this.#selected)
                 .map((arr) => arr.map((inputElement) => inputElement.value).join("\t"))
                 .join("\n");
 
-            ev.clipboardData.setData("text/plain", tsv);
+            copyEvent.clipboardData.setData("text/plain", tsv);
         });
 
-        document.addEventListener("keydown", (ev) => {
-            var key = ev.keyCode || ev.charCode;
+        document.addEventListener("keydown", (keyDownEvent) => {
+            var key = keyDownEvent.keyCode || keyDownEvent.charCode;
             if (key == 8 || key == 46) {
-                const path = this.#getPath(ev);
+                const path = this.#getPath(keyDownEvent);
                 if (path[0] === document.body)
                     Object.values(this.#selected).forEach((row) => {
                         row.forEach((cell) => {
@@ -251,13 +253,13 @@ export class SimpleTable extends LitElement {
             }
 
             // Avoid special key clicks
-            if ((ev.metaKey || ev.ctrlKey || ev.shiftKey) && !ev.key) return;
+            if ((keyDownEvent.metaKey || keyDownEvent.ctrlKey || keyDownEvent.shiftKey) && !keyDownEvent.key) return;
 
             // Undo / Redo
-            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") return this.#clearSelected();
+            if ((isMac ? keyDownEvent.metaKey : keyDownEvent.ctrlKey) && keyDownEvent.key === "z") return this.#clearSelected();
 
             if (this.#firstSelected) {
-                const path = this.#getPath(ev);
+                const path = this.#getPath(keyDownEvent);
                 if (path[0] === document.body) {
                     this.#firstSelected.input.toggle(true); // Open editor
                     this.#firstSelected.input.execute("selectAll"); // redirect keydown to the hidden input
@@ -265,12 +267,14 @@ export class SimpleTable extends LitElement {
             }
         });
 
-        this.addEventListener("paste", (ev) => {
-            ev.preventDefault();
+        this.addEventListener("paste", (pasteEvent) => {
+            pasteEvent.stopPropagation();
+            pasteEvent.preventDefault();
+
             const topLeftCell = Object.values(this.#selected)[0]?.[0];
             if (!topLeftCell) return;
             const { i: firstI, j: firstJ } = topLeftCell.simpleTableInfo;
-            const tsv = ev.clipboardData.getData("text/plain");
+            const tsv = pasteEvent.clipboardData.getData("text/plain");
             let lastCell;
 
             tsv.split("\n").map((str, i) =>
