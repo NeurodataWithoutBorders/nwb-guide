@@ -12,7 +12,7 @@ import { SimpleTable } from "../../../SimpleTable";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
-import { header } from "../../../forms/utils";
+import { header, tempPropertyKey } from "../../../forms/utils";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { Button } from "../../../Button.js";
@@ -27,12 +27,14 @@ const propsToIgnore = {
         "*": {
             starting_time: true,
             rate: true,
+            conversion: true,
+            offset: true,
+            unit: true,
+
         },
         ImagingPlane: {
             [imagingPlaneKey]: true,
             manifold: true,
-            unit: true,
-            conversion: true,
         },
         TwoPhotonSeries: {
             [imagingPlaneKey]: true,
@@ -44,9 +46,6 @@ const propsToIgnore = {
             resolution: true,
             dimension: true,
             device: true,
-            unit: true,
-            conversion: true,
-            offset: true,
         },
     },
     Icephys: true, // Always ignore icephys metadata (for now)
@@ -345,6 +344,17 @@ export class GuidedMetadataPage extends ManagedPage {
                                         <div style="width: 100%;">
                                             ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ""}
                                             ${createTable.call(mockInput, [...localPath], {
+                                                overrides: {
+                                                    schema: {
+                                                        items: {
+                                                            order: ['name', 'description'],
+                                                            additionalProperties: false,
+                                                        }
+                                                    },
+                                                    ignore: {
+                                                        [tempPropertyKey]: true
+                                                    }
+                                                },
                                                 onUpdate: (localPath, value) =>
                                                     onUpdate([name, ...localPath], value, true, {
                                                         willTimeout: false,
@@ -358,13 +368,12 @@ export class GuidedMetadataPage extends ManagedPage {
                                 };
 
                                 if (isAdditional) {
-                                    console.warn(value);
                                     const data = value.reduce((acc, item) => {
                                         const name = item.name;
                                         acc[name] = item;
                                         return acc;
                                     }, {});
-                                    console.error(data);
+
                                     return createNestedTable(data, undefined, {
                                         type: "object",
                                         items: {
@@ -385,8 +394,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
             renderTable: function (name, metadata) {
                 const updatedSchema = structuredClone(metadata.schema);
-
-                if (updatedSchema.additionalProperties !== true) updatedSchema.additionalProperties = false; // Indicate all additional properties are false (if not true)
 
                 metadata.schema = updatedSchema;
 

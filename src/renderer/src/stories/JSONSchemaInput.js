@@ -13,13 +13,13 @@ import { capitalize } from "./forms/utils";
 import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
+import { merge } from "./pages/utils";
 
-export function createTable(fullPath, { onUpdate, onThrow, forceItems = false }) {
+export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
 
     const schema = this.schema;
-    const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
     const validateOnChange = this.validateOnChange;
 
     const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : {};
@@ -76,7 +76,7 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 
         const schemaCopy = structuredClone(schema);
 
-        const schemaItemsRef = schemaCopy["items"]//forceItems ? schemaCopy["items"] : schemaCopy;
+        const schemaItemsRef = schemaCopy["items"]
 
         if (!schemaItemsRef.properties) schemaItemsRef.properties = {};
         if (!schemaItemsRef.required) schemaItemsRef.required = [];
@@ -156,6 +156,11 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 
         const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
 
+        merge(overrides.ignore, nestedIgnore)
+
+        merge(overrides.schema, schemaCopy, { arrays: true })
+
+        console.log('Ignoring', this.path, nestedIgnore, this.value, overrides)
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
@@ -218,10 +223,13 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
     };
 
+    const schemaCopy = structuredClone(schema)
+
+
     // Possibly multiple tables
     if (isEditableObject(schema, this.value)) {
         // One table with nested tables for each property
-        const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce((acc, { key, value }) => {
+        const data = getEditableItems(this.value, this.pattern, { name, schema: schemaCopy }).reduce((acc, { key, value }) => {
             acc[key] = value;
             return acc;
         }, {});
@@ -232,9 +240,16 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 
     const nestedIgnore = getIgnore(ignore, fullPath);
 
+    Object.assign(nestedIgnore, overrides.ignore ?? {})
+
+    merge(overrides.ignore, nestedIgnore)
+
+    merge(overrides.schema, schemaCopy, { arrays: true })
+
+
     // Normal table parsing
     const tableMetadata = {
-        schema,
+        schema: schemaCopy,
         data: this.value,
 
         ignore: nestedIgnore, // According to schema

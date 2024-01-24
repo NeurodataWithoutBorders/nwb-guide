@@ -1,5 +1,5 @@
 import { LitElement, css, html, unsafeCSS } from "lit";
-import { header, tempPropertyKey, tempPropertyValueKey } from "./forms/utils";
+import { header, tempPropertyValueKey } from "./forms/utils";
 import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
@@ -872,8 +872,7 @@ export class SimpleTable extends LitElement {
         this.#resetLoadState();
 
         const entries = this.#itemProps
-        for (let key in this.ignore) delete entries[key];
-        for (let key in this.ignore["*"] ?? {}) delete entries[key];
+
 
         // Add existing additional / pattern properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties !== false || this.#itemSchema.patternProperties) {
@@ -888,6 +887,11 @@ export class SimpleTable extends LitElement {
                 return acc;
             }, entries);
         }
+
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
+
+        console.error('Items', entries, this.ignore, this.schema)
 
         // Sort Columns by Key Column and Requirement
         this.colHeaders = sortTable(
