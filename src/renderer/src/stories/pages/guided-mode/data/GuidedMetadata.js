@@ -36,7 +36,6 @@ const propsToIgnore = {
             conversion: true,
             offset: true,
             unit: true,
-
         },
         ImagingPlane: {
             [imagingPlaneKey]: true,
@@ -355,13 +354,13 @@ export class GuidedMetadataPage extends ManagedPage {
                                                 overrides: {
                                                     schema: {
                                                         items: {
-                                                            order: ['name', 'description'],
+                                                            order: ["name", "description"],
                                                             additionalProperties: false,
-                                                        }
+                                                        },
                                                     },
                                                     ignore: {
-                                                        [tempPropertyKey]: true
-                                                    }
+                                                        [tempPropertyKey]: true,
+                                                    },
                                                 },
                                                 onUpdate: (localPath, value) =>
                                                     onUpdate([name, ...localPath], value, true, {

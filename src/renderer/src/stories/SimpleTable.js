@@ -865,7 +865,7 @@ export class SimpleTable extends LitElement {
         this.#updateRendered();
         this.#resetLoadState();
 
-        const entries = this.#itemProps
+        const entries = this.#itemProps;
 
         // Add existing additional / pattern properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties !== false || this.#itemSchema.patternProperties) {
