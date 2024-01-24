@@ -18,6 +18,7 @@ import { baseUrl } from "../../../../server/globals";
 import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils.js";
 import { Modal } from "../../../Modal";
+import { html } from "lit";
 
 const propsToIgnore = [
     "verbose",
@@ -240,8 +241,20 @@ export class GuidedSourceDataPage extends ManagedPage {
                             message: "Please wait...",
                         });
 
+                        const header = document.createElement('div')
+                        const h2 = document.createElement('h2')
+                        Object.assign(h2.style, {
+                            margin: 0
+                        })
+                        h2.innerText = `Alignment Preview: ${subject}/${session}`
+                        const warning = document.createElement('small')
+                        warning.innerText = 'Warning: This is just a preview. We do not currently have the features implemented to change the alignment of your interfaces.'
+                        header.append(h2, warning)
+
+
+
                         const modal = new Modal({
-                            header: `Alignment Preview: ${subject}/${session}`,
+                            header
                         });
 
                         document.body.append(modal);
@@ -256,9 +269,11 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         modal.append(content);
 
-                        const flatTimes = Object.values(results).map(interfaceTimestamps => [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]])
-                            .flat()
-                            .filter((timestamp) => !isNaN(timestamp));
+                        const flatTimes = Object.values(results).map(interfaceTimestamps => {
+                            [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]]
+                        })
+                        .flat()
+                        .filter((timestamp) => !isNaN(timestamp));
 
 
                         const minTime = Math.min(...flatTimes);
