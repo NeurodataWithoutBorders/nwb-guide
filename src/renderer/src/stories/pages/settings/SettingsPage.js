@@ -96,7 +96,7 @@ const schema = merge(
                 ...developerGlobalSchema,
             },
         },
-        required: ["DANDI"],
+        required: ["DANDI", "developer"],
     },
     {
         arrays: true,

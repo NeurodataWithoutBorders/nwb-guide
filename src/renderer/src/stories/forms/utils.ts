@@ -44,9 +44,7 @@ export const textToArray = (value: string) => value.split("\n")
                     }
                 }
             }
-
-            if (parent.properties) delete parent.properties.definitions // Delete definitions when complete
-
+            
             return copy as { [x:string]: any }
         }
 

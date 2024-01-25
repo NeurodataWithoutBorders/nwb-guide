@@ -104,8 +104,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
 
         if (getProp("ImagingPlane")) {
-            const imagingPlane = getProp("ImagingPlane")
-            imagingPlane.items.order = [
+            const imagingPlaneItems = getProp("ImagingPlane").items
+            imagingPlaneItems.order = [
                 "name",
                 "description",
                 "device",
@@ -121,7 +121,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
                 'origin_coords_unit'
             ]
 
-            imagingPlane.items.properties.optical_channel.items.order = ["name", "description"]
+            imagingPlaneItems.properties.optical_channel.items.order = ["name", "description"]
 
         }
     }
