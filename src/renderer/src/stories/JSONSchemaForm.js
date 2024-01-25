@@ -795,7 +795,7 @@ export class JSONSchemaForm extends LitElement {
         const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== "number") !== -1;
         if (undefinedPathToken) return true; // Will be unable to get schema anyways (additionalProperties)
 
-        if (!input) input = this.getFormElement(localPath, { forms: false, tables: false });
+        if (!input) input = this.getFormElement(localPath, { inputs: true });
         if (!parent) parent = this.#get(path, this.resolved);
         if (!schema) schema = this.getSchema(localPath);
 

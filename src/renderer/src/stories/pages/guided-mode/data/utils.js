@@ -65,6 +65,8 @@ export function drillSchemaProperties(schema = {}, callback, target, path = [], 
 
     for (let name in properties) {
         const info = properties[name];
+        
+        if (name === 'definitions') continue;
 
         const updatedPath = [...path, name];
 
