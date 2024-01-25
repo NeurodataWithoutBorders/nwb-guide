@@ -44,7 +44,7 @@ export const textToArray = (value: string) => value.split("\n")
                     }
                 }
             }
-            
+
             return copy as { [x:string]: any }
         }
 
