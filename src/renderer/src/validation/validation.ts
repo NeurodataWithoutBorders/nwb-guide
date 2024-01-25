@@ -192,7 +192,7 @@ schema.Ophys.Device = {
             ]
 
             dependencies.forEach(path => {
-                const table = this.getFormElement(path)
+                const table = this.getFormElement(path, { tables: true })
                 if (table) {
                     const data = table.data
                     data.forEach(row => {

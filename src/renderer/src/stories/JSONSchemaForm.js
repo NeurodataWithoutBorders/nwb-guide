@@ -253,7 +253,11 @@ export class JSONSchemaForm extends LitElement {
     }
 
     // Get the form element defined by the path (stops before table cells)
-    getFormElement = (path, { forms = true, tables = true, inputs = true } = {}) => {
+    getFormElement = (path, { forms, tables, inputs } = {
+        forms: true, 
+        tables: true, 
+        inputs: true
+    }) => {
         if (typeof path === "string") path = path.split(".");
         if (!path.length) return this;
 
