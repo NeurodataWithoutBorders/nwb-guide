@@ -34,7 +34,7 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
         });
     });
 
-    remove(name, true)
+    remove(name, true);
 
     save({
         info: {

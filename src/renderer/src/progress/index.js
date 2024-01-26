@@ -194,18 +194,20 @@ export function resume(name) {
 }
 
 export const remove = async (name, force = false) => {
-    const result = force ? { isConfirmed: true} : await Swal.fire({
-        title: `Are you sure you would like to delete this conversion pipeline?`,
-        html: `All related files will be deleted permanently, and existing progress will be lost.`,
-        icon: "warning",
-        heightAuto: false,
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: `Delete ${name}`,
-        cancelButtonText: "Cancel",
-        focusCancel: true,
-    });
+    const result = force
+        ? { isConfirmed: true }
+        : await Swal.fire({
+              title: `Are you sure you would like to delete this conversion pipeline?`,
+              html: `All related files will be deleted permanently, and existing progress will be lost.`,
+              icon: "warning",
+              heightAuto: false,
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: `Delete ${name}`,
+              cancelButtonText: "Cancel",
+              focusCancel: true,
+          });
 
     if (result.isConfirmed) return operations.remove(name);
 
