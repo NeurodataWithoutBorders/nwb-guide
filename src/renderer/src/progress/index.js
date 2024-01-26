@@ -193,8 +193,8 @@ export function resume(name) {
     return commandToResume;
 }
 
-export const remove = async (name) => {
-    const result = await Swal.fire({
+export const remove = async (name, force = false) => {
+    const result = force ? { isConfirmed: true} : await Swal.fire({
         title: `Are you sure you would like to delete this conversion pipeline?`,
         html: `All related files will be deleted permanently, and existing progress will be lost.`,
         icon: "warning",
