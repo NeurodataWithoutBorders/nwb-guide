@@ -74,15 +74,14 @@ def replace_none_with_nan(json_object, json_schema):
     def coerce_schema_compliance_recursive(obj, schema):
         if isinstance(obj, dict):
             for key, value in obj.items():
-
                 # Coerce on pattern properties as well
-                pattern_properties = schema.get('patternProperties')
-                if (pattern_properties):
+                pattern_properties = schema.get("patternProperties")
+                if pattern_properties:
                     for pattern, pattern_schema in pattern_properties.items():
                         regex = re.compile(pattern)
-                        if (regex.match(key)):
+                        if regex.match(key):
                             coerce_schema_compliance_recursive(value, pattern_schema)
-  
+
                 elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
