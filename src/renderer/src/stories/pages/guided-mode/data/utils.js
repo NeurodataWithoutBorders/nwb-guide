@@ -1,3 +1,4 @@
+import { getEditableItems } from "../../../JSONSchemaInput.js";
 import { merge } from "../../utils.js";
 
 // Merge project-wide data into metadata
@@ -32,6 +33,49 @@ export function resolveGlobalOverrides(subject, globalState) {
     merge(subjectMetadataCopy, overrides.Subject ?? (overrides.Subject = {})); // Ensure Subject exists
 
     return overrides;
+}
+
+const isPatternResult = Symbol("ispatternresult");
+
+export function resolveFromPath(path, target) {
+    return path.reduce((acc, key) => {
+        if (!acc) return;
+        if (acc[isPatternResult]) return acc;
+        if (key in acc) return acc[key];
+        else {
+            const items = getEditableItems(acc, true, { name: key });
+            const object = items.reduce((acc, { key, value }) => (acc[key] = value), {});
+            object[isPatternResult] = true;
+            return object;
+        }
+    }, target);
+}
+
+export function drillSchemaProperties(schema = {}, callback, target, path = [], inPatternProperties = false) {
+    const properties = schema.properties ?? {};
+
+    const patternProperties = schema.patternProperties ?? {};
+
+    for (let regexp in patternProperties) {
+        const info = patternProperties[regexp];
+        const updatedPath = [...path, regexp];
+        callback(updatedPath, info, undefined, true);
+        drillSchemaProperties(info, callback, undefined, updatedPath, true);
+    }
+
+    for (let name in properties) {
+        const info = properties[name];
+
+        if (name === "definitions") continue;
+
+        const updatedPath = [...path, name];
+
+        callback(updatedPath, info, target);
+
+        drillSchemaProperties(info, callback, target?.[name], updatedPath, inPatternProperties);
+    }
+
+    return schema;
 }
 
 export function resolveProperties(properties = {}, target, globals = {}) {

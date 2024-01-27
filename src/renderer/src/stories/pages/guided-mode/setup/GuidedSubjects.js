@@ -114,7 +114,10 @@ export class GuidedSubjectsPage extends Page {
         }
 
         this.table = new Table({
-            schema: getSubjectSchema(),
+            schema: {
+                type: "array",
+                items: getSubjectSchema(),
+            },
             data: subjects,
             globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
@@ -130,7 +133,7 @@ export class GuidedSubjectsPage extends Page {
                 this.unsavedUpdates = "conversions";
             },
             validateOnChange: (key, parent, v) => {
-                if (key === "sessions") {
+                if (key.slice(-1)[0] === "sessions") {
                     if (v?.length) return true;
                     else {
                         return [

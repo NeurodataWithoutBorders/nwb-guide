@@ -50,6 +50,7 @@ body {
     margin: 0;
     height: 100%;
     display: flex;
+    overflow: hidden; /* Dashboard without scroll behavior */
 }
 
 a {

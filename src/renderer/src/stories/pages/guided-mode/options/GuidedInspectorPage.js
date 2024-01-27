@@ -211,7 +211,7 @@ export class GuidedInspectorPage extends Page {
 
                     return manager;
                 })(),
-                ""
+                "Loading inspector report..."
             )}`;
     }
 }

@@ -18,18 +18,19 @@ import { baseUrl } from "../../../../server/globals";
 import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils.js";
 import { Modal } from "../../../Modal";
-import { html } from "lit";
 
-const propsToIgnore = [
-    "verbose",
-    "es_key",
-    "exclude_shanks",
-    "load_sync_channel",
-    "stream_id", // NOTE: May be desired for other interfaces
-    "nsx_override",
-    "combined",
-    "plane_no",
-];
+const propsToIgnore = {
+    "*": {
+        verbose: true,
+        es_key: true,
+        exclude_shanks: true,
+        load_sync_channel: true,
+        stream_id: true, // NOTE: May be desired for other interfaces
+        nsx_override: true,
+        combined: true,
+        plane_no: true,
+    },
+};
 
 export class GuidedSourceDataPage extends ManagedPage {
     constructor(...args) {
@@ -187,12 +188,14 @@ export class GuidedSourceDataPage extends ManagedPage {
         super.connectedCallback();
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Source Data",
-            propsToRemove: [
-                ...propsToIgnore,
-                "folder_path",
-                "file_path",
-                // NOTE: Still keeping plural path specifications for now
-            ],
+            propsToRemove: {
+                "*": {
+                    ...propsToIgnore["*"],
+                    folder_path: true,
+                    file_path: true,
+                    // NOTE: Still keeping plural path specifications for now
+                },
+            },
             key: "SourceData",
             schema: this.info.globalState.schema.source_data,
             hasInstances: true,

@@ -52,7 +52,7 @@ function decode(text) {
     }
 }
 
-function drill(object, callback) {
+export function drill(object, callback) {
     if (object && typeof object === "object") {
         const copy = Array.isArray(object) ? [...object] : { ...object };
         for (let k in copy) {

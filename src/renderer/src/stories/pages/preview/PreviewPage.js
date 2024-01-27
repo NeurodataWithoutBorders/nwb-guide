@@ -27,7 +27,7 @@ export class PreviewPage extends Page {
 
     input = new JSONSchemaInput({
         path: ["file_path"],
-        info: {
+        schema: {
             type: "string",
             format: "file",
             description:
