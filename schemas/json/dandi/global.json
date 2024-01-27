@@ -14,8 +14,10 @@
                     "description": "Your DANDI API key from the <a href='https://gui-staging.dandiarchive.org' target='_blank'>staging server</a>"
                 }
             },
+            "additionalProperties": false,
             "required": ["main_api_key"]
         }
     },
-    "required": ["api_keys"]
+    "required": ["api_keys"],
+    "additionalProperties": false
 }

@@ -106,7 +106,7 @@ test('inter-table updates are triggered', async () => {
         schema,
         results,
         validateOnChange,
-        createTable: (name, metadata, path) => {
+        renderTable: (name, metadata, path) => {
             if (name !== "Electrodes") return new SimpleTable(metadata);
             else return true
         },
@@ -121,7 +121,7 @@ test('inter-table updates are triggered', async () => {
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
-    const table = form.getTable(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
+    const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
     const row = table.addRow()
 
     const baseRow = table.getRow(0)
@@ -134,10 +134,7 @@ test('inter-table updates are triggered', async () => {
     await new Promise((res) => setTimeout(() => res(true), 1000))
 
     // Validate that the new structure is correct
-    const hasErrors = await form.validate().then(() => false).catch((error) => {
-        console.error(error)
-        return true
-    })
+    const hasErrors = await form.validate().then(() => false).catch((e) => true)
     expect(hasErrors).toBe(false) // Is valid
 })
 
@@ -193,9 +190,9 @@ test('changes are resolved correctly', async () => {
     await form.validate().catch(()=> errors = true)
     expect(errors).toBe(true) // Is invalid
 
-    const input1 = form.getInput(['v0'])
-    const input2 = form.getInput(['l1', 'v1'])
-    const input3 = form.getInput(['l1', 'l2', 'l3', 'v2'])
+    const input1 = form.getFormElement(['v0'])
+    const input2 = form.getFormElement(['l1', 'v1'])
+    const input3 = form.getFormElement(['l1', 'l2', 'l3', 'v2'])
 
     input1.updateData('test')
     input2.updateData('test')
