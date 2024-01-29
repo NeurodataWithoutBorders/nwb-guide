@@ -1,4 +1,5 @@
 """API endpoint definitions for startup operations."""
+
 from flask_restx import Namespace, Resource
 
 from errorHandlers import notBadRequestException
