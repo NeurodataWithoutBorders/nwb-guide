@@ -1,4 +1,5 @@
 """Collection of utility functions used by the NeuroConv Flask API."""
+
 import os
 import json
 import math
@@ -85,9 +86,7 @@ def replace_none_with_nan(json_object, json_schema):
                 elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
-                        obj[
-                            key
-                        ] = (
+                        obj[key] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -433,9 +432,11 @@ def convert_to_nwb(info: dict) -> str:
     available_options = converter.get_conversion_options_schema()
     options = (
         {
-            interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
-            if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
-            else {}
+            interface: (
+                {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
+                else {}
+            )
             for interface in info["source_data"]
         }
         if run_stub_test
