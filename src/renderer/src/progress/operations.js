@@ -9,12 +9,10 @@ export const remove = (name) => {
     //delete the progress file
     if (fs) {
         if (fs.existsSync(progressFilePathToDelete)) fs.unlinkSync(progressFilePathToDelete);
-    }
-    else localStorage.removeItem(progressFilePathToDelete);
+    } else localStorage.removeItem(progressFilePathToDelete);
 
     if (fs) {
-
-        console.log(previewSaveFolderPath, conversionSaveFolderPath, name)
+        console.log(previewSaveFolderPath, conversionSaveFolderPath, name);
 
         // delete default preview location
         fs.rmSync(joinPath(previewSaveFolderPath, name), { recursive: true, force: true });

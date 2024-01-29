@@ -34,7 +34,7 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
         });
     });
 
-    const updatedName = header(name)
+    const updatedName = header(name);
 
     remove(updatedName, true);
 
