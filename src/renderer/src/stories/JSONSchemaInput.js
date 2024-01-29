@@ -13,6 +13,18 @@ import { capitalize } from "./forms/utils";
 import { JSONSchemaForm } from "./JSONSchemaForm";
 import { Search } from "./Search";
 
+const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
+
+function resolveDateTime(value) {
+    if (typeof value=== 'string') {
+        const match = value.match(dateTimeRegex);
+        if (match) return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}`;
+        return value
+    }
+
+    return value
+} 
+
 const isFilesystemSelector = (name, format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
@@ -506,17 +518,25 @@ export class JSONSchemaInput extends LitElement {
                 ></textarea>`;
             // Handle other string formats
             else {
+
+                const isDateTime = info.format === "date-time"
+
                 const type =
-                    info.format === "date-time"
+                    isDateTime
                         ? "datetime-local"
                         : info.format ?? (info.type === "string" ? "text" : info.type);
+
+
+
+                const value = isDateTime ? resolveDateTime(this.value) : this.value
+
                 return html`
                     <input
                         class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
                         type="${type}"
                         step=${isNumber && info.step ? info.step : ""}
                         placeholder="${info.placeholder ?? ""}"
-                        .value="${this.value ?? ""}"
+                        .value="${value ?? ""}"
                         @input=${(ev) => {
                             let value = ev.target.value;
                             let newValue = value;
