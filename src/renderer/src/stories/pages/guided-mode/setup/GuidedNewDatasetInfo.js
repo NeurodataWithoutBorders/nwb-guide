@@ -7,38 +7,11 @@ import { validateOnChange } from "../../../../validation/index.js";
 import projectGeneralSchema from "../../../../../../../schemas/json/project/general.json" assert { type: "json" };
 import projectGlobalSchema from "../../../../../../../schemas/json/project/globals.json" assert { type: "json" };
 import { merge } from "../../utils.js";
-import { schemaToPages } from "../../FormPage.js";
 import { onThrow } from "../../../../errors";
-import baseMetadataSchema from "../../../../../../../schemas/base-metadata.schema";
-
-const changesAcrossSessions = {
-    Subject: ["weight", "subject_id", "age", "date_of_birth", "age__reference"],
-    NWBFile: [
-        "session_id",
-        "session_start_time",
-        "identifier",
-        "data_collection",
-        "notes",
-        "pharmacolocy",
-        "session_description",
-        "slices",
-        "source_script",
-        "source_script_file_name",
-    ],
-};
+import { header } from "../../../forms/utils";
+import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
-
-Object.entries(baseMetadataSchema.properties).forEach(([globalProp, v]) => {
-    Object.keys(v.properties)
-        .filter((prop) => !(changesAcrossSessions[globalProp] ?? []).includes(prop))
-        .forEach((prop) => {
-            const globalNestedProp =
-                projectMetadataSchema.properties[globalProp] ??
-                (projectMetadataSchema.properties[globalProp] = { properties: {} });
-            globalNestedProp.properties[prop] = baseMetadataSchema.properties[globalProp].properties[prop];
-        });
-});
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -79,9 +52,9 @@ export class GuidedNewDatasetPage extends Page {
                     const res = rename(name, globalState.name);
                     if (typeof res === "string") this.notify(res);
                     if (res === false) return;
-                } catch (e) {
-                    this.notify(e, "error");
-                    throw e;
+                } catch (error) {
+                    this.notify(error, "error");
+                    throw error;
                 }
             } else {
                 const has = await hasEntry(name);
@@ -102,33 +75,23 @@ export class GuidedNewDatasetPage extends Page {
     };
 
     updateForm = () => {
-        let projectGlobalState = this.info.globalState.project;
-        if (!projectGlobalState) projectGlobalState = this.info.globalState.project = {};
-
         // Properly clone the schema to produce multiple pages from the project metadata schema
         const schema = { ...projectMetadataSchema };
         schema.properties = { ...schema.properties };
 
-        this.state = merge(global.data.output_locations, structuredClone(this.info.globalState.project));
-
-        const pages = schemaToPages.call(this, schema, ["project"], { validateEmptyValues: false }, (info) => {
-            info.title = `${info.label} Global Metadata`;
-            return info;
-        });
-
-        pages.forEach((page) => {
-            page.header = {
-                subtitle: `Enter any ${page.info.label}-level metadata that can serve as the common default across each experiment session`,
-            };
-            this.addPage(page.info.label, page);
-        });
+        const globalState = this.info.globalState;
+        if (!globalState.project) globalState.project = {};
+        this.state = merge(global.data, structuredClone(globalState.project));
 
         this.form = new JSONSchemaForm({
             schema,
             results: this.state,
-            validateEmptyValues: false,
+            // validateEmptyValues: false,
             dialogOptions: {
                 properties: ["createDirectory"],
+            },
+            onOverride: (name) => {
+                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             validateOnChange,
             onUpdate: () => (this.unsavedUpdates = true),

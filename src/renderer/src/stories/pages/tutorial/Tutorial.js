@@ -19,6 +19,12 @@ const { shell } = electron;
 const tutorialPipelineName = "NWB GUIDE Tutorial Data";
 
 export class TutorialPage extends Page {
+    header = {
+        title: "Tutorial Data Generation",
+        subtitle:
+            "This page allows you to generate a dataset with multiple subjects and sessions so you can practice using NWB GUIDE before converting your own datasets.",
+    };
+
     constructor(...args) {
         super(...args);
     }
@@ -41,16 +47,6 @@ export class TutorialPage extends Page {
         const entry = entryExists ? get(tutorialPipelineName) : {};
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
-                <h1 style="margin: 0;">Tutorial Data Generation</h1>
-            </div>
-            <p>
-                This page allows you to generate a dataset with multiple subjects and sessions so you can practice using
-                NWB GUIDE before converting your own datasets.
-            </p>
-
-            <hr />
-
             ${hasEntry(tutorialPipelineName)
                 ? html`<div>
                       <p>
@@ -89,7 +85,7 @@ export class TutorialPage extends Page {
                           })}
                       </div>
 
-                      <p>Let's get started with your first conversion on the NWB GUIDE!</p>
+                      <p>Let's get started with your first conversion on the GUIDE!</p>
 
                       <nwb-button
                           primary
@@ -112,7 +108,7 @@ export class TutorialPage extends Page {
                 : html`
                       ${new InfoBox({
                           header: "How to download test data",
-                          content: html`Please refer to the
+                          content: `Please refer to the
                               <a
                                   href="https://neuroconv.readthedocs.io/en/main/developer_guide/testing_suite.html#testing-on-example-data"
                                   target="_blank"
@@ -131,9 +127,9 @@ export class TutorialPage extends Page {
 
                               const { output_directory } = await run("generate_dataset", state, {
                                   title: "Generating tutorial data",
-                              }).catch((e) => {
-                                  this.notify(e.message, "error");
-                                  throw e;
+                              }).catch((error) => {
+                                  this.notify(error.message, "error");
+                                  throw error;
                               });
 
                               this.notify("Tutorial data successfully generated!");

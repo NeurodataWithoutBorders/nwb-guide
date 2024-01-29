@@ -5,7 +5,7 @@ channels:
 dependencies:
   - python = 3.9.17
   - nodejs = 18.16.1
-  - PyInstaller = 5.13.0
+  - PyInstaller = 6.3.0
   - pywin32 = 303
   - git = 2.20.1
   - setuptools = 58.0.4
@@ -18,5 +18,6 @@ dependencies:
       - flask-cors === 3.0.10
       - flask_restx == 1.1.0
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
+      - dandi >= 0.58.1
       - pytest == 7.2.2
       - pytest-cov == 4.1.0

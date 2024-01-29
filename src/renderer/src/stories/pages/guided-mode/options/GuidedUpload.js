@@ -1,12 +1,23 @@
 import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
-import { run } from "./utils.js";
 import { onThrow } from "../../../../errors";
 import { merge } from "../../utils.js";
 import Swal from "sweetalert2";
-import dandiUploadSchema from "../../../../../../../schemas/json/dandi/upload.json";
-import { uploadToDandi } from "../../uploads/UploadsPage.js";
+import dandiUploadSchema, { ready, regenerateDandisets } from "../../../../../../../schemas/dandi-upload.schema";
+import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
+import { until } from "lit/directives/until.js";
+
+import { Button } from "../../../Button.js";
+
+import keyIcon from "../../../assets/key.svg?raw";
+
+import { validate } from "../../uploads/utils";
+import { global } from "../../../../progress/index.js";
+
+import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.json";
+import { createFormModal } from "../../../forms/GlobalFormModal";
+import { validateDANDIApiKey } from "../../../../validation/dandi";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -17,26 +28,76 @@ export class GuidedUploadPage extends Page {
 
     beforeSave = () => {
         const globalState = this.info.globalState;
-        const isNewDandiset = globalState.upload?.dandiset_id !== this.localState.dandiset_id;
+        const isNewDandiset = globalState.upload?.dandiset !== this.localState.dandiset;
         merge({ upload: this.localState }, globalState); // Merge the local and global states
-        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new dandiset
+        if (isNewDandiset) delete globalState.upload.results; // Clear the preview results entirely if a new Dandiset
     };
 
     header = {
         subtitle: "Settings to upload your conversion to the DANDI Archive",
+        controls: [
+            new Button({
+                icon: keyIcon,
+                label: "API Keys",
+                onClick: () => {
+                    this.#globalModal.form.results = structuredClone(global.data.DANDI.api_keys);
+                    this.#globalModal.open = true;
+                },
+            }),
+        ],
     };
+
+    #globalModal = null;
+    #saveNotification;
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        const modal = (this.#globalModal = createFormModal.call(this, {
+            header: "DANDI API Keys",
+            schema: dandiGlobalSchema.properties.api_keys,
+            onSave: async (form) => {
+                const apiKeys = form.resolved;
+
+                if (this.#saveNotification) this.dismiss(this.#saveNotification);
+
+                if (!Object.keys(apiKeys).length) {
+                    this.#saveNotification = this.notify("No API keys were provided", "error");
+                    return null;
+                }
+
+                merge(apiKeys, global.data.DANDI.api_keys);
+                global.save();
+                await regenerateDandisets();
+                const input = this.form.getFormElement(["dandiset "]);
+                input.requestUpdate();
+            },
+            formProps: {
+                validateOnChange: async (name, parent) => {
+                    const value = parent[name];
+                    if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+                },
+            },
+        }));
+        document.body.append(modal);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.#globalModal) this.#globalModal.remove();
+    }
 
     footer = {
         next: "Upload Project",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
-            await this.form.validate(); // Will throw an error in the callback
-
             const globalState = this.info.globalState;
             const globalUploadInfo = globalState.upload;
 
-            // Catch if dandiset is already uploaded
+            await this.form.validate(); // Will throw an error in the callback
+
+            // Catch if Dandiset is already uploaded
             if ("results" in globalUploadInfo) {
                 const result = await Swal.fire({
                     title: "This pipeline has already uploaded to DANDI",
@@ -61,16 +122,42 @@ export class GuidedUploadPage extends Page {
     };
 
     render() {
-        const state = (this.localState = merge(this.info.globalState.upload ?? { info: {} }, {}));
+        const state = (this.localState = structuredClone(this.info.globalState.upload ?? { info: {} }));
 
-        this.form = new JSONSchemaForm({
-            schema: dandiUploadSchema,
-            results: state.info,
-            onUpdate: () => (this.unsavedUpdates = true),
-            onThrow,
+        const promise = ready.cpus
+            .then(() => ready.dandisets)
+            .then(() => {
+                return (this.form = new JSONSchemaForm({
+                    schema: dandiUploadSchema,
+                    results: state.info,
+                    controls: {
+                        dandiset: [
+                            new Button({
+                                label: "Create New Dandiset",
+                                buttonStyles: {
+                                    width: "max-content",
+                                },
+                                onClick: async () => {
+                                    await createDandiset.call(this, { title: this.form.resolved.dandiset });
+                                    this.requestUpdate();
+                                },
+                            }),
+                        ],
+                    },
+                    onUpdate: () => (this.unsavedUpdates = true),
+                    onThrow,
+                    validateOnChange: validate,
+                }));
+            })
+            .catch((error) => html`<p>${error}</p>`);
+
+        // Confirm that one api key exists
+        promise.then(() => {
+            const api_keys = global.data.DANDI.api_keys;
+            if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true;
         });
 
-        return html` ${this.form} `;
+        return html`${until(promise, html`Loading form contents...`)} `;
     }
 }
 

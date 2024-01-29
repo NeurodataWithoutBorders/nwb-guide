@@ -70,6 +70,10 @@ export class Main extends LitElement {
 
         this.style.overflow = "hidden";
         this.content.style.height = "100%";
+
+        // Reset scroll position on page change
+        const section = this.content.children[0];
+        section.scrollTop = 0;
     }
 
     render() {
@@ -85,15 +89,20 @@ export class Main extends LitElement {
             const info = page.info ?? {};
 
             // Default Footer Behavior
-            if (footer === true || (!("footer" in page) && info.parent)) {
+            if (info.parent) {
+                if (!("footer" in page)) footer = true; // Allow navigating laterally if there is a next page
+
                 // Go to home screen if there is no next page
-                if (!info.next)
-                    footer = {
-                        exit: false,
-                        onNext: () => this.toRender.page.to("/"),
-                    };
-                // Allow navigating laterally if there is a next page
-                else footer = true;
+                if (!info.next) {
+                    console.log("setting", info);
+                    footer = Object.assign(
+                        {
+                            exit: false,
+                            onNext: () => this.toRender.page.to("/"),
+                        },
+                        footer && typeof footer === "object" ? footer : {}
+                    );
+                }
             }
 
             if (footer === true) footer = {};
@@ -108,7 +117,7 @@ export class Main extends LitElement {
                     if (pages.length > 1) {
                         const capsulesProps = {
                             n: pages.length,
-                            selected: pages.map((o) => o.pageLabel).indexOf(page.info.label),
+                            selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
                         };
 
                         capsules = new GuidedCapsules(capsulesProps);
@@ -140,30 +149,34 @@ export class Main extends LitElement {
 
         return html`
             ${headerEl}
-            ${capsules
-                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
-                : html`<div style="height: 50px;"></div>`}
-            <main id="content" class="js-content" style="overflow: hidden; display: flex;">
-                <section class="section">
-                    ${title
-                        ? html`<div
-                              style="position: sticky; top: 0; left: 0; background: white; z-index: 1; margin-bottom: 20px;"
-                          >
-                              <div
-                                  style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
-                              >
-                                  <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                      <h1 class="title" style="margin: 0; padding: 0;">${title}</h1>
-                                      <small style="color: gray;">${unsafeHTML(subtitle)}</small>
-                                  </div>
-                                  <div style="padding-left: 25px">${controls}</div>
+            ${
+                capsules
+                    ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
+                    : html``
+            }
+            ${
+                title
+                    ? html`<div
+                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${capsules
+                              ? ""
+                              : "padding-top: 35px;"}"
+                      >
+                          <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
+                              <div style="line-height: 1em; color: gray;">
+                                  <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
+                                  <small>${unsafeHTML(subtitle)}</small>
                               </div>
-                              <hr style="margin-bottom: 0;" />
-                          </div>`
-                        : ""}
+                              <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
+                          </div>
+                          <hr style="margin-bottom: 0;" />
+                      </div>`
+                    : ""
+            }
 
-                    <div style="height: 100%; width: 100%;">${page}</div>
-                </section>
+            <main id="content" class="js-content" style="overflow: hidden; ${
+                capsules || title ? "" : "padding-top: 35px;"
+            }"">
+                <section class="section">${page}</section>
             </main>
             ${footerEl}
         `;

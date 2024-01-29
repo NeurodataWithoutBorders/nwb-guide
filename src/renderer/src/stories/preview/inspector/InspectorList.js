@@ -2,6 +2,8 @@ import { LitElement, css, html } from "lit";
 import { List } from "../../List";
 import { getMessageType, isErrorImportance } from "../../../validation";
 
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 const sortList = (items) => {
     return items
         .sort((a, b) => {
@@ -22,9 +24,9 @@ const sortList = (items) => {
 
 const aggregateMessages = (items) => {
     let messages = {};
-    items.forEach((o) => {
-        if (!messages[o.message]) messages[o.message] = [];
-        messages[o.message].push(o);
+    items.forEach((item) => {
+        if (!messages[item.message]) messages[item.message] = [];
+        messages[item.message].push(item);
     });
     return messages;
 };
@@ -45,7 +47,7 @@ export class InspectorList extends List {
         const { items } = props;
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
-            aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
+            aggregate.files = [aggregate.file_path, ...items.map(({ file_path }) => file_path)];
             return aggregate;
         });
 
@@ -53,8 +55,8 @@ export class InspectorList extends List {
             editable: false,
             unordered: true,
             ...props,
-            items: sortList(aggregatedItems).map((o) => {
-                const item = new InspectorListItem(o);
+            items: sortList(aggregatedItems).map((itemProps) => {
+                const item = new InspectorListItem(itemProps);
                 item.style.flexGrow = "1";
                 return { content: item };
             }),
@@ -133,14 +135,17 @@ export class InspectorListItem extends LitElement {
             type: this.ORIGINAL_TYPE,
         });
 
-        this.setAttribute("title", this.message);
+        const isString = typeof this.message === "string";
+        if (isString) this.setAttribute("title", this.message);
 
         const hasObjectType = "object_type" in this;
         const hasMetadata = hasObjectType && "object_name" in this;
 
+        const message = isString ? unsafeHTML(this.message) : this.message;
+
         return html`
             ${hasMetadata ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>` : ""}
-            ${hasMetadata ? html`<span id="message">${this.message}</span>` : html`<p>${this.message}</p>`}
+            ${hasMetadata ? html`<span id="message">${message}</span>` : html`<p>${message}</p>`}
             ${this.file_path
                 ? html`<span id="filepath"
                       >${this.files && this.files.length > 1

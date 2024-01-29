@@ -1,5 +1,14 @@
 import { LitElement, css } from "lit";
 
+const convertToDateTimeLocalString = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export class DateTimeSelector extends LitElement {
     static get styles() {
         return css`
@@ -15,18 +24,25 @@ export class DateTimeSelector extends LitElement {
     }
 
     set value(newValue) {
-        this.input.value = newValue;
+        if (newValue) this.input.value = newValue;
+        else {
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            this.input.value = convertToDateTimeLocalString(d);
+        }
     }
 
-    constructor() {
+    constructor({ value } = {}) {
         super();
         this.input = document.createElement("input");
         this.input.type = "datetime-local";
 
-        this.addEventListener("click", (e) => {
+        this.addEventListener("click", () => {
             this.input.focus();
             this.input.showPicker();
         });
+
+        this.value = value ? convertToDateTimeLocalString(value) : value;
     }
 
     focus() {

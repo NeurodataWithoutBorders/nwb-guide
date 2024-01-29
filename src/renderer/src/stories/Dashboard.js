@@ -119,11 +119,11 @@ export class Dashboard extends LitElement {
             return pushState.apply(window.history, arguments);
         };
 
-        window.onpushstate = window.onpopstate = (e) => {
-            if (e.state) {
-                const titleString = e.state.title ?? e.state.label;
+        window.onpushstate = window.onpopstate = (popEvent) => {
+            if (popEvent.state) {
+                const titleString = popEvent.state.title ?? popEvent.state.label;
                 document.title = `${titleString} - ${this.name}`;
-                const page = this.pagesById[e.state.page]; // ?? this.pagesById[this.#activatePage]
+                const page = this.pagesById[popEvent.state.page]; // ?? this.pagesById[this.#activatePage]
                 if (!page) return;
                 if (page === this.#active) return; // Do not rerender current page
                 this.setMain(page);
@@ -193,6 +193,9 @@ export class Dashboard extends LitElement {
         // Update Active Page
         this.#active = page;
 
+        // Reset global state if page has no parent
+        if (!this.#active.info.parent) toPass.globalState = {};
+
         if (isNested) {
             let parent = info.parent;
             while (parent.info.parent) parent = parent.info.parent; // Lock sections to the top-level parent
@@ -205,12 +208,21 @@ export class Dashboard extends LitElement {
             this.subSidebar.hide();
         }
 
-        page.set(toPass);
+        this.#active.set(toPass, false);
 
-        // const page = this.getPage(info)
-        this.main.set({
-            page,
-            sections: this.subSidebar.sections ?? {},
+        this.#active.checkSyncState().then(() => {
+            this.#active.requestUpdate(); // Re-render page
+
+            const projectName = info.globalState?.project?.name;
+
+            this.subSidebar.header = projectName
+                ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
+                : projectName;
+
+            this.main.set({
+                page,
+                sections: this.subSidebar.sections ?? {},
+            });
         });
     }
 

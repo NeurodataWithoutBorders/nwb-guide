@@ -1,8 +1,11 @@
 """Collection of utility functions used by the NeuroConv Flask API."""
+
 import os
 import json
 import math
 import copy
+import re
+
 from datetime import datetime
 from typing import Dict, Optional  # , List, Union # TODO: figure way to add these back in without importing other class
 from shutil import rmtree, copytree
@@ -72,12 +75,18 @@ def replace_none_with_nan(json_object, json_schema):
     def coerce_schema_compliance_recursive(obj, schema):
         if isinstance(obj, dict):
             for key, value in obj.items():
-                if key in schema.get("properties", {}):
+                # Coerce on pattern properties as well
+                pattern_properties = schema.get("patternProperties")
+                if pattern_properties:
+                    for pattern, pattern_schema in pattern_properties.items():
+                        regex = re.compile(pattern)
+                        if regex.match(key):
+                            coerce_schema_compliance_recursive(value, pattern_schema)
+
+                elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
-                    if prop_schema.get("type") == "number" and value is None:
-                        obj[
-                            key
-                        ] = (
+                    if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
+                        obj[key] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -128,35 +137,82 @@ def locate_data(info: dict) -> dict:
     return organized_output
 
 
+def module_to_dict(my_module):
+    # Create an empty dictionary
+    module_dict = {}
+
+    # Iterate through the module's attributes
+    for attr_name in dir(my_module):
+        if not attr_name.startswith("__"):  # Exclude special attributes
+            attr_value = getattr(my_module, attr_name)
+            module_dict[attr_name] = attr_value
+
+    return module_dict
+
+
+doc_pattern = r":py:class:`\~.+\..+\.(\w+)`"
+remove_extra_spaces_pattern = r"\s+"
+
+
+def get_class_ref_in_docstring(input_string):
+    match = re.search(doc_pattern, input_string)
+
+    if match:
+        return match.group(1)
+
+
+def derive_interface_info(interface):
+    info = {"keywords": getattr(interface, "keywords", []), "description": ""}
+    if interface.__doc__:
+        info["description"] = re.sub(
+            remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
+        )
+
+    return info
+
+
+def get_all_converter_info() -> dict:
+    from neuroconv import converters
+
+    return {name: derive_interface_info(converter) for name, converter in module_to_dict(converters).items()}
+
+
 def get_all_interface_info() -> dict:
     """Format an information structure to be used for selecting interfaces based on modality and technique."""
     from neuroconv.datainterfaces import interface_list
 
-    exclude_interfaces_from_selection = ["SpikeGLXLFP"]  # Should have 'interface' stripped from name
-
-    interfaces_to_load = {interface.__name__.replace("Interface", ""): interface for interface in interface_list}
-    for excluded_interface in exclude_interfaces_from_selection:
-        interfaces_to_load.pop(excluded_interface)
+    exclude_interfaces_from_selection = [
+        # Deprecated
+        "SpikeGLXLFPInterface",
+        # Aliased
+        "CEDRecordingInterface",
+        "OpenEphysBinaryRecordingInterface",
+        "OpenEphysLegacyRecordingInterface",
+        # Ignored
+        "AxonaPositionDataInterface",
+        "AxonaUnitRecordingInterface",
+        "CsvTimeIntervalsInterface",
+        "ExcelTimeIntervalsInterface",
+        "Hdf5ImagingInterface",
+        "MaxOneRecordingInterface",
+        "OpenEphysSortingInterface",
+        "SimaSegmentationInterface",
+    ]
 
     return {
-        interface.__name__: {
-            "keywords": interface.keywords,
-            # Once we use the raw neuroconv list, we will want to ensure that the interfaces themselves
-            # have a label property
-            "label": format_name
-            # Can also add a description here if we want to provide more information about the interface
-        }
-        for format_name, interface in interfaces_to_load.items()
+        interface.__name__: derive_interface_info(interface)
+        for interface in interface_list
+        if not interface.__name__ in exclude_interfaces_from_selection
     }
 
 
 # Combine Multiple Interfaces
 def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
-    from neuroconv import datainterfaces, NWBConverter
+    from neuroconv import converters, datainterfaces, NWBConverter
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
-            custom_name: getattr(datainterfaces, interface_name)
+            custom_name: getattr(datainterfaces, interface_name, getattr(converters, interface_name, None))
             for custom_name, interface_name in interface_class_dict.items()
         }
 
@@ -322,6 +378,27 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
 
+def get_interface_alignment(info: dict) -> dict:
+    converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
+
+    timestamps = {}
+    for name, interface in converter.data_interface_objects.items():
+        # Run interface.get_timestamps if it has the method
+        if hasattr(interface, "get_timestamps"):
+            try:
+                interface_timestamps = interface.get_timestamps()
+                if len(interface_timestamps) == 1:
+                    interface_timestamps = interface_timestamps[0]  # Correct for video interface nesting
+                timestamps[name] = interface_timestamps.tolist()
+
+            except Exception:
+                timestamps[name] = []
+        else:
+            timestamps[name] = []
+
+    return timestamps
+
+
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
@@ -355,9 +432,11 @@ def convert_to_nwb(info: dict) -> str:
     available_options = converter.get_conversion_options_schema()
     options = (
         {
-            interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
-            if available_options.get("properties").get(interface).get("properties").get("stub_test")
-            else {}
+            interface: (
+                {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
+                else {}
+            )
             for interface in info["source_data"]
         }
         if run_stub_test
@@ -419,7 +498,7 @@ def convert_to_nwb(info: dict) -> str:
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs):
-    tmp_folder_path = aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
+    tmp_folder_path = _aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
     innerKwargs = {**kwargs}
     del innerKwargs["filesystem_paths"]
     innerKwargs["nwb_folder_path"] = tmp_folder_path
@@ -434,6 +513,8 @@ def upload_folder_to_dandi(
     nwb_folder_path: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -444,15 +525,19 @@ def upload_folder_to_dandi(
         nwb_folder_path=Path(nwb_folder_path),
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
-def upload_to_dandi(
+def upload_project_to_dandi(
     dandiset_id: str,
     api_key: str,
     project: Optional[str] = None,
     staging: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
+    number_of_jobs: Optional[int] = None,
+    number_of_threads: Optional[int] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -465,6 +550,8 @@ def upload_to_dandi(
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
         staging=staging,
         cleanup=cleanup,
+        number_of_jobs=number_of_jobs,
+        number_of_threads=number_of_threads,
     )
 
 
@@ -522,6 +609,7 @@ def generate_dataset(test_data_directory_path: str):
 
 def inspect_nwb_file(payload):
     from nwbinspector import inspect_nwbfile, load_config
+    from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     messages = list(
@@ -535,26 +623,48 @@ def inspect_nwb_file(payload):
         )
     )
 
-    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+    if payload.get("format") == "text":
+        return "\n".join(format_messages(messages=messages))
+
+    header = get_report_header()
+    header["NWBInspector_version"] = str(header["NWBInspector_version"])
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+
+    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
 def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all, load_config
+    from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from pickle import PicklingError
 
-    messages = list(
-        inspect_all(
-            n_jobs=-2,  # uses number of CPU - 1
-            ignore=[
-                "check_description",
-                "check_data_orientation",
-            ],  # TODO: remove when metadata control is exposed
-            config=load_config(filepath_or_keyword="dandi"),
-            **payload,
-        )
+    kwargs = dict(
+        n_jobs=-2,  # uses number of CPU - 1
+        ignore=[
+            "check_description",
+            "check_data_orientation",
+        ],  # TODO: remove when metadata control is exposed
+        config=load_config(filepath_or_keyword="dandi"),
+        **payload,
     )
 
-    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+    try:
+        messages = list(inspect_all(**kwargs))
+    except PicklingError as exception:
+        if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(exception):
+            del kwargs["n_jobs"]
+            messages = list(inspect_all(**kwargs))
+        else:
+            raise exception
+    except Exception as exception:
+        raise exception
+
+    header = get_report_header()
+    header["NWBInspector_version"] = str(header["NWBInspector_version"])
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+
+    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
 def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):

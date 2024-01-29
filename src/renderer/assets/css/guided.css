@@ -8,7 +8,7 @@
 
 .guided--nav {
     min-height: 100vh;
-    width: 220px;
+    min-width: 220px;
     margin: 0px !important;
     /* position: fixed; */
     background-color: var(--color-border);
@@ -807,16 +807,17 @@ h1.guided--text-sub-step {
     display: flex;
     flex-direction: column;
 }
-.container--dashed {
+.create-button {
     cursor: pointer;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    padding: 10px;
-    border: 1px dashed #ccc;
+    padding: 20px 10px;
+    margin: 5px;
     border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset;
 }
-.container--dashed:hover {
+.create-button:hover {
     background-color: whitesmoke;
 }
 .remove-left-border {

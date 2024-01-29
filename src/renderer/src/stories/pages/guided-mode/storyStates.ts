@@ -2,6 +2,10 @@ import nwbBaseSchema from "../../../../../../schemas/base-metadata.schema";
 // import exephysExampleSchema from "../../../../../../schemas/json/ecephys_metadata_schema_example.json";
 
 import { dashboard } from "../../../pages.js";
+import { activateServer } from "../../../server/globals";
+
+activateServer();
+
 export const PageTemplate = (args = {}) => {
     for (let k in args) dashboard[k] = args[k];
     return dashboard;

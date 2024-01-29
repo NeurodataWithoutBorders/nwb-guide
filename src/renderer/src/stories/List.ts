@@ -6,6 +6,7 @@ type ListItemType = {
   key: string,
   content: string,
   value: any,
+  controls: HTMLElement[]
 }
 
 export interface ListProps {
@@ -15,9 +16,17 @@ export interface ListProps {
   editable?: boolean,
   unordered?: boolean,
   listStyles?: any
+  transform?: (item: ListItemType) => ListItemType
+}
+
+type ListState = {
+  items: ListItemType[],
+  object: {[x:string]: ListItemType['value']}
 }
 
 export class List extends LitElement {
+
+  transform: ListProps['transform']
 
   static get styles() {
     return css`
@@ -26,10 +35,14 @@ export class List extends LitElement {
         overflow: auto;
       }
 
+
       #empty {
-        padding: 20px 10px;
         margin-left: -40px;
         color: gray;
+      }
+
+      :host([unordered]) #empty {
+        margin: 0;
       }
 
       li {
@@ -51,11 +64,20 @@ export class List extends LitElement {
         text-overflow: ellipsis
       }
 
+      :host(:not([unordered])) li {
+        cursor: move;
+      }
+
+
+      ol:not(:has(li)) {
+        margin: 0px;
+      }
+
+
       :host([unordered]) ol {
         list-style-type: none;
         display: flex;
         flex-wrap: wrap;
-        margin: 0;
         padding: 0;
       }
 
@@ -67,6 +89,21 @@ export class List extends LitElement {
         justify-content: center;
         display: flex;
         align-items: center;
+      }
+
+      [contenteditable] {
+        cursor: text;
+      }
+
+      [data-idx]{
+        background: #f0f0f0;
+        height: 25px;
+      }
+
+      .controls {
+        margin-left: 1rem;
+        display: flex;
+        gap: 0.5rem;
       }
 
     `;
@@ -95,20 +132,31 @@ export class List extends LitElement {
       };
     }
 
-    onChange: () => void = () => {}
+    onChange: (updated: ListState, previous: ListState) => void = () => {}
 
     object: {[x:string]: any} = {}
 
     get array() {
-      return this.items.map(o => o.value)
+      return this.items.map(item => item.value)
     }
 
     #items: ListItemType[] = []
+
     set items(value) {
-      const oldVal = this.#items
-      this.#items = value
-      this.onChange()
-      this.requestUpdate('items', oldVal)
+      const oldList = this.#items
+      this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
+      const oldObject = this.object
+      this.#updateObject()
+
+      this.onChange({
+        items: this.#items,
+        object: this.object
+      },
+      {
+        items: oldList,
+        object: oldObject
+      })
+      this.requestUpdate('items', oldList)
     }
 
     get items() { return this.#items }
@@ -121,6 +169,45 @@ export class List extends LitElement {
 
     declare listStyles: any
 
+    allowDrop = (ev) => ev.preventDefault();
+
+
+    #dragged?: number
+    #placeholder = document.createElement('div')
+
+    drag = (ev, i) => this.#dragged = i
+
+    dragEnter = (ev, i) => {
+       ev.preventDefault();
+        if (this.#dragged !== i) {
+          const item = this.shadowRoot.getElementById(`item-${i}`)
+          this.#placeholder.setAttribute('data-idx', i)
+          item?.insertAdjacentElement('beforebegin',  this.#placeholder)
+        } else {
+          this.#removePlaceholder()
+        }
+    }
+
+    dragExit = (ev, i) => {
+      ev.preventDefault();
+      if (this.#placeholder && i.toString() !== this.#placeholder.getAttribute('data-idx')){
+        this.#removePlaceholder()
+      }
+    }
+
+    drop = (ev, i) => {
+
+      ev.preventDefault();
+      const draggedIdx = this.#dragged as number
+      this.#dragged = undefined
+
+      const movedItem = this.items[draggedIdx]
+      this.items.splice(draggedIdx, 1)
+      this.items.splice(i, 0, movedItem)
+
+      this.items = [...this.items]
+    }
+
 
     constructor(props: ListProps = {}) {
       super();
@@ -131,6 +218,8 @@ export class List extends LitElement {
       this.unordered = props.unordered ?? false
       this.listStyles = props.listStyles ?? {}
 
+      this.transform = props.transform
+
       if (props.onChange) this.onChange = props.onChange
 
     }
@@ -139,21 +228,54 @@ export class List extends LitElement {
       this.items = [...this.items, item]
     }
 
+    #removePlaceholder = () => {
+      this.#placeholder.removeAttribute('data-idx')
+      this.#placeholder.remove()
+    }
+
     #renderListItem = (item: ListItemType, i: number) => {
       const { key, value, content = value } = item;
       const li = document.createElement("li");
+      li.id = `item-${i}`;
+
+      if (!this.unordered) {
+        li.draggable = true;
+        li.ondragstart = (ev) => this.drag(ev, i);
+
+        li.ondragend = (ev) => {
+          if (this.#dragged !== undefined) {
+            const idx = this.#placeholder.getAttribute('data-idx')
+            if (idx !== null) this.drop(ev, parseInt(idx))
+            this.#removePlaceholder()
+          }
+        }
+
+        li.ondrop = (ev) => this.drop(ev, i);
+
+        li.ondragover = (ev) => this.dragEnter(ev, i);
+        // li.ondragenter = (ev) => this.dragEnter(ev, i);
+        li.ondragleave = (ev) => this.dragExit(ev, i);
+      }
+
 
       const outerDiv = document.createElement('div')
       const div = document.createElement('div')
       li.append(outerDiv)
       outerDiv.append(div)
 
-      const keyEl = document.createElement("span");
+      const controlsDiv = document.createElement('div');
+      controlsDiv.classList.add("controls");
+
+      let editableElement = document.createElement("span");
 
       let resolvedKey = key;
       const originalValue = resolvedKey;
 
-      if (key) {
+      const isUnordered = !!key
+
+      const isObjectContent = content && typeof content === 'object'
+
+      if (isUnordered) {
 
         this.setAttribute('unordered', '')
 
@@ -164,58 +286,78 @@ export class List extends LitElement {
             resolvedKey = `${originalValue}_${i}`;
         }
 
-        keyEl.innerText = resolvedKey;
-        keyEl.contentEditable = true;
-        keyEl.style.cursor = "text";
+        const keyEl = editableElement
 
-        const sepEl = document.createElement("span");
-        sepEl.innerHTML = "&nbsp;-&nbsp;";
-        div.append(keyEl, sepEl);
+        keyEl.innerText = resolvedKey;
+        keyEl.style.cursor = "text";
+        div.append(keyEl);
+
+        if (!isObjectContent) {
+          const sepEl = document.createElement("span");
+          sepEl.innerHTML = "&nbsp;-&nbsp;";
+          div.append(sepEl);
+        }
 
         this.object[resolvedKey] = value;
-      } else this.object[i] = value;
+      }
+
+      else {
+        this.object[i] = value;
+      }
 
       if (typeof content === 'string')  {
-        const valueEl = document.createElement("span");
+          const valueEl = document.createElement("span");
+          if (!key) editableElement = valueEl
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
-      else li.append(content)
+
+      // Skip object contents
+      else if (content instanceof HTMLElement) li.append(editableElement = content)
 
 
 
       if (div.innerText) li.title = div.innerText
 
+      if (item.controls || this.editable) outerDiv.append(controlsDiv)
+
+      if (item.controls) controlsDiv.appendChild(...item.controls);
 
       if (this.editable) {
+
         const button = new Button({
             label: "Delete",
             size: "small",
         });
 
-        button.style.marginLeft = "1rem";
+        controlsDiv.appendChild(button);
 
-        outerDiv.appendChild(button);
+        editableElement.contentEditable = true;
 
         // Stop enter key from creating new line
-        keyEl.addEventListener("keydown", function (e) {
-            if (e.keyCode === 13) {
-                keyEl.blur();
+        editableElement.onkeydown = (keyDownEvent) => {
+            if (keyDownEvent.keyCode === 13) {
+              editableElement.blur();
                 return false;
             }
-        });
+        };
 
         const deleteListItem = () => this.delete(i);
 
-        keyEl.addEventListener("blur", () => {
-            const newKey = keyEl.innerText;
-            if (newKey === "") keyEl.innerText = resolvedKey; // Reset to original value
+        editableElement.onblur = () => {
+            const newKey = editableElement.innerText;
+            if (newKey === "") this.delete(i); // Delete if empty
             else {
-                delete this.object[resolvedKey];
-                resolvedKey = newKey;
-                this.object[resolvedKey] = value;
+                  const oKey = isUnordered ? resolvedKey : i;
+                  delete this.object[oKey];
+                  this.object[newKey] = value;
+
+                  if (!isUnordered) {
+                    this.items[i].value = newKey
+                    this.items = [...this.items]
+                  }
             }
-        });
+        };
 
         button.onClick = deleteListItem;
       }
@@ -232,6 +374,33 @@ export class List extends LitElement {
       this.items = []
     }
 
+    #updateObject = () => {
+
+      this.object = {}
+      this.#items.forEach((item, i) => {
+
+        const { key, value } = item;
+
+        const isUnordered = !!key
+        if (isUnordered) {
+          let resolvedKey = key
+
+          // Ensure no duplicate keys
+          let kI = 0;
+          while (resolvedKey in this.object) {
+              i++;
+              resolvedKey = `${key}_${kI}`;
+          }
+
+          this.object[resolvedKey] = value
+        }
+
+        else {
+          this.object[i] = value
+        }
+      })
+    }
+
     render() {
 
       this.removeAttribute('unordered')
@@ -243,7 +412,7 @@ export class List extends LitElement {
 
       return html`
       <ol style=${styleMap(this.listStyles)}>
-        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<li id="empty">${emptyMessage}</li>`}
       </ol>`
     }
   }

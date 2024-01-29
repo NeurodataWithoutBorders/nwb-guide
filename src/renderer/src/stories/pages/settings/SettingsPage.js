@@ -4,97 +4,196 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
 import projectGlobalSchema from "../../../../../../schemas/json/project/globals.json" assert { type: "json" };
+import developerGlobalSchema from "../../../../../../schemas/json/developer/globals.json" assert { type: "json" };
 
-const schema = {
-    properties: {
-        output_locations: projectGlobalSchema,
-        DANDI: dandiGlobalSchema,
-    },
-};
+import { validateDANDIApiKey } from "../../../validation/dandi";
 
 import { Button } from "../../Button.js";
-import { global } from "../../../progress/index.js";
-import { merge } from "../utils.js";
+import { global, remove, save } from "../../../progress/index.js";
+import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
+import { SERVER_FILE_PATH, fs, path, port } from "../../../electron/index.js";
 
-const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
+import saveSVG from "../../assets/save.svg?raw";
 
-const setUndefinedIfNotDeclared = (schema, resolved) => {
-    for (let prop in schema.properties) {
-        const propInfo = schema.properties[prop];
-        if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
-        else if (!(prop in resolved)) resolved[prop] = undefined;
+import { header } from "../../forms/utils";
+
+import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
+
+const propertiesToTransform = ["folder_path", "file_path"];
+
+function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
+    const subjectId = "mouse1";
+    const sessions = ["session1"];
+
+    const resolvedSourceData = structuredClone(sourceData);
+    Object.values(resolvedSourceData).forEach((info) => {
+        propertiesToTransform.forEach((property) => {
+            if (info[property]) info[property] = path.join(rootFolder, info[property]);
+        });
+    });
+
+    const updatedName = header(name);
+
+    remove(updatedName, true);
+
+    save({
+        info: {
+            globalState: {
+                project: {
+                    name: updatedName,
+                    initialized: true,
+                },
+
+                // provide data for all supported interfaces
+                interfaces: Object.keys(resolvedSourceData).reduce((acc, key) => {
+                    acc[key] = `${key}`;
+                    return acc;
+                }, {}),
+
+                structure: {
+                    keep_existing_data: true,
+                    state: false,
+                },
+
+                results: {
+                    [subjectId]: sessions.reduce((acc, sessionId) => {
+                        acc[subjectId] = {
+                            metadata: {
+                                Subject: {
+                                    subject_id: subjectId,
+                                },
+                                NWBFile: {
+                                    session_id: sessionId,
+                                },
+                            },
+                            source_data: resolvedSourceData,
+                        };
+                        return acc;
+                    }, {}),
+                },
+
+                subjects: {
+                    [subjectId]: {
+                        sessions: sessions,
+                        sex: "M",
+                        species: "Mus musculus",
+                        age: "P30D",
+                    },
+                },
+            },
+        },
+    });
+}
+
+const schema = merge(
+    projectGlobalSchema,
+    {
+        properties: {
+            DANDI: {
+                title: "DANDI Settings",
+                ...dandiGlobalSchema,
+            },
+            developer: {
+                title: "Developer Settings",
+                ...developerGlobalSchema,
+            },
+        },
+        required: ["DANDI", "developer"],
+    },
+    {
+        arrays: true,
     }
-};
+);
 
 export class SettingsPage extends Page {
+    header = {
+        title: "App Settings",
+        subtitle: "This page allows you to set global settings for the GUIDE.",
+        controls: [
+            new Button({
+                icon: saveSVG,
+                onClick: async () => {
+                    if (!this.unsavedUpdates) return this.#openNotyf("All changes were already saved", "success");
+                    this.save();
+                },
+            }),
+        ],
+    };
+
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     #notification;
 
-    #openNotyf = (opts) => {
+    #openNotyf = (message, type) => {
         if (this.#notification) notyf.dismiss(this.#notification);
-        return (this.#notification = notyf.open(opts));
+        return (this.#notification = this.notify(message, type));
     };
 
-    beforeSave = () => {
+    beforeSave = async () => {
         const { resolved } = this.form;
-        for (let prop in schema.properties) {
-            const propInfo = schema.properties[prop];
-            const res = resolved[prop];
-            if (propInfo) setUndefinedIfNotDeclared(propInfo, res);
-        }
+        setUndefinedIfNotDeclared(schema.properties, resolved);
 
-        merge(this.form.resolved, global.data);
+        merge(resolved, global.data);
 
         global.save(); // Save the changes, even if invalid on the form
-        this.#openNotyf({
-            type: "success",
-            message: "Global settings changes saved",
-        });
+        this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
     render() {
-        this.localState = merge(global.data, {});
-
-        const button = new Button({
-            label: "Save Changes",
-            onClick: async () => {
-                if (!this.unsavedUpdates)
-                    return this.#openNotyf({ type: "success", message: "All changes were already saved" });
-                this.save();
-            },
-        });
+        this.localState = structuredClone(global.data);
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
         this.form = new JSONSchemaForm({
             results: this.localState,
             schema,
-            mode: "accordion",
             onUpdate: () => (this.unsavedUpdates = true),
-            validateOnChange: (name, parent) => {
+            validateOnChange: async (name, parent) => {
                 const value = parent[name];
-                if (name.includes("api_key")) return dandiAPITokenRegex.test(value);
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
                 return true;
             },
             onThrow,
         });
 
-        return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
-                <h1 style="margin: 0;">NWB GUIDE Settings</h1>
-            </div>
-            <p>This page allows you to set global settings for the NWB GUIDE.</p>
-            <hr />
+        const generatePipelineButton = new Button({
+            label: "Generate Test Pipelines",
+            onClick: async () => {
+                const { testing_data_folder } = this.form.results.developer ?? {};
 
-            <div>
-                ${this.form}
-                <hr />
-                ${button}
-            </div>
+                if (!testing_data_folder)
+                    return this.#openNotyf(
+                        `Please specify a testing data folder in the Developer section before attempting to generate pipelines.`,
+                        "error"
+                    );
+
+                const { pipelines = {} } = testingSuiteYaml;
+
+                const pipelineNames = Object.keys(pipelines);
+                const nPipelines = pipelineNames.length;
+                pipelineNames
+                    .reverse()
+                    .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
+
+                this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
+            },
+        });
+
+        setTimeout(() => {
+            const testFolderInput = this.form.getFormElement(["developer", "testing_data_folder"]);
+            testFolderInput.after(generatePipelineButton);
+        }, 100);
+
+        return html`
+            <p><b>Server Port:</b> ${port}</p>
+            <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
+            <hr />
+            <br />
+            ${this.form}
         `;
     }
 }
