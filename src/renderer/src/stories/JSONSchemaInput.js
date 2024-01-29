@@ -18,15 +18,14 @@ import { merge } from "./pages/utils";
 const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
 
 function resolveDateTime(value) {
-    if (typeof value=== 'string') {
+    if (typeof value === "string") {
         const match = value.match(dateTimeRegex);
         if (match) return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}`;
-        return value
+        return value;
     }
 
-    return value
-} 
-
+    return value;
+}
 
 export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const name = fullPath.slice(-1)[0];
@@ -1040,16 +1039,13 @@ export class JSONSchemaInput extends LitElement {
                 ></textarea>`;
             // Handle other string formats
             else {
+                const isDateTime = info.format === "date-time";
 
-                const isDateTime = info.format === "date-time"
+                const type = isDateTime
+                    ? "datetime-local"
+                    : schema.format ?? (schema.type === "string" ? "text" : schema.type);
 
-                const type =
-                isDateTime
-                        ? "datetime-local"
-                        : schema.format ?? (schema.type === "string" ? "text" : schema.type);
-
-
-                const value = isDateTime ? resolveDateTime(this.value) : this.value
+                const value = isDateTime ? resolveDateTime(this.value) : this.value;
 
                 return html`
                     <input
