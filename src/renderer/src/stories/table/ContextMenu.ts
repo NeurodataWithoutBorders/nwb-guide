@@ -56,6 +56,11 @@ export class ContextMenu extends LitElement{
           .menu > li.trash > a:hover {
             color: red;
           }
+
+          .menu > li[disabled]{
+            pointer-events: none;
+            opacity: 0.5;
+          }
         `
     }
 
@@ -92,7 +97,7 @@ export class ContextMenu extends LitElement{
     render () {
         return html`
         <ul class="menu">
-            ${this.items.map(({ onclick , icon, label }) => html`<li class="share" @click=${() => {
+            ${this.items.map(({ id, onclick , icon, label }) => html`<li class="share" id="${id}" @click=${() => {
                 if (onclick) onclick(this.#activePath)
             }}><a href="#">${icon ?? ''}${label}</a></li>`)}
         </ul>
