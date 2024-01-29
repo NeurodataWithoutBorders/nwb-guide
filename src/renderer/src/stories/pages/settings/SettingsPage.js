@@ -9,7 +9,7 @@ import developerGlobalSchema from "../../../../../../schemas/json/developer/glob
 import { validateDANDIApiKey } from "../../../validation/dandi";
 
 import { Button } from "../../Button.js";
-import { global, save } from "../../../progress/index.js";
+import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { notyf } from "../../../dependencies/globals.js";
@@ -34,11 +34,15 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
         });
     });
 
+    const updatedName = header(name);
+
+    remove(updatedName, true);
+
     save({
         info: {
             globalState: {
                 project: {
-                    name: header(name),
+                    name: updatedName,
                     initialized: true,
                 },
 
