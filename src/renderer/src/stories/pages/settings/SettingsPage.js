@@ -34,13 +34,15 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
         });
     });
 
-    remove(name, true);
+    const updatedName = header(name)
+
+    remove(updatedName, true);
 
     save({
         info: {
             globalState: {
                 project: {
-                    name: header(name),
+                    name: updatedName,
                     initialized: true,
                 },
 
