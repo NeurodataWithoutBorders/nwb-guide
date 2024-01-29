@@ -1039,9 +1039,8 @@ export class JSONSchemaInput extends LitElement {
                 ></textarea>`;
             // Handle other string formats
             else {
+                const isDateTime = schema.format === "date-time";
 
-                const isDateTime = schema.format === "date-time"
-                
                 const type = isDateTime
                     ? "datetime-local"
                     : schema.format ?? (schema.type === "string" ? "text" : schema.type);
