@@ -3,6 +3,7 @@ Calling `pyi-makespec` regenerates the base spec file, but we need to extend the
 
 This script is run automatically as a part of `npm run build:flask:spec` after the `pyi-makespec` call.
 """
+
 from pathlib import Path
 
 with open(file=Path(__file__).parent / "nwb-guide.spec", mode="r") as io:
@@ -19,9 +20,9 @@ lines.insert(8, "import scipy\n")
 
 hiddenImportIdx = lines.index("hiddenimports = []\n")
 
-lines[
-    hiddenImportIdx
-] = "hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]\n\n"
+lines[hiddenImportIdx] = (
+    "hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]\n\n"
+)
 
 
 # Originally this was a separate `npm` command per platform to account for CLI syntax differences between ; and :
