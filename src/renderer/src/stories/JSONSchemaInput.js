@@ -15,6 +15,18 @@ import { Search } from "./Search";
 import tippy from "tippy.js";
 import { merge } from "./pages/utils";
 
+const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
+
+function resolveDateTime(value) {
+    if (typeof value === "string") {
+        const match = value.match(dateTimeRegex);
+        if (match) return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}`;
+        return value;
+    }
+
+    return value;
+}
+
 export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
@@ -1027,10 +1039,13 @@ export class JSONSchemaInput extends LitElement {
                 ></textarea>`;
             // Handle other string formats
             else {
-                const type =
-                    schema.format === "date-time"
-                        ? "datetime-local"
-                        : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+                const isDateTime = schema.format === "date-time";
+
+                const type = isDateTime
+                    ? "datetime-local"
+                    : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+
+                const value = isDateTime ? resolveDateTime(this.value) : this.value;
 
                 return html`
                     <input
@@ -1038,7 +1053,7 @@ export class JSONSchemaInput extends LitElement {
                         type="${type}"
                         step=${isNumber && schema.step ? schema.step : ""}
                         placeholder="${schema.placeholder ?? ""}"
-                        .value="${this.value ?? ""}"
+                        .value="${value ?? ""}"
                         @input=${(ev) => {
                             let value = ev.target.value;
                             let newValue = value;
