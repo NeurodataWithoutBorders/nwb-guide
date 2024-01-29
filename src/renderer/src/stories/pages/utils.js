@@ -53,7 +53,8 @@ export function merge(toMerge = {}, target = {}, mergeOptions = {}) {
         } else if (isObject(value)) {
             if (isObject(targetValue)) target[k] = merge(value, targetValue, mergeOptions);
             else {
-                if (mergeOptions.clone) target[k] = merge(value, {}, mergeOptions); // Replace primitive values
+                if (mergeOptions.clone)
+                    target[k] = merge(value, {}, mergeOptions); // Replace primitive values
                 else target[k] = value; // Replace object values
             }
         } else target[k] = value; // Replace primitive values

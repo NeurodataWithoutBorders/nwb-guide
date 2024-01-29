@@ -1,4 +1,5 @@
 """Collection of utility functions used by the NeuroConv Flask API."""
+
 import os
 import json
 import math
@@ -74,12 +75,18 @@ def replace_none_with_nan(json_object, json_schema):
     def coerce_schema_compliance_recursive(obj, schema):
         if isinstance(obj, dict):
             for key, value in obj.items():
-                if key in schema.get("properties", {}):
+                # Coerce on pattern properties as well
+                pattern_properties = schema.get("patternProperties")
+                if pattern_properties:
+                    for pattern, pattern_schema in pattern_properties.items():
+                        regex = re.compile(pattern)
+                        if regex.match(key):
+                            coerce_schema_compliance_recursive(value, pattern_schema)
+
+                elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
-                    if prop_schema.get("type") == "number" and value is None:
-                        obj[
-                            key
-                        ] = (
+                    if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
+                        obj[key] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -371,6 +378,27 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
 
+def get_interface_alignment(info: dict) -> dict:
+    converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
+
+    timestamps = {}
+    for name, interface in converter.data_interface_objects.items():
+        # Run interface.get_timestamps if it has the method
+        if hasattr(interface, "get_timestamps"):
+            try:
+                interface_timestamps = interface.get_timestamps()
+                if len(interface_timestamps) == 1:
+                    interface_timestamps = interface_timestamps[0]  # Correct for video interface nesting
+                timestamps[name] = interface_timestamps.tolist()
+
+            except Exception:
+                timestamps[name] = []
+        else:
+            timestamps[name] = []
+
+    return timestamps
+
+
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
@@ -404,9 +432,11 @@ def convert_to_nwb(info: dict) -> str:
     available_options = converter.get_conversion_options_schema()
     options = (
         {
-            interface: {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
-            if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
-            else {}
+            interface: (
+                {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
+                else {}
+            )
             for interface in info["source_data"]
         }
         if run_stub_test
@@ -579,6 +609,7 @@ def generate_dataset(test_data_directory_path: str):
 
 def inspect_nwb_file(payload):
     from nwbinspector import inspect_nwbfile, load_config
+    from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     messages = list(
@@ -592,11 +623,19 @@ def inspect_nwb_file(payload):
         )
     )
 
-    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+    if payload.get("format") == "text":
+        return "\n".join(format_messages(messages=messages))
+
+    header = get_report_header()
+    header["NWBInspector_version"] = str(header["NWBInspector_version"])
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+
+    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
 def inspect_nwb_folder(payload):
     from nwbinspector import inspect_all, load_config
+    from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
@@ -621,7 +660,11 @@ def inspect_nwb_folder(payload):
     except Exception as exception:
         raise exception
 
-    return json.loads(json.dumps(obj=messages, cls=InspectorOutputJSONEncoder))
+    header = get_report_header()
+    header["NWBInspector_version"] = str(header["NWBInspector_version"])
+    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+
+    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
 def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):

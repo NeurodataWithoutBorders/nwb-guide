@@ -1,14 +1,19 @@
-import { LitElement, css, html } from "lit";
-import { header } from "./forms/utils";
+import { LitElement, css, html, unsafeCSS } from "lit";
+import { header, tempPropertyValueKey } from "./forms/utils";
 import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
 import { ContextMenu } from "./table/ContextMenu";
-import { errorHue, warningHue } from "./globals";
+import { emojiFontFamily, errorHue, warningHue } from "./globals";
 
 import { Loader } from "./Loader";
 import { styleMap } from "lit/directives/style-map.js";
+
 import "./Button";
+import tippy from "tippy.js";
+import { sortTable } from "./Table";
+import { NestedInputCell } from "./table/cells/input";
+import { getIgnore } from "./JSONSchemaForm";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -51,6 +56,7 @@ export class SimpleTable extends LitElement {
 
             :host([loading]) tfoot {
                 display: block;
+                position: relative;
             }
 
             :host([loading]) tfoot td {
@@ -96,7 +102,6 @@ export class SimpleTable extends LitElement {
             }
 
             .table-container {
-                position: relative;
                 overflow: auto;
                 max-height: 400px;
             }
@@ -110,6 +115,7 @@ export class SimpleTable extends LitElement {
                 position: sticky;
                 top: 0;
                 left: 0;
+                z-index: 1;
             }
 
             th {
@@ -140,15 +146,18 @@ export class SimpleTable extends LitElement {
                 user-select: none;
             }
 
-            [title] .relative::after {
-                content: "ℹ️";
-                cursor: help;
-                display: inline-block;
+            .relative .info {
                 margin: 0px 5px;
-                text-align: center;
                 font-size: 80%;
-                font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-                    "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif;
+                font-family: ${unsafeCSS(emojiFontFamily)};
+            }
+
+            h3 {
+                margin: 0;
+                padding: 10px;
+                background: black;
+                color: white;
+                border-radius-top: 5px;
             }
         `;
     }
@@ -159,6 +168,11 @@ export class SimpleTable extends LitElement {
             ? (this.rendered = new Promise((resolve) => (this.#rendered = () => resolve((this.rendered = true)))))
             : this.rendered;
     rendered = this.#updateRendered(true);
+
+    #onUpdate = (...args) => {
+        this.onUpdate(...args);
+        if (this.#context) this.#updateContextMenuRendering();
+    };
 
     constructor({
         schema,
@@ -173,15 +187,22 @@ export class SimpleTable extends LitElement {
         onThrow,
         deferLoading,
         maxHeight,
+        contextOptions = {},
+        ignore = {},
     } = {}) {
         super();
         this.schema = schema ?? {};
+        this.#keyColumn = keyColumn;
         this.data = data ?? [];
-        this.keyColumn = keyColumn;
+
         this.globals = globals ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.deferLoading = deferLoading ?? false;
         this.maxHeight = maxHeight ?? "";
+
+        this.ignore = ignore;
+
+        this.contextOptions = contextOptions;
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
@@ -189,49 +210,57 @@ export class SimpleTable extends LitElement {
         if (onThrow) this.onThrow = onThrow;
         if (onUpdate) this.onUpdate = onUpdate;
 
-        this.onmousedown = (ev) => {
+        this.onmousedown = (pointerDownEvent) => {
+            pointerDownEvent.stopPropagation();
             this.#clearSelected();
             this.#selecting = true;
-            const cell = this.#getCellFromEvent(ev);
+            const cell = this.#getCellFromEvent(pointerDownEvent);
             if (cell) this.#selectCells(cell);
         };
 
-        this.onmouseup = (ev) => (this.#selecting = false);
+        this.onmouseup = () => (this.#selecting = false);
 
         document.addEventListener("onmouseup", this.onmouseup);
 
-        document.addEventListener("mousedown", (ev) => {
-            const path = this.#getPath(ev);
+        document.addEventListener("mousedown", (pointerDownEvent) => {
+            const path = this.#getPath(pointerDownEvent);
             if (!path.includes(this)) this.#clearSelected();
         });
 
         // Handle Copy-Paste Commands
-        this.addEventListener("copy", (ev) => {
-            ev.preventDefault();
+        this.addEventListener("copy", (copyEvent) => {
+            copyEvent.stopPropagation();
+            copyEvent.preventDefault();
+
             const tsv = Object.values(this.#selected)
                 .map((arr) => arr.map((inputElement) => inputElement.value).join("\t"))
                 .join("\n");
 
-            ev.clipboardData.setData("text/plain", tsv);
+            copyEvent.clipboardData.setData("text/plain", tsv);
         });
 
-        document.addEventListener("keydown", (ev) => {
-            var key = ev.keyCode || ev.charCode;
+        document.addEventListener("keydown", (keyDownEvent) => {
+            var key = keyDownEvent.keyCode || keyDownEvent.charCode;
             if (key == 8 || key == 46) {
-                const path = this.#getPath(ev);
+                const path = this.#getPath(keyDownEvent);
                 if (path[0] === document.body)
-                    Object.values(this.#selected).forEach((row) => row.forEach((cell) => cell.setInput("")));
+                    Object.values(this.#selected).forEach((row) => {
+                        row.forEach((cell) => {
+                            if (cell.type !== "table") cell.setInput("");
+                        });
+                    });
                 return;
             }
 
             // Avoid special key clicks
-            if ((ev.metaKey || ev.ctrlKey || ev.shiftKey) && !ev.key) return;
+            if ((keyDownEvent.metaKey || keyDownEvent.ctrlKey || keyDownEvent.shiftKey) && !keyDownEvent.key) return;
 
             // Undo / Redo
-            if ((isMac ? ev.metaKey : ev.ctrlKey) && ev.key === "z") return this.#clearSelected();
+            if ((isMac ? keyDownEvent.metaKey : keyDownEvent.ctrlKey) && keyDownEvent.key === "z")
+                return this.#clearSelected();
 
             if (this.#firstSelected) {
-                const path = this.#getPath(ev);
+                const path = this.#getPath(keyDownEvent);
                 if (path[0] === document.body) {
                     this.#firstSelected.input.toggle(true); // Open editor
                     this.#firstSelected.input.execute("selectAll"); // redirect keydown to the hidden input
@@ -239,12 +268,14 @@ export class SimpleTable extends LitElement {
             }
         });
 
-        this.addEventListener("paste", (ev) => {
-            ev.preventDefault();
+        this.addEventListener("paste", (pasteEvent) => {
+            pasteEvent.stopPropagation();
+            pasteEvent.preventDefault();
+
             const topLeftCell = Object.values(this.#selected)[0]?.[0];
             if (!topLeftCell) return;
             const { i: firstI, j: firstJ } = topLeftCell.simpleTableInfo;
-            const tsv = ev.clipboardData.getData("text/plain");
+            const tsv = pasteEvent.clipboardData.getData("text/plain");
             let lastCell;
 
             tsv.split("\n").map((str, i) =>
@@ -260,6 +291,19 @@ export class SimpleTable extends LitElement {
 
             this.#selectCells(lastCell, topLeftCell);
         });
+    }
+
+    #keyColumn;
+    #data = [];
+    get data() {
+        // Remove empty array entries
+        if (Array.isArray(this.#data)) return this.#data.filter((o) => Object.keys(o).length);
+        else return this.#data;
+    }
+
+    set data(val) {
+        this.#data = val;
+        this.keyColumn = Array.isArray(this.#data) ? undefined : this.#keyColumn ?? "Property Key";
     }
 
     #selected = {};
@@ -281,9 +325,12 @@ export class SimpleTable extends LitElement {
     #getPath = (ev) => ev.path || ev.composedPath();
     #getCellFromEvent = (ev) => this.#getCellFromPath(this.#getPath(ev));
     #getCellFromPath = (path) => {
-        const found = path.find(
-            (element) => element instanceof TableCell || element.children?.[0] instanceof TableCell
-        );
+        let inInputCell;
+
+        const found = path.find((element) => {
+            if (element instanceof NestedInputCell) inInputCell = true;
+            return !inInputCell && (element instanceof TableCell || element.children?.[0] instanceof TableCell);
+        });
         if (found instanceof HTMLTableCellElement) return found.children[0];
         else return found;
     };
@@ -328,24 +375,28 @@ export class SimpleTable extends LitElement {
         };
     }
 
+    #isUndefined(val) {
+        return val === undefined || val === "";
+    }
+
     #getRowData(row, cols = this.colHeaders) {
-        const hasRow = row in this.data;
+        const hasRow = row in this.#data;
         return cols.map((col, j) => {
             let value;
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
                 else return "";
-            } else
-                value =
-                    (hasRow ? this.data[row][col] : undefined) ??
-                    this.globals[col] ??
-                    this.schema.properties[col].default ??
-                    "";
+            } else {
+                value = hasRow ? this.#data[row][col] : undefined;
+                if (this.#isUndefined(value)) value = this.globals[col];
+                if (this.#isUndefined(value)) value = this.#itemSchema.properties?.[col]?.default;
+                if (this.#isUndefined(value)) value = "";
+            }
             return value;
         });
     }
 
-    #getData(rows = Object.keys(this.data), cols = this.colHeaders) {
+    #getData(rows = Object.keys(this.#data), cols = this.colHeaders) {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
@@ -402,28 +453,50 @@ export class SimpleTable extends LitElement {
     addRow = (anchorRow = this.#cells.length - 1, n) => this.#updateRows(anchorRow, 1)[0];
     getRow = (i) => Object.values(this.#cells[i]);
 
+    #updateContextMenuRendering = () => {
+        const { minItems, maxItems } = this.schema;
+
+        if (minItems || maxItems) {
+            const nRows = this.data.length;
+            const addRowButton = this.#context.shadowRoot.querySelector("#add-row");
+            const removeRowButton = this.#context.shadowRoot.querySelector("#remove-row");
+
+            removeRowButton.removeAttribute("disabled");
+            addRowButton.removeAttribute("disabled");
+
+            if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
+
+            if (nRows >= maxItems) addRowButton.setAttribute("disabled", "");
+        }
+    };
+
     #menuOptions = {
         row: {
             add: {
+                id: "add-row",
                 label: "Add Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
+                    if (!cell) return this.addRow(); // No cell selected
                     const { i } = cell.simpleTableInfo;
                     this.addRow(i); //2) // TODO: Support adding more than one row
                 },
             },
             remove: {
+                id: "remove-row",
                 label: "Remove Row",
                 onclick: (path) => {
                     const cell = this.#getCellFromPath(path);
+                    if (!cell) return; // No cell selected
+
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
 
                     // Validate with empty values before removing (to trigger any dependent validations)
-                    const cols = this.data[row];
+                    const cols = this.#data[row];
                     Object.keys(cols).map((k) => (cols[k] = ""));
                     if (this.validateOnChange)
                         Object.keys(cols).map((k) => {
-                            const res = this.validateOnChange(k, { ...cols }, cols[k]);
+                            const res = this.validateOnChange([k], { ...cols }, cols[k]);
                             if (typeof res === "function") res();
                         });
 
@@ -435,6 +508,7 @@ export class SimpleTable extends LitElement {
 
         column: {
             add: {
+                id: "add-column",
                 label: "Add Column",
                 onclick: (path) => {
                     console.log("add column");
@@ -442,6 +516,7 @@ export class SimpleTable extends LitElement {
                 },
             },
             remove: {
+                id: "remove-column",
                 label: "Remove Column",
                 onclick: (path) => {
                     console.log("remove column");
@@ -453,14 +528,30 @@ export class SimpleTable extends LitElement {
 
     generateContextMenu(options) {
         const items = [];
-        if (options.row?.add) items.push(this.#menuOptions.row.add);
-        if (options.row?.remove) items.push(this.#menuOptions.row.remove);
+
+        const { minItems, maxItems } = this.schema;
+        const nRows = this.data.length;
+
+        const noRowEdits = minItems && maxItems && minItems === maxItems && nRows === minItems && nRows === maxItems;
+
+        if (!noRowEdits) {
+            if (options.row?.add) items.push(this.#menuOptions.row.add);
+            if (options.row?.remove) items.push(this.#menuOptions.row.remove);
+        }
+
         if (options.column?.add) items.push(this.#menuOptions.column.add);
         if (options.column?.remove) items.push(this.#menuOptions.column.remove);
 
-        this.#context = new ContextMenu({ target: this.shadowRoot.querySelector("table"), items });
+        if (items.length) {
+            this.#context = new ContextMenu({
+                target: this.shadowRoot.querySelector("table"),
+                items,
+            });
 
-        this.shadowRoot.append(this.#context); // Insert context menu
+            this.#context.updated = () => this.#updateContextMenuRendering(); // Run when done rendering
+
+            document.body.append(this.#context); // Insert context menu
+        }
     }
 
     #loaded = false;
@@ -473,8 +564,10 @@ export class SimpleTable extends LitElement {
         this.removeAttribute("waiting");
 
         const scrollRoot = this.shadowRoot.querySelector("table");
+
         // Add cells to body after the initial table render
         const body = this.shadowRoot.querySelector("tbody");
+        body.innerHTML = ""; // Clear existing render
 
         if (!this.#loaded) {
             const tStart = performance.now();
@@ -507,6 +600,7 @@ export class SimpleTable extends LitElement {
                     add: true,
                     remove: true,
                 },
+                ...this.contextOptions,
             });
         }
     };
@@ -514,7 +608,7 @@ export class SimpleTable extends LitElement {
     updated() {
         this.setAttribute("loading", "");
 
-        const data = this.#getData();
+        const data = this.#getData(); // Always render at least one row
         const cells = data.map((row, i) => row.map((v, j) => this.#createCell(v, { i, j }))).flat();
 
         // Trigger load after a short delay if not deferred
@@ -537,21 +631,17 @@ export class SimpleTable extends LitElement {
         const count = Math.abs(nRows);
         const range = Array.from({ length: count }, (_, i) => row + i);
 
-        const children = Array.from(this.shadowRoot.querySelector("tbody").children);
+        const bodyEl = this.shadowRoot.querySelector("tbody");
+        const children = Array.from(bodyEl.children);
 
         const isPositive = Math.sign(nRows) === 1;
 
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
-            if (children.length - count < 1) {
-                this.onThrow("You must have at least one row");
-                return false;
-            }
-
-            const rowHeaders = Object.keys(this.data);
+            const rowHeaders = Object.keys(this.#data);
             range.map((i) => {
                 children[i].remove();
-                delete this.data[rowHeaders[row]];
+                delete this.#data[rowHeaders[row]];
                 delete this.#unresolved[row];
                 delete this.#cells[i];
             });
@@ -579,20 +669,41 @@ export class SimpleTable extends LitElement {
                 const data = this.#getRowData(); // Get information for an undefined row
                 const newRow = document.createElement("tr");
                 newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
-                latest.insertAdjacentElement("afterend", newRow);
-                latest = newRow;
+
+                if (latest) latest.insertAdjacentElement("afterend", newRow);
+                else bodyEl.append(newRow);
+
                 return this.getRow(i);
             });
 
+            this.#onUpdate([], this.data);
             return mapped;
         }
+
+        this.#onUpdate([], this.data);
     }
 
-    #renderHeaderContent = (str) => html`<div class="relative"><span>${str}</span></div>`;
+    #renderHeader = (str, { title, description }) => {
+        const header = document.createElement("th");
 
-    #renderHeader = (str, { description }) => {
-        if (description) return html`<th title="${description}">${this.#renderHeaderContent(str)}</th>`;
-        return html`<th>${this.#renderHeaderContent(str)}</th>`;
+        // Inner Content
+        const div = document.createElement("div");
+        div.classList.add("relative");
+        const span = document.createElement("span");
+        span.innerHTML = title ?? str;
+        div.append(span);
+        header.append(div);
+
+        // Add Description Tooltip
+        if (description) {
+            const span = document.createElement("span");
+            span.classList.add("info");
+            span.innerText = "ℹ️";
+            div.append(span);
+            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}`, allowHTML: true });
+        }
+
+        return header;
     };
 
     #cells = [];
@@ -609,11 +720,12 @@ export class SimpleTable extends LitElement {
         // NOTE: We would like to allow invalid values to mutate the results
         // if (isValid) {
 
-        const isResolved = rowName in this.data;
-        let target = this.data;
+        const isResolved = rowName in this.#data;
+        let target = this.#data;
 
         if (!isResolved) {
-            if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+            if (!this.keyColumn)
+                this.#data[rowName] = {}; // Add new row to array
             else {
                 rowName = row;
                 if (!this.#unresolved[rowName]) this.#unresolved[rowName] = {}; // Ensure row exists
@@ -626,7 +738,7 @@ export class SimpleTable extends LitElement {
             if (value !== rowName) {
                 const old = target[rowName] ?? {};
                 if (value) {
-                    this.data[value] = old; // Allow renaming when different
+                    this.#data[value] = old; // Allow renaming when different
                     delete this.#unresolved[row];
                 } else this.#unresolved[row] = old; // Allow tracking when keyColumn is deleted
 
@@ -635,37 +747,51 @@ export class SimpleTable extends LitElement {
         }
         // Update data on passed object
         else {
-            if (value == undefined || value === "") target[rowName][header] = undefined;
+            if (this.#isUndefined(value)) target[rowName][header] = undefined;
             else target[rowName][header] = value;
         }
 
-        if (cell.interacted) this.onUpdate([rowName, header], value);
+        if (cell.interacted) this.#onUpdate([rowName, header], value);
     };
 
     #createCell = (value, info) => {
-        const rowNames = Object.keys(this.data);
+        const rowNames = Object.keys(this.#data);
+
+        const row = Array.isArray(this.#data) ? info.i : rowNames[info.i];
 
         const fullInfo = {
             ...info,
             col: this.colHeaders[info.j],
-            row: Array.isArray(this.data) ? `${info.i}` : rowNames[info.i],
+            row: `${row}`,
         };
 
-        const schema = this.#schema[fullInfo.col];
+        const schema = this.#itemProps[fullInfo.col];
+
+        const ignore = getIgnore(this.ignore, [fullInfo.col]);
 
         // Track the cell renderer
         const cell = new TableCell({
+            info: {
+                title: header(
+                    fullInfo.col === tempPropertyValueKey
+                        ? "Property" // outerParent[tempPropertyKey] // NOTE: For new rows, this will be unresolved at instantiation
+                        : fullInfo.col
+                ),
+                col: this.colHeaders[info.j],
+            },
             value,
             schema,
-            validateOnChange: (value) => {
+            ignore,
+            validateOnChange: async (
+                value,
+                path = [],
+                parent = { ...this.#data[fullInfo.row] }, // A copy of the parent
+                innerSchema = schema
+            ) => {
                 if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
 
                 const res = this.validateOnChange
-                    ? this.validateOnChange(
-                          fullInfo.col,
-                          { ...this.data[fullInfo.row] }, // Validate on a copy of the parent
-                          value
-                      )
+                    ? await this.validateOnChange([row, fullInfo.col, ...path], parent, value, innerSchema)
                     : true;
 
                 return res;
@@ -674,6 +800,19 @@ export class SimpleTable extends LitElement {
             onValidate: (info) => {
                 const td = cell.simpleTableInfo.td;
                 if (td) {
+                    const message = info.title;
+                    delete info.title;
+
+                    if (td._tippy) {
+                        td._tippy.destroy();
+                        td.removeAttribute("data-message");
+                    }
+
+                    if (message !== undefined) {
+                        tippy(td, { content: message, allowHTML: true });
+                        td.setAttribute("data-message", message);
+                    }
+
                     for (let key in info) {
                         const value = info[key];
                         if (value === undefined) td.removeAttribute(key);
@@ -702,21 +841,40 @@ export class SimpleTable extends LitElement {
             if (this.#selecting) this.#selectCells(cell);
         };
 
+        td.ondblclick = () => cell.toggle(true);
+
+        cell.addEventListener("blur", () => {
+            this.#clearSelected(); // NOTE: May now make other clearSelected calls redundant
+        });
+
         td.appendChild(cell);
         return td;
     };
 
     #schema = {};
 
+    #itemSchema = {};
+    #itemProps = {};
+
+    get schema() {
+        return this.#schema;
+    }
+
+    set schema(schema) {
+        this.#schema = schema;
+        this.#itemSchema = this.#schema.items;
+        this.#itemProps = { ...this.#itemSchema.properties };
+    }
+
     render() {
         this.#updateRendered();
         this.#resetLoadState();
 
-        const entries = (this.#schema = { ...this.schema.properties });
+        const entries = this.#itemProps;
 
-        // Add existing additional properties to the entries variable if necessary
-        if (this.schema.additionalProperties) {
-            Object.values(this.data).reduce((acc, v) => {
+        // Add existing additional / pattern properties to the entries variable if necessary
+        if (this.#itemSchema.additionalProperties !== false || this.#itemSchema.patternProperties) {
+            Object.values(this.#data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
                         ? (entries[k] = {
@@ -728,18 +886,23 @@ export class SimpleTable extends LitElement {
             }, entries);
         }
 
+        // Ignore any additions in the ignore configuration
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
+
         // Sort Columns by Key Column and Requirement
-        const keys = (this.colHeaders = Object.keys(entries).sort((a, b) => {
-            if (a === this.keyColumn) return -1;
-            if (b === this.keyColumn) return 1;
-            if (entries[a].required && !entries[b].required) return -1;
-            if (!entries[a].required && entries[b].required) return 1;
-            return 0;
-        }));
+        this.colHeaders = sortTable(
+            {
+                ...this.#itemSchema,
+                properties: entries,
+            },
+            this.keyColumn,
+            this.#itemSchema.order ?? ["name"] // Specify the order of the columns
+        );
 
         // Try to guess the key column if unspecified
-        if (!Array.isArray(this.data) && !this.keyColumn) {
-            const [key, value] = Object.entries(this.data)[0];
+        if (!Array.isArray(this.#data) && !this.keyColumn) {
+            const [key, value] = Object.entries(this.#data)[0];
             const foundKey = Object.keys(value).find((k) => value[k] === key);
             if (foundKey) this.keyColumn = foundKey;
         }
@@ -750,7 +913,9 @@ export class SimpleTable extends LitElement {
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                     <thead>
                         <tr>
-                            ${[...keys].map(header).map((str, i) => this.#renderHeader(str, entries[keys[i]]))}
+                            ${[...this.colHeaders]
+                                .map(header)
+                                .map((str, i) => this.#renderHeader(str, entries[this.colHeaders[i]]))}
                         </tr>
                     </thead>
                     <tbody></tbody>

@@ -167,9 +167,10 @@ export class FilesystemSelector extends LitElement {
             // const path = file.filePath ?? file.filePaths?.[0];
             this.#handleFiles(results.filePath ?? results.filePaths, type);
         } else {
-            let handles = await (type === "directory"
-                ? window.showDirectoryPicker()
-                : window.showOpenFilePicker({ multiple: this.multiple })
+            let handles = await (
+                type === "directory"
+                    ? window.showDirectoryPicker()
+                    : window.showOpenFilePicker({ multiple: this.multiple })
             ).catch(() => []); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map(({ name }) => name) : handles.name;

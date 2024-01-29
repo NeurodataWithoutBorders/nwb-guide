@@ -33,7 +33,7 @@ export function schemaToPages(schema, globalStatePath, options, transformationCa
                 })
             );
 
-            if (optionsCopy.ignore && optionsCopy.ignore.includes(key)) return null;
+            if (optionsCopy.ignore && optionsCopy.ignore[key]) return null;
             return page;
         })
         .filter((page) => page);

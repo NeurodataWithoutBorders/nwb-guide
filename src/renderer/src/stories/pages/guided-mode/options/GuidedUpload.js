@@ -69,7 +69,7 @@ export class GuidedUploadPage extends Page {
                 merge(apiKeys, global.data.DANDI.api_keys);
                 global.save();
                 await regenerateDandisets();
-                const input = this.form.getInput(["dandiset "]);
+                const input = this.form.getFormElement(["dandiset "]);
                 input.requestUpdate();
             },
             formProps: {

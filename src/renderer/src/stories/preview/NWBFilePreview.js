@@ -149,23 +149,28 @@ export class NWBFilePreview extends LitElement {
 
                                   const title = "Inspecting your file";
 
-                                  const items = onlyFirstFile
-                                      ? removeFilePaths(
-                                            await run(
-                                                "inspect_file",
-                                                { nwbfile_path: fileArr[0].info.file, ...options },
-                                                { title }
-                                            )
+                                  const report = onlyFirstFile
+                                      ? await run(
+                                            "inspect_file",
+                                            { nwbfile_path: fileArr[0].info.file, ...options },
+                                            { title }
                                         ) // Inspect the first file
-                                      : await (async () =>
-                                            truncateFilePaths(
-                                                await run(
-                                                    "inspect_folder",
-                                                    { path, ...options },
-                                                    { title: title + "s" }
-                                                ),
+                                      : await run("inspect_folder", { path, ...options }, { title: title + "s" }); // Inspect the folder
+
+                                  const result = onlyFirstFile
+                                      ? {
+                                            ...report,
+                                            messages: removeFilePaths(report.messages),
+                                        }
+                                      : {
+                                            ...report,
+                                            messages: truncateFilePaths(
+                                                report.messages,
                                                 getSharedPath(fileArr.map(({ info }) => info.file))
-                                            ))();
+                                            ),
+                                        };
+
+                                  const items = result.messages;
 
                                   const list = new InspectorList({
                                       items: items,

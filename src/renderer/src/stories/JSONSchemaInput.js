@@ -3,17 +3,318 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
-import { header } from "./forms/utils";
+import { header, tempPropertyKey, tempPropertyValueKey } from "./forms/utils";
 
 import { Button } from "./Button";
 import { List } from "./List";
 import { Modal } from "./Modal";
 
 import { capitalize } from "./forms/utils";
-import { JSONSchemaForm } from "./JSONSchemaForm";
+import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
+import tippy from "tippy.js";
+import { merge } from "./pages/utils";
 
-const isFilesystemSelector = (name, format) => {
+const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
+
+function resolveDateTime(value) {
+    if (typeof value === "string") {
+        const match = value.match(dateTimeRegex);
+        if (match) return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}`;
+        return value;
+    }
+
+    return value;
+}
+
+export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
+    const name = fullPath.slice(-1)[0];
+    const path = fullPath.slice(0, -1);
+
+    const schema = this.schema;
+    const validateOnChange = this.validateOnChange;
+
+    const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : {};
+
+    const commonValidationFunction = async (tableBasePath, path, parent, newValue, itemPropSchema) => {
+        const warnings = [];
+        const errors = [];
+
+        const name = path.slice(-1)[0];
+        const completePath = [...tableBasePath, ...path.slice(0, -1)];
+
+        const result = await (validateOnChange
+            ? this.onValidate
+                ? this.onValidate()
+                : this.form?.triggerValidation
+                  ? this.form.triggerValidation(
+                        name,
+                        completePath,
+                        false,
+                        this,
+                        itemPropSchema,
+                        { ...parent, [name]: newValue },
+                        {
+                            onError: (error) => {
+                                errors.push(error); // Skip counting errors
+                            },
+                            onWarning: (warning) => {
+                                warnings.push(warning); // Skip counting warnings
+                            },
+                        }
+                    ) // NOTE: No pattern properties support
+                  : ""
+            : true);
+
+        const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
+
+        return returnedValue;
+    };
+
+    const commonTableMetadata = {
+        onStatusChange: () => this.form?.checkStatus && this.form.checkStatus(), // Check status on all elements
+        validateEmptyCells: this.validateEmptyValue,
+        deferLoading: this.form?.deferLoading,
+        onLoaded: () => {
+            if (this.form) {
+                if (this.form.nLoaded) this.form.nLoaded++;
+                if (this.form.checkAllLoaded) this.form.checkAllLoaded();
+            }
+        },
+        onThrow: (...args) => onThrow(...args),
+    };
+
+    const addPropertyKeyToSchema = (schema) => {
+        const schemaCopy = structuredClone(schema);
+
+        const schemaItemsRef = schemaCopy["items"];
+
+        if (!schemaItemsRef.properties) schemaItemsRef.properties = {};
+        if (!schemaItemsRef.required) schemaItemsRef.required = [];
+
+        schemaItemsRef.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
+        if (!schemaItemsRef.order) schemaItemsRef.order = [];
+        schemaItemsRef.order.unshift(tempPropertyKey);
+
+        schemaItemsRef.required.push(tempPropertyKey);
+
+        return schemaCopy;
+    };
+
+    const createNestedTable = (id, value, { name: propName = id, nestedSchema = schema } = {}) => {
+        const schemaCopy = addPropertyKeyToSchema(nestedSchema);
+
+        const resultPath = [...path];
+
+        const schemaPath = [...fullPath];
+
+        // THIS IS AN ISSUE
+        const rowData = Object.entries(value).map(([key, value]) => {
+            return !schemaCopy["items"]
+                ? { [tempPropertyKey]: key, [tempPropertyValueKey]: value }
+                : { [tempPropertyKey]: key, ...value };
+        });
+
+        if (propName) {
+            resultPath.push(propName);
+            schemaPath.push(propName);
+        }
+
+        const allRemovedKeys = new Set();
+
+        const keyAlreadyExists = (key) => Object.keys(value).includes(key);
+
+        const previousValidValues = {};
+
+        function resolvePath(path, target) {
+            return path
+                .map((key, i) => {
+                    const ogKey = key;
+                    const nextKey = path[i + 1];
+                    if (key === tempPropertyKey) key = target[tempPropertyKey];
+                    if (nextKey === tempPropertyKey) key = [];
+
+                    target = target[ogKey] ?? {};
+
+                    if (nextKey === tempPropertyValueKey) return target[tempPropertyKey]; // Grab next property key
+                    if (key === tempPropertyValueKey) return [];
+
+                    return key;
+                })
+                .flat();
+        }
+
+        function setValueOnAccumulator(row, acc) {
+            const key = row[tempPropertyKey];
+
+            if (!key) return acc;
+
+            if (tempPropertyValueKey in row) {
+                const propValue = row[tempPropertyValueKey];
+                if (Array.isArray(propValue))
+                    acc[key] = propValue.reduce((acc, row) => setValueOnAccumulator(row, acc), {});
+                else acc[key] = propValue;
+            } else {
+                const copy = { ...row };
+                delete copy[tempPropertyKey];
+                acc[key] = copy;
+            }
+
+            return acc;
+        }
+
+        const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
+
+        merge(overrides.ignore, nestedIgnore);
+
+        merge(overrides.schema, schemaCopy, { arrays: true });
+
+        const tableMetadata = {
+            keyColumn: tempPropertyKey,
+            schema: schemaCopy,
+            data: rowData,
+            ignore: nestedIgnore, // According to schema
+
+            onUpdate: function (path, newValue) {
+                const oldKeys = Object.keys(value);
+
+                if (path.slice(-1)[0] === tempPropertyKey && keyAlreadyExists(newValue)) return; // Do not overwrite existing keys
+
+                const result = this.data.reduce((acc, row) => setValueOnAccumulator(row, acc), {});
+
+                const newKeys = Object.keys(result);
+                const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
+                removedKeys.forEach((key) => allRemovedKeys.add(key));
+                newKeys.forEach((key) => allRemovedKeys.delete(key));
+                allRemovedKeys.forEach((key) => (result[key] = undefined));
+
+                // const resolvedPath = resolvePath(path, this.data)
+                return onUpdate.call(this, [], result); // Update all table data
+            },
+
+            validateOnChange: function (path, parent, newValue) {
+                const rowIdx = path[0];
+                const currentKey = this.data[rowIdx]?.[tempPropertyKey];
+
+                const updatedPath = resolvePath(path, this.data);
+
+                const resolvedKey = previousValidValues[rowIdx] ?? currentKey;
+
+                // Do not overwrite existing keys
+                if (path.slice(-1)[0] === tempPropertyKey && resolvedKey !== newValue) {
+                    if (keyAlreadyExists(newValue)) {
+                        if (!previousValidValues[rowIdx]) previousValidValues[rowIdx] = resolvedKey;
+
+                        return [
+                            {
+                                message: `Key already exists.<br><small>This value is still ${resolvedKey}.</small>`,
+                                type: "error",
+                            },
+                        ];
+                    } else delete previousValidValues[rowIdx];
+                }
+
+                const toIterate = updatedPath.filter((value) => typeof value === "string");
+
+                const itemPropsSchema = toIterate.reduce(
+                    (acc, key) => acc?.properties?.[key] ?? acc?.items?.properties?.[key],
+                    schemaCopy
+                );
+
+                return commonValidationFunction([], updatedPath, parent, newValue, itemPropsSchema, 1);
+            },
+            ...commonTableMetadata,
+        };
+
+        const table = this.renderTable(id, tableMetadata, fullPath);
+        return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
+    };
+
+    const schemaCopy = structuredClone(schema);
+
+    // Possibly multiple tables
+    if (isEditableObject(schema, this.value)) {
+        // One table with nested tables for each property
+        const data = getEditableItems(this.value, this.pattern, { name, schema: schemaCopy }).reduce(
+            (acc, { key, value }) => {
+                acc[key] = value;
+                return acc;
+            },
+            {}
+        );
+
+        const table = createNestedTable(name, data, { schema });
+        if (table) return table;
+    }
+
+    const nestedIgnore = getIgnore(ignore, fullPath);
+
+    Object.assign(nestedIgnore, overrides.ignore ?? {});
+
+    merge(overrides.ignore, nestedIgnore);
+
+    merge(overrides.schema, schemaCopy, { arrays: true });
+
+    // Normal table parsing
+    const tableMetadata = {
+        schema: schemaCopy,
+        data: this.value,
+
+        ignore: nestedIgnore, // According to schema
+
+        onUpdate: function () {
+            return onUpdate.call(this, fullPath, this.data); // Update all table data
+        },
+
+        validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
+
+        ...commonTableMetadata,
+    };
+
+    const table = (this.table = this.renderTable(name, tableMetadata, path)); // Try creating table. Otherwise use nested form
+
+    if (table) {
+        const tableEl = table === true ? new BasicTable(tableMetadata) : table;
+        const tables = this.form?.tables;
+        if (tables) tables[name] = tableEl;
+        return tableEl;
+    }
+}
+
+// Schema or value indicates editable object
+export const isEditableObject = (schema, value) =>
+    schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value));
+
+export const isAdditionalProperties = (pattern) => pattern === "additional";
+export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
+
+export const getEditableItems = (value, pattern, { name, schema } = {}) => {
+    let items = Object.entries(value);
+
+    const allowAdditionalProperties = isAdditionalProperties(pattern);
+
+    if (isPatternProperties(pattern)) {
+        const regex = new RegExp(name);
+        items = items.filter(([key]) => regex.test(key));
+    } else if (allowAdditionalProperties) {
+        const props = Object.keys(schema.properties ?? {});
+        items = items.filter(([key]) => !props.includes(key));
+
+        const patternProps = Object.keys(schema.patternProperties ?? {});
+        patternProps.forEach((key) => {
+            const regex = new RegExp(key);
+            items = items.filter(([k]) => !regex.test(k));
+        });
+    } else if (schema.properties) items = items.filter(([key]) => key in schema.properties);
+
+    items = items.filter(([key]) => !key.includes("__")); // Remove secret properties
+
+    return items.map(([key, value]) => {
+        return { key, value };
+    });
+};
+
+const isFilesystemSelector = (name = "", format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
     const matched = name.match(/(.+_)?(.+)_paths?/);
@@ -51,6 +352,7 @@ export class JSONSchemaInput extends LitElement {
             }
 
             :host {
+                margin-top: 1.45rem;
                 display: block;
             }
 
@@ -60,6 +362,7 @@ export class JSONSchemaInput extends LitElement {
 
             main {
                 display: flex;
+                margin-top: 0.5rem;
             }
 
             #controls {
@@ -81,7 +384,7 @@ export class JSONSchemaInput extends LitElement {
             }
 
             .guided--input:disabled {
-                color: dimgray;
+                opacity: 0.5;
                 pointer-events: none;
             }
 
@@ -124,13 +427,77 @@ export class JSONSchemaInput extends LitElement {
                 margin: 0 0 1em;
                 line-height: 1.4285em;
             }
+
+            .nan-handler {
+                display: flex;
+                align-items: center;
+                margin-left: 5px;
+                white-space: nowrap;
+            }
+
+            .nan-handler label {
+                margin-left: 5px;
+                font-size: 12px;
+            }
+
+            .schema-input.list {
+                width: 100%;
+            }
+
+            .guided--form-label {
+                display: block;
+                width: 100%;
+                margin: 0;
+                color: black;
+                font-weight: 600;
+                font-size: 1.2em !important;
+            }
+
+            .guided--form-label.centered {
+                text-align: center;
+            }
+
+            .guided--form-label.header {
+                font-size: 1.5em !important;
+            }
+
+            .required label:after {
+                content: " *";
+                color: #ff0033;
+            }
+
+            :host(:not([validateemptyvalue])) .required label:after {
+                color: gray;
+            }
+
+            .required.conditional label:after {
+                color: transparent;
+            }
+
+            hr {
+                display: block;
+                height: 1px;
+                border: 0;
+                border-top: 1px solid #ccc;
+                padding: 0;
+                margin-bottom: 1em;
+            }
         `;
     }
 
-    // info,
+    static get properties() {
+        return {
+            schema: { type: Object, reflect: false },
+            validateEmptyValue: { type: Boolean, reflect: true },
+        };
+    }
+
+    // schema,
     // parent,
     // path,
     // form,
+    // pattern
+    // showLabel
     controls = [];
     required = false;
     validateOnChange = true;
@@ -144,17 +511,17 @@ export class JSONSchemaInput extends LitElement {
     // onValidate = () => {}
 
     updateData(value, forceValidate = false) {
-        if (this.value !== value && !forceValidate) {
+        if (!forceValidate) {
             // Update the actual input element
             const inputElement = this.getElement();
             if (inputElement.type === "checkbox") inputElement.checked = value;
-            else if (inputElement.classList.contains("list"))
-                inputElement.children[0].items = value
-                    ? value.map((value) => {
-                          return { value };
-                      })
-                    : [];
-            else if (inputElement instanceof Search) inputElement.shadowRoot.querySelector("input").value = value;
+            else if (inputElement.classList.contains("list")) {
+                const list = inputElement.children[0];
+                inputElement.children[0].items = this.#mapToList({
+                    value,
+                    list,
+                }); // NOTE: Make sure this is correct
+            } else if (inputElement instanceof Search) inputElement.shadowRoot.querySelector("input").value = value;
             else inputElement.value = value;
         }
 
@@ -162,18 +529,22 @@ export class JSONSchemaInput extends LitElement {
         const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
         const name = path.splice(-1)[0];
 
-        this.#triggerValidation(name, path);
         this.#updateData(fullPath, value);
+        this.#triggerValidation(name, path); // NOTE: Is asynchronous
 
         return true;
     }
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");
 
-    #activateTimeoutValidation = (name, path) => {
+    #activateTimeoutValidation = (name, path, hooks) => {
         this.#clearTimeoutValidation();
         this.#validationTimeout = setTimeout(() => {
-            this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
+            this.onValidate
+                ? this.onValidate()
+                : this.form?.triggerValidation
+                  ? this.form.triggerValidation(name, path, undefined, this, undefined, undefined, hooks)
+                  : "";
         }, 1000);
     };
 
@@ -182,20 +553,28 @@ export class JSONSchemaInput extends LitElement {
     };
 
     #validationTimeout = null;
-    #updateData = (fullPath, value, forceUpdate) => {
-        this.onUpdate ? this.onUpdate(value) : this.form ? this.form.updateData(fullPath, value, forceUpdate) : "";
+    #updateData = (fullPath, value, forceUpdate, hooks = {}) => {
+        this.onUpdate
+            ? this.onUpdate(value)
+            : this.form?.updateData
+              ? this.form.updateData(fullPath, value, forceUpdate)
+              : "";
 
         const path = [...fullPath];
         const name = path.splice(-1)[0];
 
         this.value = value; // Update the latest value
 
-        this.#activateTimeoutValidation(name, path);
+        if (hooks.willTimeout !== false) this.#activateTimeoutValidation(name, path, hooks);
     };
 
     #triggerValidation = async (name, path) => {
         this.#clearTimeoutValidation();
-        return this.onValidate ? this.onValidate() : this.form ? this.form.triggerValidation(name, path) : "";
+        return this.onValidate
+            ? this.onValidate()
+            : this.form?.triggerValidation
+              ? this.form.triggerValidation(name, path, this)
+              : "";
     };
 
     updated() {
@@ -204,26 +583,197 @@ export class JSONSchemaInput extends LitElement {
     }
 
     render() {
-        const { info } = this;
+        const { schema } = this;
 
         const input = this.#render();
 
+        if (input === null) return null; // Hide rendering
+
         return html`
-            <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
-            <p class="guided--text-input-instructions">
-                ${info.description
-                    ? html`${unsafeHTML(capitalize(info.description))}${info.description.slice(-1)[0] === "."
-                          ? ""
-                          : "."}`
-                    : ""}
-            </p>
+            <div class="${this.required || this.conditional ? "required" : ""} ${
+                this.conditional ? "conditional" : ""
+            }">
+
+                ${
+                    this.showLabel
+                        ? html`<label class="guided--form-label"
+                              >${(schema.title ? unsafeHTML(schema.title) : null) ??
+                              header(this.path.slice(-1)[0])}</label
+                          >`
+                        : ""
+                }
+                </label>
+                <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
+                <p class="guided--text-input-instructions">
+                    ${
+                        schema.description
+                            ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] ===
+                              "."
+                                  ? ""
+                                  : "."}`
+                            : ""
+                    }
+                </p>
+            </div>
         `;
     }
 
     #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
 
+    #list;
+    #mapToList({ value = this.value, schema = this.schema, list } = {}) {
+        const { path: fullPath } = this;
+        const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
+        const name = path.splice(-1)[0];
+
+        const canAddProperties = isEditableObject(this.schema, this.value);
+
+        if (canAddProperties) {
+            const editable = getEditableItems(this.value, this.pattern, { name, schema });
+
+            return editable.map(({ key, value }) => {
+                return {
+                    key,
+                    value,
+                    controls: [
+                        new Button({
+                            label: "Edit",
+                            size: "small",
+                            onClick: () => {
+                                this.#createModal({
+                                    key,
+                                    schema: isAdditionalProperties(this.pattern) ? undefined : schema,
+                                    results: value,
+                                    list: list ?? this.#list,
+                                });
+                            },
+                        }),
+                    ],
+                };
+            });
+        } else {
+            const resolved = value ?? [];
+            return resolved
+                ? resolved.map((value) => {
+                      return { value };
+                  })
+                : [];
+        }
+
+        return items;
+    }
+
+    #schemaElement;
+    #modal;
+
+    async #createModal({ key, schema = {}, results, list } = {}) {
+        const createNewObject = !results;
+
+        // const schemaProperties = Object.keys(schema.properties ?? {});
+        // const additionalProperties = Object.keys(results).filter((key) => !schemaProperties.includes(key));
+        // // const additionalElement = html`<label class="guided--form-label">Additional Properties</label><small>Cannot edit additional properties (${additionalProperties}) at this time</small>`
+
+        const allowPatternProperties = isPatternProperties(this.pattern);
+        const allowAdditionalProperties = isAdditionalProperties(this.pattern);
+        const creatNewPatternProperty = allowPatternProperties && createNewObject;
+
+        const schemaCopy = structuredClone(schema);
+
+        // Add a property name entry to the schema
+        if (creatNewPatternProperty) {
+            schemaCopy.properties = {
+                __: { title: "Property Name", type: "string", pattern: this.pattern },
+                ...schemaCopy.properties,
+            };
+            schemaCopy.required = [...(schemaCopy.required ?? []), "__"];
+        }
+
+        if (this.#modal) this.#modal.remove();
+
+        const submitButton = new Button({
+            label: "Submit",
+            primary: true,
+        });
+
+        const updateTarget = results ?? {};
+
+        submitButton.addEventListener("click", async () => {
+            if (this.#schemaElement instanceof JSONSchemaForm) await this.#schemaElement.validate();
+
+            let value = updateTarget;
+
+            if (schemaCopy?.format && schemaCopy.properties) {
+                let newValue = schemaCopy?.format;
+                for (let key in schemaCopy.properties) newValue = newValue.replace(`{${key}}`, value[key] ?? "").trim();
+                value = newValue;
+            }
+
+            // Skip if not unique
+            if (schemaCopy.uniqueItems && list.items.find((item) => item.value === value))
+                return this.#modal.toggle(false);
+
+            // Add to the list
+            if (createNewObject) {
+                if (creatNewPatternProperty) {
+                    const key = value.__;
+                    delete value.__;
+                    list.add({ key, value });
+                } else list.add({ key, value });
+            } else list.requestUpdate();
+
+            this.#modal.toggle(false);
+        });
+
+        this.#modal = new Modal({
+            header: key ? header(key) : "Property Definition",
+            footer: submitButton,
+            showCloseButton: createNewObject,
+        });
+
+        const div = document.createElement("div");
+        div.style.padding = "25px";
+
+        const isObject = schemaCopy.type === "object" || schemaCopy.properties; // NOTE: For formatted strings, this is not an object
+
+        this.#schemaElement = isObject
+            ? new JSONSchemaForm({
+                  schema: schemaCopy,
+                  results: updateTarget,
+                  onUpdate: (internalPath, value) => {
+                      if (!createNewObject) {
+                          const path = [key, ...internalPath];
+                          this.#updateData(path, value, true); // Live updates
+                      }
+                  },
+                  renderTable: this.renderTable,
+                  onThrow: this.#onThrow,
+              })
+            : new JSONSchemaInput({
+                  schema: schemaCopy,
+                  validateOnChange: allowAdditionalProperties,
+                  path: this.path,
+                  form: this.form,
+                  value: updateTarget,
+                  renderTable: this.renderTable,
+                  onUpdate: (value) => {
+                      if (createNewObject) updateTarget[key] = value;
+                      else this.#updateData(key, value); // NOTE: Untested
+                  },
+              });
+
+        div.append(this.#schemaElement);
+
+        this.#modal.append(div);
+
+        document.body.append(this.#modal);
+
+        setTimeout(() => this.#modal.toggle(true));
+    }
+
+    #getType = (value = this.value) => (Array.isArray(value) ? "array" : typeof value);
+
     #handleNextInput = (idx) => {
-        const next = this.form.inputs[idx];
+        const next = Object.values(this.form.inputs)[idx];
         if (next) {
             const firstFocusableElement = getFirstFocusableElement(next);
             if (firstFocusableElement) {
@@ -236,8 +786,8 @@ export class JSONSchemaInput extends LitElement {
     #moveToNextInput = (ev) => {
         if (ev.key === "Enter") {
             ev.preventDefault();
-            if (this.form) {
-                const idx = this.form.inputs.findIndex((input) => input === this);
+            if (this.form?.inputs) {
+                const idx = Object.values(this.form.inputs).findIndex((input) => input === this);
                 this.#handleNextInput(idx + 1);
             }
 
@@ -246,23 +796,33 @@ export class JSONSchemaInput extends LitElement {
     };
 
     #render() {
-        const { validateOnChange, info, path: fullPath } = this;
+        const { validateOnChange, schema, path: fullPath } = this;
 
-        const path = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
+        // Do your best to fill in missing schema values
+        if (!("type" in schema)) schema.type = this.#getType();
+
+        const resolvedFullPath = typeof fullPath === "string" ? fullPath.split("-") : [...fullPath];
+        const path = [...resolvedFullPath];
         const name = path.splice(-1)[0];
 
-        const isArray = info.type === "array"; // Handle string (and related) formats / types
+        const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
-        const hasItemsRef = "items" in info && "$ref" in info.items;
-        if (!("items" in info)) info.items = {};
-        if (!("type" in info.items) && !hasItemsRef) info.items.type = "string";
+        const canAddProperties = isEditableObject(this.schema, this.value);
+
+        if (this.renderCustomHTML) {
+            const custom = this.renderCustomHTML(name, schema, path, {
+                onUpdate: this.#updateData,
+                onThrow: this.#onThrow,
+            });
+            if (custom || custom === null) return custom;
+        }
 
         // Handle file and directory formats
         const createFilesystemSelector = (format) => {
             const filesystemSelectorElement = new FilesystemSelector({
                 type: format,
                 value: this.value,
-                onSelect: (paths) => {
+                onSelect: (paths = []) => {
                     const value = paths.length ? paths : undefined;
                     this.#updateData(fullPath, value);
                 },
@@ -276,159 +836,130 @@ export class JSONSchemaInput extends LitElement {
             return filesystemSelectorElement;
         };
 
-        if (isArray) {
+        if (isArray || canAddProperties) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
-            const itemSchema = this.form ? this.form.getSchema("items", info) : info["items"];
-
-            const fileSystemFormat = isFilesystemSelector(name, itemSchema.format);
-            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-            // Create tables if possible
-            else if (itemSchema.type === "object" && this.form.createTable) {
-                const tableMetadata = {
-                    schema: itemSchema,
-                    data: this.value,
-
-                    onUpdate: () => this.#updateData(fullPath, tableMetadata.data, true), // Ensure change propagates to all forms
-
-                    // NOTE: This is likely an incorrect declaration of the table validation call
-                    validateOnChange: (key, parent, v) => {
-                        return (
-                            validateOnChange &&
-                            (this.onValidate
-                                ? this.onValidate()
-                                : this.form
-                                  ? this.form.validateOnChange(key, parent, [...this.form.base, ...fullPath], v)
-                                  : "")
-                        );
-                    },
-
-                    onStatusChange: () => this.form?.checkStatus(), // Check status on all elements
-                    validateEmptyCells: this.form?.validateEmptyValues,
-                    deferLoading: this.form?.deferLoading,
-                    onLoaded: () => {
-                        if (this.form) {
-                            this.form.nLoaded++;
-                            this.form.checkAllLoaded();
-                        }
-                    },
-                    onThrow: (...args) => this.#onThrow(...args),
-                };
-
-                const table = this.form.createTable(name, tableMetadata, fullPath); // Try creating table. Otherwise use nested form
-                if (table) return (this.form.tables[name] = table === true ? new BasicTable(tableMetadata) : table);
-            }
-
-            const headerText = document.createElement("span");
-            headerText.innerText = header(name);
+            const allowPatternProperties = isPatternProperties(this.pattern);
+            const allowAdditionalProperties = isAdditionalProperties(this.pattern);
 
             const addButton = new Button({
                 size: "small",
             });
 
-            addButton.innerText = "Add Item";
+            addButton.innerText = `Add ${canAddProperties ? "Property" : "Item"}`;
 
-            let modal;
+            const buttonDiv = document.createElement("div");
+            Object.assign(buttonDiv.style, { width: "fit-content" });
+            buttonDiv.append(addButton);
 
-            let tempParent = {};
-
-            const itemInfo = info.items;
-            const formProperties = itemInfo.properties;
-
-            let element;
-
-            addButton.addEventListener("click", () => {
-                if (modal) modal.remove();
-
-                tempParent[name] = {}; // Wipe previous values
-
-                modal = new Modal({
-                    header: headerText,
-                    footer: submitButton,
+            const disableButton = ({ message, submessage }) => {
+                addButton.setAttribute("disabled", true);
+                tippy(buttonDiv, {
+                    content: `<div style="padding: 10px;">${message} <br><small>${submessage}</small></div>`,
+                    allowHTML: true,
                 });
+            };
 
-                const div = document.createElement("div");
-                div.style.padding = "25px";
+            // Provide default item types
+            if (isArray) {
+                const hasItemsRef = "items" in schema && "$ref" in schema.items;
+                if (!("items" in schema)) schema.items = {};
+                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value?.[0]);
+            }
 
-                element = formProperties
-                    ? new JSONSchemaForm({
-                          schema: itemInfo,
-                          results: tempParent[name],
-                          onThrow: this.#onThrow,
-                      })
-                    : new JSONSchemaInput({
-                          info: itemInfo,
-                          validateOnChange: false,
-                          path: this.path,
-                          form: this.form,
-                          onUpdate: (value) => (tempParent[name] = value),
-                      });
+            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
 
-                div.append(element);
+            const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
+            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
+            // Create tables if possible
+            else if (itemSchema?.type === "object" && this.renderTable) {
+                const instanceThis = this;
 
-                modal.append(div);
-
-                document.body.append(modal);
-
-                setTimeout(() => modal.toggle(true));
-            });
-
-            const list = new List({
-                items: this.value
-                    ? this.value.map((value) => {
-                          return { value };
-                      })
-                    : [],
-                onChange: async () => {
-                    const { items } = list;
-                    this.#updateData(fullPath, items.length ? items.map(({ value }) => value) : undefined);
-                    if (validateOnChange) await this.#triggerValidation(name, path);
-                },
-            });
-
-            const submitButton = new Button({
-                label: "Submit",
-                primary: true,
-            });
-
-            submitButton.addEventListener("click", async () => {
-                let value = tempParent[name];
-
-                if (formProperties) {
-                    await element.validate();
-                    if (itemInfo?.format) {
-                        let newValue = itemInfo?.format;
-                        for (let key in formProperties)
-                            newValue = newValue.replace(`{${key}}`, value[key] ?? "").trim();
-                        value = newValue;
-                    }
+                function updateFunction(path, value = this.data) {
+                    return instanceThis.#updateData(path, value, true, {
+                        willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
+                        onError: (e) => e,
+                        onWarning: (e) => e,
+                    });
                 }
 
-                if (info.uniqueItems) {
-                    if (!list.items.find((item) => item.value === value)) list.add({ value });
-                } else list.add({ value });
-                modal.toggle(false);
+                const table = createTable.call(this, resolvedFullPath, {
+                    onUpdate: updateFunction,
+                    onThrow: this.#onThrow,
+                }); // Ensure change propagates
+
+                if (table) return table;
+            }
+
+            const list = (this.#list = new List({
+                items: this.#mapToList(),
+
+                // Add edit button when new items are added
+                // NOTE: Duplicates some code in #mapToList
+                transform: (item) => {
+                    if (canAddProperties) {
+                        const { key, value } = item;
+                        item.controls = [
+                            new Button({
+                                label: "Edit",
+                                size: "small",
+                                onClick: () => {
+                                    this.#createModal({
+                                        key,
+                                        schema,
+                                        results: value,
+                                        list,
+                                    });
+                                },
+                            }),
+                        ];
+                    }
+                },
+                onChange: async ({ object, items }, { object: oldObject }) => {
+                    if (this.pattern) {
+                        const oldKeys = Object.keys(oldObject);
+                        const newKeys = Object.keys(object);
+                        const removedKeys = oldKeys.filter((k) => !newKeys.includes(k));
+                        const updatedKeys = newKeys.filter((k) => oldObject[k] !== object[k]);
+                        removedKeys.forEach((k) => this.#updateData([...fullPath.slice(1), k], undefined));
+                        updatedKeys.forEach((k) => this.#updateData([...fullPath.slice(1), k], object[k]));
+                    } else {
+                        this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
+                    }
+
+                    if (validateOnChange) await this.#triggerValidation(name, path);
+                },
+            }));
+
+            if (allowAdditionalProperties)
+                disableButton({
+                    message: "Additional properties cannot be added at this time.",
+                    submessage: "They don't have a predictable structure.",
+                });
+
+            addButton.addEventListener("click", () => {
+                this.#createModal({ list, schema: allowPatternProperties ? schema : itemSchema });
             });
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
-                    ${list} ${addButton}
+                    ${list} ${buttonDiv}
                 </div>
             `;
         }
 
         // Basic enumeration of properties on a select element
-        if (info.enum && info.enum.length) {
-            if (info.strict === false) {
+        if (schema.enum && schema.enum.length) {
+            if (schema.strict === false) {
                 // const category = categories.find(({ test }) => test.test(key))?.value;
 
-                const options = info.enum.map((v) => {
+                const options = schema.enum.map((v) => {
                     return {
                         key: v,
                         value: v,
-                        category: info.enumCategories?.[v],
-                        label: info.enumLabels?.[v] ?? v,
-                        keywords: info.enumKeywords?.[v],
+                        category: schema.enumCategories?.[v],
+                        label: schema.enumLabels?.[v] ?? v,
+                        keywords: schema.enumKeywords?.[v],
                     };
                 });
 
@@ -437,9 +968,9 @@ export class JSONSchemaInput extends LitElement {
                     value: {
                         value: this.value,
                         key: this.value,
-                        category: info.enumCategories?.[this.value],
-                        label: info.enumLabels?.[this.value],
-                        keywords: info.enumKeywords?.[this.value],
+                        category: schema.enumCategories?.[this.value],
+                        label: schema.enumLabels?.[this.value],
+                        keywords: schema.enumKeywords?.[this.value],
                     },
                     showAllWhenEmpty: false,
                     listMode: "click",
@@ -461,20 +992,20 @@ export class JSONSchemaInput extends LitElement {
             return html`
                 <select
                     class="guided--input schema-input"
-                    @input=${(ev) => this.#updateData(fullPath, info.enum[ev.target.value])}
+                    @input=${(ev) => this.#updateData(fullPath, schema.enum[ev.target.value])}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     @keydown=${this.#moveToNextInput}
                 >
-                    <option disabled selected value>${info.placeholder ?? "Select an option"}</option>
-                    ${info.enum.map(
+                    <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
+                    ${schema.enum.map(
                         (item, i) =>
                             html`<option value=${i} ?selected=${this.value === item}>
-                                ${info.enumLabels?.[item] ?? item}
+                                ${schema.enumLabels?.[item] ?? item}
                             </option>`
                     )}
                 </select>
             `;
-        } else if (info.type === "boolean") {
+        } else if (schema.type === "boolean") {
             return html`<input
                 type="checkbox"
                 class="schema-input"
@@ -482,19 +1013,21 @@ export class JSONSchemaInput extends LitElement {
                 ?checked=${this.value ?? false}
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
             />`;
-        } else if (info.type === "string" || info.type === "number" || info.type === "integer") {
-            const isInteger = info.type === "integer";
-            if (isInteger) info.type = "number";
-            const isNumber = info.type === "number";
+        } else if (schema.type === "string" || schema.type === "number" || schema.type === "integer") {
+            const isInteger = schema.type === "integer";
+            if (isInteger) schema.type = "number";
+            const isNumber = schema.type === "number";
 
-            const fileSystemFormat = isFilesystemSelector(name, info.format);
+            const isRequiredNumber = isNumber && this.required;
+
+            const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Handle long string formats
-            else if (info.format === "long" || isArray)
+            else if (schema.format === "long" || isArray)
                 return html`<textarea
                     class="guided--input guided--text-area schema-input"
                     type="text"
-                    placeholder="${info.placeholder ?? ""}"
+                    placeholder="${schema.placeholder ?? ""}"
                     style="height: 7.5em; padding-bottom: 20px"
                     maxlength="255"
                     .value="${this.value ?? ""}"
@@ -506,17 +1039,21 @@ export class JSONSchemaInput extends LitElement {
                 ></textarea>`;
             // Handle other string formats
             else {
-                const type =
-                    info.format === "date-time"
-                        ? "datetime-local"
-                        : info.format ?? (info.type === "string" ? "text" : info.type);
+                const isDateTime = schema.format === "date-time";
+
+                const type = isDateTime
+                    ? "datetime-local"
+                    : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+
+                const value = isDateTime ? resolveDateTime(this.value) : this.value;
+
                 return html`
                     <input
-                        class="guided--input schema-input ${info.step === null ? "hideStep" : ""}"
+                        class="guided--input schema-input ${schema.step === null ? "hideStep" : ""}"
                         type="${type}"
-                        step=${isNumber && info.step ? info.step : ""}
-                        placeholder="${info.placeholder ?? ""}"
-                        .value="${this.value ?? ""}"
+                        step=${isNumber && schema.step ? schema.step : ""}
+                        placeholder="${schema.placeholder ?? ""}"
+                        .value="${value ?? ""}"
                         @input=${(ev) => {
                             let value = ev.target.value;
                             let newValue = value;
@@ -527,15 +1064,15 @@ export class JSONSchemaInput extends LitElement {
                             else if (isNumber) newValue = parseFloat(value);
 
                             if (isNumber) {
-                                if ("min" in info && newValue < info.min) newValue = info.min;
-                                if ("max" in info && newValue > info.max) newValue = info.max;
+                                if ("min" in schema && newValue < schema.min) newValue = schema.min;
+                                else if ("max" in schema && newValue > schema.max) newValue = schema.max;
                             }
 
-                            if (info.transform) newValue = info.transform(newValue, this.value, info);
+                            if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
 
                             // // Do not check patter if value is empty
-                            // if (info.pattern && !isBlank) {
-                            //     const regex = new RegExp(info.pattern)
+                            // if (schema.pattern && !isBlank) {
+                            //     const regex = new RegExp(schema.pattern)
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
                             // }
 
@@ -544,17 +1081,39 @@ export class JSONSchemaInput extends LitElement {
                                 value = newValue;
                             }
 
+                            if (isRequiredNumber) {
+                                const nanHandler = ev.target.parentNode.querySelector(".nan-handler");
+                                if (!(newValue && Number.isNaN(newValue))) nanHandler.checked = false;
+                            }
+
                             this.#updateData(fullPath, value);
                         }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                         @keydown=${this.#moveToNextInput}
                     />
+                    ${isRequiredNumber
+                        ? html`<div class="nan-handler"><input
+                        type="checkbox"
+                        ?checked=${this.value && Number.isNaN(this.value)}
+                        @change=${(ev) => {
+                            const siblingInput = ev.target.parentNode.previousElementSibling;
+                            if (ev.target.checked) {
+                                this.#updateData(fullPath, NaN);
+                                siblingInput.setAttribute("disabled", true);
+                            } else {
+                                siblingInput.removeAttribute("disabled");
+                                const ev = new Event("input");
+                                siblingInput.dispatchEvent(ev);
+                            }
+                        }}
+                    ></input><label>I Don't Know</label></div>`
+                        : ""}
                 `;
             }
         }
 
         // Print out the immutable default value
-        return html`<pre>${info.default ? JSON.stringify(info.default, null, 2) : "No default value"}</pre>`;
+        return html`<pre>${schema.default ? JSON.stringify(schema.default, null, 2) : "No default value"}</pre>`;
     }
 }
 

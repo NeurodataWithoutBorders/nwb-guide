@@ -7,6 +7,8 @@ import { errorHue, warningHue } from "./globals";
 import * as promises from "../promises";
 
 import "./Button";
+import { sortTable } from "./Table";
+import tippy from "tippy.js";
 
 export class BasicTable extends LitElement {
     static get styles() {
@@ -105,6 +107,7 @@ export class BasicTable extends LitElement {
     constructor({
         name,
         schema,
+        ignore,
         data,
         keyColumn,
         maxHeight,
@@ -121,9 +124,25 @@ export class BasicTable extends LitElement {
         this.maxHeight = maxHeight ?? "";
         this.validateEmptyCells = validateEmptyCells ?? true;
 
+        this.ignore = ignore ?? {};
+
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
+    }
+
+    #schema = {};
+    #itemSchema = {};
+    #itemProps = {};
+
+    get schema() {
+        return this.#schema;
+    }
+
+    set schema(schema) {
+        this.#schema = schema;
+        this.#itemSchema = schema.items;
+        this.#itemProps = { ...this.#itemSchema.properties };
     }
 
     #rendered;
@@ -134,7 +153,7 @@ export class BasicTable extends LitElement {
     rendered = this.#updateRendered(true);
 
     #renderHeaderContent = (str) => {
-        const required = this.schema.required ? this.schema.required.includes(str) : false;
+        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(str) : false;
         if (required) return html`<div class="relative"><span required>${header(str)}</span></div>`;
         return html`<div class="relative"><span>${header(str)}</span></div>`;
     };
@@ -155,7 +174,7 @@ export class BasicTable extends LitElement {
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
                     // this.globals[col] ??
-                    this.schema.properties[col].default ??
+                    this.#itemSchema.properties[col].default ??
                     "";
             return value;
         });
@@ -197,7 +216,7 @@ export class BasicTable extends LitElement {
 
         let result;
 
-        const propInfo = this.schema.properties[col] ?? {};
+        const propInfo = this.#itemProps[col] ?? {};
         let thisTypeOf = typeof value;
         let ogType;
         let type = (ogType = propInfo.type || propInfo.data_type);
@@ -218,13 +237,13 @@ export class BasicTable extends LitElement {
         }
 
         // Check if required
-        if (!value && "required" in this.schema && this.schema.required.includes(col))
+        if (!value && "required" in this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
         // If not required, check matching types for values that are defined
         else if (value !== "" && thisTypeOf !== type)
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange(col, parent, value);
+        else result = this.validateOnChange([col], parent, value, this.#itemProps[col]);
 
         // Will run synchronously if not a promise result
         return promises.resolve(result, () => {
@@ -239,14 +258,12 @@ export class BasicTable extends LitElement {
 
             if (result === false) errors.push({ message: "Cell is invalid" });
 
-            if (warnings.length) {
-                info.warning = "";
-                info.title = warnings.map((error) => error.message).join("\n");
-            }
-
             if (errors.length) {
                 info.error = "";
                 info.title = errors.map((error) => error.message).join("\n"); // Class switching handled automatically
+            } else if (warnings.length) {
+                info.warning = "";
+                info.title = warnings.map((warning) => warning.message).join("\n");
             }
 
             if (typeof result === "function") result(); // Run if returned value is a function
@@ -265,6 +282,19 @@ export class BasicTable extends LitElement {
                     if (info === true) return;
                     const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
                     if (td) {
+                        const message = info.title;
+                        delete info.title;
+
+                        if (td._tippy) {
+                            td._tippy.destroy();
+                            td.removeAttribute("data-message");
+                        }
+
+                        if (message !== undefined) {
+                            tippy(td, { content: message, allowHTML: true });
+                            td.setAttribute("data-message", message);
+                        }
+
                         for (let key in info) {
                             const value = info[key];
                             if (value === undefined) td.removeAttribute(key);
@@ -326,9 +356,7 @@ export class BasicTable extends LitElement {
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
-            Object.entries(cols).forEach(([key, value]) =>
-                key in this.schema.properties ? (latest[key] = value) : ""
-            ); // Only include data from schema
+            Object.entries(cols).forEach(([key, value]) => (key in this.#itemProps ? (latest[key] = value) : "")); // Only include data from schema
         });
 
         this.onUpdate(null, null, value); // Update the whole table
@@ -338,10 +366,12 @@ export class BasicTable extends LitElement {
     render() {
         this.#updateRendered();
 
-        const entries = { ...this.schema.properties };
+        const entries = this.#itemProps;
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional properties to the entries variable if necessary
-        if (this.schema.additionalProperties) {
+        if (this.#itemSchema.additionalProperties) {
             Object.values(this.data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
@@ -358,13 +388,14 @@ export class BasicTable extends LitElement {
         const keys =
             (this.#keys =
             this.colHeaders =
-                Object.keys(entries).sort((a, b) => {
-                    if (a === this.keyColumn) return -1;
-                    if (b === this.keyColumn) return 1;
-                    if (entries[a].required && !entries[b].required) return -1;
-                    if (!entries[a].required && entries[b].required) return 1;
-                    return 0;
-                }));
+                sortTable(
+                    {
+                        ...this.#itemSchema,
+                        properties: entries,
+                    },
+                    this.keyColumn,
+                    this.#itemSchema.order
+                ));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
