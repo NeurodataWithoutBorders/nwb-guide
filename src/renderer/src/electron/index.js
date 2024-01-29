@@ -14,6 +14,11 @@ export let path = null;
 export let log = null;
 export let crypto = null;
 
+// Used in tests
+try {
+    crypto = require("crypto");
+} catch {}
+
 if (isElectron) {
     try {
         fs = require("fs-extra"); // File System
@@ -40,7 +45,7 @@ if (isElectron) {
         SERVER_FILE_PATH = electron.ipcRenderer.sendSync("get-server-file-path");
 
         path = require("path");
-    } catch (e) {
-        console.error("Electron API access failed —", e);
+    } catch (error) {
+        console.error("Electron API access failed —", error);
     }
 } else console.warn("Electron API is blocked for web builds");

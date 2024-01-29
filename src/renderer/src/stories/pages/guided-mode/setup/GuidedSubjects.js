@@ -36,9 +36,9 @@ export class GuidedSubjectsPage extends Page {
     beforeSave = () => {
         try {
             this.table.validate();
-        } catch (e) {
-            this.notify(e.message, "error");
-            throw e;
+        } catch (error) {
+            this.notify(error.message, "error");
+            throw error;
         }
 
         // Delete old subjects before merging
@@ -85,8 +85,10 @@ export class GuidedSubjectsPage extends Page {
             header: "Global Subject Metadata",
             key: "Subject",
             schema: preprocessMetadataSchema(undefined, true).properties.Subject,
-            validateOnChange: (key, parent, path) => {
-                return validateOnChange(key, parent, ["Subject", ...path]);
+            formProps: {
+                validateOnChange: (key, parent, path) => {
+                    return validateOnChange(key, parent, ["Subject", ...path]);
+                },
             },
         }));
         document.body.append(modal);
@@ -94,7 +96,7 @@ export class GuidedSubjectsPage extends Page {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.#globalModal.remove();
+        if (this.#globalModal) this.#globalModal.remove();
     }
 
     render() {
@@ -112,7 +114,10 @@ export class GuidedSubjectsPage extends Page {
         }
 
         this.table = new Table({
-            schema: getSubjectSchema(),
+            schema: {
+                type: "array",
+                items: getSubjectSchema(),
+            },
             data: subjects,
             globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
@@ -128,7 +133,7 @@ export class GuidedSubjectsPage extends Page {
                 this.unsavedUpdates = "conversions";
             },
             validateOnChange: (key, parent, v) => {
-                if (key === "sessions") {
+                if (key.slice(-1)[0] === "sessions") {
                     if (v?.length) return true;
                     else {
                         return [

@@ -37,22 +37,7 @@ dashboard.logo = logo;
 dashboard.name = "NWB GUIDE";
 dashboard.renderNameInSidebar = false;
 
-const overviewIcon = `
-<svg
-    style="margin-right: 30px; margin-bottom: -5px"
-    width="20px"
-    height="20px"
-    viewBox="0 0 16 16"
-    class="bi bi-caret-right-square-fill"
-    fill="white"
-    xmlns="http://www.w3.org/2000/svg"
->
-<path
-    fill-rule="evenodd"
-    d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.5 10a.5.5 0 0 0 .832.374l4.5-4a.5.5 0 0 0 0-.748l-4.5-4A.5.5 0 0 0 5.5 4v8z"
-></path>
-</svg>
-`;
+const resourcesGroup = "Resources";
 
 const guidedIcon = `
 <svg
@@ -97,12 +82,8 @@ style="margin-right: 30px; margin-bottom: -5px"
 `;
 
 const pages = {
-    "/": new GettingStartedPage({
-        label: "Home",
-        icon: overviewIcon,
-    }),
-    conversion: new GuidedHomePage({
-        label: "Conversions",
+    "/": new GuidedHomePage({
+        label: "Convert",
         icon: guidedIcon,
         pages: {
             start: new GuidedStartPage({
@@ -116,7 +97,7 @@ const pages = {
             }),
 
             structure: new GuidedStructurePage({
-                title: "Data Formats",
+                title: "Provide Data Formats",
                 label: "Data formats",
                 section: sections[0],
             }),
@@ -134,7 +115,7 @@ const pages = {
             }),
 
             sourcedata: new GuidedSourceDataPage({
-                title: "Source Data",
+                title: "Source Data Information",
                 label: "Source data",
                 section: sections[1],
             }),
@@ -173,29 +154,32 @@ const pages = {
             }),
         },
     }),
-    inspect: new InspectPage({
-        label: "Inspect",
+    validate: new InspectPage({
+        label: "Validate",
         icon: inspectIcon,
     }),
-    preview: new PreviewPage({
-        label: "Neurosift",
+    explore: new PreviewPage({
+        label: "Explore",
         icon: neurosiftIcon,
     }),
     uploads: new UploadsPage({
-        label: "Uploads",
+        label: "Upload",
         icon: uploadIcon,
     }),
     tutorial: new TutorialPage({
         label: "Tutorial",
         icon: tutorialIcon,
+        group: resourcesGroup,
     }),
     docs: new DocumentationPage({
         label: "Documentation",
         icon: documentationIcon,
+        group: resourcesGroup,
     }),
     contact: new ContactPage({
         label: "Contact Us",
         icon: contactIcon,
+        group: resourcesGroup,
     }),
     settings: new SettingsPage({
         label: "Settings",

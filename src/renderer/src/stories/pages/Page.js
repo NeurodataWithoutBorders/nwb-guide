@@ -2,10 +2,10 @@ import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
-import { randomizeElements, mapSessions } from "./utils.js";
+import { randomizeElements, mapSessions, merge } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
-import { resolveResults } from "./guided-mode/data/utils.js";
+import { resolveMetadata } from "./guided-mode/data/utils.js";
 import Swal from "sweetalert2";
 
 export class Page extends LitElement {
@@ -66,7 +66,8 @@ export class Page extends LitElement {
                 transition === 1 && // Only ensure save for standard forward progression
                 !this.info.states.saved)
         ) {
-            if (transition === 1) await this.save(); // Save before a single forward transition
+            if (transition === 1)
+                await this.save(); // Save before a single forward transition
             else {
                 await Swal.fire({
                     title: "You have unsaved data on this page.",
@@ -144,7 +145,8 @@ export class Page extends LitElement {
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
         // Filter the sessions to run
-        if (typeof original === "number") toRun = randomizeElements(toRun, original); // Grab a random set of sessions
+        if (typeof original === "number")
+            toRun = randomizeElements(toRun, original); // Grab a random set of sessions
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
@@ -187,12 +189,17 @@ export class Page extends LitElement {
             const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, name } = globalState.project;
+            const { conversion_output_folder, name, SourceData } = globalState.project;
+
+            const sessionResults = globalState.results[subject][session];
+
+            const sourceDataCopy = structuredClone(sessionResults.source_data);
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
-                ...globalState.results[subject][session],
-                metadata: resolveResults(subject, session, globalState),
+                ...sessionResults,
+                metadata: resolveMetadata(subject, session, globalState),
+                source_data: merge(SourceData, sourceDataCopy),
             };
 
             const result = await runConversion(
@@ -207,17 +214,17 @@ export class Page extends LitElement {
                     interfaces: globalState.interfaces,
                 },
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
-            ).catch((e) => {
-                let message = e.message;
+            ).catch((error) => {
+                let message = error.message;
 
                 if (message.includes("The user aborted a request.")) {
                     this.notify("Conversion was cancelled.", "warning");
-                    throw e;
+                    throw error;
                 }
 
                 this.notify(message, "error");
                 popup.close();
-                throw e;
+                throw error;
             });
 
             completed++;

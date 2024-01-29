@@ -9,7 +9,7 @@ import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 import { baseUrl } from "../../../../server/globals";
 
-const defaultEmptyMessage = "No interfaces selected";
+const defaultEmptyMessage = "No formats selected";
 
 const categories = [
     {
@@ -33,7 +33,7 @@ export class GuidedStructurePage extends Page {
             this.searchModal.toggle(false);
         };
 
-        this.addButton.innerText = "Add Interface";
+        this.addButton.innerText = "Add Format";
         this.addButton.onClick = () => {
             this.searchModal.toggle(true);
         };
@@ -42,7 +42,7 @@ export class GuidedStructurePage extends Page {
     }
 
     header = {
-        subtitle: "Select all interfaces which apply to this experiment",
+        subtitle: "List all the data formats in your dataset.",
     };
 
     search = new Search({
@@ -109,7 +109,7 @@ export class GuidedStructurePage extends Page {
     async updated() {
         const { interfaces = {} } = this.info.globalState;
 
-        this.list.emptyMessage = "Loading valid interfaces...";
+        this.list.emptyMessage = "Loading valid formats...";
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
@@ -126,12 +126,12 @@ export class GuidedStructurePage extends Page {
                     }; // Has label and keywords property already
                 })
             )
-            .catch((e) => console.error(e));
+            .catch((error) => console.error(error));
 
         this.list.emptyMessage = defaultEmptyMessage;
 
         for (const [key, name] of Object.entries(interfaces)) {
-            let found = this.search.options?.find((o) => o.value === name);
+            let found = this.search.options?.find((item) => item.value === name);
 
             // If not found, spoof based on the key and names provided previously
             if (!found) {

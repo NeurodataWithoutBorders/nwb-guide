@@ -6,6 +6,7 @@ type ListItemType = {
   key: string,
   content: string,
   value: any,
+  controls: HTMLElement[]
 }
 
 export interface ListProps {
@@ -15,9 +16,17 @@ export interface ListProps {
   editable?: boolean,
   unordered?: boolean,
   listStyles?: any
+  transform?: (item: ListItemType) => ListItemType
+}
+
+type ListState = {
+  items: ListItemType[],
+  object: {[x:string]: ListItemType['value']}
 }
 
 export class List extends LitElement {
+
+  transform: ListProps['transform']
 
   static get styles() {
     return css`
@@ -60,6 +69,10 @@ export class List extends LitElement {
       }
 
 
+      ol:not(:has(li)) {
+        margin: 0px;
+      }
+
 
       :host([unordered]) ol {
         list-style-type: none;
@@ -85,6 +98,12 @@ export class List extends LitElement {
       [data-idx]{
         background: #f0f0f0;
         height: 25px;
+      }
+
+      .controls {
+        margin-left: 1rem;
+        display: flex;
+        gap: 0.5rem;
       }
 
     `;
@@ -113,20 +132,31 @@ export class List extends LitElement {
       };
     }
 
-    onChange: () => void = () => {}
+    onChange: (updated: ListState, previous: ListState) => void = () => {}
 
     object: {[x:string]: any} = {}
 
     get array() {
-      return this.items.map(o => o.value)
+      return this.items.map(item => item.value)
     }
 
     #items: ListItemType[] = []
+
     set items(value) {
-      const oldVal = this.#items
-      this.#items = value
-      this.onChange()
-      this.requestUpdate('items', oldVal)
+      const oldList = this.#items
+      this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
+      const oldObject = this.object
+      this.#updateObject()
+
+      this.onChange({
+        items: this.#items,
+        object: this.object
+      },
+      {
+        items: oldList,
+        object: oldObject
+      })
+      this.requestUpdate('items', oldList)
     }
 
     get items() { return this.#items }
@@ -188,6 +218,8 @@ export class List extends LitElement {
       this.unordered = props.unordered ?? false
       this.listStyles = props.listStyles ?? {}
 
+      this.transform = props.transform
+
       if (props.onChange) this.onChange = props.onChange
 
     }
@@ -231,12 +263,17 @@ export class List extends LitElement {
       li.append(outerDiv)
       outerDiv.append(div)
 
+      const controlsDiv = document.createElement('div');
+      controlsDiv.classList.add("controls");
+
       let editableElement = document.createElement("span");
 
       let resolvedKey = key;
       const originalValue = resolvedKey;
 
       const isUnordered = !!key
+
+      const isObjectContent = content && typeof content === 'object'
 
       if (isUnordered) {
 
@@ -253,10 +290,13 @@ export class List extends LitElement {
 
         keyEl.innerText = resolvedKey;
         keyEl.style.cursor = "text";
+        div.append(keyEl);
 
-        const sepEl = document.createElement("span");
-        sepEl.innerHTML = "&nbsp;-&nbsp;";
-        div.append(keyEl, sepEl);
+        if (!isObjectContent) {
+          const sepEl = document.createElement("span");
+          sepEl.innerHTML = "&nbsp;-&nbsp;";
+          div.append(sepEl);
+        }
 
         this.object[resolvedKey] = value;
       }
@@ -271,28 +311,32 @@ export class List extends LitElement {
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
-      else li.append(editableElement = content)
+
+      // Skip object contents
+      else if (content instanceof HTMLElement) li.append(editableElement = content)
 
 
 
       if (div.innerText) li.title = div.innerText
 
+      if (item.controls || this.editable) outerDiv.append(controlsDiv)
+
+      if (item.controls) controlsDiv.appendChild(...item.controls);
 
       if (this.editable) {
+
         const button = new Button({
             label: "Delete",
             size: "small",
         });
 
-        button.style.marginLeft = "1rem";
-
-        outerDiv.appendChild(button);
+        controlsDiv.appendChild(button);
 
         editableElement.contentEditable = true;
 
         // Stop enter key from creating new line
-        editableElement.onkeydown = (e) => {
-            if (e.keyCode === 13) {
+        editableElement.onkeydown = (keyDownEvent) => {
+            if (keyDownEvent.keyCode === 13) {
               editableElement.blur();
                 return false;
             }
@@ -330,6 +374,33 @@ export class List extends LitElement {
       this.items = []
     }
 
+    #updateObject = () => {
+
+      this.object = {}
+      this.#items.forEach((item, i) => {
+
+        const { key, value } = item;
+
+        const isUnordered = !!key
+        if (isUnordered) {
+          let resolvedKey = key
+
+          // Ensure no duplicate keys
+          let kI = 0;
+          while (resolvedKey in this.object) {
+              i++;
+              resolvedKey = `${key}_${kI}`;
+          }
+
+          this.object[resolvedKey] = value
+        }
+
+        else {
+          this.object[i] = value
+        }
+      })
+    }
+
     render() {
 
       this.removeAttribute('unordered')
@@ -341,7 +412,7 @@ export class List extends LitElement {
 
       return html`
       <ol style=${styleMap(this.listStyles)}>
-        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<li id="empty">${emptyMessage}</li>`}
       </ol>`
     }
   }

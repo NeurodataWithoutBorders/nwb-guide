@@ -4,32 +4,108 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
 import projectGlobalSchema from "../../../../../../schemas/json/project/globals.json" assert { type: "json" };
+import developerGlobalSchema from "../../../../../../schemas/json/developer/globals.json" assert { type: "json" };
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
+
+import { Button } from "../../Button.js";
+import { global, remove, save } from "../../../progress/index.js";
+import { merge, setUndefinedIfNotDeclared } from "../utils.js";
+
+import { notyf } from "../../../dependencies/globals.js";
+import { SERVER_FILE_PATH, fs, path, port } from "../../../electron/index.js";
+
+import saveSVG from "../../assets/save.svg?raw";
+
+import { header } from "../../forms/utils";
+
+import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
+
+const propertiesToTransform = ["folder_path", "file_path"];
+
+function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
+    const subjectId = "mouse1";
+    const sessions = ["session1"];
+
+    const resolvedSourceData = structuredClone(sourceData);
+    Object.values(resolvedSourceData).forEach((info) => {
+        propertiesToTransform.forEach((property) => {
+            if (info[property]) info[property] = path.join(rootFolder, info[property]);
+        });
+    });
+
+    const updatedName = header(name);
+
+    remove(updatedName, true);
+
+    save({
+        info: {
+            globalState: {
+                project: {
+                    name: updatedName,
+                    initialized: true,
+                },
+
+                // provide data for all supported interfaces
+                interfaces: Object.keys(resolvedSourceData).reduce((acc, key) => {
+                    acc[key] = `${key}`;
+                    return acc;
+                }, {}),
+
+                structure: {
+                    keep_existing_data: true,
+                    state: false,
+                },
+
+                results: {
+                    [subjectId]: sessions.reduce((acc, sessionId) => {
+                        acc[subjectId] = {
+                            metadata: {
+                                Subject: {
+                                    subject_id: subjectId,
+                                },
+                                NWBFile: {
+                                    session_id: sessionId,
+                                },
+                            },
+                            source_data: resolvedSourceData,
+                        };
+                        return acc;
+                    }, {}),
+                },
+
+                subjects: {
+                    [subjectId]: {
+                        sessions: sessions,
+                        sex: "M",
+                        species: "Mus musculus",
+                        age: "P30D",
+                    },
+                },
+            },
+        },
+    });
+}
 
 const schema = merge(
     projectGlobalSchema,
     {
         properties: {
-            DANDI: dandiGlobalSchema,
+            DANDI: {
+                title: "DANDI Settings",
+                ...dandiGlobalSchema,
+            },
+            developer: {
+                title: "Developer Settings",
+                ...developerGlobalSchema,
+            },
         },
-        required: ["DANDI"],
+        required: ["DANDI", "developer"],
     },
     {
         arrays: true,
     }
 );
-
-console.log(schema);
-
-import { Button } from "../../Button.js";
-import { global } from "../../../progress/index.js";
-import { merge, setUndefinedIfNotDeclared } from "../utils.js";
-
-import { notyf } from "../../../dependencies/globals.js";
-import { SERVER_FILE_PATH, port } from "../../../electron/index.js";
-
-import saveSVG from "../../assets/save.svg?raw";
 
 export class SettingsPage extends Page {
     header = {
@@ -84,9 +160,39 @@ export class SettingsPage extends Page {
             onThrow,
         });
 
+        const generatePipelineButton = new Button({
+            label: "Generate Test Pipelines",
+            onClick: async () => {
+                const { testing_data_folder } = this.form.results.developer ?? {};
+
+                if (!testing_data_folder)
+                    return this.#openNotyf(
+                        `Please specify a testing data folder in the Developer section before attempting to generate pipelines.`,
+                        "error"
+                    );
+
+                const { pipelines = {} } = testingSuiteYaml;
+
+                const pipelineNames = Object.keys(pipelines);
+                const nPipelines = pipelineNames.length;
+                pipelineNames
+                    .reverse()
+                    .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
+
+                this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
+            },
+        });
+
+        setTimeout(() => {
+            const testFolderInput = this.form.getFormElement(["developer", "testing_data_folder"]);
+            testFolderInput.after(generatePipelineButton);
+        }, 100);
+
         return html`
             <p><b>Server Port:</b> ${port}</p>
             <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
+            <hr />
+            <br />
             ${this.form}
         `;
     }

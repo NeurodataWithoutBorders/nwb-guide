@@ -89,15 +89,20 @@ export class Main extends LitElement {
             const info = page.info ?? {};
 
             // Default Footer Behavior
-            if (footer === true || (!("footer" in page) && info.parent)) {
+            if (info.parent) {
+                if (!("footer" in page)) footer = true; // Allow navigating laterally if there is a next page
+
                 // Go to home screen if there is no next page
-                if (!info.next)
-                    footer = {
-                        exit: false,
-                        onNext: () => this.toRender.page.to("/"),
-                    };
-                // Allow navigating laterally if there is a next page
-                else footer = true;
+                if (!info.next) {
+                    console.log("setting", info);
+                    footer = Object.assign(
+                        {
+                            exit: false,
+                            onNext: () => this.toRender.page.to("/"),
+                        },
+                        footer && typeof footer === "object" ? footer : {}
+                    );
+                }
             }
 
             if (footer === true) footer = {};
@@ -112,7 +117,7 @@ export class Main extends LitElement {
                     if (pages.length > 1) {
                         const capsulesProps = {
                             n: pages.length,
-                            selected: pages.map((o) => o.pageLabel).indexOf(page.info.label),
+                            selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
                         };
 
                         capsules = new GuidedCapsules(capsulesProps);
@@ -161,7 +166,7 @@ export class Main extends LitElement {
                                   <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
                                   <small>${unsafeHTML(subtitle)}</small>
                               </div>
-                              <div style="padding-left: 25px;">${controls}</div>
+                              <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
                           </div>
                           <hr style="margin-bottom: 0;" />
                       </div>`

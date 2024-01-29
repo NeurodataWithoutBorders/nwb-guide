@@ -52,9 +52,9 @@ export class GuidedNewDatasetPage extends Page {
                     const res = rename(name, globalState.name);
                     if (typeof res === "string") this.notify(res);
                     if (res === false) return;
-                } catch (e) {
-                    this.notify(e, "error");
-                    throw e;
+                } catch (error) {
+                    this.notify(error, "error");
+                    throw error;
                 }
             } else {
                 const has = await hasEntry(name);
@@ -79,7 +79,9 @@ export class GuidedNewDatasetPage extends Page {
         const schema = { ...projectMetadataSchema };
         schema.properties = { ...schema.properties };
 
-        this.state = merge(global.data, structuredClone(this.info.globalState.project));
+        const globalState = this.info.globalState;
+        if (!globalState.project) globalState.project = {};
+        this.state = merge(global.data, structuredClone(globalState.project));
 
         this.form = new JSONSchemaForm({
             schema,

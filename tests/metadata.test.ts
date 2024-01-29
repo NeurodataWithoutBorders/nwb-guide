@@ -18,7 +18,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-var v = new Validator();
+var validator = new Validator();
 
 describe('metadata is specified correctly', () => {
 
@@ -29,7 +29,7 @@ describe('metadata is specified correctly', () => {
         baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
 
         const result = mapSessions(info => createResults(info, globalState), globalState)
-        const res = v.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
+        const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
 })
@@ -106,7 +106,7 @@ test('inter-table updates are triggered', async () => {
         schema,
         results,
         validateOnChange,
-        createTable: (name, metadata, path) => {
+        renderTable: (name, metadata, path) => {
             if (name !== "Electrodes") return new SimpleTable(metadata);
             else return true
         },
@@ -117,11 +117,11 @@ test('inter-table updates are triggered', async () => {
     await form.rendered
 
     // Validate that the results are incorrect
-    const errors = await form.validate().catch(() => true).catch(e =>  true)
+    const errors = await form.validate().catch(() => true).catch(() =>  true)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
-    const table = form.getTable(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
+    const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
     const row = table.addRow()
 
     const baseRow = table.getRow(0)
@@ -134,10 +134,7 @@ test('inter-table updates are triggered', async () => {
     await new Promise((res) => setTimeout(() => res(true), 1000))
 
     // Validate that the new structure is correct
-    const hasErrors = await form.validate().then(() => false).catch((e) => {
-        console.error(e)
-        return true
-    })
+    const hasErrors = await form.validate().then(() => false).catch((e) => true)
     expect(hasErrors).toBe(false) // Is valid
 })
 
@@ -190,19 +187,19 @@ test('changes are resolved correctly', async () => {
 
     // Validate that the results are incorrect
     let errors = false
-    await form.validate().catch(e => errors = true)
+    await form.validate().catch(()=> errors = true)
     expect(errors).toBe(true) // Is invalid
 
-    const input1 = form.getInput(['v0'])
-    const input2 = form.getInput(['l1', 'v1'])
-    const input3 = form.getInput(['l1', 'l2', 'l3', 'v2'])
+    const input1 = form.getFormElement(['v0'])
+    const input2 = form.getFormElement(['l1', 'v1'])
+    const input3 = form.getFormElement(['l1', 'l2', 'l3', 'v2'])
 
     input1.updateData('test')
     input2.updateData('test')
     input3.updateData('test')
 
     // Validate that the new structure is correct
-    const hasErrors = await form.validate(form.results).then(res => false).catch(e => true)
+    const hasErrors = await form.validate(form.results).then(res => false).catch(() => true)
 
     expect(hasErrors).toBe(false) // Is valid
 })

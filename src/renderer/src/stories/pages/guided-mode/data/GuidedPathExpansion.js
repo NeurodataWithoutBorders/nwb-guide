@@ -14,7 +14,6 @@ import { CodeBlock } from "../../../CodeBlock.js";
 import { List } from "../../../List";
 import { fs } from "../../../../electron/index.js";
 import { joinPath } from "../../../../globals.js";
-import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
 const exampleFileStructure = `mylab/
     ¦   Subjects/
@@ -170,9 +169,9 @@ export class GuidedPathExpansionPage extends Page {
                 finalStructure[key] = entry;
             }
 
-            const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((e) => {
-                this.notify(e.message, "error");
-                throw e;
+            const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
+                this.notify(error.message, "error");
+                throw error;
             });
 
             const subjects = Object.keys(results);
@@ -190,12 +189,14 @@ export class GuidedPathExpansionPage extends Page {
             if (!keepExistingData) {
                 for (let sub in globalResults) {
                     const subRef = results[sub];
-                    if (!subRef) delete globalResults[sub]; // Delete removed subjects
+                    if (!subRef)
+                        delete globalResults[sub]; // Delete removed subjects
                     else {
                         for (let ses in globalResults[sub]) {
                             const sesRef = subRef[ses];
 
-                            if (!sesRef) delete globalResults[sub][ses]; // Delete removed sessions
+                            if (!sesRef)
+                                delete globalResults[sub][ses]; // Delete removed sessions
                             else {
                                 const globalSesRef = globalResults[sub][ses];
 
@@ -271,7 +272,7 @@ export class GuidedPathExpansionPage extends Page {
         if (state === undefined) infoBox.open = true; // Open the info box if no option has been selected
 
         // Require properties for all sources
-        const generatedSchema = { type: "object", properties: {} };
+        const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
         for (let key in this.info.globalState.interfaces)
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
         structureState.schema = generatedSchema;
@@ -291,8 +292,8 @@ export class GuidedPathExpansionPage extends Page {
                 const name = parentPath.pop();
 
                 if (name === "base_directory") {
-                    form.getInput([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
-                    const input = form.getInput([...parentPath, "format_string_path"]);
+                    form.getFormElement([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
+                    const input = form.getFormElement([...parentPath, "format_string_path"]);
                     if (input.value) input.updateData(input.value, true);
                 }
             },
@@ -300,7 +301,7 @@ export class GuidedPathExpansionPage extends Page {
                 const value = parent[name];
 
                 if (fs) {
-                    const baseDir = form.getInput([...parentPath, "base_directory"]);
+                    const baseDir = form.getFormElement([...parentPath, "base_directory"]);
                     if (name === "format_string_path") {
                         if (value && baseDir && !baseDir.value) {
                             return [
@@ -324,10 +325,12 @@ export class GuidedPathExpansionPage extends Page {
 
                         const interfaceName = parentPath.slice(-1)[0];
 
-                        const results = await run(`locate`, { [interfaceName]: entry }, { swal: false }).catch((e) => {
-                            this.notify(e.message, "error");
-                            throw e;
-                        });
+                        const results = await run(`locate`, { [interfaceName]: entry }, { swal: false }).catch(
+                            (error) => {
+                                this.notify(error.message, "error");
+                                throw error;
+                            }
+                        );
 
                         const resolved = [];
 
@@ -369,6 +372,7 @@ export class GuidedPathExpansionPage extends Page {
             onUpdate: () => (this.unsavedUpdates = "conversions"),
             schema: {
                 type: "object",
+                additionalProperties: false,
                 properties: {
                     keep_existing_data: {
                         type: "boolean",

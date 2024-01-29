@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 
 import { get } from "dandi";
-import { isStaging } from "./pages/uploads/UploadsPage.js";
+import { isStaging } from "./pages/uploads/utils";
 
 export class DandiResults extends LitElement {
     static get styles() {
@@ -18,51 +18,55 @@ export class DandiResults extends LitElement {
     }
 
     async updated() {
-        const handleId = (str, info) => {
+        const handleClass = (str, info) => {
             let value = info[str];
             if (str === "modified") value = new Date(value).toString();
 
-            const el = this.shadowRoot.querySelector(`#${str}`);
-            el.innerText = value;
+            const elements = this.shadowRoot.querySelectorAll(`.${str}`);
+            elements.forEach((element) => {
+                element.innerText = value;
 
-            if (el.tagName === "A") {
-                if (str === "doi") value = `http://doi.org/${value}`;
-                el.href = value;
-                el.target = "_blank";
-            }
+                if (element.tagName === "A") {
+                    if (str === "doi") value = `http://doi.org/${value}`;
+                    element.href = value;
+                    element.target = "_blank";
+                }
+            });
         };
 
         const elIds = ["name", "modified"];
 
         const otherElIds = ["embargo_status"];
 
-        const dandiset = await get(this.id, isStaging(this.id) ? "staging" : undefined);
+        const type = isStaging(this.id) ? "staging" : undefined;
+        const dandiset = await get(this.id, { type });
 
-        otherElIds.forEach((str) => handleId(str, dandiset));
-        elIds.forEach((str) => handleId(str, dandiset.draft_version));
+        otherElIds.forEach((str) => handleClass(str, dandiset));
+        elIds.forEach((str) => handleClass(str, dandiset.draft_version));
 
-        const info = await dandiset.getInfo({ version: dandiset.draft_version.version });
+        const latestVersionInfo = dandiset.most_recent_published_version ?? dandiset.draft_version;
+        const info = await dandiset.getInfo({ type, version: latestVersionInfo.version });
 
         const secondElIds = ["description", "url"];
-        secondElIds.forEach((str) => handleId(str, info));
+        secondElIds.forEach((str) => handleClass(str, info));
 
-        const publicationEl = this.shadowRoot.querySelector(`#publication`);
+        const publicationEl = this.shadowRoot.querySelector(`.publication`);
         publicationEl.innerHTML = "";
-        const publications = (info.relatedResource ?? []).filter((o) => o.relation === "dcite:IsDescribedBy");
+        const publications = (info.relatedResource ?? []).filter(({ relation }) => relation === "dcite:IsDescribedBy");
 
         if (publications.length)
             publicationEl.append(
                 ...(await Promise.all(
-                    publications.map(async (o) => {
+                    publications.map(async ({ identifier }) => {
                         const li = document.createElement("li");
                         const { message } = await fetch(
-                            `http://api.crossref.org/works${new URL(o.identifier).pathname}`
+                            `http://api.crossref.org/works${new URL(identifier).pathname}`
                         ).then((res) => res.json());
-                        li.innerHTML = `${message.author.map((o) => `${o.family}, ${o.given[0]}.`).join(", ")} (${
-                            message.created["date-parts"][0][0]
-                        }). ${message.title[0]}. <i>${message["container-title"]}</i>, <i>${message.volume}</i>(${
-                            message.issue
-                        }), ${message.page}. doi:${message.DOI}`;
+                        li.innerHTML = `${message.author
+                            .map(({ family, given }) => `${family}, ${given[0]}.`)
+                            .join(", ")} (${message.created["date-parts"][0][0]}). ${message.title[0]}. <i>${
+                            message["container-title"]
+                        }</i>, <i>${message.volume}</i>(${message.issue}), ${message.page}. doi:${message.DOI}`;
                         return li;
                     })
                 ))
@@ -74,29 +78,29 @@ export class DandiResults extends LitElement {
         return html`
             <div style="text-align: center;">
                 <div style="display: inline-block; width: 100%; text-align: left;">
-                    <h2 style="margin: 0; margin-bottom: 10px;"><span id="name"></span></h2>
-                    <p><span id="description"></span></p>
+                    <h2 style="margin: 0; margin-bottom: 10px;"><span class="name"></span></h2>
+                    <p><span class="description"></span></p>
 
                     <p><b>Identifier:</b> ${this.id}</p>
-                    <p><b>Upload Time:</b> <span id="modified"></span></p>
-                    <p><b>Embargo Status:</b> <span id="embargo_status"></span></p>
+                    <p><b>Upload Time:</b> <span class="modified"></span></p>
+                    <p><b>Embargo Status:</b> <span class="embargo_status"></span></p>
 
-                    <small><b>URL:</b> <a id="url"></a></small><br />
+                    <small><b>URL:</b> <a class="url"></a></small><br />
 
                     <h3 style="padding: 0;">Related Publications</h3>
-                    <hr />
-                    <ol id="publication"></ol>
+                    <ol class="publication"></ol>
 
                     ${this.files
-                        ? html` <h3 style="padding: 0;">Files Uploaded with this Conversion</h3>
-                              <hr />
+                        ? html` <h3 style="padding: 0;">Files Uploaded</h3>
                               <ol>
                                   ${Object.values(this.files)
-                                      .map((v) => Object.values(v))
+                                      .map((item) => Object.values(item))
                                       .flat()
-                                      .map((o) => html`<li>${o.file}</li>`)}
+                                      .map(({ file }) => html`<li>${file}</li>`)}
                               </ol>`
                         : ""}
+                    <hr />
+                    <small>We encourage you to add additional metadata for your Dandiset at <a class="url"></a></small>
                 </div>
             </div>
         `;

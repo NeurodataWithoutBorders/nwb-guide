@@ -10,6 +10,44 @@ import "tippy.js/dist/tippy.css";
 
 const maxRows = 20;
 
+const isRequired = (col, schema) => {
+    return schema.required?.includes(col);
+};
+
+export function sortTable(schema, keyColumn, order) {
+    const cols = Object.keys(schema.properties)
+
+        //Sort alphabetically
+        .sort((a, b) => {
+            if (a < b) return -1;
+            if (a > b) return 1;
+            return 0;
+        })
+        .sort((a, b) => {
+            const aRequired = isRequired(a, schema);
+            const bRequired = isRequired(b, schema);
+            if (aRequired && bRequired) return 0;
+            if (aRequired) return -1;
+            if (bRequired) return 1;
+            return 0;
+        })
+        .sort((a, b) => {
+            if (a === keyColumn) return -1;
+            if (b === keyColumn) return 1;
+            return 0;
+        });
+
+    return order
+        ? cols.sort((a, b) => {
+              const idxA = order.indexOf(a);
+              const idxB = order.indexOf(b);
+              if (idxA === -1) return 1;
+              if (idxB === -1) return -1;
+              return idxA - idxB;
+          })
+        : cols;
+}
+
 // Inject scoped stylesheet
 const styles = `
 
@@ -78,6 +116,7 @@ export class Table extends LitElement {
         onStatusChange,
         onThrow,
         contextMenu,
+        ignore,
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -86,6 +125,7 @@ export class Table extends LitElement {
         this.globals = globals ?? {};
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.contextMenu = contextMenu ?? {};
+        this.ignore = ignore ?? {};
 
         if (onThrow) this.onThrow = onThrow;
         if (onUpdate) this.onUpdate = onUpdate;
@@ -161,19 +201,31 @@ export class Table extends LitElement {
     onOverride = () => {};
     onThrow = () => {};
 
-    isRequired = (col) => {
-        return this.schema?.required?.includes(col);
-    };
+    #schema = {};
+    #itemSchema = {};
+    #itemProps = {};
+
+    get schema() {
+        return this.#schema;
+    }
+
+    set schema(schema) {
+        this.#schema = schema;
+        this.#itemSchema = schema.items;
+        this.#itemProps = { ...this.#itemSchema.properties };
+    }
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
 
         const unresolved = (this.unresolved = {});
 
-        const entries = { ...this.schema.properties };
+        const entries = this.#itemProps;
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional properties to the entries variable if necessary
-        if (this.schema.additionalProperties) {
+        if (this.#itemSchema.additionalProperties) {
             Object.values(this.data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
@@ -187,26 +239,15 @@ export class Table extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
-        const colHeaders = (this.colHeaders = Object.keys(entries)
-            .sort((a, b) => {
-                //Sort alphabetically
-                if (a < b) return -1;
-                if (a > b) return 1;
-                return 0;
-            })
-            .sort((a, b) => {
-                const aRequired = this.isRequired(a);
-                const bRequired = this.isRequired(b);
-                if (aRequired && bRequired) return 0;
-                if (aRequired) return -1;
-                if (bRequired) return 1;
-                return 0;
-            })
-            .sort((a, b) => {
-                if (a === this.keyColumn) return -1;
-                if (b === this.keyColumn) return 1;
-                return 0;
-            }));
+
+        const colHeaders = (this.colHeaders = sortTable(
+            {
+                ...this.#itemSchema,
+                properties: entries,
+            },
+            this.keyColumn,
+            this.#itemSchema.order
+        ));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -254,32 +295,33 @@ export class Table extends LitElement {
                 try {
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
-                              k,
+                              [k],
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
-                              value
+                              value,
+                              info
                           )
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
 
                     return this.#handleValidationResult(valid, row, prop);
-                } catch (e) {
+                } catch {
                     return true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
                 }
             };
 
-            let ogThis = this;
-            const isRequired = this.isRequired(k);
+            let instanceThis = this;
+            const required = isRequired(k, this.#itemSchema);
 
             const validator = async function (value, callback) {
-                const validateEmptyCells = ogThis.validateEmptyCells;
+                const validateEmptyCells = instanceThis.validateEmptyCells;
                 const willValidate =
                     validateEmptyCells === true ||
                     (Array.isArray(validateEmptyCells) && validateEmptyCells.includes(k));
 
-                value = ogThis.#getValue(value, colInfo);
+                value = instanceThis.#getValue(value, colInfo);
 
                 // Clear empty values if not validated
                 if (!value && !willValidate) {
-                    ogThis.#handleValidationResult(
+                    instanceThis.#handleValidationResult(
                         [], // Clear errors
                         this.row,
                         this.col
@@ -288,9 +330,9 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (value && k === ogThis.keyColumn && unresolved[this.row]) {
-                    if (value in ogThis.data) {
-                        ogThis.#handleValidationResult(
+                if (value && k === instanceThis.keyColumn && unresolved[this.row]) {
+                    if (value in instanceThis.data) {
+                        instanceThis.#handleValidationResult(
                             [{ message: `${header(k)} already exists`, type: "error" }],
                             this.row,
                             this.col
@@ -305,8 +347,8 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (!value && isRequired) {
-                    ogThis.#handleValidationResult(
+                if (!value && required) {
+                    instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         this.row,
                         this.col
@@ -351,8 +393,8 @@ export class Table extends LitElement {
 
             const rel = TH.querySelector(".relative");
 
-            const isRequired = this.isRequired(col);
-            if (isRequired)
+            const required = isRequired(col, this.#itemSchema);
+            if (required)
                 rel.setAttribute(
                     "data-required",
                     this.validateEmptyCells
@@ -373,7 +415,7 @@ export class Table extends LitElement {
                 }
 
                 if (span._tippy) span._tippy.destroy();
-                tippy(span, { content: `${desc}` });
+                tippy(span, { content: `${desc}`, allowHTML: true });
             }
         };
 
@@ -382,7 +424,7 @@ export class Table extends LitElement {
         let nRows = rowHeaders.length;
 
         let contextMenu = ["row_below", "remove_row"];
-        if (this.schema.additionalProperties) contextMenu.push("col_right", "remove_col");
+        if (this.#itemSchema.additionalProperties) contextMenu.push("col_right", "remove_col");
 
         contextMenu = contextMenu.filter((k) => !(this.contextMenu.ignore ?? []).includes(k));
 
@@ -444,7 +486,8 @@ export class Table extends LitElement {
                 let target = this.data;
 
                 if (!isResolved) {
-                    if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+                    if (!this.keyColumn)
+                        this.data[rowName] = {}; // Add new row to array
                     else {
                         rowName = row;
                         if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
@@ -517,7 +560,7 @@ export class Table extends LitElement {
 
         table.addHook("afterCreateRow", (index, amount) => {
             nRows += amount;
-            const physicalRows = Array.from({ length: amount }, (e, i) => index + i);
+            const physicalRows = Array.from({ length: amount }, (_, i) => index + i);
             physicalRows.forEach((row) => this.#setRow(row, this.#getRowData(row)));
         });
 
@@ -533,7 +576,7 @@ export class Table extends LitElement {
 
     #getRenderedData = (data) => {
         return Object.values(data).map((row) =>
-            row.map((value, j) => this.#getRenderedValue(value, this.schema.properties[this.colHeaders[j]]))
+            row.map((value, j) => this.#getRenderedValue(value, this.#itemSchema.properties[this.colHeaders[j]]))
         );
     };
 
@@ -547,7 +590,7 @@ export class Table extends LitElement {
 
     #setRow(row, data) {
         data.forEach((value, j) => {
-            value = this.#getRenderedValue(value, this.schema.properties[this.colHeaders[j]]);
+            value = this.#getRenderedValue(value, this.#itemSchema.properties[this.colHeaders[j]]);
             this.table.setDataAtCell(row, j, value);
         });
     }
@@ -563,11 +606,11 @@ export class Table extends LitElement {
             let message = "";
             let theme = "";
             if (warnings.length) {
-                (theme = "warning"), (message = warnings.map((o) => o.message).join("\n"));
+                (theme = "warning"), (message = warnings.map((error) => error.message).join("\n"));
             } else cell.removeAttribute("warning");
 
             if (errors.length) {
-                (theme = "error"), (message = errors.map((o) => o.message).join("\n")); // Class switching handled automatically
+                (theme = "error"), (message = errors.map((error) => error.message).join("\n")); // Class switching handled automatically
             } else cell.removeAttribute("error");
 
             if (theme) cell.setAttribute(theme, "");
@@ -578,7 +621,7 @@ export class Table extends LitElement {
             }
 
             if (message) {
-                tippy(cell, { content: message, theme });
+                tippy(cell, { content: message, allowHTML: true });
                 cell.setAttribute("data-message", message);
             }
         }
@@ -602,7 +645,7 @@ export class Table extends LitElement {
         const root = this.getRootNode().body ?? this.getRootNode();
         this.#root = root;
         const stylesheets = Array.from(root.querySelectorAll("style"));
-        const exists = (this.stylesheet = stylesheets.find((el) => styleSymbol in el));
+        const exists = (this.stylesheet = stylesheets.find((stylesheet) => styleSymbol in stylesheet));
 
         if (exists) exists[styleSymbol]++;
         else {

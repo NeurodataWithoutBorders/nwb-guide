@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   - python = 3.9.18
-  - PyInstaller = 5.13.0
+  - PyInstaller = 6.3.0
   - nodejs = 18.16.1
   - numcodecs = 0.11.0
   - lxml = 4.9.3  # pypi build fails due to x64/arm64 mismatch so install from conda-forge
@@ -22,5 +22,6 @@ dependencies:
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
+      - dandi >= 0.58.1
       - pytest == 7.4.0
       - pytest-cov == 4.1.0

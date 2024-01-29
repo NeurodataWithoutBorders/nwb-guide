@@ -7,11 +7,11 @@ import {
 
 import Swal from 'sweetalert2'
 
-import { activateServer, baseUrl } from './globals.js';
+import { activateServer, baseUrl, statusBar } from './globals.js';
 
 // Check if the Flask server is live
 const serverIsLiveStartup = async () => {
-    const echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json()).catch(e => e)
+    const echoResponse = await fetch(`${baseUrl}/startup/echo?arg=server ready`).then(res => res.json()).catch(error => error)
     return echoResponse === "server ready" ? true : false;
   };
 
@@ -40,13 +40,13 @@ export async function pythonServerOpened() {
     });
 
   })
-  .catch(e =>{
+  .catch(error =>{
 
     statusBar.items[2].status = 'issue'
 
     notyf.open({
       type: "warning",
-      message: e.message,
+      message: error.message,
     });
 
   })
