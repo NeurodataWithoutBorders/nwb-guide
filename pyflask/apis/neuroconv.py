@@ -1,4 +1,5 @@
 """API endpoint definitions for interacting with NeuroConv."""
+
 import traceback
 
 from flask_restx import Namespace, Resource, reqparse
@@ -20,6 +21,7 @@ from manageNeuroconv import (
     upload_project_to_dandi,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
+    get_interface_alignment,
 )
 
 from errorHandlers import notBadRequestException
@@ -94,6 +96,18 @@ class Convert(Resource):
     def post(self):
         try:
             return convert_to_nwb(neuroconv_api.payload)
+
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
+
+
+@neuroconv_api.route("/alignment")
+class Alignment(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return get_interface_alignment(neuroconv_api.payload)
 
         except Exception as exception:
             if notBadRequestException(exception):

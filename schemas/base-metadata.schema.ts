@@ -1,6 +1,6 @@
 import { serverGlobals, resolve } from '../src/renderer/src/server/globals'
 
-import { header } from '../src/renderer/src/stories/forms/utils'
+import { header, replaceRefsWithValue } from '../src/renderer/src/stories/forms/utils'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
@@ -37,7 +37,9 @@ function getSpeciesInfo(species: any[][] = []) {
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
-    const copy = structuredClone(schema)
+    const copy = replaceRefsWithValue(structuredClone(schema))
+
+    copy.additionalProperties = false
 
     // Add unit to weight
     const subjectProps = copy.properties.Subject.properties
@@ -82,6 +84,62 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     nwbProps.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
 
 
+    const ophys = copy.properties.Ophys
+
+    if (ophys) {
+
+        const getProp = (name: string) => ophys.properties[name]
+
+        if (getProp("TwoPhotonSeries")) {
+            const tpsItemSchema = getProp("TwoPhotonSeries").items
+            tpsItemSchema.order = [
+                "name",
+                "description",
+                "scan_line_rate",
+                "field_of_view"
+            ]
+
+            tpsItemSchema.properties.pmt_gain.title =  'Photomultiplier Gain'
+        }
+
+
+        if (getProp("ImagingPlane")) {
+            const imagingPlaneItems = getProp("ImagingPlane").items
+            imagingPlaneItems.order = [
+                "name",
+                "description",
+                "device",
+                "optical_channel",
+                "excitation_lambda",
+                "indicator",
+                "location",
+                "reference_frame",
+                "imaging_rate",
+                'grid_spacing',
+                "grid_spacing_unit",
+                "origin_coords",
+                'origin_coords_unit'
+            ]
+
+            imagingPlaneItems.properties.optical_channel.items.order = ["name", "description"]
+
+        }
+    }
+
+
+    Object.entries(copy.properties).forEach(([key, value]) => {
+
+        Object.entries(value.properties).forEach(([k, v]) => {
+
+            //  Uniformly grab definitions
+           const ref = v.items ?? v
+           if (!ref.properties) return
+           Object.keys(ref.properties).forEach(k => {
+                const info = ref.properties[k]
+                if (info.description && info.description.includes('DEPRECATED')) delete ref.properties[k] // Remove deprecated properties
+            })
+        })
+    })
 
     // Remove non-global properties
     if (global) {

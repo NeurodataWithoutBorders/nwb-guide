@@ -7,10 +7,20 @@ import { onThrow } from "../../errors";
 import { merge } from "../pages/utils.js";
 import { save } from "../../progress/index.js";
 
+type SingleIgnorePropsLevel = {
+    [x:string]: true,
+}
+
+type IgnorePropsLevel = {
+    ["*"]?: SingleIgnorePropsLevel,
+    [x:string]: true | IgnorePropsLevel,
+}
+
 type BaseFormModalOptions = {
     header: string
     schema: any
-    propsToRemove?: string[]
+    propsToIgnore?: IgnorePropsLevel
+    propsToRemove?: IgnorePropsLevel
     formProps: {
         validateOnChange?: Function,
         [key: string]: any
@@ -23,7 +33,7 @@ export function createFormModal ({
     onSave,
     header,
     schema,
-    propsToRemove = [],
+    propsToRemove = {},
     formProps,
     hasInstances = false
 }: BaseFormModalOptions & { onSave: Function }) {
@@ -35,11 +45,28 @@ export function createFormModal ({
 
     const schemaCopy = structuredClone(schema) // Ensure no mutation
 
-    function removeProperties(obj: any, props: string[]) {
-        props.forEach(prop =>  delete obj[prop])
+
+    function removeProperties(obj: any, props: IgnorePropsLevel = {}, extraGlobalProps?: SingleIgnorePropsLevel) {
+
+        if (extraGlobalProps && Object.keys(extraGlobalProps).length > 0) {
+            if (props["*"]) props["*"] = { ...props["*"], ...extraGlobalProps }
+            else props["*"] = extraGlobalProps
+        }
+
+        const globals = props["*"] ?? {}
+
+        // First remove all global properties
+        Object.entries(globals).forEach(([key, value]) => (value === true) ? delete obj[key] : '')
+
+        // Full pass for explicit removal
+        Object.entries(props).forEach(([key, value]) => {
+            if (key === '*') return
+            if (value === true) delete obj[key]
+            else removeProperties(obj[key], value, globals)
+        })
     }
 
-    if (hasInstances) Object.keys(schemaCopy.properties).forEach(i => removeProperties(schemaCopy.properties[i].properties, propsToRemove))
+    if (hasInstances) Object.keys(schemaCopy.properties).forEach(key => removeProperties(schemaCopy.properties[key].properties, propsToRemove[key], propsToRemove["*"]))
     else removeProperties(schemaCopy.properties, propsToRemove)
 
     const globalForm = new JSONSchemaForm({
@@ -75,7 +102,8 @@ export function createFormModal ({
 export function createGlobalFormModal(this: Page, {
     header,
     schema,
-    propsToRemove = [],
+
+    propsToRemove = {},
     formProps,
 
     // Global-specific options
