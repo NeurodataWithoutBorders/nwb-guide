@@ -1041,7 +1041,7 @@ export class JSONSchemaInput extends LitElement {
             // Handle other string formats
             else {
 
-                const isDateTime = info.format === "date-time"
+                const isDateTime = schema.format === "date-time"
 
                 const type =
                 isDateTime
