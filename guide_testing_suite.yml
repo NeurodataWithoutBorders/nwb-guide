@@ -29,3 +29,7 @@ pipelines:
   ScanImage_SinglePlane_SingleChannel:
     ScanImageImagingInterface:
       file_path: ophys_testing_data/imaging_datasets/ScanImage/scanimage_20220801_single.tif
+
+  TDT:
+    TdtRecordingInterface:
+      folder_path: ephy_testing_data/tdt/aep_05
