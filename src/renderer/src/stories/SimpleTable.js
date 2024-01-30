@@ -104,6 +104,7 @@ export class SimpleTable extends LitElement {
             .table-container {
                 overflow: auto;
                 max-height: 400px;
+                border: 1px solid gray;
             }
 
             table {
@@ -119,7 +120,7 @@ export class SimpleTable extends LitElement {
             }
 
             th {
-                border: 1px solid silver;
+                border-right: 1px solid gray;
                 color: #222;
                 font-weight: 400;
                 text-align: center;
@@ -141,9 +142,15 @@ export class SimpleTable extends LitElement {
             }
 
             td {
-                border: 1px solid gainsboro;
+                border: 1px solid gray;
+                border-left: none;
+                border-bottom: none;
                 background: white;
                 user-select: none;
+            }
+
+            table *:last-child {
+                border-right: none;
             }
 
             .relative .info {
@@ -496,7 +503,7 @@ export class SimpleTable extends LitElement {
                     Object.keys(cols).map((k) => (cols[k] = ""));
                     if (this.validateOnChange)
                         Object.keys(cols).map((k) => {
-                            const res = this.validateOnChange([k], { ...cols }, cols[k]);
+                            const res = this.validateOnChange(k, { ...cols }, cols[k]);
                             if (typeof res === "function") res();
                         });
 

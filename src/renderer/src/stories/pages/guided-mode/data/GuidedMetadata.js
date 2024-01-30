@@ -26,7 +26,6 @@ import { Button } from "../../../Button.js";
 import globalIcon from "../../../assets/global.svg?raw";
 
 const imagingPlaneKey = "imaging_plane";
-
 const propsToIgnore = {
     Ophys: {
         // NOTE: Get this to work
@@ -36,6 +35,9 @@ const propsToIgnore = {
             conversion: true,
             offset: true,
             unit: true,
+            control: true,
+            comments: true,
+            control_description: true,
         },
         ImagingPlane: {
             [imagingPlaneKey]: true,
@@ -61,6 +63,8 @@ const propsToIgnore = {
     },
     NWBFile: {
         session_id: true,
+        source_script: true,
+        source_script_file_name: true,
     },
 };
 
@@ -80,6 +84,7 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     beforeSave = () => {
+        console.log(this.localState.results, this.info.globalState.results);
         merge(this.localState.results, this.info.globalState.results);
     };
 
@@ -117,10 +122,13 @@ export class GuidedMetadataPage extends ManagedPage {
     connectedCallback() {
         super.connectedCallback();
 
+        // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+        const schema = preprocessMetadataSchema(undefined, true);
+
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Metadata",
             propsToRemove: propsToIgnore,
-            schema: preprocessMetadataSchema(undefined, true), // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+            schema,
             hasInstances: true,
             mergeFunction: function (globalResolved, globals) {
                 merge(globalResolved, globals);
@@ -154,8 +162,6 @@ export class GuidedMetadataPage extends ManagedPage {
         // Ignore specific metadata in the form by removing their schema value
         const schema = globalState.schema.metadata[subject][session];
         delete schema.description;
-        delete schema.properties.NWBFile.properties.source_script;
-        delete schema.properties.NWBFile.properties.source_script_file_name;
 
         // Only include a select group of Ecephys metadata here
         if ("Ecephys" in schema.properties) {
@@ -498,10 +504,10 @@ export class GuidedMetadataPage extends ManagedPage {
                         this.beforeSave = () => {
                             const { subject, session } = getInfoFromId(id);
 
-                            merge(
-                                this.localState.results[subject][session],
-                                this.info.globalState.results[subject][session]
-                            );
+                            const local = this.localState.results[subject][session];
+                            const global = this.info.globalState.results[subject][session];
+
+                            merge(local, global);
 
                             this.notify(`Session ${id} metadata saved!`);
                         };
