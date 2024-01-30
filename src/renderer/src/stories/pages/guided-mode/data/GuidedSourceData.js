@@ -277,7 +277,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         const flatTimes = Object.values(results)
                             .map((interfaceTimestamps) => {
-                                [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]];
+                                return [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]];
                             })
                             .flat()
                             .filter((timestamp) => !isNaN(timestamp));
