@@ -41,6 +41,12 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     copy.additionalProperties = false
 
+
+
+    copy.required = Object.keys(copy.properties) // Require all properties at the top level
+
+    copy.order = [ "NWBFile", "Subject" ]
+
     // Add unit to weight
     const subjectProps = copy.properties.Subject.properties
     subjectProps.weight.unit = 'kg'
@@ -87,6 +93,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     const ophys = copy.properties.Ophys
 
     if (ophys) {
+
+        ophys.required = Object.keys(ophys.properties)
 
         const getProp = (name: string) => ophys.properties[name]
 
@@ -143,8 +151,17 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     // Remove non-global properties
     if (global) {
+
         Object.entries(copy.properties).forEach(([globalProp, schema]) => {
-            instanceSpecificFields[globalProp]?.forEach((prop) =>  delete schema.properties[prop]);
+
+            const requiredSet = new Set(schema.required)
+
+            instanceSpecificFields[globalProp]?.forEach((prop) =>  {
+                delete schema.properties[prop]
+                requiredSet.delete(prop)
+            });
+
+            schema.required = Array.from(requiredSet)
         });
     }
 
