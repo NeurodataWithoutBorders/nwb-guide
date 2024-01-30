@@ -1076,7 +1076,9 @@ export class JSONSchemaInput extends LitElement {
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
                             // }
 
-                            if (!isNaN(newValue) && newValue !== value) {
+                            if (isNaN(newValue)) newValue = undefined
+
+                            if (newValue !== value) {
                                 ev.target.value = newValue;
                                 value = newValue;
                             }
