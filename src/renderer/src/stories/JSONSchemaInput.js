@@ -1067,7 +1067,7 @@ export class JSONSchemaInput extends LitElement {
                                 if ("min" in schema && newValue < schema.min) newValue = schema.min;
                                 else if ("max" in schema && newValue > schema.max) newValue = schema.max;
 
-                                if (isNaN(newValue)) newValue = undefined
+                                if (isNaN(newValue)) newValue = undefined;
                             }
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
