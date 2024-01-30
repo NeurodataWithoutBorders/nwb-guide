@@ -109,7 +109,7 @@ export class SimpleTable extends LitElement {
 
             table {
                 background: white;
-                width: 100%;     
+                width: 100%;
             }
 
             thead {
