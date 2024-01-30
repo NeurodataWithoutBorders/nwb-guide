@@ -374,10 +374,12 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    validateSchema = async (resolved, schema, name) => {
-        return await validator
+    validateSchema = (resolved, schema, name) => {
+
+        return validator
             .validate(resolved, schema)
             .errors.map((e) => {
+
                 const propName = e.path.slice(-1)[0] ?? name ?? e.property;
                 const rowName = e.path.slice(-2)[0];
 
@@ -391,9 +393,9 @@ export class JSONSchemaForm extends LitElement {
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN") return;
-                    else e.message = `${e.message}. ${provideNaNMessage}`;
-                }
+                    if (resolvedValue === "NaN" | resolvedValue === null) return;
+                    else if (isRow) e.message = `${e.message}. ${provideNaNMessage}`;
+                } 
 
                 const prevHeader = name ? header(name) : "Row";
 
@@ -414,7 +416,7 @@ export class JSONSchemaForm extends LitElement {
         const copy = structuredClone(resolved);
         delete copy.__disabled;
 
-        const result = await this.validateSchema(copy, this.schema);
+        const result = this.validateSchema(copy, this.schema);
 
         const resolvedErrors = this.#resolveErrors(result, this.base, resolved);
 
@@ -807,7 +809,7 @@ export class JSONSchemaForm extends LitElement {
         const skipValidation = !this.validateEmptyValues && value === undefined;
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
-        const jsonSchemaErrors = validateArgs.length === 2 ? await this.validateSchema(...validateArgs, name) : [];
+        const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
 
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
 

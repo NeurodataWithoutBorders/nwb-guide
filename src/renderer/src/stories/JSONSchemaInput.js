@@ -435,7 +435,7 @@ export class JSONSchemaInput extends LitElement {
                 white-space: nowrap;
             }
 
-            .nan-handler label {
+            .nan-handler span {
                 margin-left: 5px;
                 font-size: 12px;
             }
@@ -1060,8 +1060,8 @@ export class JSONSchemaInput extends LitElement {
 
                             // const isBlank = value === '';
 
-                            if (isInteger) newValue = parseInt(value);
-                            else if (isNumber) newValue = parseFloat(value);
+                            if (isInteger) value = newValue = parseInt(value);
+                            else if (isNumber) value = newValue = parseFloat(value);
 
                             if (isNumber) {
                                 if ("min" in schema && newValue < schema.min) newValue = schema.min;
@@ -1094,19 +1094,21 @@ export class JSONSchemaInput extends LitElement {
                     ${isRequiredNumber
                         ? html`<div class="nan-handler"><input
                         type="checkbox"
-                        ?checked=${this.value && Number.isNaN(this.value)}
+                        ?checked=${this.value === null}
                         @change=${(ev) => {
                             const siblingInput = ev.target.parentNode.previousElementSibling;
                             if (ev.target.checked) {
-                                this.#updateData(fullPath, NaN);
+                                this.#updateData(fullPath, null);
                                 siblingInput.setAttribute("disabled", true);
                             } else {
                                 siblingInput.removeAttribute("disabled");
                                 const ev = new Event("input");
                                 siblingInput.dispatchEvent(ev);
                             }
+                            this.#triggerValidation(name, path)
+
                         }}
-                    ></input><label>I Don't Know</label></div>`
+                    ></input><span>I Don't Know</span></div>`
                         : ""}
                 `;
             }
