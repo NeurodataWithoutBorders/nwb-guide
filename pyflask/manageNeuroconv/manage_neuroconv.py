@@ -258,7 +258,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     """Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data."""
     from neuroconv.utils import NWBMetaDataEncoder
 
-    resolved_source_data = replace_none_with_nan(source_data, resolve_references(get_custom_converter(interfaces).get_source_schema()))
+    resolved_source_data = replace_none_with_nan(
+        source_data, resolve_references(get_custom_converter(interfaces).get_source_schema())
+    )
 
     converter = instantiate_custom_converter(resolved_source_data, interfaces)
     schema = converter.get_metadata_schema()
@@ -425,8 +427,9 @@ def convert_to_nwb(info: dict) -> str:
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
-
-    resolved_source_data = replace_none_with_nan(info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema()))
+    resolved_source_data = replace_none_with_nan(
+        info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
+    )
 
     converter = instantiate_custom_converter(resolved_source_data, info["interfaces"])
 

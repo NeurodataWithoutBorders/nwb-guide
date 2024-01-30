@@ -1076,7 +1076,7 @@ export class JSONSchemaInput extends LitElement {
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
                             // }
 
-                            if (isNaN(newValue)) newValue = undefined
+                            if (isNaN(newValue)) newValue = undefined;
 
                             if (newValue !== value) {
                                 ev.target.value = newValue;
@@ -1107,8 +1107,7 @@ export class JSONSchemaInput extends LitElement {
                                 const ev = new Event("input");
                                 siblingInput.dispatchEvent(ev);
                             }
-                            this.#triggerValidation(name, path)
-
+                            this.#triggerValidation(name, path);
                         }}
                     ></input><span>I Don't Know</span></div>`
                         : ""}
