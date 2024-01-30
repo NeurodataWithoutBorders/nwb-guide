@@ -43,14 +43,6 @@ export class Accordion extends LitElement {
                 margin-right: 10px;
             }
 
-            .header > *:nth-child(2) {
-                padding-bottom: 2px;
-            }
-
-            nwb-chevron {
-                margin: 10px;
-            }
-
             .guided--nav-bar-section {
                 display: flex;
                 flex-direction: column;
@@ -60,17 +52,12 @@ export class Accordion extends LitElement {
                 height: 100%;
             }
 
-            .guided--nav-bar-section > * {
-                padding: 0px 10px;
-            }
-
             .content {
                 width: 100%;
             }
 
             .guided--nav-bar-dropdown {
                 position: relative;
-                min-height: 40px;
                 width: 100%;
                 display: flex;
                 align-items: center;
@@ -79,6 +66,10 @@ export class Accordion extends LitElement {
                 user-select: none;
                 background-color: rgb(240, 240, 240);
                 box-shadow: 0 5px 2px -2px silver;
+            }
+
+            .guided--nav-bar-section > * {
+                padding: 5px 15px 5px 10px;
             }
 
             .guided--nav-bar-dropdown.active {
@@ -173,6 +164,7 @@ export class Accordion extends LitElement {
     updated() {
         if (!this.content) return;
         this.toggle(!!this.open);
+        console.log(this)
     }
 
     setStatus = (status) => {
@@ -248,7 +240,7 @@ export class Accordion extends LitElement {
                     ? html`<div
                           id="section"
                           class="content hidden ${this.disabled ? "disabled" : ""}"
-                          style="padding: ${this.contentPadding ?? "25px"}"
+                          style="padding: ${this.contentPadding ?? "20px"}"
                       >
                           ${this.content}
                       </div>`
