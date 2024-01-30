@@ -435,7 +435,6 @@ export class JSONSchemaForm extends LitElement {
 
         if (resolvedErrors.length) {
             const len = resolvedErrors.length;
-            console.error("JSON Schema Errors", resolvedErrors);
             if (len === 1) this.throw(resolvedErrors[0].message);
             else this.throw(`${len} JSON Schema errors detected.`);
         }

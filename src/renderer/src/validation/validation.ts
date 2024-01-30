@@ -79,7 +79,8 @@ schema.Ecephys.Electrodes = {
         // Label columns as invalid if not registered on the ElectrodeColumns table
         // NOTE: If not present in the schema, these are not being rendered...
         ['*']: function (this: JSONSchemaForm, name, parent, path) {
-            if (!this.results.Ecephys.ElectrodeColumns.find((row: any) => row.name === name)) return [
+            const electrodeColumns = this.results.ElectrodeColumns
+            if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) return [
                 {
                     message: 'Not a valid column',
                     type: 'error'
