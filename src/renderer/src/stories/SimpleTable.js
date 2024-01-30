@@ -110,7 +110,7 @@ export class SimpleTable extends LitElement {
                 background: white;
                 width: 100%;
                 border: 1px solid gray;
-                border-collapse: collapse;              
+                border-collapse: collapse;
             }
 
             thead {

@@ -989,21 +989,20 @@ export class JSONSchemaInput extends LitElement {
                 return search;
             }
 
-            const enumItems = [...schema.enum]
+            const enumItems = [...schema.enum];
 
-            const noSelection = 'No Selection'
-            if (!this.required) enumItems.unshift(noSelection)
+            const noSelection = "No Selection";
+            if (!this.required) enumItems.unshift(noSelection);
 
-            const selectedItem = enumItems.find(item => this.value === item)
-            
+            const selectedItem = enumItems.find((item) => this.value === item);
 
             return html`
                 <select
                     class="guided--input schema-input"
                     @input=${(ev) => {
-                        const index = ev.target.value
-                        const value = enumItems[index]
-                        this.#updateData(fullPath, value === noSelection ? undefined : value)
+                        const index = ev.target.value;
+                        const value = enumItems[index];
+                        this.#updateData(fullPath, value === noSelection ? undefined : value);
                     }}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     @keydown=${this.#moveToNextInput}
@@ -1011,7 +1010,10 @@ export class JSONSchemaInput extends LitElement {
                     <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
                     ${enumItems.map(
                         (item, i) =>
-                            html`<option value=${i} ?selected=${selectedItem === item || (selectedItem === -1 && item === noSelection)}>
+                            html`<option
+                                value=${i}
+                                ?selected=${selectedItem === item || (selectedItem === -1 && item === noSelection)}
+                            >
                                 ${schema.enumLabels?.[item] ?? item}
                             </option>`
                     )}

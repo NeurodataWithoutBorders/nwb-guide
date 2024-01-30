@@ -82,7 +82,7 @@ export class GuidedSubjectsPage extends Page {
     connectedCallback() {
         super.connectedCallback();
 
-        const schema = preprocessMetadataSchema(undefined, true).properties.Subject
+        const schema = preprocessMetadataSchema(undefined, true).properties.Subject;
 
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Subject Metadata",
