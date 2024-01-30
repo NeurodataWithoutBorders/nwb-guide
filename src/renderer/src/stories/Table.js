@@ -293,9 +293,10 @@ export class Table extends LitElement {
 
             const runThisValidator = async (value, row, prop) => {
                 try {
+
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
-                              [k],
+                              k,
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
                               value,
                               info

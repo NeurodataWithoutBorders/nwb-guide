@@ -189,8 +189,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
         const schema = structuredClone(this.info.globalState.schema.source_data)
         delete schema.description
-        schema.required = Object.keys(schema.properties)
-
+        
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Source Data",
             propsToRemove: {

@@ -42,6 +42,7 @@
     "Behavior": false,
 
     "Subject": {
+        "sessions": false,
         "description": false,
         "genotype": false,
         "strain": false,

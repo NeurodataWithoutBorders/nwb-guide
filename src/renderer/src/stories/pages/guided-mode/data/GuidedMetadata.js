@@ -83,6 +83,7 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     beforeSave = () => {
+        console.log(this.localState.results, this.info.globalState.results)
         merge(this.localState.results, this.info.globalState.results);
     };
 
@@ -504,9 +505,12 @@ export class GuidedMetadataPage extends ManagedPage {
                         this.beforeSave = () => {
                             const { subject, session } = getInfoFromId(id);
 
+                            const local = this.localState.results[subject][session]
+                            const global = this.info.globalState.results[subject][session]
+
                             merge(
-                                this.localState.results[subject][session],
-                                this.info.globalState.results[subject][session]
+                                local,
+                                global
                             );
 
                             this.notify(`Session ${id} metadata saved!`);

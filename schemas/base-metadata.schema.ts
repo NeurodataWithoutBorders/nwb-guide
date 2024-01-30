@@ -149,8 +149,17 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     // Remove non-global properties
     if (global) {
+
         Object.entries(copy.properties).forEach(([globalProp, schema]) => {
-            instanceSpecificFields[globalProp]?.forEach((prop) =>  delete schema.properties[prop]);
+
+            const requiredSet = new Set(schema.required)
+
+            instanceSpecificFields[globalProp]?.forEach((prop) =>  {
+                delete schema.properties[prop]
+                requiredSet.delete(prop)
+            });
+
+            schema.required = Array.from(requiredSet)
         });
     }
 

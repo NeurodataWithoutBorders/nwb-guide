@@ -13,7 +13,6 @@ export async function validateOnChange(name, parent, path, value) {
     let functions = [];
 
     const fullPath = [...path, name];
-
     const toIterate = fullPath; //fullPathNoRows // fullPath
 
     const copy = { ...parent }; // Validate on a copy of the parent
@@ -29,6 +28,7 @@ export async function validateOnChange(name, parent, path, value) {
 
     // Skip wildcard check for categories marked with false
     if (lastResolved !== false && (functions === undefined || functions === true)) {
+
         // let overridden = false;
         let lastWildcard;
         toIterate.reduce((acc, key) => {
@@ -38,7 +38,6 @@ export async function validateOnChange(name, parent, path, value) {
                 // Otherwise set the last wildcard
                 else {
                     lastWildcard = typeof acc["*"] === "string" ? acc["*"].replace(`{*}`, `${name}`) : acc["*"];
-
                     overridden = false; // Re-enable if a new one is specified below
                 }
             } else if (lastWildcard && typeof lastWildcard === "object") {
@@ -52,7 +51,7 @@ export async function validateOnChange(name, parent, path, value) {
 
         if (overridden && functions !== true) lastWildcard = false; // Disable if not promised to exist
 
-        if (typeof lastWildcard === "function") functions = [lastWildcard];
+        if (typeof lastWildcard === "function" || typeof lastWildcard === 'string') functions = [lastWildcard];
     }
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
@@ -75,6 +74,7 @@ export async function validateOnChange(name, parent, path, value) {
                 .catch(() => {}); // Let failed fetch succeed
         }
     });
+
 
     const res = resolveAll(results, (arr) => {
         arr = arr.map((v, i) => {

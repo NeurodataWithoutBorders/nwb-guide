@@ -303,7 +303,10 @@ export class JSONSchemaForm extends LitElement {
         const path = [...localPath];
         const name = path.pop();
 
-        const reducer = (acc, key) => (key in acc ? acc[key] : (acc[key] = {})); // NOTE: Create nested objects if required to set a new path
+        const reducer = (acc, key) => {
+            const value = acc[key]
+            return (value && typeof value === 'object' ? value : (acc[key] = {}))
+        }; // NOTE: Create nested objects if required to set a new path
 
         const resultParent = path.reduce(reducer, this.results);
         const resolvedParent = path.reduce(reducer, this.resolved);
@@ -386,7 +389,12 @@ export class JSONSchemaForm extends LitElement {
 
                 const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
 
+
                 // ------------ Exclude Certain Errors ------------
+
+                // Ignore required errors if value is empty
+                if (e.name === 'required' && !this.validateEmptyValues && !(e.property in e.instance)) return
+
                 // Non-Strict Rule
                 if (schema.strict === false && e.message.includes("is not one of enum values")) return;
 
@@ -428,8 +436,9 @@ export class JSONSchemaForm extends LitElement {
 
         if (resolvedErrors.length) {
             const len = resolvedErrors.length;
+            console.error('JSON Schema Errors', resolvedErrors)
             if (len === 1) this.throw(resolvedErrors[0].message);
-            else this.throw(`${len} JSON Schema errors on this form.`);
+            else this.throw(`${len} JSON Schema errors detected.`);
         }
 
         const allErrors = Array.from(flaggedInputs)
@@ -1139,6 +1148,9 @@ export class JSONSchemaForm extends LitElement {
 
             const disableText = 'Skip'
             const enableText = 'Enable'
+
+            const disabledPath = [...path, '__disabled']
+            const interactedPath = [...disabledPath, '__interacted']
             
             const enableToggle = new Button({
                 label: isDisabled ? enableText : disableText,
@@ -1153,18 +1165,10 @@ export class JSONSchemaForm extends LitElement {
                     isGlobalEffect = false;
 
                     enableToggle.label = willEnable ? disableText : enableText
-                    // Object.assign(enableToggle.style, { accentColor: "unset" });
-    
-                    const { __disabled = {} } = this.results;
-                    const { __disabled: resolvedDisabled = {} } = this.resolved;
-    
-                    if (!__disabled.__interacted) __disabled.__interacted = {};
-                    if (!resolvedDisabled.__interacted) resolvedDisabled.__interacted = {};
-    
-                    __disabled.__interacted[name] = resolvedDisabled.__interacted[name] = true; // Track that the user has interacted with the form
-    
+                
                     willEnable ? enable() : disable();
-    
+                    this.updateData([...interactedPath, name], true, true)
+
                     this.onUpdate(localPath, this.results[name]);
                 }
             })
@@ -1192,23 +1196,22 @@ export class JSONSchemaForm extends LitElement {
 
             accordion.id = name; // assign name to accordion id
 
-            // Set enable / disable behavior
-            const addDisabled = (name, parentObject) => {
-                if (!parentObject.__disabled) parentObject.__disabled = {};
-
-                // Do not overwrite cache of disabled values (with globals, for instance)
-                if (parentObject.__disabled[name]) {
-                    if (isGlobalEffect) return;
-                }
-
-                parentObject.__disabled[name] = parentObject[name] ?? (parentObject[name] = {}); // Track disabled values (or at least something)
-            };
-
             const disable = () => {
                 accordion.disabled = true;
-                addDisabled(name, this.resolved);
-                addDisabled(name, this.results);
-                this.resolved[name] = this.results[name] = undefined; // Remove entry from results
+
+
+                const target = this.results
+                const value = target[name] ?? {}
+
+                let update = true
+                if (target.__disabled?.[name] && isGlobalEffect) update = false
+
+                // Disabled path is set to actual value
+                if (update) this.updateData([...disabledPath, name], value)
+
+
+                // Actual data is set to undefined
+                this.updateData(localPath, undefined)
 
                 this.checkStatus();
             };
@@ -1217,12 +1220,13 @@ export class JSONSchemaForm extends LitElement {
                 accordion.disabled = false;
 
                 const { __disabled = {} } = this.results;
-                const { __disabled: resolvedDisabled = {} } = this.resolved;
 
-                if (__disabled[name]) this.updateData(localPath, __disabled[name]); // Propagate restored disabled values
-                __disabled[name] = undefined; // Clear disabled value
-                resolvedDisabled[name] = undefined; // Clear disabled value
+                // Actual value is restored to the cached value
+                if (__disabled[name]) this.updateData(localPath, __disabled[name]);
 
+                // Cached value is cleared
+                this.updateData([...disabledPath, name], undefined) 
+                
                 this.checkStatus();
             };
 
