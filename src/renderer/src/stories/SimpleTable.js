@@ -104,13 +104,12 @@ export class SimpleTable extends LitElement {
             .table-container {
                 overflow: auto;
                 max-height: 400px;
+                border: 1px solid gray;
             }
 
             table {
                 background: white;
-                width: 100%;
-                border: 1px solid gray;
-                border-collapse: collapse;              
+                width: 100%;     
             }
 
             thead {
@@ -144,8 +143,14 @@ export class SimpleTable extends LitElement {
 
             td {
                 border: 1px solid gray;
+                border-left: none;
+                border-bottom: none;
                 background: white;
                 user-select: none;
+            }
+
+            table *:last-child {
+                border-right: none;
             }
 
             .relative .info {
