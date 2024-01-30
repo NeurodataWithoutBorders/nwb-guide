@@ -13,7 +13,7 @@ export class Chevron extends LitElement {
 
             div::before {
                 border-style: solid;
-                border-width: 0.25em 0.25em 0 0;
+                border-width: 0.20em 0.20em 0 0;
                 content: "";
                 display: inline-block;
                 height: 0.45em;

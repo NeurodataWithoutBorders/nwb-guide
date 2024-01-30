@@ -41,6 +41,12 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     copy.additionalProperties = false
 
+
+
+    copy.required = Object.keys(copy.properties) // Require all properties at the top level
+
+    copy.order = [ "NWBFile", "Subject" ]
+
     // Add unit to weight
     const subjectProps = copy.properties.Subject.properties
     subjectProps.weight.unit = 'kg'

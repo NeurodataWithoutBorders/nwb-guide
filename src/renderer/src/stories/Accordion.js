@@ -11,8 +11,6 @@ import {
 
 import { Chevron } from "./Chevron";
 
-// import 'fa-icons';
-
 const faSize = "1em";
 const faColor = "#000000";
 
@@ -25,13 +23,11 @@ export class Accordion extends LitElement {
 
             :host {
                 display: block;
-                overflow: hidden;
             }
 
             .header {
                 display: flex;
-                align-items: end;
-                padding: 20px 0px;
+                align-items: center;
                 white-space: nowrap;
             }
 
@@ -82,27 +78,23 @@ export class Accordion extends LitElement {
                 flex-wrap: nowrap;
                 user-select: none;
                 background-color: rgb(240, 240, 240);
-                border-bottom: 1px solid gray;
+                box-shadow: 0 5px 2px -2px silver;
             }
 
             .guided--nav-bar-dropdown.active {
-                border-bottom: none;
-            }
-
-            .guided--nav-bar-section:last-child > .guided--nav-bar-dropdown {
-                border-bottom: none;
+                border-left: none;
             }
 
             .guided--nav-bar-dropdown.error {
-                border-bottom: 5px solid hsl(${errorHue}, 100%, 70%) !important;
+                border-left: 3px solid hsl(${errorHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown.warning {
-                border-bottom: 5px solid hsl(${warningHue}, 100%, 70%) !important;
+                border-left: 3px solid hsl(${warningHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown.valid {
-                border-bottom: 5px solid hsl(${successHue}, 100%, 70%) !important;
+                border-left: 3px solid hsl(${successHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown {
@@ -120,21 +112,9 @@ export class Accordion extends LitElement {
                 right: 50px;
             }
 
-            .guided--nav-bar-dropdown.error::after {
-                content: "${errorSymbol}";
-            }
-
-            .guided--nav-bar-dropdown.warning::after {
-                content: "${warningSymbol}";
-            }
-
-            .guided--nav-bar-dropdown.valid::after {
-                content: "${successSymbol}";
-            }
-
             .guided--nav-bar-dropdown.toggleable:hover {
                 cursor: pointer;
-                background-color: lightgray;
+                background-color: gainsboro;
             }
 
             .guided--nav-bar-section-page {

@@ -109,6 +109,8 @@ export class SimpleTable extends LitElement {
             table {
                 background: white;
                 width: 100%;
+                border: 1px solid gray;
+                border-collapse: collapse;              
             }
 
             thead {
@@ -119,7 +121,7 @@ export class SimpleTable extends LitElement {
             }
 
             th {
-                border: 1px solid silver;
+                border-right: 1px solid gray;
                 color: #222;
                 font-weight: 400;
                 text-align: center;
@@ -141,7 +143,7 @@ export class SimpleTable extends LitElement {
             }
 
             td {
-                border: 1px solid gainsboro;
+                border: 1px solid gray;
                 background: white;
                 user-select: none;
             }

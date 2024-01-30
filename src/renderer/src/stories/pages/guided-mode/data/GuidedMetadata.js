@@ -36,6 +36,9 @@ const propsToIgnore = {
             conversion: true,
             offset: true,
             unit: true,
+            control: true,
+            comments: true,
+            control_description: true
         },
         ImagingPlane: {
             [imagingPlaneKey]: true,
@@ -117,10 +120,13 @@ export class GuidedMetadataPage extends ManagedPage {
     connectedCallback() {
         super.connectedCallback();
 
+        // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+        const schema = preprocessMetadataSchema(undefined, true)
+
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Metadata",
             propsToRemove: propsToIgnore,
-            schema: preprocessMetadataSchema(undefined, true), // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
+            schema,
             hasInstances: true,
             mergeFunction: function (globalResolved, globals) {
                 merge(globalResolved, globals);

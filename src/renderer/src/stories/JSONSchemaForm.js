@@ -27,6 +27,7 @@ const provideNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown v
 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
+import { Button } from "./Button";
 
 var validator = new Validator();
 
@@ -1060,23 +1061,10 @@ export class JSONSchemaForm extends LitElement {
 
             const localPath = [...path, name];
 
-            const enableToggle = document.createElement("input");
-            const enableToggleContainer = document.createElement("div");
-            Object.assign(enableToggleContainer.style, {
-                position: "relative",
-            });
-            enableToggleContainer.append(enableToggle);
-
             // Check properties that will be rendered before creating the accordion
             const base = [...this.base, ...localPath];
 
             const explicitlyRequired = schema.required?.includes(name) ?? false;
-
-            Object.assign(enableToggle, {
-                type: "checkbox",
-                checked: true,
-                style: "margin-right: 10px; pointer-events:all;",
-            });
 
             const headerName = header(info.title ?? name);
 
@@ -1096,8 +1084,6 @@ export class JSONSchemaForm extends LitElement {
             const __disabledResolved = isGlobalEffect ? __disabledGlobal : __disabled;
 
             const isDisabled = !!__disabledResolved[name];
-
-            enableToggle.checked = !isDisabled;
 
             const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
 
@@ -1151,13 +1137,50 @@ export class JSONSchemaForm extends LitElement {
 
             const oldStates = this.#accordions[headerName];
 
+            const disableText = 'Skip'
+            const enableText = 'Enable'
+            
+            const enableToggle = new Button({
+                label: isDisabled ? enableText : disableText,
+                size: 'extra-small',
+                onClick:  (ev) => {
+
+                    ev.stopPropagation();
+
+                    const willEnable = enableToggle.label === enableText
+    
+                    // Reset parameters on interaction
+                    isGlobalEffect = false;
+
+                    enableToggle.label = willEnable ? disableText : enableText
+                    // Object.assign(enableToggle.style, { accentColor: "unset" });
+    
+                    const { __disabled = {} } = this.results;
+                    const { __disabled: resolvedDisabled = {} } = this.resolved;
+    
+                    if (!__disabled.__interacted) __disabled.__interacted = {};
+                    if (!resolvedDisabled.__interacted) resolvedDisabled.__interacted = {};
+    
+                    __disabled.__interacted[name] = resolvedDisabled.__interacted[name] = true; // Track that the user has interacted with the form
+    
+                    willEnable ? enable() : disable();
+    
+                    this.onUpdate(localPath, this.results[name]);
+                }
+            })
+
+            // const enableToggle = document.createElement("input");
+            const enableToggleContainer = document.createElement("div");
+            Object.assign(enableToggleContainer.style, { position: "relative" });
+            enableToggleContainer.append(enableToggle);
+            Object.assign(enableToggle.style, {  marginRight: '10px', pointerEvents: 'all' });
+
+
             const accordion = (this.#accordions[headerName] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
                 subtitle: html`<div style="display:flex; align-items: center;">
-                    ${explicitlyRequired ? "" : enableToggleContainer}${renderableInside.length
-                        ? `${hasPatternProperties ? "Dynamic" : renderableInside.length} fields`
-                        : ""}
+                    ${explicitlyRequired ? "" : enableToggleContainer}
                 </div>`,
                 content: this.#nestedForms[name],
 
@@ -1203,34 +1226,9 @@ export class JSONSchemaForm extends LitElement {
                 this.checkStatus();
             };
 
-            enableToggle.addEventListener("click", (clickEvent) => {
-                clickEvent.stopPropagation();
-                const { checked } = clickEvent.target;
-
-                // Reset parameters on interaction
-                isGlobalEffect = false;
-                Object.assign(enableToggle.style, {
-                    accentColor: "unset",
-                });
-
-                const { __disabled = {} } = this.results;
-                const { __disabled: resolvedDisabled = {} } = this.resolved;
-
-                if (!__disabled.__interacted) __disabled.__interacted = {};
-                if (!resolvedDisabled.__interacted) resolvedDisabled.__interacted = {};
-
-                __disabled.__interacted[name] = resolvedDisabled.__interacted[name] = true; // Track that the user has interacted with the form
-
-                checked ? enable() : disable();
-
-                this.onUpdate(localPath, this.results[name]);
-            });
-
             if (isGlobalEffect) {
                 isDisabled ? disable() : enable();
-                Object.assign(enableToggle.style, {
-                    accentColor: "gray",
-                });
+                Object.assign(enableToggle.style, {accentColor: "gray" });
             }
 
             return accordion;
