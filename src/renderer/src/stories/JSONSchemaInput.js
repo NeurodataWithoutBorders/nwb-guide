@@ -989,17 +989,31 @@ export class JSONSchemaInput extends LitElement {
                 return search;
             }
 
+            const enumItems = [...schema.enum];
+
+            const noSelection = "No Selection";
+            if (!this.required) enumItems.unshift(noSelection);
+
+            const selectedItem = enumItems.find((item) => this.value === item);
+
             return html`
                 <select
                     class="guided--input schema-input"
-                    @input=${(ev) => this.#updateData(fullPath, schema.enum[ev.target.value])}
+                    @input=${(ev) => {
+                        const index = ev.target.value;
+                        const value = enumItems[index];
+                        this.#updateData(fullPath, value === noSelection ? undefined : value);
+                    }}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     @keydown=${this.#moveToNextInput}
                 >
                     <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
-                    ${schema.enum.map(
+                    ${enumItems.map(
                         (item, i) =>
-                            html`<option value=${i} ?selected=${this.value === item}>
+                            html`<option
+                                value=${i}
+                                ?selected=${selectedItem === item || (selectedItem === -1 && item === noSelection)}
+                            >
                                 ${schema.enumLabels?.[item] ?? item}
                             </option>`
                     )}
