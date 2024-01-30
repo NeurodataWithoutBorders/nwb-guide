@@ -1107,8 +1107,7 @@ export class JSONSchemaInput extends LitElement {
                                 const ev = new Event("input");
                                 siblingInput.dispatchEvent(ev);
                             }
-                            this.#triggerValidation(name, path)
-
+                            this.#triggerValidation(name, path);
                         }}
                     ></input><span>I Don't Know</span></div>`
                         : ""}

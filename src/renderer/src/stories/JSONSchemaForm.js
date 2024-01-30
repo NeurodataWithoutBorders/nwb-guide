@@ -375,11 +375,9 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validateSchema = (resolved, schema, name) => {
-
         return validator
             .validate(resolved, schema)
             .errors.map((e) => {
-
                 const propName = e.path.slice(-1)[0] ?? name ?? e.property;
                 const rowName = e.path.slice(-2)[0];
 
@@ -387,16 +385,15 @@ export class JSONSchemaForm extends LitElement {
 
                 const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
 
-
                 // ------------ Exclude Certain Errors ------------
                 // Non-Strict Rule
                 if (schema.strict === false && e.message.includes("is not one of enum values")) return;
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN" | resolvedValue === null) return;
+                    if ((resolvedValue === "NaN") | (resolvedValue === null)) return;
                     else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
-                } 
+                }
 
                 const prevHeader = name ? header(name) : "Row";
 
@@ -850,19 +847,21 @@ export class JSONSchemaForm extends LitElement {
             }
         }
 
-
         if (!errors.length) {
             if (isUndefined) {
                 // Throw at least a basic warning if a non-linked property is required and missing
                 if (!hasLinks && isRequired) {
                     if (this.validateEmptyValues) {
-
                         const rowName = pathToValidate.slice(-1)[0];
                         const isRow = typeof rowName === "number";
-                
+
                         errors.push({
                             message: `${schema.title ?? header(name)} ${this.#isARequiredPropertyString}. ${
-                                schema.type === "number" ? ( isRow ? templateNaNMessage : "<br><small>Use the 'I Don't Know' checkbox if unsure.</small>" ) : ""
+                                schema.type === "number"
+                                    ? isRow
+                                        ? templateNaNMessage
+                                        : "<br><small>Use the 'I Don't Know' checkbox if unsure.</small>"
+                                    : ""
                             }`,
                             type: "error",
                             missing: true,
