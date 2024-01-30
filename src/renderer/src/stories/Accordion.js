@@ -65,7 +65,6 @@ export class Accordion extends LitElement {
                 flex-wrap: nowrap;
                 user-select: none;
                 background-color: rgb(235, 235, 235);
-                box-shadow: 0 5px 2px -2px silver;
             }
 
             .guided--nav-bar-section > * {
@@ -73,19 +72,19 @@ export class Accordion extends LitElement {
             }
 
             .guided--nav-bar-dropdown.active {
-                border-left: none;
+                border-bottom: none;
             }
 
             .guided--nav-bar-dropdown.error {
-                border-left: 3px solid hsl(${errorHue}, 100%, 70%) !important;
+                border-bottom: 3px solid hsl(${errorHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown.warning {
-                border-left: 3px solid hsl(${warningHue}, 100%, 70%) !important;
+                border-bottom: 3px solid hsl(${warningHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown.valid {
-                border-left: 3px solid hsl(${successHue}, 100%, 70%) !important;
+                border-bottom: 3px solid hsl(${successHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown {
@@ -239,7 +238,7 @@ export class Accordion extends LitElement {
                     ? html`<div
                           id="section"
                           class="content hidden ${this.disabled ? "disabled" : ""}"
-                          style="padding: ${this.contentPadding ?? "20px"}"
+                          style="padding: ${this.contentPadding ?? "15px"}"
                       >
                           ${this.content}
                       </div>`

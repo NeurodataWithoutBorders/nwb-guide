@@ -26,7 +26,6 @@ import { Button } from "../../../Button.js";
 import globalIcon from "../../../assets/global.svg?raw";
 
 const imagingPlaneKey = "imaging_plane";
-
 const propsToIgnore = {
     Ophys: {
         // NOTE: Get this to work
@@ -64,6 +63,8 @@ const propsToIgnore = {
     },
     NWBFile: {
         session_id: true,
+        source_script: true,
+        source_script_file_name: true
     },
 };
 
@@ -161,8 +162,6 @@ export class GuidedMetadataPage extends ManagedPage {
         // Ignore specific metadata in the form by removing their schema value
         const schema = globalState.schema.metadata[subject][session];
         delete schema.description;
-        delete schema.properties.NWBFile.properties.source_script;
-        delete schema.properties.NWBFile.properties.source_script_file_name;
 
         // Only include a select group of Ecephys metadata here
         if ("Ecephys" in schema.properties) {
@@ -272,6 +271,7 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
+
                 if (name === "TwoPhotonSeries" && (!this.value || !this.value.length)) return null;
 
                 const isAdditional = isAdditionalProperties(this.pattern);
