@@ -23,10 +23,11 @@ const encode = (str) => {
 
 const additionalPropPattern = "additional";
 
-const provideNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
+const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
+import { Button } from "./Button";
 
 var validator = new Validator();
 
@@ -302,7 +303,10 @@ export class JSONSchemaForm extends LitElement {
         const path = [...localPath];
         const name = path.pop();
 
-        const reducer = (acc, key) => (key in acc ? acc[key] : (acc[key] = {})); // NOTE: Create nested objects if required to set a new path
+        const reducer = (acc, key) => {
+            const value = acc[key];
+            return value && typeof value === "object" ? value : (acc[key] = {});
+        }; // NOTE: Create nested objects if required to set a new path
 
         const resultParent = path.reduce(reducer, this.results);
         const resolvedParent = path.reduce(reducer, this.resolved);
@@ -374,8 +378,8 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    validateSchema = async (resolved, schema, name) => {
-        return await validator
+    validateSchema = (resolved, schema, name) => {
+        return validator
             .validate(resolved, schema)
             .errors.map((e) => {
                 const propName = e.path.slice(-1)[0] ?? name ?? e.property;
@@ -386,13 +390,17 @@ export class JSONSchemaForm extends LitElement {
                 const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
 
                 // ------------ Exclude Certain Errors ------------
+
+                // Ignore required errors if value is empty
+                if (e.name === "required" && !this.validateEmptyValues && !(e.property in e.instance)) return;
+
                 // Non-Strict Rule
                 if (schema.strict === false && e.message.includes("is not one of enum values")) return;
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN") return;
-                    else e.message = `${e.message}. ${provideNaNMessage}`;
+                    if ((resolvedValue === "NaN") | (resolvedValue === null)) return;
+                    else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
                 }
 
                 const prevHeader = name ? header(name) : "Row";
@@ -414,7 +422,7 @@ export class JSONSchemaForm extends LitElement {
         const copy = structuredClone(resolved);
         delete copy.__disabled;
 
-        const result = await this.validateSchema(copy, this.schema);
+        const result = this.validateSchema(copy, this.schema);
 
         const resolvedErrors = this.#resolveErrors(result, this.base, resolved);
 
@@ -428,7 +436,7 @@ export class JSONSchemaForm extends LitElement {
         if (resolvedErrors.length) {
             const len = resolvedErrors.length;
             if (len === 1) this.throw(resolvedErrors[0].message);
-            else this.throw(`${len} JSON Schema errors on this form.`);
+            else this.throw(`${len} JSON Schema errors detected.`);
         }
 
         const allErrors = Array.from(flaggedInputs)
@@ -807,7 +815,7 @@ export class JSONSchemaForm extends LitElement {
         const skipValidation = !this.validateEmptyValues && value === undefined;
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
-        const jsonSchemaErrors = validateArgs.length === 2 ? await this.validateSchema(...validateArgs, name) : [];
+        const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
 
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
 
@@ -852,9 +860,16 @@ export class JSONSchemaForm extends LitElement {
                 // Throw at least a basic warning if a non-linked property is required and missing
                 if (!hasLinks && isRequired) {
                     if (this.validateEmptyValues) {
+                        const rowName = pathToValidate.slice(-1)[0];
+                        const isRow = typeof rowName === "number";
+
                         errors.push({
                             message: `${schema.title ?? header(name)} ${this.#isARequiredPropertyString}. ${
-                                schema.type === "number" ? provideNaNMessage : ""
+                                schema.type === "number"
+                                    ? isRow
+                                        ? templateNaNMessage
+                                        : "<br><small>Use the 'I Don't Know' checkbox if unsure.</small>"
+                                    : ""
                             }`,
                             type: "error",
                             missing: true,
@@ -1060,23 +1075,10 @@ export class JSONSchemaForm extends LitElement {
 
             const localPath = [...path, name];
 
-            const enableToggle = document.createElement("input");
-            const enableToggleContainer = document.createElement("div");
-            Object.assign(enableToggleContainer.style, {
-                position: "relative",
-            });
-            enableToggleContainer.append(enableToggle);
-
             // Check properties that will be rendered before creating the accordion
             const base = [...this.base, ...localPath];
 
             const explicitlyRequired = schema.required?.includes(name) ?? false;
-
-            Object.assign(enableToggle, {
-                type: "checkbox",
-                checked: true,
-                style: "margin-right: 10px; pointer-events:all;",
-            });
 
             const headerName = header(info.title ?? name);
 
@@ -1096,8 +1098,6 @@ export class JSONSchemaForm extends LitElement {
             const __disabledResolved = isGlobalEffect ? __disabledGlobal : __disabled;
 
             const isDisabled = !!__disabledResolved[name];
-
-            enableToggle.checked = !isDisabled;
 
             const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
 
@@ -1151,13 +1151,43 @@ export class JSONSchemaForm extends LitElement {
 
             const oldStates = this.#accordions[headerName];
 
+            const disableText = "Skip";
+            const enableText = "Enable";
+
+            const disabledPath = [...path, "__disabled"];
+            const interactedPath = [...disabledPath, "__interacted"];
+
+            const enableToggle = new Button({
+                label: isDisabled ? enableText : disableText,
+                size: "extra-small",
+                onClick: (ev) => {
+                    ev.stopPropagation();
+
+                    const willEnable = enableToggle.label === enableText;
+
+                    // Reset parameters on interaction
+                    isGlobalEffect = false;
+
+                    enableToggle.label = willEnable ? disableText : enableText;
+
+                    willEnable ? enable() : disable();
+                    this.updateData([...interactedPath, name], true, true);
+
+                    this.onUpdate(localPath, this.results[name]);
+                },
+            });
+
+            // const enableToggle = document.createElement("input");
+            const enableToggleContainer = document.createElement("div");
+            Object.assign(enableToggleContainer.style, { position: "relative" });
+            enableToggleContainer.append(enableToggle);
+            Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
+
             const accordion = (this.#accordions[headerName] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
                 subtitle: html`<div style="display:flex; align-items: center;">
-                    ${explicitlyRequired ? "" : enableToggleContainer}${renderableInside.length
-                        ? `${hasPatternProperties ? "Dynamic" : renderableInside.length} fields`
-                        : ""}
+                    ${explicitlyRequired ? "" : enableToggleContainer}
                 </div>`,
                 content: this.#nestedForms[name],
 
@@ -1169,23 +1199,20 @@ export class JSONSchemaForm extends LitElement {
 
             accordion.id = name; // assign name to accordion id
 
-            // Set enable / disable behavior
-            const addDisabled = (name, parentObject) => {
-                if (!parentObject.__disabled) parentObject.__disabled = {};
-
-                // Do not overwrite cache of disabled values (with globals, for instance)
-                if (parentObject.__disabled[name]) {
-                    if (isGlobalEffect) return;
-                }
-
-                parentObject.__disabled[name] = parentObject[name] ?? (parentObject[name] = {}); // Track disabled values (or at least something)
-            };
-
             const disable = () => {
                 accordion.disabled = true;
-                addDisabled(name, this.resolved);
-                addDisabled(name, this.results);
-                this.resolved[name] = this.results[name] = undefined; // Remove entry from results
+
+                const target = this.results;
+                const value = target[name] ?? {};
+
+                let update = true;
+                if (target.__disabled?.[name] && isGlobalEffect) update = false;
+
+                // Disabled path is set to actual value
+                if (update) this.updateData([...disabledPath, name], value);
+
+                // Actual data is set to undefined
+                this.updateData(localPath, undefined);
 
                 this.checkStatus();
             };
@@ -1194,43 +1221,19 @@ export class JSONSchemaForm extends LitElement {
                 accordion.disabled = false;
 
                 const { __disabled = {} } = this.results;
-                const { __disabled: resolvedDisabled = {} } = this.resolved;
 
-                if (__disabled[name]) this.updateData(localPath, __disabled[name]); // Propagate restored disabled values
-                __disabled[name] = undefined; // Clear disabled value
-                resolvedDisabled[name] = undefined; // Clear disabled value
+                // Actual value is restored to the cached value
+                if (__disabled[name]) this.updateData(localPath, __disabled[name]);
+
+                // Cached value is cleared
+                this.updateData([...disabledPath, name], undefined);
 
                 this.checkStatus();
             };
 
-            enableToggle.addEventListener("click", (clickEvent) => {
-                clickEvent.stopPropagation();
-                const { checked } = clickEvent.target;
-
-                // Reset parameters on interaction
-                isGlobalEffect = false;
-                Object.assign(enableToggle.style, {
-                    accentColor: "unset",
-                });
-
-                const { __disabled = {} } = this.results;
-                const { __disabled: resolvedDisabled = {} } = this.resolved;
-
-                if (!__disabled.__interacted) __disabled.__interacted = {};
-                if (!resolvedDisabled.__interacted) resolvedDisabled.__interacted = {};
-
-                __disabled.__interacted[name] = resolvedDisabled.__interacted[name] = true; // Track that the user has interacted with the form
-
-                checked ? enable() : disable();
-
-                this.onUpdate(localPath, this.results[name]);
-            });
-
             if (isGlobalEffect) {
                 isDisabled ? disable() : enable();
-                Object.assign(enableToggle.style, {
-                    accentColor: "gray",
-                });
+                Object.assign(enableToggle.style, { accentColor: "gray" });
             }
 
             return accordion;
