@@ -94,6 +94,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ophys) {
 
+        ophys.required = Object.keys(ophys.properties)
+
         const getProp = (name: string) => ophys.properties[name]
 
         if (getProp("TwoPhotonSeries")) {

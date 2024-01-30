@@ -64,12 +64,12 @@ export class Accordion extends LitElement {
                 justify-content: space-between;
                 flex-wrap: nowrap;
                 user-select: none;
-                background-color: rgb(240, 240, 240);
+                background-color: rgb(235, 235, 235);
                 box-shadow: 0 5px 2px -2px silver;
             }
 
             .guided--nav-bar-section > * {
-                padding: 5px 15px 5px 10px;
+                padding: 3px 15px 3px 10px;
             }
 
             .guided--nav-bar-dropdown.active {
@@ -164,7 +164,6 @@ export class Accordion extends LitElement {
     updated() {
         if (!this.content) return;
         this.toggle(!!this.open);
-        console.log(this)
     }
 
     setStatus = (status) => {
