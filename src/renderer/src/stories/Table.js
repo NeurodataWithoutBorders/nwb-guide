@@ -293,7 +293,6 @@ export class Table extends LitElement {
 
             const runThisValidator = async (value, row, prop) => {
                 try {
-
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
                               k,

@@ -38,7 +38,7 @@ const propsToIgnore = {
             unit: true,
             control: true,
             comments: true,
-            control_description: true
+            control_description: true,
         },
         ImagingPlane: {
             [imagingPlaneKey]: true,
@@ -83,7 +83,7 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     beforeSave = () => {
-        console.log(this.localState.results, this.info.globalState.results)
+        console.log(this.localState.results, this.info.globalState.results);
         merge(this.localState.results, this.info.globalState.results);
     };
 
@@ -122,7 +122,7 @@ export class GuidedMetadataPage extends ManagedPage {
         super.connectedCallback();
 
         // Provide HARDCODED global schema for metadata properties (not automatically abstracting across sessions)...
-        const schema = preprocessMetadataSchema(undefined, true)
+        const schema = preprocessMetadataSchema(undefined, true);
 
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Metadata",
@@ -505,13 +505,10 @@ export class GuidedMetadataPage extends ManagedPage {
                         this.beforeSave = () => {
                             const { subject, session } = getInfoFromId(id);
 
-                            const local = this.localState.results[subject][session]
-                            const global = this.info.globalState.results[subject][session]
+                            const local = this.localState.results[subject][session];
+                            const global = this.info.globalState.results[subject][session];
 
-                            merge(
-                                local,
-                                global
-                            );
+                            merge(local, global);
 
                             this.notify(`Session ${id} metadata saved!`);
                         };
