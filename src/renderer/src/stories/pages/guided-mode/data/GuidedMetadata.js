@@ -64,7 +64,7 @@ const propsToIgnore = {
     NWBFile: {
         session_id: true,
         source_script: true,
-        source_script_file_name: true
+        source_script_file_name: true,
     },
 };
 
@@ -271,7 +271,6 @@ export class GuidedMetadataPage extends ManagedPage {
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
             renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
-
                 if (name === "TwoPhotonSeries" && (!this.value || !this.value.length)) return null;
 
                 const isAdditional = isAdditionalProperties(this.pattern);
