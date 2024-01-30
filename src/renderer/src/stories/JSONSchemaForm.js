@@ -23,7 +23,7 @@ const encode = (str) => {
 
 const additionalPropPattern = "additional";
 
-const provideNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
+const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
@@ -378,8 +378,8 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    validateSchema = async (resolved, schema, name) => {
-        return await validator
+    validateSchema = (resolved, schema, name) => {
+        return validator
             .validate(resolved, schema)
             .errors.map((e) => {
                 const propName = e.path.slice(-1)[0] ?? name ?? e.property;
@@ -399,8 +399,8 @@ export class JSONSchemaForm extends LitElement {
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN") return;
-                    else e.message = `${e.message}. ${provideNaNMessage}`;
+                    if ((resolvedValue === "NaN") | (resolvedValue === null)) return;
+                    else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
                 }
 
                 const prevHeader = name ? header(name) : "Row";
@@ -422,7 +422,7 @@ export class JSONSchemaForm extends LitElement {
         const copy = structuredClone(resolved);
         delete copy.__disabled;
 
-        const result = await this.validateSchema(copy, this.schema);
+        const result = this.validateSchema(copy, this.schema);
 
         const resolvedErrors = this.#resolveErrors(result, this.base, resolved);
 
@@ -815,7 +815,7 @@ export class JSONSchemaForm extends LitElement {
         const skipValidation = !this.validateEmptyValues && value === undefined;
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
-        const jsonSchemaErrors = validateArgs.length === 2 ? await this.validateSchema(...validateArgs, name) : [];
+        const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
 
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
 
@@ -860,9 +860,16 @@ export class JSONSchemaForm extends LitElement {
                 // Throw at least a basic warning if a non-linked property is required and missing
                 if (!hasLinks && isRequired) {
                     if (this.validateEmptyValues) {
+                        const rowName = pathToValidate.slice(-1)[0];
+                        const isRow = typeof rowName === "number";
+
                         errors.push({
                             message: `${schema.title ?? header(name)} ${this.#isARequiredPropertyString}. ${
-                                schema.type === "number" ? provideNaNMessage : ""
+                                schema.type === "number"
+                                    ? isRow
+                                        ? templateNaNMessage
+                                        : "<br><small>Use the 'I Don't Know' checkbox if unsure.</small>"
+                                    : ""
                             }`,
                             type: "error",
                             missing: true,
