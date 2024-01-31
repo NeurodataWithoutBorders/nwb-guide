@@ -53,7 +53,7 @@ export const connect = () => {
     output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null })
     const pages = await output.browser.pages()
     output.page = pages[0]
-  }, sleepBeforeQuery + 1000)
+  }, sleepBeforeQuery + 5000)
 
   afterAll(async () => {
     if (output.browser) await output.browser.close() // Will also exit the Electron instance
