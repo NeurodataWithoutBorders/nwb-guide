@@ -14,7 +14,7 @@ export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
 
   const handleOutput = (data) => {
-    if (data.includes('WINDOW READY FOR TESTING'))  resolve(true)
+    if (data.includes('WINDOW READY FOR TESTING')) setTimeout(() => resolve(true), 1000)
     else console.log(`[electron] ${data}`)
   }
 
