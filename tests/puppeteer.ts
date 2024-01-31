@@ -23,7 +23,7 @@ const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
   process.stderr.on('data', handleOutput);
   process.on('close', (code) => console.log(`[electron] Exited with code ${code}`));
   await sleep(timeout) // Wait for five seconds for Electron to open
-  
+
   reject('Failed to open Electron window successfully.')
 })
 
