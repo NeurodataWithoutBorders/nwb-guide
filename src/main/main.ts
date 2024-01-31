@@ -395,6 +395,8 @@ app.on('activate', () => {
 
 const root = runByTestSuite ? path.join(paths.root, '.test') : paths.root
 
+if (runByTestSuite) onWindowReady(() => console.log('WINDOW READY FOR TESTING'))
+
 
 const homeDirectory = app.getPath("home");
 const appDirectory = path.join(homeDirectory, root)
