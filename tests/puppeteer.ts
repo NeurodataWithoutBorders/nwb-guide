@@ -14,8 +14,8 @@ export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
 
   const handleOutput = (data) => {
-    if (data.includes('WINDOW READY FOR TESTING')) setTimeout(() => resolve(true), 1000)
-    else console.log(`[electron] ${data}`)
+    if (data.includes('WINDOW READY FOR TESTING')) resolve(true)
+    console.log(`[electron] ${data}`)
   }
 
   const process = exec('npm run start') // Run Start Script from package.json
@@ -23,6 +23,8 @@ const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
   process.stderr.on('data', handleOutput);
   process.on('close', (code) => console.log(`[electron] Exited with code ${code}`));
   await sleep(timeout) // Wait for five seconds for Electron to open
+
+  console.log('timed out')
   reject()
 })
 
@@ -32,7 +34,7 @@ type BrowserTestOutput = {
   browser?: puppeteer.Browser,
 }
 
-const timeout = 10 * 1000 // Wait for five seconds for Electron to open
+const timeout = 60 * 1000 // Wait for 1 minute for Electron to open (mostly for Windows)
 
 export const connect = () => {
 
@@ -43,6 +45,8 @@ export const connect = () => {
   beforeAll(async () => {
 
     await beforeStart(timeout)
+    
+    
 
     // Ensure Electron will exit gracefully
     const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
