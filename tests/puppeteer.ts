@@ -45,8 +45,8 @@ export const connect = () => {
   beforeAll(async () => {
 
     await beforeStart(timeout)
-    
-    
+
+
 
     // Ensure Electron will exit gracefully
     const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
