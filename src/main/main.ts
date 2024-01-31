@@ -402,8 +402,7 @@ const guidedProgressFilePath = path.join(appDirectory, ...paths.subfolders.progr
 const guidedConversionFolderPath = path.join(appDirectory, ...paths.subfolders.conversions);
 const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.preview);
 
-if (runByTestSuite) fs.rmdirSync(appDirectory, { recursive: true }) // Clear the test directory if it exists
-
+if (runByTestSuite && fs.existsSync(appDirectory)) fs.rmSync(appDirectory, { recursive: true }) // Clear the test directory if it exists
 
 function getEntries(path, type = 'isDirectory') {
   if (!fs.existsSync(path)) return []
