@@ -3,7 +3,7 @@ import { afterAll, beforeAll, expect, describe, vi, test } from 'vitest'
 
 import * as puppeteer from 'puppeteer'
 
-import { spawn } from 'child_process'
+import { exec } from 'child_process'
 import { electronDebugPort } from './globals'
 
 export const sharePort = 1234
@@ -18,13 +18,10 @@ const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
     else console.log(`[electron] ${data}`)
   }
 
-  console.log('Spawning Electron application')
-  const process = spawn('npm', ['run', 'start']) // Run Start Script from package.json
+  const process = exec('npm run start') // Run Start Script from package.json
   process.stdout.on('data', handleOutput);
   process.stderr.on('data', handleOutput);
   process.on('close', (code) => console.log(`[electron] Exited with code ${code}`));
-
-  console.log('Waiting for the application to open...')
   await sleep(timeout) // Wait for five seconds for Electron to open
   reject()
 })
@@ -35,7 +32,7 @@ type BrowserTestOutput = {
   browser?: puppeteer.Browser,
 }
 
-const timeout = 20 * 1000 // Wait for five seconds for Electron to open
+const timeout = 10 * 1000 // Wait for five seconds for Electron to open
 
 export const connect = () => {
 
@@ -52,9 +49,6 @@ export const connect = () => {
         mockExit.mockRestore()
     });
 
-
-    console.log('Deriving Electron Connection Details')
-
     const browserURL = `http://localhost:${electronDebugPort}`
     const browser = output.browser = await puppeteer.launch({ headless: 'new' })
     const page = output.page = await browser.newPage();
@@ -65,15 +59,11 @@ export const connect = () => {
     delete output.page
 
     // Connect to browser WS Endpoint
-    console.log('Connecting to Electron Instance via Websockets')
     const browserWSEndpoint = endpoint.replace('localhost', '0.0.0.0')
     output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null })
 
-    console.log('Grabbing the first Electron page')
     const pages = await output.browser.pages()
     output.page = pages[0]
-
-    console.log('Successfully connected to Electron!')
 
   }, timeout + 1000)
 
