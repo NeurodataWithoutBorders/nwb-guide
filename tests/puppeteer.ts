@@ -18,14 +18,13 @@ const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
     console.log(`[electron] ${data}`)
   }
 
-  const process = exec('npm run start') // Run Start Script from package.json
+  const process = exec('npm start') // Run Start Script from package.json
   process.stdout.on('data', handleOutput);
   process.stderr.on('data', handleOutput);
   process.on('close', (code) => console.log(`[electron] Exited with code ${code}`));
   await sleep(timeout) // Wait for five seconds for Electron to open
-
-  console.log('timed out')
-  reject()
+  
+  reject('Failed to open Electron window successfully.')
 })
 
 type BrowserTestOutput = {
