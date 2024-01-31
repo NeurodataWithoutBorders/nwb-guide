@@ -17,7 +17,7 @@ describe('E2E Test', () => {
     test('Ensure number of test pipelines starts at zero', async () => {
       const page = references.page
       const nPipelines = await page.evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
-      // await page.screenshot({ path: join(screenshotPath, 'test.png'), fullPage: true });
+      await page.screenshot({ path: join(screenshotPath, 'test.png'), fullPage: true });
       expect(nPipelines).toBe(0)
     })
 
