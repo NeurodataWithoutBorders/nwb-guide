@@ -18,7 +18,7 @@ const beforeStart = async (startupTime) => {
   process.stdout.on('data', (data) =>  console.log(`[electron] ${data}`));
   process.stderr.on('data', (data) => console.error(`[electron] ${data}`));
   process.on('close', (code) => console.log(`[electron] Exited with code ${code}`));
-  
+
   console.log('Waiting for the application to open...')
   await sleep(startupTime) // Wait for five seconds for Electron to open
 }
