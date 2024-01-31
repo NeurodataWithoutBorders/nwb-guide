@@ -11,7 +11,15 @@ export const sharePort = 1234
 export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 
-const beforeStart = async () => spawn('npm', ['run', 'start']) // Run Start Script from package.json
+const beforeStart = async (startupTime) => {
+  const process = spawn('npm', ['run', 'start']) // Run Start Script from package.json
+
+  process.stdout.on('data', (data) =>  console.log(`[electron] ${data}`));
+  process.stderr.on('data', (data) => console.error(`[electron] ${data}`));
+  process.on('close', (code) => console.log(`[electron] Exited with code ${code}`));
+
+  await sleep(startupTime) // Wait for five seconds for Electron to open
+}
 
 type BrowserTestOutput = {
   info?: any
@@ -29,15 +37,12 @@ export const connect = () => {
 
   beforeAll(async () => {
 
-    beforeStart()
+    await beforeStart(sleepBeforeQuery)
 
     // Ensure Electron will exit gracefully
     const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
         mockExit.mockRestore()
     });
-
-
-    await sleep(sleepBeforeQuery) // Wait for five seconds for Electron to open
 
     const browserURL = `http://localhost:${electronDebugPort}`
     const browser = output.browser = await puppeteer.launch({ headless: 'new' })
@@ -53,7 +58,7 @@ export const connect = () => {
     output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null })
     const pages = await output.browser.pages()
     output.page = pages[0]
-  }, sleepBeforeQuery + 5000)
+  }, sleepBeforeQuery + 1000)
 
   afterAll(async () => {
     if (output.browser) await output.browser.close() // Will also exit the Electron instance

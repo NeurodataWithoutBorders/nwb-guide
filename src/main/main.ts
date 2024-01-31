@@ -406,6 +406,7 @@ if (runByTestSuite) fs.rmdirSync(appDirectory, { recursive: true }) // Clear the
 
 
 function getEntries(path, type = 'isDirectory') {
+  if (!fs.existsSync(path)) return []
   return fs.readdirSync(path, { withFileTypes: true })
   .filter(dirent => dirent[type]())
   .map(dirent => dirent.name)
