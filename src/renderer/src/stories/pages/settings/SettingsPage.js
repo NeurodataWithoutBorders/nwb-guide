@@ -142,7 +142,6 @@ export class SettingsPage extends Page {
     };
 
     generateTestData = async () => {
-
         await run(
             "generate",
             {
@@ -175,8 +174,8 @@ export class SettingsPage extends Page {
 
         this.notify(`Test dataset successfully generated at ${output_path}!`);
 
-        return output_path
-    }
+        return output_path;
+    };
 
     beforeSave = async () => {
         const { resolved } = this.form;
@@ -251,7 +250,7 @@ export class SettingsPage extends Page {
                         : new Button({
                               label: "Generate Test Dataset",
                               onClick: async () => {
-                                  const output_path = await this.generateTestData()
+                                  const output_path = await this.generateTestData();
                                   if (shell) shell.showItemInFolder(output_path);
                                   this.requestUpdate();
                               },
