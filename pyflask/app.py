@@ -21,7 +21,7 @@ from flask import Flask, request, send_from_directory, send_file
 from flask_cors import CORS
 from flask_restx import Api, Resource
 
-from apis import startup_api, neuroconv_api, tutorial_api
+from apis import startup_api, neuroconv_api, data_api
 from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 app = Flask(__name__)
@@ -57,7 +57,7 @@ api = Api(
 )
 api.add_namespace(startup_api)
 api.add_namespace(neuroconv_api)
-api.add_namespace(tutorial_api)
+api.add_namespace(data_api)
 api.init_app(app)
 
 registered = {}

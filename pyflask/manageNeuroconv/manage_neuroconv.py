@@ -13,7 +13,7 @@ from shutil import rmtree, copytree
 from pathlib import Path
 
 from sse import MessageAnnouncer
-from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, TUTORIAL_SAVE_FOLDER_PATH
+from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
 
@@ -572,23 +572,24 @@ def listen_to_neuroconv_events():
         yield msg
 
 
-def generate_dataset(test_data_directory_path: str):
-    base_path = Path(test_data_directory_path)
-    output_directory = TUTORIAL_SAVE_FOLDER_PATH / "Dataset"
+def generate_dataset(input_path: str, output_path: str):
+    
+    base_path = Path(input_path)
+    output_path = Path(output_path)
 
-    if TUTORIAL_SAVE_FOLDER_PATH.exists():
-        rmtree(TUTORIAL_SAVE_FOLDER_PATH)
+    if output_path.exists():
+        rmtree(output_path)
 
     subjects = ["mouse1", "mouse2"]
 
-    sessions = ["070623", "060623"]
+    sessions = ["Session1", "Session2"]
 
-    base_id = "Noise4Sam"
+    base_id = "Session1"
 
     for subject in subjects:
         for session in sessions:
             full_id = f"{subject}_{session}"
-            session_output_directory = output_directory / subject / full_id
+            session_output_directory = output_path / subject / full_id
             spikeglx_base_directory = base_path / "spikeglx" / f"{base_id}_g0"
             phy_base_directory = base_path / "phy" / "phy_example_0"
 
@@ -613,7 +614,7 @@ def generate_dataset(test_data_directory_path: str):
 
             phy_output_dir.symlink_to(phy_base_directory, True)
 
-    return {"output_directory": str(output_directory)}
+    return { "output_path": str(output_path) }
 
 
 def inspect_nwb_file(payload):
@@ -762,7 +763,7 @@ userNotes=
     return meta_structure
 
 
-def generate_tutorial_data(base_path: str):
+def generate_test_data(output_path: str):
     """
     Autogenerate the data formats needed for the tutorial pipeline.
 
@@ -772,7 +773,7 @@ def generate_tutorial_data(base_path: str):
     from spikeinterface.preprocessing import bandpass_filter
     from spikeinterface.exporters import export_to_phy
 
-    base_path = Path(base_path)
+    base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
     phy_output_folder = base_path / "phy"
 
