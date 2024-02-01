@@ -3,6 +3,7 @@
 
 dist
 out
+tests/screenshots
 
 coverage
 
