@@ -38,7 +38,7 @@ describe('E2E Test', () => {
     })
 
     pipelineDescribeFn('Generate and run pipeline from YAML file', () => {
-    
+
       test('Can create test pipelines', async ( ) => {
         const page = references.page
 
@@ -53,7 +53,7 @@ describe('E2E Test', () => {
             const page = dashboard.page
             const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
             folderInput.updateData(testDataPath)
-            
+
             const button = folderInput.nextSibling
             await button.onClick()
 
@@ -77,7 +77,7 @@ describe('E2E Test', () => {
       })
 
       test.skip('Can navigate entirely through the pipeline without interaction', async ( ) => {
-        
+
       })
 
     })
@@ -85,7 +85,7 @@ describe('E2E Test', () => {
     pipelineDescribeFn('Run full pipeline from scratch', () => {
 
       test.skip('Create a new pipeline by specifying a name', async ( ) => {
-        
+
       })
 
     })
