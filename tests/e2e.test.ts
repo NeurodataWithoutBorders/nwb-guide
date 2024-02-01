@@ -21,6 +21,8 @@ const testDataPath = join(guideRootPath, 'test-data')
 
 const hasTestPath = existsSync(testDataPath)
 
+const pipelineDescribeFn = hasTestPath ? describe : describe.skip
+
 describe('E2E Test', () => {
 
     const references = connect()
@@ -47,4 +49,50 @@ describe('E2E Test', () => {
 
     })
 
+
+    // NOTE: The following code is dependent on the presence of test data on the user's computer
+    pipelineDescribeFn('Generate and run pipeline from YAML file', () => {
+
+      test('Can create test pipelines', async ( ) => {
+        const page = references.page
+
+        await page.evaluate(async (testDataPath) => {
+
+            // Transition to settings page
+            const dashboard = document.querySelector('nwb-dashboard')
+            dashboard.sidebar.select('settings')
+            await new Promise(resolve => setTimeout(resolve, 200))
+
+            // Genereate test pipelines
+            const page = dashboard.page
+            const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
+            folderInput.updateData(testDataPath)
+
+            const button = folderInput.nextSibling
+            await button.onClick()
+
+            page.save()
+        }, testDataPath)
+
+        // Take image after pipeline generation
+        await page.screenshot({ path: join(screenshotPath, 'generate.png'), fullPage: true });
+
+        // Transiton back to conversions page and count pipelines
+        const nPipelines = await page.evaluate(async () => {
+          const dashboard = document.querySelector('nwb-dashboard')
+          dashboard.sidebar.select('/')
+          await new Promise(resolve => setTimeout(resolve, 200))
+          return document.getElementById('guided-div-resume-progress-cards').children.length
+        })
+
+        // Assert new pipeline count
+        expect(nPipelines).toBe(Object.keys(testingSuiteYaml.pipelines).length)
+
+      })
+
+      test.skip('Can navigate entirely through the pipeline without interaction', async ( ) => {
+
+      })
+
+    })
 })
