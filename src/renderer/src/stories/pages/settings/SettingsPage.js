@@ -25,6 +25,9 @@ import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
 import { run } from "../guided-mode/options/utils.js";
 import { joinPath } from "../../../globals.js";
 
+const dataOutputPath = joinPath(testDataFolderPath, "data");
+const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
+
 const propertiesToTransform = ["folder_path", "file_path"];
 
 function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
@@ -138,6 +141,43 @@ export class SettingsPage extends Page {
         return (this.#notification = this.notify(message, type));
     };
 
+    generateTestData = async () => {
+
+        await run(
+            "generate",
+            {
+                output_path: dataOutputPath,
+            },
+            {
+                title: "Generating test data",
+                html: "<small>This will take ~1min to complete.</small>",
+                base: "data",
+            }
+        ).catch((error) => {
+            this.notify(error.message, "error");
+            throw error;
+        });
+
+        const { output_path } = await run(
+            "generate/dataset",
+            {
+                input_path: dataOutputPath,
+                output_path: datasetOutputPath,
+            },
+            {
+                title: "Generating test dataset",
+                base: "data",
+            }
+        ).catch((error) => {
+            this.notify(error.message, "error");
+            throw error;
+        });
+
+        this.notify(`Test dataset successfully generated at ${output_path}!`);
+
+        return output_path
+    }
+
     beforeSave = async () => {
         const { resolved } = this.form;
         setUndefinedIfNotDeclared(schema.properties, resolved);
@@ -192,9 +232,6 @@ export class SettingsPage extends Page {
             testFolderInput.after(generatePipelineButton);
         }, 100);
 
-        const dataOutputPath = joinPath(testDataFolderPath, "data");
-        const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
-
         return html`
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
@@ -214,39 +251,8 @@ export class SettingsPage extends Page {
                         : new Button({
                               label: "Generate Test Dataset",
                               onClick: async () => {
-                                  await run(
-                                      "generate",
-                                      {
-                                          output_path: dataOutputPath,
-                                      },
-                                      {
-                                          title: "Generating test data",
-                                          html: "<small>This will take ~1min to complete.</small>",
-                                          base: "data",
-                                      }
-                                  ).catch((error) => {
-                                      this.notify(error.message, "error");
-                                      throw error;
-                                  });
-
-                                  const { output_path } = await run(
-                                      "generate/dataset",
-                                      {
-                                          input_path: dataOutputPath,
-                                          output_path: datasetOutputPath,
-                                      },
-                                      {
-                                          title: "Generating test dataset",
-                                          base: "data",
-                                      }
-                                  ).catch((error) => {
-                                      this.notify(error.message, "error");
-                                      throw error;
-                                  });
-
-                                  this.notify(`Test dataset successfully generated at ${output_path}!`);
+                                  const output_path = await this.generateTestData()
                                   if (shell) shell.showItemInFolder(output_path);
-
                                   this.requestUpdate();
                               },
                           })}
