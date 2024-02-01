@@ -51,15 +51,15 @@ export const run = async (url, payload, options = {}) => {
         const container = document.createElement("div");
         container.append(loader);
 
-        const notDisplayed = element.style.display === 'none'
-        
+        const notDisplayed = element.style.display === "none";
+
         Object.assign(element.style, {
-            marginTop: notDisplayed ? '' : '0',
-            display: 'unset'
-        })
+            marginTop: notDisplayed ? "" : "0",
+            display: "unset",
+        });
 
         Object.assign(container.style, {
-            marginTop: notDisplayed ? '' : '25px',
+            marginTop: notDisplayed ? "" : "25px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -73,7 +73,7 @@ export const run = async (url, payload, options = {}) => {
     }
 
     if (!("base" in options)) options.base = "/neuroconv";
-    if (options.base[0] !== '/') options.base = `/${options.base}`
+    if (options.base[0] !== "/") options.base = `/${options.base}`;
 
     // Clear private keys from being passed
     payload = sanitize(structuredClone(payload));

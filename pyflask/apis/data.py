@@ -46,9 +46,8 @@ class GenerateDataset(Resource):
     def post(self):
         try:
             arguments = generate_test_dataset_parser.parse_args()
-            return generate_dataset(input_path=arguments['input_path'], output_path=arguments['output_path'])
+            return generate_dataset(input_path=arguments["input_path"], output_path=arguments["output_path"])
 
         except Exception as exception:
             if notBadRequestException(exception):
                 data_api.abort(500, str(exception))
-
