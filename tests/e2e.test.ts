@@ -40,7 +40,7 @@ describe('E2E Test', () => {
     describe('Generate tutorial data and manually run through the pipeline', () => {
 
       test.skip('Create tutorial dataset', async ( ) => {
-        
+
       })
 
       test.skip('Create new pipeline by specifying a name', async ( ) => {
