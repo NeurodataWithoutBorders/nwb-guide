@@ -21,6 +21,14 @@ import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
 import preloadUrl from './../preload/preload.js?asset'
 
+const runByTestSuite = !!process.env.VITEST
+
+// Enable remote debugging port for Vitest
+if (runByTestSuite) {
+  app.commandLine.appendSwitch('remote-debugging-port', `${8315}`) // Mirrors the global electronDebugPort variable
+  app.commandLine.appendSwitch('remote-allow-origins', '*') // Allow all remote origins
+}
+
 // autoUpdater.channel = "latest";
 
 /*************************************************************
@@ -35,6 +43,8 @@ const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
 const PYINSTALLER_NAME = "nwb-guide"
 
 const isWindows = process.platform === 'win32'
+
+
 
 
 let pyflaskProcess: any = null;
@@ -383,13 +393,21 @@ app.on('activate', () => {
 })
 
 
+const root = runByTestSuite ? path.join(paths.root, '.test') : paths.root
+
+if (runByTestSuite) onWindowReady(() => console.log('WINDOW READY FOR TESTING'))
+
+
 const homeDirectory = app.getPath("home");
-const appDirectory = path.join(homeDirectory, paths.root)
+const appDirectory = path.join(homeDirectory, root)
 const guidedProgressFilePath = path.join(appDirectory, ...paths.subfolders.progress);
 const guidedConversionFolderPath = path.join(appDirectory, ...paths.subfolders.conversions);
 const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.preview);
 
+if (runByTestSuite && fs.existsSync(appDirectory)) fs.rmSync(appDirectory, { recursive: true }) // Clear the test directory if it exists
+
 function getEntries(path, type = 'isDirectory') {
+  if (!fs.existsSync(path)) return []
   return fs.readdirSync(path, { withFileTypes: true })
   .filter(dirent => dirent[type]())
   .map(dirent => dirent.name)
@@ -416,16 +434,17 @@ app.on("window-all-closed", () => {
 app.on("before-quit", async (ev: Event) => {
 
   ev.preventDefault()
+    if (!runByTestSuite) {
+    const { response } = await dialog
+    .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
+      type: "question",
+      buttons: ["Yes", "No"],
+      title: "Confirm",
+      message: "Any running process will be stopped. Are you sure you want to quit?",
+    })
 
-  const { response } = await dialog
-  .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
-    type: "question",
-    buttons: ["Yes", "No"],
-    title: "Confirm",
-    message: "Any running process will be stopped. Are you sure you want to quit?",
-  })
-
-  if (response !== 0) return // Skip quitting
+    if (response !== 0) return // Skip quitting
+  }
 
   try {
     globalShortcut.unregisterAll();

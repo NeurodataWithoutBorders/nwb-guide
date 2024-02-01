@@ -52,6 +52,11 @@ export class Button extends LitElement {
                 background-color: transparent;
                 box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset;
             }
+            .storybook-button--extra-small {
+                font-size: 10px;
+                padding: 7px 12px;
+            }
+
             .storybook-button--small {
                 font-size: 12px;
                 padding: 10px 16px;
