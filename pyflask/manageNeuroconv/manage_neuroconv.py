@@ -573,7 +573,7 @@ def listen_to_neuroconv_events():
 
 
 def generate_dataset(input_path: str, output_path: str):
-    
+
     base_path = Path(input_path)
     output_path = Path(output_path)
 
@@ -614,7 +614,7 @@ def generate_dataset(input_path: str, output_path: str):
 
             phy_output_dir.symlink_to(phy_base_directory, True)
 
-    return { "output_path": str(output_path) }
+    return {"output_path": str(output_path)}
 
 
 def inspect_nwb_file(payload):

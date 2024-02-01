@@ -263,6 +263,7 @@ class NWBToHTML(Resource):
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
 
+
 # Create an events endpoint
 # announcer.announce('test', 'publish')
 @neuroconv_api.route("/events", methods=["GET"])

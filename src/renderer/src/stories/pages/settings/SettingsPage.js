@@ -17,7 +17,6 @@ import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/in
 
 const { shell } = electron;
 
-
 import saveSVG from "../../assets/save.svg?raw";
 
 import { header } from "../../forms/utils";
@@ -193,8 +192,8 @@ export class SettingsPage extends Page {
             testFolderInput.after(generatePipelineButton);
         }, 100);
 
-        const dataOutputPath = joinPath(testDataFolderPath, 'data')
-        const datasetOutputPath = joinPath(testDataFolderPath, 'dataset')
+        const dataOutputPath = joinPath(testDataFolderPath, "data");
+        const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
 
         return html`
             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -203,46 +202,54 @@ export class SettingsPage extends Page {
                     <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
                 </div>
                 <div>
-                    ${fs.existsSync(datasetOutputPath) ? new Button({
-                        label: 'Delete Test Dataset',
-                        onClick: async () => {
-                            fs.rmSync(datasetOutputPath, { recursive: true })
-                            this.notify(`Test dataset successfully deleted from your system.`)
-                            this.requestUpdate()
-                        }
-                    }) : new Button({
-                            label: 'Generate Test Dataset',
-                            onClick: async () => {
-                                
-                                await run('generate', {
-                                    output_path: dataOutputPath
-                                }, {
-                                    title: 'Generating test data',
-                                    html: '<small>This will take ~1min to complete.</small>',
-                                    base: 'data'
-                                }).catch((error) => {
-                                    this.notify(error.message, "error");
-                                    throw error;
-                                });
+                    ${fs.existsSync(datasetOutputPath)
+                        ? new Button({
+                              label: "Delete Test Dataset",
+                              onClick: async () => {
+                                  fs.rmSync(datasetOutputPath, { recursive: true });
+                                  this.notify(`Test dataset successfully deleted from your system.`);
+                                  this.requestUpdate();
+                              },
+                          })
+                        : new Button({
+                              label: "Generate Test Dataset",
+                              onClick: async () => {
+                                  await run(
+                                      "generate",
+                                      {
+                                          output_path: dataOutputPath,
+                                      },
+                                      {
+                                          title: "Generating test data",
+                                          html: "<small>This will take ~1min to complete.</small>",
+                                          base: "data",
+                                      }
+                                  ).catch((error) => {
+                                      this.notify(error.message, "error");
+                                      throw error;
+                                  });
 
-                                const { output_path } = await run('generate/dataset', {
-                                    input_path: dataOutputPath,
-                                    output_path: datasetOutputPath
-                                }, {
-                                    title: 'Generating test dataset',
-                                    base: 'data'
-                                }).catch((error) => {
-                                    this.notify(error.message, "error");
-                                    throw error;
-                                });
-  
-                                this.notify(`Test dataset successfully generated at ${output_path}!`);
-                                if (shell) shell.showItemInFolder(output_path);
+                                  const { output_path } = await run(
+                                      "generate/dataset",
+                                      {
+                                          input_path: dataOutputPath,
+                                          output_path: datasetOutputPath,
+                                      },
+                                      {
+                                          title: "Generating test dataset",
+                                          base: "data",
+                                      }
+                                  ).catch((error) => {
+                                      this.notify(error.message, "error");
+                                      throw error;
+                                  });
 
-                                this.requestUpdate()
-                            }
-                        })
-                    }
+                                  this.notify(`Test dataset successfully generated at ${output_path}!`);
+                                  if (shell) shell.showItemInFolder(output_path);
+
+                                  this.requestUpdate();
+                              },
+                          })}
                 </div>
             </div>
             <hr />
