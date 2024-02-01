@@ -37,6 +37,20 @@ describe('E2E Test', () => {
       expect(nPipelines).toBe(0)
     })
 
+    describe('Generate tutorial data and manually run through the pipeline', () => {
+
+      test.skip('Create tutorial dataset', async ( ) => {
+        
+      })
+
+      test.skip('Create new pipeline by specifying a name', async ( ) => {
+
+      })
+
+    })
+
+
+    // NOTE: The following code is dependent on the presence of test data on the user's computer
     pipelineDescribeFn('Generate and run pipeline from YAML file', () => {
 
       test('Can create test pipelines', async ( ) => {
@@ -81,14 +95,4 @@ describe('E2E Test', () => {
       })
 
     })
-
-    pipelineDescribeFn('Run full pipeline from scratch', () => {
-
-      test.skip('Create a new pipeline by specifying a name', async ( ) => {
-
-      })
-
-    })
-
-
 })
