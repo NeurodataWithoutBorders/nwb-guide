@@ -31,10 +31,9 @@ const subjectSchema = getSubjectSchema();
 subjectSchema.additionalProperties = true;
 
 const subjectTableSchema = {
-    type: 'array',
-    items: subjectSchema
-}
-
+    type: "array",
+    items: subjectSchema,
+};
 
 export const Basic = BasicTableTemplate.bind({});
 Basic.args = {
