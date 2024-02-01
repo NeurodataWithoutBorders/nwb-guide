@@ -30,7 +30,11 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
     const resolvedSourceData = structuredClone(sourceData);
     Object.values(resolvedSourceData).forEach((info) => {
         propertiesToTransform.forEach((property) => {
-            if (info[property]) info[property] = path.join(rootFolder, info[property]);
+            if (info[property]) {
+                const fullPath = path.join(rootFolder, info[property]);
+                if (fs.existsSync(fullPath)) info[property] = fullPath;
+                else throw new Error("Source data not available for this pipeline.");
+            }
         });
     });
 
@@ -174,12 +178,35 @@ export class SettingsPage extends Page {
                 const { pipelines = {} } = testingSuiteYaml;
 
                 const pipelineNames = Object.keys(pipelines);
-                const nPipelines = pipelineNames.length;
-                pipelineNames
-                    .reverse()
-                    .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
 
-                this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
+                const resolved = pipelineNames.reverse().map((name) => {
+                    try {
+                        saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder);
+                        return true;
+                    } catch (e) {
+                        console.error(e);
+                        return name;
+                    }
+                });
+
+                const nSuccessful = resolved.reduce((acc, v) => (acc += v === true ? 1 : 0), 0);
+                const nFailed = resolved.length - nSuccessful;
+
+                if (nFailed) {
+                    const failDisplay =
+                        nFailed === 1
+                            ? `the <b>${resolved.find((v) => typeof v === "string")}</b> pipeline`
+                            : `${nFailed} pipelines`;
+                    this.#openNotyf(
+                        `<h4 style="margin-bottom: 0;">Generated ${nSuccessful} test pipelines.</h4><small>Could not find source data for ${failDisplay}.`,
+                        "warning"
+                    );
+                } else if (nSuccessful) this.#openNotyf(`Generated ${nSuccessful} test pipelines.`, "success");
+                else
+                    this.#openNotyf(
+                        `<h4 style="margin-bottom: 0;">Pipeline Generation Failed</h4><small>Could not find source data for any pipelines.</small>`,
+                        "error"
+                    );
             },
         });
 
