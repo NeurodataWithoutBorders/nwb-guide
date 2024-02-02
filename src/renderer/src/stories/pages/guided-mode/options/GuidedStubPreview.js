@@ -6,7 +6,7 @@ import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
 import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
-const { shell } = electron;
+const { ipcRenderer } = electron;
 
 export const getStubArray = (stubs) =>
     Object.values(stubs)
@@ -24,12 +24,9 @@ export class GuidedStubPreviewPage extends Page {
         controls: () =>
             html`<nwb-button
                 size="small"
-                @click=${() =>
-                    shell
-                        ? shell.showItemInFolder(
-                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((item) => item.file))
-                          )
-                        : ""}
+                @click=${() => {
+                    if (ipcRenderer) ipcRenderer.send('showItemInFolder', getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((item) => item.file)))
+                }}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
     };

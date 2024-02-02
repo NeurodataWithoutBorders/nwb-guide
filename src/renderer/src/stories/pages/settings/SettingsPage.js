@@ -12,10 +12,8 @@ import { Button } from "../../Button.js";
 import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
-import { appDirectory, notyf, testDataFolderPath } from "../../../dependencies/globals.js";
+import { notyf, testDataFolderPath } from "../../../dependencies/globals.js";
 import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/index.js";
-
-const { shell } = electron;
 
 import saveSVG from "../../assets/save.svg?raw";
 import folderSVG from "../../assets/folder_open.svg?raw";
@@ -256,25 +254,25 @@ export class SettingsPage extends Page {
                                       },
                                   }),
 
-                                  new Button({
-                                      icon: folderSVG,
-                                      label: "Open",
-                                      size: "small",
-                                      onClick: async () => {
-                                          if (shell) shell.showItemInFolder(datasetOutputPath);
-                                      },
-                                  }),
-                              ]
-                            : new Button({
-                                  label: "Generate",
-                                  icon: generateSVG,
-                                  size: "small",
-                                  onClick: async () => {
-                                      const output_path = await this.generateTestData();
-                                      if (shell) shell.showItemInFolder(output_path);
-                                      this.requestUpdate();
-                                  },
-                              })}
+                            new Button({
+                                icon: folderSVG,
+                                label: "Open",
+                                size: 'small',
+                                onClick: async () => {
+                                    if (electron.ipcRenderer) electron.ipcRenderer.send('showItemInFolder', datasetOutputPath);
+                                }
+                            })
+                        ]
+                        : new Button({
+                              label: "Generate",
+                              icon: generateSVG,
+                              size: 'small',
+                              onClick: async () => {
+                                  const output_path = await this.generateTestData();
+                                  if (electron.ipcRenderer) electron.ipcRenderer.send('showItemInFolder', output_path);
+                                  this.requestUpdate();
+                              },
+                          })}
                     </div>
                 </div>
             </div>
