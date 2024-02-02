@@ -25,7 +25,11 @@ export class GuidedStubPreviewPage extends Page {
             html`<nwb-button
                 size="small"
                 @click=${() => {
-                    if (ipcRenderer) ipcRenderer.send('showItemInFolder', getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((item) => item.file)))
+                    if (ipcRenderer)
+                        ipcRenderer.send(
+                            "showItemInFolder",
+                            getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((item) => item.file))
+                        );
                 }}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,

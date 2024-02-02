@@ -64,7 +64,11 @@ export class GuidedInspectorPage extends Page {
             html`<nwb-button
                 size="small"
                 @click=${() => {
-                    if (ipcRenderer) ipcRenderer.send('showItemInFolder', getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file)))
+                    if (ipcRenderer)
+                        ipcRenderer.send(
+                            "showItemInFolder",
+                            getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file))
+                        );
                 }}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
