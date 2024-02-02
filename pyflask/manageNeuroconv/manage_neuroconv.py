@@ -591,9 +591,7 @@ def generate_dataset(input_path: str, output_path: str):
             full_id = f"{subject}_{session}"
             session_output_directory = output_path / subject / full_id
             spikeglx_base_directory = base_path / "spikeglx" / f"{base_id}_g0"
-            phy_base_directory = base_path / "phy" / "phy_example_0"
-
-            # phy_base_directory.symlink_to(session_output_directory / f'{full_id}_phy', True)
+            phy_base_directory = base_path / "phy"
 
             spikeglx_output_dir = session_output_directory / f"{full_id}_g0"
             phy_output_dir = session_output_directory / f"{full_id}_phy"
@@ -614,7 +612,7 @@ def generate_dataset(input_path: str, output_path: str):
 
             phy_output_dir.symlink_to(phy_base_directory, True)
 
-    return {"output_path": str(output_path)}
+    return { "output_path": str(output_path) }
 
 
 def inspect_nwb_file(payload):

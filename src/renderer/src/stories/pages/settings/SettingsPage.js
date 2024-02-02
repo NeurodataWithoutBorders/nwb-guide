@@ -18,6 +18,9 @@ import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/in
 const { shell } = electron;
 
 import saveSVG from "../../assets/save.svg?raw";
+import folderSVG from "../../assets/folder_open.svg?raw";
+import deleteSVG from "../../assets/delete.svg?raw";
+import generateSVG from "../../assets/restart.svg?raw";
 
 import { header } from "../../forms/utils";
 
@@ -231,6 +234,7 @@ export class SettingsPage extends Page {
             testFolderInput.after(generatePipelineButton);
         }, 100);
 
+
         return html`
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
@@ -238,23 +242,41 @@ export class SettingsPage extends Page {
                     <p><b>Server File Location:</b> ${SERVER_FILE_PATH}</p>
                 </div>
                 <div>
+                <p style="font-weight: bold;">Test Dataset</p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
                     ${fs.existsSync(datasetOutputPath)
-                        ? new Button({
-                              label: "Delete Test Dataset",
-                              onClick: async () => {
-                                  fs.rmSync(datasetOutputPath, { recursive: true });
-                                  this.notify(`Test dataset successfully deleted from your system.`);
-                                  this.requestUpdate();
-                              },
-                          })
+                        ? [
+                            new Button({
+                                icon: deleteSVG,
+                                label: "Delete",
+                                size: 'small',
+                                onClick: async () => {
+                                    fs.rmSync(datasetOutputPath, { recursive: true });
+                                    this.notify(`Test dataset successfully deleted from your system.`);
+                                    this.requestUpdate();
+                                },
+                            }),
+
+                            new Button({
+                                icon: folderSVG,
+                                label: "Open",
+                                size: 'small',
+                                onClick: async () => {
+                                    if (shell) shell.showItemInFolder(datasetOutputPath);
+                                }
+                            })
+                        ]
                         : new Button({
-                              label: "Generate Test Dataset",
+                              label: "Generate",
+                              icon: generateSVG,
+                              size: 'small',
                               onClick: async () => {
                                   const output_path = await this.generateTestData();
                                   if (shell) shell.showItemInFolder(output_path);
                                   this.requestUpdate();
                               },
                           })}
+                    </div>
                 </div>
             </div>
             <hr />
