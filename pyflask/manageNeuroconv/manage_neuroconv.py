@@ -87,7 +87,9 @@ def replace_none_with_nan(json_object, json_schema):
                 elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
-                        obj[key] = (
+                        obj[
+                            key
+                        ] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -775,8 +777,9 @@ def generate_test_data(output_path: str):
     phy_output_folder = base_path / "phy"
 
     recording, sorting = generate_ground_truth_recording(
-        durations=[5.0], sampling_frequency=30_000.0, num_channels=385, num_units=200, seed=0
+        durations=[5.0], sampling_frequency=30_000.0, num_channels=385, dtype="float32", num_units=200, seed=0
     )
+    recording = (recording / 2.34375).astype(dtype="int16")
     artificial_lf_band = bandpass_filter(recording=recording, freq_min=300, freq_max=6000)
     waveform_extractor = extract_waveforms(recording=recording, sorting=sorting, mode="memory")
 
