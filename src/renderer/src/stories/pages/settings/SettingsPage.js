@@ -12,10 +12,8 @@ import { Button } from "../../Button.js";
 import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
-import { appDirectory, notyf, testDataFolderPath } from "../../../dependencies/globals.js";
+import { notyf, testDataFolderPath } from "../../../dependencies/globals.js";
 import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/index.js";
-
-const { shell } = electron;
 
 import saveSVG from "../../assets/save.svg?raw";
 import folderSVG from "../../assets/folder_open.svg?raw";
@@ -145,22 +143,24 @@ export class SettingsPage extends Page {
     };
 
     generateTestData = async () => {
-        await run(
-            "generate",
-            {
-                output_path: dataOutputPath,
-            },
-            {
-                title: "Generating test data",
-                html: "<small>This will take several minutes to complete.</small>",
-                base: "data",
-            }
-        ).catch((error) => {
-            this.notify(error.message, "error");
-            throw error;
-        });
+        if (!fs.existsSync(dataOutputPath)) {
+            await run(
+                "generate",
+                {
+                    output_path: dataOutputPath,
+                },
+                {
+                    title: "Generating test data",
+                    html: "<small>This will take several minutes to complete.</small>",
+                    base: "data",
+                }
+            ).catch((error) => {
+                this.notify(error.message, "error");
+                throw error;
+            });
+        }
 
-        const { output_path } = await run(
+        await run(
             "generate/dataset",
             {
                 input_path: dataOutputPath,
@@ -175,9 +175,9 @@ export class SettingsPage extends Page {
             throw error;
         });
 
-        this.notify(`Test dataset successfully generated at ${output_path}!`);
+        this.notify(`Test dataset successfully generated at ${datasetOutputPath}!`);
 
-        return output_path;
+        return datasetOutputPath;
     };
 
     beforeSave = async () => {
@@ -234,6 +234,8 @@ export class SettingsPage extends Page {
             testFolderInput.after(generatePipelineButton);
         }, 100);
 
+        const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
+
         return html`
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
@@ -243,14 +245,15 @@ export class SettingsPage extends Page {
                 <div>
                     <p style="font-weight: bold;">Test Dataset</p>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        ${fs.existsSync(datasetOutputPath)
+                        ${fs.existsSync(datasetOutputPath) && fs.existsSync(dataOutputPath)
                             ? [
                                   new Button({
                                       icon: deleteSVG,
                                       label: "Delete",
                                       size: "small",
                                       onClick: async () => {
-                                          fs.rmSync(datasetOutputPath, { recursive: true });
+                                          deleteIfExists(dataOutputPath);
+                                          deleteIfExists(datasetOutputPath);
                                           this.notify(`Test dataset successfully deleted from your system.`);
                                           this.requestUpdate();
                                       },
@@ -261,7 +264,14 @@ export class SettingsPage extends Page {
                                       label: "Open",
                                       size: "small",
                                       onClick: async () => {
-                                          if (shell) shell.showItemInFolder(datasetOutputPath);
+                                          if (electron.ipcRenderer) {
+                                              if (fs.existsSync(datasetOutputPath))
+                                                  electron.ipcRenderer.send("showItemInFolder", datasetOutputPath);
+                                              else {
+                                                  this.notify("The test dataset no longer exists!", "warning");
+                                                  this.requestUpdate();
+                                              }
+                                          }
                                       },
                                   }),
                               ]
@@ -271,7 +281,8 @@ export class SettingsPage extends Page {
                                   size: "small",
                                   onClick: async () => {
                                       const output_path = await this.generateTestData();
-                                      if (shell) shell.showItemInFolder(output_path);
+                                      if (electron.ipcRenderer)
+                                          electron.ipcRenderer.send("showItemInFolder", output_path);
                                       this.requestUpdate();
                                   },
                               })}
