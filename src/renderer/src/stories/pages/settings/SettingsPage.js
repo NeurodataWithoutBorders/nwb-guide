@@ -149,7 +149,7 @@ export class SettingsPage extends Page {
             },
             {
                 title: "Generating test data",
-                html: "<small>This will take ~1min to complete.</small>",
+                html: "<small>This will take several minutes to complete.</small>",
                 base: "data",
             }
         ).catch((error) => {
