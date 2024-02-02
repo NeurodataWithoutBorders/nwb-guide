@@ -87,7 +87,9 @@ def replace_none_with_nan(json_object, json_schema):
                 elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
-                        obj[key] = (
+                        obj[
+                            key
+                        ] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -573,7 +575,6 @@ def listen_to_neuroconv_events():
 
 
 def generate_dataset(input_path: str, output_path: str):
-
     base_path = Path(input_path)
     output_path = Path(output_path)
 
@@ -707,7 +708,7 @@ def _format_spikeglx_meta_file(bin_file_path: str) -> str:
     with open(file=bin_file_path, mode="rb") as io:
         file_sha1 = hashlib.sha1(string=io.read()).hexdigest().upper()
     file_size = bin_file_path.stat().st_size
-    file_time_seconds = file_size / (384 * 2)  # 384 channels with int16 itemsize
+    file_time_seconds = file_size / (385 * 2)  # 385 channels with int16 itemsize
 
     meta_structure = f"""acqApLfSy=384,384,1
 appVersion=20190327
@@ -776,7 +777,7 @@ def generate_test_data(output_path: str):
     phy_output_folder = base_path / "phy"
 
     recording, sorting = generate_ground_truth_recording(
-        sampling_frequency=30_000.0, num_channels=384, num_units=200, seed=0
+        sampling_frequency=30_000.0, num_channels=385, num_units=200, seed=0
     )
     artificial_lf_band = bandpass_filter(recording=recording, freq_min=300, freq_max=6000)
     waveform_extractor = extract_waveforms(recording=recording, sorting=sorting, mode="memory")
