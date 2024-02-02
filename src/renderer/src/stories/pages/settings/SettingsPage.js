@@ -254,25 +254,27 @@ export class SettingsPage extends Page {
                                       },
                                   }),
 
-                            new Button({
-                                icon: folderSVG,
-                                label: "Open",
-                                size: 'small',
-                                onClick: async () => {
-                                    if (electron.ipcRenderer) electron.ipcRenderer.send('showItemInFolder', datasetOutputPath);
-                                }
-                            })
-                        ]
-                        : new Button({
-                              label: "Generate",
-                              icon: generateSVG,
-                              size: 'small',
-                              onClick: async () => {
-                                  const output_path = await this.generateTestData();
-                                  if (electron.ipcRenderer) electron.ipcRenderer.send('showItemInFolder', output_path);
-                                  this.requestUpdate();
-                              },
-                          })}
+                                  new Button({
+                                      icon: folderSVG,
+                                      label: "Open",
+                                      size: "small",
+                                      onClick: async () => {
+                                          if (electron.ipcRenderer)
+                                              electron.ipcRenderer.send("showItemInFolder", datasetOutputPath);
+                                      },
+                                  }),
+                              ]
+                            : new Button({
+                                  label: "Generate",
+                                  icon: generateSVG,
+                                  size: "small",
+                                  onClick: async () => {
+                                      const output_path = await this.generateTestData();
+                                      if (electron.ipcRenderer)
+                                          electron.ipcRenderer.send("showItemInFolder", output_path);
+                                      this.requestUpdate();
+                                  },
+                              })}
                     </div>
                 </div>
             </div>
