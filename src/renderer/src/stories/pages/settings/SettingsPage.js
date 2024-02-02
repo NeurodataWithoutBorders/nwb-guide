@@ -143,7 +143,6 @@ export class SettingsPage extends Page {
     };
 
     generateTestData = async () => {
-
         if (!fs.existsSync(dataOutputPath)) {
             await run(
                 "generate",
@@ -161,8 +160,6 @@ export class SettingsPage extends Page {
             });
         }
 
-
-
         await run(
             "generate/dataset",
             {
@@ -177,7 +174,6 @@ export class SettingsPage extends Page {
             this.notify(error.message, "error");
             throw error;
         });
-
 
         this.notify(`Test dataset successfully generated at ${datasetOutputPath}!`);
 
@@ -238,7 +234,7 @@ export class SettingsPage extends Page {
             testFolderInput.after(generatePipelineButton);
         }, 100);
 
-        const deleteIfExists = (path) => fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : ''
+        const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
         return html`
             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -256,38 +252,40 @@ export class SettingsPage extends Page {
                                       label: "Delete",
                                       size: "small",
                                       onClick: async () => {
-                                        deleteIfExists(dataOutputPath);
-                                        deleteIfExists(datasetOutputPath);
+                                          deleteIfExists(dataOutputPath);
+                                          deleteIfExists(datasetOutputPath);
                                           this.notify(`Test dataset successfully deleted from your system.`);
                                           this.requestUpdate();
                                       },
                                   }),
 
-                            new Button({
-                                icon: folderSVG,
-                                label: "Open",
-                                size: 'small',
-                                onClick: async () => {
-                                    if (electron.ipcRenderer) {
-                                        if (fs.existsSync(datasetOutputPath)) electron.ipcRenderer.send('showItemInFolder', datasetOutputPath);
-                                        else {
-                                            this.notify('The test dataset no longer exists!', 'warning')
-                                            this.requestUpdate();
-                                        }
-                                    }
-                                }
-                            })
-                        ]
-                        : new Button({
-                              label: "Generate",
-                              icon: generateSVG,
-                              size: 'small',
-                              onClick: async () => {
-                                  const output_path = await this.generateTestData();
-                                  if (electron.ipcRenderer) electron.ipcRenderer.send('showItemInFolder', output_path);
-                                  this.requestUpdate();
-                              },
-                          })}
+                                  new Button({
+                                      icon: folderSVG,
+                                      label: "Open",
+                                      size: "small",
+                                      onClick: async () => {
+                                          if (electron.ipcRenderer) {
+                                              if (fs.existsSync(datasetOutputPath))
+                                                  electron.ipcRenderer.send("showItemInFolder", datasetOutputPath);
+                                              else {
+                                                  this.notify("The test dataset no longer exists!", "warning");
+                                                  this.requestUpdate();
+                                              }
+                                          }
+                                      },
+                                  }),
+                              ]
+                            : new Button({
+                                  label: "Generate",
+                                  icon: generateSVG,
+                                  size: "small",
+                                  onClick: async () => {
+                                      const output_path = await this.generateTestData();
+                                      if (electron.ipcRenderer)
+                                          electron.ipcRenderer.send("showItemInFolder", output_path);
+                                      this.requestUpdate();
+                                  },
+                              })}
                     </div>
                 </div>
             </div>
