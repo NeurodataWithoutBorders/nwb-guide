@@ -777,9 +777,10 @@ def generate_test_data(output_path: str):
     phy_output_folder = base_path / "phy"
 
     recording, sorting = generate_ground_truth_recording(
-        durations=[5.0], sampling_frequency=30_000.0, num_channels=385, dtype="float32", num_units=200, seed=0
+        durations=[5.0], sampling_frequency=30_000.0, num_channels=385, dtype="float32", num_units=100, seed=0
     )
-    recording = (recording / 2.34375).astype(dtype="int16")
+    recording.set_channel_gains(gains=2.34375)
+    recording = recording.astype(dtype="int16")
     artificial_lf_band = bandpass_filter(recording=recording, freq_min=300, freq_max=6000)
     waveform_extractor = extract_waveforms(recording=recording, sorting=sorting, mode="memory")
 
