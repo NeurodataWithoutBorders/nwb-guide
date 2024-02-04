@@ -87,7 +87,9 @@ def replace_none_with_nan(json_object, json_schema):
                 elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
-                        obj[key] = (
+                        obj[
+                            key
+                        ] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -766,21 +768,45 @@ def generate_test_data(output_path: str):
 
     Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy spiking data.
     """
-    from spikeinterface import generate_ground_truth_recording, write_binary_recording, extract_waveforms
-    from spikeinterface.preprocessing import bandpass_filter
+    import spikeinterface
+    from spikeinterface.extractors import NumpyRecording
     from spikeinterface.exporters import export_to_phy
 
     base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
     phy_output_folder = base_path / "phy"
 
-    recording, sorting = generate_ground_truth_recording(
-        durations=[5.0], sampling_frequency=30_000.0, num_channels=385, dtype="float32", num_units=100, seed=0
+    # Define NeuroPixel-like values for sampling rates and conversion factors
+    duration_in_s = 3.0
+    number_of_units = 50
+    number_of_channels = 385  # Have to include 'sync' channel to be proper SpikeGLX. TODO: artificiate sync pulses
+    ap_conversion_factor_to_uV = 2.34375
+    ap_sampling_frequency = 30_000.0
+    lf_sampling_frequency = 2_500.0
+    downsample_factor = int(ap_sampling_frequency / lf_sampling_frequency)
+
+    # Generate synthetic spiking and voltage traces with waveforms around them
+    artificial_ap_band, spiking = spikeinterface.generate_ground_truth_recording(
+        durations=[duration_in_s],
+        sampling_frequency=ap_sampling_frequency,
+        num_channels=number_of_channels,
+        dtype="float32",
+        num_units=number_of_units,
+        seed=0,  # Fixed seed for reproducibility
     )
-    recording.set_channel_gains(gains=2.34375)
-    recording = recording.astype(dtype="int16")
-    artificial_lf_band = bandpass_filter(recording=recording, freq_min=300, freq_max=6000)
-    waveform_extractor = extract_waveforms(recording=recording, sorting=sorting, mode="memory")
+    artificial_ap_band.set_channel_gains(gains=ap_conversion_factor_to_uV)
+    waveform_extractor = spikeinterface.extract_waveforms(recording=artificial_ap_band, sorting=spiking, mode="memory")
+    int16_artificial_ap_band = artificial_ap_band.astype(dtype="int16")
+
+    # Approximate behavior of LF band with filter and downsampling
+    # TODO: currently looks a little out of scale?
+    artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
+        recording=artificial_ap_band, freq_min=10, freq_max=300
+    )
+    int16_artificial_lf_band = NumpyRecording(
+        traces_list=artificial_lf_filter.get_traces()[::downsample_factor],
+        sampling_frequency=lf_sampling_frequency,
+    )
 
     ap_file_path = spikeglx_output_folder / "Session1_g0" / "Session1_g0_imec0" / "Session1_g0_t0.imec0.ap.bin"
     ap_meta_file_path = spikeglx_output_folder / "Session1_g0" / "Session1_g0_imec0" / "Session1_g0_t0.imec0.ap.meta"
@@ -789,8 +815,8 @@ def generate_test_data(output_path: str):
 
     # Make .bin files
     ap_file_path.parent.mkdir(parents=True, exist_ok=True)
-    write_binary_recording(recording=recording, file_paths=[ap_file_path])
-    write_binary_recording(recording=artificial_lf_band, file_paths=[lf_file_path])
+    spikeinterface.write_binary_recording(recording=int16_artificial_ap_band, file_paths=[ap_file_path])
+    spikeinterface.write_binary_recording(recording=int16_artificial_lf_band, file_paths=[lf_file_path])
 
     # Make .meta files
     ap_meta_content = _format_spikeglx_meta_file(bin_file_path=ap_file_path)
@@ -802,4 +828,6 @@ def generate_test_data(output_path: str):
         io.write(lf_meta_content)
 
     # Make Phy folder
-    export_to_phy(waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True)
+    export_to_phy(
+        waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
+    )
