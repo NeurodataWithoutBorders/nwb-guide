@@ -21,7 +21,7 @@ export class GuidedConversionOptionsPage extends Page {
             });
             this.info.globalState.stubs = results; // Save the preview results
 
-            this.to(1);
+            return this.to(1);
         },
     };
 

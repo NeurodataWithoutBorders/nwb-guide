@@ -365,7 +365,7 @@ export class JSONSchemaForm extends LitElement {
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
             ...Object.entries(this.#nestedForms)
                 .filter(([k, v]) => {
-                    const accordion = this.#accordions[k];
+                    const accordion = this.accordions[k];
                     return !accordion || !accordion.disabled;
                 })
                 .map(([_, v]) => v),
@@ -479,7 +479,7 @@ export class JSONSchemaForm extends LitElement {
 
         // Validate nested forms (skip disabled)
         for (let name in this.#nestedForms) {
-            const accordion = this.#accordions[name];
+            const accordion = this.accordions[name];
             if (!accordion || !accordion.disabled)
                 await this.#nestedForms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
@@ -640,7 +640,7 @@ export class JSONSchemaForm extends LitElement {
         for (let name in requirements) {
             let isRequired = this.#isRequired(name, requirements);
 
-            if (this.#accordions[name]?.disabled) continue; // Skip disabled accordions
+            if (this.accordions[name]?.disabled) continue; // Skip disabled accordions
 
             // // NOTE: Uncomment to block checking requirements inside optional properties
             // if (!requirements[name][selfRequiredSymbol] && !resolved[name]) continue; // Do not continue checking requirements if absent and not required
@@ -960,7 +960,7 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
-    #accordions = {};
+    accordions = {};
 
     #render = (schema, results, required = {}, ignore = {}, path = []) => {
         let isLink = Symbol("isLink");
@@ -1149,7 +1149,7 @@ export class JSONSchemaForm extends LitElement {
                 }));
             }
 
-            const oldStates = this.#accordions[headerName];
+            const oldStates = this.accordions[name];
 
             const disableText = "Skip";
             const enableText = "Enable";
@@ -1183,7 +1183,7 @@ export class JSONSchemaForm extends LitElement {
             enableToggleContainer.append(enableToggle);
             Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
 
-            const accordion = (this.#accordions[headerName] = new Accordion({
+            const accordion = (this.accordions[name] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
                 subtitle: html`<div style="display:flex; align-items: center;">

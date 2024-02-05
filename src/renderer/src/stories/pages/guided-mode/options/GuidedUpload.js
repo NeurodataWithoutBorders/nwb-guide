@@ -117,7 +117,7 @@ export class GuidedUploadPage extends Page {
                 project: globalState.project.name,
             });
 
-            this.to(1);
+            return this.to(1);
         },
     };
 

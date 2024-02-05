@@ -55,6 +55,10 @@ async function isOnline() {
 
   statusBar.items[1].status = true
 
+  const isTestEnvironment = globalThis?.process?.env?.VITEST
+
+  if (isTestEnvironment) return
+  
   notyf.open({
     type: "success",
     message: "Connected to the internet",

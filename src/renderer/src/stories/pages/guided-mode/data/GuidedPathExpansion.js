@@ -224,7 +224,7 @@ export class GuidedPathExpansionPage extends Page {
                 throw new Error(message);
             }
 
-            this.to(1);
+            return this.to(1);
         },
     };
 
@@ -269,7 +269,6 @@ export class GuidedPathExpansionPage extends Page {
         const state = structureState.state;
 
         this.optional.state = state;
-        if (state === undefined) infoBox.open = true; // Open the info box if no option has been selected
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
@@ -385,6 +384,8 @@ export class GuidedPathExpansionPage extends Page {
         this.optional.append(form);
 
         form.style.width = "100%";
+
+        this.scrollTop = '300px'
 
         return html`${this.dataManagementForm}${this.optional}`;
     }

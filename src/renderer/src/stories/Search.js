@@ -209,6 +209,7 @@ export class Search extends LitElement {
         });
 
         this.#initialize();
+        this.#populate();
     }
 
     onSelect = (id, value) => {};
@@ -238,6 +239,7 @@ export class Search extends LitElement {
         );
 
         if (!this.showAllWhenEmpty) this.setAttribute("active", false);
+
     };
 
     list = document.createElement("ul");
@@ -246,7 +248,7 @@ export class Search extends LitElement {
 
     #sortedCategories = [];
 
-    #populate = (input) => {
+    #populate = (input = this.value ?? "") => {
         const toShow = [];
 
         // Check if the input value matches the label
