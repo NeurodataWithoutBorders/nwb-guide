@@ -34,7 +34,7 @@ export class Button extends LitElement {
             }
 
             .with-icon {
-                margin-left: 10px;
+                margin-left: 5px;
             }
 
             svg {

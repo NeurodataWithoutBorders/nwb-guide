@@ -6,7 +6,7 @@ import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
 import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../preview/NWBFilePreview.js";
-const { shell } = electron;
+const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
 import { run } from "./utils.js";
 import { InspectorList } from "../../../preview/inspector/InspectorList.js";
@@ -63,12 +63,13 @@ export class GuidedInspectorPage extends Page {
             ...this.headerButtons,
             html`<nwb-button
                 size="small"
-                @click=${() =>
-                    shell
-                        ? shell.showItemInFolder(
-                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file))
-                          )
-                        : ""}
+                @click=${() => {
+                    if (ipcRenderer)
+                        ipcRenderer.send(
+                            "showItemInFolder",
+                            getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file))
+                        );
+                }}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
         ],

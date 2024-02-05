@@ -4,6 +4,6 @@
         "progress": ["pipelines"],
         "conversions": ["conversions"],
         "preview": ["preview"],
-        "tutorial": ["tutorial"]
+        "testdata": ["test-data"]
     }
 }
