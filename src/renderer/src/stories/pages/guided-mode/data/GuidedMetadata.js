@@ -184,7 +184,7 @@ export class GuidedMetadataPage extends ManagedPage {
             sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
         }
 
-        resolveResults(subject, session, globalState);
+        resolveMetadata(subject, session, globalState);
 
         const additionalPropertiesToRetitle = ["Ophys.ImageSegmentation"];
 
@@ -220,7 +220,6 @@ export class GuidedMetadataPage extends ManagedPage {
             );
         }
 
-        const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
         // Create the form
         const form = new JSONSchemaForm({

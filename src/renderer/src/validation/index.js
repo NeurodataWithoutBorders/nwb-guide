@@ -13,9 +13,8 @@ export async function validateOnChange(name, parent, path, value) {
     let functions = [];
 
     const fullPath = [...path, name];
-    const toIterate = fullPath; //fullPathNoRows // fullPath
 
-    const toIterate = fullPath; //fullPathNoRows // fullPath
+    const toIterate = fullPath;
 
     const copy = { ...parent }; // Validate on a copy of the parent
     if (arguments.length > 3) copy[name] = value; // Update value on copy
