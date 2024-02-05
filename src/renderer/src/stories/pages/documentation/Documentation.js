@@ -51,10 +51,10 @@ export class DocumentationPage extends Page {
 
                 <h3 style="padding: 0; margin-top: 25px;">Getting Started</h3>
                 <h4 style="margin-top: 0;">Converting your data</h4>
-                <p>Most users will want to start with the <a @click=${(ev) => {
+                <p>Most users will want to start by generating a <a @click=${(ev) => {
                     ev.preventDefault();
-                    this.to("tutorial");
-                }}>Tutorial</a> to learn how to use the NWB GUIDE.</p>
+                    this.to("settings");
+                }}>test dataset</a> to learn how to use the NWB GUIDE.</p>
                 <p>If you'd like to jump right in, head to the <a @click=${(ev) => {
                     ev.preventDefault();
                     this.to("/");
