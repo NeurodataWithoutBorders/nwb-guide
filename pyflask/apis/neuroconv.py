@@ -264,18 +264,6 @@ class NWBToHTML(Resource):
                 neuroconv_api.abort(500, str(exception))
 
 
-@neuroconv_api.route("/generate_dataset")
-class GenerateDataset(Resource):
-    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        try:
-            return generate_dataset(**neuroconv_api.payload)
-
-        except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
-
-
 # Create an events endpoint
 # announcer.announce('test', 'publish')
 @neuroconv_api.route("/events", methods=["GET"])

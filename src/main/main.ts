@@ -472,6 +472,10 @@ ipcMain.on("resize-window", (event, dir) => {
   globals.mainWindow.setSize(x, y);
 });
 
+ipcMain.on('showItemInFolder', function(event, fullPath) {
+  shell.showItemInFolder(fullPath);
+});
+
 // autoUpdater.on("update-available", () => {
 //   onWindowReady(win => send.call(win, "update_available"));
 // });
