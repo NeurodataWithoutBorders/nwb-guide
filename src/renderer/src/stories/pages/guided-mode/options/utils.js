@@ -45,12 +45,21 @@ export const run = async (url, payload, options = {}) => {
         }));
 
         const element = popup.getHtmlContainer();
+
         const actions = popup.getActions();
         const loader = actions.querySelector(".swal2-loader");
         const container = document.createElement("div");
         container.append(loader);
-        element.innerText = "";
+
+        const notDisplayed = element.style.display === "none";
+
+        Object.assign(element.style, {
+            marginTop: notDisplayed ? "" : "0",
+            display: "unset",
+        });
+
         Object.assign(container.style, {
+            marginTop: notDisplayed ? "" : "25px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -64,6 +73,7 @@ export const run = async (url, payload, options = {}) => {
     }
 
     if (!("base" in options)) options.base = "/neuroconv";
+    if (options.base[0] !== "/") options.base = `/${options.base}`;
 
     // Clear private keys from being passed
     payload = sanitize(structuredClone(payload));
