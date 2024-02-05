@@ -18,8 +18,6 @@ import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedI
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
-import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
-import tutorialIcon from "./stories/assets/exploration.svg?raw";
 import uploadIcon from "./stories/assets/dandi.svg?raw";
 import inspectIcon from "./stories/assets/inspect.svg?raw";
 import neurosiftIcon from "./stories/assets/neurosift-logo.svg?raw";
@@ -165,11 +163,6 @@ const pages = {
     uploads: new UploadsPage({
         label: "Upload",
         icon: uploadIcon,
-    }),
-    tutorial: new TutorialPage({
-        label: "Tutorial",
-        icon: tutorialIcon,
-        group: resourcesGroup,
     }),
     docs: new DocumentationPage({
         label: "Documentation",
