@@ -273,17 +273,13 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # Clear the Electrodes information for being set as a collection of Interfaces
     has_ecephys = "Ecephys" in metadata
-    if (has_ecephys):
+    if has_ecephys:
         metadata["Ecephys"]["Electrodes"] = {}
 
         ecephys_properties = schema["properties"]["Ecephys"]["properties"]
         original_electrodes_schema = ecephys_properties["Electrodes"]
 
-        ecephys_properties["Electrodes"] = {
-            "type": "object",
-            "properties": {}
-        }
-
+        ecephys_properties["Electrodes"] = {"type": "object", "properties": {}}
 
     defs = ecephys_properties["definitions"]
 
@@ -294,15 +290,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["Electrodes"]["properties"][name] = {
             "type": "array",
             "minItems": 0,
-            "items": {
-                "$ref": '#/properties/Ecephys/properties/definitions/Electrode'
-            },
+            "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
         }
 
         return recording_interface
 
     recording_interfaces = map_recording_interfaces(on_recording_interface, converter)
-
 
     # Delete Ecephys metadata if ElectrodeTable helper function is not available
     if has_ecephys:
@@ -315,17 +308,13 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             electrode_def = defs["Electrodes"]
 
             # NOTE: Update to output from NeuroConv
-            electrode_def["properties"]["dtype"] = {
-                "type": "string",
-                "enum": ["array", "int", "float", "bool", "str"]
-            }
+            electrode_def["properties"]["dtype"] = {"type": "string", "enum": ["array", "int", "float", "bool", "str"]}
 
             # Configure electrode columns
             # NOTE: Update to output ALL columns and associated dtypes...
             metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
             ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": electrode_def}
             ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(electrode_def["properties"].keys())
-
 
             new_electrodes_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -337,7 +326,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "properties": new_electrodes_properties,
                 "additionalProperties": True,  # Allow for new columns
             }
-                
 
     return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
 
@@ -487,16 +475,17 @@ def convert_to_nwb(info: dict) -> str:
         if run_stub_test
         else None
     )
-    
+
     if "Ecephys" not in info["metadata"]:
         info["metadata"].update(Ecephys=dict())
 
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
 
-
     ecephys_metadata = resolved_metadata["Ecephys"]
-    electrode_column_results = ecephys_metadata["ElectrodeColumns"] # NOTE: Need more specificity from the ElectrodeColumns (e.g. dtype, not always provided...)
+    electrode_column_results = ecephys_metadata[
+        "ElectrodeColumns"
+    ]  # NOTE: Need more specificity from the ElectrodeColumns (e.g. dtype, not always provided...)
 
     for interface_name, electrode_results in ecephys_metadata["Electrodes"].items():
         interface = converter.data_interface_objects[interface_name]
@@ -504,10 +493,8 @@ def convert_to_nwb(info: dict) -> str:
         # NOTE: Must have a method to update the electrode table
         # interface.update_electrode_table(electrode_table_json=electrode_results, electrode_column_info=electrode_column_results)
 
-
     # Update with the latest metadata for the electrodes
     ecephys_metadata["Electrodes"] = electrode_column_results
-
 
     ecephys_metadata.pop("ElectrodeColumns", dict())
 

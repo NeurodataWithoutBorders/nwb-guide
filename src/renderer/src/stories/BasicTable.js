@@ -214,13 +214,12 @@ export class BasicTable extends LitElement {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
-
         let result;
 
         const propInfo = this.#itemProps[col] ?? {};
         let inferredType = typeof value;
         let ogType;
-        let type = (ogType = propInfo.type || propInfo.data_type)
+        let type = (ogType = propInfo.type || propInfo.data_type);
 
         // Handle based on JSON Schema types
         if ("type" in propInfo) {
@@ -236,7 +235,7 @@ export class BasicTable extends LitElement {
             if (type.startsWith("bool")) type = "boolean";
             if (type.startsWith("str")) type = "string";
         }
-        
+
         // Check if required
         if (!value && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];

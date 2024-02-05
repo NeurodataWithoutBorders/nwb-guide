@@ -226,9 +226,8 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
             ...commonTableMetadata,
         };
 
-
         const table = this.renderTable(id, tableMetadata, fullPath);
-        
+
         return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
     };
 
@@ -272,7 +271,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         ...commonTableMetadata,
     };
-
 
     const table = (this.table = this.renderTable(name, tableMetadata, path)); // Try creating table. Otherwise use nested form
 
@@ -886,7 +884,7 @@ export class JSONSchemaInput extends LitElement {
                     });
                 }
 
-                const externalPath = this.form ? [...this.form.base, ...resolvedFullPath] : resolvedFullPath
+                const externalPath = this.form ? [...this.form.base, ...resolvedFullPath] : resolvedFullPath;
 
                 const table = createTable.call(this, externalPath, {
                     onUpdate: updateFunction,
@@ -1033,7 +1031,6 @@ export class JSONSchemaInput extends LitElement {
                 @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
             />`;
         } else if (schema.type === "string" || schema.type === "number" || schema.type === "integer") {
-            
             const isInteger = schema.type === "integer";
             if (isInteger) schema.type = "number";
             const isNumber = schema.type === "number";

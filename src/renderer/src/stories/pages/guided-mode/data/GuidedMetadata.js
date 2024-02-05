@@ -58,8 +58,7 @@ const propsToIgnore = {
     Ecephys: {
         UnitProperties: true,
         ElectricalSeriesLF: true,
-        ElectricalSeriesAP: true
-
+        ElectricalSeriesAP: true,
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)
@@ -169,7 +168,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const schema = preprocessMetadataSchema(globalState.schema.metadata[subject][session]);
         delete schema.description;
 
-        const ephys = schema.properties.Ecephys
+        const ephys = schema.properties.Ecephys;
 
         resolveMetadata(subject, session, globalState);
 
