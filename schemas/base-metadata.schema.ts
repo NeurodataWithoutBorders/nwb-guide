@@ -34,6 +34,10 @@ function getSpeciesInfo(species: any[][] = []) {
 
 }
 
+const propsToInclude = {
+    ecephys: ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"]
+}
+
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
@@ -89,8 +93,18 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     // Override description of keywords
     nwbProps.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
 
-
+    const ecephys = copy.properties.Ecephys
     const ophys = copy.properties.Ophys
+
+    if (ecephys) {
+
+        // Change rendering order for electrode table columns
+        const electrodesProp = ecephys.properties["Electrodes"]
+        for (let name in electrodesProp.properties) {
+            electrodesProp.properties[name].items.order = ["channel_name", "group_name", "shank_electrode_number"];
+        }
+
+    }
 
     if (ophys) {
 

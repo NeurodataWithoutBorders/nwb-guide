@@ -113,11 +113,12 @@ schema.Ecephys.ElectrodeColumns = {
         const name = parent['name']
         if (!name) return true // Allow blank rows
 
-        if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
-            const element = rerender.call(this, ['Ecephys', 'Electrodes'])
-            element.schema.properties[name] = {} // Ensure property is present in the schema now
-            element.data.forEach(row => name in row ? undefined : row[name] = '') // Set column value as blank if not existent on row
-        }
+        // NOTE: Reimplement across all separate tables...
+        // if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
+        //     const element = rerender.call(this, ['Ecephys', 'Electrodes'])
+        //     element.schema.properties[name] = {} // Ensure property is present in the schema now
+        //     element.data.forEach(row => name in row ? undefined : row[name] = '') // Set column value as blank if not existent on row
+        // }
     }
     }
 }

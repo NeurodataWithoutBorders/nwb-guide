@@ -230,12 +230,17 @@ def get_source_schema(interface_class_dict: dict) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def get_first_recording_interface(converter):
+def map_recording_interfaces(callback, converter):
     from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
 
-    for interface in converter.data_interface_objects.values():
+    output = []
+
+    for name, interface in converter.data_interface_objects.items():
         if isinstance(interface, BaseRecordingExtractorInterface):
-            return interface
+            result = callback(name, interface)
+            output.append(result)
+
+    return output
 
 
 def is_supported_recording_interface(recording_interface, metadata):
@@ -250,7 +255,7 @@ def is_supported_recording_interface(recording_interface, metadata):
         recording_interface
         and recording_interface.get_electrode_table_json
         and metadata["Ecephys"].get("Electrodes")
-        and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
+        # and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
     )
 
 
@@ -266,41 +271,73 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     schema = converter.get_metadata_schema()
     metadata = converter.get_metadata()
 
-    # recording_interface = get_first_recording_interface(converter)
+    # Clear the Electrodes information for being set as a collection of Interfaces
+    has_ecephys = "Ecephys" in metadata
+    if (has_ecephys):
+        metadata["Ecephys"]["Electrodes"] = {}
 
-    # if is_supported_recording_interface(recording_interface, metadata):
-    #     metadata["Ecephys"]["Electrodes"] = recording_interface.get_electrode_table_json()
+        ecephys_properties = schema["properties"]["Ecephys"]["properties"]
+        original_electrodes_schema = ecephys_properties["Electrodes"]
 
-    #     # Get Electrode metadata
-    #     ecephys_properties = schema["properties"]["Ecephys"]["properties"]
-    #     original_electrodes_schema = ecephys_properties["Electrodes"]
+        ecephys_properties["Electrodes"] = {
+            "type": "object",
+            "properties": {}
+        }
 
-    #     new_electrodes_properties = {
-    #         properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-    #         for properties in original_electrodes_schema["default"]
-    #     }
 
-    #     ecephys_properties["Electrodes"] = {
-    #         "type": "array",
-    #         "minItems": 0,
-    #         "items": {
-    #             "type": "object",
-    #             "properties": new_electrodes_properties,
-    #             "additionalProperties": True,  # Allow for new columns
-    #         },
-    #     }
+    defs = ecephys_properties["definitions"]
 
-    #     metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
-    #     defs = ecephys_properties["definitions"]
+    def on_recording_interface(name, recording_interface):
 
-    #     ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": defs["Electrodes"]}
-    #     ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(defs["Electrodes"]["properties"].keys())
-    #     del defs["Electrodes"]
+        metadata["Ecephys"]["Electrodes"][name] = recording_interface.get_electrode_table_json()
 
-    # # Delete Ecephys metadata if ElectrodeTable helper function is not available
-    # else:
-    if "Ecephys" in schema["properties"]:
-        schema["properties"].pop("Ecephys", dict())
+        ecephys_properties["Electrodes"]["properties"][name] = {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+                "$ref": '#/properties/Ecephys/properties/definitions/Electrode'
+            },
+        }
+
+        return recording_interface
+
+    recording_interfaces = map_recording_interfaces(on_recording_interface, converter)
+
+
+    # Delete Ecephys metadata if ElectrodeTable helper function is not available
+    if has_ecephys:
+        if len(recording_interfaces) == 0:
+            schema["properties"].pop("Ecephys", dict())
+
+        else:
+
+            defs = ecephys_properties["definitions"]
+            electrode_def = defs["Electrodes"]
+
+            # NOTE: Update to output from NeuroConv
+            electrode_def["properties"]["dtype"] = {
+                "type": "string",
+                "enum": ["array", "int", "float", "bool", "str"]
+            }
+
+            # Configure electrode columns
+            # NOTE: Update to output ALL columns and associated dtypes...
+            metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
+            ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": electrode_def}
+            ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(electrode_def["properties"].keys())
+
+
+            new_electrodes_properties = {
+                properties["name"]: {key: value for key, value in properties.items() if key != "name"}
+                for properties in original_electrodes_schema["default"]
+            }
+
+            defs["Electrode"] = {
+                "type": "object",
+                "properties": new_electrodes_properties,
+                "additionalProperties": True,  # Allow for new columns
+            }
+                
 
     return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
 
@@ -450,30 +487,29 @@ def convert_to_nwb(info: dict) -> str:
         if run_stub_test
         else None
     )
-
-    # Update the first recording interface with Ecephys table data
-    # This will be refactored after the ndx-probe-interface integration
-    # recording_interface = get_first_recording_interface(converter)
-
+    
     if "Ecephys" not in info["metadata"]:
         info["metadata"].update(Ecephys=dict())
 
-    resolved_metadata = replace_none_with_nan(
-        info["metadata"], resolve_references(converter.get_metadata_schema())
-    )  # Ensure Ophys NaN values are resolved
+    # Ensure Ophys NaN values are resolved
+    resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
 
-    # if is_supported_recording_interface(recording_interface, info["metadata"]):
-    #     electrode_column_results = ecephys_metadata["ElectrodeColumns"]
-    #     electrode_results = ecephys_metadata["Electrodes"]
 
-    #     recording_interface.update_electrode_table(
-    #         electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
-    #     )
+    ecephys_metadata = resolved_metadata["Ecephys"]
+    electrode_column_results = ecephys_metadata["ElectrodeColumns"] # NOTE: Need more specificity from the ElectrodeColumns (e.g. dtype, not always provided...)
 
-    #     # Update with the latest metadata for the electrodes
-    #     ecephys_metadata["Electrodes"] = electrode_column_results
+    for interface_name, electrode_results in ecephys_metadata["Electrodes"].items():
+        interface = converter.data_interface_objects[interface_name]
 
-    # ecephys_metadata.pop("ElectrodeColumns", dict())
+        # NOTE: Must have a method to update the electrode table
+        # interface.update_electrode_table(electrode_table_json=electrode_results, electrode_column_info=electrode_column_results)
+
+
+    # Update with the latest metadata for the electrodes
+    ecephys_metadata["Electrodes"] = electrode_column_results
+
+
+    ecephys_metadata.pop("ElectrodeColumns", dict())
 
     # Actually run the conversion
     converter.run_conversion(

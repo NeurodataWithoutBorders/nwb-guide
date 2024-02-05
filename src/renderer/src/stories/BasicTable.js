@@ -214,12 +214,13 @@ export class BasicTable extends LitElement {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
+
         let result;
 
         const propInfo = this.#itemProps[col] ?? {};
-        let thisTypeOf = typeof value;
+        let inferredType = typeof value;
         let ogType;
-        let type = (ogType = propInfo.type || propInfo.data_type);
+        let type = (ogType = propInfo.type || propInfo.data_type)
 
         // Handle based on JSON Schema types
         if ("type" in propInfo) {
@@ -227,21 +228,22 @@ export class BasicTable extends LitElement {
             if (type === "integer") type = "number";
 
             // Convert to json schema type
-            if (Array.isArray(value)) thisTypeOf = "array";
-            if (value == undefined) thisTypeOf = "null";
+            if (Array.isArray(value)) inferredType = "array";
+            if (value == undefined) inferredType = "null";
         } else if ("data_type" in propInfo) {
             if (type.includes("array")) type = "array";
             if (type.includes("int") || type.includes("float")) type = "number";
             if (type.startsWith("bool")) type = "boolean";
             if (type.startsWith("str")) type = "string";
         }
-
+        
         // Check if required
-        if (!value && "required" in this.#itemSchema.required.includes(col))
+        if (!value && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
-        // If not required, check matching types for values that are defined
-        else if (value !== "" && thisTypeOf !== type)
-            result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
+        // If not required, check matching types (if provided) for values that are defined
+        else if (value !== "" && type && inferredType !== type) {
+            result = [{ message: `${col} is expected to be of type ${ogType}, not ${inferredType}`, type: "error" }];
+        }
         // Otherwise validate using the specified onChange function
         else result = this.validateOnChange(col, parent, value, this.#itemProps[col]);
 
