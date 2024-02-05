@@ -12,7 +12,7 @@ import { Button } from "../../Button.js";
 import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
-import { notyf, testDataFolderPath } from "../../../dependencies/globals.js";
+import { homeDirectory, notyf, testDataFolderPath } from "../../../dependencies/globals.js";
 import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/index.js";
 
 import saveSVG from "../../assets/save.svg?raw";
@@ -30,6 +30,8 @@ const dataOutputPath = joinPath(testDataFolderPath, "data");
 const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
 
 const propertiesToTransform = ["folder_path", "file_path"];
+
+const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
 function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
     const subjectId = "mouse1";
@@ -146,6 +148,11 @@ export class SettingsPage extends Page {
         return (this.#notification = this.notify(message, type));
     };
 
+    deleteTestData = () => {
+        deleteIfExists(dataOutputPath);
+        deleteIfExists(datasetOutputPath);
+    }
+
     generateTestData = async () => {
         if (!fs.existsSync(dataOutputPath)) {
             await run(
@@ -179,7 +186,9 @@ export class SettingsPage extends Page {
             throw error;
         });
 
-        this.notify(`Test dataset successfully generated at ${datasetOutputPath}!`);
+        const sanitizedOutputPath = datasetOutputPath.replace(homeDirectory, '~')
+
+        this.notify(`Test dataset successfully generated at ${sanitizedOutputPath}!`);
 
         return datasetOutputPath;
     };
@@ -261,8 +270,6 @@ export class SettingsPage extends Page {
             testFolderInput.after(generatePipelineButton);
         }, 100);
 
-        const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
-
         return html`
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
@@ -279,8 +286,7 @@ export class SettingsPage extends Page {
                                       label: "Delete",
                                       size: "small",
                                       onClick: async () => {
-                                          deleteIfExists(dataOutputPath);
-                                          deleteIfExists(datasetOutputPath);
+                                          this.deleteTestData()
                                           this.notify(`Test dataset successfully deleted from your system.`);
                                           this.requestUpdate();
                                       },

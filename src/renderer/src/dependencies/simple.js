@@ -10,25 +10,25 @@ export const reloadPageToHome = () => {
 // Filesystem Management
 const root = globalThis?.process?.env?.VITEST ? joinPath(paths.root, ".test") : paths.root;
 export const homeDirectory = app?.getPath("home") ?? "";
-export const appDirectory = homeDirectory ? joinPath(homeDirectory, root) : "";
-export const guidedProgressFilePath = homeDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
+export const appDirectory = homeDirectory ? joinPath(homeDirectory, root) : root;
+export const guidedProgressFilePath = appDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
 
-export const previewSaveFolderPath = homeDirectory
-    ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.preview)
+export const previewSaveFolderPath = appDirectory
+    ? joinPath(appDirectory, ...paths.subfolders.preview)
     : "";
-export const conversionSaveFolderPath = homeDirectory
-    ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.conversions)
+export const conversionSaveFolderPath = appDirectory
+    ? joinPath(appDirectory, ...paths.subfolders.conversions)
     : "";
 
-export const testDataFolderPath = homeDirectory
-    ? joinPath(homeDirectory, paths["root"], ...paths.subfolders.testdata)
+export const testDataFolderPath = appDirectory
+    ? joinPath(appDirectory, ...paths.subfolders.testdata)
     : "";
 
 // Encryption
 const IV_LENGTH = 16;
 const KEY_LENGTH = 32;
-export const ENCRYPTION_KEY = homeDirectory
-    ? Buffer.concat([Buffer.from(homeDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH)
+export const ENCRYPTION_KEY = appDirectory
+    ? Buffer.concat([Buffer.from(appDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH)
     : null;
 
 export const ENCRYPTION_IV = crypto ? crypto.randomBytes(IV_LENGTH) : null;
