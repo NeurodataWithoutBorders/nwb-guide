@@ -367,9 +367,7 @@ export class BasicTable extends LitElement {
         this.#updateRendered();
 
         const entries = this.#itemProps;
-        for (let key in this.ignore) delete entries[key];
-        for (let key in this.ignore["*"] ?? {}) delete entries[key];
-
+  
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 

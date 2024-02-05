@@ -224,9 +224,6 @@ export class Table extends LitElement {
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
-        for (let key in this.ignore) delete entries[key];
-        for (let key in this.ignore["*"] ?? {}) delete entries[key];
-
         // Add existing additional properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties) {
             Object.values(this.data).reduce((acc, v) => {
@@ -298,7 +295,7 @@ export class Table extends LitElement {
                 try {
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
-                              [k],
+                              k,
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
                               value,
                               info
