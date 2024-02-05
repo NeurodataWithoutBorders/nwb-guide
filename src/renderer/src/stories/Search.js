@@ -239,7 +239,6 @@ export class Search extends LitElement {
         );
 
         if (!this.showAllWhenEmpty) this.setAttribute("active", false);
-
     };
 
     list = document.createElement("ul");

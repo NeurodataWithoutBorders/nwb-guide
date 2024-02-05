@@ -26,7 +26,7 @@ const regenerateTestData = false
 
 
 beforeAll(() => {
-  
+
   if (regenerateTestData) {
     if (existsSync(testRootPath)) rmSync(testRootPath, {recursive: true})
   } else {
@@ -73,7 +73,7 @@ describe('E2E Test', () => {
         // Transition to settings page
         const dashboard = document.querySelector('nwb-dashboard')
         dashboard.sidebar.select('settings')
-  
+
         // Genereate test data
         const page = dashboard.page
         page.deleteTestData()
@@ -82,7 +82,7 @@ describe('E2E Test', () => {
 
       // Take image after dataset generation
       await takeScreenshot('dataset-creation', 500)
-  
+
       expect(existsSync(outputLocation)).toBe(true)
 
     }, 2 * 60 * 1000) // Allow two minutes to create dataset
@@ -104,7 +104,7 @@ describe('E2E Test', () => {
       pageId = await page.evaluate(async () => {
         const dashboard = document.querySelector('nwb-dashboard')
         await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
+        return dashboard.page.info.id
       })
 
       await takeScreenshot('intro-page', 300)
@@ -114,7 +114,7 @@ describe('E2E Test', () => {
       pageId = await page.evaluate(async () => {
         const dashboard = document.querySelector('nwb-dashboard')
         await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
+        return dashboard.page.info.id
       })
 
       await takeScreenshot('info-page', 300)
@@ -125,7 +125,7 @@ describe('E2E Test', () => {
        pageId = await page.evaluate(async () => {
         const dashboard = document.querySelector('nwb-dashboard')
         await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
+        return dashboard.page.info.id
       })
 
       expect(pageId).toBe('//details')
@@ -149,7 +149,7 @@ describe('E2E Test', () => {
       pageId = await page.evaluate(async () => {
         const dashboard = document.querySelector('nwb-dashboard')
         await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
+        return dashboard.page.info.id
       })
 
       expect(pageId).toBe('//structure')
@@ -238,11 +238,11 @@ describe('E2E Test', () => {
 
         dashboard.main.querySelector('main > section').scrollTop = 100
 
-      }, 
+      },
       testInterfaceInfo,
       join(testRootPath, 'test-data', 'dataset')
       )
-      
+
 
       await takeScreenshot('pathexpansion-completed', 300)
 

@@ -34,7 +34,7 @@ export async function pythonServerOpened() {
    activateServer()
 
     if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
-    
+
     const isTestEnvironment = globalThis?.process?.env?.VITEST
     if (isTestEnvironment) return
 
