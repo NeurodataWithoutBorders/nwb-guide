@@ -167,9 +167,10 @@ export class FilesystemSelector extends LitElement {
             // const path = file.filePath ?? file.filePaths?.[0];
             this.#handleFiles(results.filePath ?? results.filePaths, type);
         } else {
-            let handles = await (type === "directory"
-                ? window.showDirectoryPicker()
-                : window.showOpenFilePicker({ multiple: this.multiple })
+            let handles = await (
+                type === "directory"
+                    ? window.showDirectoryPicker()
+                    : window.showOpenFilePicker({ multiple: this.multiple })
             ).catch(() => []); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map(({ name }) => name) : handles.name;
@@ -183,6 +184,7 @@ export class FilesystemSelector extends LitElement {
         const isMultipleTypes = Array.isArray(this.type);
         this.setAttribute("manytypes", isMultipleTypes);
         const isArray = Array.isArray(this.value);
+
         const len = isArray ? this.value.length : 0;
 
         if (isArray) {
@@ -251,7 +253,7 @@ export class FilesystemSelector extends LitElement {
                                         >`
                                   : ""}`}
                 </button>
-                ${this.multiple && this.value.length > 1
+                ${this.multiple && isArray && this.value.length > 1
                     ? new List({
                           items: this.value.map((v) => ({ value: v })),
                           editable: false,

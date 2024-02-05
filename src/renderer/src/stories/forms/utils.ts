@@ -21,7 +21,7 @@ export const textToArray = (value: string) => value.split("\n")
     export const replaceRefsWithValue = (
         schema: any,
         path: string[] = [],
-        parent: { [x:string]: any } = schema
+        parent: { [x:string]: any } = structuredClone(schema)
     ) => {
 
         if (schema && typeof schema === "object" && !Array.isArray(schema)) {
@@ -35,7 +35,8 @@ export const textToArray = (value: string) => value.split("\n")
                     if (internalCopy["$ref"]) {
                         const prevItem = path.slice(-1)[0];
                         const resolved = parent.properties.definitions?.[prevItem];
-                        copy[propName] = resolved;
+                        if (resolved) copy[propName] = resolved;
+                        else delete copy[propName]
                     } else {
                         for (let key in internalCopy) {
                             const fullPath = [...path, propName, key];

@@ -81,13 +81,17 @@ export class GuidedSubjectsPage extends Page {
 
     connectedCallback() {
         super.connectedCallback();
+
+        const schema = preprocessMetadataSchema(undefined, true).properties.Subject;
+
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Subject Metadata",
             key: "Subject",
-            schema: preprocessMetadataSchema(undefined, true).properties.Subject,
+            validateEmptyValues: false,
+            schema,
             formProps: {
-                validateOnChange: (key, parent, path) => {
-                    return validateOnChange(key, parent, ["Subject", ...path]);
+                validateOnChange: (localPath, parent, path) => {
+                    return validateOnChange(localPath, parent, ["Subject", ...path]);
                 },
             },
         }));
@@ -114,7 +118,10 @@ export class GuidedSubjectsPage extends Page {
         }
 
         this.table = new Table({
-            schema: getSubjectSchema(),
+            schema: {
+                type: "array",
+                items: getSubjectSchema(),
+            },
             data: subjects,
             globals: this.info.globalState.project.Subject,
             keyColumn: "subject_id",
@@ -129,8 +136,8 @@ export class GuidedSubjectsPage extends Page {
             onUpdate: () => {
                 this.unsavedUpdates = "conversions";
             },
-            validateOnChange: (key, parent, v) => {
-                if (key.slice(-1)[0] === "sessions") {
+            validateOnChange: (localPath, parent, v) => {
+                if (localPath.slice(-1)[0] === "sessions") {
                     if (v?.length) return true;
                     else {
                         return [
@@ -142,7 +149,7 @@ export class GuidedSubjectsPage extends Page {
                     }
                 } else {
                     delete parent.sessions; // Delete sessions from parent copy
-                    return validateOnChange(key, parent, ["Subject"], v);
+                    return validateOnChange(localPath, parent, ["Subject"], v);
                 }
             },
         });

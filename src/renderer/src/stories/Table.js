@@ -201,18 +201,34 @@ export class Table extends LitElement {
     onOverride = () => {};
     onThrow = () => {};
 
+    #schema = {};
+    #itemSchema = {};
+    #itemProps = {};
+
+    get schema() {
+        return this.#schema;
+    }
+
+    set schema(schema) {
+        this.#schema = schema;
+        this.#itemSchema = schema.items;
+        this.#itemProps = { ...this.#itemSchema.properties };
+    }
+
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
 
         const unresolved = (this.unresolved = {});
 
-        const entries = { ...this.schema.properties };
+        const entries = this.#itemProps;
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional properties to the entries variable if necessary
-        if (this.schema.additionalProperties) {
+        if (this.#itemSchema.additionalProperties) {
             Object.values(this.data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
@@ -229,11 +245,11 @@ export class Table extends LitElement {
 
         const colHeaders = (this.colHeaders = sortTable(
             {
-                ...this.schema,
+                ...this.#itemSchema,
                 properties: entries,
             },
             this.keyColumn,
-            this.schema.order
+            this.#itemSchema.order
         ));
 
         // Try to guess the key column if unspecified
@@ -285,7 +301,7 @@ export class Table extends LitElement {
                               [k],
                               { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
                               value,
-                              info.properties[k]
+                              info
                           )
                         : true; // Return true if validation errored out on the JavaScript side (e.g. server is down)
 
@@ -296,7 +312,7 @@ export class Table extends LitElement {
             };
 
             let instanceThis = this;
-            const required = isRequired(k, this.schema);
+            const required = isRequired(k, this.#itemSchema);
 
             const validator = async function (value, callback) {
                 const validateEmptyCells = instanceThis.validateEmptyCells;
@@ -380,7 +396,7 @@ export class Table extends LitElement {
 
             const rel = TH.querySelector(".relative");
 
-            const required = isRequired(col, this.schema);
+            const required = isRequired(col, this.#itemSchema);
             if (required)
                 rel.setAttribute(
                     "data-required",
@@ -411,7 +427,7 @@ export class Table extends LitElement {
         let nRows = rowHeaders.length;
 
         let contextMenu = ["row_below", "remove_row"];
-        if (this.schema.additionalProperties) contextMenu.push("col_right", "remove_col");
+        if (this.#itemSchema.additionalProperties) contextMenu.push("col_right", "remove_col");
 
         contextMenu = contextMenu.filter((k) => !(this.contextMenu.ignore ?? []).includes(k));
 
@@ -473,7 +489,8 @@ export class Table extends LitElement {
                 let target = this.data;
 
                 if (!isResolved) {
-                    if (!this.keyColumn) this.data[rowName] = {}; // Add new row to array
+                    if (!this.keyColumn)
+                        this.data[rowName] = {}; // Add new row to array
                     else {
                         rowName = row;
                         if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
@@ -562,7 +579,7 @@ export class Table extends LitElement {
 
     #getRenderedData = (data) => {
         return Object.values(data).map((row) =>
-            row.map((value, j) => this.#getRenderedValue(value, this.schema.properties[this.colHeaders[j]]))
+            row.map((value, j) => this.#getRenderedValue(value, this.#itemSchema.properties[this.colHeaders[j]]))
         );
     };
 
@@ -576,7 +593,7 @@ export class Table extends LitElement {
 
     #setRow(row, data) {
         data.forEach((value, j) => {
-            value = this.#getRenderedValue(value, this.schema.properties[this.colHeaders[j]]);
+            value = this.#getRenderedValue(value, this.#itemSchema.properties[this.colHeaders[j]]);
             this.table.setDataAtCell(row, j, value);
         });
     }

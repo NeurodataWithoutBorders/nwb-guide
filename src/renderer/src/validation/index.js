@@ -13,6 +13,7 @@ export async function validateOnChange(name, parent, path, value) {
     let functions = [];
 
     const fullPath = [...path, name];
+    const toIterate = fullPath; //fullPathNoRows // fullPath
 
     const toIterate = fullPath; //fullPathNoRows // fullPath
 
@@ -52,7 +53,7 @@ export async function validateOnChange(name, parent, path, value) {
 
         if (overridden && functions !== true) lastWildcard = false; // Disable if not promised to exist
 
-        if (typeof lastWildcard === "function") functions = [lastWildcard];
+        if (typeof lastWildcard === "function" || typeof lastWildcard === "string") functions = [lastWildcard];
     }
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field

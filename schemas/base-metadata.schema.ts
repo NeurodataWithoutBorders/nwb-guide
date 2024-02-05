@@ -46,6 +46,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     copy.additionalProperties = false
 
+    copy.required = Object.keys(copy.properties) // Require all properties at the top level
+
+    copy.order = [ "NWBFile", "Subject" ]
+
     // Add unit to weight
     const subjectProps = copy.properties.Subject.properties
     subjectProps.weight.unit = 'kg'
@@ -102,6 +106,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ophys) {
 
+        ophys.required = Object.keys(ophys.properties)
+
         const getProp = (name: string) => ophys.properties[name]
 
         if (getProp("TwoPhotonSeries")) {
@@ -118,15 +124,24 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
 
         if (getProp("ImagingPlane")) {
-            const imagingPlane = getProp("ImagingPlane")
-            imagingPlane.items.order = [
+            const imagingPlaneItems = getProp("ImagingPlane").items
+            imagingPlaneItems.order = [
                 "name",
                 "description",
                 "device",
-                "optical_channel"
+                "optical_channel",
+                "excitation_lambda",
+                "indicator",
+                "location",
+                "reference_frame",
+                "imaging_rate",
+                'grid_spacing',
+                "grid_spacing_unit",
+                "origin_coords",
+                'origin_coords_unit'
             ]
 
-            imagingPlane.items.properties.optical_channel.items.order = ["name", "description"]
+            imagingPlaneItems.properties.optical_channel.items.order = ["name", "description"]
 
         }
     }
@@ -148,8 +163,17 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     // Remove non-global properties
     if (global) {
+
         Object.entries(copy.properties).forEach(([globalProp, schema]) => {
-            instanceSpecificFields[globalProp]?.forEach((prop) =>  delete schema.properties[prop]);
+
+            const requiredSet = new Set(schema.required)
+
+            instanceSpecificFields[globalProp]?.forEach((prop) =>  {
+                delete schema.properties[prop]
+                requiredSet.delete(prop)
+            });
+
+            schema.required = Array.from(requiredSet)
         });
     }
 

@@ -1,0 +1,35 @@
+# Follows pattern
+# pipelines:
+#   pipeline_name:
+#     DataInterfaceName:
+#       file_or_folder_path: <relative path>
+#       other_source_data_inputs: <insert if needed>
+#     AdditionalDataInterface: ...
+
+pipelines:
+
+  SpikeGLX-Phy:
+    SpikeGLXRecordingInterface:
+      file_path: ephy_testing_data/spikeglx/Noise4Sam_g0/Noise4Sam_g0_imec0/Noise4Sam_g0_t0.imec0.ap.bin
+    PhySortingInterface:
+      folder_path: ephy_testing_data/phy/phy_example_0
+
+  SpikeGLX_v1_SingleProbe_AP:
+    SpikeGLXRecordingInterface:
+      file_path: ephy_testing_data/spikeglx/Noise4Sam_g0/Noise4Sam_g0_imec0/Noise4Sam_g0_t0.imec0.ap.bin
+
+  Suite2P_SinglePlane_SingleChannel:
+    Suite2pSegmentationInterface:
+      folder_path: ophys_testing_data/segmentation_datasets/suite2p
+
+  Caiman_SinglePlane_SingleChannel:
+    CaimanSegmentationInterface:
+      file_path: ophys_testing_data/segmentation_datasets/caiman/caiman_analysis.hdf5
+
+  ScanImage_SinglePlane_SingleChannel:
+    ScanImageImagingInterface:
+      file_path: ophys_testing_data/imaging_datasets/ScanImage/scanimage_20220801_single.tif
+
+  TDT:
+    TdtRecordingInterface:
+      folder_path: ephy_testing_data/tdt/aep_05

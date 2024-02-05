@@ -21,6 +21,7 @@ type OnValidateFunction = (info: ValidationResult) => void
 type TableCellProps = {
     value: string,
     info: { col: string }
+    ignore: { [key: string]: boolean },
     schema: {[key: string]: any},
     validateOnChange?: ValidationFunction,
     onValidate?: OnValidateFunction,
@@ -76,7 +77,7 @@ export class TableCell extends LitElement {
 
     type = 'text'
 
-    constructor({ info, value, schema, validateOnChange, onValidate }: TableCellProps) {
+    constructor({ info, value, schema, validateOnChange, ignore, onValidate }: TableCellProps) {
         super()
         this.#value = value
 
@@ -84,6 +85,7 @@ export class TableCell extends LitElement {
         this.info = info
 
         if (validateOnChange) this.validateOnChange = validateOnChange
+        if (ignore) this.ignore = ignore
 
         if (onValidate) this.onValidate = onValidate
 
@@ -108,6 +110,8 @@ export class TableCell extends LitElement {
     }
 
     set value(value) {
+        // if (!value) value = []
+
         if (this.input) this.input.set(renderValue(value, this.schema)) // Allow null to be set directly
         this.#value = this.input
                             ? this.input.getValue() // Ensure all operations are undoable / value is coerced
@@ -115,6 +119,8 @@ export class TableCell extends LitElement {
      }
 
     validateOnChange?: ValidationFunction
+    ignore?: { [key: string]: boolean } = {}
+
     onValidate: OnValidateFunction = () => {}
 
     #validator: ValidationFunction = () => true
@@ -162,9 +168,10 @@ export class TableCell extends LitElement {
 
     setInput(value: any) {
         this.interacted = persistentInteraction
-        this.value = value
-        // if (this.input) this.input.set(value)  // Ensure all operations are undoable
-        // else this.#value = value // Silently set value if not rendered yet
+        // this.value = value
+
+        if (this.input) this.input.set(value)  // Ensure all operations are undoable
+        else this.#value = value // Silently set value if not rendered yet
     }
 
     #value
@@ -221,8 +228,12 @@ export class TableCell extends LitElement {
                 schema: this.schema,
                 nestedProps: {
                     validateOnChange: this.validateOnChange,
+                    ignore: this.ignore
                 }
             })
+
+            // Forward blur events
+            this.input.addEventListener('blur', () =>  this.dispatchEvent(new Event('blur')))
         }
 
         this.#cls = cls

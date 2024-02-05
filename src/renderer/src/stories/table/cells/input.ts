@@ -14,12 +14,14 @@ export class NestedEditor extends LitElement {
     schema: any
     toggle: any
     validateOnChange
+    ignore: any
 
     constructor(props: any) {
         super(props)
         this.schema = props.schema
         this.info = props.info ?? {}
         this.toggle = props.toggle
+        this.ignore = props.ignore
         this.validateOnChange = props.validateOnChange
     }
 
@@ -39,12 +41,20 @@ export class NestedEditor extends LitElement {
 
         const data = this.#value || (this.schema.type === 'array' ? [] : (this.schema.type === 'object' ? {} : this.schema.default))
 
+        const schema = this.schema
+
+
         const input = this.#input = new JSONSchemaInput({
-            schema: this.schema,
+            schema,
             value: data,
-            path: [ this.info.col ],
-            validateOnChange: (path, parent, value, schema) => {
-                if (this.validateOnChange) return this.validateOnChange(value, path, parent, schema) // NOTE: Flipped because usually only value is passed
+            path: [],
+            form: {
+                ignore: this.ignore,
+                triggerValidation: (name, completePath, _, __, schema, parent) => {
+                    const path = [ ...completePath, name ]
+                    const value = parent[name]
+                    if (this.validateOnChange) return this.validateOnChange(value, path, parent, schema) // NOTE: Flipped because usually only value is passed
+                }
             },
             renderTable: (name, metadata, path) => new SimpleTable(metadata) // NOTE: Would be most ideal to have a reference to the containing input...
         })
@@ -101,7 +111,7 @@ export class NestedRenderer extends BaseRenderer {
     }
 
     render() {
-        return html`<small>Click to view cell</small>`
+        return html`<small>Double-click to view cell</small>`
     }
 }
 

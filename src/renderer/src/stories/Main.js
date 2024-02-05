@@ -166,7 +166,7 @@ export class Main extends LitElement {
                                   <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
                                   <small>${unsafeHTML(subtitle)}</small>
                               </div>
-                              <div style="padding-left: 25px;">${controls}</div>
+                              <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
                           </div>
                           <hr style="margin-bottom: 0;" />
                       </div>`

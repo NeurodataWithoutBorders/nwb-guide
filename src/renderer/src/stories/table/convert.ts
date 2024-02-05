@@ -7,6 +7,9 @@ export const renderValue = (value: any, schema: any) => {
 }
 
 export const getValue = (value: any, schema: any) => {
+
+    if (schema.type === 'array' && !value.length) return undefined
+
     if (schema.type === 'number' || schema.type === 'integer') {
 
         if (typeof value === 'number') return value

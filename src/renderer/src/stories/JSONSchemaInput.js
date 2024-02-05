@@ -13,35 +13,35 @@ import { capitalize } from "./forms/utils";
 import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
+import { merge } from "./pages/utils";
 
-export function createTable(fullPath, { onUpdate, onThrow, forceItems = false }) {
-    const path = [...fullPath];
-    const name = path.splice(-1)[0];
+const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
+
+function resolveDateTime(value) {
+    if (typeof value === "string") {
+        const match = value.match(dateTimeRegex);
+        if (match) return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}`;
+        return value;
+    }
+
+    return value;
+}
+
+export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
+    const name = fullPath.slice(-1)[0];
+    const path = fullPath.slice(0, -1);
+
     const schema = this.schema;
-    const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
     const validateOnChange = this.validateOnChange;
 
     const ignore = this.form?.ignore ? getIgnore(this.form?.ignore, path) : {};
 
-    const commonValidationFunction = async (
-        tableBasePath,
-        path,
-        parent,
-        newValue,
-        baseSchema = itemSchema,
-        skip = 0
-    ) => {
+    const commonValidationFunction = async (tableBasePath, path, parent, newValue, itemPropSchema) => {
         const warnings = [];
         const errors = [];
 
         const name = path.slice(-1)[0];
         const completePath = [...tableBasePath, ...path.slice(0, -1)];
-
-        const toIterate = path.slice(skip);
-
-        const itemPropSchema = toIterate.reduce((acc, key) => {
-            return acc?.properties?.[key] ?? acc?.items?.properties?.[key];
-        }, baseSchema);
 
         const result = await (validateOnChange
             ? this.onValidate
@@ -87,47 +87,30 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
     const addPropertyKeyToSchema = (schema) => {
         const schemaCopy = structuredClone(schema);
 
-        const schemaRef = forceItems ? schemaCopy["items"] : schemaCopy;
+        const schemaItemsRef = schemaCopy["items"];
 
-        if (!schemaRef.properties) schemaRef.properties = {};
-        if (!schemaRef.required) schemaRef.required = [];
+        if (!schemaItemsRef.properties) schemaItemsRef.properties = {};
+        if (!schemaItemsRef.required) schemaItemsRef.required = [];
 
-        schemaRef.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
-        if (!schemaRef.order) schemaRef.order = [];
-        schemaRef.order.unshift(tempPropertyKey);
+        schemaItemsRef.properties[tempPropertyKey] = { title: "Property Key", type: "string", pattern: name };
+        if (!schemaItemsRef.order) schemaItemsRef.order = [];
+        schemaItemsRef.order.unshift(tempPropertyKey);
 
-        schemaRef.required.push(tempPropertyKey);
+        schemaItemsRef.required.push(tempPropertyKey);
 
-        if (!schema["items"]) {
-            const resolvedItemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
-            if (!resolvedItemSchema) return schemaRef;
-
-            delete schemaRef.patternProperties;
-
-            schemaRef.properties[tempPropertyValueKey] = {
-                type: "array",
-                items: resolvedItemSchema.properties ? addPropertyKeyToSchema(itemSchema) : itemSchema,
-                title: "Property Value",
-                __generated: true,
-            };
-
-            schemaRef.required.push(tempPropertyValueKey);
-        }
-
-        if (schemaRef.__generated) return schemaRef["items"]; // Only return the relevant items for tables in nested tables
-
-        return schemaRef;
+        return schemaCopy;
     };
 
-    const createNestedTable = (id, value, { name: propName = id, schema = itemSchema } = {}) => {
-        const schemaCopy = addPropertyKeyToSchema(schema);
+    const createNestedTable = (id, value, { name: propName = id, nestedSchema = schema } = {}) => {
+        const schemaCopy = addPropertyKeyToSchema(nestedSchema);
 
         const resultPath = [...path];
 
         const schemaPath = [...fullPath];
 
+        // THIS IS AN ISSUE
         const rowData = Object.entries(value).map(([key, value]) => {
-            return !schema["items"]
+            return !schemaCopy["items"]
                 ? { [tempPropertyKey]: key, [tempPropertyValueKey]: value }
                 : { [tempPropertyKey]: key, ...value };
         });
@@ -180,11 +163,17 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
             return acc;
         }
 
+        const nestedIgnore = this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {};
+
+        merge(overrides.ignore, nestedIgnore);
+
+        merge(overrides.schema, schemaCopy, { arrays: true });
+
         const tableMetadata = {
             keyColumn: tempPropertyKey,
             schema: schemaCopy,
             data: rowData,
-            ignore: this.form?.ignore ? getIgnore(this.form?.ignore, schemaPath) : {}, // According to schema
+            ignore: nestedIgnore, // According to schema
 
             onUpdate: function (path, newValue) {
                 const oldKeys = Object.keys(value);
@@ -225,7 +214,14 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
                     } else delete previousValidValues[rowIdx];
                 }
 
-                return commonValidationFunction([], updatedPath, parent, newValue, schemaCopy, 1);
+                const toIterate = updatedPath.filter((value) => typeof value === "string");
+
+                const itemPropsSchema = toIterate.reduce(
+                    (acc, key) => acc?.properties?.[key] ?? acc?.items?.properties?.[key],
+                    schemaCopy
+                );
+
+                return commonValidationFunction([], updatedPath, parent, newValue, itemPropsSchema, 1);
             },
             ...commonTableMetadata,
         };
@@ -234,30 +230,43 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
         return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
     };
 
+    const schemaCopy = structuredClone(schema);
+
     // Possibly multiple tables
     if (isEditableObject(schema, this.value)) {
         // One table with nested tables for each property
-        const data = getEditableItems(this.value, this.pattern, { name, schema }).reduce((acc, { key, value }) => {
-            acc[key] = value;
-            return acc;
-        }, {});
+        const data = getEditableItems(this.value, this.pattern, { name, schema: schemaCopy }).reduce(
+            (acc, { key, value }) => {
+                acc[key] = value;
+                return acc;
+            },
+            {}
+        );
 
         const table = createNestedTable(name, data, { schema });
         if (table) return table;
     }
 
+    const nestedIgnore = getIgnore(ignore, fullPath);
+
+    Object.assign(nestedIgnore, overrides.ignore ?? {});
+
+    merge(overrides.ignore, nestedIgnore);
+
+    merge(overrides.schema, schemaCopy, { arrays: true });
+
     // Normal table parsing
     const tableMetadata = {
-        schema: itemSchema,
+        schema: schemaCopy,
         data: this.value,
 
-        ignore,
+        ignore: nestedIgnore, // According to schema
 
         onUpdate: function () {
-            return onUpdate.call(this, fullPath);
+            return onUpdate.call(this, fullPath, this.data); // Update all table data
         },
 
-        validateOnChange: (...args) => commonValidationFunction(fullPath, ...args, 1),
+        validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
 
         ...commonTableMetadata,
     };
@@ -275,7 +284,8 @@ export function createTable(fullPath, { onUpdate, onThrow, forceItems = false })
 // Schema or value indicates editable object
 export const isEditableObject = (schema, value) =>
     schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value));
-const isAdditionalProperties = (pattern) => pattern === "additional";
+
+export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
 export const getEditableItems = (value, pattern, { name, schema } = {}) => {
@@ -304,9 +314,7 @@ export const getEditableItems = (value, pattern, { name, schema } = {}) => {
     });
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const isFilesystemSelector = (name, format) => {
+const isFilesystemSelector = (name = "", format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
     const matched = name.match(/(.+_)?(.+)_paths?/);
@@ -427,7 +435,7 @@ export class JSONSchemaInput extends LitElement {
                 white-space: nowrap;
             }
 
-            .nan-handler label {
+            .nan-handler span {
                 margin-left: 5px;
                 font-size: 12px;
             }
@@ -578,6 +586,8 @@ export class JSONSchemaInput extends LitElement {
         const { schema } = this;
 
         const input = this.#render();
+
+        if (input === null) return null; // Hide rendering
 
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
@@ -804,7 +814,7 @@ export class JSONSchemaInput extends LitElement {
                 onUpdate: this.#updateData,
                 onThrow: this.#onThrow,
             });
-            if (custom) return custom;
+            if (custom || custom === null) return custom;
         }
 
         // Handle file and directory formats
@@ -812,7 +822,10 @@ export class JSONSchemaInput extends LitElement {
             const filesystemSelectorElement = new FilesystemSelector({
                 type: format,
                 value: this.value,
-                onSelect: (filePath) => this.#updateData(fullPath, filePath),
+                onSelect: (paths = []) => {
+                    const value = paths.length ? paths : undefined;
+                    this.#updateData(fullPath, value);
+                },
                 onChange: (filePath) => validateOnChange && this.#triggerValidation(name, path),
                 onThrow: (...args) => this.#onThrow(...args),
                 dialogOptions: this.form?.dialogOptions,
@@ -976,17 +989,31 @@ export class JSONSchemaInput extends LitElement {
                 return search;
             }
 
+            const enumItems = [...schema.enum];
+
+            const noSelection = "No Selection";
+            if (!this.required) enumItems.unshift(noSelection);
+
+            const selectedItem = enumItems.find((item) => this.value === item);
+
             return html`
                 <select
                     class="guided--input schema-input"
-                    @input=${(ev) => this.#updateData(fullPath, schema.enum[ev.target.value])}
+                    @input=${(ev) => {
+                        const index = ev.target.value;
+                        const value = enumItems[index];
+                        this.#updateData(fullPath, value === noSelection ? undefined : value);
+                    }}
                     @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                     @keydown=${this.#moveToNextInput}
                 >
                     <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
-                    ${schema.enum.map(
+                    ${enumItems.map(
                         (item, i) =>
-                            html`<option value=${i} ?selected=${this.value === item}>
+                            html`<option
+                                value=${i}
+                                ?selected=${selectedItem === item || (selectedItem === -1 && item === noSelection)}
+                            >
                                 ${schema.enumLabels?.[item] ?? item}
                             </option>`
                     )}
@@ -1026,10 +1053,13 @@ export class JSONSchemaInput extends LitElement {
                 ></textarea>`;
             // Handle other string formats
             else {
-                const type =
-                    schema.format === "date-time"
-                        ? "datetime-local"
-                        : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+                const isDateTime = schema.format === "date-time";
+
+                const type = isDateTime
+                    ? "datetime-local"
+                    : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+
+                const value = isDateTime ? resolveDateTime(this.value) : this.value;
 
                 return html`
                     <input
@@ -1037,19 +1067,21 @@ export class JSONSchemaInput extends LitElement {
                         type="${type}"
                         step=${isNumber && schema.step ? schema.step : ""}
                         placeholder="${schema.placeholder ?? ""}"
-                        .value="${this.value ?? ""}"
+                        .value="${value ?? ""}"
                         @input=${(ev) => {
                             let value = ev.target.value;
                             let newValue = value;
 
                             // const isBlank = value === '';
 
-                            if (isInteger) newValue = parseInt(value);
-                            else if (isNumber) newValue = parseFloat(value);
+                            if (isInteger) value = newValue = parseInt(value);
+                            else if (isNumber) value = newValue = parseFloat(value);
 
                             if (isNumber) {
                                 if ("min" in schema && newValue < schema.min) newValue = schema.min;
                                 else if ("max" in schema && newValue > schema.max) newValue = schema.max;
+
+                                if (isNaN(newValue)) newValue = undefined;
                             }
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
@@ -1060,7 +1092,7 @@ export class JSONSchemaInput extends LitElement {
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
                             // }
 
-                            if (!isNaN(newValue) && newValue !== value) {
+                            if (isNumber && newValue !== value) {
                                 ev.target.value = newValue;
                                 value = newValue;
                             }
@@ -1078,19 +1110,20 @@ export class JSONSchemaInput extends LitElement {
                     ${isRequiredNumber
                         ? html`<div class="nan-handler"><input
                         type="checkbox"
-                        ?checked=${this.value && Number.isNaN(this.value)}
+                        ?checked=${this.value === null}
                         @change=${(ev) => {
                             const siblingInput = ev.target.parentNode.previousElementSibling;
                             if (ev.target.checked) {
-                                this.#updateData(fullPath, NaN);
+                                this.#updateData(fullPath, null);
                                 siblingInput.setAttribute("disabled", true);
                             } else {
                                 siblingInput.removeAttribute("disabled");
                                 const ev = new Event("input");
                                 siblingInput.dispatchEvent(ev);
                             }
+                            this.#triggerValidation(name, path);
                         }}
-                    ></input><label>I Don't Know</label></div>`
+                    ></input><span>I Don't Know</span></div>`
                         : ""}
                 `;
             }
