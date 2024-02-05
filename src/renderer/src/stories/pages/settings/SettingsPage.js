@@ -151,7 +151,7 @@ export class SettingsPage extends Page {
     deleteTestData = () => {
         deleteIfExists(dataOutputPath);
         deleteIfExists(datasetOutputPath);
-    }
+    };
 
     generateTestData = async () => {
         if (!fs.existsSync(dataOutputPath)) {
@@ -186,7 +186,7 @@ export class SettingsPage extends Page {
             throw error;
         });
 
-        const sanitizedOutputPath = datasetOutputPath.replace(homeDirectory, '~')
+        const sanitizedOutputPath = datasetOutputPath.replace(homeDirectory, "~");
 
         this.notify(`Test dataset successfully generated at ${sanitizedOutputPath}!`);
 
@@ -286,7 +286,7 @@ export class SettingsPage extends Page {
                                       label: "Delete",
                                       size: "small",
                                       onClick: async () => {
-                                          this.deleteTestData()
+                                          this.deleteTestData();
                                           this.notify(`Test dataset successfully deleted from your system.`);
                                           this.requestUpdate();
                                       },

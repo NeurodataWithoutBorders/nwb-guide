@@ -44,17 +44,17 @@ describe('E2E Test', () => {
         const dashboard = document.querySelector('nwb-dashboard')
         dashboard.sidebar.select('settings')
         await new Promise(resolve => setTimeout(resolve, 200))
-  
+
         // Genereate test data
         const page = dashboard.page
         page.deleteTestData()
         return await page.generateTestData()
       })
-  
+
       // Take image after dataset generation
       await sleep(500)
       await page.screenshot({ path: join(screenshotPath, '02-dataset-creation.png'), fullPage: true });
-  
+
       expect(existsSync(outputLocation)).toBe(true)
 
     }, 2 * 60 * 1000) // Allow two minutes to create dataset

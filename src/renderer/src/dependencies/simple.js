@@ -13,16 +13,10 @@ export const homeDirectory = app?.getPath("home") ?? "";
 export const appDirectory = homeDirectory ? joinPath(homeDirectory, root) : root;
 export const guidedProgressFilePath = appDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
 
-export const previewSaveFolderPath = appDirectory
-    ? joinPath(appDirectory, ...paths.subfolders.preview)
-    : "";
-export const conversionSaveFolderPath = appDirectory
-    ? joinPath(appDirectory, ...paths.subfolders.conversions)
-    : "";
+export const previewSaveFolderPath = appDirectory ? joinPath(appDirectory, ...paths.subfolders.preview) : "";
+export const conversionSaveFolderPath = appDirectory ? joinPath(appDirectory, ...paths.subfolders.conversions) : "";
 
-export const testDataFolderPath = appDirectory
-    ? joinPath(appDirectory, ...paths.subfolders.testdata)
-    : "";
+export const testDataFolderPath = appDirectory ? joinPath(appDirectory, ...paths.subfolders.testdata) : "";
 
 // Encryption
 const IV_LENGTH = 16;
