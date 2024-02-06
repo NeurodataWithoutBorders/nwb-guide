@@ -725,7 +725,7 @@ export class JSONSchemaInput extends LitElement {
         });
 
         this.#modal = new Modal({
-            header: key ? header(key) : "Property Definition",
+            header: key ? `${header(key)} Entry` : "Property Definition",
             footer: submitButton,
             showCloseButton: createNewObject,
         });
@@ -938,7 +938,11 @@ export class JSONSchemaInput extends LitElement {
                 });
 
             addButton.addEventListener("click", () => {
-                this.#createModal({ list, schema: allowPatternProperties ? schema : itemSchema });
+                this.#createModal({ 
+                    key: name, 
+                    list, 
+                    schema: allowPatternProperties ? schema : itemSchema 
+                });
             });
 
             return html`

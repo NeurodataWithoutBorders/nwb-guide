@@ -34,16 +34,19 @@
             "format": "{last_name}, {first_name} {middle_name_or_initial}",
             "properties": {
               "first_name": {
-                "pattern": "^[A-Z][a-z,'-]+$",
-                "type": "string"
+                "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                "type": "string",
+                "flags": "u"
               },
               "last_name": {
-                  "pattern": "^[A-Z][a-z,'-]+$",
-                  "type": "string"
+                  "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                  "type": "string",
+                  "flags": "u"
               },
               "middle_name_or_initial": {
-                  "pattern": "^[A-Z][a-z.'-]*$",
-                  "type": "string"
+                "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                "type": "string",
+                "flags": "u"
               }
             },
             "required": [

@@ -886,11 +886,11 @@ export class JSONSchemaForm extends LitElement {
 
             // Validate Regex Pattern automatically
             else if (schema.pattern) {
-                const regex = new RegExp(schema.pattern);
+                const regex = new RegExp(schema.pattern, schema.flags);
                 if (!regex.test(parent[name])) {
                     errors.push({
                         message: `${schema.title ?? header(name)} does not match the required pattern (${
-                            schema.pattern
+                            regex
                         }).`,
                         type: "error",
                     });
