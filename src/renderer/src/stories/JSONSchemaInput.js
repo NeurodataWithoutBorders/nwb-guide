@@ -722,7 +722,7 @@ export class JSONSchemaInput extends LitElement {
         };
 
         this.#modal = new Modal({
-            header: label ? `${header(label)} Editor` : (key ? header(key) : `Property Editor`),
+            header: label ? `${header(label)} Editor` : key ? header(key) : `Property Editor`,
             footer: submitButton,
             showCloseButton: createNewObject,
         });
@@ -730,7 +730,7 @@ export class JSONSchemaInput extends LitElement {
         const div = document.createElement("div");
         div.style.padding = "25px";
 
-        const inputTitle = header(schemaCopy.title ?? label ?? 'Value')
+        const inputTitle = header(schemaCopy.title ?? label ?? "Value");
 
         const nestedModalElement = isObject
             ? new JSONSchemaForm({
@@ -896,7 +896,6 @@ export class JSONSchemaInput extends LitElement {
                 if (table) return table;
             }
 
-
             const list = (this.#list = new List({
                 items: this.#mapToList(),
 
@@ -943,7 +942,8 @@ export class JSONSchemaInput extends LitElement {
                     submessage: "They don't have a predictable structure.",
                 });
 
-            addButton.onClick = () => this.#createModal({ label: name, list, schema: allowPatternProperties ? schema : itemSchema });
+            addButton.onClick = () =>
+                this.#createModal({ label: name, list, schema: allowPatternProperties ? schema : itemSchema });
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
