@@ -391,8 +391,9 @@ export class JSONSchemaForm extends LitElement {
 
                 // ------------ Exclude Certain Errors ------------
 
-                // Allow for constructing types from object types 
-                if (e.message.includes('is not of a type(s)') && "properties" in schema && schema.type === "string") return;
+                // Allow for constructing types from object types
+                if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string")
+                    return;
 
                 // Ignore required errors if value is empty
                 if (e.name === "required" && !this.validateEmptyValues && !(e.property in e.instance)) return;
@@ -513,17 +514,15 @@ export class JSONSchemaForm extends LitElement {
             else {
                 const level1 = acc?.[skipped.find((str) => acc[str])];
                 if (level1) {
-
                     // Handle items-like objects
                     const result = this.#get(path.slice(i), level1, omitted, skipped);
-                    if (result) return result
+                    if (result) return result;
 
                     // Handle pattern properties objects
                     const got = Object.keys(level1).find((key) => {
                         const result = this.#get(path.slice(i + 1), level1[key], omitted, skipped);
-                        if (result && typeof result === 'object') return result // Schema are objects...
+                        if (result && typeof result === "object") return result; // Schema are objects...
                     });
-
 
                     if (got) return level1[got];
                 }
@@ -804,7 +803,6 @@ export class JSONSchemaForm extends LitElement {
         const externalPath = [...this.base, ...localPath];
         const pathToValidate = [...this.base, ...path];
 
-
         const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== "number") !== -1;
         if (undefinedPathToken) return true; // Will be unable to get schema anyways (additionalProperties)
 
@@ -891,9 +889,7 @@ export class JSONSchemaForm extends LitElement {
                 const regex = new RegExp(schema.pattern, schema.flags);
                 if (!regex.test(parent[name])) {
                     errors.push({
-                        message: `${schema.title ?? header(name)} does not match the required pattern (${
-                            regex
-                        }).`,
+                        message: `${schema.title ?? header(name)} does not match the required pattern (${regex}).`,
                         type: "error",
                     });
                 }
@@ -1331,9 +1327,7 @@ export class JSONSchemaForm extends LitElement {
     // Check if everything is internally rendered
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
-            Promise.all(
-                [...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered)
-            )
+            Promise.all([...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered))
         );
         return isRendered;
     }

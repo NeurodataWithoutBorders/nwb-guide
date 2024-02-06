@@ -174,7 +174,7 @@ test('pop-up inputs work correctly', async () => {
     const experimenterModal = experimenterButton.onClick()
     const experimenterNestedElement = experimenterModal.children[0].children[0]
     const experimenterSubmitButton = experimenterModal.footer
-    
+
     await sleep(1000)
 
     let modalFailed
@@ -224,7 +224,7 @@ test('pop-up inputs work correctly', async () => {
 
     keywordsNestedElement.requestUpdate()
 
-    await keywordsNestedElement.rendered    
+    await keywordsNestedElement.rendered
 
     try {
         await keywordsSubmitButton.onClick()

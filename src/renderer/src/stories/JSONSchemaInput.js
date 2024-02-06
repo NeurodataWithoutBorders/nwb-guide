@@ -639,12 +639,13 @@ export class JSONSchemaInput extends LitElement {
                         new Button({
                             label: "Edit",
                             size: "small",
-                            onClick: () => this.#createModal({
-                                key,
-                                schema: isAdditionalProperties(this.pattern) ? undefined : schema,
-                                results: value,
-                                list: list ?? this.#list,
-                            }),
+                            onClick: () =>
+                                this.#createModal({
+                                    key,
+                                    schema: isAdditionalProperties(this.pattern) ? undefined : schema,
+                                    results: value,
+                                    list: list ?? this.#list,
+                                }),
                         }),
                     ],
                 };
@@ -663,7 +664,6 @@ export class JSONSchemaInput extends LitElement {
     #modal;
 
     #createModal({ key, schema = {}, results, list } = {}) {
-
         const schemaCopy = structuredClone(schema);
 
         const createNewObject = !results && (schemaCopy.type === "object" || schemaCopy.properties);
@@ -712,7 +712,6 @@ export class JSONSchemaInput extends LitElement {
             if (schemaCopy.uniqueItems && list.items.find((item) => item.value === value))
                 return this.#modal.toggle(false);
 
-            
             // Add to the list
             if (createNewPatternProperty) {
                 const key = value.__;
@@ -723,7 +722,7 @@ export class JSONSchemaInput extends LitElement {
             this.#modal.toggle(false);
         };
 
-        const label = schemaCopy.title ?? key
+        const label = schemaCopy.title ?? key;
 
         this.#modal = new Modal({
             header: key ? header(key) : "Property Editor",
@@ -747,26 +746,24 @@ export class JSONSchemaInput extends LitElement {
                   renderTable: this.renderTable,
                   onThrow: this.#onThrow,
               })
-            : 
-
-              new JSONSchemaForm({
-                schema: {
-                    properties: {
-                        [tempPropertyKey]: {
-                            ...schemaCopy,
-                            title: header(label)
-                        }
-                    },
-                    required: [tempPropertyKey]
-                },
-                results: updateTarget,
-                onUpdate: (_, value) => {
-                    if (createNewObject) updateTarget[key] = value;
-                    else updateTarget = value
-                },
-                // renderTable: this.renderTable,
-                // onThrow: this.#onThrow,
-            })
+            : new JSONSchemaForm({
+                  schema: {
+                      properties: {
+                          [tempPropertyKey]: {
+                              ...schemaCopy,
+                              title: header(label),
+                          },
+                      },
+                      required: [tempPropertyKey],
+                  },
+                  results: updateTarget,
+                  onUpdate: (_, value) => {
+                      if (createNewObject) updateTarget[key] = value;
+                      else updateTarget = value;
+                  },
+                  // renderTable: this.renderTable,
+                  // onThrow: this.#onThrow,
+              });
 
         div.append(nestedModalElement);
 
@@ -776,7 +773,7 @@ export class JSONSchemaInput extends LitElement {
 
         setTimeout(() => this.#modal.toggle(true));
 
-        return this.#modal
+        return this.#modal;
     }
 
     #getType = (value = this.value) => (Array.isArray(value) ? "array" : typeof value);
