@@ -382,7 +382,7 @@ export class JSONSchemaForm extends LitElement {
         return validator
             .validate(resolved, schema)
             .errors.map((e) => {
-                const propName = e.path.slice(-1)[0] ?? name ?? e.property;
+                const propName = e.path.slice(-1)[0] ?? name ?? (e.property === 'instance' ? "Form" : e.property);
                 const rowName = e.path.slice(-2)[0];
 
                 const isRow = typeof rowName === "number";
@@ -392,6 +392,7 @@ export class JSONSchemaForm extends LitElement {
                 // ------------ Exclude Certain Errors ------------
 
                 // Allow for constructing types from object types
+                console.log(e)
                 if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string")
                     return;
 
