@@ -34,7 +34,6 @@ export class GuidedSubjectsPage extends Page {
 
     // Abort save if subject structure is invalid
     beforeSave = () => {
-
         try {
             this.table.validate();
         } catch (error) {
@@ -45,7 +44,7 @@ export class GuidedSubjectsPage extends Page {
         // Delete old subjects before merging
         const { subjects: globalSubjects } = this.info.globalState;
 
-        const localState = this.table.data
+        const localState = this.table.data;
 
         for (let key in globalSubjects) {
             if (!localState[key]) delete globalSubjects[key];
@@ -137,7 +136,7 @@ export class GuidedSubjectsPage extends Page {
                 this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
             },
             onUpdate: () => {
-                console.log('UPDATED!')
+                console.log("UPDATED!");
                 this.unsavedUpdates = "conversions";
             },
             validateOnChange: (localPath, parent, v) => {

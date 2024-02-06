@@ -227,7 +227,7 @@ export class Dashboard extends LitElement {
                 sections: this.subSidebar.sections ?? {},
             });
 
-            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page) // This ensures calls to page.to() can be properly awaited until the next page is ready
+            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
         });
     }
 
@@ -279,7 +279,9 @@ export class Dashboard extends LitElement {
         if (!active) active = this.activePage; // default to active page
 
         this.main.onTransition = async (transition) => {
-            const promise = this.#transitionPromise.value = new Promise((resolve) => this.#transitionPromise.trigger = resolve)
+            const promise = (this.#transitionPromise.value = new Promise(
+                (resolve) => (this.#transitionPromise.trigger = resolve)
+            ));
 
             if (typeof transition === "number") {
                 const info = this.page.info;
@@ -290,7 +292,7 @@ export class Dashboard extends LitElement {
 
             this.setAttribute("activePage", transition);
 
-            return await promise
+            return await promise;
         };
 
         this.main.updatePages = () => {
