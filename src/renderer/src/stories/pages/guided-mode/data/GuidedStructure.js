@@ -131,11 +131,9 @@ export class GuidedStructurePage extends Page {
                     displayName = displayName.replace("MultiPlane", " Multi Plane");
                     if (displayName.endsWith("Interface")) {
                         displayName = displayName.replace("Interface", "");
-                    }
-                    else if (displayName.endsWith("Converter")) {
+                    } else if (displayName.endsWith("Converter")) {
                         displayName = displayName.replace("Converter", " (All Data)");
-                    }
-                    else if (displayName.endsWith("ConverterPipe")) {
+                    } else if (displayName.endsWith("ConverterPipe")) {
                         displayName = displayName.replace("ConverterPipe", " (All Data)");
                     }
                     displayName = displayName.trim();
