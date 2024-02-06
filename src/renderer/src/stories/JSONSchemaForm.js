@@ -391,6 +391,9 @@ export class JSONSchemaForm extends LitElement {
 
                 // ------------ Exclude Certain Errors ------------
 
+                // Allow for constructing types from object types 
+                if (e.message.includes('is not of a type(s)') && "properties" in schema && schema.type === "string") return;
+
                 // Ignore required errors if value is empty
                 if (e.name === "required" && !this.validateEmptyValues && !(e.property in e.instance)) return;
 
@@ -510,10 +513,18 @@ export class JSONSchemaForm extends LitElement {
             else {
                 const level1 = acc?.[skipped.find((str) => acc[str])];
                 if (level1) {
+
+                    // Handle items-like objects
+                    const result = this.#get(path.slice(i), level1, omitted, skipped);
+                    if (result) return result
+
+                    // Handle pattern properties objects
                     const got = Object.keys(level1).find((key) => {
                         const result = this.#get(path.slice(i + 1), level1[key], omitted, skipped);
-                        return result;
+                        if (result && typeof result === 'object') return result // Schema are objects...
                     });
+
+
                     if (got) return level1[got];
                 }
             }
@@ -550,7 +561,7 @@ export class JSONSchemaForm extends LitElement {
         }
 
         // NOTE: Refs are now pre-resolved
-        const resolved = this.#get(path, schema, ["properties", "patternProperties"], ["patternProperties"]);
+        const resolved = this.#get(path, schema, ["properties", "patternProperties"], ["patternProperties", "items"]);
         // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
         return resolved;

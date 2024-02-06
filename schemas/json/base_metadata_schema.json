@@ -11,6 +11,7 @@
       "required": ["session_start_time"],
       "properties": {
         "keywords": {
+          "title": "Keyword",
           "description": "Terms to search over",
           "type": "array",
           "items": {
@@ -30,6 +31,7 @@
           "description": "Name of person/people who performed experiment",
           "type": "array",
           "items": {
+            "title": "Experimenter",
             "type": "string",
             "format": "{last_name}, {first_name} {middle_name_or_initial}",
             "properties": {
@@ -92,6 +94,7 @@
           "type": "array",
           "description": "Provide a DOI for each publication.",
           "items": {
+            "title": "Related Publication",
             "type": "string",
             "format": "{doi}",
             "properties": {

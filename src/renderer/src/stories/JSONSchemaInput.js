@@ -659,15 +659,13 @@ export class JSONSchemaInput extends LitElement {
                   })
                 : [];
         }
-
-        return items;
     }
 
     #schemaElement;
     #modal;
 
     async #createModal({ key, schema = {}, results, list } = {}) {
-        const createNewObject = !results;
+        const createNewObject = !results && schema.properties;
 
         // const schemaProperties = Object.keys(schema.properties ?? {});
         // const additionalProperties = Object.keys(results).filter((key) => !schemaProperties.includes(key));
@@ -675,12 +673,12 @@ export class JSONSchemaInput extends LitElement {
 
         const allowPatternProperties = isPatternProperties(this.pattern);
         const allowAdditionalProperties = isAdditionalProperties(this.pattern);
-        const creatNewPatternProperty = allowPatternProperties && createNewObject;
+        const createNewPatternProperty = allowPatternProperties && createNewObject;
 
         const schemaCopy = structuredClone(schema);
 
         // Add a property name entry to the schema
-        if (creatNewPatternProperty) {
+        if (createNewPatternProperty) {
             schemaCopy.properties = {
                 __: { title: "Property Name", type: "string", pattern: this.pattern },
                 ...schemaCopy.properties,
@@ -695,7 +693,8 @@ export class JSONSchemaInput extends LitElement {
             primary: true,
         });
 
-        const updateTarget = results ?? {};
+        // NOTE: Will be replaced by single instances
+        let updateTarget = results ?? ( createNewObject ? {} : undefined );
 
         submitButton.addEventListener("click", async () => {
             if (this.#schemaElement instanceof JSONSchemaForm) await this.#schemaElement.validate();
@@ -712,20 +711,21 @@ export class JSONSchemaInput extends LitElement {
             if (schemaCopy.uniqueItems && list.items.find((item) => item.value === value))
                 return this.#modal.toggle(false);
 
+            
             // Add to the list
-            if (createNewObject) {
-                if (creatNewPatternProperty) {
-                    const key = value.__;
-                    delete value.__;
-                    list.add({ key, value });
-                } else list.add({ key, value });
-            } else list.requestUpdate();
+            if (createNewPatternProperty) {
+                const key = value.__;
+                delete value.__;
+                list.add({ key, value });
+            } else list.add({ key, value });
 
             this.#modal.toggle(false);
         });
 
+        const label = schemaCopy.title ?? key
+
         this.#modal = new Modal({
-            header: key ? `${header(key)} Entry` : "Property Definition",
+            header: label ? header(label) : "Property Definition",
             footer: submitButton,
             showCloseButton: createNewObject,
         });
@@ -757,8 +757,8 @@ export class JSONSchemaInput extends LitElement {
                   renderTable: this.renderTable,
                   onUpdate: (value) => {
                       if (createNewObject) updateTarget[key] = value;
-                      else this.#updateData(key, value); // NOTE: Untested
-                  },
+                      else updateTarget = value
+                    },
               });
 
         div.append(this.#schemaElement);
@@ -939,7 +939,6 @@ export class JSONSchemaInput extends LitElement {
 
             addButton.addEventListener("click", () => {
                 this.#createModal({ 
-                    key: name, 
                     list, 
                     schema: allowPatternProperties ? schema : itemSchema 
                 });
