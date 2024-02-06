@@ -117,11 +117,36 @@ export class GuidedStructurePage extends Page {
                 Object.entries(json).map(([key, value]) => {
                     const category = categories.find(({ test }) => test.test(key))?.value;
 
+                    // replace the keys in the schema with a new string that is the original key with the string "New" appended at the end
+                    let displayName = key;
+                    displayName = displayName.replace("Recording", " Recording");
+                    displayName = displayName.replace("Sorting", " Sorting");
+                    displayName = displayName.replace("Imaging", " Imaging");
+                    displayName = displayName.replace("Segmentation", " Segmentation");
+                    displayName = displayName.replace("Data", " Data");
+                    displayName = displayName.replace("LFP", " LFP");
+                    displayName = displayName.replace("NIDQ", " NIDQ");
+                    displayName = displayName.replace("Tiff", " Tiff");
+                    displayName = displayName.replace("SinglePlane", " Single Plane");
+                    displayName = displayName.replace("MultiPlane", " Multi Plane");
+                    if (displayName.endsWith("Interface")) {
+                        displayName = displayName.replace("Interface", "");
+                    }
+                    else if (displayName.endsWith("Converter")) {
+                        displayName = displayName.replace("Converter", " (All Data)");
+                    }
+                    else if (displayName.endsWith("ConverterPipe")) {
+                        displayName = displayName.replace("ConverterPipe", " (All Data)");
+                    }
+                    displayName = displayName.trim();
+                    console.log(displayName);
+
                     return {
                         ...value,
                         key,
                         value: key,
                         category,
+                        displayName: displayName,
                         disabled: !supportedInterfaces.includes(key),
                     }; // Has label and keywords property already
                 })

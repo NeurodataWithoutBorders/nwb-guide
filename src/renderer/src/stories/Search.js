@@ -295,7 +295,7 @@ export class Search extends LitElement {
         if (this.options) {
             const options = this.options.map((item) => {
                 return {
-                    label: item.key,
+                    label: item.displayName,
                     ...item,
                 };
             });
