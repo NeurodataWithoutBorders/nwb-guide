@@ -48,8 +48,8 @@ export class Main extends LitElement {
     onTransition = () => {}; // user-defined function
     updatePages = () => {}; // user-defined function
 
-    next = () => this.footer ? this.footer.onNext() : this.toRender.page.to(1)
-    back = () => this.footer ? this.footer.onBack() : this.toRender.page.to(-1)
+    next = () => (this.footer ? this.footer.onNext() : this.toRender.page.to(1));
+    back = () => (this.footer ? this.footer.onBack() : this.toRender.page.to(-1));
 
     #queue = [];
 
@@ -138,9 +138,9 @@ export class Main extends LitElement {
             }
         }
 
-        const headerEl = header ? this.header = new GuidedHeader(header) : html`<div></div>`; // Render for grid
+        const headerEl = header ? (this.header = new GuidedHeader(header)) : html`<div></div>`; // Render for grid
 
-        const footerEl = footer ? this.footer = new GuidedFooter(footer) : html`<div></div>`; // Render for grid
+        const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
 
         const title = header?.title ?? page.info?.title;
 

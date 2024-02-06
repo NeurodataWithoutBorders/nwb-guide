@@ -87,9 +87,8 @@ export class Dashboard extends LitElement {
     pagesById = {};
     page;
 
-    next = () => this.main.next()
-    back = () => this.main.back()
-
+    next = () => this.main.next();
+    back = () => this.main.back();
 
     constructor(props = {}) {
         super();

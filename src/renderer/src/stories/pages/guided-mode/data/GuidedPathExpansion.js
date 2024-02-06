@@ -385,7 +385,7 @@ export class GuidedPathExpansionPage extends Page {
 
         form.style.width = "100%";
 
-        this.scrollTop = '300px'
+        this.scrollTop = "300px";
 
         return html`${this.dataManagementForm}${this.optional}`;
     }

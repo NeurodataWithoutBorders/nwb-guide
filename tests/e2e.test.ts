@@ -220,8 +220,8 @@ describe('E2E Test', () => {
         dashboard.main.querySelector('main > section').scrollTop = 200
 
       },
-        testInterfaceInfo,
-        join(testRootPath, 'test-data', 'dataset')
+      testInterfaceInfo,
+      join(testRootPath, 'test-data', 'dataset')
       )
 
 
@@ -302,7 +302,7 @@ describe('E2E Test', () => {
 
       await toNextPage('inspect')
 
-    })
+    }, 10 * 1000) // Wait for conversion to complete
 
     test('Review NWB Inspector output', async () => {
 
@@ -312,7 +312,7 @@ describe('E2E Test', () => {
     })
 
     // NOTE: Finish these with the correct timing
-    test.skip('Review Neurosift visualization', async () => {
+    test('Review Neurosift visualization', async () => {
 
       await takeScreenshot('preview-page', 1000) // Finish loading Neurosift
       await toNextPage('upload')
