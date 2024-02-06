@@ -55,10 +55,13 @@ export class GuidedFooter extends LitElement {
         return html`
             <nwb-footer style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
+                    ${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ""}
+                </div>
+                
+                <div>
                     ${this.back ? html`<nwb-button @click=${this.onBack}>${this.back}</nwb-button>` : ""}
                     ${this.next ? html`<nwb-button @click=${this.onNext} primary>${this.next}</nwb-button>` : ""}
                 </div>
-                ${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ""}
             </nwb-footer>
         `;
     }
