@@ -26,14 +26,14 @@ const regenerateTestData = false
 
 
 beforeAll(() => {
-  
+
   if (regenerateTestData) {
-    if (existsSync(testRootPath)) rmSync(testRootPath, {recursive: true})
+    if (existsSync(testRootPath)) rmSync(testRootPath, { recursive: true })
   } else {
-    if (existsSync(testPipelinePath)) rmSync(testPipelinePath, {recursive: true})
+    if (existsSync(testPipelinePath)) rmSync(testPipelinePath, { recursive: true })
   }
 
-  if (existsSync(screenshotPath)) rmSync(screenshotPath, {recursive: true})
+  if (existsSync(screenshotPath)) rmSync(screenshotPath, { recursive: true })
   mkdirSync(screenshotPath, { recursive: true })
 })
 
@@ -42,18 +42,36 @@ describe('E2E Test', () => {
   const references = connect()
 
   let nScreenshots = 0
-  async function takeScreenshot(label, delay = 0) {
+  const takeScreenshot = async (label, delay = 0) => {
     if (delay) await sleep(delay)
     await references.page.screenshot({ path: join(screenshotPath, `${nScreenshots}-${label}.png`), fullPage: true });
     nScreenshots++
   }
 
+  const evaluate = async (...args) => await references.page.evaluate(...args)
+
+  const toNextPage = async (path?: null | string) => {
+    const pageId = await evaluate(async () => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      await dashboard.page.save() // Ensure always saved
+      await dashboard.next() // Advance one page
+      return dashboard.page.info.id
+    }).catch(() => {
+      expect(path).toBe(null)
+    })
+
+    if (path) expect(pageId).toBe(`//${path}`)
+
+    return pageId
+
+  }
+
+
 
   test('Ensure number of test pipelines starts at zero', async () => {
-    const page = references.page
 
     await sleep(500) // Wait for full notification to render
-    const nPipelines = await page.evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
+    const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
     await takeScreenshot('home-page')
 
     // Assert no pipelines yet
@@ -66,14 +84,12 @@ describe('E2E Test', () => {
 
     datasetTestFunction('Create tutorial dataset', async () => {
 
-      const page = references.page
-
-      const outputLocation = await page.evaluate(async () => {
+      const outputLocation = await evaluate(async () => {
 
         // Transition to settings page
         const dashboard = document.querySelector('nwb-dashboard')
         dashboard.sidebar.select('settings')
-  
+
         // Genereate test data
         const page = dashboard.page
         page.deleteTestData()
@@ -82,17 +98,15 @@ describe('E2E Test', () => {
 
       // Take image after dataset generation
       await takeScreenshot('dataset-creation', 500)
-  
+
       expect(existsSync(outputLocation)).toBe(true)
 
     }, 2 * 60 * 1000) // Allow two minutes to create dataset
 
     test('Create new pipeline by specifying a name', async () => {
 
-      const page = references.page
-
       // Ensure you are on the home page
-      let pageId = await page.evaluate(() => {
+      let pageId = await evaluate(() => {
         const dashboard = document.querySelector('nwb-dashboard')
         dashboard.sidebar.select('/')
         return dashboard.page.info.id
@@ -101,68 +115,43 @@ describe('E2E Test', () => {
       expect(pageId).toBe('/')
 
       // Advance to instructions page
-      pageId = await page.evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
-      })
+      await toNextPage('start')
 
       await takeScreenshot('intro-page', 300)
-      expect(pageId).toBe('//start')
 
       // Advance to general information page
-      pageId = await page.evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
-      })
+      await toNextPage('details')
 
       await takeScreenshot('info-page', 300)
-      expect(pageId).toBe('//details')
 
 
-       // Fail to advance without name
-       pageId = await page.evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
-      })
-
-      expect(pageId).toBe('//details')
+      // Fail to advance without name
+      await toNextPage('details')
 
       await takeScreenshot('fail-name', 500)
 
       // Fill in name of the test pipeline
-      await page.evaluate(() => {
+      await evaluate(() => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         page.dismiss() // Dismiss all internal notifications
 
-        const nameInput = page.form.getFormElement([ 'name' ])
+        const nameInput = page.form.getFormElement(['name'])
         nameInput.updateData('My Test Pipeline')
       })
 
-      await sleep(300) // Wait to render
       await takeScreenshot('valid-name', 300)
 
       // Advance to formats page
-      pageId = await page.evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        await dashboard.next() // Advance one page
-        return dashboard.page.info.id    
-      })
-
-      expect(pageId).toBe('//structure')
+      await toNextPage('structure')
 
     }, 10 * 1000)
 
     test('Specify data formats', async () => {
 
-      const page = references.page
-
       await takeScreenshot('formats-page', 300)
 
-      await page.evaluate(() => {
+      await evaluate(() => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         page.addButton.onClick()
@@ -170,7 +159,7 @@ describe('E2E Test', () => {
 
       await takeScreenshot('format-options', 1000)
 
-      await page.evaluate(() => {
+      await evaluate(() => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         page.search.value = 'SpikeGLX'
@@ -178,17 +167,17 @@ describe('E2E Test', () => {
 
       await takeScreenshot('search-behavior')
 
-      await page.evaluate((interfaces) => {
+      await evaluate((interfaces) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
-        const [ name, info ] = Object.entries(interfaces)[0]
+        const [name, info] = Object.entries(interfaces)[0]
         page.list.add({ key: name, value: name });
         page.searchModal.toggle(false);
       }, testInterfaceInfo)
 
       await takeScreenshot('interface-added', 1000)
 
-      await page.evaluate((interfaces) => {
+      await evaluate((interfaces) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         Object.keys(interfaces).slice(1).forEach(name => page.list.add({ key: name, value: name }))
@@ -196,23 +185,15 @@ describe('E2E Test', () => {
 
       await takeScreenshot('all-interfaces-added')
 
-      const pageId = await page.evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        await dashboard.next() // Advance one page
-        return dashboard.page.info.id
-      })
-
-      expect(pageId).toBe('//locate')
-
+      await toNextPage('locate')
 
     }, 10 * 1000)
 
     test('Locate all your source data programmatically', async () => {
-      const page = references.page
 
       await takeScreenshot('pathexpansion-page', 300)
 
-      await page.evaluate(async (interfaces) => {
+      await evaluate(async (interfaces) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         page.optional.yes.onClick()
@@ -224,42 +205,138 @@ describe('E2E Test', () => {
       await takeScreenshot('pathexpansion-selected')
 
       // Fill out the path expansion information
-      await page.evaluate((interfaceInfo, basePath) => {
+      await evaluate((interfaceInfo, basePath) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const form = dashboard.page.form
 
-        Object.entries(interfaceInfo).forEach(([ name, info ]) => {
-          const baseInput = form.getFormElement([ name, 'base_directory' ])
+        Object.entries(interfaceInfo).forEach(([name, info]) => {
+          const baseInput = form.getFormElement([name, 'base_directory'])
           baseInput.updateData(basePath)
 
-          const formatInput = form.getFormElement([ name, 'format_string_path' ])
+          const formatInput = form.getFormElement([name, 'format_string_path'])
           formatInput.updateData(info.format)
         })
 
-        dashboard.main.querySelector('main > section').scrollTop = 100
+        dashboard.main.querySelector('main > section').scrollTop = 200
 
-      }, 
-      testInterfaceInfo,
-      join(testRootPath, 'test-data', 'dataset')
+      },
+        testInterfaceInfo,
+        join(testRootPath, 'test-data', 'dataset')
       )
-      
+
 
       await takeScreenshot('pathexpansion-completed', 300)
 
-      const pageId = await page.evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        await dashboard.next() // Advance one page
-        return dashboard.page.info.id
-      })
-
-      expect(pageId).toBe('//subjects')
+      await toNextPage('subjects')
     })
 
 
     test('Provide subject information', async () => {
-      const page = references.page
 
       await takeScreenshot('subject-page', 300)
+
+
+      // Set invalid age
+      await evaluate(async () => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const table = dashboard.page.table
+
+        const data = { ...table.data }
+        data[Object.keys(data)[0]].age = '30'
+        table.data = data
+      })
+
+      await takeScreenshot('subject-invalid', 600)
+
+      await toNextPage(null)
+
+      await takeScreenshot('subject-error', 500)
+
+      await evaluate(() => {
+        const dashboard = document.querySelector('nwb-dashboard')
+
+        const page =  dashboard.page
+        page.dismiss()
+
+        const table = page.table
+
+        const data = { ...table.data }
+
+        for (let name in data) {
+          data[name] = {
+            ...data[name],
+            sex: 'M',
+            species: 'Mus musculus',
+            age: 'P30D'
+          }
+        }
+
+        table.data = data // This changes the render but not the update flag
+
+      })
+
+      await takeScreenshot('subject-complete', 500)
+
+      await toNextPage('sourcedata')
+
+    })
+
+    test('Review source data information', async () => {
+
+      await takeScreenshot('sourcedata-page', 100)
+      await toNextPage('metadata')
+
+    })
+
+    test('Review metadata', async () => {
+
+      await takeScreenshot('metadata-page', 100)
+
+      await evaluate(() => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        page.forms[0].form.accordions["Subject"].toggle(true)
+      })
+
+      await takeScreenshot('metadata-open', 100)
+
+      await toNextPage('inspect')
+
+    })
+
+    test('Review NWB Inspector output', async () => {
+
+      await takeScreenshot('inspect-page', 2000) // Finish file inspection
+      await toNextPage('preview')
+
+    })
+
+    // NOTE: Finish these with the correct timing
+    test.skip('Review Neurosift visualization', async () => {
+
+      await takeScreenshot('preview-page', 1000) // Finish loading Neurosift
+      await toNextPage('upload')
+
+    })
+
+    test.skip('Upload pipeline output to DANDI', async () => {
+
+      await takeScreenshot('upload-page', 100)
+      await toNextPage('review')
+
+    })
+
+
+    test.skip('Review upload results', async () => {
+
+      await takeScreenshot('review-page', 100)
+      await toNextPage()
+
+    })
+
+    test.skip('Ensure there is one completed pipeline', async () => {
+
+      await takeScreenshot('home-page', 100)
 
     })
 

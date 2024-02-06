@@ -227,6 +227,8 @@ export class Dashboard extends LitElement {
                 page,
                 sections: this.subSidebar.sections ?? {},
             });
+
+            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page) // This ensures calls to page.to() can be properly awaited until the next page is ready
         });
     }
 
@@ -269,13 +271,17 @@ export class Dashboard extends LitElement {
         return globalState.sections;
     };
 
+    #transitionPromise = {};
+
     #updated(pages = this.pages) {
         const url = new URL(window.location.href);
         let active = url.pathname.slice(1);
         if (isElectron || isStorybook) active = new URLSearchParams(url.search).get("page");
         if (!active) active = this.activePage; // default to active page
 
-        this.main.onTransition = (transition) => {
+        this.main.onTransition = async (transition) => {
+            const promise = this.#transitionPromise.value = new Promise((resolve) => this.#transitionPromise.trigger = resolve)
+
             if (typeof transition === "number") {
                 const info = this.page.info;
                 const sign = Math.sign(transition);
@@ -284,6 +290,8 @@ export class Dashboard extends LitElement {
             }
 
             this.setAttribute("activePage", transition);
+
+            return await promise
         };
 
         this.main.updatePages = () => {

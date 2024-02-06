@@ -797,7 +797,7 @@ export class JSONSchemaForm extends LitElement {
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, path = [], checkLinks = true, input, schema, parent, hooks = {}) => {
-        const { onError, onWarning } = hooks;
+        const { onError, onWarning, onInfo } = hooks;
 
         const localPath = [...path, name].filter((str) => typeof str === "string"); // Ignore row information
         const externalPath = [...this.base, ...localPath];
