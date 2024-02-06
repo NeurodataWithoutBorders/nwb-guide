@@ -382,7 +382,7 @@ export class JSONSchemaForm extends LitElement {
         return validator
             .validate(resolved, schema)
             .errors.map((e) => {
-                const propName = e.path.slice(-1)[0] ?? name ?? (e.property === 'instance' ? "Form" : e.property);
+                const propName = e.path.slice(-1)[0] ?? name ?? (e.property === "instance" ? "Form" : e.property);
                 const rowName = e.path.slice(-2)[0];
 
                 const isRow = typeof rowName === "number";
