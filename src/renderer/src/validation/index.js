@@ -33,8 +33,8 @@ export async function validateOnChange(name, parent, path, value) {
         toIterate.reduce((acc, key) => {
 
             // Disable the value is a hardcoded list of functions + a wildcard has already been specified
-            if (lastWildcard && Array.isArray(acc[key] ?? {})) overridden = true; 
-                
+            if (acc && lastWildcard && Array.isArray(acc[key] ?? {})) overridden = true; 
+                            
             else if (acc && "*" in acc) {
                 if (acc["*"] === false && lastWildcard)
                     overridden = true; // Disable if false and a wildcard has already been specified

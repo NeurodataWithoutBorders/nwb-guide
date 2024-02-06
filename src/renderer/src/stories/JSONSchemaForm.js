@@ -190,7 +190,7 @@ export class JSONSchemaForm extends LitElement {
     }
 
     base = [];
-    #nestedForms = {};
+    forms = {};
     inputs = [];
 
     tables = {};
@@ -268,7 +268,7 @@ export class JSONSchemaForm extends LitElement {
         const name = path[0];
         const updatedPath = path.slice(1);
 
-        const form = this.#nestedForms[name]; // Check forms
+        const form = this.forms[name]; // Check forms
         if (!form) {
             const table = this.tables[name]; // Check tables
             if (table && tables) return table; // Skip table cells
@@ -363,7 +363,7 @@ export class JSONSchemaForm extends LitElement {
     status;
     checkStatus = () => {
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
-            ...Object.entries(this.#nestedForms)
+            ...Object.entries(this.forms)
                 .filter(([k, v]) => {
                     const accordion = this.#accordions[k];
                     return !accordion || !accordion.disabled;
@@ -481,10 +481,10 @@ export class JSONSchemaForm extends LitElement {
         if (message) this.throw(message);
 
         // Validate nested forms (skip disabled)
-        for (let name in this.#nestedForms) {
+        for (let name in this.forms) {
             const accordion = this.#accordions[name];
             if (!accordion || !accordion.disabled)
-                await this.#nestedForms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
+                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
 
         for (let key in this.tables) {
@@ -607,16 +607,6 @@ export class JSONSchemaForm extends LitElement {
         });
 
         this.inputs[localPath.join("-")] = interactiveInput;
-        // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
-
-        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
-        // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
-        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("filesystem-selector") ?? []);
-        // const allInputs = [...inputs, ...fileInputs];
-        // const filtered = filter ? allInputs.filter(filter) : allInputs;
-        // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
-
-        // console.log(interactiveInput)
 
         return html`
             <div id=${encode(localPath.join("-"))} class="form-section">
@@ -636,7 +626,7 @@ export class JSONSchemaForm extends LitElement {
     nLoaded = 0;
 
     checkAllLoaded = () => {
-        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.tables)].length;
+        const expected = [...Object.keys(this.forms), ...Object.keys(this.tables)].length;
         if (this.nLoaded === expected) {
             this.#loaded = true;
             this.onLoaded();
@@ -813,6 +803,7 @@ export class JSONSchemaForm extends LitElement {
         const localPath = [...path, name].filter((str) => typeof str === "string"); // Ignore row information
         const externalPath = [...this.base, ...localPath];
         const pathToValidate = [...this.base, ...path];
+
 
         const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== "number") !== -1;
         if (undefinedPathToken) return true; // Will be unable to get schema anyways (additionalProperties)
@@ -1116,7 +1107,7 @@ export class JSONSchemaForm extends LitElement {
                 const ignore = getIgnore(this.ignore, name);
 
                 const ogContext = this;
-                const nested = (this.#nestedForms[name] = new JSONSchemaForm({
+                const nested = (this.forms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
                     results: { ...nestedResults },
@@ -1200,7 +1191,7 @@ export class JSONSchemaForm extends LitElement {
                 subtitle: html`<div style="display:flex; align-items: center;">
                     ${explicitlyRequired ? "" : enableToggleContainer}
                 </div>`,
-                content: this.#nestedForms[name],
+                content: this.forms[name],
 
                 // States
                 open: oldStates?.open ?? !hasMany,
@@ -1341,7 +1332,7 @@ export class JSONSchemaForm extends LitElement {
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
             Promise.all(
-                [...Object.values(this.#nestedForms), ...Object.values(this.tables)].map(({ rendered }) => rendered)
+                [...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered)
             )
         );
         return isRendered;
