@@ -660,10 +660,9 @@ export class JSONSchemaInput extends LitElement {
         }
     }
 
-    #schemaElement;
     #modal;
 
-    #createModal({ key, schema = {}, results, list } = {}) {
+    #createModal({ key, schema = {}, results, list, label } = {}) {
         const schemaCopy = structuredClone(schema);
 
         const createNewObject = !results && (schemaCopy.type === "object" || schemaCopy.properties);
@@ -722,16 +721,16 @@ export class JSONSchemaInput extends LitElement {
             this.#modal.toggle(false);
         };
 
-        const label = schemaCopy.title ?? key;
-
         this.#modal = new Modal({
-            header: key ? header(key) : "Property Editor",
+            header: label ? `${header(label)} Editor` : (key ? header(key) : `Property Editor`),
             footer: submitButton,
             showCloseButton: createNewObject,
         });
 
         const div = document.createElement("div");
         div.style.padding = "25px";
+
+        const inputTitle = header(schemaCopy.title ?? label ?? 'Value')
 
         const nestedModalElement = isObject
             ? new JSONSchemaForm({
@@ -751,7 +750,7 @@ export class JSONSchemaInput extends LitElement {
                       properties: {
                           [tempPropertyKey]: {
                               ...schemaCopy,
-                              title: header(label),
+                              title: inputTitle,
                           },
                       },
                       required: [tempPropertyKey],
@@ -897,6 +896,7 @@ export class JSONSchemaInput extends LitElement {
                 if (table) return table;
             }
 
+
             const list = (this.#list = new List({
                 items: this.#mapToList(),
 
@@ -943,7 +943,7 @@ export class JSONSchemaInput extends LitElement {
                     submessage: "They don't have a predictable structure.",
                 });
 
-            addButton.onClick = () => this.#createModal({ list, schema: allowPatternProperties ? schema : itemSchema });
+            addButton.onClick = () => this.#createModal({ label: name, list, schema: allowPatternProperties ? schema : itemSchema });
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>

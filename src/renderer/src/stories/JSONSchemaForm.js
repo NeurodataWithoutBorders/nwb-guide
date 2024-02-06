@@ -392,7 +392,6 @@ export class JSONSchemaForm extends LitElement {
                 // ------------ Exclude Certain Errors ------------
 
                 // Allow for constructing types from object types
-                console.log(e)
                 if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string")
                     return;
 
