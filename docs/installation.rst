@@ -12,7 +12,7 @@ MacOS - Intel
 
 Download the `NWB-GUIDE-vX.Y.Z.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-0.0.13.dmg>`_ file, which should prompt you to move it into your 'Applications' folder in order to run.
 
-MacOS - M1 Silicon
+MacOS - Apple Silicon
 ------------------
 
 Download the `NWB-GUIDE-vX.Y.Z-arm64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-0.0.13-arm64.dmg>`_ file, which should prompt you to move it into your 'Applications' folder in order to run.
