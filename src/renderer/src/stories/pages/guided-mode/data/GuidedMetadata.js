@@ -110,7 +110,6 @@ export class GuidedMetadataPage extends ManagedPage {
     };
 
     footer = {
-        next: "Run Conversion Preview",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
