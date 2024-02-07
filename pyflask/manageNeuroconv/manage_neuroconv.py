@@ -896,7 +896,7 @@ def generate_test_data(output_path: str):
 
         return table_as_json
 
-    
+
     def update_recording_properties_from_table_as_json(interface, electrode_table_as_json: List[Dict[str, Any]], column_table_as_json: List[Dict[str, Any]]) ->None:
         """A convenience function for setting the property values of the underlying recording extractor."""
        recording = interface.recording_extractor
