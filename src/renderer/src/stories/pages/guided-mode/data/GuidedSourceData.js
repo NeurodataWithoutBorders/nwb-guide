@@ -58,7 +58,6 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     footer = {
-        next: "Request Metadata Schema",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
