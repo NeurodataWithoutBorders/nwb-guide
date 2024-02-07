@@ -54,9 +54,7 @@ export class GuidedFooter extends LitElement {
     render() {
         return html`
             <nwb-footer style="display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                    ${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ""}
-                </div>
+                <div>${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ""}</div>
 
                 <div>
                     ${this.back ? html`<nwb-button @click=${this.onBack}>${this.back}</nwb-button>` : ""}
