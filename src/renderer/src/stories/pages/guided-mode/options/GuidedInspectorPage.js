@@ -76,9 +76,7 @@ export class GuidedInspectorPage extends Page {
     };
 
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
-    footer = {
-        next: "Preview Files",
-    };
+    footer = {};
 
     getStatus = (list) => {
         return list.reduce((acc, messageInfo) => {

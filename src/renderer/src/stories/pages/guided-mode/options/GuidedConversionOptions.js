@@ -9,7 +9,6 @@ export class GuidedConversionOptionsPage extends Page {
     }
 
     footer = {
-        next: "Run Conversion Preview",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
             await this.form.validate(); // Will throw an error in the callback
