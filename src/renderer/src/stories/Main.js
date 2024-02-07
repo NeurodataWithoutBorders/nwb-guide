@@ -101,6 +101,7 @@ export class Main extends LitElement {
                     footer = Object.assign(
                         {
                             exit: false,
+                            next: "Complete Pipeline",
                             onNext: () => this.toRender.page.to("/"),
                         },
                         footer && typeof footer === "object" ? footer : {}
@@ -109,7 +110,7 @@ export class Main extends LitElement {
             }
 
             if (footer === true) footer = {};
-            if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Save and Continue";
+            if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Next";
 
             // Default Capsules Behavior
             const section = sections[info.section];

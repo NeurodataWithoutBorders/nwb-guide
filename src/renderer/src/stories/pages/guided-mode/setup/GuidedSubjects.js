@@ -69,9 +69,7 @@ export class GuidedSubjectsPage extends Page {
         updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
     };
 
-    footer = {
-        next: "Generate Data Structure",
-    };
+    footer = {};
 
     updated() {
         const add = this.query("#addButton");
