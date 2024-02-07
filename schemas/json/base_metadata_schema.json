@@ -184,7 +184,7 @@
         },
         "date_of_birth": {
           "type": "string",
-          "format": "date-time",
+          "format": "date",
           "description": "Date of birth of subject. Can be supplied instead of 'age'."
         },
         "strain": {

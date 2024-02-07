@@ -30,11 +30,13 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
     init() {
         // Create detached node, add CSS class and make sure its not visible
         this.DATETIME = new DateTimeSelector();
-        this.DATETIME.type = "datetime-local";
-        this.DATETIME.style.position = "absolute";
 
-        this.DATETIME.style.display = "none";
-        this.DATETIME.input.style.width = "0px"; // Don't actually show the input, just the picker
+        Object.assign(this.DATETIME.style, {
+            overflow: 'hidden',
+            position: 'absolute',
+            display: 'none',
+            zIndex: 1000
+        })
 
         // Attach node to DOM, by appending it to the container holding the table
         this.hot.rootElement.appendChild(this.DATETIME);
@@ -53,12 +55,20 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
         const style = this.DATETIME.style;
         this._opened = true;
 
-        style.height = `${height}px`;
         style.minWidth = `${width}px`;
         style.top = `${top}px`;
         style[this.hot.isRtl() ? "right" : "left"] = `${start}px`;
         style.margin = "0px";
         style.display = "";
+        
+        Object.assign(this.DATETIME.input.style, {
+            height: `${height}px`,
+            minWidth: `${width}px`,
+            padding: '5px',
+            boxSizing: 'border-box',
+            fontSize: '12px'
+        })
+
     }
 
     focus() {
@@ -69,6 +79,17 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
         this._opened = false;
         this.DATETIME.style.display = "none";
         // setTimeout(() => this.correctCopyPasteElement(), 40)
+    }
+}
+
+class DateEditor extends DateTimeEditor {
+    constructor(hotInstance) {
+        super(hotInstance);
+    }
+
+    init() {
+        super.init()
+        this.DATETIME.input.type = "date";
     }
 }
 
@@ -105,3 +126,7 @@ Handsontable.cellTypes.registerCellType("array", {
 Handsontable.cellTypes.registerCellType("date-time", {
     editor: DateTimeEditor,
 });
+
+// Handsontable.cellTypes.registerCellType("date", {
+//     editor: DateEditor,
+// });

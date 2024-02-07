@@ -279,6 +279,12 @@ export class Table extends LitElement {
                 info.correctFormat = false;
             }
 
+            if (colInfo.format === "date") {
+                info.type = "date";
+                info.dateFormat = 'YYYY-MM-DD'
+
+            }
+
             if (colInfo.type === "array") {
                 info.data = k;
                 info.type = "array";
