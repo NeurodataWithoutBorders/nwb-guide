@@ -852,3 +852,59 @@ def generate_test_data(output_path: str):
     export_to_phy(
         waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
     )
+
+
+    def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
+        """A convenience function for collecting and organizing the property values of the underlying recording extractor."""
+        recording = interface.recording_extractor
+
+        property_names = recording.get_property_keys()
+
+        default_column_metadata =  interface.get_metadata()["Ecephys"]["ElectrodeColumns"]["properties"]
+        property_descriptions = {column_name: column_fields ["description"] for column_name, column_fields in default_column_metadata}
+
+        channel_ids = recording.get_channel_ids()
+        property_dtypes= {property_name: str(recording.get_property(key=property_name, ids=[channel_ids[0]]).dtype) for property_name in property_names}
+
+        table = list()
+        for property_name in property_names:
+            table_row = dict(name=property_name, description=property_descriptions.get(property_name, ""), dtype=property_dtypes.get(property_name, ""))
+            table.append(electrode_column)
+        table_as_json = json.loads(json.dumps(obj=table))
+
+        return table_as_json
+
+    def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
+        """A convenience function for collecting and organizing the property values of the underlying recording extractor."""
+        from neuroconv.utils.json_schema import NWBMetaDataEncoder
+
+        recording = interface.recording_extractor
+
+        property_names = set(recording.get_property_keys())
+        electrode_ids = recording.get_channel_ids()
+
+        table = list()
+        for electrode_id in electrode_ids:
+            electrode_column = dict()
+            for property_name in property_names:
+                recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[
+                    0  # First axis is always electrodes in SI
+                ]  # Since only fetching one electrode at a time, use trivial zero-index
+                electrode_column.update({property_name: recording_property_value})
+            table.append(electrode_column)
+        table_as_json = json.loads(json.dumps(obj=table, cls=NWBMetaDataEncoder))
+
+        return table_as_json
+
+    
+    def update_recording_properties_from_table_as_json(interface, electrode_table_as_json: List[Dict[str, Any]], column_table_as_json: List[Dict[str, Any]]) ->None:
+        """A convenience function for setting the property values of the underlying recording extractor."""
+       recording = interface.recording_extractor
+        property_names = list(table_as_json[0].keys())  # Assumes no dict in the list will have missing or inconsitent keys
+
+        for property_name in property_names:
+            dtype = column_table_as_json[property_name in row for row in column_table_as_json].index(True)]["data_type"]
+            property_values = np.array([row[propery_name] for row in table_as_json], dtype=dtype)
+            recording.set_property(key=property_name, values=property_values)
+
+        return table_as_json
