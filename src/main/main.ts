@@ -263,20 +263,28 @@ function initialize() {
 
     const win = globals.mainWindow = new BrowserWindow(windowOptions);
 
-    // Avoid CORS for Dandiset creation
+    // Avoid CORS (for all requests) for Dandiset creation
     win.webContents.session.webRequest.onBeforeSendHeaders(
       (details, callback) => {
         callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
       },
     );
 
+    const accessControlHeader = 'Access-Control-Allow-Origin'
+
     win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-      callback({
+
+      const accessHeader = [accessControlHeader, accessControlHeader.toLowerCase()].find(key => details.responseHeaders?.[key]) ?? accessControlHeader
+      const origins = details.responseHeaders?.[accessHeader] ?? []
+      if (origins.includes("*")) return callback(details)
+
+      return callback({
         responseHeaders: {
-          'Access-Control-Allow-Origin': ['*'],
+          [accessHeader]: ['*'],
           ...details.responseHeaders,
         },
       });
+
     });
 
 
