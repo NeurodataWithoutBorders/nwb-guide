@@ -7,7 +7,6 @@ type ListItemType = {
   content: string,
   value: any,
   controls: HTMLElement[]
-  displayName?: string
 }
 
 export interface ListProps {
@@ -235,7 +234,7 @@ export class List extends LitElement {
     }
 
     #renderListItem = (item: ListItemType, i: number) => {
-      const { key, value, content = value, displayName } = item;
+      const { key, value, content = value } = item;
       const li = document.createElement("li");
       li.id = `item-${i}`;
 
@@ -309,7 +308,7 @@ export class List extends LitElement {
       if (typeof content === 'string')  {
           const valueEl = document.createElement("span");
           if (!key) editableElement = valueEl
-          valueEl.innerText = displayName ? displayName : content;
+          valueEl.innerText = content;
           div.appendChild(valueEl);
       }
 

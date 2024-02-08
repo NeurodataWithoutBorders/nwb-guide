@@ -167,8 +167,9 @@ def derive_interface_info(interface):
     if interface.__doc__:
         info["description"] = re.sub(
             remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
-        )
+        ) 
 
+    info["name"] = interface.__name__
     return info
 
 
@@ -186,7 +187,7 @@ def get_all_interface_info() -> dict:
         # Deprecated
         "SpikeGLXLFPInterface",
         # Aliased
-        "CEDRecordingInterface",
+        "CEDRecordingInterface", 
         "OpenEphysBinaryRecordingInterface",
         "OpenEphysLegacyRecordingInterface",
         # Ignored
@@ -201,7 +202,7 @@ def get_all_interface_info() -> dict:
     ]
 
     return {
-        interface.__name__: derive_interface_info(interface)
+        getattr(interface, 'display_name', interface.__name__) or interface.__name__: derive_interface_info(interface)
         for interface in interface_list
         if not interface.__name__ in exclude_interfaces_from_selection
     }
