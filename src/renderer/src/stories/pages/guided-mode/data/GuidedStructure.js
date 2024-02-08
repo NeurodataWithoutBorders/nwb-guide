@@ -118,7 +118,7 @@ export class GuidedStructurePage extends Page {
 
                     const displayName = key.trim();
 
-                    const interfaceName = value.name
+                    const interfaceName = value.name;
 
                     const category = categories.find(({ test }) => test.test(interfaceName))?.value;
 
