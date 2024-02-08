@@ -282,8 +282,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         ecephys_properties["Electrodes"] = {"type": "object", "properties": {}}
 
-    defs = ecephys_properties["definitions"]
-
     def on_recording_interface(name, recording_interface):
 
         metadata["Ecephys"]["Electrodes"][name] = recording_interface.get_electrode_table_json()
