@@ -11,6 +11,7 @@
       "required": ["session_start_time"],
       "properties": {
         "keywords": {
+          "title": "Keyword",
           "description": "Terms to search over",
           "type": "array",
           "items": {
@@ -30,20 +31,24 @@
           "description": "Name of person/people who performed experiment",
           "type": "array",
           "items": {
+            "title": "Experimenter",
             "type": "string",
             "format": "{last_name}, {first_name} {middle_name_or_initial}",
             "properties": {
               "first_name": {
-                "pattern": "^[A-Z][a-z,'-]+$",
-                "type": "string"
+                "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                "type": "string",
+                "flags": "u"
               },
               "last_name": {
-                  "pattern": "^[A-Z][a-z,'-]+$",
-                  "type": "string"
+                  "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                  "type": "string",
+                  "flags": "u"
               },
               "middle_name_or_initial": {
-                  "pattern": "^[A-Z][a-z.'-]*$",
-                  "type": "string"
+                "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                "type": "string",
+                "flags": "u"
               }
             },
             "required": [
@@ -89,6 +94,7 @@
           "type": "array",
           "description": "Provide a DOI for each publication.",
           "items": {
+            "title": "Related Publication",
             "type": "string",
             "format": "{doi}",
             "properties": {

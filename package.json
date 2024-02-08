@@ -55,6 +55,7 @@
   },
   "build": {
     "appId": "com.catalystneuro.nwbguide",
+    "artifactName": "NWB-GUIDE-${arch}.${ext}",
     "generateUpdatesFilesForAllChannels": true,
     "afterSign": "./notarize.js",
     "fileAssociations": [
