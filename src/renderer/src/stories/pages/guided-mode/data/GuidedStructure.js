@@ -136,7 +136,7 @@ export class GuidedStructurePage extends Page {
 
                     displayName = displayName.trim();
 
-                    const interfaceName = value.name
+                    const interfaceName = value.name;
 
                     return {
                         ...value,
