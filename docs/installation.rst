@@ -5,17 +5,17 @@ Installation
 Windows
 -------
 
-Download and run the `NWB-GUIDE-Setup-vX.Y.Z.exe <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-Setup-0.0.13.exe>`_ file and follow all instruction prompts.
+Download and run the `NWB-GUIDE-Setup-vX.Y.Z.exe <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-x64.exe>`_ file and follow all instruction prompts.
 
 MacOS - Intel
 -------------
 
-Download the `NWB-GUIDE-vX.Y.Z.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-0.0.13.dmg>`_ file, which should prompt you to move it into your 'Applications' folder in order to run.
+Download the `NWB-GUIDE-vX.Y.Z.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-x64.dmg>`_ file, which should prompt you to move it into your 'Applications' folder in order to run.
 
 MacOS - Apple Silicon
 ---------------------
 
-Download the `NWB-GUIDE-vX.Y.Z-arm64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-0.0.13-arm64.dmg>`_ file, which should prompt you to move it into your 'Applications' folder in order to run.
+Download the `NWB-GUIDE-vX.Y.Z-arm64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-arm64.dmg>`_ file, which should prompt you to move it into your 'Applications' folder in order to run.
 
 .. note::
    Some data formats can have issues using this build of the application. If you encounter errors when using a particular interface, try following the advanced :ref:`Developer Installation instructions<developer_installation>` instructions.
