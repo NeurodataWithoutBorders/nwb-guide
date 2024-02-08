@@ -176,7 +176,10 @@ def derive_interface_info(interface):
 def get_all_converter_info() -> dict:
     from neuroconv import converters
 
-    return {getattr(converter, 'display_name', name) or name: derive_interface_info(converter) for name, converter in module_to_dict(converters).items()}
+    return {
+        getattr(converter, "display_name", name) or name: derive_interface_info(converter)
+        for name, converter in module_to_dict(converters).items()
+    }
 
 
 def get_all_interface_info() -> dict:

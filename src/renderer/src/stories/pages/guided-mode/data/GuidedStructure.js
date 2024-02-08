@@ -115,7 +115,6 @@ export class GuidedStructurePage extends Page {
             .then((res) => res.json())
             .then((json) =>
                 Object.entries(json).map(([key, value]) => {
-
                     const displayName = key.trim();
 
                     const interfaceName = value.name;
