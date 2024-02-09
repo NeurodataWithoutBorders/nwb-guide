@@ -7,11 +7,28 @@ import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
 
 import paths from "../paths.config.json" assert { type: "json" };
+
+// ------------------------------------------------------------------
+// ------------------------ Path Definitions ------------------------
+// ------------------------------------------------------------------
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const screenshotPath = join(__dirname, 'screenshots')
 const guideRootPath = join(homedir(), paths.root)
 const testRootPath = join(guideRootPath, '.test')
-const testPipelinePath = join(testRootPath, 'pipelines')
+const testDataPath = join(testRootPath, 'test-data')
+
+const alwaysDelete = [ 
+  join(testRootPath, 'pipelines'),
+  join(testRootPath, 'conversions'),
+  join(testRootPath, 'preview'),
+  join(testRootPath, 'config.json')
+]
+
+
+// -----------------------------------------------------------------------
+// ------------------------ Configuration Options ------------------------
+// -----------------------------------------------------------------------
 
 const testInterfaceInfo = {
   SpikeGLXRecordingInterface: {
@@ -22,15 +39,16 @@ const testInterfaceInfo = {
   }
 }
 
-const regenerateTestData = !existsSync(testRootPath) || false // Generate only if doesn't exist
-// const regenerateTestData = !existsSync(testRootPath) || true // Always regenerate
-
+const regenerateTestData = !existsSync(testDataPath) || false // Generate only if doesn't exist
 
 const dandiInfo = {
   id: '212750',
   token: process.env.DANDI_STAGING_API_KEY
 }
 
+// -------------------------------------------------------
+// ------------------------ Tests ------------------------
+// -------------------------------------------------------
 
 const skipUpload = dandiInfo.token ? false : true
 
@@ -39,10 +57,10 @@ if (skipUpload) console.log('No DANDI API key provided. Will skip upload step...
 beforeAll(() => {
 
   if (regenerateTestData) {
-    if (existsSync(testRootPath)) rmSync(testRootPath, { recursive: true })
-  } else {
-    if (existsSync(testPipelinePath)) rmSync(testPipelinePath, { recursive: true })
-  }
+    if (existsSync(testDataPath)) rmSync(testDataPath, { recursive: true })
+  } 
+
+  alwaysDelete.forEach(path => existsSync(path) ? rmSync(path, { recursive: true }) : '')
 
   if (existsSync(screenshotPath)) rmSync(screenshotPath, { recursive: true })
   mkdirSync(screenshotPath, { recursive: true })
@@ -67,7 +85,8 @@ describe('E2E Test', () => {
       await dashboard.page.save() // Ensure always saved
       await dashboard.next() // Advance one page
       return dashboard.page.info.id
-    }).catch(() => {
+    }).catch((e) => {
+      console.error('ERROR', e)
       expect(path).toBe(null)
     })
 
@@ -242,7 +261,7 @@ describe('E2E Test', () => {
 
       },
       testInterfaceInfo,
-      join(testRootPath, 'test-data', 'dataset')
+      join(testDataPath, 'dataset')
       )
 
 
@@ -348,14 +367,47 @@ describe('E2E Test', () => {
       test('Upload pipeline output to DANDI', async () => {
 
         await takeScreenshot('upload-page', 100)
+
+        await evaluate(async () => {
+          const dashboard = document.querySelector('nwb-dashboard')
+          const page =  dashboard.page
+          await page.rendered
+          page.click() // Ensure page is clicked (otherwise, Electron crashes after DANDI upload after this...)
+        })
+
+        await takeScreenshot('upload-page-api-tokens', 100)
+
+        await evaluate(async (dandiAPIToken) => {
+          const dashboard = document.querySelector('nwb-dashboard')
+          const page =  dashboard.page
+          const modal = page.globalModal
+          const stagingKeyInput = modal.form.getFormElement([ 'staging_api_key' ])
+          stagingKeyInput.updateData(dandiAPIToken)
+        }, dandiInfo.token)
+
+        await takeScreenshot('upload-page-api-token-added', 100)
+
+        await evaluate(async (dandisetId) => {
+          const dashboard = document.querySelector('nwb-dashboard')
+          const page =  dashboard.page
+          const modal = page.globalModal
+          await modal.footer.onClick() // Validate and submit value
+          const idInput = page.form.getFormElement(["dandiset"])
+          idInput.updateData(dandisetId)
+        }, dandiInfo.id)
+
+        await takeScreenshot('upload-page-with-id', 100)
+
+        await sleep(500) // Wait for input status to update
+
         await toNextPage('review')
-
-      })
-
-
+  
+      }, 3 * 60 * 1000) // Wait for upload to finish (~2min on M2)
+  
+  
       test('Review upload results', async () => {
 
-        await takeScreenshot('review-page', 100)
+        await takeScreenshot('review-page', 1000)
         await toNextPage()
 
       })

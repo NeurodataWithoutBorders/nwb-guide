@@ -65,14 +65,12 @@ export const updateDandisets = async (main = true) => {
     let token = DANDI?.api_keys?.[whichAPIKey];
 
     if (!token) return []
-
+    
     return await getMine({ token, type: staging ? 'staging' : undefined })
         .then((results) => results ? Promise.all(results.map(addDandiset)) : [])
-        .catch(error => {
-            console.error(error)
+        .catch(() => {
             return []
         })
-
 }
 
 export const addDandiset = async (info) => {
