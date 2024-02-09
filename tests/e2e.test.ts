@@ -26,6 +26,16 @@ const regenerateTestData = !existsSync(testRootPath) || false // Generate only i
 // const regenerateTestData = !existsSync(testRootPath) || true // Always regenerate
 
 
+const dandiInfo = {
+  id: '212750',
+  token: process.env.DANDI_STAGING_API_KEY
+}
+
+
+const skipUpload = dandiInfo.token ? false : true
+
+if (skipUpload) console.log('No DANDI API key provided. Will skip upload step...')
+
 beforeAll(() => {
 
   if (regenerateTestData) {
@@ -65,6 +75,16 @@ describe('E2E Test', () => {
 
     return pageId
 
+  }
+
+  const toHome = async () => {
+    const pageId = await evaluate(async () => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      await dashboard.page.to('/')
+      return dashboard.page.info.id
+    })
+
+    expect(pageId).toBe('/') // Ensure you are on the home page
   }
 
 
@@ -194,7 +214,7 @@ describe('E2E Test', () => {
 
       await takeScreenshot('pathexpansion-page', 300)
 
-      await evaluate(async (interfaces) => {
+      await evaluate(async () => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         page.optional.yes.onClick()
@@ -317,30 +337,36 @@ describe('E2E Test', () => {
       await takeScreenshot('preview-page', 1000) // Finish loading Neurosift
       await toNextPage('upload')
 
+      if (skipUpload) await toHome()
+
     }, 30 * 1000) // Wait for full conversion to complete
 
+    const uploadDescribe = skipUpload ? describe.skip: describe
 
-    test.skip('Upload pipeline output to DANDI', async () => {
+    uploadDescribe('Upload to DANDI', () => {
 
-      await takeScreenshot('upload-page', 100)
-      await toNextPage('review')
+      test('Upload pipeline output to DANDI', async () => {
+
+        await takeScreenshot('upload-page', 100)
+        await toNextPage('review')
+  
+      })
+  
+  
+      test('Review upload results', async () => {
+  
+        await takeScreenshot('review-page', 100)
+        await toNextPage()
+
+      })
 
     })
 
-
-    test.skip('Review upload results', async () => {
-
-      await takeScreenshot('review-page', 100)
-      await toNextPage()
-
-    })
-
-    test.skip('Ensure there is one completed pipeline', async () => {
-
+    test('Ensure there is one completed pipeline', async () => {
       await takeScreenshot('home-page', 100)
-
+      const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)  
+      expect(nPipelines).toBe(1)
     })
-
 
   })
 
