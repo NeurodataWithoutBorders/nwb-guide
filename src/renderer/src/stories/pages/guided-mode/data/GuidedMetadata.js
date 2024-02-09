@@ -204,6 +204,9 @@ export class GuidedMetadataPage extends ManagedPage {
             );
         }
 
+
+        console.log(schema)
+        
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
@@ -394,7 +397,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 metadata.schema = updatedSchema;
 
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
-                if (fullPath.slice(-1)[0] !== "Electrodes") return new SimpleTable(metadata);
+                if (name !== "Electrodes") return new SimpleTable(metadata);
                 else return true; // All other tables are handled by the default behavior
                 // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
             },
