@@ -204,9 +204,8 @@ export class GuidedMetadataPage extends ManagedPage {
             );
         }
 
+        console.log(schema);
 
-        console.log(schema)
-        
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,

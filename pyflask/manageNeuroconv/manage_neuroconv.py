@@ -263,7 +263,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     if has_ecephys:
         metadata["Ecephys"]["Electrodes"] = {}
 
-        schema["properties"]["Ecephys"]["required"].append('Electrodes')
+        schema["properties"]["Ecephys"]["required"].append("Electrodes")
         ecephys_properties = schema["properties"]["Ecephys"]["properties"]
         original_electrodes_schema = ecephys_properties["Electrodes"]
 
@@ -274,25 +274,25 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     def on_recording_interface(name, recording_interface):
 
         metadata["Ecephys"]["Electrodes"][name] = dict(
-            Electrodes = get_electrode_table_json(recording_interface),
-            ElectrodeColumns = get_electrode_columns_json(recording_interface)
+            Electrodes=get_electrode_table_json(recording_interface),
+            ElectrodeColumns=get_electrode_columns_json(recording_interface),
         )
 
         ecephys_properties["Electrodes"]["properties"][name] = dict(
-            type = 'object',
-            properties = dict(
-                Electrodes = {
+            type="object",
+            properties=dict(
+                Electrodes={
                     "type": "array",
                     "minItems": 0,
                     "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
                 },
-                ElectrodeColumns = {
+                ElectrodeColumns={
                     "type": "array",
                     "minItems": 0,
                     "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
-                }
+                },
             ),
-            required = ["Electrodes", "ElectrodeColumns"]
+            required=["Electrodes", "ElectrodeColumns"],
         )
 
         ecephys_properties["Electrodes"]["required"].append(name)
@@ -311,13 +311,8 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             defs = ecephys_properties["definitions"]
             electrode_def = defs["Electrodes"]
 
-            numbers = ['int', 'float']
-            n_bits = [
-                "8",
-                "16"
-                "32",
-                "64"
-            ]
+            numbers = ["int", "float"]
+            n_bits = ["8", "16" "32", "64"]
 
             # NOTE: Update to output from NeuroConv
             electrode_def["properties"]["data_type"] = {
@@ -325,7 +320,11 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "enum": [
                     "bool",
                     "str",
-                    *[item for row in list(map(lambda bits: map(lambda type: f"{type}{bits}", numbers), n_bits)) for item in row]
+                    *[
+                        item
+                        for row in list(map(lambda bits: map(lambda type: f"{type}{bits}", numbers), n_bits))
+                        for item in row
+                    ],
                 ],
                 "enumLabels": {
                     "bool": "logical",
@@ -337,8 +336,8 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                     "int8": "8-bit integer",
                     "int16": "16-bit integer",
                     "int32": "32-bit integer",
-                    "int64": "64-bit integer"
-                }
+                    "int64": "64-bit integer",
+                },
             }
 
             # Configure electrode columns
@@ -520,7 +519,9 @@ def convert_to_nwb(info: dict) -> str:
         interface = converter.data_interface_objects[interface_name]
 
         # NOTE: Must have a method to update the electrode table
-        update_recording_properties_from_table_as_json(interface, electrode_table_json=electrode_results, electrode_column_info=electrode_column_results)
+        update_recording_properties_from_table_as_json(
+            interface, electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
+        )
 
     # Update with the latest metadata for the electrodes
     ecephys_metadata["Electrodes"] = electrode_column_results
@@ -912,20 +913,27 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
     # default_column_metadata =  interface.get_metadata()["Ecephys"]["ElectrodeColumns"]["properties"] # NOTE: This doesn't exist...
     # property_descriptions = {column_name: column_fields["description"] for column_name, column_fields in default_column_metadata}
 
-    property_dtypes= {property_name: type(recording.get_property(key=property_name)[0]).__name__.replace("_", "") for property_name in property_names}
-    
+    property_dtypes = {
+        property_name: type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
+        for property_name in property_names
+    }
+
     # channel_ids = recording.get_channel_ids()
     # property_dtypes= {property_name: str(recording.get_property(key=property_name, ids=[channel_ids[0]]).dtype) for property_name in property_names}
 
     # Return table as JSON
-    return json.loads(json.dumps(obj=[
-        dict(
-            name=property_name,
-            description=property_descriptions.get(property_name, "No description."),
-            data_type=property_dtypes.get(property_name, ""),
+    return json.loads(
+        json.dumps(
+            obj=[
+                dict(
+                    name=property_name,
+                    description=property_descriptions.get(property_name, "No description."),
+                    data_type=property_dtypes.get(property_name, ""),
+                )
+                for property_name in property_names
+            ]
         )
-        for property_name in property_names
-    ]))
+    )
 
 
 def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
@@ -954,7 +962,10 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
 
     return table_as_json
 
-def update_recording_properties_from_table_as_json(recording_interface, electrode_column_info: dict, electrode_table_json: List[Dict[str, Any]]):
+
+def update_recording_properties_from_table_as_json(
+    recording_interface, electrode_column_info: dict, electrode_table_json: List[Dict[str, Any]]
+):
     import numpy as np
 
     electrode_column_data_types = {column["name"]: column["data_type"] for column in electrode_column_info}
@@ -962,7 +973,7 @@ def update_recording_properties_from_table_as_json(recording_interface, electrod
     recording = recording_interface.recording_extractor
     channel_ids = recording.get_channel_ids()
     stream_prefix = channel_ids[0].split("#")[0]  # TODO: see if this generalized across formats
-    
+
     for entry in electrode_table_json:
         electrode_properties = dict(entry)  # copy
         channel_name = electrode_properties.pop("channel_name")
