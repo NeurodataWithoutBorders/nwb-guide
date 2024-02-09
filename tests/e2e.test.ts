@@ -18,7 +18,7 @@ const guideRootPath = join(homedir(), paths.root)
 const testRootPath = join(guideRootPath, '.test')
 const testDataPath = join(testRootPath, 'test-data')
 
-const alwaysDelete = [ 
+const alwaysDelete = [
   join(testRootPath, 'pipelines'),
   join(testRootPath, 'conversions'),
   join(testRootPath, 'preview'),
@@ -58,7 +58,7 @@ beforeAll(() => {
 
   if (regenerateTestData) {
     if (existsSync(testDataPath)) rmSync(testDataPath, { recursive: true })
-  } 
+  }
 
   alwaysDelete.forEach(path => existsSync(path) ? rmSync(path, { recursive: true }) : '')
 
@@ -401,10 +401,10 @@ describe('E2E Test', () => {
         await sleep(500) // Wait for input status to update
 
         await toNextPage('review')
-  
+
       }, 3 * 60 * 1000) // Wait for upload to finish (~2min on M2)
-  
-  
+
+
       test('Review upload results', async () => {
 
         await takeScreenshot('review-page', 1000)
