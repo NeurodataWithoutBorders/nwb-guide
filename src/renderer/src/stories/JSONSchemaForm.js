@@ -482,7 +482,7 @@ export class JSONSchemaForm extends LitElement {
         if (message) this.throw(message);
 
         // Validate nested forms (skip disabled)
-        for (let name in this.#nestedForms) {
+        for (let name in this.forms) {
             const accordion = this.accordions[name];
             if (!accordion || !accordion.disabled)
                 await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
