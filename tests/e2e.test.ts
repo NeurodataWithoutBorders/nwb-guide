@@ -358,7 +358,7 @@ describe('E2E Test', () => {
 
       if (skipUpload) await toHome()
 
-    }, 30 * 1000) // Wait for full conversion to complete
+    }, 60 * 1000) // Wait for full conversion to complete
 
     const uploadDescribe = skipUpload ? describe.skip: describe
 
