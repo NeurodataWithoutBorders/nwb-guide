@@ -311,14 +311,14 @@ describe('E2E Test', () => {
 
     })
 
-    // NOTE: Finish these with the correct timing
     test('Review Neurosift visualization', async () => {
 
       await takeScreenshot('preview-page', 1000) // Finish loading Neurosift
       await toNextPage('upload')
 
-    })
+    }, 30 * 1000) // Wait for full conversion to complete
 
+    
     test.skip('Upload pipeline output to DANDI', async () => {
 
       await takeScreenshot('upload-page', 100)

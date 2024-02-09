@@ -209,7 +209,7 @@ export class Search extends LitElement {
         });
 
         this.#initialize();
-        this.#populate();
+        if (this.listMode !== "click") this.#populate();
     }
 
     onSelect = (id, value) => {};
