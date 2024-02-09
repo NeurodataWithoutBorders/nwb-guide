@@ -349,12 +349,12 @@ describe('E2E Test', () => {
 
         await takeScreenshot('upload-page', 100)
         await toNextPage('review')
-  
+
       })
-  
-  
+
+
       test('Review upload results', async () => {
-  
+
         await takeScreenshot('review-page', 100)
         await toNextPage()
 
@@ -364,7 +364,7 @@ describe('E2E Test', () => {
 
     test('Ensure there is one completed pipeline', async () => {
       await takeScreenshot('home-page', 100)
-      const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)  
+      const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
       expect(nPipelines).toBe(1)
     })
 
