@@ -158,7 +158,7 @@ async function getAPIKey(staging = false) {
 
     const isInvalid = !errors || errors.length;
 
-    console.log('GETTING API KEY', DANDI, api_key, staging, isInvalid, errors)
+    console.log("GETTING API KEY", DANDI, api_key, staging, isInvalid, errors);
 
     if (isInvalid) {
         const modal = new Modal({
@@ -302,8 +302,8 @@ export class UploadsPage extends Page {
                     return null;
                 }
 
-                const globalDandiData =  global.data.DANDI ?? (global.data.DANDI = {})
-                if (!globalDandiData.api_keys) globalDandiData.api_keys = {}
+                const globalDandiData = global.data.DANDI ?? (global.data.DANDI = {});
+                if (!globalDandiData.api_keys) globalDandiData.api_keys = {};
                 merge(apiKeys, globalDandiData.api_keys);
 
                 global.save();
@@ -326,9 +326,7 @@ export class UploadsPage extends Page {
         if (this.#globalModal) this.#globalModal.remove();
     }
 
-    
     render() {
-
         const globalState = (global.data.uploads = global.data.uploads ?? {});
         const defaultButtonMessage = "Upload Files";
 
@@ -364,7 +362,6 @@ export class UploadsPage extends Page {
         const promise = ready.cpus
             .then(() => ready.dandisets)
             .then(() => {
-
                 // NOTE: API Keys and Dandiset IDs persist across selected project
                 return (this.form = new JSONSchemaForm({
                     results: globalState,

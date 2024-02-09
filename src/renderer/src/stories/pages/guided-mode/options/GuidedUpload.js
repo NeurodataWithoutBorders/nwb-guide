@@ -68,8 +68,8 @@ export class GuidedUploadPage extends Page {
                 }
 
                 // Ensure values exist
-                const globalDandiData =  global.data.DANDI ?? (global.data.DANDI = {})
-                if (!globalDandiData.api_keys) globalDandiData.api_keys = {}
+                const globalDandiData = global.data.DANDI ?? (global.data.DANDI = {});
+                if (!globalDandiData.api_keys) globalDandiData.api_keys = {};
                 merge(apiKeys, globalDandiData.api_keys);
 
                 global.save();
@@ -129,7 +129,9 @@ export class GuidedUploadPage extends Page {
     #rendered;
     #updateRendered = (force) =>
         force || this.#rendered === true
-            ? (this.#rendered = new Promise((resolve) => this.#toggleRendered = () => resolve((this.#rendered = true))))
+            ? (this.#rendered = new Promise(
+                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+              ))
             : this.#rendered;
 
     get rendered() {
@@ -137,12 +139,11 @@ export class GuidedUploadPage extends Page {
     }
 
     async updated() {
-        await this.rendered
+        await this.rendered;
     }
 
     render() {
-
-        this.#updateRendered(true)
+        this.#updateRendered(true);
 
         const state = (this.localState = structuredClone(this.info.globalState.upload ?? { info: {} }));
 
@@ -179,11 +180,11 @@ export class GuidedUploadPage extends Page {
             if (!api_keys || !Object.keys(api_keys).length) this.globalModal.open = true;
         });
 
-        const untilResult = until(promise, html`Loading form contents...`)
+        const untilResult = until(promise, html`Loading form contents...`);
 
         promise.then(() => {
-            this.#toggleRendered()
-        })
+            this.#toggleRendered();
+        });
 
         return untilResult;
     }
