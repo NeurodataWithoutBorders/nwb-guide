@@ -22,7 +22,8 @@ const testInterfaceInfo = {
   }
 }
 
-const regenerateTestData = false
+const regenerateTestData = !existsSync(testRootPath) || false // Generate only if doesn't exist
+// const regenerateTestData = !existsSync(testRootPath) || true // Always regenerate
 
 
 beforeAll(() => {
@@ -318,7 +319,7 @@ describe('E2E Test', () => {
 
     }, 30 * 1000) // Wait for full conversion to complete
 
-    
+
     test.skip('Upload pipeline output to DANDI', async () => {
 
       await takeScreenshot('upload-page', 100)
