@@ -146,7 +146,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await this.save(undefined, false); // Just save new raw values
 
-            this.to(1);
+            return this.to(1);
         },
     };
 
