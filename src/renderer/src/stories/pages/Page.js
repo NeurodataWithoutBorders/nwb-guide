@@ -83,7 +83,7 @@ export class Page extends LitElement {
             }
         }
 
-        this.onTransition(transition);
+        return await this.onTransition(transition);
     };
 
     onTransition = () => {}; // User-defined function
