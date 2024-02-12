@@ -9,6 +9,7 @@ import * as promises from "../promises";
 import "./Button";
 import { sortTable } from "./Table";
 import tippy from "tippy.js";
+import { getIgnore } from "./JSONSchemaForm";
 
 export class BasicTable extends LitElement {
     static get styles() {
@@ -368,8 +369,6 @@ export class BasicTable extends LitElement {
         this.#updateRendered();
 
         const entries = this.#itemProps;
-        for (let key in this.ignore) delete entries[key];
-        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties) {
@@ -385,6 +384,10 @@ export class BasicTable extends LitElement {
             }, entries);
         }
 
+          // Ignore any additions in the ignore configuration
+          for (let key in this.ignore) delete entries[key];
+          for (let key in this.ignore["*"] ?? {}) delete entries[key];
+  
         // Sort Columns by Key Column and Requirement
         const keys =
             (this.#keys =
@@ -419,7 +422,7 @@ export class BasicTable extends LitElement {
                         ${data.map(
                             (row, i) =>
                                 html`<tr>
-                                    ${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${col}</div></td>`)}
+                                    ${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`)}
                                 </tr>`
                         )}
                     </tbody>

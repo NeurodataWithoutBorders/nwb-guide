@@ -309,33 +309,26 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             defs = ecephys_properties["definitions"]
             electrode_def = defs["Electrodes"]
 
-            numbers = ["int", "float"]
-            n_bits = ["8", "16" "32", "64"]
+            dtype_descriptions = {
+                "bool": "logical",
+                "str": "string",
+                "ndarray": "n-dimensional array",
+                "float8": "8-bit number",
+                "float16": "16-bit number",
+                "float32": "32-bit number",
+                "float64": "64-bit number",
+                "int8": "8-bit integer",
+                "int16": "16-bit integer",
+                "int32": "32-bit integer",
+                "int64": "64-bit integer",
+            }
 
             # NOTE: Update to output from NeuroConv
             electrode_def["properties"]["data_type"] = {
                 "type": "string",
-                "enum": [
-                    "bool",
-                    "str",
-                    *[
-                        item
-                        for row in list(map(lambda bits: map(lambda type: f"{type}{bits}", numbers), n_bits))
-                        for item in row
-                    ],
-                ],
-                "enumLabels": {
-                    "bool": "logical",
-                    "str": "string",
-                    "float8": "8-bit number",
-                    "float16": "16-bit number",
-                    "float32": "32-bit number",
-                    "float64": "64-bit number",
-                    "int8": "8-bit integer",
-                    "int16": "16-bit integer",
-                    "int32": "32-bit integer",
-                    "int64": "64-bit integer",
-                },
+                "strict": False,
+                "enum": list(dtype_descriptions.keys()),
+                "enumLabels": dtype_descriptions,
             }
 
             # Configure electrode columns
@@ -502,29 +495,21 @@ def convert_to_nwb(info: dict) -> str:
         else None
     )
 
-    if "Ecephys" not in info["metadata"]:
-        info["metadata"].update(Ecephys=dict())
-
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
 
-    ecephys_metadata = resolved_metadata["Ecephys"]
-    electrode_column_results = ecephys_metadata[
-        "ElectrodeColumns"
-    ]  # NOTE: Need more specificity from the ElectrodeColumns (e.g. dtype, not always provided...)
+    ecephys_metadata = resolved_metadata.get('Ecephys')
 
-    for interface_name, electrode_results in ecephys_metadata["Electrodes"].items():
-        interface = converter.data_interface_objects[interface_name]
+    if ecephys_metadata:
 
-        # NOTE: Must have a method to update the electrode table
-        update_recording_properties_from_table_as_json(
-            interface, electrode_table_json=electrode_results, electrode_column_info=electrode_column_results
-        )
+        for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+            interface = converter.data_interface_objects[interface_name]
 
-    # Update with the latest metadata for the electrodes
-    ecephys_metadata["Electrodes"] = electrode_column_results
+            update_recording_properties_from_table_as_json(
+                interface, electrode_table_json=interface_electrode_results["Electrodes"], electrode_column_info=interface_electrode_results["ElectrodeColumns"]
+            )
 
-    ecephys_metadata.pop("ElectrodeColumns", dict())
+        del ecephys_metadata["Electrodes"] # NOTE: Not sure what this should be now...
 
     # Actually run the conversion
     converter.run_conversion(
@@ -881,23 +866,34 @@ def generate_test_data(output_path: str):
     )
 
 
+dtype_map = {
+    "<U64": "int64",
+    "<U2": "str"
+}
+
+def get_property_dtype(recording_interface, property_name, channel_ids = []):
+    recording = recording_interface.recording_extractor
+    dtype = str(recording.get_property(key=property_name, ids=channel_ids).dtype)
+
+    # return type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
+    # return dtype
+    return dtype_map.get(dtype, dtype)
+
 ## Ecephys Helper Functions
 def get_electrode_properties(recording_interface):
     """A convenience function for uniformly excluding certain properties of the provided recording extractor."""
 
-    return set(recording_interface.recording_extractor.get_property_keys()) - {
-        "location",  # this is mapped to (rel_x,rel_y,(rel_z)))]),
-        "group",  # this is auto-assigned as a link using the group_name
-        "contact_vector",  # contains various probeinterface related info but not yet unpacked or fully used
-    }
+    properties = set(recording_interface.recording_extractor.get_property_keys())
+
+    return properties
 
 
 def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
     """A convenience function for collecting and organizing the property values of the underlying recording extractor."""
-    recording = interface.recording_extractor
+
     property_names = get_electrode_properties(interface)
 
-    # Hardcuded for SpikeGLX
+    # Hardcuded for SpikeGLX (NOTE: Update for more interfaces)
     property_descriptions = dict(
         channel_name="The name of this channel.",
         group_name="The name of the ElectrodeGroup this channel's electrode is a part of.",
@@ -911,13 +907,8 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
     # default_column_metadata =  interface.get_metadata()["Ecephys"]["ElectrodeColumns"]["properties"] # NOTE: This doesn't exist...
     # property_descriptions = {column_name: column_fields["description"] for column_name, column_fields in default_column_metadata}
 
-    property_dtypes = {
-        property_name: type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
-        for property_name in property_names
-    }
-
-    # channel_ids = recording.get_channel_ids()
-    # property_dtypes= {property_name: str(recording.get_property(key=property_name, ids=[channel_ids[0]]).dtype) for property_name in property_names}
+    recording = interface.recording_extractor
+    channel_ids = recording.get_channel_ids()
 
     # Return table as JSON
     return json.loads(
@@ -926,7 +917,7 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
                 dict(
                     name=property_name,
                     description=property_descriptions.get(property_name, "No description."),
-                    data_type=property_dtypes.get(property_name, ""),
+                    data_type=get_property_dtype(interface, property_name, [ channel_ids[0] ]),
                 )
                 for property_name in property_names
             ]

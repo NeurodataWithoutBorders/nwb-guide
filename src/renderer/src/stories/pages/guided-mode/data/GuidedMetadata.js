@@ -28,7 +28,6 @@ import globalIcon from "../../../assets/global.svg?raw";
 const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
     Ophys: {
-        // NOTE: Get this to work
         "*": {
             starting_time: true,
             rate: true,
@@ -59,6 +58,13 @@ const propsToIgnore = {
         UnitProperties: true,
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
+        Electrodes: {
+            '*': {
+                location: true,
+                group: true,
+                contact_vector: true
+            }
+        }
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)
