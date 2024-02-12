@@ -130,7 +130,7 @@ describe('E2E Test', () => {
         const dashboard = document.querySelector('nwb-dashboard')
         dashboard.sidebar.select('settings')
 
-        // Genereate test data
+        // Generate test data
         const page = dashboard.page
         page.deleteTestData()
         return await page.generateTestData()
