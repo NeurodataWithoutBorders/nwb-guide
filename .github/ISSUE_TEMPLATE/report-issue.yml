@@ -1,0 +1,71 @@
+name: Report issue
+description: Let us know of any issue you encounter while using NWB GUIDE.
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Thanks for taking the time to fill out this issue report!
+        ### The following information will help us resolve your issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Describe the issue
+      description: Provide a clear and concise description of what the issue is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        For example:
+          1. Go to '...'
+          2. Click on '....'
+          3. Scroll down to '....'
+          4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: Provide the operating system used to run the GUIDE (e.g. Windows 10 Pro)
+    validations:
+      required: true
+
+  - type: input
+    id: guide_version
+    attributes:
+      label: GUIDE Version
+      description: Provide the release version or development branch
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-content
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwb-guide/blob/main/.github/CODE_OF_CONDUCT.rst)
+      options:
+        - label: I agree to follow this project's [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwb-guide/blob/main/.github/CODE_OF_CONDUCT.rst)
+          required: true
+        - label: Have you ensured this bug was not already [reported](https://github.com/NeurodataWithoutBorders/nwb-guide/issues)?
+          required: true
