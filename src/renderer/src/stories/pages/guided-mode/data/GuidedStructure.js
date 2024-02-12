@@ -122,8 +122,8 @@ export class GuidedStructurePage extends Page {
                     const category = categories.find(({ test }) => test.test(interfaceName))?.value;
 
                     const structuredKeywords = {
-                        suffixes: value.suffixes
-                    }
+                        suffixes: value.suffixes,
+                    };
 
                     return {
                         ...value, // Contains label and name already (extra metadata)

@@ -327,11 +327,15 @@ export class Search extends LitElement {
                     listItemElement.setAttribute("hidden", "");
                     listItemElement.setAttribute("tabindex", -1);
 
-                    const { disabled, structuredKeywords, keywords } = option
+                    const { disabled, structuredKeywords, keywords } = option;
 
-                    if (structuredKeywords) listItemElement.setAttribute("data-structured-keywords", JSON.stringify(option.structuredKeywords));
+                    if (structuredKeywords)
+                        listItemElement.setAttribute(
+                            "data-structured-keywords",
+                            JSON.stringify(option.structuredKeywords)
+                        );
                     if (keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
-                    
+
                     listItemElement.addEventListener("click", (clickEvent) => {
                         clickEvent.stopPropagation();
                         this.#onSelect(option);
@@ -368,15 +372,15 @@ export class Search extends LitElement {
                     }
 
                     if (structuredKeywords) {
-                        const div = document.createElement('div')
-                        div.classList.add('structured-keywords')
+                        const div = document.createElement("div");
+                        div.classList.add("structured-keywords");
 
                         Object.entries(structuredKeywords).forEach(([key, value]) => {
                             const keywordsElement = document.createElement("small");
-                            const capitalizedKey = key[0].toUpperCase() + key.slice(1)
-                            keywordsElement.innerHTML = `<b>${capitalizedKey}:</b> ${value.join(', ')}`
+                            const capitalizedKey = key[0].toUpperCase() + key.slice(1);
+                            keywordsElement.innerHTML = `<b>${capitalizedKey}:</b> ${value.join(", ")}`;
                             div.appendChild(keywordsElement);
-                        })
+                        });
 
                         container.appendChild(div);
                     }
