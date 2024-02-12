@@ -388,12 +388,16 @@ export class JSONSchemaForm extends LitElement {
                 const isRow = typeof rowName === "number";
 
                 const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
-                const resolvedSchema = this.getSchema(e.path, schema)
+                const resolvedSchema = this.getSchema(e.path, schema);
 
                 // ------------ Exclude Certain Errors ------------
 
                 // Allow for constructing types from object types
-                if (e.message.includes("is not of a type(s)") && "properties" in resolvedSchema && resolvedSchema.type === "string")
+                if (
+                    e.message.includes("is not of a type(s)") &&
+                    "properties" in resolvedSchema &&
+                    resolvedSchema.type === "string"
+                )
                     return;
 
                 // Ignore required errors if value is empty

@@ -498,7 +498,7 @@ def convert_to_nwb(info: dict) -> str:
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
 
-    ecephys_metadata = resolved_metadata.get('Ecephys')
+    ecephys_metadata = resolved_metadata.get("Ecephys")
 
     if ecephys_metadata:
 
@@ -506,10 +506,12 @@ def convert_to_nwb(info: dict) -> str:
             interface = converter.data_interface_objects[interface_name]
 
             update_recording_properties_from_table_as_json(
-                interface, electrode_table_json=interface_electrode_results["Electrodes"], electrode_column_info=interface_electrode_results["ElectrodeColumns"]
+                interface,
+                electrode_table_json=interface_electrode_results["Electrodes"],
+                electrode_column_info=interface_electrode_results["ElectrodeColumns"],
             )
 
-        del ecephys_metadata["Electrodes"] # NOTE: Not sure what this should be now...
+        del ecephys_metadata["Electrodes"]  # NOTE: Not sure what this should be now...
 
     # Actually run the conversion
     converter.run_conversion(
@@ -866,18 +868,17 @@ def generate_test_data(output_path: str):
     )
 
 
-dtype_map = {
-    "<U64": "int64",
-    "<U2": "str"
-}
+dtype_map = {"<U64": "int64", "<U2": "str"}
 
-def get_property_dtype(recording_interface, property_name, channel_ids = []):
+
+def get_property_dtype(recording_interface, property_name, channel_ids=[]):
     recording = recording_interface.recording_extractor
     dtype = str(recording.get_property(key=property_name, ids=channel_ids).dtype)
 
     # return type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
     # return dtype
     return dtype_map.get(dtype, dtype)
+
 
 ## Ecephys Helper Functions
 def get_electrode_properties(recording_interface):
@@ -917,7 +918,7 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
                 dict(
                     name=property_name,
                     description=property_descriptions.get(property_name, "No description."),
-                    data_type=get_property_dtype(interface, property_name, [ channel_ids[0] ]),
+                    data_type=get_property_dtype(interface, property_name, [channel_ids[0]]),
                 )
                 for property_name in property_names
             ]

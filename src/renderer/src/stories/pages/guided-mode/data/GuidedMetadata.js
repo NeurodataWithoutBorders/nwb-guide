@@ -59,12 +59,12 @@ const propsToIgnore = {
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
         Electrodes: {
-            '*': {
+            "*": {
                 location: true,
                 group: true,
-                contact_vector: true
-            }
-        }
+                contact_vector: true,
+            },
+        },
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)

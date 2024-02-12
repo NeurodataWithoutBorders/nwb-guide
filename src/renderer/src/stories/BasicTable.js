@@ -384,10 +384,10 @@ export class BasicTable extends LitElement {
             }, entries);
         }
 
-          // Ignore any additions in the ignore configuration
-          for (let key in this.ignore) delete entries[key];
-          for (let key in this.ignore["*"] ?? {}) delete entries[key];
-  
+        // Ignore any additions in the ignore configuration
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
+
         // Sort Columns by Key Column and Requirement
         const keys =
             (this.#keys =
@@ -422,7 +422,9 @@ export class BasicTable extends LitElement {
                         ${data.map(
                             (row, i) =>
                                 html`<tr>
-                                    ${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`)}
+                                    ${row.map(
+                                        (col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`
+                                    )}
                                 </tr>`
                         )}
                     </tbody>
