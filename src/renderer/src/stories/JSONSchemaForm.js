@@ -365,7 +365,7 @@ export class JSONSchemaForm extends LitElement {
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
             ...Object.entries(this.forms)
                 .filter(([k, v]) => {
-                    const accordion = this.#accordions[k];
+                    const accordion = this.accordions[k];
                     return !accordion || !accordion.disabled;
                 })
                 .map(([_, v]) => v),
@@ -464,6 +464,7 @@ export class JSONSchemaForm extends LitElement {
 
         // if (!isValid && allErrors.length && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`;
 
+        console.log(allErrors);
         // Check if all inputs are valid
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
@@ -483,7 +484,7 @@ export class JSONSchemaForm extends LitElement {
 
         // Validate nested forms (skip disabled)
         for (let name in this.forms) {
-            const accordion = this.#accordions[name];
+            const accordion = this.accordions[name];
             if (!accordion || !accordion.disabled)
                 await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
@@ -640,7 +641,7 @@ export class JSONSchemaForm extends LitElement {
         for (let name in requirements) {
             let isRequired = this.#isRequired(name, requirements);
 
-            if (this.#accordions[name]?.disabled) continue; // Skip disabled accordions
+            if (this.accordions[name]?.disabled) continue; // Skip disabled accordions
 
             // // NOTE: Uncomment to block checking requirements inside optional properties
             // if (!requirements[name][selfRequiredSymbol] && !resolved[name]) continue; // Do not continue checking requirements if absent and not required
@@ -797,7 +798,7 @@ export class JSONSchemaForm extends LitElement {
 
     // Assume this is going to return as a Promise—even if the change function isn't returning one
     triggerValidation = async (name, path = [], checkLinks = true, input, schema, parent, hooks = {}) => {
-        const { onError, onWarning } = hooks;
+        const { onError, onWarning, onInfo } = hooks;
 
         const localPath = [...path, name].filter((str) => typeof str === "string"); // Ignore row information
         const externalPath = [...this.base, ...localPath];
@@ -958,7 +959,7 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
-    #accordions = {};
+    accordions = {};
 
     #render = (schema, results, required = {}, ignore = {}, path = []) => {
         let isLink = Symbol("isLink");
@@ -1147,7 +1148,7 @@ export class JSONSchemaForm extends LitElement {
                 }));
             }
 
-            const oldStates = this.#accordions[headerName];
+            const oldStates = this.accordions[name];
 
             const disableText = "Skip";
             const enableText = "Enable";
@@ -1181,7 +1182,7 @@ export class JSONSchemaForm extends LitElement {
             enableToggleContainer.append(enableToggle);
             Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
 
-            const accordion = (this.#accordions[headerName] = new Accordion({
+            const accordion = (this.accordions[name] = new Accordion({
                 name: headerName,
                 toggleable: hasMany,
                 subtitle: html`<div style="display:flex; align-items: center;">
