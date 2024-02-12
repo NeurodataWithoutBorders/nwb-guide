@@ -77,6 +77,7 @@ class Locate(Resource):
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
 
+
 @neuroconv_api.route("/locate/autocomplete")
 class Locate(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -86,7 +87,8 @@ class Locate(Resource):
         except Exception as exception:
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
-                
+
+
 @neuroconv_api.route("/metadata")
 class Metadata(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})

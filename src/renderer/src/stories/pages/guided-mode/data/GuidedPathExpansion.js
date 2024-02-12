@@ -18,13 +18,12 @@ import { Button } from "../../../Button.js";
 import { Modal } from "../../../Modal";
 import { header } from "../../../forms/utils";
 
-import autocompleteIcon from '../../../assets/inspect.svg?raw' 
+import autocompleteIcon from "../../../assets/inspect.svg?raw";
 
-
-export async function autocompleteFormatString( path ) {
+export async function autocompleteFormatString(path) {
     let notification;
 
-    const { base_directory } = path.reduce((acc, key) => acc[key] ?? {}, this.form.resolved)
+    const { base_directory } = path.reduce((acc, key) => acc[key] ?? {}, this.form.resolved);
 
     const notify = (message, type) => {
         if (notification) this.dismiss(notification);
@@ -32,9 +31,9 @@ export async function autocompleteFormatString( path ) {
     };
 
     if (!base_directory) {
-        const message = `Please fill out the <b>base directory</b> for ${header(path[0])} before attempting auto-completion.`
-        notify(message, 'error')
-        throw new Error(message)
+        const message = `Please fill out the <b>base directory</b> for ${header(path[0])} before attempting auto-completion.`;
+        notify(message, "error");
+        throw new Error(message);
     }
 
     const modal = new Modal({
@@ -47,7 +46,7 @@ export async function autocompleteFormatString( path ) {
         paddingBottom: "0px",
     });
 
-    const propOrder = ["path", "subject_id", "session_id"]
+    const propOrder = ["path", "subject_id", "session_id"];
     const form = new JSONSchemaForm({
         schema: {
             type: "object",
@@ -55,45 +54,44 @@ export async function autocompleteFormatString( path ) {
                 path: {
                     type: "string",
                     title: "Example Filesystem Entry",
-                    format: [ "file", "directory" ],
-                    description: "Provide an example filesystem entry for the selected interface"
+                    format: ["file", "directory"],
+                    description: "Provide an example filesystem entry for the selected interface",
                 },
                 subject_id: {
                     type: "string",
-                    description: "The subject ID in the above entry"
+                    description: "The subject ID in the above entry",
                 },
                 session_id: {
                     type: "string",
-                    description: "The session ID in the above entry"
+                    description: "The session ID in the above entry",
                 },
             },
             required: propOrder,
-            order: propOrder
+            order: propOrder,
         },
         validateOnChange: async (name, parent) => {
             const value = parent[name];
 
-            if (name === 'path') {
-                const errors = []
+            if (name === "path") {
+                const errors = [];
                 for (let key in parent) {
                     if (key === name) continue;
-                    if (!value.includes(parent[key])) errors.push( {
-                        type: "error",
-                        message: `${header(name)} not found in the updated path.`,
-                    })
+                    if (!value.includes(parent[key]))
+                        errors.push({
+                            type: "error",
+                            message: `${header(name)} not found in the updated path.`,
+                        });
                 }
+            } else {
+                if (!parent.path || !parent.path.includes(value))
+                    return [
+                        {
+                            type: "error",
+                            message: `${header(name)} not found in the provided path.`,
+                        },
+                    ];
             }
-
-            else {
-                if (!parent.path || !parent.path.includes(value)) return [
-                    {
-                        type: "error",
-                        message: `${header(name)} not found in the provided path.`,
-                    },
-                ];
-            } 
-
-        }
+        },
     });
 
     content.append(form);
@@ -111,8 +109,12 @@ export async function autocompleteFormatString( path ) {
                     throw e;
                 });
 
-                const results = await run('locate/autocomplete', { base_directory, additional_metadata: {}, ...form.results })    
-                const input = this.form.getFormElement([ ...path, 'format_string_path' ]);
+                const results = await run("locate/autocomplete", {
+                    base_directory,
+                    additional_metadata: {},
+                    ...form.results,
+                });
+                const input = this.form.getFormElement([...path, "format_string_path"]);
                 input.updateData(results.format_string);
                 this.save();
                 resolve(results.format_string);
@@ -385,7 +387,7 @@ export class GuidedPathExpansionPage extends Page {
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
-        const controls = {}
+        const controls = {};
         for (let key in this.info.globalState.interfaces) {
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
 
@@ -397,12 +399,10 @@ export class GuidedPathExpansionPage extends Page {
                         buttonStyles: {
                             width: "max-content",
                         },
-                        onClick: async () => autocompleteFormatString.call(this, [key])
+                        onClick: async () => autocompleteFormatString.call(this, [key]),
                     }),
-                ]
-            }
-
-
+                ],
+            };
         }
         structureState.schema = generatedSchema;
 
