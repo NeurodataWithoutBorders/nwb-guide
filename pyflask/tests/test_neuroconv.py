@@ -13,6 +13,7 @@ def test_get_all_interfaces(client):
                     "type": "object",
                     "properties": {
                         "name": {"type": "string"},
+                        "suffixes": {"type": "array", "items": {"type": "string"}},
                         "label": {"type": "string"},
                         "description": {"type": "string"},
                         "keywords": {"type": "array", "items": {"type": "string"}},

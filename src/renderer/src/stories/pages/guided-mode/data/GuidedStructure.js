@@ -121,14 +121,18 @@ export class GuidedStructurePage extends Page {
 
                     const category = categories.find(({ test }) => test.test(interfaceName))?.value;
 
+                    const structuredKeywords = {
+                        suffixes: value.suffixes
+                    }
+
                     return {
-                        ...value,
+                        ...value, // Contains label and name already (extra metadata)
                         key: displayName,
                         value: interfaceName,
+                        structuredKeywords,
                         category,
-                        // displayName: displayName,
                         disabled: !supportedInterfaces.includes(interfaceName),
-                    }; // Has label and keywords property already
+                    };
                 })
             )
             .catch((error) => console.error(error));

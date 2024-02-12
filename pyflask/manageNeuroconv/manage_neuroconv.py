@@ -164,7 +164,14 @@ def get_class_ref_in_docstring(input_string):
 
 def derive_interface_info(interface):
     info = {"keywords": getattr(interface, "keywords", []), "description": ""}
-    if interface.__doc__:
+
+    if hasattr(interface, "info"):
+        info["description"] = interface.info
+
+    if hasattr(interface, "associated_suffixes"):
+        info["suffixes"] = interface.associated_suffixes
+
+    elif interface.__doc__:
         info["description"] = re.sub(
             remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
         )
