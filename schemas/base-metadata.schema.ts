@@ -115,8 +115,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
         const getProp = (name: string) => ophys.properties[name]
 
-        if (getProp("TwoPhotonSeries")) {
-            const tpsItemSchema = getProp("TwoPhotonSeries").items
+        const tpsItemSchema = getProp("TwoPhotonSeries")?.items
+
+        if (tpsItemSchema) {
+
             tpsItemSchema.order = [
                 "name",
                 "description",
@@ -128,8 +130,9 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         }
 
 
-        if (getProp("ImagingPlane")) {
-            const imagingPlaneItems = getProp("ImagingPlane").items
+        const imagingPlaneItems = getProp("ImagingPlane")?.items
+
+        if (imagingPlaneItems) {
             imagingPlaneItems.order = [
                 "name",
                 "description",
