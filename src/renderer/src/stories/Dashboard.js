@@ -85,7 +85,10 @@ export class Dashboard extends LitElement {
     }
 
     pagesById = {};
-    #active;
+    page;
+
+    next = () => this.main.next();
+    back = () => this.main.back();
 
     constructor(props = {}) {
         super();
@@ -96,12 +99,12 @@ export class Dashboard extends LitElement {
         this.sidebar = new Sidebar();
         this.sidebar.onClick = (_, value) => {
             const id = value.info.id;
-            if (this.#active) this.#active.to(id);
+            if (this.page) this.page.to(id);
             else this.setAttribute("activePage", id);
         };
 
         this.subSidebar = new NavigationSidebar();
-        this.subSidebar.onClick = async (id) => this.#active.to(id);
+        this.subSidebar.onClick = async (id) => this.page.to(id);
 
         this.pages = props.pages ?? {};
         this.name = props.name;
@@ -125,7 +128,7 @@ export class Dashboard extends LitElement {
                 document.title = `${titleString} - ${this.name}`;
                 const page = this.pagesById[popEvent.state.page]; // ?? this.pagesById[this.#activatePage]
                 if (!page) return;
-                if (page === this.#active) return; // Do not rerender current page
+                if (page === this.page) return; // Do not rerender current page
                 this.setMain(page);
             }
         };
@@ -134,7 +137,7 @@ export class Dashboard extends LitElement {
     }
 
     requestPageUpdate() {
-        if (this.#active) this.#active.requestUpdate();
+        if (this.page) this.page.requestUpdate();
     }
 
     createRenderRoot() {
@@ -147,7 +150,7 @@ export class Dashboard extends LitElement {
         else if (key === "renderNameInSidebar") this.sidebar.renderName = latest === "true" || latest === true;
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {
-            if (this.#active && this.#active.info.parent && this.#active.info.section) {
+            if (this.page && this.page.info.parent && this.page.info.section) {
                 const currentProject = getCurrentProjectName();
                 if (currentProject) updateAppProgress(latest, currentProject);
             }
@@ -158,9 +161,9 @@ export class Dashboard extends LitElement {
             this.sidebar.initialize = false;
             this.#activatePage(latest);
             return;
-        } else if (key.toLowerCase() === "globalstate" && this.#active) {
-            this.#active.info.globalState = JSON.parse(latest);
-            this.#active.requestUpdate();
+        } else if (key.toLowerCase() === "globalstate" && this.page) {
+            this.page.info.globalState = JSON.parse(latest);
+            this.page.requestUpdate();
         }
     }
 
@@ -174,7 +177,7 @@ export class Dashboard extends LitElement {
     setMain(page) {
         // Update Previous Page
         const info = page.info;
-        const previous = this.#active;
+        const previous = this.page;
 
         // if (previous === page) return // Prevent rerendering the same page
 
@@ -191,10 +194,10 @@ export class Dashboard extends LitElement {
         if (isNested && !("globalState" in toPass)) toPass.globalState = this.globalState ?? page.load();
 
         // Update Active Page
-        this.#active = page;
+        this.page = page;
 
         // Reset global state if page has no parent
-        if (!this.#active.info.parent) toPass.globalState = {};
+        if (!this.page.info.parent) toPass.globalState = {};
 
         if (isNested) {
             let parent = info.parent;
@@ -208,10 +211,10 @@ export class Dashboard extends LitElement {
             this.subSidebar.hide();
         }
 
-        this.#active.set(toPass, false);
+        this.page.set(toPass, false);
 
-        this.#active.checkSyncState().then(() => {
-            this.#active.requestUpdate(); // Re-render page
+        this.page.checkSyncState().then(() => {
+            this.page.requestUpdate(); // Re-render page
 
             const projectName = info.globalState?.project?.name;
 
@@ -223,6 +226,8 @@ export class Dashboard extends LitElement {
                 page,
                 sections: this.subSidebar.sections ?? {},
             });
+
+            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
         });
     }
 
@@ -258,12 +263,14 @@ export class Dashboard extends LitElement {
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 
                 if (!("visited" in pageState)) pageState.visited = false;
-                if (id === this.#active.info.id) state.active = pageState.visited = pageState.active = true; // Set active page as visited
+                if (id === this.page.info.id) state.active = pageState.visited = pageState.active = true; // Set active page as visited
             }
         });
 
         return globalState.sections;
     };
+
+    #transitionPromise = {};
 
     #updated(pages = this.pages) {
         const url = new URL(window.location.href);
@@ -271,20 +278,26 @@ export class Dashboard extends LitElement {
         if (isElectron || isStorybook) active = new URLSearchParams(url.search).get("page");
         if (!active) active = this.activePage; // default to active page
 
-        this.main.onTransition = (transition) => {
+        this.main.onTransition = async (transition) => {
+            const promise = (this.#transitionPromise.value = new Promise(
+                (resolve) => (this.#transitionPromise.trigger = resolve)
+            ));
+
             if (typeof transition === "number") {
-                const info = this.#active.info;
+                const info = this.page.info;
                 const sign = Math.sign(transition);
                 if (sign === 1) return this.setAttribute("activePage", info.next.info.id);
                 else if (sign === -1) return this.setAttribute("activePage", (info.previous ?? info.parent).info.id); // Default to back in time
             }
 
             this.setAttribute("activePage", transition);
+
+            return await promise;
         };
 
         this.main.updatePages = () => {
             this.#updated(); // Rerender with new pages
-            this.setAttribute("activePage", this.#active.info.id); // Re-render the current page
+            this.setAttribute("activePage", this.page.info.id); // Re-render the current page
         };
 
         this.pagesById = {};
