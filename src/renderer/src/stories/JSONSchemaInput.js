@@ -288,7 +288,7 @@ export const isEditableObject = (schema, value) =>
 export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
-export const getEditableItems = (value, pattern, { name, schema } = {}) => {
+export const getEditableItems = (value = {}, pattern, { name, schema } = {}) => {
     let items = Object.entries(value);
 
     const allowAdditionalProperties = isAdditionalProperties(pattern);

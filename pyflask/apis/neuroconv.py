@@ -9,12 +9,12 @@ from manageNeuroconv import (
     get_all_interface_info,
     get_all_converter_info,
     locate_data,
+    autocomplete_format_string,
     get_source_schema,
     get_metadata_schema,
     convert_to_nwb,
     validate_metadata,
     listen_to_neuroconv_events,
-    generate_dataset,
     inspect_nwb_file,
     inspect_nwb_folder,
     inspect_multiple_filesystem_objects,
@@ -77,7 +77,16 @@ class Locate(Resource):
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
 
-
+@neuroconv_api.route("/locate/autocomplete")
+class Locate(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return autocomplete_format_string(neuroconv_api.payload)
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
+                
 @neuroconv_api.route("/metadata")
 class Metadata(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})

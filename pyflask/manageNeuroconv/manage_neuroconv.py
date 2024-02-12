@@ -17,6 +17,16 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 
 announcer = MessageAnnouncer()
 
+def is_path_contained(child, parent):
+    parent = Path(parent).resolve()
+    child = Path(child).resolve()
+    
+    # Attempt to construct a relative path from parent to child
+    try:
+        child.relative_to(parent)
+        return True
+    except ValueError:
+        return False
 
 def replace_nan_with_none(data):
     if isinstance(data, dict):
@@ -108,6 +118,38 @@ def replace_none_with_nan(json_object, json_schema):
         copy.deepcopy(json_object), resolve_references(copy.deepcopy(json_schema))
     )
 
+def autocomplete_format_string(info: dict) -> str:
+    from neuroconv.tools.path_expansion import construct_path_template
+
+    base_directory = info["base_directory"]
+    filesystem_entry_path = info["path"]
+
+    if not is_path_contained(filesystem_entry_path, base_directory):
+        raise "Path is not contained in the provided base directory."
+    
+    full_format_string = construct_path_template(filesystem_entry_path, subject_id=info["subject_id"], session_id=info["session_id"], **info["additional_metadata"])
+    
+    parent = Path(base_directory).resolve()
+    child = Path(full_format_string).resolve()
+
+    format_string = str(child.relative_to(parent))
+
+    to_locate_info = dict(base_directory=base_directory)
+
+    if (Path(filesystem_entry_path).is_dir()):
+        to_locate_info["folder_path"] = format_string
+    else:
+        to_locate_info["file_path"] = format_string
+
+
+    all_matched = locate_data(dict(
+        autocomplete = to_locate_info
+    ))
+
+    return dict(
+        matched=all_matched,
+        format_string=format_string
+    )
 
 def locate_data(info: dict) -> dict:
     """Locate data from the specifies directories using fstrings."""
