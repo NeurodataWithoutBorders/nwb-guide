@@ -10,7 +10,7 @@ export const reloadPageToHome = () => {
 // Filesystem Management
 const root = globalThis?.process?.env?.VITEST ? joinPath(paths.root, ".test") : paths.root;
 export const homeDirectory = app?.getPath("home") ?? "";
-export const appDirectory = homeDirectory ? joinPath(homeDirectory, root) : root;
+export const appDirectory = homeDirectory ? joinPath(homeDirectory, root) : "";
 export const guidedProgressFilePath = appDirectory ? joinPath(appDirectory, ...paths.subfolders.progress) : "";
 
 export const previewSaveFolderPath = appDirectory ? joinPath(appDirectory, ...paths.subfolders.preview) : "";
