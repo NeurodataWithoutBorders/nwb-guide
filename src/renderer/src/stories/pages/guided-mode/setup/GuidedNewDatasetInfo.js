@@ -70,7 +70,7 @@ export class GuidedNewDatasetPage extends Page {
             globalState.initialized = true;
             Object.assign(globalState, this.state);
 
-            this.to(1);
+            return this.to(1);
         },
     };
 

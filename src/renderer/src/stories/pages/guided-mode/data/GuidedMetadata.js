@@ -112,7 +112,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             await this.convert({ preview: true });
 
-            this.to(1);
+            return this.to(1);
         },
     };
 

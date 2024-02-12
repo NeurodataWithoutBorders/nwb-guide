@@ -43,7 +43,7 @@ export class GuidedStubPreviewPage extends Page {
 
             await this.convert();
 
-            this.to(1);
+            return this.to(1);
         },
     };
 

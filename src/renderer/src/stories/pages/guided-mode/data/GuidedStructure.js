@@ -102,7 +102,7 @@ export class GuidedStructurePage extends Page {
     footer = {
         onNext: async () => {
             if (!this.info.globalState.schema) await this.getSchema(); // Initialize schema
-            this.to(1);
+            return this.to(1);
         },
     };
 

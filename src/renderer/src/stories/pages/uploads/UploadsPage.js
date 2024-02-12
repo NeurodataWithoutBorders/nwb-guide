@@ -158,6 +158,8 @@ async function getAPIKey(staging = false) {
 
     const isInvalid = !errors || errors.length;
 
+    console.log("GETTING API KEY", DANDI, api_key, staging, isInvalid, errors);
+
     if (isInvalid) {
         const modal = new Modal({
             header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
@@ -271,7 +273,7 @@ export class UploadsPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
-                    this.#globalModal.form.results = structuredClone(global.data.DANDI.api_keys);
+                    this.#globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
                     this.#globalModal.open = true;
                 },
             }),
@@ -300,10 +302,13 @@ export class UploadsPage extends Page {
                     return null;
                 }
 
-                merge(apiKeys, global.data.DANDI.api_keys);
+                const globalDandiData = global.data.DANDI ?? (global.data.DANDI = {});
+                if (!globalDandiData.api_keys) globalDandiData.api_keys = {};
+                merge(apiKeys, globalDandiData.api_keys);
+
                 global.save();
                 await regenerateDandisets();
-                const input = this.form.getFormElement(["dandiset "]);
+                const input = this.form.getFormElement(["dandisets"]);
                 input.requestUpdate();
             },
             formProps: {
@@ -404,7 +409,7 @@ export class UploadsPage extends Page {
 
         // Confirm that one api key exists
         promise.then(() => {
-            const api_keys = global.data.DANDI.api_keys;
+            const api_keys = global.data.DANDI?.api_keys;
             if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true;
         });
 
