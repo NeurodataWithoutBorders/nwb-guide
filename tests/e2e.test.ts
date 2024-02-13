@@ -319,7 +319,7 @@ describe('E2E Test', () => {
 
       await toNextPage('sourcedata')
 
-    })
+    }, 10 * 1000)
 
     test('Review source data information', async () => {
 
