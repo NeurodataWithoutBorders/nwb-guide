@@ -14,10 +14,10 @@ const sortList = (items) => {
             else return 1;
         })
         .sort((a, b) => {
-            const aLow = a.severity == "LOW";
-            const bLow = b.severity === "LOW";
-            if (aLow && bLow) return 0;
-            else if (aLow) return 1;
+            const lowA = a.severity == "LOW";
+            const lowB = b.severity === "LOW";
+            if (lowA && lowB) return 0;
+            else if (lowA) return 1;
             else return -1;
         });
 };

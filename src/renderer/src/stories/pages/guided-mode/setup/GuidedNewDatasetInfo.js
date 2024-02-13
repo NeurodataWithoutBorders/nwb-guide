@@ -91,7 +91,7 @@ export class GuidedNewDatasetPage extends Page {
                 properties: ["createDirectory"],
             },
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+                this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
             validateOnChange,
             onUpdate: () => (this.unsavedUpdates = true),

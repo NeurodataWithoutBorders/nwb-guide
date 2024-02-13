@@ -105,7 +105,7 @@ export class GuidedUploadPage extends Page {
             if ("results" in globalUploadInfo) {
                 const result = await Swal.fire({
                     title: "This pipeline has already uploaded to DANDI",
-                    html: "Would you like to reupload the lastest files?",
+                    html: "Would you like to reupload the latest files?",
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#3085d6",
