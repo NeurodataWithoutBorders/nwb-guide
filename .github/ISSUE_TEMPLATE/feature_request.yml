@@ -21,11 +21,6 @@ body:
         Is this a more convenient way to do something that is already possible, or is a workaround currently unfeasible?
     validations:
       required: true
-  - type: textarea
-    id: problem
-    attributes:
-      label: Is your feature request related to a problem?
-      description: A clear and concise description of what the problem is.
   - type: dropdown
     id: interest
     attributes:
