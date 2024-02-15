@@ -66,4 +66,3 @@ body:
         - "Yes"
     validations:
       required: true
-
