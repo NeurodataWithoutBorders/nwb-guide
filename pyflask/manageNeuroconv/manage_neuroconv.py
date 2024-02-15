@@ -15,7 +15,13 @@ from pathlib import Path
 from sse import MessageAnnouncer
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
+from neuroconv import get_format_summaries
+
 announcer = MessageAnnouncer()
+
+
+
+format_summaries = get_format_summaries()
 
 
 def replace_nan_with_none(data):
@@ -163,29 +169,18 @@ def get_class_ref_in_docstring(input_string):
 
 
 def derive_interface_info(interface):
-    info = {"keywords": getattr(interface, "keywords", []), "description": ""}
-
-    if hasattr(interface, "info"):
-        info["description"] = interface.info
-
-    if hasattr(interface, "associated_suffixes"):
-        info["suffixes"] = interface.associated_suffixes
-
-    elif interface.__doc__:
-        info["description"] = re.sub(
-            remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
-        )
-
-    info["name"] = interface.__name__
-    return info
+    return {
+        "name": interface.__name__,
+        **format_summaries.get(interface.__name__, "")
+    }
 
 
 def get_all_converter_info() -> dict:
-    from neuroconv import converters
+    from neuroconv.converters import converter_list
 
     return {
-        getattr(converter, "display_name", name) or name: derive_interface_info(converter)
-        for name, converter in module_to_dict(converters).items()
+        getattr(converter, "display_name", converter.__name__) or converter.__name__: derive_interface_info(converter)
+        for converter in converter_list
     }
 
 
