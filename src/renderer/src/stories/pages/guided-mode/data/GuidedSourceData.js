@@ -164,7 +164,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             ignore: propsToIgnore,
             globals: this.info.globalState.project.SourceData,
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+                this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
             // onlyRequired: true,
             onUpdate: () => (this.unsavedUpdates = "conversions"),
