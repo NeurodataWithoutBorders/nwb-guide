@@ -12,7 +12,7 @@ import { Button } from "../../Button.js";
 import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
-import { notyf, testDataFolderPath } from "../../../dependencies/globals.js";
+import { homeDirectory, notyf, testDataFolderPath } from "../../../dependencies/globals.js";
 import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/index.js";
 
 import saveSVG from "../../assets/save.svg?raw";
@@ -31,6 +31,8 @@ const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
 
 const propertiesToTransform = ["folder_path", "file_path"];
 
+const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
+
 function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
     const subjectId = "mouse1";
     const sessions = ["session1"];
@@ -38,7 +40,11 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
     const resolvedSourceData = structuredClone(sourceData);
     Object.values(resolvedSourceData).forEach((info) => {
         propertiesToTransform.forEach((property) => {
-            if (info[property]) info[property] = path.join(rootFolder, info[property]);
+            if (info[property]) {
+                const fullPath = path.join(rootFolder, info[property]);
+                if (fs.existsSync(fullPath)) info[property] = fullPath;
+                else throw new Error("Source data not available for this pipeline.");
+            }
         });
     });
 
@@ -142,6 +148,11 @@ export class SettingsPage extends Page {
         return (this.#notification = this.notify(message, type));
     };
 
+    deleteTestData = () => {
+        deleteIfExists(dataOutputPath);
+        deleteIfExists(datasetOutputPath);
+    };
+
     generateTestData = async () => {
         if (!fs.existsSync(dataOutputPath)) {
             await run(
@@ -175,7 +186,9 @@ export class SettingsPage extends Page {
             throw error;
         });
 
-        this.notify(`Test dataset successfully generated at ${datasetOutputPath}!`);
+        const sanitizedOutputPath = datasetOutputPath.replace(homeDirectory, "~");
+
+        this.notify(`Test dataset successfully generated at ${sanitizedOutputPath}!`);
 
         return datasetOutputPath;
     };
@@ -220,12 +233,35 @@ export class SettingsPage extends Page {
                 const { pipelines = {} } = testingSuiteYaml;
 
                 const pipelineNames = Object.keys(pipelines);
-                const nPipelines = pipelineNames.length;
-                pipelineNames
-                    .reverse()
-                    .forEach((name) => saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder));
 
-                this.#openNotyf(`Generated ${nPipelines} test pipelines`, "success");
+                const resolved = pipelineNames.reverse().map((name) => {
+                    try {
+                        saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder);
+                        return true;
+                    } catch (e) {
+                        console.error(e);
+                        return name;
+                    }
+                });
+
+                const nSuccessful = resolved.reduce((acc, v) => (acc += v === true ? 1 : 0), 0);
+                const nFailed = resolved.length - nSuccessful;
+
+                if (nFailed) {
+                    const failDisplay =
+                        nFailed === 1
+                            ? `the <b>${resolved.find((v) => typeof v === "string")}</b> pipeline`
+                            : `${nFailed} pipelines`;
+                    this.#openNotyf(
+                        `<h4 style="margin-bottom: 0;">Generated ${nSuccessful} test pipelines.</h4><small>Could not find source data for ${failDisplay}.`,
+                        "warning"
+                    );
+                } else if (nSuccessful) this.#openNotyf(`Generated ${nSuccessful} test pipelines.`, "success");
+                else
+                    this.#openNotyf(
+                        `<h4 style="margin-bottom: 0;">Pipeline Generation Failed</h4><small>Could not find source data for any pipelines.</small>`,
+                        "error"
+                    );
             },
         });
 
@@ -233,8 +269,6 @@ export class SettingsPage extends Page {
             const testFolderInput = this.form.getFormElement(["developer", "testing_data_folder"]);
             testFolderInput.after(generatePipelineButton);
         }, 100);
-
-        const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
         return html`
             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -252,8 +286,7 @@ export class SettingsPage extends Page {
                                       label: "Delete",
                                       size: "small",
                                       onClick: async () => {
-                                          deleteIfExists(dataOutputPath);
-                                          deleteIfExists(datasetOutputPath);
+                                          this.deleteTestData();
                                           this.notify(`Test dataset successfully deleted from your system.`);
                                           this.requestUpdate();
                                       },

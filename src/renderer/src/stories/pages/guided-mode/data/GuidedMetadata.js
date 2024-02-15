@@ -112,7 +112,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             await this.convert({ preview: true });
 
-            this.to(1);
+            return this.to(1);
         },
     };
 
@@ -228,7 +228,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             ignore: propsToIgnore,
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+                this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
 
             transformErrors: (error) => {

@@ -18,6 +18,7 @@ import { global } from "../../../../progress/index.js";
 import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.json";
 import { createFormModal } from "../../../forms/GlobalFormModal";
 import { validateDANDIApiKey } from "../../../../validation/dandi";
+import { resolve } from "../../../../promises";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {
@@ -40,20 +41,20 @@ export class GuidedUploadPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
-                    this.#globalModal.form.results = structuredClone(global.data.DANDI.api_keys);
-                    this.#globalModal.open = true;
+                    this.globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
+                    this.globalModal.open = true;
                 },
             }),
         ],
     };
 
-    #globalModal = null;
+    globalModal = null;
     #saveNotification;
 
     connectedCallback() {
         super.connectedCallback();
 
-        const modal = (this.#globalModal = createFormModal.call(this, {
+        const modal = (this.globalModal = createFormModal.call(this, {
             header: "DANDI API Keys",
             schema: dandiGlobalSchema.properties.api_keys,
             onSave: async (form) => {
@@ -66,10 +67,14 @@ export class GuidedUploadPage extends Page {
                     return null;
                 }
 
-                merge(apiKeys, global.data.DANDI.api_keys);
+                // Ensure values exist
+                const globalDandiData = global.data.DANDI ?? (global.data.DANDI = {});
+                if (!globalDandiData.api_keys) globalDandiData.api_keys = {};
+                merge(apiKeys, globalDandiData.api_keys);
+
                 global.save();
                 await regenerateDandisets();
-                const input = this.form.getFormElement(["dandiset "]);
+                const input = this.form.getFormElement(["dandiset"]);
                 input.requestUpdate();
             },
             formProps: {
@@ -84,7 +89,7 @@ export class GuidedUploadPage extends Page {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        if (this.#globalModal) this.#globalModal.remove();
+        if (this.globalModal) this.globalModal.remove();
     }
 
     footer = {
@@ -100,7 +105,7 @@ export class GuidedUploadPage extends Page {
             if ("results" in globalUploadInfo) {
                 const result = await Swal.fire({
                     title: "This pipeline has already uploaded to DANDI",
-                    html: "Would you like to reupload the lastest files?",
+                    html: "Would you like to reupload the latest files?",
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#3085d6",
@@ -116,11 +121,30 @@ export class GuidedUploadPage extends Page {
                 project: globalState.project.name,
             });
 
-            this.to(1);
+            return this.to(1);
         },
     };
 
+    #toggleRendered;
+    #rendered;
+    #updateRendered = (force) =>
+        force || this.#rendered === true
+            ? (this.#rendered = new Promise(
+                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+              ))
+            : this.#rendered;
+
+    get rendered() {
+        return resolve(this.#rendered, () => true);
+    }
+
+    async updated() {
+        await this.rendered;
+    }
+
     render() {
+        this.#updateRendered(true);
+
         const state = (this.localState = structuredClone(this.info.globalState.upload ?? { info: {} }));
 
         const promise = ready.cpus
@@ -152,11 +176,17 @@ export class GuidedUploadPage extends Page {
 
         // Confirm that one api key exists
         promise.then(() => {
-            const api_keys = global.data.DANDI.api_keys;
-            if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true;
+            const api_keys = global.data.DANDI?.api_keys;
+            if (!api_keys || !Object.keys(api_keys).length) this.globalModal.open = true;
         });
 
-        return html`${until(promise, html`Loading form contents...`)} `;
+        const untilResult = until(promise, html`Loading form contents...`);
+
+        promise.then(() => {
+            this.#toggleRendered();
+        });
+
+        return untilResult;
     }
 }
 

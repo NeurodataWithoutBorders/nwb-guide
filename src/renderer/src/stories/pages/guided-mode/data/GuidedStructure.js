@@ -95,14 +95,14 @@ export class GuidedStructurePage extends Page {
             });
         }
 
-        await this.save(undefined, false); // Interrim save, in case the schema request fails
+        await this.save(undefined, false); // Interim save, in case the schema request fails
         await this.getSchema();
     };
 
     footer = {
         onNext: async () => {
             if (!this.info.globalState.schema) await this.getSchema(); // Initialize schema
-            this.to(1);
+            return this.to(1);
         },
     };
 

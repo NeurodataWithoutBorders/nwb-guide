@@ -44,11 +44,13 @@ export class GuidedSubjectsPage extends Page {
         // Delete old subjects before merging
         const { subjects: globalSubjects } = this.info.globalState;
 
+        const localState = this.table.data;
+
         for (let key in globalSubjects) {
-            if (!this.localState[key]) delete globalSubjects[key];
+            if (!localState[key]) delete globalSubjects[key];
         }
 
-        this.info.globalState.subjects = merge(this.localState, globalSubjects); // Merge the local and global states
+        this.info.globalState.subjects = merge(localState, globalSubjects); // Merge the local and global states
 
         const { results, subjects } = this.info.globalState;
 
@@ -129,9 +131,10 @@ export class GuidedSubjectsPage extends Page {
             },
             onThrow: (message, type) => this.notify(message, type),
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+                this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
             onUpdate: () => {
+                console.log("UPDATED!");
                 this.unsavedUpdates = "conversions";
             },
             validateOnChange: (localPath, parent, v) => {
