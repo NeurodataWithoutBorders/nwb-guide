@@ -20,7 +20,6 @@ from neuroconv import get_format_summaries
 announcer = MessageAnnouncer()
 
 
-
 format_summaries = get_format_summaries()
 
 
@@ -169,10 +168,7 @@ def get_class_ref_in_docstring(input_string):
 
 
 def derive_interface_info(interface):
-    return {
-        "name": interface.__name__,
-        **format_summaries.get(interface.__name__, "")
-    }
+    return {"name": interface.__name__, **format_summaries.get(interface.__name__, "")}
 
 
 def get_all_converter_info() -> dict:
