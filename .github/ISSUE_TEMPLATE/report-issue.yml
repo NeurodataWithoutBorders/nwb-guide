@@ -59,13 +59,23 @@ body:
       label: Additional context
       description: Add any other context about the problem here.
 
-  - type: checkboxes
-    id: terms
+  - type: dropdown
+    id: code_of_conduct
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwb-guide/blob/main/.github/CODE_OF_CONDUCT.rst)
+      description: Do you agree to follow our [Code of Conduct](https://github.com/catalystneuro/tqdm_publisher/blob/main/.github/CODE_OF_CONDUCT.md)?
       options:
-        - label: I agree to follow this project's [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwb-guide/blob/main/.github/CODE_OF_CONDUCT.rst)
-          required: true
-        - label: Have you ensured this bug was not already [reported](https://github.com/NeurodataWithoutBorders/nwb-guide/issues)?
-          required: true
+        - "Yes"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: existing_issues
+    attributes:
+      label: Did you confirm this issue was not already reported?
+      description: This issue should not already be [reported](https://github.com/NeurodataWithoutBorders/nwb-guide/issues)
+      options:
+        - "Yes"
+    validations:
+      required: true
+
