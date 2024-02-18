@@ -1090,7 +1090,7 @@ export class JSONSchemaInput extends LitElement {
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
 
-                            // // Do not check patter if value is empty
+                            // // Do not check pattern if value is empty
                             // if (schema.pattern && !isBlank) {
                             //     const regex = new RegExp(schema.pattern)
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
