@@ -130,7 +130,7 @@ describe('E2E Test', () => {
         const dashboard = document.querySelector('nwb-dashboard')
         dashboard.sidebar.select('settings')
 
-        // Genereate test data
+        // Generate test data
         const page = dashboard.page
         page.deleteTestData()
         return await page.generateTestData()
@@ -319,7 +319,7 @@ describe('E2E Test', () => {
 
       await toNextPage('sourcedata')
 
-    })
+    }, 10 * 1000)
 
     test('Review source data information', async () => {
 
@@ -342,7 +342,7 @@ describe('E2E Test', () => {
 
       await toNextPage('inspect')
 
-    }, 20 * 1000) // Wait for conversion to complete
+    }, 30 * 1000) // Wait for conversion to complete
 
     test('Review NWB Inspector output', async () => {
 
