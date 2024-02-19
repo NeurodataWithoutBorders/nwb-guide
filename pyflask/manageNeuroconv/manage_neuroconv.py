@@ -128,7 +128,7 @@ def autocomplete_format_string(info: dict) -> str:
     filesystem_entry_path = info["path"]
 
     if not is_path_contained(filesystem_entry_path, base_directory):
-        raise "Path is not contained in the provided base directory."
+        raise ValueError("Path is not contained in the provided base directory.")
 
     full_format_string = construct_path_template(
         filesystem_entry_path,
