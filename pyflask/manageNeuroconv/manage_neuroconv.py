@@ -19,8 +19,8 @@ announcer = MessageAnnouncer()
 
 
 def is_path_contained(child, parent):
-    parent = Path(parent).resolve()
-    child = Path(child).resolve()
+    parent = Path(parent)
+    child = Path(child)
 
     # Attempt to construct a relative path from parent to child
     try:
