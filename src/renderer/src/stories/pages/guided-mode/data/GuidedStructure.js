@@ -122,7 +122,7 @@ export class GuidedStructurePage extends Page {
                     const category = categories.find(({ test }) => test.test(interfaceName))?.value;
 
                     const structuredKeywords = {
-                        suffixes: value.associated_suffixes ?? [],
+                        suffixes: value.suffixes ?? [],
                     };
 
                     return {

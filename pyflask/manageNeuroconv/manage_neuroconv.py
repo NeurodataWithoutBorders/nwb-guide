@@ -16,16 +16,6 @@ from sse import MessageAnnouncer
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
-format_summaries = dict()
-
-
-def load_format_summaries():
-    from neuroconv import get_format_summaries
-
-    global format_summaries
-
-    format_summaries = get_format_summaries()
-
 
 def replace_nan_with_none(data):
     if isinstance(data, dict):
@@ -172,7 +162,23 @@ def get_class_ref_in_docstring(input_string):
 
 
 def derive_interface_info(interface):
-    return {"name": interface.__name__, **format_summaries.get(interface.__name__, "")}
+
+    info = {"keywords": getattr(interface, "keywords", []), "description": ""}
+
+    if hasattr(interface, "associated_suffixes"):
+        info["suffixes"] = interface.associated_suffixes
+
+    if hasattr(interface, "info"):
+        info["description"] = interface.info
+
+    elif interface.__doc__:
+        info["description"] = re.sub(
+            remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
+        )
+
+    info["name"] = interface.__name__
+    
+    return info
 
 
 def get_all_converter_info() -> dict:

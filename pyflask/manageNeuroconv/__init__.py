@@ -15,8 +15,7 @@ from .manage_neuroconv import (
     inspect_nwb_folder,
     inspect_multiple_filesystem_objects,
     get_interface_alignment,
-    generate_test_data,
-    load_format_summaries,
+    generate_test_data
 )
 
 
