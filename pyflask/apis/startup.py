@@ -3,7 +3,7 @@
 from flask_restx import Namespace, Resource
 
 from errorHandlers import notBadRequestException
-from manageNeuroconv import get_format_summaries
+from manageNeuroconv import load_format_summaries
 
 startup_api = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
 
@@ -40,7 +40,7 @@ class PreloadImports(Resource):
         try:
             import neuroconv
 
-            get_format_summaries()
+            load_format_summaries()
 
             return True
         except Exception as exception:
