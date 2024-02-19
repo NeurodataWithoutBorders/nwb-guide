@@ -87,7 +87,7 @@ jobs:
           timeout_minutes: 30
           max_attempts: 3
           retry_on: error
-          command: conda activate nwb-guide && npm run test:coverage
+          command: conda init && conda activate nwb-guide && npm run test:coverage
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
@@ -96,7 +96,7 @@ jobs:
           timeout_minutes: 30
           max_attempts: 3
           retry_on: error
-          command: conda activate nwb-guide && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
+          command: conda init && conda activate nwb-guide && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
