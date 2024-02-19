@@ -63,6 +63,9 @@ jobs:
         name: Create and activate environment
         run: mamba env update -n nwb-guide -f ${{ matrix.label }}
 
+      - name: Display conda environment
+        run: conda list
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
