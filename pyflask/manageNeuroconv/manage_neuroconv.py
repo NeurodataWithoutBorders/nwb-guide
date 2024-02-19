@@ -667,7 +667,7 @@ def generate_dataset(input_path: str, output_path: str):
                     if base_id in file:
                         os.rename(os.path.join(root, file), os.path.join(root, file.replace(base_id, full_id)))
 
-            phy_output_dir.symlink_to(phy_base_directory, True)
+            copytree(phy_base_directory, phy_output_dir)
 
     return {"output_path": str(output_path)}
 
