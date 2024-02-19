@@ -73,15 +73,35 @@ export async function autocompleteFormatString(path) {
             const value = parent[name];
 
             if (name === "path") {
-                const errors = [];
-                for (let key in parent) {
-                    if (key === name) continue;
-                    if (!value.includes(parent[key]))
-                        errors.push({
-                            type: "error",
-                            message: `${header(name)} not found in the updated path.`,
-                        });
+
+                if (value) {
+                    if (fs.lstatSync(value).isSymbolicLink()) return [{
+                        type: "error",
+                        message: "This feature does not support symbolic links. Please provide a valid path.",
+                    }]
+
+                    if (base_directory) {
+                        if (!value.includes(base_directory))
+                            return [
+                                {
+                                    type: "error",
+                                    message: "The provided path must include the base directory.",
+                                },
+                            ];
+                    }
+                    
+
+                    const errors = [];
+                    for (let key in parent) {
+                        if (key === name) continue;
+                        if (!value.includes(parent[key]))
+                            errors.push({
+                                type: "error",
+                                message: `${header(name)} not found in the updated path.`,
+                            });
+                    }
                 }
+
             } else {
                 if (!parent.path || !parent.path.includes(value))
                     return [
