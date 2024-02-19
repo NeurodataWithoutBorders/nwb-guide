@@ -208,19 +208,32 @@ def get_class_ref_in_docstring(input_string):
 
 
 def derive_interface_info(interface):
+
     info = {"keywords": getattr(interface, "keywords", []), "description": ""}
-    if interface.__doc__:
+
+    if hasattr(interface, "associated_suffixes"):
+        info["suffixes"] = interface.associated_suffixes
+
+    if hasattr(interface, "info"):
+        info["description"] = interface.info
+
+    elif interface.__doc__:
         info["description"] = re.sub(
             remove_extra_spaces_pattern, " ", re.sub(doc_pattern, r"<code>\1</code>", interface.__doc__)
         )
+
+    info["name"] = interface.__name__
 
     return info
 
 
 def get_all_converter_info() -> dict:
-    from neuroconv import converters
+    from neuroconv.converters import converter_list
 
-    return {name: derive_interface_info(converter) for name, converter in module_to_dict(converters).items()}
+    return {
+        getattr(converter, "display_name", converter.__name__) or converter.__name__: derive_interface_info(converter)
+        for converter in converter_list
+    }
 
 
 def get_all_interface_info() -> dict:
@@ -246,7 +259,7 @@ def get_all_interface_info() -> dict:
     ]
 
     return {
-        interface.__name__: derive_interface_info(interface)
+        getattr(interface, "display_name", interface.__name__) or interface.__name__: derive_interface_info(interface)
         for interface in interface_list
         if not interface.__name__ in exclude_interfaces_from_selection
     }
