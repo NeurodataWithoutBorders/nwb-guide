@@ -17,6 +17,7 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 
 announcer = MessageAnnouncer()
 
+
 def replace_nan_with_none(data):
     if isinstance(data, dict):
         # If it's a dictionary, iterate over its items and replace NaN values with None
@@ -177,7 +178,7 @@ def derive_interface_info(interface):
         )
 
     info["name"] = interface.__name__
-    
+
     return info
 
 
