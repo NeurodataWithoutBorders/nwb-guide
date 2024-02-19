@@ -3,7 +3,7 @@
 from flask_restx import Namespace, Resource
 
 from errorHandlers import notBadRequestException
-from manageNeuroConv import get_format_summaries
+from manageNeuroconv import get_format_summaries
 
 startup_api = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
 
