@@ -73,12 +73,14 @@ export async function autocompleteFormatString(path) {
             const value = parent[name];
 
             if (name === "path") {
-
                 if (value) {
-                    if (fs.lstatSync(value).isSymbolicLink()) return [{
-                        type: "error",
-                        message: "This feature does not support symbolic links. Please provide a valid path.",
-                    }]
+                    if (fs.lstatSync(value).isSymbolicLink())
+                        return [
+                            {
+                                type: "error",
+                                message: "This feature does not support symbolic links. Please provide a valid path.",
+                            },
+                        ];
 
                     if (base_directory) {
                         if (!value.includes(base_directory))
@@ -89,7 +91,6 @@ export async function autocompleteFormatString(path) {
                                 },
                             ];
                     }
-                    
 
                     const errors = [];
                     for (let key in parent) {
@@ -101,7 +102,6 @@ export async function autocompleteFormatString(path) {
                             });
                     }
                 }
-
             } else {
                 if (!parent.path || !parent.path.includes(value))
                     return [
