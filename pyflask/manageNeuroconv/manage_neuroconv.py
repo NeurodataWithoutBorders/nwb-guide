@@ -18,12 +18,14 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 announcer = MessageAnnouncer()
 format_summaries = dict()
 
+
 def get_format_summaries():
     from neuroconv import get_format_summaries
 
     global format_summaries
 
     format_summaries = get_format_summaries()
+
 
 def replace_nan_with_none(data):
     if isinstance(data, dict):
