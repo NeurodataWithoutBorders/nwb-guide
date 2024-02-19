@@ -81,6 +81,7 @@ jobs:
         name: Run tests
         uses: nick-fields/retry@v3
         with:
+          timeout_minutes: 30
           max_attempts: 3
           retry_on: error
           command: npm run test:coverage
@@ -89,6 +90,7 @@ jobs:
         name: Run tests with xvfb
         uses: nick-fields/retry@v3
         with:
+          timeout_minutes: 30
           max_attempts: 3
           retry_on: error
           command: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
