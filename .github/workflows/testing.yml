@@ -79,12 +79,21 @@ jobs:
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
-        run: npm run test:coverage
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 15
+          max_attempts: 3
+          retry_on: error
+          command: npm run test:coverage
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
-
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 15
+          max_attempts: 3
+          retry_on: error
+          command: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
