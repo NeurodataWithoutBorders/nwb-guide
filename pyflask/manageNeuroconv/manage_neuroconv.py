@@ -19,7 +19,7 @@ announcer = MessageAnnouncer()
 format_summaries = dict()
 
 
-def get_format_summaries():
+def load_format_summaries():
     from neuroconv import get_format_summaries
 
     global format_summaries
