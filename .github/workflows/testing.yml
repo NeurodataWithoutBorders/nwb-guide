@@ -87,7 +87,7 @@ jobs:
           timeout_minutes: 30
           max_attempts: 3
           retry_on: error
-          shell: bash
+          shell: bash {0}
           command: npm run test:coverage
 
       - if: matrix.os == 'ubuntu-latest'
@@ -97,7 +97,7 @@ jobs:
           timeout_minutes: 30
           max_attempts: 3
           retry_on: error
-          shell: bash
+          shell: bash {0}
           command: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
 
       - name: Upload coverage reports to Codecov
