@@ -342,7 +342,7 @@ describe('E2E Test', () => {
 
       await toNextPage('inspect')
 
-    }, 30 * 1000) // Wait for conversion to complete
+    }, 30 * 1000) // Wait for conversion preview to complete
 
     test('Review NWB Inspector output', async () => {
 
