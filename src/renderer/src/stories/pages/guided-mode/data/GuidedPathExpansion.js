@@ -87,7 +87,8 @@ export async function autocompleteFormatString(path) {
                             return [
                                 {
                                     type: "error",
-                                    message: "The provided path must include the base directory.<br><small>This is likely due to the target being contained in a symlink, which is unsupported by this feature.</small>",
+                                    message:
+                                        "The provided path must include the base directory.<br><small>This is likely due to the target being contained in a symlink, which is unsupported by this feature.</small>",
                                 },
                             ];
                     }
