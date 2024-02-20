@@ -256,27 +256,31 @@ export class Search extends LitElement {
 
     #sortedCategories = [];
 
-    getTokens = (input) => input.replaceAll(/[^\w\s]/g, '').split(" ").map(token => token.trim().toLowerCase()).filter((token) => token);
-    
+    getTokens = (input) =>
+        input
+            .replaceAll(/[^\w\s]/g, "")
+            .split(" ")
+            .map((token) => token.trim().toLowerCase())
+            .filter((token) => token);
+
     #populate = (input = this.value ?? "") => {
         const toShow = [];
 
         const inputTokens = this.getTokens(input);
-        
+
         // Check if the input value matches the label or any of the keywords
         this.#options.forEach(({ label, keywords, structuredKeywords }, i) => {
-
             const labelTokens = this.getTokens(label);
             const allKeywords = [...keywords, ...Object.values(structuredKeywords).flat()];
-            const allKeywordTokens = allKeywords.map(keyword => this.getTokens(keyword)).flat();
+            const allKeywordTokens = allKeywords.map((keyword) => this.getTokens(keyword)).flat();
             const allTokens = [...labelTokens, ...allKeywordTokens];
 
             const result = inputTokens.reduce((acc, token) => {
                 for (let subtoken of allTokens) {
-                    if (subtoken.startsWith(token) && !toShow.includes(i)) return acc += 1
+                    if (subtoken.startsWith(token) && !toShow.includes(i)) return (acc += 1);
                 }
-                return acc
-            }, 0)
+                return acc;
+            }, 0);
 
             if (result === inputTokens.length) toShow.push(i);
         });
