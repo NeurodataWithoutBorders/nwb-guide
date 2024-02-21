@@ -40,4 +40,4 @@ lines[app_py_line_index] = injected_app_py_line
 with open(file=Path(__file__).parent / "nwb-guide.spec", mode="w") as io:
     io.writelines(lines)
 
-print("Sucessfully injected recursion depth extension and json paths!")
+print("Successfully injected recursion depth extension and json paths!")

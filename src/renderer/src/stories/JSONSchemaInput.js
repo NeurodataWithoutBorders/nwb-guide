@@ -289,7 +289,7 @@ export const isEditableObject = (schema, value) =>
 export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
-export const getEditableItems = (value, pattern, { name, schema } = {}) => {
+export const getEditableItems = (value = {}, pattern, { name, schema } = {}) => {
     let items = Object.entries(value);
 
     const allowAdditionalProperties = isAdditionalProperties(pattern);
@@ -1093,7 +1093,7 @@ export class JSONSchemaInput extends LitElement {
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
 
-                            // // Do not check patter if value is empty
+                            // // Do not check pattern if value is empty
                             // if (schema.pattern && !isBlank) {
                             //     const regex = new RegExp(schema.pattern)
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value

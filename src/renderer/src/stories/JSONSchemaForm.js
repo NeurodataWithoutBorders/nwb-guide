@@ -1115,6 +1115,8 @@ export class JSONSchemaForm extends LitElement {
                     results: { ...nestedResults },
                     globals: this.globals?.[name],
 
+                    controls: this.controls[name],
+
                     onUpdate: (internalPath, value, forceUpdate) => {
                         const path = [...localPath, ...internalPath];
                         this.updateData(path, value, forceUpdate);
