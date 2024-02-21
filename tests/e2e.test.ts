@@ -141,7 +141,7 @@ describe('E2E Test', () => {
 
       expect(existsSync(outputLocation)).toBe(true)
 
-    }, 2 * 60 * 1000) // Allow two minutes to create dataset
+    })
 
     test('Create new pipeline by specifying a name', async () => {
 
@@ -185,7 +185,7 @@ describe('E2E Test', () => {
       // Advance to formats page
       await toNextPage('structure')
 
-    }, 10 * 1000)
+    })
 
     test('Specify data formats', async () => {
 
@@ -227,7 +227,7 @@ describe('E2E Test', () => {
 
       await toNextPage('locate')
 
-    }, 10 * 1000)
+    })
 
     test('Locate all your source data programmatically', async () => {
 
@@ -319,7 +319,7 @@ describe('E2E Test', () => {
 
       await toNextPage('sourcedata')
 
-    }, 10 * 1000)
+    })
 
     test('Review source data information', async () => {
 
@@ -342,7 +342,7 @@ describe('E2E Test', () => {
 
       await toNextPage('inspect')
 
-    }, 30 * 1000) // Wait for conversion to complete
+    }) // Wait for conversion preview to complete
 
     test('Review NWB Inspector output', async () => {
 
@@ -358,7 +358,7 @@ describe('E2E Test', () => {
 
       if (skipUpload) await toHome()
 
-    }, 60 * 1000) // Wait for full conversion to complete
+    }) // Wait for full conversion to complete
 
     const uploadDescribe = skipUpload ? describe.skip: describe
 
@@ -402,7 +402,7 @@ describe('E2E Test', () => {
 
         await toNextPage('review')
 
-      }, 3 * 60 * 1000) // Wait for upload to finish (~2min on M2)
+      }) // Wait for upload to finish (~2min on M2)
 
 
       test('Review upload results', async () => {
