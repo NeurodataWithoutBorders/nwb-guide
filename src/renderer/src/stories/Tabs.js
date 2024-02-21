@@ -4,9 +4,6 @@ import {
     warningHue,
 } from "./globals";
 
-const faSize = "1em";
-const faColor = "#000000";
-
 export class Tabs extends LitElement {
     static get styles() {
         return css`
