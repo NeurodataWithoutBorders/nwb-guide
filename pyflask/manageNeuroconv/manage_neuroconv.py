@@ -582,10 +582,17 @@ def upload_folder_to_dandi(
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
+    ignore_cache: Optional[bool] = None,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+
+    if ignore_cache:
+        os.environ["DANDI_CACHE"] = "ignore"
+    else:
+        os.environ.pop("DANDI_CACHE", None)
+
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
