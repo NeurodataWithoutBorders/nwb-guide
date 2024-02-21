@@ -121,7 +121,9 @@ export class InfoBox extends LitElement {
                 ${new Chevron({ direction: "right" })}
             </div>
             <div class="guided--info-container">
-                <span class="guided--help-text">${typeof this.content === 'string' ? unsafeHTML(this.content) : this.content}</span>
+                <span class="guided--help-text"
+                    >${typeof this.content === "string" ? unsafeHTML(this.content) : this.content}</span
+                >
             </div>
         `;
     }
