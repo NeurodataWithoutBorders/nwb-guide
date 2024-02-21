@@ -616,7 +616,7 @@ def upload_project_to_dandi(
     if ignore_cache:
         os.environ["DANDI_CACHE"] = 'ignore'
     else:
-        os.environ.pop("DANDI_CACHE")
+        os.environ.pop("DANDI_CACHE", None)
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
