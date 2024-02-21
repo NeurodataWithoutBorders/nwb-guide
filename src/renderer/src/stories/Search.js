@@ -158,6 +158,11 @@ export class Search extends LitElement {
                 z-index: 1;
             }
 
+            .structured-keywords {
+                font-size: 90%;
+                color: dimgrey;
+            }
+
             .option:hover {
                 background: #f2f2f2;
                 cursor: pointer;
@@ -204,8 +209,12 @@ export class Search extends LitElement {
         const options = this.shadowRoot.querySelectorAll(".option");
         this.#options = Array.from(options).map((option) => {
             const keywordString = option.getAttribute("data-keywords");
-            const keywords = keywordString ? JSON.parse(keywordString) : [];
-            return { option, keywords, label: option.querySelector(".label").innerText };
+            const structuredKeywordString = option.getAttribute("data-structured-keywords");
+
+            const keywords = keywordString ? JSON.parse(option.getAttribute("data-keywords")) : [];
+            const structuredKeywords = structuredKeywordString ? JSON.parse(structuredKeywordString) : {};
+
+            return { option, keywords, structuredKeywords, label: option.querySelector(".label").innerText };
         });
 
         this.#initialize();
@@ -247,23 +256,37 @@ export class Search extends LitElement {
 
     #sortedCategories = [];
 
+    getTokens = (input) =>
+        input
+            .replaceAll(/[^\w\s]/g, "")
+            .split(" ")
+            .map((token) => token.trim().toLowerCase())
+            .filter((token) => token);
+
     #populate = (input = this.value ?? "") => {
         const toShow = [];
 
-        // Check if the input value matches the label
-        this.#options.forEach(({ option, label }, i) => {
-            if (label.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-        });
+        const inputTokens = this.getTokens(input);
 
-        // Check if the input value matches any of the keywords
-        this.#options.forEach(({ option, keywords = [] }, i) => {
-            keywords.forEach((keyword) => {
-                if (keyword.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-            });
+        // Check if the input value matches the label or any of the keywords
+        this.#options.forEach(({ label, keywords, structuredKeywords }, i) => {
+            const labelTokens = this.getTokens(label);
+            const allKeywords = [...keywords, ...Object.values(structuredKeywords).flat()];
+            const allKeywordTokens = allKeywords.map((keyword) => this.getTokens(keyword)).flat();
+            const allTokens = [...labelTokens, ...allKeywordTokens];
+
+            const result = inputTokens.reduce((acc, token) => {
+                for (let subtoken of allTokens) {
+                    if (subtoken.startsWith(token) && !toShow.includes(i)) return (acc += 1);
+                }
+                return acc;
+            }, 0);
+
+            if (result === inputTokens.length) toShow.push(i);
         });
 
         this.#options.forEach(({ option }, i) => {
-            if (toShow.includes(i)) {
+            if (toShow.includes(i) || !inputTokens.length) {
                 option.removeAttribute("hidden");
             } else {
                 option.setAttribute("hidden", "");
@@ -276,7 +299,7 @@ export class Search extends LitElement {
             else element.removeAttribute("hidden");
         });
 
-        this.setAttribute("active", !!toShow.length);
+        this.setAttribute("active", !!toShow.length || !inputTokens.length);
         this.setAttribute("interacted", true);
     };
 
@@ -317,13 +340,22 @@ export class Search extends LitElement {
                     listItemElement.classList.add("option");
                     listItemElement.setAttribute("hidden", "");
                     listItemElement.setAttribute("tabindex", -1);
-                    if (option.keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
+
+                    const { disabled, structuredKeywords, keywords } = option;
+
+                    if (structuredKeywords)
+                        listItemElement.setAttribute(
+                            "data-structured-keywords",
+                            JSON.stringify(option.structuredKeywords)
+                        );
+                    if (keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
+
                     listItemElement.addEventListener("click", (clickEvent) => {
                         clickEvent.stopPropagation();
                         this.#onSelect(option);
                     });
 
-                    if (option.disabled) listItemElement.setAttribute("disabled", "");
+                    if (disabled) listItemElement.setAttribute("disabled", "");
 
                     const container = document.createElement("div");
 
@@ -346,11 +378,25 @@ export class Search extends LitElement {
 
                     container.appendChild(label);
 
-                    if (option.keywords) {
-                        const keywords = document.createElement("small");
-                        keywords.classList.add("keywords");
-                        keywords.innerText = option.keywords.join(", ");
-                        container.appendChild(keywords);
+                    if (keywords) {
+                        const keywordsElement = document.createElement("small");
+                        keywordsElement.classList.add("keywords");
+                        keywordsElement.innerText = option.keywords.join(", ");
+                        container.appendChild(keywordsElement);
+                    }
+
+                    if (structuredKeywords) {
+                        const div = document.createElement("div");
+                        div.classList.add("structured-keywords");
+
+                        Object.entries(structuredKeywords).forEach(([key, value]) => {
+                            const keywordsElement = document.createElement("small");
+                            const capitalizedKey = key[0].toUpperCase() + key.slice(1);
+                            keywordsElement.innerHTML = `<b>${capitalizedKey}:</b> ${value.join(", ")}`;
+                            div.appendChild(keywordsElement);
+                        });
+
+                        container.appendChild(div);
                     }
 
                     listItemElement.append(container);
