@@ -20,9 +20,15 @@
                     "min": 1,
                     "default": 1
                 },
+                "ignore_cache": {
+                    "type": "boolean",
+                    "description": "Ignore the cache and re-upload all files.",
+                    "default": false
+                },
                 "cleanup": {
                     "type": "boolean",
-                    "title": "Delete Local Files After Upload",
+                    "title": "Cleanup Local Filesystem",
+                    "description": "Delete Local Files After Upload",
                     "default": false
                 }
             }
