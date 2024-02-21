@@ -614,7 +614,7 @@ def upload_project_to_dandi(
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
 
     if ignore_cache:
-        os.environ["DANDI_CACHE"] = 'ignore'
+        os.environ["DANDI_CACHE"] = "ignore"
     else:
         os.environ.pop("DANDI_CACHE", None)
 
