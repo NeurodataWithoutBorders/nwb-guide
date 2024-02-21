@@ -256,23 +256,37 @@ export class Search extends LitElement {
 
     #sortedCategories = [];
 
+    getTokens = (input) =>
+        input
+            .replaceAll(/[^\w\s]/g, "")
+            .split(" ")
+            .map((token) => token.trim().toLowerCase())
+            .filter((token) => token);
+
     #populate = (input = this.value ?? "") => {
         const toShow = [];
 
-        // Check if the input value matches the label
-        this.#options.forEach(({ option, label }, i) => {
-            if (label.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-        });
+        const inputTokens = this.getTokens(input);
 
-        // Check if the input value matches any of the keywords
-        this.#options.forEach(({ option, keywords = [], structuredKeywords = {} }, i) => {
-            [...keywords, ...Object.values(structuredKeywords).flat()].forEach((keyword) => {
-                if (keyword.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-            });
+        // Check if the input value matches the label or any of the keywords
+        this.#options.forEach(({ label, keywords, structuredKeywords }, i) => {
+            const labelTokens = this.getTokens(label);
+            const allKeywords = [...keywords, ...Object.values(structuredKeywords).flat()];
+            const allKeywordTokens = allKeywords.map((keyword) => this.getTokens(keyword)).flat();
+            const allTokens = [...labelTokens, ...allKeywordTokens];
+
+            const result = inputTokens.reduce((acc, token) => {
+                for (let subtoken of allTokens) {
+                    if (subtoken.startsWith(token) && !toShow.includes(i)) return (acc += 1);
+                }
+                return acc;
+            }, 0);
+
+            if (result === inputTokens.length) toShow.push(i);
         });
 
         this.#options.forEach(({ option }, i) => {
-            if (toShow.includes(i)) {
+            if (toShow.includes(i) || !inputTokens.length) {
                 option.removeAttribute("hidden");
             } else {
                 option.setAttribute("hidden", "");
@@ -285,7 +299,7 @@ export class Search extends LitElement {
             else element.removeAttribute("hidden");
         });
 
-        this.setAttribute("active", !!toShow.length);
+        this.setAttribute("active", !!toShow.length || !inputTokens.length);
         this.setAttribute("interacted", true);
     };
 
