@@ -40,9 +40,11 @@ export class Tabs extends LitElement {
             }
 
             .status {
-                width: 25px;
-                height: 25px;
                 border-radius: 50%;
+                border: 1px solid #BFBFBF;
+                width: 25px;
+                aspect-ratio: 1 / 1;
+                height: auto;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -145,7 +147,7 @@ export class Tabs extends LitElement {
                             ${Object.entries(item.status).map(([status, value]) => {
                                 if (!value) return
                                 return html`
-                                    <span class="status ${status}">${value}</span>
+                                    <span class="status ${status}">${typeof value === 'number' ? value : ''}</span>
                                 `;
                             })}
                         </div>

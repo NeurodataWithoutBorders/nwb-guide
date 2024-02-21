@@ -29,7 +29,7 @@ const base = [
         name: "Ecephys",
         status: {
             errors: 0,
-            warnings: 3,
+            warnings: 10,
         },
         content: "Ecephys information",
         subtitle: "Ecephys Properties",
@@ -39,8 +39,8 @@ const base = [
         content: "Ophys information",
         subtitle: "Ophys Properties",
         status: {
-            errors: 5,
-            warnings: 3,
+            errors: true,
+            warnings: true,
         },
     },
 ]
