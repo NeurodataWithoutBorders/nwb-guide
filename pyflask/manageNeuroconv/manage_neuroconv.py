@@ -593,7 +593,6 @@ def upload_folder_to_dandi(
     else:
         os.environ.pop("DANDI_CACHE", None)
 
-
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=Path(nwb_folder_path),
