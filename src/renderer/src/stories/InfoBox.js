@@ -1,5 +1,6 @@
 import { LitElement, css, html } from "lit";
 import { Chevron } from "./Chevron";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 export class InfoBox extends LitElement {
     static get styles() {
@@ -120,7 +121,7 @@ export class InfoBox extends LitElement {
                 ${new Chevron({ direction: "right" })}
             </div>
             <div class="guided--info-container">
-                <span class="guided--help-text">${this.content}</span>
+                <span class="guided--help-text">${typeof this.content === 'string' ? unsafeHTML(this.content) : this.content}</span>
             </div>
         `;
     }
