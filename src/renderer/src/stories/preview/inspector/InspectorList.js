@@ -43,7 +43,7 @@ export class InspectorList extends List {
                     margin: 0 !important;
                 }
             `,
-            super.styles
+            super.styles,
         ];
     }
 
@@ -134,7 +134,7 @@ export class InspectorListItem extends LitElement {
     }
 
     updated() {
-        console.log(this)
+        console.log(this);
     }
 
     render() {

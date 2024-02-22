@@ -189,7 +189,7 @@ export class BasicTable extends LitElement {
     // Validation Code
 
     #checkStatus = () => {
-        const nWarnings = this.shadowRoot.querySelectorAll("[warning]").length;;
+        const nWarnings = this.shadowRoot.querySelectorAll("[warning]").length;
         const nErrors = this.shadowRoot.querySelectorAll("[error]").length;
         checkStatus.call(this, nWarnings, nErrors);
     };

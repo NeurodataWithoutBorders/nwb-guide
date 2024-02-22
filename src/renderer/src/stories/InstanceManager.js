@@ -454,7 +454,11 @@ export class InstanceManager extends LitElement {
                     <div id="instance-display">
                         ${this.#items.map((item, i) => {
                             return html`
-                                <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id} style="padding: ${this.contentPadding}">
+                                <div
+                                    data-instance="${item.id}"
+                                    ?hidden=${this.#selected !== item.id}
+                                    style="padding: ${this.contentPadding}"
+                                >
                                     ${this.getInstanceContent(item)}
                                 </div>
                             `;

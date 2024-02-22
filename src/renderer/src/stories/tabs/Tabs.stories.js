@@ -43,12 +43,12 @@ const base = [
             warnings: false,
         },
     },
-]
+];
 
 export const Basic = Template.bind({});
 Basic.args = {
     items: base,
-    selected: 1
+    selected: 1,
 };
 
 // export const Valid = Template.bind({});

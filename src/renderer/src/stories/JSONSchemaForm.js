@@ -382,7 +382,7 @@ export class JSONSchemaForm extends LitElement {
         throw new Error(message);
     };
 
-    #contextMenus = []
+    #contextMenus = [];
 
     validateSchema = (resolved, schema, name) => {
         return validator
@@ -1055,8 +1055,7 @@ export class JSONSchemaForm extends LitElement {
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
-
-        const tabItems = []
+        const tabItems = [];
 
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
@@ -1079,7 +1078,6 @@ export class JSONSchemaForm extends LitElement {
 
             // ------------------------- Directly render the interactive property element -------------------------
             if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
-
 
             // ------------------------- Create tabs -------------------------
             const hasMany = renderable.length > 1; // How many siblings?
@@ -1146,8 +1144,8 @@ export class JSONSchemaForm extends LitElement {
                         tabItem.status = {
                             errors,
                             warnings,
-                        }
-                    }, 
+                        };
+                    },
                     onStatusChange: () => this.checkStatus(), // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
@@ -1172,14 +1170,13 @@ export class JSONSchemaForm extends LitElement {
             const tabItem = new TabItem({
                 name: headerName,
                 content: this.forms[name],
-            })
+            });
 
             tabItem.id = name; // assign name to accordion id
 
+            console.warn("WAS OPEN", oldStates?.open ?? !hasMany);
+            console.log("DISABLED", isDisabled);
 
-            console.warn('WAS OPEN', oldStates?.open ?? !hasMany)
-            console.log('DISABLED', isDisabled)
-            
             // this.accordions[name] = new Accordion({
             //     name: headerName,
             //     toggleable: hasMany,
@@ -1194,11 +1191,10 @@ export class JSONSchemaForm extends LitElement {
             //     status: oldStates?.status ?? "valid", // Always show a status
             // });
 
-            const toggleable = hasMany
-            const isOptionalProperty = !explicitlyRequired
+            const toggleable = hasMany;
+            const isOptionalProperty = !explicitlyRequired;
 
             if (isOptionalProperty) {
-
                 const context = new ContextMenu({
                     target: tabItem,
                     items: [
@@ -1208,7 +1204,7 @@ export class JSONSchemaForm extends LitElement {
                             disabled: !isDisabled,
                             onclick: (path) => {
                                 isGlobalEffect = false;
-                                enable()
+                                enable();
                                 console.log("enable");
                                 this.updateData([...interactedPath, name], true, true);
                                 this.onUpdate(localPath, this.results[name]);
@@ -1221,26 +1217,24 @@ export class JSONSchemaForm extends LitElement {
                             onclick: (path) => {
                                 isGlobalEffect = false;
                                 console.log("disable");
-                                disable()
+                                disable();
                                 this.updateData([...interactedPath, name], true, true);
                                 this.onUpdate(localPath, this.results[name]);
                             },
                         },
-                    ]
+                    ],
                 });
 
-                this.#contextMenus.push(context)
-                document.body.append(context)
-
+                this.#contextMenus.push(context);
+                document.body.append(context);
 
                 const disable = () => {
                     tabItem.disabled = true;
 
                     const enableButton = context.shadowRoot.querySelector("#enable-property");
-                    const disableButton = context.shadowRoot.querySelector("#disable-property");    
-                    if (disableButton) disableButton.setAttribute("disabled", '');
+                    const disableButton = context.shadowRoot.querySelector("#disable-property");
+                    if (disableButton) disableButton.setAttribute("disabled", "");
                     if (enableButton) enableButton.removeAttribute("disabled");
-        
 
                     const target = this.results;
                     const value = target[name] ?? {};
@@ -1262,9 +1256,8 @@ export class JSONSchemaForm extends LitElement {
 
                     const enableButton = context.shadowRoot.querySelector("#enable-property");
                     const disableButton = context.shadowRoot.querySelector("#disable-property");
-                    if (enableButton) enableButton.setAttribute("disabled", '');
+                    if (enableButton) enableButton.setAttribute("disabled", "");
                     if (disableButton) disableButton.removeAttribute("disabled");
-        
 
                     const { __disabled = {} } = this.results;
 
@@ -1278,13 +1271,11 @@ export class JSONSchemaForm extends LitElement {
                 };
 
                 if (isGlobalEffect) isDisabled ? disable() : enable();
-
             }
 
-            tabItems.push(tabItem)
-            return ''
+            tabItems.push(tabItem);
+            return "";
         });
-
 
         if (hasPatternProperties) {
             const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
@@ -1305,7 +1296,7 @@ export class JSONSchemaForm extends LitElement {
         }
 
         if (tabItems.length) {
-            const tabs = new Tabs({ items: tabItems, contentPadding: '25px' })
+            const tabs = new Tabs({ items: tabItems, contentPadding: "25px" });
             rendered.push(tabs);
         }
 
@@ -1387,9 +1378,9 @@ export class JSONSchemaForm extends LitElement {
     }
 
     #resetContextMenus = () => {
-        this.#contextMenus.forEach(o => o.remove())
-        this.#contextMenus = []
-    }
+        this.#contextMenus.forEach((o) => o.remove());
+        this.#contextMenus = [];
+    };
 
     disconnectedCallback() {
         super.disconnectedCallback();
@@ -1401,7 +1392,6 @@ export class JSONSchemaForm extends LitElement {
 
         // Remove context menus
         this.#resetContextMenus();
-
 
         this.#resetLoadState();
 

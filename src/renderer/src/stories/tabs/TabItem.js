@@ -1,9 +1,5 @@
 import { LitElement, css, html } from "lit";
-import {
-    errorHue,
-    successHue,
-    warningHue,
-} from "../globals";
+import { errorHue, successHue, warningHue } from "../globals";
 
 export class TabItem extends LitElement {
     static get styles() {
@@ -39,7 +35,6 @@ export class TabItem extends LitElement {
             :host([data-status="valid"]) {
                 border-bottom: 2px solid hsl(${successHue}, 100%, 70%) !important;
             }
-
 
             .status {
                 border-radius: 50%;
@@ -79,69 +74,56 @@ export class TabItem extends LitElement {
                 background-color: gainsboro;
             }
 
-
             :host([selected]:not(:only-child)) {
                 background-color: gainsboro;
             }
-
         `;
     }
 
     static get properties() {
         return {
             selected: { type: Boolean, reflect: true },
-            status : { type: Object },
+            status: { type: Object },
         };
     }
 
-    constructor({ 
-        status = {}, 
-        name = 'Tab',
-        subtitle,
-        content,
-        selected = false,
-        onClick
-    } = {}) {
+    constructor({ status = {}, name = "Tab", subtitle, content, selected = false, onClick } = {}) {
         super();
         this.status = status;
         this.name = name;
         this.subtitle = subtitle;
         this.content = content;
         this.selected = selected;
-        if (onClick) this.onClick = onClick
-        this.addEventListener('click', () => this.#select())
+        if (onClick) this.onClick = onClick;
+        this.addEventListener("click", () => this.#select());
     }
 
     #select = (select = true) => {
-        this.selected = select
-        if (select) this.onClick()
+        this.selected = select;
+        if (select) this.onClick();
+    };
 
-    }
-
-    onClick = () => {}
+    onClick = () => {};
 
     render() {
+        const warnings = this.status?.warnings ?? 0;
+        const errors = this.status?.errors ?? 0;
 
-        const warnings = this.status?.warnings ?? 0
-        const errors = this.status?.errors ?? 0
-
-        const status = errors ? 'error' : warnings ? 'warning' : 'valid'
-        this.setAttribute('data-status', status)
+        const status = errors ? "error" : warnings ? "warning" : "valid";
+        this.setAttribute("data-status", status);
 
         return html`
-        <div>
-            <span class="name">${this.name}</span><br>
-            <span class="subtitle">${this.subtitle}</span>
-        </div>
-        <div class="statuses">
-            ${Object.entries(this.status).map(([status, value]) => {
-                if (!value) return
-                return html`
-                    <span class="status ${status}">${typeof value === 'number' ? value : ''}</span>
-                `;
-            })}
-        </div>
-        `
+            <div>
+                <span class="name">${this.name}</span><br />
+                <span class="subtitle">${this.subtitle}</span>
+            </div>
+            <div class="statuses">
+                ${Object.entries(this.status).map(([status, value]) => {
+                    if (!value) return;
+                    return html` <span class="status ${status}">${typeof value === "number" ? value : ""}</span> `;
+                })}
+            </div>
+        `;
     }
 }
 
