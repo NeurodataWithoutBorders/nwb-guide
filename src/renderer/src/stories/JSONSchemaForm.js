@@ -28,6 +28,8 @@ const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
 import { Button } from "./Button";
+import { Tabs } from "./tabs/Tabs";
+import { TabItem } from "./tabs/TabItem";
 
 var validator = new Validator();
 
@@ -249,6 +251,7 @@ export class JSONSchemaForm extends LitElement {
         if (props.onOverride) this.onOverride = props.onOverride;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
+        if (props.onStatusUpdate) this.onStatusUpdate = props.onStatusUpdate;
 
         if (props.base) this.base = props.base;
     }
@@ -720,6 +723,7 @@ export class JSONSchemaForm extends LitElement {
 
     validateOnChange = () => {};
     onStatusChange = () => {};
+    onStatusUpdate = () => {};
     onThrow = () => {};
     renderTable = () => {};
     renderCustomHTML = () => {};
@@ -1048,10 +1052,13 @@ export class JSONSchemaForm extends LitElement {
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
+
+        const tabItems = []
+
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
 
-            const hasPatternProperties = !!info.patternProperties;
+            // const hasPatternProperties = !!info.patternProperties;
 
             // Render linked properties
             if (entry[isLink]) {
@@ -1067,8 +1074,12 @@ export class JSONSchemaForm extends LitElement {
                 `;
             }
 
-            // Directly render the interactive property element
+            // ------------------------- Directly render the interactive property element -------------------------
             if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
+
+
+            // ------------------------- Create something nested (accordion or tab) -------------------------
+            let nestedItem
 
             const hasMany = renderable.length > 1; // How many siblings?
 
@@ -1130,8 +1141,16 @@ export class JSONSchemaForm extends LitElement {
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
-                    onStatusChange: (status) => {
-                        accordion.setStatus(status);
+                    onStatusUpdate: ({ errors, warnings }) => {
+                        if (nestedItem instanceof TabItem) {
+                            nestedItem.status = {
+                                errors,
+                                warnings,
+                            }
+                        }
+                    }, 
+                    onStatusChange: (status, details) => {
+                        if (nestedItem instanceof Accordion) tabItems.setStatus(status)
                         this.checkStatus();
                     }, // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
@@ -1184,24 +1203,30 @@ export class JSONSchemaForm extends LitElement {
             enableToggleContainer.append(enableToggle);
             Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
 
-            const accordion = (this.accordions[name] = new Accordion({
+            nestedItem = new TabItem({
                 name: headerName,
-                toggleable: hasMany,
-                subtitle: html`<div style="display:flex; align-items: center;">
-                    ${explicitlyRequired ? "" : enableToggleContainer}
-                </div>`,
                 content: this.forms[name],
+            })
 
-                // States
-                open: oldStates?.open ?? !hasMany,
-                disabled: isDisabled,
-                status: oldStates?.status ?? "valid", // Always show a status
-            }));
+            // nestedItem = (this.accordions[name] = new Accordion({
+            //     name: headerName,
+            //     toggleable: hasMany,
+            //     subtitle: html`<div style="display:flex; align-items: center;">
+            //         ${explicitlyRequired ? "" : enableToggleContainer}
+            //     </div>`,
+            //     content: this.forms[name],
 
-            accordion.id = name; // assign name to accordion id
+            //     // States
+            //     open: oldStates?.open ?? !hasMany,
+            //     disabled: isDisabled,
+            //     status: oldStates?.status ?? "valid", // Always show a status
+            // }));
+
+            nestedItem.id = name; // assign name to accordion id
+
 
             const disable = () => {
-                accordion.disabled = true;
+                nestedItem.disabled = true;
 
                 const target = this.results;
                 const value = target[name] ?? {};
@@ -1219,7 +1244,7 @@ export class JSONSchemaForm extends LitElement {
             };
 
             const enable = () => {
-                accordion.disabled = false;
+                nestedItem.disabled = false;
 
                 const { __disabled = {} } = this.results;
 
@@ -1237,8 +1262,14 @@ export class JSONSchemaForm extends LitElement {
                 Object.assign(enableToggle.style, { accentColor: "gray" });
             }
 
-            return accordion;
+            if (nestedItem instanceof TabItem) {
+                tabItems.push(nestedItem)
+                return ''
+            }
+
+            return nestedItem;
         });
+
 
         if (hasPatternProperties) {
             const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
@@ -1256,6 +1287,12 @@ export class JSONSchemaForm extends LitElement {
             });
 
             rendered = [...rendered, ...patternProps];
+        }
+
+        if (tabItems.length) {
+            const tabs = new Tabs({ items: tabItems, contentPadding: '25px' })
+            console.log(tabs)
+            rendered.push(tabs);
         }
 
         const additionalProps = getEditableItems(results, additionalPropPattern, { schema });

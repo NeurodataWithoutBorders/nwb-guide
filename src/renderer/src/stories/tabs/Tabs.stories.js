@@ -40,7 +40,7 @@ const base = [
         subtitle: "Ophys Properties",
         status: {
             errors: true,
-            warnings: true,
+            warnings: false,
         },
     },
 ]

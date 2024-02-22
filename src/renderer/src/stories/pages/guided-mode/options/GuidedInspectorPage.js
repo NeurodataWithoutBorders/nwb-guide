@@ -206,6 +206,7 @@ export class GuidedInspectorPage extends Page {
 
                     const manager = new InstanceManager({
                         instances: allInstances,
+                        contentPadding: "15px",
                     });
 
                     return manager;

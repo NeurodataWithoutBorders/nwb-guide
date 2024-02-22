@@ -68,7 +68,6 @@ export class InstanceManager extends LitElement {
             }
 
             #instance-display {
-                padding: 25px;
                 border-left: 0;
                 overflow-y: auto;
                 overflow-x: hidden;
@@ -139,6 +138,7 @@ export class InstanceManager extends LitElement {
         if (props.onAdded) this.onAdded = props.onAdded;
         if (props.onRemoved) this.onRemoved = props.onRemoved;
         if (props.onDisplay) this.onDisplay = props.onDisplay;
+        this.contentPadding = props.contentPadding ?? "0px";
         this.controls = props.controls ?? [];
     }
 
@@ -165,7 +165,7 @@ export class InstanceManager extends LitElement {
             const id = path.slice(0, i + 1).join("/");
             const accordion = this.#accordions[id];
             target = target[path[i]]; // Progressively check the deeper nested instances
-            if (accordion) accordion.setStatus(checkStatus(false, false, [...Object.values(target)]));
+            if (accordion) accordion.setStatus(checkStatus(0, 0, [...Object.values(target)]));
         }
     };
 
@@ -454,7 +454,7 @@ export class InstanceManager extends LitElement {
                     <div id="instance-display">
                         ${this.#items.map((item, i) => {
                             return html`
-                                <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id}>
+                                <div data-instance="${item.id}" ?hidden=${this.#selected !== item.id} style="padding: ${this.contentPadding}">
                                     ${this.getInstanceContent(item)}
                                 </div>
                             `;

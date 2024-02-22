@@ -33,13 +33,18 @@ const aggregateMessages = (items) => {
 
 export class InspectorList extends List {
     static get styles() {
+        console.log('AHH')
         return [
-            super.styles,
             css`
-            :host {
-                display: block;
-            }
-        }`,
+                :host {
+                    display: block;
+                }
+
+                ol {
+                    margin: 0 !important;
+                }
+            `,
+            super.styles
         ];
     }
 
@@ -127,6 +132,10 @@ export class InspectorListItem extends LitElement {
                 reflect: true,
             },
         };
+    }
+
+    updated() {
+        console.log(this)
     }
 
     render() {

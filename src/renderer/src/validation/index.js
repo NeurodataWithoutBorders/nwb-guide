@@ -108,14 +108,19 @@ export async function validateOnChange(name, parent, path, value) {
     return res;
 }
 
-export function checkStatus(warnings, errors, items = []) {
+export function checkStatus(warnings = 0, errors = 0, items = []) {
     let newStatus = "valid";
+
     const nestedStatus = items.map((f) => f.status);
     if (nestedStatus.includes("error")) newStatus = "error";
     else if (errors) newStatus = "error";
     else if (nestedStatus.includes("warning")) newStatus = "warning";
     else if (warnings) newStatus = "warning";
-    if (this && this.onStatusChange && "status" in this && newStatus !== this.status)
-        this.onStatusChange((this.status = newStatus)); // Automatically run callbacks if supported by the context
+
+    if (this) {
+        if (this.onStatusUpdate) this.onStatusUpdate({ warnings, errors });
+        if (this.onStatusChange && "status" in this && newStatus !== this.status)
+            this.onStatusChange((this.status = newStatus)); // Automatically run callbacks if supported by the context
+    }
     return newStatus;
 }
