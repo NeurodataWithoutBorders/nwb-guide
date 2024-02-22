@@ -73,12 +73,12 @@ export class ContextMenu extends LitElement{
         this.target = target ?? document
         this.items = items ?? []
 
-        document.addEventListener('click', () => this.#hide()) // Hide at the last step of any click
-        document.addEventListener('contextmenu', () => this.#hide())
+        document.addEventListener('click', () => this.hide()) // Hide at the last step of any click
+        document.addEventListener('contextmenu', () => this.hide())
         this.target.addEventListener('contextmenu', (contextEvent) => this.#open(contextEvent))
     }
 
-    #hide() {
+    hide() {
         this.#activePath = null
         this.style.display = ""
     }
@@ -86,6 +86,9 @@ export class ContextMenu extends LitElement{
     #activePath: HTMLElement[] | null = null
 
     #open(mouseEvent: MouseEvent) {
+        const otherContextMenus = document.querySelectorAll('nwb-context-menu')
+        otherContextMenus.forEach((menu) => menu !== this ? menu.hide() : '')
+
         mouseEvent.preventDefault()
         mouseEvent.stopPropagation()
         this.#activePath = mouseEvent.path || mouseEvent.composedPath()
@@ -97,9 +100,11 @@ export class ContextMenu extends LitElement{
     render () {
         return html`
         <ul class="menu">
-            ${this.items.map(({ id, onclick , icon, label }) => html`<li class="share" id="${id}" @click=${() => {
+            ${this.items.map(({ id, onclick , icon, label, disabled }) => {
+              return  html`<li ?disabled=${disabled} class="share" id="${id}" @click=${() => {
                 if (onclick) onclick(this.#activePath)
-            }}><a href="#">${icon ?? ''}${label}</a></li>`)}
+              }}><a href="#">${icon ?? ''}${label}</a></li>`
+            })}
         </ul>
         `
     }

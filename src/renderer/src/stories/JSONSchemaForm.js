@@ -30,6 +30,7 @@ import { successHue, warningHue, errorHue } from "./globals";
 import { Button } from "./Button";
 import { Tabs } from "./tabs/Tabs";
 import { TabItem } from "./tabs/TabItem";
+import { ContextMenu } from "./table/ContextMenu";
 
 var validator = new Validator();
 
@@ -380,6 +381,8 @@ export class JSONSchemaForm extends LitElement {
         this.onThrow(message, this.identifier);
         throw new Error(message);
     };
+
+    #contextMenus = []
 
     validateSchema = (resolved, schema, name) => {
         return validator
@@ -1078,9 +1081,7 @@ export class JSONSchemaForm extends LitElement {
             if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
 
 
-            // ------------------------- Create something nested (accordion or tab) -------------------------
-            let nestedItem
-
+            // ------------------------- Create tabs -------------------------
             const hasMany = renderable.length > 1; // How many siblings?
 
             const localPath = [...path, name];
@@ -1142,17 +1143,12 @@ export class JSONSchemaForm extends LitElement {
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusUpdate: ({ errors, warnings }) => {
-                        if (nestedItem instanceof TabItem) {
-                            nestedItem.status = {
-                                errors,
-                                warnings,
-                            }
+                        tabItem.status = {
+                            errors,
+                            warnings,
                         }
                     }, 
-                    onStatusChange: (status, details) => {
-                        if (nestedItem instanceof Accordion) tabItems.setStatus(status)
-                        this.checkStatus();
-                    }, // Forward status changes to the parent form
+                    onStatusChange: () => this.checkStatus(), // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
                         this.nLoaded++;
@@ -1170,45 +1166,21 @@ export class JSONSchemaForm extends LitElement {
             }
 
             const oldStates = this.accordions[name];
-
-            const disableText = "Skip";
-            const enableText = "Enable";
-
             const disabledPath = [...path, "__disabled"];
             const interactedPath = [...disabledPath, "__interacted"];
 
-            const enableToggle = new Button({
-                label: isDisabled ? enableText : disableText,
-                size: "extra-small",
-                onClick: (ev) => {
-                    ev.stopPropagation();
-
-                    const willEnable = enableToggle.label === enableText;
-
-                    // Reset parameters on interaction
-                    isGlobalEffect = false;
-
-                    enableToggle.label = willEnable ? disableText : enableText;
-
-                    willEnable ? enable() : disable();
-                    this.updateData([...interactedPath, name], true, true);
-
-                    this.onUpdate(localPath, this.results[name]);
-                },
-            });
-
-            // const enableToggle = document.createElement("input");
-            const enableToggleContainer = document.createElement("div");
-            Object.assign(enableToggleContainer.style, { position: "relative" });
-            enableToggleContainer.append(enableToggle);
-            Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
-
-            nestedItem = new TabItem({
+            const tabItem = new TabItem({
                 name: headerName,
                 content: this.forms[name],
             })
 
-            // nestedItem = (this.accordions[name] = new Accordion({
+            tabItem.id = name; // assign name to accordion id
+
+
+            console.warn('WAS OPEN', oldStates?.open ?? !hasMany)
+            console.log('DISABLED', isDisabled)
+            
+            // this.accordions[name] = new Accordion({
             //     name: headerName,
             //     toggleable: hasMany,
             //     subtitle: html`<div style="display:flex; align-items: center;">
@@ -1220,54 +1192,97 @@ export class JSONSchemaForm extends LitElement {
             //     open: oldStates?.open ?? !hasMany,
             //     disabled: isDisabled,
             //     status: oldStates?.status ?? "valid", // Always show a status
-            // }));
+            // });
 
-            nestedItem.id = name; // assign name to accordion id
+            const toggleable = hasMany
+            const isOptionalProperty = !explicitlyRequired
+
+            if (isOptionalProperty) {
+
+                const context = new ContextMenu({
+                    target: tabItem,
+                    items: [
+                        {
+                            id: "enable-property",
+                            label: "Enable",
+                            disabled: !isDisabled,
+                            onclick: (path) => {
+                                isGlobalEffect = false;
+                                enable()
+                                console.log("enable");
+                                this.updateData([...interactedPath, name], true, true);
+                                this.onUpdate(localPath, this.results[name]);
+                            },
+                        },
+                        {
+                            id: "disable-property",
+                            label: "Disable",
+                            disabled: isDisabled,
+                            onclick: (path) => {
+                                isGlobalEffect = false;
+                                console.log("disable");
+                                disable()
+                                this.updateData([...interactedPath, name], true, true);
+                                this.onUpdate(localPath, this.results[name]);
+                            },
+                        },
+                    ]
+                });
+
+                this.#contextMenus.push(context)
+                document.body.append(context)
 
 
-            const disable = () => {
-                nestedItem.disabled = true;
+                const disable = () => {
+                    tabItem.disabled = true;
 
-                const target = this.results;
-                const value = target[name] ?? {};
+                    const enableButton = context.shadowRoot.querySelector("#enable-property");
+                    const disableButton = context.shadowRoot.querySelector("#disable-property");    
+                    if (disableButton) disableButton.setAttribute("disabled", '');
+                    if (enableButton) enableButton.removeAttribute("disabled");
+        
 
-                let update = true;
-                if (target.__disabled?.[name] && isGlobalEffect) update = false;
+                    const target = this.results;
+                    const value = target[name] ?? {};
 
-                // Disabled path is set to actual value
-                if (update) this.updateData([...disabledPath, name], value);
+                    let update = true;
+                    if (target.__disabled?.[name] && isGlobalEffect) update = false;
 
-                // Actual data is set to undefined
-                this.updateData(localPath, undefined);
+                    // Disabled path is set to actual value
+                    if (update) this.updateData([...disabledPath, name], value);
 
-                this.checkStatus();
-            };
+                    // Actual data is set to undefined
+                    this.updateData(localPath, undefined);
 
-            const enable = () => {
-                nestedItem.disabled = false;
+                    this.checkStatus();
+                };
 
-                const { __disabled = {} } = this.results;
+                const enable = () => {
+                    tabItem.disabled = false;
 
-                // Actual value is restored to the cached value
-                if (__disabled[name]) this.updateData(localPath, __disabled[name]);
+                    const enableButton = context.shadowRoot.querySelector("#enable-property");
+                    const disableButton = context.shadowRoot.querySelector("#disable-property");
+                    if (enableButton) enableButton.setAttribute("disabled", '');
+                    if (disableButton) disableButton.removeAttribute("disabled");
+        
 
-                // Cached value is cleared
-                this.updateData([...disabledPath, name], undefined);
+                    const { __disabled = {} } = this.results;
 
-                this.checkStatus();
-            };
+                    // Actual value is restored to the cached value
+                    if (__disabled[name]) this.updateData(localPath, __disabled[name]);
 
-            if (isGlobalEffect) {
-                isDisabled ? disable() : enable();
-                Object.assign(enableToggle.style, { accentColor: "gray" });
+                    // Cached value is cleared
+                    this.updateData([...disabledPath, name], undefined);
+
+                    this.checkStatus();
+                };
+
+                if (isGlobalEffect) isDisabled ? disable() : enable();
+
             }
 
-            if (nestedItem instanceof TabItem) {
-                tabItems.push(nestedItem)
-                return ''
-            }
-
-            return nestedItem;
+            tabItems.push(tabItem)
+            return ''
         });
 
 
@@ -1291,7 +1306,6 @@ export class JSONSchemaForm extends LitElement {
 
         if (tabItems.length) {
             const tabs = new Tabs({ items: tabItems, contentPadding: '25px' })
-            console.log(tabs)
             rendered.push(tabs);
         }
 
@@ -1372,8 +1386,22 @@ export class JSONSchemaForm extends LitElement {
         return isRendered;
     }
 
+    #resetContextMenus = () => {
+        this.#contextMenus.forEach(o => o.remove())
+        this.#contextMenus = []
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#resetContextMenus();
+    }
+
     render() {
         this.#updateRendered(); // Create a new promise to check on the rendered state
+
+        // Remove context menus
+        this.#resetContextMenus();
+
 
         this.#resetLoadState();
 

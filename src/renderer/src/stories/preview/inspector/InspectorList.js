@@ -33,7 +33,6 @@ const aggregateMessages = (items) => {
 
 export class InspectorList extends List {
     static get styles() {
-        console.log('AHH')
         return [
             css`
                 :host {
