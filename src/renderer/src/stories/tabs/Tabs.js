@@ -74,34 +74,6 @@ export class Tabs extends LitElement {
                     };
 
                     return tabItem;
-                    // return html`
-                    //     <div class="toggle"
-
-                    //         @click=${() => {
-
-                    //             Array.from(this.shadowRoot.getElementById("tab-toggles").children).forEach((toggle, j) => {
-                    //                 toggle.classList.toggle("active", i === j)
-                    //             })
-
-                    //             Array.from(this.shadowRoot.getElementById("tab-content").children).forEach((content, j) => {
-                    //                 content.style.display = i === j ? 'block' : ""
-                    //             })
-                    //         }}
-                    //     >
-                    //         <div>
-                    //             <span class="name">${item.name}</span><br>
-                    //             <span class="subtitle">${item.subtitle}</span>
-                    //         </div>
-                    //         <div class="statuses">
-                    //             ${Object.entries(item.status ?? {}).map(([status, value]) => {
-                    //                 if (!value) return
-                    //                 return html`
-                    //                     <span class="status ${status}">${typeof value === 'number' ? value : ''}</span>
-                    //                 `;
-                    //             })}
-                    //         </div>
-                    //     </div>
-                    // `;
                 })}
             </div>
             <div id="tab-content">
