@@ -99,7 +99,7 @@ export class TabItem extends LitElement {
         this.subtitle = subtitle;
         this.content = content;
         this.selected = selected;
-        this.disabled = disabled
+        this.disabled = disabled;
         if (onClick) this.onClick = onClick;
         this.addEventListener("click", () => this.#select());
     }
