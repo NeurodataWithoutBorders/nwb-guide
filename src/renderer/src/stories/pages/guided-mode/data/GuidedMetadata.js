@@ -198,17 +198,17 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (path[0] === "Ophys") {
                         const name = path.slice(-1)[0];
 
-                        if (isPatternProperties) return schema.minItems = schema.maxItems = Object.values(resolveFromPath(path, results)).length
+                        if (isPatternProperties)
+                            return (schema.minItems = schema.maxItems =
+                                Object.values(resolveFromPath(path, results)).length);
 
                         if (schema.type === "array") {
-                            if (
-                                name !== "Device" &&
-                                target
-                            ) {
-                                if (name in target) schema.minItems = schema.maxItems = target[name].length // Skip unresolved deep in pattern propertie)
-                                
+                            if (name !== "Device" && target) {
+                                if (name in target)
+                                    schema.minItems = schema.maxItems = target[name].length; // Skip unresolved deep in pattern propertie)
                                 // Remove Ophys requirements if left initially undefined
-                                else if (parentSchema.required.includes(name)) parentSchema.required = parentSchema.required.filter((n) => n !== name);
+                                else if (parentSchema.required.includes(name))
+                                    parentSchema.required = parentSchema.required.filter((n) => n !== name);
                             }
                         }
                     }
