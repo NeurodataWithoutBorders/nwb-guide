@@ -84,7 +84,6 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     beforeSave = () => {
-        console.log(this.localState.results, this.info.globalState.results);
         merge(this.localState.results, this.info.globalState.results);
     };
 

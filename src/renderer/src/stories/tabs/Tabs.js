@@ -20,6 +20,11 @@ export class Tabs extends LitElement {
             .content {
                 display: none;
             }
+
+            .content [disabled] {
+                opacity: 0.5;
+                pointer-events: none;
+            }
         `;
     }
 

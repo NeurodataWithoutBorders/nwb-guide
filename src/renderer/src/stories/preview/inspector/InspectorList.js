@@ -133,10 +133,6 @@ export class InspectorListItem extends LitElement {
         };
     }
 
-    updated() {
-        console.log(this);
-    }
-
     render() {
         this.type = getMessageType({
             ...this,

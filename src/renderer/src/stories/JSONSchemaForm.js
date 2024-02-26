@@ -369,8 +369,8 @@ export class JSONSchemaForm extends LitElement {
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
             ...Object.entries(this.forms)
                 .filter(([k, v]) => {
-                    const accordion = this.accordions[k];
-                    return !accordion || !accordion.disabled;
+                    const tab = this.tabs[k];
+                    return !tab || !tab.disabled;
                 })
                 .map(([_, v]) => v),
             ...Object.values(this.tables),
@@ -470,7 +470,6 @@ export class JSONSchemaForm extends LitElement {
 
         // if (!isValid && allErrors.length && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`;
 
-        console.log(allErrors);
         // Check if all inputs are valid
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
@@ -490,8 +489,8 @@ export class JSONSchemaForm extends LitElement {
 
         // Validate nested forms (skip disabled)
         for (let name in this.forms) {
-            const accordion = this.accordions[name];
-            if (!accordion || !accordion.disabled)
+            const tab = this.tabs[name];
+            if (!tab || !tab.disabled)
                 await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
 
@@ -647,7 +646,7 @@ export class JSONSchemaForm extends LitElement {
         for (let name in requirements) {
             let isRequired = this.#isRequired(name, requirements);
 
-            if (this.accordions[name]?.disabled) continue; // Skip disabled accordions
+            if (this.tabs[name]?.disabled) continue; // Skip disabled tabs
 
             // // NOTE: Uncomment to block checking requirements inside optional properties
             // if (!requirements[name][selfRequiredSymbol] && !resolved[name]) continue; // Do not continue checking requirements if absent and not required
@@ -966,7 +965,7 @@ export class JSONSchemaForm extends LitElement {
         }
     };
 
-    accordions = {};
+    tabs = {};
 
     #render = (schema, results, required = {}, ignore = {}, path = []) => {
         let isLink = Symbol("isLink");
@@ -1080,8 +1079,6 @@ export class JSONSchemaForm extends LitElement {
             if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
 
             // ------------------------- Create tabs -------------------------
-            const hasMany = renderable.length > 1; // How many siblings?
-
             const localPath = [...path, name];
 
             // Check properties that will be rendered before creating the accordion
@@ -1163,35 +1160,17 @@ export class JSONSchemaForm extends LitElement {
                 }));
             }
 
-            const oldStates = this.accordions[name];
             const disabledPath = [...path, "__disabled"];
             const interactedPath = [...disabledPath, "__interacted"];
 
-            const tabItem = new TabItem({
+            const tabItem = this.tabs[name] = new TabItem({
                 name: headerName,
                 content: this.forms[name],
+                disabled: isDisabled
             });
 
             tabItem.id = name; // assign name to accordion id
 
-            console.warn("WAS OPEN", oldStates?.open ?? !hasMany);
-            console.log("DISABLED", isDisabled);
-
-            // this.accordions[name] = new Accordion({
-            //     name: headerName,
-            //     toggleable: hasMany,
-            //     subtitle: html`<div style="display:flex; align-items: center;">
-            //         ${explicitlyRequired ? "" : enableToggleContainer}
-            //     </div>`,
-            //     content: this.forms[name],
-
-            //     // States
-            //     open: oldStates?.open ?? !hasMany,
-            //     disabled: isDisabled,
-            //     status: oldStates?.status ?? "valid", // Always show a status
-            // });
-
-            const toggleable = hasMany;
             const isOptionalProperty = !explicitlyRequired;
 
             if (isOptionalProperty) {
@@ -1205,7 +1184,6 @@ export class JSONSchemaForm extends LitElement {
                             onclick: (path) => {
                                 isGlobalEffect = false;
                                 enable();
-                                console.log("enable");
                                 this.updateData([...interactedPath, name], true, true);
                                 this.onUpdate(localPath, this.results[name]);
                             },
@@ -1216,7 +1194,6 @@ export class JSONSchemaForm extends LitElement {
                             disabled: isDisabled,
                             onclick: (path) => {
                                 isGlobalEffect = false;
-                                console.log("disable");
                                 disable();
                                 this.updateData([...interactedPath, name], true, true);
                                 this.onUpdate(localPath, this.results[name]);

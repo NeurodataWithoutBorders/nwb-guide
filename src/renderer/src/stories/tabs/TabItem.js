@@ -20,6 +20,10 @@ export class TabItem extends LitElement {
                 width: -webkit-fill-available;
             }
 
+            :host([disabled]) {
+                opacity: 0.5;
+            }
+
             :host(:not(:only-child)) {
                 cursor: pointer;
             }
@@ -83,17 +87,19 @@ export class TabItem extends LitElement {
     static get properties() {
         return {
             selected: { type: Boolean, reflect: true },
+            disabled: { type: Boolean, reflect: true },
             status: { type: Object },
         };
     }
 
-    constructor({ status = {}, name = "Tab", subtitle, content, selected = false, onClick } = {}) {
+    constructor({ status = {}, name = "Tab", subtitle, content, selected = false, disabled = false, onClick } = {}) {
         super();
         this.status = status;
         this.name = name;
         this.subtitle = subtitle;
         this.content = content;
         this.selected = selected;
+        this.disabled = disabled
         if (onClick) this.onClick = onClick;
         this.addEventListener("click", () => this.#select());
     }
@@ -111,6 +117,11 @@ export class TabItem extends LitElement {
 
         const status = errors ? "error" : warnings ? "warning" : "valid";
         this.setAttribute("data-status", status);
+
+        if (this.content) {
+            if (this.disabled) this.content.setAttribute("disabled", true);
+            else this.content.removeAttribute("disabled");
+        }
 
         return html`
             <div>
