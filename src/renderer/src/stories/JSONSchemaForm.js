@@ -490,8 +490,7 @@ export class JSONSchemaForm extends LitElement {
         // Validate nested forms (skip disabled)
         for (let name in this.forms) {
             const tab = this.tabs[name];
-            if (!tab || !tab.disabled)
-                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
+            if (!tab || !tab.disabled) await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
 
         for (let key in this.tables) {
@@ -1163,11 +1162,11 @@ export class JSONSchemaForm extends LitElement {
             const disabledPath = [...path, "__disabled"];
             const interactedPath = [...disabledPath, "__interacted"];
 
-            const tabItem = this.tabs[name] = new TabItem({
+            const tabItem = (this.tabs[name] = new TabItem({
                 name: headerName,
                 content: this.forms[name],
-                disabled: isDisabled
-            });
+                disabled: isDisabled,
+            }));
 
             tabItem.id = name; // assign name to accordion id
 
