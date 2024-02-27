@@ -14,8 +14,8 @@
     <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-win.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-win.yml/badge.svg" alt="Windows Build"></a>
   </p>
   <p align="center">
-    <a href="https://github.com/psf/black"><img alt="Python code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-    <a href="https://github.com/prettier/prettier"><img alt="JavaScript code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat"></a>
+    <a href="https://github.com/psf/black"><img alt="Python code style: black" src="https://img.shields.io/badge/python_code_style-black-000000.svg"></a>
+    <a href="https://github.com/prettier/prettier"><img alt="JavaScript code style: prettier" src="https://img.shields.io/badge/javascript_code_style-prettier-ff69b4.svg?style=flat"></a>
   </p>
   <p align="center">
       <a href="https://join.slack.com/t/nwb-users/shared_invite/enQtNzMwOTcwNzQ2MDM5LWMyZDUwODJjYjM3MzMzYzZiNDk4ZTU3ZjQ3MmMxMmY5MDUyNzc0ZDI5ZjViYmJjYTQ5NjljOGFjZmMwOGIwZmQ"><img src="https://img.shields.io/badge/chat-Slack-lightblue?style=flat&logo=slack" alt="NWB Slack"></a>
