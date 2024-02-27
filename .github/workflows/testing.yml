@@ -71,12 +71,6 @@ jobs:
       - name: Install GUIDE
         run: npm ci
 
-
-      - name: Create env file
-        run: |
-          touch .env
-          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
-
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
         run: npm run test:coverage
