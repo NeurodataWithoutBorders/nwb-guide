@@ -27,6 +27,6 @@ Please clone the :linux-fix:`linux-fix <>` branch of the NWB GUIDE and follow th
 
 .. code-block:: bash
 
-   git clone --branch linux-fix https://github.com/NeurodataWithoutBorders/nwb-guide.git
+   git clone --branch linux-fix https://github.com/NeurodataWithoutBorders/nwb-guide
    cd nwb-guide
 
