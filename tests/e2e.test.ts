@@ -164,11 +164,8 @@ describe('E2E Test', () => {
 
       await takeScreenshot('info-page', 300)
 
-
       // Fail to advance without name
       await toNextPage('details')
-
-      await takeScreenshot('fail-name', 500)
 
       // Fill in name of the test pipeline
       await evaluate(() => {
@@ -180,7 +177,7 @@ describe('E2E Test', () => {
         nameInput.updateData('My Test Pipeline')
       })
 
-      await takeScreenshot('valid-name', 300)
+      await takeScreenshot('valid-name', 1000)
 
       // Advance to formats page
       await toNextPage('structure')
@@ -302,13 +299,16 @@ describe('E2E Test', () => {
 
         const data = { ...table.data }
 
+        let i = 29 // Start at 29 weeks
+
         for (let name in data) {
           data[name] = {
             ...data[name],
             sex: 'M',
             species: 'Mus musculus',
-            age: 'P30D'
+            age: `P${i}W`
           }
+          i++
         }
 
         table.data = data // This changes the render but not the update flag
@@ -366,8 +366,6 @@ describe('E2E Test', () => {
 
       test('Upload pipeline output to DANDI', async () => {
 
-        await takeScreenshot('upload-page', 100)
-
         await evaluate(async () => {
           const dashboard = document.querySelector('nwb-dashboard')
           const page =  dashboard.page
@@ -377,26 +375,18 @@ describe('E2E Test', () => {
 
         await takeScreenshot('upload-page-api-tokens', 100)
 
-        await evaluate(async (dandiAPIToken) => {
+        await evaluate(async (dandisetId, dandiAPIToken) => {
           const dashboard = document.querySelector('nwb-dashboard')
           const page =  dashboard.page
           const modal = page.globalModal
           const stagingKeyInput = modal.form.getFormElement([ 'staging_api_key' ])
           stagingKeyInput.updateData(dandiAPIToken)
-        }, dandiInfo.token)
-
-        await takeScreenshot('upload-page-api-token-added', 100)
-
-        await evaluate(async (dandisetId) => {
-          const dashboard = document.querySelector('nwb-dashboard')
-          const page =  dashboard.page
-          const modal = page.globalModal
           await modal.footer.onClick() // Validate and submit value
           const idInput = page.form.getFormElement(["dandiset"])
           idInput.updateData(dandisetId)
-        }, dandiInfo.id)
+        }, dandiInfo.id, dandiInfo.token)
 
-        await takeScreenshot('upload-page-with-id', 100)
+        await takeScreenshot('upload-page-with-id', 500)
 
         await sleep(500) // Wait for input status to update
 
