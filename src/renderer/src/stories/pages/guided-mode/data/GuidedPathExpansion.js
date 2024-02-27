@@ -14,6 +14,143 @@ import { CodeBlock } from "../../../CodeBlock.js";
 import { List } from "../../../List";
 import { fs } from "../../../../electron/index.js";
 import { joinPath } from "../../../../globals.js";
+import { Button } from "../../../Button.js";
+import { Modal } from "../../../Modal";
+import { header } from "../../../forms/utils";
+
+import autocompleteIcon from "../../../assets/inspect.svg?raw";
+
+export async function autocompleteFormatString(path) {
+    let notification;
+
+    const { base_directory } = path.reduce((acc, key) => acc[key] ?? {}, this.form.resolved);
+
+    const notify = (message, type) => {
+        if (notification) this.dismiss(notification);
+        return (notification = this.notify(message, type));
+    };
+
+    if (!base_directory) {
+        const message = `Please fill out the <b>base directory</b> for ${header(path[0])} before attempting auto-completion.`;
+        notify(message, "error");
+        throw new Error(message);
+    }
+
+    const modal = new Modal({
+        header: "Autocomplete Format String",
+    });
+
+    const content = document.createElement("div");
+    Object.assign(content.style, {
+        padding: "25px",
+        paddingBottom: "0px",
+    });
+
+    const propOrder = ["path", "subject_id", "session_id"];
+    const form = new JSONSchemaForm({
+        schema: {
+            type: "object",
+            properties: {
+                path: {
+                    type: "string",
+                    title: "Example Filesystem Entry",
+                    format: ["file", "directory"],
+                    description: "Provide an example filesystem entry for the selected interface",
+                },
+                subject_id: {
+                    type: "string",
+                    description: "The subject ID in the above entry",
+                },
+                session_id: {
+                    type: "string",
+                    description: "The session ID in the above entry",
+                },
+            },
+            required: propOrder,
+            order: propOrder,
+        },
+        validateOnChange: async (name, parent) => {
+            const value = parent[name];
+
+            if (name === "path") {
+                if (value) {
+                    if (fs.lstatSync(value).isSymbolicLink())
+                        return [
+                            {
+                                type: "error",
+                                message: "This feature does not support symbolic links. Please provide a valid path.",
+                            },
+                        ];
+
+                    if (base_directory) {
+                        if (!value.includes(base_directory))
+                            return [
+                                {
+                                    type: "error",
+                                    message:
+                                        "The provided path must include the base directory.<br><small>This is likely due to the target being contained in a symlink, which is unsupported by this feature.</small>",
+                                },
+                            ];
+                    }
+
+                    const errors = [];
+                    for (let key in parent) {
+                        if (key === name) continue;
+                        if (!value.includes(parent[key]))
+                            errors.push({
+                                type: "error",
+                                message: `${header(name)} not found in the updated path.`,
+                            });
+                    }
+                }
+            } else {
+                if (!parent.path || !parent.path.includes(value))
+                    return [
+                        {
+                            type: "error",
+                            message: `${header(name)} not found in the provided path.`,
+                        },
+                    ];
+            }
+        },
+    });
+
+    content.append(form);
+    modal.append(content);
+
+    modal.onClose = async () => notify("Format String Path was not completed.", "error");
+
+    return new Promise((resolve) => {
+        const button = new Button({
+            label: "Create",
+            primary: true,
+            onClick: async () => {
+                await form.validate().catch((e) => {
+                    notify(e.message, "error");
+                    throw e;
+                });
+
+                const results = await run("locate/autocomplete", {
+                    base_directory,
+                    additional_metadata: {},
+                    ...form.results,
+                });
+                const input = this.form.getFormElement([...path, "format_string_path"]);
+                input.updateData(results.format_string);
+                this.save();
+                resolve(results.format_string);
+            },
+        });
+
+        modal.footer = button;
+
+        modal.open = true;
+
+        document.body.append(modal);
+    }).finally(() => {
+        modal.remove();
+    });
+}
 
 const exampleFileStructure = `mylab/
     ¦   Subjects/
@@ -271,8 +408,23 @@ export class GuidedPathExpansionPage extends Page {
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
-        for (let key in this.info.globalState.interfaces)
+        const controls = {};
+        for (let key in this.info.globalState.interfaces) {
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
+
+            controls[key] = {
+                format_string_path: [
+                    new Button({
+                        label: "Autocomplete",
+                        icon: autocompleteIcon,
+                        buttonStyles: {
+                            width: "max-content",
+                        },
+                        onClick: async () => autocompleteFormatString.call(this, [key]),
+                    }),
+                ],
+            };
+        }
         structureState.schema = generatedSchema;
 
         this.optional.requestUpdate();
@@ -281,6 +433,8 @@ export class GuidedPathExpansionPage extends Page {
             ...structureState,
             onThrow,
             validateEmptyValues: false,
+
+            controls,
 
             // NOTE: These are custom coupled form inputs
             onUpdate: (path, value) => {

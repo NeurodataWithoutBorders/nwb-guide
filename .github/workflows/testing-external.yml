@@ -1,4 +1,4 @@
-name: Dev Tests
+name: Dev Tests (Live Services)
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -13,7 +13,7 @@ env:
 
 jobs:
   testing:
-    name: Dev tests on ${{ matrix.os }}
+    name: Dev tests with live services on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -71,13 +71,18 @@ jobs:
       - name: Install GUIDE
         run: npm ci
 
+      - name: Create env file
+        run: |
+          touch .env
+          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
-        run: npm run test:coverage
+        run: npm run coverage:app
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:app
 
 
       - name: Upload coverage reports to Codecov

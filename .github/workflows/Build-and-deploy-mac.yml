@@ -1,4 +1,4 @@
-name: Build-and-deploy-mac
+name: Mac Release
 run-name: ${{ github.actor }} is building a MAC release for NWB GUIDE
 
 on:

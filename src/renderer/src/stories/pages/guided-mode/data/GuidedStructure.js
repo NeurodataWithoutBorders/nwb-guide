@@ -115,15 +115,24 @@ export class GuidedStructurePage extends Page {
             .then((res) => res.json())
             .then((json) =>
                 Object.entries(json).map(([key, value]) => {
-                    const category = categories.find(({ test }) => test.test(key))?.value;
+                    const displayName = key.trim();
+
+                    const interfaceName = value.name;
+
+                    const category = categories.find(({ test }) => test.test(interfaceName))?.value;
+
+                    const structuredKeywords = {
+                        suffixes: value.suffixes ?? [],
+                    };
 
                     return {
-                        ...value,
-                        key,
-                        value: key,
+                        ...value, // Contains label and name already (extra metadata)
+                        key: displayName,
+                        value: interfaceName,
+                        structuredKeywords,
                         category,
-                        disabled: !supportedInterfaces.includes(key),
-                    }; // Has label and keywords property already
+                        disabled: !supportedInterfaces.includes(interfaceName),
+                    };
                 })
             )
             .catch((error) => console.error(error));

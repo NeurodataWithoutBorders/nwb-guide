@@ -464,7 +464,6 @@ export class JSONSchemaForm extends LitElement {
 
         // if (!isValid && allErrors.length && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`;
 
-        console.log(allErrors);
         // Check if all inputs are valid
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
@@ -1109,6 +1108,8 @@ export class JSONSchemaForm extends LitElement {
                     schema: info,
                     results: { ...nestedResults },
                     globals: this.globals?.[name],
+
+                    controls: this.controls[name],
 
                     onUpdate: (internalPath, value, forceUpdate) => {
                         const path = [...localPath, ...internalPath];
