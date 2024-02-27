@@ -29,4 +29,3 @@ Please clone the :linux-fix:`linux-fix <>` branch of the NWB GUIDE and follow th
 
    git clone --branch linux-fix https://github.com/NeurodataWithoutBorders/nwb-guide
    cd nwb-guide
-
