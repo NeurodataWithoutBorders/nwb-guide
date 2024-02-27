@@ -2,12 +2,16 @@
   <img src="src/renderer/assets/img/logo-guide-draft-transparent-tight.png" width="250" alt="NeuroConv logo"/>
   <h3 align="center">NWB Graphical User Interface for Data Entry</h3>
   <p align="center">
-    <a href="https://github.com/vitejs/vite/actions/workflows/testing.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing.yml/badge.svg" alt="Full Tests"></a>
-    <a href="https://github.com/vitejs/vite/actions/workflows/Build-and-deploy-mac.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-mac.yml/badge.svg" alt="Mac Build"></a>
-    <a href="https://github.com/vitejs/vite/actions/workflows/Build-and-deploy-win.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-win.yml/badge.svg" alt="Windows Build"></a>
+    <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing.yml/badge.svg" alt="Full Tests"></a>
+    <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/vite/actions/workflows/testing-external.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing-external.yml/badge.svg" alt="Full Tests with External Dependencies"></a>
+      <a href="https://github.com/neurodatawithoutborders/nwb-guide/actions/workflows/pyflask-build-and-dist-tests.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/pyflask-build-and-dist-tests.yml/badge.svg" alt="Build and Distributable Tests"></a>
     <a href="https://codecov.io/github/NeurodataWithoutBorders/nwb-guide?branch=main"><img src="https://codecov.io/github/NeurodataWithoutBorders/nwb-guide/coverage.svg?branch=main" alt="codecov"></a>
     <a href="https://nwb-guide.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/nwb-guide/badge/?version=latest" alt="Documentation"></a>
       <a href="https://github.com/catalystneuro/nwb-guide/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License: MIT"></a>
+  </p>
+  <p align="center">
+     <a href="https://github.com/vitejs/vite/actions/workflows/Build-and-deploy-mac.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-mac.yml/badge.svg" alt="Mac Build"></a>
+    <a href="https://github.com/vitejs/vite/actions/workflows/Build-and-deploy-win.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-win.yml/badge.svg" alt="Windows Build"></a>
   </p>
   <p align="center">
     <a href="https://github.com/psf/black"><img alt="Python code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
