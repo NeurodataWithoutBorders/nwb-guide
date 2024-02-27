@@ -1,4 +1,4 @@
-name: Back-end Tests
+name: Dev Tests
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -13,7 +13,7 @@ env:
 
 jobs:
   testing:
-    name: Back-end tests on ${{ matrix.os }}
+    name: Dev tests on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:

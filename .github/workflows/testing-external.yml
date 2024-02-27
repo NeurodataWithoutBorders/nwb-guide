@@ -1,4 +1,4 @@
-name: External Tests
+name: Dev Tests (Live Services)
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -13,7 +13,7 @@ env:
 
 jobs:
   testing:
-    name: External tests on ${{ matrix.os }}
+    name: Dev tests with live services on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
