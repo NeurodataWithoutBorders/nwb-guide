@@ -1,4 +1,4 @@
-name: Dev Tests
+name: Dev Tests (Live Services)
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -13,7 +13,7 @@ env:
 
 jobs:
   testing:
-    name: Dev tests on ${{ matrix.os }}
+    name: Dev tests with live services on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -63,9 +63,6 @@ jobs:
         name: Create and activate environment
         run: mamba env update -n nwb-guide -f ${{ matrix.label }}
 
-      - name: Display conda environment
-        run: conda list
-
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -74,25 +71,19 @@ jobs:
       - name: Install GUIDE
         run: npm ci
 
+      - name: Create env file
+        run: |
+          touch .env
+          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 30
-          max_attempts: 3
-          retry_on: error
-          shell: bash
-          command: conda init && conda activate nwb-guide && npm run test:coverage
+        run: npm run coverage:app
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 30
-          max_attempts: 3
-          retry_on: error
-          shell: bash
-          command: conda init && conda activate nwb-guide && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:app
+
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
