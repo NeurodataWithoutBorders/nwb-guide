@@ -205,7 +205,7 @@ export class GuidedMetadataPage extends ManagedPage {
                         if (schema.type === "array") {
                             if (name !== "Device" && target) {
                                 if (name in target)
-                                    schema.minItems = schema.maxItems = target[name].length; // Skip unresolved deep in pattern propertie)
+                                    schema.minItems = schema.maxItems = target[name].length; // Skip unresolved deep in pattern properties)
                                 // Remove Ophys requirements if left initially undefined
                                 else if (parentSchema.required.includes(name))
                                     parentSchema.required = parentSchema.required.filter((n) => n !== name);
