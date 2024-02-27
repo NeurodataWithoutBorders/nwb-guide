@@ -1,4 +1,4 @@
-name: Build-and-deploy-win
+name: Windows Release
 run-name: ${{ github.actor }} is building a Windows release for NWB GUIDE
 
 on:
