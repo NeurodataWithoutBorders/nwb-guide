@@ -1,0 +1,93 @@
+name: External Tests
+on:
+  schedule:
+    - cron: "0 16 * * *"  # Daily at noon EST
+  pull_request:
+
+concurrency:  # Cancel previous workflows on the same pull request
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CACHE_NUMBER: 2  # increase to reset cache manually
+
+jobs:
+  testing:
+    name: External tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            label: environments/environment-Linux.yml
+
+          - os: macos-latest
+            label: environments/environment-Mac.yml
+
+          - os: windows-latest
+            label: environments/environment-Windows.yml
+
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: git fetch --prune --unshallow --tags
+
+      # see https://github.com/conda-incubator/setup-miniconda#caching-environments
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: nwb-guide
+          use-mamba: true
+
+      - name: Set cache date
+        id: get-date
+        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache Conda env
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
+        id: cache
+
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Create and activate environment
+        run: mamba env update -n nwb-guide -f ${{ matrix.label }}
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install GUIDE
+        run: npm ci
+
+      - name: Create env file
+        run: |
+          touch .env
+          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+
+      - if: matrix.os != 'ubuntu-latest'
+        name: Run tests
+        run: npm run coverage:app
+
+      - if: matrix.os == 'ubuntu-latest'
+        name: Run tests with xvfb
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:app
+
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          fail_ci_if_error: true
