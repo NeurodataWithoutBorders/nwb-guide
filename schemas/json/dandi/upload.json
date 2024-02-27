@@ -22,13 +22,13 @@
                 },
                 "ignore_cache": {
                     "type": "boolean",
-                    "description": "Ignore the cache and re-upload all files.",
+                    "description": "Ignore the cache used by DANDI to speed up repeated operations.",
                     "default": false
                 },
                 "cleanup": {
                     "type": "boolean",
                     "title": "Cleanup Local Filesystem",
-                    "description": "Delete Local Files After Upload",
+                    "description": "Delete local files after upload",
                     "default": false
                 }
             }
