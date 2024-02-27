@@ -1,4 +1,4 @@
-name: External Tests
+name: Dev Tests with External Dependencies
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
