@@ -60,7 +60,7 @@ export function drillSchemaProperties(schema = {}, callback, target, path = [], 
         const info = patternProperties[regexp];
         const updatedPath = [...path, regexp];
         callback(updatedPath, info, undefined, true);
-        drillSchemaProperties(info, callback, undefined, updatedPath, true);
+        drillSchemaProperties(info, callback, undefined, updatedPath, true, schema);
     }
 
     for (let name in properties) {
@@ -70,7 +70,7 @@ export function drillSchemaProperties(schema = {}, callback, target, path = [], 
 
         const updatedPath = [...path, name];
 
-        callback(updatedPath, info, target);
+        callback(updatedPath, info, target, undefined, schema);
 
         drillSchemaProperties(info, callback, target?.[name], updatedPath, inPatternProperties);
     }

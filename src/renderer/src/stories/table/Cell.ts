@@ -110,8 +110,6 @@ export class TableCell extends LitElement {
     }
 
     set value(value) {
-        if (!value) value = []
-
         if (this.input) this.input.set(renderValue(value, this.schema)) // Allow null to be set directly
         this.#value = this.input
                             ? this.input.getValue() // Ensure all operations are undoable / value is coerced
