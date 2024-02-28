@@ -95,7 +95,6 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     beforeSave = () => {
-        console.log(this.localState.results, this.info.globalState.results);
         merge(this.localState.results, this.info.globalState.results);
     };
 
@@ -186,22 +185,21 @@ export class GuidedMetadataPage extends ManagedPage {
             // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
             drillSchemaProperties(
                 schema,
-                (path, schema, target, isPatternProperties) => {
+                (path, schema, target, isPatternProperties, parentSchema) => {
                     if (path[0] === "Ophys") {
                         const name = path.slice(-1)[0];
 
-                        if (isPatternProperties) {
-                            schema.minItems = schema.maxItems = Object.values(resolveFromPath(path, results)).length;
-                            return;
-                        }
+                        if (isPatternProperties)
+                            return (schema.minItems = schema.maxItems =
+                                Object.values(resolveFromPath(path, results)).length);
 
                         if (schema.type === "array") {
-                            if (
-                                name !== "Device" &&
-                                target &&
-                                name in target // Skip unresolved deep in pattern properties
-                            ) {
-                                schema.minItems = schema.maxItems = target[name].length;
+                            if (name !== "Device" && target) {
+                                if (name in target)
+                                    schema.minItems = schema.maxItems = target[name].length; // Skip unresolved deep in pattern properties)
+                                // Remove Ophys requirements if left initially undefined
+                                else if (parentSchema.required.includes(name))
+                                    parentSchema.required = parentSchema.required.filter((n) => n !== name);
                             }
                         }
                     }
