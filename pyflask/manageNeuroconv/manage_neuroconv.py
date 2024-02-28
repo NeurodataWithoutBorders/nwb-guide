@@ -582,7 +582,7 @@ def upload_folder_to_dandi(
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
-    ignore_cache: Optional[bool] = None,
+    ignore_cache: bool = False,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -611,7 +611,7 @@ def upload_project_to_dandi(
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
-    ignore_cache: Optional[bool] = None,
+    ignore_cache: bool = False,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
@@ -622,7 +622,7 @@ def upload_project_to_dandi(
     if ignore_cache:
         os.environ["DANDI_CACHE"] = "ignore"
     else:
-        os.environ.pop("DANDI_CACHE", None)
+        os.environ["DANDI_CACHE"] = ""
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
