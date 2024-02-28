@@ -55,25 +55,33 @@ export class Tabs extends LitElement {
     }
 
     render() {
-
         return html`
             <div id="tab-toggles">
                 ${this.items.map((item, i) => {
-                    const tabItem = item instanceof TabItem ? item : new TabItem({ 
-                        ...item,
-                        selected: i === this.selected,
-                        onClick: () => {
-                            this.selected = i
-                            Array.from(this.shadowRoot.querySelectorAll("nwb-tab-item")).forEach((item, j) => item === tabItem ? '' : item.selected = false)
-                            Array.from(this.shadowRoot.getElementById("tab-content").children).forEach((content, j) => content.style.display = i === j ? "block" : "");
-                        }
-                    });
+                    const tabItem =
+                        item instanceof TabItem
+                            ? item
+                            : new TabItem({
+                                  ...item,
+                                  selected: i === this.selected,
+                                  onClick: () => {
+                                      this.selected = i;
+                                      Array.from(this.shadowRoot.querySelectorAll("nwb-tab-item")).forEach((item, j) =>
+                                          item === tabItem ? "" : (item.selected = false)
+                                      );
+                                      Array.from(this.shadowRoot.getElementById("tab-content").children).forEach(
+                                          (content, j) => (content.style.display = i === j ? "block" : "")
+                                      );
+                                  },
+                              });
 
                     return tabItem;
                 })}
             </div>
             <div id="tab-content">
-                ${this.items.map((item) => html` <div class="content" style="padding: ${this.contentPadding}">${item.content}</div> `)}
+                ${this.items.map(
+                    (item) => html` <div class="content" style="padding: ${this.contentPadding}">${item.content}</div> `
+                )}
             </div>
         `;
     }
