@@ -1,4 +1,4 @@
-name: PyFlask build and distributable tests
+name: Build Tests — Flask
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST

@@ -104,8 +104,7 @@ export class GuidedStartPage extends Page {
                                 Although not required to use the GUIDE, you can learn more about the NWB conversion
                                 process in the
                                 <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
-                                    >neuroconv documentation page</a
-                                >
+                                    >neuroconv documentation page</a>.
                             `,
                         })}
                     </div>
