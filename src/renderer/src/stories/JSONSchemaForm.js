@@ -60,7 +60,8 @@ const componentCSS = `
 
     :host {
       display: inline-block;
-      width:100%;
+      width: 100%;
+      height: 100%;
     }
 
     #empty {
@@ -168,6 +169,7 @@ const componentCSS = `
     small {
         font-size: 0.8em;
     }
+
 `;
 
 document.addEventListener("dragover", (dragEvent) => {
@@ -199,6 +201,22 @@ export class JSONSchemaForm extends LitElement {
     tables = {};
     #nErrors = 0;
     #nWarnings = 0;
+
+    getActiveForms = () => Object.entries(this.forms).filter(([k, v]) => !this.tabs[k] || !this.tabs[k].disabled).map(([_, v]) => v)
+
+    get nErrors() {
+        const reducer = (acc, item) => acc + item.nErrors;
+        const tableErrors = Object.values(this.tables).reduce(reducer, 0);
+        const activeFormErrors = this.getActiveForms().reduce(reducer, 0);
+        return this.#nErrors + tableErrors + activeFormErrors;
+    }
+
+    get nWarnings() {
+        const reducer = (acc, item) => acc + item.nWarnings;
+        const tableWarnings = Object.values(this.tables).reduce(reducer, 0);
+        const activeFormWarnings = this.getActiveForms().reduce(reducer, 0);
+        return this.#nWarnings + tableWarnings + activeFormWarnings;
+    }
 
     #toggleRendered;
     #rendered;
@@ -366,15 +384,9 @@ export class JSONSchemaForm extends LitElement {
 
     status;
     checkStatus = () => {
-        checkStatus.call(this, this.#nWarnings, this.#nErrors, [
-            ...Object.entries(this.forms)
-                .filter(([k, v]) => {
-                    const tab = this.tabs[k];
-                    return !tab || !tab.disabled;
-                })
-                .map(([_, v]) => v),
-            ...Object.values(this.tables),
-        ]);
+
+
+        return checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
     throw = (message) => {
@@ -398,8 +410,7 @@ export class JSONSchemaForm extends LitElement {
                 // ------------ Exclude Certain Errors ------------
 
                 // Allow for constructing types from object types
-                if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string")
-                    return;
+                if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string") return;
 
                 // Ignore required errors if value is empty
                 if (e.name === "required" && !this.validateEmptyValues && !(e.property in e.instance)) return;
@@ -409,7 +420,8 @@ export class JSONSchemaForm extends LitElement {
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if ((resolvedValue === "NaN") | (resolvedValue === null)) return;
+                    if (resolvedValue === "NaN") return;
+                    else if (resolvedValue === null) {}
                     else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
                 }
 
@@ -1136,13 +1148,10 @@ export class JSONSchemaForm extends LitElement {
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
-                    onStatusUpdate: ({ errors, warnings }) => {
-                        tabItem.status = {
-                            errors,
-                            warnings,
-                        };
+                    onStatusUpdate: ({ errors, warnings }) => tabItem.status = { errors,  warnings },
+                    onStatusChange: () => {
+                        this.checkStatus() // Forward status changes to the parent form
                     },
-                    onStatusChange: () => this.checkStatus(), // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
                         this.nLoaded++;

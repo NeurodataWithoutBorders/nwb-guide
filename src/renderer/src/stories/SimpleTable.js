@@ -409,10 +409,16 @@ export class SimpleTable extends LitElement {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
+    get nErrors() {
+        return this.shadowRoot.querySelectorAll("[error]").length;
+    }
+
+    get nWarnings() {
+        return this.shadowRoot.querySelectorAll("[warning]").length;
+    }
+
     #checkStatus = () => {
-        const nWarnings = this.shadowRoot.querySelectorAll("[warning]").length;
-        const nErrors = this.shadowRoot.querySelectorAll("[error]").length;
-        checkStatus.call(this, nWarnings, nErrors);
+        checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
     validate = () => {

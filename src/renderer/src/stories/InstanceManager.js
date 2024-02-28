@@ -69,7 +69,7 @@ export class InstanceManager extends LitElement {
 
             #instance-display {
                 border-left: 0;
-                overflow-y: auto;
+                overflow-y: hidden;
                 overflow-x: hidden;
                 height: 100%;
             }

@@ -1,5 +1,5 @@
 import { LitElement, css, html } from "lit";
-import { errorHue, successHue, warningHue } from "../globals";
+import { errorHue, errorSymbol, successHue, warningHue, warningSymbol } from "../globals";
 
 export class TabItem extends LitElement {
     static get styles() {
@@ -14,10 +14,9 @@ export class TabItem extends LitElement {
                 justify-content: space-between;
                 padding: 5px 10px;
                 user-select: none;
-                background-color: rgb(235, 235, 235);
                 flex-grow: 1;
                 min-width: 200px;
-                width: -webkit-fill-available;
+                border-radius: 5px 5px 0 0;
             }
 
             :host([disabled]) {
@@ -28,17 +27,23 @@ export class TabItem extends LitElement {
                 cursor: pointer;
             }
 
+            :host([data-status]) {
+                border-bottom-width: 2px;
+                border-bottom-style: solid;
+            }
+
             :host([data-status="error"]) {
-                border-bottom: 2px solid hsl(${errorHue}, 100%, 70%) !important;
+                border-bottom-color: hsl(${errorHue}, 100%, 70%);
             }
 
             :host([data-status="warning"]) {
-                border-bottom: 2px solid hsl(${warningHue}, 100%, 70%) !important;
+                border-bottom-color: hsl(${warningHue}, 100%, 70%);
             }
 
             :host([data-status="valid"]) {
-                border-bottom: 2px solid hsl(${successHue}, 100%, 70%) !important;
+                border-bottom-color: hsl(${successHue}, 100%, 70%);
             }
+
 
             .status {
                 border-radius: 50%;
@@ -55,14 +60,16 @@ export class TabItem extends LitElement {
                 gap: 5px;
             }
 
-            .status.errors {
-                background-color: hsl(${errorHue}, 100%, 70%);
-                color: white;
+
+            .status.errors::before {
+                content: "${errorSymbol}";
+                margin-right: 3px;
             }
 
-            .status.warnings {
-                background-color: hsl(${warningHue}, 100%, 70%);
-                color: black;
+
+            .status.warnings::before {
+                margin-right: 3px;
+                content: "${warningSymbol}";
             }
 
             .name {
@@ -74,8 +81,8 @@ export class TabItem extends LitElement {
                 font-size: 90%;
             }
 
-            :host(hover:not(:only-child)) {
-                background-color: gainsboro;
+            :host(:hover:not(:only-child)) {
+                background-color: rgb(235, 235, 235);
             }
 
             :host([selected]:not(:only-child)) {
@@ -114,7 +121,7 @@ export class TabItem extends LitElement {
     render() {
         const warnings = this.status?.warnings ?? 0;
         const errors = this.status?.errors ?? 0;
-
+        
         const status = errors ? "error" : warnings ? "warning" : "valid";
         this.setAttribute("data-status", status);
 

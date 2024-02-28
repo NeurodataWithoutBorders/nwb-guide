@@ -9,15 +9,34 @@ export class Tabs extends LitElement {
             }
 
             :host {
-                display: block;
+                display: grid;
+                height: 100%;
+                grid-template-rows: auto 1fr;
             }
 
             #tab-toggles {
                 display: flex;
+                flex-wrap: wrap;
                 overflow-x: auto;
+                background-color: whitesmoke;
+                gap: 5px;
+                padding: 3px;
+                padding-bottom: 0;
+            }
+
+            #tab-toggles.single {
+                padding: 0;
+            }
+
+            #tab-content {
+                height: 100%;
+                overflow-y: hidden;
             }
 
             .content {
+                overflow-y: auto;
+                height: max-content;
+                max-height: 100%;
                 display: none;
             }
 
@@ -47,6 +66,7 @@ export class Tabs extends LitElement {
 
     updated() {
         this.toggle(this.selected);
+        setTimeout(() => console.log(this), 1000)
     }
 
     toggle(index) {
@@ -56,24 +76,17 @@ export class Tabs extends LitElement {
 
     render() {
         return html`
-            <div id="tab-toggles">
+            <div id="tab-toggles" class="${this.items.length > 1 ? '' : 'single'}">
                 ${this.items.map((item, i) => {
-                    const tabItem =
-                        item instanceof TabItem
-                            ? item
-                            : new TabItem({
-                                  ...item,
-                                  selected: i === this.selected,
-                                  onClick: () => {
-                                      this.selected = i;
-                                      Array.from(this.shadowRoot.querySelectorAll("nwb-tab-item")).forEach((item, j) =>
-                                          item === tabItem ? "" : (item.selected = false)
-                                      );
-                                      Array.from(this.shadowRoot.getElementById("tab-content").children).forEach(
-                                          (content, j) => (content.style.display = i === j ? "block" : "")
-                                      );
-                                  },
-                              });
+                    const tabItem = item instanceof TabItem ? item : new TabItem({ ...item });
+
+                    tabItem.selected = i === this.selected;
+
+                    tabItem.onClick = () => {
+                        const tabItems = this.shadowRoot.querySelectorAll("nwb-tab-item");
+                        Array.from(tabItems).forEach((item, j) => i === j ? '' : item.selected = false);
+                        Array.from(this.shadowRoot.getElementById("tab-content").children).forEach((content, j) => content.style.display = i === j ? "block" : "");
+                    };
 
                     return tabItem;
                 })}
