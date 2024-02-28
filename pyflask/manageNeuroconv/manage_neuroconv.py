@@ -100,7 +100,9 @@ def replace_none_with_nan(json_object, json_schema):
                 elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
-                        obj[key] = (
+                        obj[
+                            key
+                        ] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -929,28 +931,29 @@ def generate_test_data(output_path: str):
 dtype_map = {"<U64": "int64", "<U2": "str"}
 
 
-def get_property_dtype(recording_interface, property_name, channel_ids=[]):
-    recording = recording_interface.recording_extractor
-    dtype = str(recording.get_property(key=property_name, ids=channel_ids).dtype)
+def get_property_dtype(recording_extractor, property_name: str, channel_ids: list):
+    dtype = str(recording_extractor.get_property(key=property_name, ids=channel_ids).dtype)
 
     # return type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
     # return dtype
     return dtype_map.get(dtype, dtype)
 
 
-## Ecephys Helper Functions
-def get_electrode_properties(recording_interface):
+# Ecephys Helper Functions
+def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
     """A convenience function for uniformly excluding certain properties of the provided recording extractor."""
-
-    properties = set(recording_interface.recording_extractor.get_property_keys())
+    property_names = list(recording_interface.recording_extractor.get_property_keys())
+    properties = {
+        property_name: recording_interface.recording_extractor.get_property(key=property_name)
+        for property_name in property_names
+    }
 
     return properties
 
 
 def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
-    """A convenience function for collecting and organizing the property values of the underlying recording extractor."""
-
-    property_names = get_electrode_properties(interface)
+    """A convenience function for collecting and organizing the properties of the underlying recording extractor."""
+    properties = get_recording_interface_properties(interface)
 
     # Hardcuded for SpikeGLX (NOTE: Update for more interfaces)
     property_descriptions = dict(
@@ -969,19 +972,33 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
     recording = interface.recording_extractor
     channel_ids = recording.get_channel_ids()
 
-    # Return table as JSON
-    return json.loads(
-        json.dumps(
-            obj=[
-                dict(
-                    name=property_name,
-                    description=property_descriptions.get(property_name, "No description."),
-                    data_type=get_property_dtype(interface, property_name, [channel_ids[0]]),
-                )
-                for property_name in property_names
-            ]
+    contact_vector = properties.pop("contact_vector", None)
+
+    electrode_columns = [
+        dict(
+            name=property_name,
+            description=property_descriptions.get(property_name, "No description."),
+            data_type=get_property_dtype(
+                recording_extractor=recording, property_name=property_name, channel_ids=[channel_ids[0]]
+            ),
         )
-    )
+        for property_name in properties.keys()
+    ]
+
+    if contact_vector is None:
+        return json.loads(json.dumps(obj=electrode_columns))
+
+    # Unpack contact vector
+    for property_name in contact_vector.dtype.names:
+        electrode_columns.append(
+            dict(
+                name=property_name,
+                description=property_descriptions.get(property_name, ""),
+                dtype=str(contact_vector.dtype.fields[property_name][0]),
+            )
+        )
+
+    return json.loads(json.dumps(obj=electrode_columns))
 
 
 def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
@@ -993,7 +1010,7 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
 
     recording = interface.recording_extractor
 
-    property_names = get_electrode_properties(interface)
+    property_names = get_recording_interface_properties(interface)
 
     electrode_ids = recording.get_channel_ids()
 
