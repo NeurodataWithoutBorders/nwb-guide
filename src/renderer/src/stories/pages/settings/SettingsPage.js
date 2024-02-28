@@ -67,7 +67,6 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
                 }, {}),
 
                 structure: {
-                    keep_existing_data: true,
                     state: false,
                 },
 

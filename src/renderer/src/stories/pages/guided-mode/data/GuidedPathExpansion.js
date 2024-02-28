@@ -235,6 +235,8 @@ function getFiles(dir) {
     return entries;
 }
 
+const keepExistingData = true // NOTE: This can now be modified by developers
+
 export class GuidedPathExpansionPage extends Page {
     constructor(...args) {
         super(...args);
@@ -245,8 +247,6 @@ export class GuidedPathExpansionPage extends Page {
     };
 
     beforeSave = async () => {
-        const keepExistingData = this.dataManagementForm.resolved.keep_existing_data;
-        this.localState.keep_existing_data = keepExistingData;
 
         const globalState = this.info.globalState;
         merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
@@ -397,10 +397,7 @@ export class GuidedPathExpansionPage extends Page {
             // altContent: this.altForm,
         });
 
-        const structureState = (this.localState = merge(this.info.globalState.structure, {
-            results: {},
-            keep_existing_data: true,
-        }));
+        const structureState = (this.localState = merge(this.info.globalState.structure, { results: {} }));
 
         const state = structureState.state;
 
@@ -519,28 +516,13 @@ export class GuidedPathExpansionPage extends Page {
 
         this.optional.style.paddingTop = "10px";
 
-        this.dataManagementForm = new JSONSchemaForm({
-            results: { keep_existing_data: structureState.keep_existing_data },
-            onUpdate: () => (this.unsavedUpdates = "conversions"),
-            schema: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                    keep_existing_data: {
-                        type: "boolean",
-                        description: "Maintain data for subjects / sessions that are not located.",
-                    },
-                },
-            },
-        });
-
         this.optional.append(form);
 
         form.style.width = "100%";
 
         this.scrollTop = "300px";
 
-        return html`${this.dataManagementForm}${this.optional}`;
+        return this.optional
     }
 }
 
