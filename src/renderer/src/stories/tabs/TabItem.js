@@ -118,7 +118,7 @@ export class TabItem extends LitElement {
         const status = errors ? "error" : warnings ? "warning" : "valid";
         this.setAttribute("data-status", status);
 
-        if (this.content) {
+        if (this.content instanceof HTMLElement) {
             if (this.disabled) this.content.setAttribute("disabled", true);
             else this.content.removeAttribute("disabled");
         }
