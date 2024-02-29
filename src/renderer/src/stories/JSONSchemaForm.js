@@ -463,6 +463,9 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+
+        if (this.validateEmptyValues === false) this.validateEmptyValues = true
+
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
