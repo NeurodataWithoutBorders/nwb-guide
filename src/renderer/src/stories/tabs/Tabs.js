@@ -75,7 +75,7 @@ export class Tabs extends LitElement {
 
     render() {
         return html`
-            <div id="tab-toggles" class="${this.items.length > 1 ? '' : 'single'}">
+            <div id="tab-toggles" class="${this.items.length > 1 ? "" : "single"}">
                 ${this.items.map((item, i) => {
                     const tabItem = item instanceof TabItem ? item : new TabItem({ ...item });
 
@@ -83,8 +83,10 @@ export class Tabs extends LitElement {
 
                     tabItem.onClick = () => {
                         const tabItems = this.shadowRoot.querySelectorAll("nwb-tab-item");
-                        Array.from(tabItems).forEach((item, j) => i === j ? '' : item.selected = false);
-                        Array.from(this.shadowRoot.getElementById("tab-content").children).forEach((content, j) => content.style.display = i === j ? "block" : "");
+                        Array.from(tabItems).forEach((item, j) => (i === j ? "" : (item.selected = false)));
+                        Array.from(this.shadowRoot.getElementById("tab-content").children).forEach(
+                            (content, j) => (content.style.display = i === j ? "block" : "")
+                        );
                     };
 
                     return tabItem;

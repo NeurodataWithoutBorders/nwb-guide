@@ -202,7 +202,10 @@ export class JSONSchemaForm extends LitElement {
     #nErrors = 0;
     #nWarnings = 0;
 
-    getActiveForms = () => Object.entries(this.forms).filter(([k, v]) => !this.tabs[k] || !this.tabs[k].disabled).map(([_, v]) => v)
+    getActiveForms = () =>
+        Object.entries(this.forms)
+            .filter(([k, v]) => !this.tabs[k] || !this.tabs[k].disabled)
+            .map(([_, v]) => v);
 
     get nErrors() {
         const reducer = (acc, item) => acc + item.nErrors;
@@ -384,8 +387,6 @@ export class JSONSchemaForm extends LitElement {
 
     status;
     checkStatus = () => {
-
-
         return checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
@@ -410,7 +411,8 @@ export class JSONSchemaForm extends LitElement {
                 // ------------ Exclude Certain Errors ------------
 
                 // Allow for constructing types from object types
-                if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string") return;
+                if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string")
+                    return;
 
                 // Ignore required errors if value is empty
                 if (e.name === "required" && !this.validateEmptyValues && !(e.property in e.instance)) return;
@@ -421,8 +423,8 @@ export class JSONSchemaForm extends LitElement {
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
                     if (resolvedValue === "NaN") return;
-                    else if (resolvedValue === null) {}
-                    else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                    else if (resolvedValue === null) {
+                    } else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
                 }
 
                 const prevHeader = name ? header(name) : "Row";

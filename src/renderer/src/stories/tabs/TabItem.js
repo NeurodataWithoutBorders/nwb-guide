@@ -44,7 +44,6 @@ export class TabItem extends LitElement {
                 border-bottom-color: hsl(${successHue}, 100%, 70%);
             }
 
-
             .status {
                 border-radius: 50%;
                 width: 20px;
@@ -60,12 +59,10 @@ export class TabItem extends LitElement {
                 gap: 5px;
             }
 
-
             .status.errors::before {
                 content: "${errorSymbol}";
                 margin-right: 3px;
             }
-
 
             .status.warnings::before {
                 margin-right: 3px;
@@ -121,7 +118,7 @@ export class TabItem extends LitElement {
     render() {
         const warnings = this.status?.warnings ?? 0;
         const errors = this.status?.errors ?? 0;
-        
+
         const status = errors ? "error" : warnings ? "warning" : "valid";
         this.setAttribute("data-status", status);
 
