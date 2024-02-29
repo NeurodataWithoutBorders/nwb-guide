@@ -950,7 +950,6 @@ export class JSONSchemaForm extends LitElement {
             groupEl.classList[warnings.length ? "add" : "remove"]("warning");
         }
 
-
         const result = isValid && updatedErrors.length === 0;
 
         if (result) {
@@ -961,7 +960,6 @@ export class JSONSchemaForm extends LitElement {
             }, localPath);
 
             if (isFunction) valid(); // Run if returned value is a function
-
         } else {
             // Add new invalid classes and errors
             input.classList.add("invalid");
@@ -976,8 +974,8 @@ export class JSONSchemaForm extends LitElement {
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
         }
 
-        setTimeout(() => this.checkStatus()) // Check the status after a short delay since the Tables rely on updating element attributes
-        
+        setTimeout(() => this.checkStatus()); // Check the status after a short delay since the Tables rely on updating element attributes
+
         return result;
     };
 
@@ -1153,7 +1151,7 @@ export class JSONSchemaForm extends LitElement {
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
-                    onStatusUpdate: ({ errors, warnings }) => tabItem.status = { errors,  warnings },
+                    onStatusUpdate: ({ errors, warnings }) => (tabItem.status = { errors, warnings }),
                     onStatusChange: () => this.checkStatus(), // Forward status changes to the parent form,
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {

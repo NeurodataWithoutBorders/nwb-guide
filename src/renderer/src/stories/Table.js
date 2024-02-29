@@ -180,7 +180,6 @@ export class Table extends LitElement {
         return this.querySelectorAll("[warning]").length;
     }
 
-
     #checkStatus = () => {
         checkStatus.call(this, this.nWarnings, this.nErrors);
     };

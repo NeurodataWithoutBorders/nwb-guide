@@ -188,7 +188,6 @@ export class BasicTable extends LitElement {
 
     // Validation Code
 
-
     get nErrors() {
         return this.shadowRoot.querySelectorAll("[error]").length;
     }
@@ -196,7 +195,6 @@ export class BasicTable extends LitElement {
     get nWarnings() {
         return his.shadowRoot.querySelectorAll("[warning]").length;
     }
-
 
     #checkStatus = () => {
         checkStatus.call(this, this.nWarnings, this.nErrors);
