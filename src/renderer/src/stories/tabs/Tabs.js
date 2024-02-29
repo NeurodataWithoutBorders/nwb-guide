@@ -66,7 +66,6 @@ export class Tabs extends LitElement {
 
     updated() {
         this.toggle(this.selected);
-        setTimeout(() => console.log(this), 1000)
     }
 
     toggle(index) {

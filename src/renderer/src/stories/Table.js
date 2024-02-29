@@ -172,10 +172,17 @@ export class Table extends LitElement {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
+    get nErrors() {
+        return this.querySelectorAll("[error]").length;
+    }
+
+    get nWarnings() {
+        return this.querySelectorAll("[warning]").length;
+    }
+
+
     #checkStatus = () => {
-        const nWarnings = this.querySelectorAll("[warning]").length;
-        const nErrors = this.querySelectorAll("[error]").length;
-        checkStatus.call(this, nWarnings, nErrors);
+        checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
     validate = () => {
@@ -219,7 +226,7 @@ export class Table extends LitElement {
     }
 
     updated() {
-        const div = (this.shadowRoot ?? this).querySelector("div");
+        const div = this.querySelector("div");
 
         const unresolved = (this.unresolved = {});
 

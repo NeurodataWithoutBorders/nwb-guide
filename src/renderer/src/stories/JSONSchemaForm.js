@@ -936,7 +936,6 @@ export class JSONSchemaForm extends LitElement {
 
         this.#nErrors += updatedErrors.length;
         this.#nWarnings += updatedWarnings.length;
-        this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
         updatedWarnings.forEach((info) => (onWarning ? "" : this.#addMessage(localPath, info, "warnings")));
@@ -949,7 +948,10 @@ export class JSONSchemaForm extends LitElement {
             groupEl.classList[warnings.length ? "add" : "remove"]("warning");
         }
 
-        if (isValid && updatedErrors.length === 0) {
+
+        const result = isValid && updatedErrors.length === 0;
+
+        if (result) {
             input.classList.remove("invalid");
 
             await this.#applyToLinkedProperties((path, element) => {
@@ -958,7 +960,6 @@ export class JSONSchemaForm extends LitElement {
 
             if (isFunction) valid(); // Run if returned value is a function
 
-            return true;
         } else {
             // Add new invalid classes and errors
             input.classList.add("invalid");
@@ -971,9 +972,11 @@ export class JSONSchemaForm extends LitElement {
 
             updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
-
-            return false;
         }
+
+        setTimeout(() => this.checkStatus()) // Check the status after a short delay since the Tables rely on updating element attributes
+        
+        return result;
     };
 
     tabs = {};
@@ -1149,9 +1152,7 @@ export class JSONSchemaForm extends LitElement {
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusUpdate: ({ errors, warnings }) => tabItem.status = { errors,  warnings },
-                    onStatusChange: () => {
-                        this.checkStatus() // Forward status changes to the parent form
-                    },
+                    onStatusChange: () => this.checkStatus(), // Forward status changes to the parent form,
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
                         this.nLoaded++;

@@ -188,10 +188,18 @@ export class BasicTable extends LitElement {
 
     // Validation Code
 
+
+    get nErrors() {
+        return this.shadowRoot.querySelectorAll("[error]").length;
+    }
+
+    get nWarnings() {
+        return his.shadowRoot.querySelectorAll("[warning]").length;
+    }
+
+
     #checkStatus = () => {
-        const nWarnings = this.shadowRoot.querySelectorAll("[warning]").length;
-        const nErrors = this.shadowRoot.querySelectorAll("[error]").length;
-        checkStatus.call(this, nWarnings, nErrors);
+        checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
     validate = () => {
