@@ -991,8 +991,8 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
         electrode_columns.append(
             dict(
                 name=property_name,
-                description=property_descriptions.get(property_name, ""),
-                dtype=str(contact_vector.dtype.fields[property_name][0]),
+                description=property_descriptions.get(property_name, "No description."),
+                data_type=str(contact_vector.dtype.fields[property_name][0]),
             )
         )
 
@@ -1031,7 +1031,27 @@ def update_recording_properties_from_table_as_json(
 ):
     import numpy as np
 
-    electrode_column_data_types = {column["name"]: column["data_type"] for column in electrode_column_info}
+    # # Extract contact vector properties
+    properties = get_recording_interface_properties(recording_interface)
+    contact_vector = properties.pop("contact_vector", None)
+
+    contact_vector_dtypes = {}
+
+    if contact_vector is not None:
+
+        # Remove names from contact vector from the electrode_column_info and add to reconstructed_contact_vector_info
+        contact_vector_dtypes = contact_vector.dtype
+        # contact_vector_dtypes = { property_name: next((item for item in electrode_column_info if item['name'] == property_name), None)["data_type"] for property_name in contact_vector.dtype.names}
+
+        # Remove contact vector properties from electrode_column_info
+        for property_name in contact_vector.dtype.names:
+            found = next((item for item in electrode_column_info if item['name'] == property_name), None)
+            if (found):
+                electrode_column_info.remove(found)
+
+    # Organize dtypes
+    electrode_column_data_types = { column["name"]: column["data_type"] for column in electrode_column_info }
+    electrode_column_data_types["contact_vector"] = contact_vector_dtypes # Provide contact vector information
 
     recording = recording_interface.recording_extractor
     channel_ids = recording.get_channel_ids()
@@ -1041,8 +1061,11 @@ def update_recording_properties_from_table_as_json(
         electrode_properties = dict(entry)  # copy
         channel_name = electrode_properties.pop("channel_name")
         for property_name, property_value in electrode_properties.items():
-            recording.set_property(
-                key=property_name,
-                values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
-                ids=[stream_prefix + "#" + channel_name],
-            )
+
+            # Skip data with missing column information
+            if (property_name in electrode_column_data_types):
+                recording.set_property(
+                    key=property_name,
+                    values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
+                    ids=[stream_prefix + "#" + channel_name],
+                )
