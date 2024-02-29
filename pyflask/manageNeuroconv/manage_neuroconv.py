@@ -1045,13 +1045,13 @@ def update_recording_properties_from_table_as_json(
 
         # Remove contact vector properties from electrode_column_info
         for property_name in contact_vector.dtype.names:
-            found = next((item for item in electrode_column_info if item['name'] == property_name), None)
-            if (found):
+            found = next((item for item in electrode_column_info if item["name"] == property_name), None)
+            if found:
                 electrode_column_info.remove(found)
 
     # Organize dtypes
-    electrode_column_data_types = { column["name"]: column["data_type"] for column in electrode_column_info }
-    electrode_column_data_types["contact_vector"] = contact_vector_dtypes # Provide contact vector information
+    electrode_column_data_types = {column["name"]: column["data_type"] for column in electrode_column_info}
+    electrode_column_data_types["contact_vector"] = contact_vector_dtypes  # Provide contact vector information
 
     recording = recording_interface.recording_extractor
     channel_ids = recording.get_channel_ids()
@@ -1063,7 +1063,7 @@ def update_recording_properties_from_table_as_json(
         for property_name, property_value in electrode_properties.items():
 
             # Skip data with missing column information
-            if (property_name in electrode_column_data_types):
+            if property_name in electrode_column_data_types:
                 recording.set_property(
                     key=property_name,
                     values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
