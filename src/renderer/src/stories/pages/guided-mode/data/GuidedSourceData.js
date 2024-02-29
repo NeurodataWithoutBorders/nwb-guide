@@ -156,6 +156,8 @@ export class GuidedSourceDataPage extends ManagedPage {
         const schema = this.info.globalState.schema.source_data;
         delete schema.description;
 
+        console.log(subject,session, schema, this.info.globalState.interfaces)
+
         const form = new JSONSchemaForm({
             identifier: instanceId,
             schema: preprocessSourceDataSchema(schema),
