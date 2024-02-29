@@ -60,7 +60,7 @@ export const getSchema = (path, schema, base = []) => {
     // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
     return resolved;
-}
+};
 
 const additionalPropPattern = "additional";
 
@@ -463,8 +463,7 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-
-        if (this.validateEmptyValues === false) this.validateEmptyValues = true
+        if (this.validateEmptyValues === false) this.validateEmptyValues = true;
 
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
@@ -570,7 +569,7 @@ export class JSONSchemaForm extends LitElement {
         return this.#schema;
     }
 
-    getSchema = (path, schema = this.schema)  => getSchema(path, schema, this.base);
+    getSchema = (path, schema = this.schema) => getSchema(path, schema, this.base);
 
     #renderInteractiveElement = (name, info, required, path = [], value, propertyType) => {
         let isRequired = this.#isRequired([...path, name]);
@@ -880,9 +879,7 @@ export class JSONSchemaForm extends LitElement {
                             type: "error",
                             missing: true,
                         });
-                    } 
-                    
-                    else if (this.validateEmptyValues === null) {
+                    } else if (this.validateEmptyValues === null) {
                         warnings.push({
                             message: `${schema.title ?? header(name)} is a suggested property.`,
                             type: "warning",

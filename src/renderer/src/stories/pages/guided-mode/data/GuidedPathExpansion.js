@@ -26,12 +26,12 @@ export async function autocompleteFormatString(path) {
     const { base_directory } = path.reduce((acc, key) => acc[key] ?? {}, this.form.resolved);
 
     const schema = getSchema(path, this.info.globalState.schema.source_data);
-    
-    const isFile = 'file_path' in schema.properties
-    const pathType = isFile ? 'file' : 'directory'
 
-    const description = isFile ? schema.properties.file_path.description : schema.properties.folder_path.description
-    
+    const isFile = "file_path" in schema.properties;
+    const pathType = isFile ? "file" : "directory";
+
+    const description = isFile ? schema.properties.file_path.description : schema.properties.folder_path.description;
+
     const notify = (message, type) => {
         if (notification) this.dismiss(notification);
         return (notification = this.notify(message, type));
@@ -61,7 +61,7 @@ export async function autocompleteFormatString(path) {
             properties: {
                 path: {
                     type: "string",
-                    title: `Example ${isFile ? 'File' : "Folder"}`,
+                    title: `Example ${isFile ? "File" : "Folder"}`,
                     format: pathType,
                     description: description ?? `Provide an example ${pathType} for the selected interface`,
                 },
@@ -81,12 +81,10 @@ export async function autocompleteFormatString(path) {
             const value = parent[name];
 
             if (name === "path") {
-
-                const toUpdate = ['subject_id', 'session_id']
-                toUpdate.forEach(key => form.getFormElement([key]).requestUpdate())
+                const toUpdate = ["subject_id", "session_id"];
+                toUpdate.forEach((key) => form.getFormElement([key]).requestUpdate());
 
                 if (value) {
-
                     if (fs.lstatSync(value).isSymbolicLink())
                         return [
                             {
