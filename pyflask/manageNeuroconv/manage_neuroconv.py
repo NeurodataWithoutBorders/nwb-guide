@@ -100,7 +100,9 @@ def replace_none_with_nan(json_object, json_schema):
                 elif key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
-                        obj[key] = (
+                        obj[
+                            key
+                        ] = (
                             math.nan
                         )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
                     elif prop_schema.get("type") == "number" and isinstance(value, int):
@@ -967,34 +969,34 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
     # default_column_metadata =  interface.get_metadata()["Ecephys"]["ElectrodeColumns"]["properties"] # NOTE: This doesn't exist...
     # property_descriptions = {column_name: column_fields["description"] for column_name, column_fields in default_column_metadata}
 
-    recording = interface.recording_extractor
-    channel_ids = recording.get_channel_ids()
-
-    contact_vector = properties.pop("contact_vector", None)
+    recording_extractor = interface.recording_extractor
+    channel_ids = recording_extractor.get_channel_ids()
 
     electrode_columns = [
         dict(
             name=property_name,
             description=property_descriptions.get(property_name, "No description."),
             data_type=get_property_dtype(
-                recording_extractor=recording, property_name=property_name, channel_ids=[channel_ids[0]]
+                recording_extractor=recording_extractor, property_name=property_name, channel_ids=[channel_ids[0]]
             ),
         )
         for property_name in properties.keys()
+        if property_name != "contact_vector"
     ]
 
-    if contact_vector is None:
-        return json.loads(json.dumps(obj=electrode_columns))
-
-    # Unpack contact vector
-    for property_name in contact_vector.dtype.names:
-        electrode_columns.append(
-            dict(
-                name=property_name,
-                description=property_descriptions.get(property_name, "No description."),
-                data_type=str(contact_vector.dtype.fields[property_name][0]),
-            )
-        )
+    # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+    # contact_vector = properties.pop("contact_vector", None)
+    # if contact_vector is None:
+    #     return json.loads(json.dumps(obj=electrode_columns))
+    # # Unpack contact vector
+    # for property_name in contact_vector.dtype.names:
+    #     electrode_columns.append(
+    #         dict(
+    #             name=property_name,
+    #             description=property_descriptions.get(property_name, "No description."),
+    #             data_type=str(contact_vector.dtype.fields[property_name][0]),
+    #         )
+    #     )
 
     return json.loads(json.dumps(obj=electrode_columns))
 
@@ -1053,19 +1055,34 @@ def update_recording_properties_from_table_as_json(
     electrode_column_data_types = {column["name"]: column["data_type"] for column in electrode_column_info}
     electrode_column_data_types["contact_vector"] = contact_vector_dtypes  # Provide contact vector information
 
-    recording = recording_interface.recording_extractor
-    channel_ids = recording.get_channel_ids()
+    recording_extractor = recording_interface.recording_extractor
+    channel_ids = recording_extractor.get_channel_ids()
     stream_prefix = channel_ids[0].split("#")[0]  # TODO: see if this generalized across formats
 
-    for entry in electrode_table_json:
+    property_names = recording_extractor.get_property_keys()
+
+    # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+    # if "contact_vector" in property_names:
+    #     modified_contact_vector = np.array(recording_extractor.get_property(key="contact_vector"))  # copy
+    #     contact_vector_property_names = list(modified_contact_vector.dtype.names)
+
+    for entry_index, entry in enumerate(electrode_table_json):
         electrode_properties = dict(entry)  # copy
         channel_name = electrode_properties.pop("channel_name")
         for property_name, property_value in electrode_properties.items():
-
-            # Skip data with missing column information
-            if property_name in electrode_column_data_types:
-                recording.set_property(
+            if property_name not in electrode_column_data_types:  # Skip data with missing column information
+                continue
+            # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+            # elif property_name in contact_vector_property_names:
+            #     property_index = contact_vector_property_names.index(property_name)
+            #     modified_contact_vector[entry_index][property_index] = property_value
+            else:
+                recording_extractor.set_property(
                     key=property_name,
                     values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
                     ids=[stream_prefix + "#" + channel_name],
                 )
+
+    # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+    # if "contact_vector" in property_names:
+    #     recording_extractor.set_property(key="contact_vector", values=modified_contact_vector)
