@@ -942,7 +942,7 @@ def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
     """A convenience function for uniformly excluding certain properties of the provided recording extractor."""
     property_names = list(recording_interface.recording_extractor.get_property_keys())
 
-    excluded_properties = [ "contact_vector", "contact_shapes" ]
+    excluded_properties = ["contact_vector", "contact_shapes"]
 
     properties = {
         property_name: recording_interface.recording_extractor.get_property(key=property_name)
