@@ -941,9 +941,14 @@ def get_property_dtype(recording_extractor, property_name: str, channel_ids: lis
 def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
     """A convenience function for uniformly excluding certain properties of the provided recording extractor."""
     property_names = list(recording_interface.recording_extractor.get_property_keys())
+
+    excluded_properties = ["contact_vector"]
+
+    
     properties = {
         property_name: recording_interface.recording_extractor.get_property(key=property_name)
         for property_name in property_names
+        if property_name not in excluded_properties
     }
 
     return properties
@@ -979,7 +984,6 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
             ),
         )
         for property_name in properties.keys()
-        if property_name != "contact_vector"
     ]
 
     # TODO: uncomment when neuroconv supports contact vectors (probe interface)
@@ -1033,33 +1037,31 @@ def update_recording_properties_from_table_as_json(
 
     # # Extract contact vector properties
     properties = get_recording_interface_properties(recording_interface)
-    contact_vector = properties.pop("contact_vector", None)
 
-    contact_vector_dtypes = {}
 
-    if contact_vector is not None:
-
-        # Remove names from contact vector from the electrode_column_info and add to reconstructed_contact_vector_info
-        contact_vector_dtypes = contact_vector.dtype
-        # contact_vector_dtypes = { property_name: next((item for item in electrode_column_info if item['name'] == property_name), None)["data_type"] for property_name in contact_vector.dtype.names}
-
-        # Remove contact vector properties from electrode_column_info
-        for property_name in contact_vector.dtype.names:
-            found = next((item for item in electrode_column_info if item["name"] == property_name), None)
-            if found:
-                electrode_column_info.remove(found)
+    # TODO: uncomment and adapt when neuroconv supports contact vectors (probe interface)
+    # contact_vector = properties.pop("contact_vector", None)
+    # contact_vector_dtypes = {}
+    # if contact_vector is not None:
+    #     # Remove names from contact vector from the electrode_column_info and add to reconstructed_contact_vector_info
+    #     contact_vector_dtypes = contact_vector.dtype
+    #     # contact_vector_dtypes = { property_name: next((item for item in electrode_column_info if item['name'] == property_name), None)["data_type"] for property_name in contact_vector.dtype.names}
+    #     # Remove contact vector properties from electrode_column_info
+    #     for property_name in contact_vector.dtype.names:
+    #         found = next((item for item in electrode_column_info if item["name"] == property_name), None)
+    #         if found:
+    #             electrode_column_info.remove(found)
 
     # Organize dtypes
     electrode_column_data_types = {column["name"]: column["data_type"] for column in electrode_column_info}
-    electrode_column_data_types["contact_vector"] = contact_vector_dtypes  # Provide contact vector information
+    # electrode_column_data_types["contact_vector"] = contact_vector_dtypes  # Provide contact vector information
 
     recording_extractor = recording_interface.recording_extractor
     channel_ids = recording_extractor.get_channel_ids()
     stream_prefix = channel_ids[0].split("#")[0]  # TODO: see if this generalized across formats
 
-    property_names = recording_extractor.get_property_keys()
-
     # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+    # property_names = recording_extractor.get_property_keys()
     # if "contact_vector" in property_names:
     #     modified_contact_vector = np.array(recording_extractor.get_property(key="contact_vector"))  # copy
     #     contact_vector_property_names = list(modified_contact_vector.dtype.names)
