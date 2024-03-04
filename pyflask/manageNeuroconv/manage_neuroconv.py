@@ -944,7 +944,6 @@ def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
 
     excluded_properties = ["contact_vector"]
 
-    
     properties = {
         property_name: recording_interface.recording_extractor.get_property(key=property_name)
         for property_name in property_names
@@ -1037,7 +1036,6 @@ def update_recording_properties_from_table_as_json(
 
     # # Extract contact vector properties
     properties = get_recording_interface_properties(recording_interface)
-
 
     # TODO: uncomment and adapt when neuroconv supports contact vectors (probe interface)
     # contact_vector = properties.pop("contact_vector", None)
