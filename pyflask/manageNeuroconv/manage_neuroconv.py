@@ -619,10 +619,16 @@ def upload_folder_to_dandi(
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
+    ignore_cache: bool = False,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+
+    if ignore_cache:
+        os.environ["DANDI_CACHE"] = "ignore"
+    else:
+        os.environ["DANDI_CACHE"] = ""
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
@@ -642,12 +648,18 @@ def upload_project_to_dandi(
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
+    ignore_cache: bool = False,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+
+    if ignore_cache:
+        os.environ["DANDI_CACHE"] = "ignore"
+    else:
+        os.environ["DANDI_CACHE"] = ""
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
