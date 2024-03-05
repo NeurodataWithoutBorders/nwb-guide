@@ -253,6 +253,70 @@ export class JSONSchemaForm extends LitElement {
         if (props.base) this.base = props.base;
     }
 
+
+    // Handle wildcards to grab multiple form elements
+    getAllFormElements = (path, config = { forms: true, tables: true, inputs: true }) => {
+
+
+        const name = path[0];
+        const upcomingPath = path.slice(1);
+
+
+        const isWildcard = name === "*"
+        const last = !upcomingPath.length;
+
+        if (isWildcard) {
+
+            if (last) {
+                const allElements = [ ];
+                if (config.forms) allElements.push(...this.forms.values());
+                if (config.tables) allElements.push(...this.tables.values());
+                if (config.inputs) allElements.push(...this.inputs.values());
+                return allElements
+            } 
+            
+            else return Object.values(this.forms).map((form) => form.getAllFormElements(upcomingPath, config)).flat()
+        }
+
+
+        // Get Single element
+        else {
+            const result = this.#getElementOnForm(path)
+            if (!result) return []
+
+            if (last) {
+                if (result instanceof JSONSchemaForm && config.forms) return [ result ]
+                else if (result instanceof JSONSchemaInput && config.inputs) return [ result ]
+                else if (config.tables) return [ result ]
+                
+                return [ ]
+            }
+            else {
+                if (result instanceof JSONSchemaForm) return result.getAllFormElements(upcomingPath, config)
+                else return [ result ]
+            }
+        }
+
+    }
+
+    // Single later only
+    #getElementOnForm = (path, { forms = true, tables = true, inputs = true } = {}) => {
+        if (typeof path === "string") path = path.split(".");
+        if (!path.length) return this;
+
+        const name = path[0];
+
+        const form = this.forms[name]
+        if (form && forms) return form
+
+        const table = this.tables[name]
+        if (table && tables) return table
+
+        const foundInput = this.inputs[path.join(".")]; // Check Inputs
+        if (foundInput && inputs) return foundInput;
+
+    }
+
     // Get the form element defined by the path (stops before table cells)
     getFormElement = (
         path,
@@ -260,29 +324,21 @@ export class JSONSchemaForm extends LitElement {
             forms: true,
             tables: true,
             inputs: true,
-        }
+        },
     ) => {
+
         if (typeof path === "string") path = path.split(".");
         if (!path.length) return this;
 
-        const name = path[0];
         const updatedPath = path.slice(1);
 
-        const form = this.forms[name]; // Check forms
-        if (!form) {
-            const table = this.tables[name]; // Check tables
-            if (table && tables) return table; // Skip table cells
-        } else if (!updatedPath.length && forms) return form;
+        const result = this.#getElementOnForm(path, { forms, tables, inputs });
+        if (result instanceof JSONSchemaForm) {
+            if (!updatedPath.length) return result;
+            else return result.getElementOnForm(updatedPath, { forms, tables, inputs });
+        }
 
-        // Check Inputs
-        // const inputContainer = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
-        // if (inputContainer && inputs) return inputContainer.querySelector("jsonschema-input");;
-
-        const foundInput = this.inputs[path.join(".")]; // Check Inputs
-        if (foundInput && inputs) return foundInput;
-
-        // Check Nested Form Inputs
-        return form?.getFormElement(updatedPath, { forms, tables, inputs });
+        return result;
     };
 
     #requirements = {};

@@ -14,7 +14,7 @@ export async function validateOnChange(name, parent, path, value) {
 
     const fullPath = [...path, name];
     const toIterate = fullPath; //fullPathNoRows // fullPath
-
+    
     const copy = { ...parent }; // Validate on a copy of the parent
     if (arguments.length > 3) copy[name] = value; // Update value on copy
 
@@ -24,35 +24,33 @@ export async function validateOnChange(name, parent, path, value) {
         else return;
     }, validationSchema); // Pass the top level until it runs out
 
-    let overridden = false;
-
     // Skip wildcard check for categories marked with false
     if (lastResolved !== false && (functions === undefined || functions === true)) {
-        // let overridden = false;
-        let lastWildcard;
-        toIterate.reduce((acc, key) => {
-            // Disable the value is a hardcoded list of functions + a wildcard has already been specified
-            if (acc && lastWildcard && Array.isArray(acc[key] ?? {})) overridden = true;
-            else if (acc && "*" in acc) {
-                if (acc["*"] === false && lastWildcard)
-                    overridden = true; // Disable if false and a wildcard has already been specified
-                // Otherwise set the last wildcard
-                else {
-                    lastWildcard = typeof acc["*"] === "string" ? acc["*"].replace(`{*}`, `${name}`) : acc["*"];
-                    overridden = false; // Re-enable if a new one is specified below
-                }
-            } else if (lastWildcard && typeof lastWildcard === "object") {
-                const newWildcard = lastWildcard[key] ?? lastWildcard["*"] ?? lastWildcard["**"] ?? (acc && acc["**"]); // Drill wildcard objects once resolved
-                // Prioritize continuation of last wildcard
-                if (newWildcard) lastWildcard = newWildcard;
-            }
 
-            return acc?.[key];
-        }, validationSchema);
+        const getNestedMatches = (result, searchPath, toAlwaysCheck = []) => {
+            const matches = []
+            const isUndefined = result === undefined;
+            if (Array.isArray(result)) matches.push(...result)
+            else if (result && typeof result === "object") matches.push(...getMatches(result, searchPath, toAlwaysCheck));
+            else if (!isUndefined) matches.push(result);
+            if (searchPath.length) toAlwaysCheck.forEach((obj) => matches.push(...getMatches(obj, searchPath, toAlwaysCheck)))
+            return matches;
+        }
 
-        if (overridden && functions !== true) lastWildcard = false; // Disable if not promised to exist
+        const getMatches = (obj = {}, searchPath, toAlwaysCheck = []) => {
+            const updatedAlwaysCheck = [...toAlwaysCheck]
+            const updateSearchPath = [...searchPath]
+            const nextToken = updateSearchPath.shift();
+            const matches = [];
+            if (obj['*']) matches.push(...getNestedMatches(obj['*'], updateSearchPath, updatedAlwaysCheck))
+            if (obj['**']) updatedAlwaysCheck.push(obj['**'])
+            matches.push(...getNestedMatches(obj[nextToken], updateSearchPath, updatedAlwaysCheck)); // Always search to the end of the search path
+            return matches;
+        }
 
-        if (typeof lastWildcard === "function" || typeof lastWildcard === "string") functions = [lastWildcard];
+        const matches = getMatches(validationSchema, toIterate);
+        const overridden = matches.some((match) => match === false);
+        functions = (overridden && functions !== true) ? false : matches; // Disable if not promised to exist—or use matches
     }
 
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
@@ -63,12 +61,14 @@ export async function validateOnChange(name, parent, path, value) {
         if (typeof func === "function") {
             return func.call(this, name, copy, path, value); // Can specify alternative client-side validation
         } else {
+
+            const resolvedFunctionName = func.replace(`{*}`, `${name}`)
             return fetch(`${baseUrl}/neuroconv/validate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     parent: copy,
-                    function_name: func,
+                    function_name: resolvedFunctionName,
                 }),
             })
                 .then((res) => res.json())

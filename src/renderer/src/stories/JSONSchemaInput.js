@@ -30,6 +30,7 @@ function resolveDateTime(value) {
 export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
+    const relativePath = this.form?.base ? fullPath.slice(this.form.base.length) : fullPath;
 
     const schema = this.schema;
     const validateOnChange = this.validateOnChange;
@@ -256,6 +257,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
     merge(overrides.schema, schemaCopy, { arrays: true });
 
+
     // Normal table parsing
     const tableMetadata = {
         schema: schemaCopy,
@@ -264,10 +266,10 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         ignore: nestedIgnore, // According to schema
 
         onUpdate: function () {
-            return onUpdate.call(this, fullPath, this.data); // Update all table data
+            return onUpdate.call(this, relativePath, this.data); // Update all table data
         },
 
-        validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
+        validateOnChange: (...args) => commonValidationFunction(relativePath, ...args),
 
         ...commonTableMetadata,
     };
