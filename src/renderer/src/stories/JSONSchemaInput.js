@@ -257,7 +257,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
     merge(overrides.schema, schemaCopy, { arrays: true });
 
-
     // Normal table parsing
     const tableMetadata = {
         schema: schemaCopy,

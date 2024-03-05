@@ -74,7 +74,7 @@ const dependencies = {
             {
                 path: [ 'ImagingPlane' ],
                 key: 'device'
-            }, 
+            },
             {
                 path: [ 'TwoPhotonSeries' ],
                 key: 'imaging_plane'
@@ -184,7 +184,7 @@ schema.Ophys.Device = schema.Ecephys.Device = {
                 dependencies: { Ophys: dependencies.Ophys.devices, Ecephys: dependencies.Ecephys.devices },
                 swalOptions: {
                     title: (current, prev) => `Are you sure you want to rename the ${prev} device?`,
-                    text: () => `We will attempt to auto-update your Ophys devices to reflect this.`,            
+                    text: () => `We will attempt to auto-update your Ophys devices to reflect this.`,
                 }
             })
         },
@@ -203,7 +203,7 @@ schema.Ecephys.ElectrodeGroup = {
                 dependencies: { Ecephys: dependencies.Ecephys.groups },
                 swalOptions: {
                     title: (current, prev) => `Are you sure you want to rename the ${prev} group?`,
-                    text: () => `We will attempt to auto-update your electrode groups to reflect this.`,            
+                    text: () => `We will attempt to auto-update your electrode groups to reflect this.`,
                 }
             })
         },
