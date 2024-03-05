@@ -245,7 +245,7 @@ schema.Ecephys.Electrodes = {
                 const { value: electrodeColumns } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
 
                 // console.log('Electrode Columns', electrodeColumns, colPath, name, path, this.results.Ecephys.ElectrodeColumns)
-                
+
                 if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) {
                     // console.error('Not a valid column', name, electrodeColumns, path, this.results.Ecephys.ElectrodeColumns)
                     return [
@@ -294,7 +294,7 @@ schema.Ecephys.Electrodes = {
                         electrodesTable.data.forEach(row => name in row ? undefined : row[name] = '') // Set column value as blank if not existent on row
                         electrodesTable.requestUpdate()
                     }
-                    
+
                 }
             }
         }
