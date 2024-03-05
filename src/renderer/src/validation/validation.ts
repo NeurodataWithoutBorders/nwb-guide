@@ -1,6 +1,7 @@
 import schema from './validation.json'
-import { JSONSchemaForm } from '../stories/JSONSchemaForm.js'
+import { JSONSchemaForm, getSchema } from '../stories/JSONSchemaForm'
 import Swal from 'sweetalert2'
+
 
 // ----------------- Validation Utility Functions ----------------- //
 
@@ -237,19 +238,30 @@ schema.Ecephys.Electrodes = {
 
             // All other column
             ['*']: function (this: JSONSchemaForm, name, parent, path) {
-                const electrodeColumns = this.results.ElectrodeColumns
-                if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) return [
-                    {
-                        message: 'Not a valid column',
-                        type: 'error'
-                    }
-                ]
+
+                const commonPath = path.slice(0, -1) // NOTE: Path does not account for the row index
+                const colPath = [...commonPath, 'ElectrodeColumns']
+
+                const { value: electrodeColumns } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
+
+                // console.log('Electrode Columns', electrodeColumns, colPath, name, path, this.results.Ecephys.ElectrodeColumns)
+                
+                if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) {
+                    // console.error('Not a valid column', name, electrodeColumns, path, this.results.Ecephys.ElectrodeColumns)
+                    return [
+                        {
+                            message: 'Not a valid column',
+                            type: 'error'
+                        }
+                    ]
+                }
             },
 
             // Group name column
-            group_name: function (this: JSONSchemaForm, _, __, ___, value) {
+            group_name: function (this: JSONSchemaForm, _, __, path, value) {
 
-                const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name)
+                const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
+
                 if (groups.includes(value)) return true
                 else {
                     return [
@@ -265,17 +277,24 @@ schema.Ecephys.Electrodes = {
         // Update the columns available on the Electrodes table when there is a new name in the ElectrodeColumns table
         ElectrodeColumns: {
             ['*']: {
-                ['*']: function (this: JSONSchemaForm, prop, parent, path) {
+                name: function (this: JSONSchemaForm, _, __, path, value) {
 
-                    const name = parent['name']
-                    if (!name) return true // Allow blank rows
+                    const name = value
 
-                    // NOTE: Reimplement across all separate tables...
-                    // if (prop === 'name' && !(name in this.schema.properties.Ecephys.properties.Electrodes.items.properties)) {
-                    //     const element = rerender.call(this, ['Ecephys', 'Electrodes'])
-                    //     element.schema.properties[name] = {} // Ensure property is present in the schema now
-                    //     element.data.forEach(row => name in row ? undefined : row[name] = '') // Set column value as blank if not existent on row
-                    // }
+                    const commonPath = path.slice(0, -2)
+
+                    const electrodesSchema = getSchema([ ...commonPath, 'Electrodes'], this.schema)
+
+                    if (!name) return true // Only set when name is actually present
+
+                    if (!(name in electrodesSchema.items.properties)) {
+                        const electrodesTable = this.getFormElement([ ...commonPath, 'Electrodes'])
+                        // electrodesTable.schema.properties[name] = {} // Ensure property is present in the schema now
+                        electrodesSchema.items.properties[name] = {}
+                        electrodesTable.data.forEach(row => name in row ? undefined : row[name] = '') // Set column value as blank if not existent on row
+                        electrodesTable.requestUpdate()
+                    }
+                    
                 }
             }
         }
