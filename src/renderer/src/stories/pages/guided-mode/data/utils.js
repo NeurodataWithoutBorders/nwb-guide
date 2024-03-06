@@ -33,11 +33,10 @@ export function resolveGlobalOverrides(subject, globalState, resolveMultiSession
 
         merge(subjectMetadataCopy, overrides.Subject ?? (overrides.Subject = {})); // Ensure Subject exists
 
-        return overrides
+        return overrides;
     }
 
-    return { Subject: subjectMetadataCopy }
-    
+    return { Subject: subjectMetadataCopy };
 }
 
 const isPatternResult = Symbol("ispatternresult");

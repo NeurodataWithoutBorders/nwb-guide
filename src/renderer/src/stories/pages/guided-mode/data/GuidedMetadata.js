@@ -151,8 +151,7 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     createForm = ({ subject, session, info }) => {
-
-        const hasMultipleSessions = this.workflow.multiple_sessions.value
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
 
         // const results = createResults({ subject, info }, this.info.globalState);
 
@@ -226,7 +225,6 @@ export class GuidedMetadataPage extends ManagedPage {
             );
         }
 
-        
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
