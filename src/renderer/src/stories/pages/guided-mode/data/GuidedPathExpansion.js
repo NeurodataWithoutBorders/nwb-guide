@@ -236,6 +236,9 @@ function getFiles(dir) {
 }
 
 export class GuidedPathExpansionPage extends Page {
+
+    #notification
+
     constructor(...args) {
         super(...args);
     }
@@ -244,121 +247,130 @@ export class GuidedPathExpansionPage extends Page {
         subtitle: "Automatic source data detection for multiple subjects / sessions",
     };
 
-    beforeSave = async () => {
-        const keepExistingData = this.dataManagementForm.resolved.keep_existing_data;
-        this.localState.keep_existing_data = keepExistingData;
+    #initialize = () => this.localState = merge(this.info.globalState.structure, { results: {} })
+    
+    workflow = {
+        locate_data: {
+            skip: () => {
 
-        const globalState = this.info.globalState;
-        merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
+                this.#initialize()
+                const globalState = this.info.globalState;
+                merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
+                
+                // Force single subject/session if not keeping existing data
+                if (!globalState.results) {
+                    const existingMetadata =
+                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
 
-        const hidden = this.optional.hidden;
-        globalState.structure.state = !hidden;
+                    const existingSourceData =
+                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
 
-        if (hidden) {
-            // Force single subject/session if not keeping existing data
-            if (!keepExistingData || !globalState.results) {
-                const existingMetadata =
-                    globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
+                    const source_data = {};
+                    for (let key in globalState.interfaces) {
+                        const existing = existingSourceData?.[key];
+                        if (existing) source_data[key] = existing ?? {};
+                    }
 
-                const existingSourceData =
-                    globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
-
-                const source_data = {};
-                for (let key in globalState.interfaces) {
-                    const existing = existingSourceData?.[key];
-                    if (existing) source_data[key] = existing ?? {};
-                }
-
-                globalState.results = {
-                    [this.altInfo.subject_id]: {
-                        [this.altInfo.session_id]: {
-                            source_data,
-                            metadata: {
-                                NWBFile: {
-                                    session_id: this.altInfo.session_id,
-                                    ...(existingMetadata?.NWBFile ?? {}),
-                                },
-                                Subject: {
-                                    subject_id: this.altInfo.subject_id,
-                                    ...(existingMetadata?.Subject ?? {}),
+                    globalState.results = {
+                        [this.altInfo.subject_id]: {
+                            [this.altInfo.session_id]: {
+                                source_data,
+                                metadata: {
+                                    NWBFile: {
+                                        session_id: this.altInfo.session_id,
+                                        ...(existingMetadata?.NWBFile ?? {}),
+                                    },
+                                    Subject: {
+                                        subject_id: this.altInfo.subject_id,
+                                        ...(existingMetadata?.Subject ?? {}),
+                                    },
                                 },
                             },
                         },
-                    },
-                };
+                    };
+                }
+
             }
         }
+    }
 
-        // Otherwise use path expansion to merge into existing subjects
-        else if (!hidden && hidden !== undefined) {
-            const structure = globalState.structure.results;
+    beforeSave = async () => {
+ 
+        const globalState = this.info.globalState;
+        merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
-            await this.form.validate();
+        const structure = globalState.structure.results;
 
-            const finalStructure = {};
-            for (let key in structure) {
-                const entry = { ...structure[key] };
-                const fstring = entry.format_string_path;
-                if (!fstring) continue;
-                if (fstring.split(".").length > 1) entry.file_path = fstring;
-                else entry.folder_path = fstring;
-                delete entry.format_string_path;
-                finalStructure[key] = entry;
-            }
+        await this.form.validate();
 
-            const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
-                this.notify(error.message, "error");
-                throw error;
-            });
+        const finalStructure = {};
+        for (let key in structure) {
+            const entry = { ...structure[key] };
+            const fstring = entry.format_string_path;
+            if (!fstring) continue;
+            if (fstring.split(".").length > 1) entry.file_path = fstring;
+            else entry.folder_path = fstring;
+            delete entry.format_string_path;
+            finalStructure[key] = entry;
+        }
 
-            const subjects = Object.keys(results);
-            if (subjects.length === 0) {
-                const message = "No subjects found with the current configuration. Please try again.";
-                this.notify(message, "error");
-                throw message;
-            }
+        const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
+            this.notify(error.message, "error");
+            throw error;
+        });
 
-            // Save an overall results object organized by subject and session
-            merge({ results }, globalState);
+        const subjects = Object.keys(results);
+        if (subjects.length === 0) {
+            if (this.#notification) this.dismiss(this.#notification);
+            const message = "No subjects found with the current configuration. Please try again.";
+            this.#notification = this.notify(message, "error");
+            throw message;
+        }
 
-            const globalResults = globalState.results;
+        // Save an overall results object organized by subject and session
+        merge({ results }, globalState);
 
-            if (!keepExistingData) {
-                for (let sub in globalResults) {
-                    const subRef = results[sub];
-                    if (!subRef)
-                        delete globalResults[sub]; // Delete removed subjects
-                    else {
-                        for (let ses in globalResults[sub]) {
-                            const sesRef = subRef[ses];
+        const globalResults = globalState.results;
 
-                            if (!sesRef)
-                                delete globalResults[sub][ses]; // Delete removed sessions
-                            else {
-                                const globalSesRef = globalResults[sub][ses];
+        if (!keepExistingData) {
+            for (let sub in globalResults) {
+                const subRef = results[sub];
+                if (!subRef)
+                    delete globalResults[sub]; // Delete removed subjects
+                else {
+                    for (let ses in globalResults[sub]) {
+                        const sesRef = subRef[ses];
 
-                                for (let name in globalSesRef.source_data) {
-                                    if (!sesRef.source_data[name]) delete globalSesRef.source_data[name]; // Delete removed interfaces
-                                }
+                        if (!sesRef)
+                            delete globalResults[sub][ses]; // Delete removed sessions
+                        else {
+                            const globalSesRef = globalResults[sub][ses];
+
+                            for (let name in globalSesRef.source_data) {
+                                if (!sesRef.source_data[name]) delete globalSesRef.source_data[name]; // Delete removed interfaces
                             }
                         }
-
-                        if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]; // Delete empty subjects
                     }
+
+                    if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]; // Delete empty subjects
                 }
             }
         }
+
     };
 
     footer = {
         onNext: async () => {
+            
             await this.save(); // Save in case the request fails
 
-            if (!this.optional.toggled) {
-                const message = "Please select an option.";
-                this.notify(message, "error");
-                throw new Error(message);
-            }
+            await this.form.validate()
+
+            // if (!this.optional.toggled) {
+            //     const message = "Please select an option.";
+            //     this.notify(message, "error");
+            //     throw new Error(message);
+            // }
 
             return this.to(1);
         },
@@ -390,21 +402,8 @@ export class GuidedPathExpansionPage extends Page {
     localState = {};
 
     render() {
-        this.optional = new OptionalSection({
-            header: "Will you locate your files programmatically?",
-            description: infoBox,
-            onChange: () => (this.unsavedUpdates = "conversions"),
-            // altContent: this.altForm,
-        });
 
-        const structureState = (this.localState = merge(this.info.globalState.structure, {
-            results: {},
-            keep_existing_data: true,
-        }));
-
-        const state = structureState.state;
-
-        this.optional.state = state;
+        const structureState = this.#initialize()
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
@@ -427,7 +426,7 @@ export class GuidedPathExpansionPage extends Page {
         }
         structureState.schema = generatedSchema;
 
-        this.optional.requestUpdate();
+        // this.optional.requestUpdate();
 
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
@@ -515,32 +514,9 @@ export class GuidedPathExpansionPage extends Page {
             },
         }));
 
-        this.optional.innerHTML = "";
-
-        this.optional.style.paddingTop = "10px";
-
-        this.dataManagementForm = new JSONSchemaForm({
-            results: { keep_existing_data: structureState.keep_existing_data },
-            onUpdate: () => (this.unsavedUpdates = "conversions"),
-            schema: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                    keep_existing_data: {
-                        type: "boolean",
-                        description: "Maintain data for subjects / sessions that are not located.",
-                    },
-                },
-            },
-        });
-
-        this.optional.append(form);
-
         form.style.width = "100%";
 
-        this.scrollTop = "300px";
-
-        return html`${this.dataManagementForm}${this.optional}`;
+        return html`${infoBox}<br/><br/>${form}`;
     }
 }
 

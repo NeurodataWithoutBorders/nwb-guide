@@ -12,7 +12,6 @@ export const remove = (name) => {
     } else localStorage.removeItem(progressFilePathToDelete);
 
     if (fs) {
-        console.log(previewSaveFolderPath, conversionSaveFolderPath, name);
 
         // delete default preview location
         fs.rmSync(joinPath(previewSaveFolderPath, name), { recursive: true, force: true });

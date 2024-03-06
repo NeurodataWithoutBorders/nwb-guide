@@ -89,17 +89,23 @@ export class GuidedMetadataPage extends ManagedPage {
 
     form;
 
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Metadata",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project);
+            this.#globalModal.open = true;
+        },
+    })
+
+    workflow = {
+        multiple_sessions: {
+            elements: [ this.#globalButton ],
+        }
+    }
+
     header = {
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Metadata",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project);
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [ this.#globalButton ],
         subtitle: "Edit all metadata for this conversion at the session level",
     };
 

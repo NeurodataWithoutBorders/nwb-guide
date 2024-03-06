@@ -42,20 +42,26 @@ export class GuidedSourceDataPage extends ManagedPage {
         merge(this.localState, this.info.globalState);
     };
 
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Source Data",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
+            this.#globalModal.open = true;
+        },
+    })
+
     header = {
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Source Data",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [ this.#globalButton ],
         subtitle:
             "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
     };
+
+    workflow = {
+        multiple_sessions: {
+            elements: [ this.#globalButton ],
+        }
+    }
 
     footer = {
         onNext: async () => {
