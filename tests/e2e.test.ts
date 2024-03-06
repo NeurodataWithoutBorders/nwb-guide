@@ -208,7 +208,7 @@ describe('E2E Test', () => {
     })
 
     test('View the pre-form workflow page', async () => {
-        
+
         await takeScreenshot('workflow-page', 300)
         await toNextPage('structure')
 
