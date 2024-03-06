@@ -157,6 +157,9 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     createForm = ({ subject, session, info }) => {
+
+        const hasMultipleSessions = this.workflow.multiple_sessions.value
+
         const instanceId = `sub-${subject}/ses-${session}`;
 
         const schema = this.info.globalState.schema.source_data;
@@ -168,7 +171,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             results: info.source_data,
             emptyMessage: "No source data required for this session.",
             ignore: propsToIgnore,
-            globals: this.info.globalState.project.SourceData,
+            globals: hasMultipleSessions ? this.info.globalState.project.SourceData : undefined,
             onOverride: (name) => {
                 this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },

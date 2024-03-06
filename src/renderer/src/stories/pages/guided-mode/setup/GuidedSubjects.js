@@ -115,6 +115,8 @@ export class GuidedSubjectsPage extends Page {
 
     render() {
 
+        const hasMultipleSessions = this.workflow.multiple_sessions.value
+
         const subjects = (this.localState = structuredClone(this.info.globalState.subjects ?? {}));
 
         // Ensure all the proper subjects are in the global state
@@ -130,7 +132,7 @@ export class GuidedSubjectsPage extends Page {
 
         const contextMenuConfig = { ignore: [ "row_below" ] };
 
-        if (!this.workflow.multiple_sessions.value) contextMenuConfig.ignore.push("remove_row");
+        if (!hasMultipleSessions) contextMenuConfig.ignore.push("remove_row");
 
         this.table = new Table({
             schema: {
@@ -138,7 +140,7 @@ export class GuidedSubjectsPage extends Page {
                 items: getSubjectSchema(),
             },
             data: subjects,
-            globals: this.info.globalState.project.Subject,
+            globals: hasMultipleSessions ? this.info.globalState.project.Subject : undefined,
             keyColumn: "subject_id",
             validateEmptyCells: ["subject_id", "sessions"],
             contextMenu: contextMenuConfig,

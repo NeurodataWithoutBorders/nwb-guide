@@ -151,6 +151,9 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     createForm = ({ subject, session, info }) => {
+
+        const hasMultipleSessions = this.workflow.multiple_sessions.value
+
         // const results = createResults({ subject, info }, this.info.globalState);
 
         const { globalState } = this.info;
@@ -158,7 +161,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const results = info.metadata; // Edited form info
 
         // Define the appropriate global metadata to fill empty values in the form
-        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, globalState);
+        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, globalState, hasMultipleSessions);
 
         // Define the correct instance identifier
         const instanceId = `sub-${subject}/ses-${session}`;
@@ -223,6 +226,7 @@ export class GuidedMetadataPage extends ManagedPage {
             );
         }
 
+        
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,

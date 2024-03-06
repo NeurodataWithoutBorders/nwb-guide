@@ -24,15 +24,20 @@ export const getInfoFromId = (key) => {
     return { subject, session };
 };
 
-export function resolveGlobalOverrides(subject, globalState) {
+export function resolveGlobalOverrides(subject, globalState, resolveMultiSessionOverrides = true) {
     const subjectMetadataCopy = { ...globalState.subjects[subject] };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata
 
-    const overrides = structuredClone(globalState.project ?? {}); // Copy project-wide metadata
+    if (resolveMultiSessionOverrides) {
+        const overrides = structuredClone(globalState.project ?? {}); // Copy project-wide metadata
 
-    merge(subjectMetadataCopy, overrides.Subject ?? (overrides.Subject = {})); // Ensure Subject exists
+        merge(subjectMetadataCopy, overrides.Subject ?? (overrides.Subject = {})); // Ensure Subject exists
 
-    return overrides;
+        return overrides
+    }
+
+    return { Subject: subjectMetadataCopy }
+    
 }
 
 const isPatternResult = Symbol("ispatternresult");
