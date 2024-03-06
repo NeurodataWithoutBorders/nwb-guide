@@ -220,6 +220,15 @@ export class GuidedSourceDataPage extends ManagedPage {
         if (this.#globalModal) this.#globalModal.remove();
     }
 
+    updated() {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        setTimeout(() => {
+            console.log(page.forms[0].form.accordions["SpikeGLX Recording"])
+        })
+        console.log(page.forms[0].form.accordions)
+    }
+
     render() {
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 

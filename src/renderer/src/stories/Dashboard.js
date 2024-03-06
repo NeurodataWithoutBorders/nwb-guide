@@ -229,7 +229,7 @@ export class Dashboard extends LitElement {
 
             if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
 
-            const { skipped } = this.subSidebar.sections[info.section].pages[info.id];
+            const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
             if (skipped) {
                 // Run skip functions
                 Object.entries(page.workflow).forEach(([key, state]) => {
