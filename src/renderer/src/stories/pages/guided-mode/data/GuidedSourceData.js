@@ -157,8 +157,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     createForm = ({ subject, session, info }) => {
-
-        const hasMultipleSessions = this.workflow.multiple_sessions.value
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
 
         const instanceId = `sub-${subject}/ses-${session}`;
 

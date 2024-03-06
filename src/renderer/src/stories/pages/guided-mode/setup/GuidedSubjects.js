@@ -113,8 +113,7 @@ export class GuidedSubjectsPage extends Page {
     }
 
     render() {
-
-        const hasMultipleSessions = this.workflow.multiple_sessions.value
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
 
         const subjects = (this.localState = structuredClone(this.info.globalState.subjects ?? {}));
 
