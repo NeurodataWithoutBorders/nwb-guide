@@ -20,7 +20,7 @@ export class GuidedSubjectsPage extends Page {
 
     #addButton = new Button({
         label: "Add Subject",
-        onClick: () => this.table.table.alter("insert_row_below")
+        onClick: () => this.table.table.alter("insert_row_below"),
     });
 
     #globalButton = new Button({
@@ -30,18 +30,17 @@ export class GuidedSubjectsPage extends Page {
             this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
             this.#globalModal.open = true;
         },
-    })
+    });
 
     workflow = {
         multiple_sessions: {
-            elements: [ this.#globalButton, this.#addButton ],
-        }
-    }
+            elements: [this.#globalButton, this.#addButton],
+        },
+    };
 
     header = {
         subtitle: "Enter all metadata known about each experiment subject",
-        controls: [ this.#globalButton ],
-
+        controls: [this.#globalButton],
     };
 
     // Abort save if subject structure is invalid
@@ -130,7 +129,7 @@ export class GuidedSubjectsPage extends Page {
             subjects[subject].sessions = sessions;
         }
 
-        const contextMenuConfig = { ignore: [ "row_below" ] };
+        const contextMenuConfig = { ignore: ["row_below"] };
 
         if (!hasMultipleSessions) contextMenuConfig.ignore.push("remove_row");
 

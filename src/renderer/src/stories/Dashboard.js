@@ -216,7 +216,6 @@ export class Dashboard extends LitElement {
         this.page.set(toPass, false);
 
         this.page.checkSyncState().then(() => {
-
             const projectName = info.globalState?.project?.name;
 
             this.subSidebar.header = projectName
@@ -231,15 +230,14 @@ export class Dashboard extends LitElement {
             if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
 
             const { skipped } = this.subSidebar.sections[info.section].pages[info.id];
-            if ( skipped ) {
-
+            if (skipped) {
                 // Run skip functions
                 Object.entries(page.workflow).forEach(([key, state]) => {
-                    if (typeof state.skip === 'function') state.skip()
+                    if (typeof state.skip === "function") state.skip();
                 });
 
                 // Skip right over the page if configured as such
-                if (previous.info.previous === this.page) this.back()
+                if (previous.info.previous === this.page) this.back();
                 else this.next();
             }
         });
@@ -279,12 +277,11 @@ export class Dashboard extends LitElement {
                     const workflow = page.workflow;
                     const workflowValues = globalState.project?.workflow ?? {};
                     const skipped = Object.entries(workflow).some(([key, state]) => {
-                        if (!workflowValues[key]) return state.skip
+                        if (!workflowValues[key]) return state.skip;
                     });
 
-                    pageState.skipped = skipped
+                    pageState.skipped = skipped;
                 }
-
 
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 
@@ -337,7 +334,6 @@ export class Dashboard extends LitElement {
         const page = this.getPage(this.pagesById[id]);
 
         if (page) {
-                        
             const { id, label } = page.info;
             const queries = new URLSearchParams(window.location.search);
             queries.set("page", id);

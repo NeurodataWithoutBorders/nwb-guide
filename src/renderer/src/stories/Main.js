@@ -61,22 +61,22 @@ export class Main extends LitElement {
         page.updatePages = this.updatePages;
 
         // Constrain based on workflow configuration
-        const workflowConfig = page.workflow ?? ( page.workflow = {} )
+        const workflowConfig = page.workflow ?? (page.workflow = {});
         const workflowValues = page.info.globalState?.project?.workflow ?? {};
 
-        Object.entries(workflowConfig).forEach(([ key, state ]) => {
-            workflowConfig[key].value = workflowValues[key]
+        Object.entries(workflowConfig).forEach(([key, state]) => {
+            workflowConfig[key].value = workflowValues[key];
 
-            const value = workflowValues[key]
+            const value = workflowValues[key];
 
             if (state.elements) {
-                const elements = state.elements
-                if (value) elements.forEach((el) => el.removeAttribute("hidden"))
-                else elements.forEach((el) => el.setAttribute("hidden", true))
+                const elements = state.elements;
+                if (value) elements.forEach((el) => el.removeAttribute("hidden"));
+                else elements.forEach((el) => el.setAttribute("hidden", true));
             }
-        })
+        });
 
-        page.requestUpdate() // Ensure the page is re-rendered with new workflow configurations
+        page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
 
         if (this.content) this.toRender = toRender.page ? toRender : { page };
         else this.#queue.push(page);
@@ -98,7 +98,6 @@ export class Main extends LitElement {
     }
 
     render() {
-
         let { page = "", sections = {} } = this.toRender ?? {};
 
         let footer = page?.footer; // Page-specific footer
