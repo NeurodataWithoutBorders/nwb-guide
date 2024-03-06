@@ -96,16 +96,16 @@ export class GuidedMetadataPage extends ManagedPage {
             this.#globalModal.form.results = structuredClone(this.info.globalState.project);
             this.#globalModal.open = true;
         },
-    })
+    });
 
     workflow = {
         multiple_sessions: {
-            elements: [ this.#globalButton ],
-        }
-    }
+            elements: [this.#globalButton],
+        },
+    };
 
     header = {
-        controls: [ this.#globalButton ],
+        controls: [this.#globalButton],
         subtitle: "Edit all metadata for this conversion at the session level",
     };
 

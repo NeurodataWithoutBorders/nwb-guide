@@ -236,8 +236,7 @@ function getFiles(dir) {
 }
 
 export class GuidedPathExpansionPage extends Page {
-
-    #notification
+    #notification;
 
     constructor(...args) {
         super(...args);
@@ -247,16 +246,15 @@ export class GuidedPathExpansionPage extends Page {
         subtitle: "Automatic source data detection for multiple subjects / sessions",
     };
 
-    #initialize = () => this.localState = merge(this.info.globalState.structure, { results: {} })
-    
+    #initialize = () => (this.localState = merge(this.info.globalState.structure, { results: {} }));
+
     workflow = {
         locate_data: {
             skip: () => {
-
-                this.#initialize()
+                this.#initialize();
                 const globalState = this.info.globalState;
                 merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
-                
+
                 // Force single subject/session if not keeping existing data
                 if (!globalState.results) {
                     const existingMetadata =
@@ -289,13 +287,11 @@ export class GuidedPathExpansionPage extends Page {
                         },
                     };
                 }
-
-            }
-        }
-    }
+            },
+        },
+    };
 
     beforeSave = async () => {
- 
         const globalState = this.info.globalState;
         merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
@@ -356,15 +352,13 @@ export class GuidedPathExpansionPage extends Page {
                 }
             }
         }
-
     };
 
     footer = {
         onNext: async () => {
-            
             await this.save(); // Save in case the request fails
 
-            await this.form.validate()
+            await this.form.validate();
 
             // if (!this.optional.toggled) {
             //     const message = "Please select an option.";
@@ -402,8 +396,7 @@ export class GuidedPathExpansionPage extends Page {
     localState = {};
 
     render() {
-
-        const structureState = this.#initialize()
+        const structureState = this.#initialize();
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
@@ -516,7 +509,7 @@ export class GuidedPathExpansionPage extends Page {
 
         form.style.width = "100%";
 
-        return html`${infoBox}<br/><br/>${form}`;
+        return html`${infoBox}<br /><br />${form}`;
     }
 }
 

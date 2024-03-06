@@ -515,16 +515,16 @@ export class JSONSchemaInput extends LitElement {
             // Update the actual input element
             const inputElement = this.getElement();
             if (!inputElement) return false;
-            
+
             if (inputElement.type === "checkbox") inputElement.checked = value;
-                else if (inputElement.classList.contains("list")) {
-                    const list = inputElement.children[0];
-                    inputElement.children[0].items = this.#mapToList({
-                        value,
-                        list,
-                    }); // NOTE: Make sure this is correct
-                } else if (inputElement instanceof Search) inputElement.shadowRoot.querySelector("input").value = value;
-                else inputElement.value = value;
+            else if (inputElement.classList.contains("list")) {
+                const list = inputElement.children[0];
+                inputElement.children[0].items = this.#mapToList({
+                    value,
+                    list,
+                }); // NOTE: Make sure this is correct
+            } else if (inputElement instanceof Search) inputElement.shadowRoot.querySelector("input").value = value;
+            else inputElement.value = value;
         }
 
         const { path: fullPath } = this;

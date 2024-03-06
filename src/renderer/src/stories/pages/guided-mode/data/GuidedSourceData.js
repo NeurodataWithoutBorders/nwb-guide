@@ -49,19 +49,19 @@ export class GuidedSourceDataPage extends ManagedPage {
             this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
             this.#globalModal.open = true;
         },
-    })
+    });
 
     header = {
-        controls: [ this.#globalButton ],
+        controls: [this.#globalButton],
         subtitle:
             "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
     };
 
     workflow = {
         multiple_sessions: {
-            elements: [ this.#globalButton ],
-        }
-    }
+            elements: [this.#globalButton],
+        },
+    };
 
     footer = {
         onNext: async () => {
