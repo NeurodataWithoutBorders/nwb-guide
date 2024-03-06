@@ -19,6 +19,10 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 announcer = MessageAnnouncer()
 
 
+EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes"]
+
+
+
 def is_path_contained(child, parent):
     parent = Path(parent)
     child = Path(child)
@@ -393,9 +397,11 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             defs["ElectrodeColumn"] = electrode_def
             defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
+
             new_electrodes_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
                 for properties in original_electrodes_schema["default"]
+                if properties["name"] not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
             }
 
             defs["Electrode"] = {
@@ -937,8 +943,12 @@ def generate_test_data(output_path: str):
         waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
     )
 
-
-dtype_map = {"<U64": "int64", "<U2": "str"}
+def map_dtype(dtype: str) -> str:
+    if '<U' in dtype:
+        return 'str'
+    else:
+        return dtype
+    
 
 
 def get_property_dtype(recording_extractor, property_name: str, channel_ids: list):
@@ -946,7 +956,7 @@ def get_property_dtype(recording_extractor, property_name: str, channel_ids: lis
 
     # return type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
     # return dtype
-    return dtype_map.get(dtype, dtype)
+    return map_dtype(dtype)
 
 
 # Ecephys Helper Functions
@@ -954,12 +964,10 @@ def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
     """A convenience function for uniformly excluding certain properties of the provided recording extractor."""
     property_names = list(recording_interface.recording_extractor.get_property_keys())
 
-    excluded_properties = ["contact_vector", "contact_shapes"]
-
     properties = {
         property_name: recording_interface.recording_extractor.get_property(key=property_name)
         for property_name in property_names
-        if property_name not in excluded_properties
+        if property_name not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
     }
 
     return properties
@@ -1006,7 +1014,7 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
     #     electrode_columns.append(
     #         dict(
     #             name=property_name,
-    #             description=property_descriptions.get(property_name, "No description."),
+    #             description=property_descriptions.get(property_name, ""),
     #             data_type=str(contact_vector.dtype.fields[property_name][0]),
     #         )
     #     )

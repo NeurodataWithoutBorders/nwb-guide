@@ -118,9 +118,14 @@ export class SimpleTable extends LitElement {
                 left: 0;
                 z-index: 1;
             }
+            
+            table tr:first-child td {
+                border-top: 0px;
+            }
 
             th {
                 border-right: 1px solid gray;
+                border-bottom: 1px solid gray;
                 color: #222;
                 font-weight: 400;
                 text-align: center;

@@ -237,17 +237,15 @@ schema.Ecephys.Electrodes = {
         Electrodes: {
 
             // All other column
-            ['*']: function (this: JSONSchemaForm, name, parent, path) {
+            ['*']: function (this: JSONSchemaForm, name, _, path) {
 
-                const commonPath = path.slice(0, -1) // NOTE: Path does not account for the row index
+                const commonPath = path.slice(0, -2)
+
                 const colPath = [...commonPath, 'ElectrodeColumns']
 
                 const { value: electrodeColumns } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
-
-                // console.log('Electrode Columns', electrodeColumns, colPath, name, path, this.results.Ecephys.ElectrodeColumns)
                 
                 if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) {
-                    // console.error('Not a valid column', name, electrodeColumns, path, this.results.Ecephys.ElectrodeColumns)
                     return [
                         {
                             message: 'Not a valid column',
@@ -258,7 +256,7 @@ schema.Ecephys.Electrodes = {
             },
 
             // Group name column
-            group_name: function (this: JSONSchemaForm, _, __, path, value) {
+            group_name: function (this: JSONSchemaForm, _, __, ___, value) {
 
                 const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
 
@@ -277,26 +275,49 @@ schema.Ecephys.Electrodes = {
         // Update the columns available on the Electrodes table when there is a new name in the ElectrodeColumns table
         ElectrodeColumns: {
             ['*']: {
-                name: function (this: JSONSchemaForm, _, __, path, value) {
-
-                    const name = value
+                '*': function (this: JSONSchemaForm, propName, __, path, value) {
 
                     const commonPath = path.slice(0, -2)
+                    const electrodesTablePath = [ ...commonPath, 'Electrodes']
+                    const electrodesTable = this.getFormElement(electrodesTablePath)
+                    const electrodesSchema = electrodesTable.schema // Manipulate the schema that is on the table
+                    const globalElectrodeSchema = getSchema(electrodesTablePath, this.schema)
 
-                    const electrodesSchema = getSchema([ ...commonPath, 'Electrodes'], this.schema)
+                    const { value: row } = get(this.results, path)
 
-                    if (!name) return true // Only set when name is actually present
+                    const currentName = row?.['name']
 
-                    if (!(name in electrodesSchema.items.properties)) {
+                    const hasNameUpdate = propName == 'name' && !(value in electrodesSchema.items.properties)
+
+                    const resolvedName = hasNameUpdate ? value : currentName
+
+                    if (value === currentName) return true // No change
+                    if (!resolvedName) return true // Only set when name is actually present
+
+                    const schemaToEdit = [electrodesSchema, globalElectrodeSchema]
+                    schemaToEdit.forEach(schema => {
+
+                        if (row) delete schema.items.properties[currentName] // Delete previous name from schema
+
+                        schema.items.properties[resolvedName] = {
+                            description: propName === 'description' ? value : row?.description,
+                            data_type: propName === 'data_type' ? value : row?.data_type
+                        }
+                    })
+
+                    //  Swap the new and current name information
+                    if (hasNameUpdate) {     
                         const electrodesTable = this.getFormElement([ ...commonPath, 'Electrodes'])
-                        // electrodesTable.schema.properties[name] = {} // Ensure property is present in the schema now
-                        electrodesSchema.items.properties[name] = {}
-                        electrodesTable.data.forEach(row => name in row ? undefined : row[name] = '') // Set column value as blank if not existent on row
-                        electrodesTable.requestUpdate()
+                        electrodesTable.data.forEach(row => {
+                            if (!(value in row)) row[value] = row[currentName] // Initialize new column with old values
+                            delete row[currentName] // Delete old column
+                        })
                     }
                     
+                    // Always re-render the Electrodes table on column changes
+                    electrodesTable.requestUpdate()
                 }
-            }
+            },
         }
     }
 }
