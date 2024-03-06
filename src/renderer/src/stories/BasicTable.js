@@ -165,10 +165,8 @@ export class BasicTable extends LitElement {
         return html`<div class="relative"><span>${header(str)}</span></div>`;
     };
 
-
     #renderHeader = (str, { description }) => {
         const th = document.createElement("th");
-
 
         const required = this.#itemSchema.required ? this.#itemSchema.required.includes(str) : false;
         const container = document.createElement("div");
@@ -187,10 +185,9 @@ export class BasicTable extends LitElement {
             tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}`, allowHTML: true });
         }
 
-
         th.appendChild(container);
 
-        return th
+        return th;
     };
 
     #getRowData(row, cols = this.colHeaders) {
@@ -236,8 +233,8 @@ export class BasicTable extends LitElement {
     };
 
     status;
-    onStatusChange = () => { };
-    onLoaded = () => { };
+    onStatusChange = () => {};
+    onLoaded = () => {};
 
     #validateCell = (value, col, row, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
@@ -397,9 +394,9 @@ export class BasicTable extends LitElement {
     render() {
         this.#updateRendered();
 
-        this.schema = this.schema // Always update the schema
+        this.schema = this.schema; // Always update the schema
 
-        console.warn('RERENDERING')
+        console.warn("RERENDERING");
 
         const entries = this.#itemProps;
 
@@ -409,8 +406,8 @@ export class BasicTable extends LitElement {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
                         ? (entries[k] = {
-                            type: typeof v[k],
-                        })
+                              type: typeof v[k],
+                          })
                         : ""
                 );
                 return acc;
@@ -424,7 +421,7 @@ export class BasicTable extends LitElement {
         // Sort Columns by Key Column and Requirement
         const keys =
             (this.#keys =
-                this.colHeaders =
+            this.colHeaders =
                 sortTable(
                     {
                         ...this.#itemSchema,
@@ -453,13 +450,13 @@ export class BasicTable extends LitElement {
                     </thead>
                     <tbody>
                         ${data.map(
-            (row, i) =>
-                html`<tr>
+                            (row, i) =>
+                                html`<tr>
                                     ${row.map(
-                    (col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`
-                )}
+                                        (col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`
+                                    )}
                                 </tr>`
-        )}
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -468,38 +465,38 @@ export class BasicTable extends LitElement {
                     primary
                     size="small"
                     @click=${() => {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept = "text/tab-separated-values";
-                input.click();
-                input.onchange = () => {
-                    const file = input.files[0];
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        this.#readTSV(reader.result);
-                        this.requestUpdate();
-                    };
-                    reader.readAsText(file);
-                };
-            }}
+                        const input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = "text/tab-separated-values";
+                        input.click();
+                        input.onchange = () => {
+                            const file = input.files[0];
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                this.#readTSV(reader.result);
+                                this.requestUpdate();
+                            };
+                            reader.readAsText(file);
+                        };
+                    }}
                     >Upload TSV File</nwb-button
                 >
                 <nwb-button
                     size="small"
                     @click=${() => {
-                const tsv = this.#getTSV();
+                        const tsv = this.#getTSV();
 
-                const element = document.createElement("a");
-                element.setAttribute(
-                    "href",
-                    "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
-                );
-                element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
-                element.style.display = "none";
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
-            }}
+                        const element = document.createElement("a");
+                        element.setAttribute(
+                            "href",
+                            "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
+                        );
+                        element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
+                        element.style.display = "none";
+                        document.body.appendChild(element);
+                        element.click();
+                        document.body.removeChild(element);
+                    }}
                     >Download TSV File</nwb-button
                 >
             </div>

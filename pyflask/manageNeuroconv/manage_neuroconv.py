@@ -22,7 +22,6 @@ announcer = MessageAnnouncer()
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes"]
 
 
-
 def is_path_contained(child, parent):
     parent = Path(parent)
     child = Path(child)
@@ -396,7 +395,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             # Configure electrode columns
             defs["ElectrodeColumn"] = electrode_def
             defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
-
 
             new_electrodes_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -943,12 +941,12 @@ def generate_test_data(output_path: str):
         waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
     )
 
+
 def map_dtype(dtype: str) -> str:
-    if '<U' in dtype:
-        return 'str'
+    if "<U" in dtype:
+        return "str"
     else:
         return dtype
-    
 
 
 def get_property_dtype(recording_extractor, property_name: str, channel_ids: list):

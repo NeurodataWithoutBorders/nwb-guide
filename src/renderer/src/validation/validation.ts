@@ -244,7 +244,7 @@ schema.Ecephys.Electrodes = {
                 const colPath = [...commonPath, 'ElectrodeColumns']
 
                 const { value: electrodeColumns } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
-                
+
                 if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) {
                     return [
                         {
@@ -306,14 +306,14 @@ schema.Ecephys.Electrodes = {
                     })
 
                     //  Swap the new and current name information
-                    if (hasNameUpdate) {     
+                    if (hasNameUpdate) {
                         const electrodesTable = this.getFormElement([ ...commonPath, 'Electrodes'])
                         electrodesTable.data.forEach(row => {
                             if (!(value in row)) row[value] = row[currentName] // Initialize new column with old values
                             delete row[currentName] // Delete old column
                         })
                     }
-                    
+
                     // Always re-render the Electrodes table on column changes
                     electrodesTable.requestUpdate()
                 }

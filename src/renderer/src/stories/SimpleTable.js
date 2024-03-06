@@ -118,7 +118,7 @@ export class SimpleTable extends LitElement {
                 left: 0;
                 z-index: 1;
             }
-            
+
             table tr:first-child td {
                 border-top: 0px;
             }
