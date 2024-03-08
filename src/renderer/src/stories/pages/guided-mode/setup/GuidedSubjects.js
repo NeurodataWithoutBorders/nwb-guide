@@ -87,7 +87,7 @@ export class GuidedSubjectsPage extends Page {
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Subject Metadata",
             key: "Subject",
-            validateEmptyValues: false,
+            validateEmptyValues: null,
             schema,
             formProps: {
                 validateOnChange: (localPath, parent, path) => {
