@@ -873,8 +873,6 @@ export class JSONSchemaInput extends LitElement {
                     },
                 });
 
-                console.log(list)
-
                 if (itemSchema.enum) {
 
                     const search = new Search({
@@ -906,7 +904,7 @@ export class JSONSchemaInput extends LitElement {
                 else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
-                    input.placeholder = "Provide an item for the list"
+                    input.placeholder = "Add an item to the list"
 
                     const submitButton = new Button({
                         label: "Submit",
