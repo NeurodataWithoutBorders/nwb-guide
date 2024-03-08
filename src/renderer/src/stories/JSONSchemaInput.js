@@ -899,7 +899,7 @@ export class JSONSchemaInput extends LitElement {
                 } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
-                    input.placeholder = "Provide an item for the list"
+                    input.placeholder = "Provide an item for the list";
 
                     const submitButton = new Button({
                         label: "Submit",
