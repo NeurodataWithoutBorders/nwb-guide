@@ -858,12 +858,11 @@ export class JSONSchemaInput extends LitElement {
             }
 
             const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
-        
+
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
             else if (itemSchema?.type === "string" && !itemSchema.properties) {
-
                 const list = new List({
                     items: this.value,
                     emptyMessage: "No items",
@@ -874,7 +873,6 @@ export class JSONSchemaInput extends LitElement {
                 });
 
                 if (itemSchema.enum) {
-
                     const search = new Search({
                         options: itemSchema.enum.map((v) => {
                             return {
@@ -887,45 +885,41 @@ export class JSONSchemaInput extends LitElement {
                             };
                         }),
                         value: this.value,
-                        listMode: schema.strict === false ? 'click' : "append",
+                        listMode: schema.strict === false ? "click" : "append",
                         showAllWhenEmpty: false,
                         onSelect: async ({ label, value }) => {
-                            if (!value) return
-                            if (schema.uniqueItems && this.value && this.value.includes(value)) return
-                            list.add({ content: label,  value })
+                            if (!value) return;
+                            if (schema.uniqueItems && this.value && this.value.includes(value)) return;
+                            list.add({ content: label, value });
                         },
                     });
 
                     search.style.height = "auto";
                     return html`<div style="width: 100%;">${search}${list}</div>`;
-
-                }
-
-                else {
+                } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
-                    input.placeholder = "Add an item to the list"
+                    input.placeholder = "Provide an item for the list"
 
                     const submitButton = new Button({
                         label: "Submit",
                         primary: true,
                         size: "small",
                         onClick: () => {
-                            const value = input.value
-                            if (!value) return
-                            if (schema.uniqueItems && this.value && this.value.includes(value)) return
-                            list.add({ value })
-                            input.value = ""
-                        }
+                            const value = input.value;
+                            if (!value) return;
+                            if (schema.uniqueItems && this.value && this.value.includes(value)) return;
+                            list.add({ value });
+                            input.value = "";
+                        },
                     });
 
-
-
-                    return html`<div style="width: 100%;"><div style="display: flex; gap: 10px; align-items: center;">${input}${submitButton}</div>${list}</div>`;
+                    return html`<div style="width: 100%;">
+                        <div style="display: flex; gap: 10px; align-items: center;">${input}${submitButton}</div>
+                        ${list}
+                    </div>`;
                 }
-
             } else if (itemSchema?.type === "object" && this.renderTable) {
-                
                 const instanceThis = this;
 
                 function updateFunction(path, value = this.data) {
@@ -961,7 +955,6 @@ export class JSONSchemaInput extends LitElement {
                     allowHTML: true,
                 });
             };
-
 
             const list = (this.#list = new List({
                 items: this.#mapToList(),

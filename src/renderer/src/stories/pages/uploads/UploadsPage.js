@@ -56,7 +56,7 @@ export async function createDandiset(results = {}) {
     });
 
     const updateNIHInput = (embargoed) => {
-        const nihInput = form.getFormElement([ "nih_award_number" ]);
+        const nihInput = form.getFormElement(["nih_award_number"]);
 
         // Show the NIH input if embargo is set
         if (embargoed) nihInput.removeAttribute("hidden");
@@ -64,7 +64,7 @@ export async function createDandiset(results = {}) {
 
         // Make the NIH input required if embargo is set
         nihInput.required = embargoed;
-    }
+    };
 
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
@@ -73,7 +73,7 @@ export async function createDandiset(results = {}) {
         validateOnChange: async (name, parent) => {
             const value = parent[name];
 
-            if (name === 'embargo_status') return updateNIHInput(value);
+            if (name === "embargo_status") return updateNIHInput(value);
 
             if (name === "nih_award_number") {
                 if (value)
@@ -97,7 +97,7 @@ export async function createDandiset(results = {}) {
 
     content.append(form);
     modal.append(content);
-    
+
     modal.onClose = async () => notify("Dandiset was not created.", "error");
 
     return new Promise((resolve) => {

@@ -115,7 +115,6 @@ export async function autocompleteFormatString(path) {
                     }
                 }
             } else {
-                
                 if (!parent.path) return;
                 if (!value) return;
 
