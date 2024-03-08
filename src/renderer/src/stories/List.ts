@@ -37,6 +37,7 @@ export class List extends LitElement {
 
 
       #empty {
+        margin: 1rem;
         margin-left: -40px;
         color: gray;
       }
@@ -412,7 +413,7 @@ export class List extends LitElement {
 
       return html`
       <ol style=${styleMap(this.listStyles)}>
-        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<li id="empty">${emptyMessage}</li>`}
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
       </ol>`
     }
   }

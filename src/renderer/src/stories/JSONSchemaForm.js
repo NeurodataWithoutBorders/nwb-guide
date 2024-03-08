@@ -121,10 +121,11 @@ const componentCSS = `
     }
 
     .link {
-      margin-top: 20px;
+      margin: 20px 0px;
       border: 1px solid black;
       border-radius: 4px;
       position: relative;
+      
     }
 
     .link > div {
