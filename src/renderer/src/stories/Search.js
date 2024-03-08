@@ -6,7 +6,6 @@ import searchSVG from "./assets/search.svg?raw";
 import tippy from "tippy.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-
 const ALTERNATIVE_MODES = ["input", "append"];
 
 export class Search extends LitElement {
@@ -35,7 +34,7 @@ export class Search extends LitElement {
         if (this.listMode === "input" && this.getAttribute("interacted") === "true") {
             this.setAttribute("interacted", false);
             this.#onSelect(this.getSelectedOption());
-        } else if (this.listMode !== 'list') {
+        } else if (this.listMode !== "list") {
             this.setAttribute("active", false);
         }
     };
@@ -109,7 +108,8 @@ export class Search extends LitElement {
                 overflow: auto;
             }
 
-            :host([listmode="input"]) ul, :host([listmode="append"]) ul {
+            :host([listmode="input"]) ul,
+            :host([listmode="append"]) ul {
                 position: absolute;
                 top: 38px;
                 left: 0;
@@ -140,7 +140,8 @@ export class Search extends LitElement {
                 font-size: 60%;
             }
 
-            :host([listmode="input"]) svg, :host([listmode="append"]) svg {
+            :host([listmode="input"]) svg,
+            :host([listmode="append"]) svg {
                 position: absolute;
                 top: 50%;
                 padding: 0px;
@@ -319,7 +320,7 @@ export class Search extends LitElement {
         this.setAttribute("interacted", true);
     };
 
-    #ignore = false
+    #ignore = false;
 
     render() {
         this.categories = {};
@@ -370,7 +371,7 @@ export class Search extends LitElement {
 
                     listItemElement.addEventListener("click", (clickEvent) => {
                         clickEvent.stopPropagation();
-                        if (this.#ignore) return this.#ignore = false
+                        if (this.#ignore) return (this.#ignore = false);
                         this.#onSelect(option);
                     });
 
@@ -382,9 +383,8 @@ export class Search extends LitElement {
                     label.classList.add("label");
                     label.innerText = option.label;
 
-
                     if (option.description || option.link) {
-                        const info = option.link ? document.createElement('a') : document.createElement("span");
+                        const info = option.link ? document.createElement("a") : document.createElement("span");
                         if (option.link) {
                             info.setAttribute("data-link", true);
                             info.href = option.link;
@@ -394,11 +394,12 @@ export class Search extends LitElement {
                         info.innerText = "ℹ️";
                         label.append(info);
 
-                        if (option.description) tippy(info, {
-                            content: `<p>${option.description}</p>`,
-                            allowHTML: true,
-                            placement: "right",
-                        });
+                        if (option.description)
+                            tippy(info, {
+                                content: `<p>${option.description}</p>`,
+                                allowHTML: true,
+                                placement: "right",
+                            });
                     }
 
                     container.appendChild(label);
@@ -482,14 +483,14 @@ export class Search extends LitElement {
       @blur=${(blurEvent) => {
           const relatedTarget = blurEvent.relatedTarget;
           if (relatedTarget) {
-            if (relatedTarget.classList.contains("option")) return;
-            if (relatedTarget.hasAttribute("data-link")) {
-                this.#ignore = true
-                return
-            }
-        }
+              if (relatedTarget.classList.contains("option")) return;
+              if (relatedTarget.hasAttribute("data-link")) {
+                  this.#ignore = true;
+                  return;
+              }
+          }
 
-        this.#close();
+          this.#close();
       }}
 
       ></input>
