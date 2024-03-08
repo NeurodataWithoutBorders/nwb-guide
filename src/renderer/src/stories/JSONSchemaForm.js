@@ -817,12 +817,14 @@ export class JSONSchemaForm extends LitElement {
 
         const value = parent[name];
 
-        const skipValidation = !this.validateEmptyValues && value === undefined;
+
+        const skipValidation = this.validateEmptyValues === null && value === undefined;
+
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
 
+        // Run validation functions
         const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
-
-        const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
+        const valid = skipValidation ? true :  await this.validateOnChange(name, parent, pathToValidate, value);
 
         if (valid === null) return null; // Skip validation / data change if the value is null
 
@@ -879,7 +881,9 @@ export class JSONSchemaForm extends LitElement {
                             type: "error",
                             missing: true,
                         });
-                    } else if (this.validateEmptyValues === null) {
+                    } 
+                    
+                    else if (this.validateEmptyValues === null) {
                         warnings.push({
                             message: `${schema.title ?? header(name)} is a suggested property.`,
                             type: "warning",

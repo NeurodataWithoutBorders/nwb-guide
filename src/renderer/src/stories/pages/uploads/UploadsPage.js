@@ -55,11 +55,25 @@ export async function createDandiset(results = {}) {
         paddingBottom: "0px",
     });
 
+    const updateNIHInput = (embargoed) => {
+        const nihInput = form.getFormElement([ "nih_award_number" ]);
+
+        // Show the NIH input if embargo is set
+        if (embargoed) nihInput.removeAttribute("hidden");
+        else nihInput.setAttribute("hidden", "");
+
+        // Make the NIH input required if embargo is set
+        nihInput.required = embargoed;
+    }
+
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
         results,
+        validateEmptyValues: false, // Only show errors after submission
         validateOnChange: async (name, parent) => {
             const value = parent[name];
+
+            if (name === 'embargo_status') return updateNIHInput(value);
 
             if (name === "nih_award_number") {
                 if (value)
@@ -83,7 +97,7 @@ export async function createDandiset(results = {}) {
 
     content.append(form);
     modal.append(content);
-
+    
     modal.onClose = async () => notify("Dandiset was not created.", "error");
 
     return new Promise((resolve) => {

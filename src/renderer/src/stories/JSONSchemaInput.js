@@ -353,7 +353,6 @@ export class JSONSchemaInput extends LitElement {
 
             :host {
                 margin-top: 1.45rem;
-                display: block;
             }
 
             :host(.invalid) .guided--input {
@@ -489,6 +488,7 @@ export class JSONSchemaInput extends LitElement {
         return {
             schema: { type: Object, reflect: false },
             validateEmptyValue: { type: Boolean, reflect: true },
+            required: { type: Boolean, reflect: true },
         };
     }
 
@@ -499,7 +499,7 @@ export class JSONSchemaInput extends LitElement {
     // pattern
     // showLabel
     controls = [];
-    required = false;
+    // required;
     validateOnChange = true;
 
     constructor(props) {
@@ -848,6 +848,81 @@ export class JSONSchemaInput extends LitElement {
             const allowPatternProperties = isPatternProperties(this.pattern);
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
 
+            // Provide default item types
+            if (isArray) {
+                const hasItemsRef = "items" in schema && "$ref" in schema.items;
+                if (!("items" in schema)) schema.items = {};
+                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value?.[0]);
+            }
+
+            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
+        
+            const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
+            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
+            // Create tables if possible
+            else if (itemSchema?.type === "string") {
+                console.error('JUST SEARCH STRINGS')
+
+                const list = new List({
+                    items: this.value,
+                    onChange: ({ items }) => {
+                        this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
+                        if (validateOnChange) this.#triggerValidation(name, path);
+                    },
+                });
+
+
+                const search = new Search({
+                    options: itemSchema.enum.map((v) => {
+                        return {
+                            key: v,
+                            value: v,
+                            label: itemSchema.enumLabels?.[v] ?? v,
+                            keywords: itemSchema.enumKeywords?.[v],
+                            description: itemSchema.enumDescriptions?.[v],
+                            link: itemSchema.enumLinks?.[v],
+                        };
+                    }),
+                    value: this.value,
+                    listMode: schema.strict === false ? 'click' : "append",
+                    showAllWhenEmpty: false,
+                    onSelect: async ({ label, value }) => {
+                        if (!value) return
+                        if (schema.uniqueItems && this.value && this.value.includes(value)) return
+                        list.add({ content: label,  value })
+                        // search.value = ''
+                        // search.requestUpdate()
+                    },
+                });
+
+                list.classList.add("schema-input");
+
+                search.style.height = "auto";
+
+                console.log(search)
+                
+                return html`<div style="width: 100%;">${search}${list}</div>`;
+
+            } else if (itemSchema?.type === "object" && this.renderTable) {
+                
+                const instanceThis = this;
+
+                function updateFunction(path, value = this.data) {
+                    return instanceThis.#updateData(path, value, true, {
+                        willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
+                        onError: (e) => e,
+                        onWarning: (e) => e,
+                    });
+                }
+
+                const table = createTable.call(this, resolvedFullPath, {
+                    onUpdate: updateFunction,
+                    onThrow: this.#onThrow,
+                }); // Ensure change propagates
+
+                if (table) return table;
+            }
+
             const addButton = new Button({
                 size: "small",
             });
@@ -866,36 +941,6 @@ export class JSONSchemaInput extends LitElement {
                 });
             };
 
-            // Provide default item types
-            if (isArray) {
-                const hasItemsRef = "items" in schema && "$ref" in schema.items;
-                if (!("items" in schema)) schema.items = {};
-                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value?.[0]);
-            }
-
-            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
-
-            const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
-            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-            // Create tables if possible
-            else if (itemSchema?.type === "object" && this.renderTable) {
-                const instanceThis = this;
-
-                function updateFunction(path, value = this.data) {
-                    return instanceThis.#updateData(path, value, true, {
-                        willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
-                        onError: (e) => e,
-                        onWarning: (e) => e,
-                    });
-                }
-
-                const table = createTable.call(this, resolvedFullPath, {
-                    onUpdate: updateFunction,
-                    onThrow: this.#onThrow,
-                }); // Ensure change propagates
-
-                if (table) return table;
-            }
 
             const list = (this.#list = new List({
                 items: this.#mapToList(),
@@ -965,6 +1010,8 @@ export class JSONSchemaInput extends LitElement {
                         category: schema.enumCategories?.[v],
                         label: schema.enumLabels?.[v] ?? v,
                         keywords: schema.enumKeywords?.[v],
+                        description: schema.enumDescriptions?.[v],
+                        link: schema.enumLinks?.[v],
                     };
                 });
 
@@ -978,7 +1025,7 @@ export class JSONSchemaInput extends LitElement {
                         keywords: schema.enumKeywords?.[this.value],
                     },
                     showAllWhenEmpty: false,
-                    listMode: "click",
+                    listMode: "input",
                     onSelect: async ({ value, key }) => {
                         const result = value ?? key;
                         this.#updateData(fullPath, result);

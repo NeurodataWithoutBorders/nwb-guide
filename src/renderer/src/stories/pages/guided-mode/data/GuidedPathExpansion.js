@@ -115,7 +115,11 @@ export async function autocompleteFormatString(path) {
                     }
                 }
             } else {
-                if (!parent.path || !parent.path.includes(value))
+                
+                if (!parent.path) return;
+                if (!value) return;
+
+                if (!parent.path.includes(value))
                     return [
                         {
                             type: "error",
