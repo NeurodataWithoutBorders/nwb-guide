@@ -80,7 +80,8 @@ export class InspectorListItem extends LitElement {
                 border-radius: 10px;
                 overflow: hidden;
                 text-wrap: wrap;
-                padding: 25px;
+                padding: 10px;
+                font-size: 12px;
                 margin: 0 0 1em;
             }
 
