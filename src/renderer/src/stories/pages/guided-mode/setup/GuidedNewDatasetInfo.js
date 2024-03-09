@@ -86,7 +86,7 @@ export class GuidedNewDatasetPage extends Page {
         this.form = new JSONSchemaForm({
             schema,
             results: this.state,
-            // validateEmptyValues: false,
+            // validateEmptyValues: null,
             dialogOptions: {
                 properties: ["createDirectory"],
             },

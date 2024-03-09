@@ -2,7 +2,7 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 // For Multi-Select Form
-import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
+import { JSONSchemaForm, getSchema } from "../../../JSONSchemaForm.js";
 import { OptionalSection } from "../../../OptionalSection.js";
 import { run } from "../options/utils.js";
 import { onThrow } from "../../../../errors";
@@ -24,6 +24,13 @@ export async function autocompleteFormatString(path) {
     let notification;
 
     const { base_directory } = path.reduce((acc, key) => acc[key] ?? {}, this.form.resolved);
+
+    const schema = getSchema(path, this.info.globalState.schema.source_data);
+
+    const isFile = "file_path" in schema.properties;
+    const pathType = isFile ? "file" : "directory";
+
+    const description = isFile ? schema.properties.file_path.description : schema.properties.folder_path.description;
 
     const notify = (message, type) => {
         if (notification) this.dismiss(notification);
@@ -48,14 +55,15 @@ export async function autocompleteFormatString(path) {
 
     const propOrder = ["path", "subject_id", "session_id"];
     const form = new JSONSchemaForm({
+        validateEmptyValues: false,
         schema: {
             type: "object",
             properties: {
                 path: {
                     type: "string",
-                    title: "Example Filesystem Entry",
-                    format: ["file", "directory"],
-                    description: "Provide an example filesystem entry for the selected interface",
+                    title: `Example ${isFile ? "File" : "Folder"}`,
+                    format: pathType,
+                    description: description ?? `Provide an example ${pathType} for the selected interface`,
                 },
                 subject_id: {
                     type: "string",
@@ -73,6 +81,9 @@ export async function autocompleteFormatString(path) {
             const value = parent[name];
 
             if (name === "path") {
+                const toUpdate = ["subject_id", "session_id"];
+                toUpdate.forEach((key) => form.getFormElement([key]).requestUpdate());
+
                 if (value) {
                     if (fs.lstatSync(value).isSymbolicLink())
                         return [
@@ -122,7 +133,7 @@ export async function autocompleteFormatString(path) {
 
     return new Promise((resolve) => {
         const button = new Button({
-            label: "Create",
+            label: "Submit",
             primary: true,
             onClick: async () => {
                 await form.validate().catch((e) => {
@@ -424,7 +435,7 @@ export class GuidedPathExpansionPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
             onThrow,
-            validateEmptyValues: false,
+            validateEmptyValues: null,
 
             controls,
 
