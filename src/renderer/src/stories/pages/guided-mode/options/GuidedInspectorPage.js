@@ -145,8 +145,8 @@ export class GuidedInspectorPage extends Page {
                         const list = new InspectorList({ items, emptyMessage });
                         setTimeout(() => {
                             console.log(list);
-                        })
-                        return list
+                        });
+                        return list;
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
