@@ -13,15 +13,15 @@ dependencies:
   - pytables = 3.8 # pypi build fails on arm64 so install from conda-forge (used by neuroconv deps)
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0  # installs jsonschema-specifications
-  - pydantic[email] = 1.10.12  # installs email-validator
   - pip
   - pip:
+      - pyinstaller-hooks-contrib == 2024.2  # Required for fix to pydantic v2
       - chardet == 5.1.0
       - configparser == 6.0.0
       - flask == 2.3.2
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
-      - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
+      - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@try_remove_packaing_bound#neuroconv[full]
       - dandi >= 0.60.0
       - pytest == 7.4.0
       - pytest-cov == 4.1.0
