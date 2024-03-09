@@ -143,9 +143,6 @@ export class GuidedInspectorPage extends Page {
                         const items = this.report.messages;
 
                         const list = new InspectorList({ items, emptyMessage });
-                        setTimeout(() => {
-                            console.log(list);
-                        })
                         return list
                     }
 
