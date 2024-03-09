@@ -142,8 +142,7 @@ export class GuidedInspectorPage extends Page {
 
                         const items = this.report.messages;
 
-                        const list = new InspectorList({ items, emptyMessage });
-                        return list
+                        return new InspectorList({ items, emptyMessage });
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
