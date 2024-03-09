@@ -17,8 +17,6 @@ hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_s
 datas += collect_data_files('jsonschema_specifications')
 tmp_ret = collect_all('dandi')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('pydantic')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('keyrings')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('unittest')
@@ -53,7 +51,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['pydantic.compiled'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
