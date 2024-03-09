@@ -428,10 +428,10 @@ export class JSONSchemaForm extends LitElement {
 
                 const isRow = typeof rowName === "number";
 
-                const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
+                const resolvedValue = e.instance; // Get offending value
+                const schema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
-
                 // Allow for constructing types from object types
                 if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string")
                     return;
