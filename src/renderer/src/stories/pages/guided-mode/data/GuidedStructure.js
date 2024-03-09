@@ -110,6 +110,7 @@ export class GuidedStructurePage extends Page {
         const { interfaces = {} } = this.info.globalState;
 
         this.list.emptyMessage = "Loading valid formats...";
+        console.log(this.list)
 
         this.search.options = await fetch(`${baseUrl}/neuroconv`)
             .then((res) => res.json())
