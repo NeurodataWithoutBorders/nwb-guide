@@ -66,6 +66,18 @@ autodoc_default_options = {
 }
 add_module_names = False
 
+html_theme_options = {
+    "use_edit_page_button": True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/catalystneuro/neuroconv",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+    ],
+}
+
 
 def _correct_signatures(app, what, name, obj, options, signature, return_annotation):
     if what == "class":
