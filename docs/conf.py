@@ -71,7 +71,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/catalystneuro/neuroconv",
+            "url": "https://github.com/NeurodataWithoutBorders/nwb-guide",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },
