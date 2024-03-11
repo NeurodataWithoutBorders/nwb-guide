@@ -92,7 +92,6 @@ export class OptionalSection extends LitElement {
     });
 
     updated() {
-        console.log(this);
         if (this.value === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
         else if (this.value) this.yes.onClick();
         else this.no.onClick();

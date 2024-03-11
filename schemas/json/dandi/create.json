@@ -57,6 +57,7 @@
                     "spdx:CC-BY-4.0"
                 ]
             },
+            "maxItems": 1,
             "uniqueItems": true
         },
 

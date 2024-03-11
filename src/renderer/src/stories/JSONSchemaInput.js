@@ -806,7 +806,7 @@ export class JSONSchemaInput extends LitElement {
 
     #render() {
         const { validateOnChange, schema, path: fullPath } = this;
-
+        
         // Do your best to fill in missing schema values
         if (!("type" in schema)) schema.type = this.#getType();
 
@@ -815,7 +815,7 @@ export class JSONSchemaInput extends LitElement {
         const name = path.splice(-1)[0];
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
-
+        
         const canAddProperties = isEditableObject(this.schema, this.value);
 
         if (this.renderCustomHTML) {
@@ -844,6 +844,22 @@ export class JSONSchemaInput extends LitElement {
             filesystemSelectorElement.classList.add("schema-input");
             return filesystemSelectorElement;
         };
+        
+
+        // Transform to single item if maxItems is 1
+        if (isArray && schema.maxItems === 1) {
+            return new JSONSchemaInput({
+                value: this.value?.[0],
+                schema: schema.items,
+                path: fullPath,
+                validateEmptyValue: this.validateEmptyValue,
+                required: this.required,
+                validateOnChange: () => validateOnChange ? this.#triggerValidation(name, path) : '',
+                form: this.form,
+                onUpdate: (value) => this.#updateData(fullPath, [ value ]),
+            })
+        }
+
 
         if (isArray || canAddProperties) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
