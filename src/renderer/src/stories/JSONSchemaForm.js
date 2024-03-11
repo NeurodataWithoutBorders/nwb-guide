@@ -276,7 +276,7 @@ export class JSONSchemaForm extends LitElement {
 
         this.groups = props.groups ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
-        this.validateEmptyValues = props.validateEmptyValues ?? true;
+        this.validateEmptyValues = props.validateEmptyValues === undefined ? true : props.validateEmptyValues; // false = validate when not empty, true = always validate, null = never validate
 
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.sort) this.sort = props.sort;
@@ -475,11 +475,10 @@ export class JSONSchemaForm extends LitElement {
 
                 const isRow = typeof rowName === "number";
 
-                const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
-                const resolvedSchema = this.getSchema(e.path, schema);
+                const resolvedValue = e.instance; // Get offending value
+                const schema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
-
                 // Allow for constructing types from object types
                 if (
                     e.message.includes("is not of a type(s)") &&
@@ -489,7 +488,7 @@ export class JSONSchemaForm extends LitElement {
                     return;
 
                 // Ignore required errors if value is empty
-                if (e.name === "required" && !this.validateEmptyValues && !(e.property in e.instance)) return;
+                if (e.name === "required" && this.validateEmptyValues === null && !(e.property in e.instance)) return;
 
                 // Non-Strict Rule
                 if (resolvedSchema.strict === false && e.message.includes("is not one of enum values")) return;
@@ -515,6 +514,8 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+        if (this.validateEmptyValues === false) this.validateEmptyValues = true;
+
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
@@ -707,7 +708,7 @@ export class JSONSchemaForm extends LitElement {
                 // if (typeof isRequired === "object" && !Array.isArray(isRequired))
                 //     invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
                 // else
-                if (this.isUndefined(resolved[name]) && this.validateEmptyValues) invalid.push(path);
+                if (this.isUndefined(resolved[name]) && this.validateEmptyValues !== null) invalid.push(path);
             }
         }
 
@@ -929,7 +930,7 @@ export class JSONSchemaForm extends LitElement {
                             type: "error",
                             missing: true,
                         });
-                    } else {
+                    } else if (this.validateEmptyValues === null) {
                         warnings.push({
                             message: `${schema.title ?? header(name)} is a suggested property.`,
                             type: "warning",

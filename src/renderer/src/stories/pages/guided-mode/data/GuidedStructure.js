@@ -84,13 +84,20 @@ export class GuidedStructurePage extends Page {
     };
 
     beforeSave = async () => {
-        this.info.globalState.interfaces = { ...this.list.object };
+        const interfaces = (this.info.globalState.interfaces = { ...this.list.object });
 
-        // Remove extra interfaces from results
+        // Remove or reassign extra interfaces in results
         if (this.info.globalState.results) {
             this.mapSessions(({ info }) => {
-                Object.keys(info.source_data).forEach((key) => {
-                    if (!this.info.globalState.interfaces[key]) delete info.source_data[key];
+                const metadata = [info.source_data];
+                metadata.forEach((results) => {
+                    Object.keys(results).forEach((key) => {
+                        if (!interfaces[key]) {
+                            const renamed = this.list.items.find((item) => item.originalKey === key);
+                            if (renamed) results[renamed.key] = results[key];
+                            delete results[key];
+                        }
+                    });
                 });
             });
         }

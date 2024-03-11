@@ -507,6 +507,7 @@ export class JSONSchemaInput extends LitElement {
     constructor(props) {
         super();
         Object.assign(this, props);
+        if (props.validateEmptyValue === false) this.validateEmptyValue = true; // False is treated as required but not triggered if empty
     }
 
     // onUpdate = () => {}
