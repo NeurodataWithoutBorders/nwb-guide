@@ -1099,7 +1099,7 @@ export class JSONSchemaInput extends LitElement {
         } else if (schema.type === "boolean") {
             const optional = new OptionalSection({
                 value: this.value ?? false,
-                color: 'rgb(32,32,32)',
+                color: "rgb(32,32,32)",
                 size: "small",
                 onChange: (value) => {
                     this.#updateData(fullPath, value);
