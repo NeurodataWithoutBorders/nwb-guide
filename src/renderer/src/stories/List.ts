@@ -229,7 +229,7 @@ export class List extends LitElement {
     }
 
     add = (item: ListItemType) => {
-      this.items.push(item) // Update original
+      this.items.push({ ...item }) // Update original
       this.items = this.items
     }
 
