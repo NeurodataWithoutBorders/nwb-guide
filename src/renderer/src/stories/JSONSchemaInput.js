@@ -845,7 +845,10 @@ export class JSONSchemaInput extends LitElement {
         if (isArray && schema.maxItems === 1) {
             return new JSONSchemaInput({
                 value: this.value?.[0],
-                schema: schema.items,
+                schema: {
+                    ...schema.items,
+                    strict: schema.strict
+                },
                 path: fullPath,
                 validateEmptyValue: this.validateEmptyValue,
                 required: this.required,
@@ -1025,77 +1028,46 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (schema.enum && schema.enum.length) {
-            if (schema.strict === false) {
-                // const category = categories.find(({ test }) => test.test(key))?.value;
 
-                const options = schema.enum.map((v) => {
-                    return {
-                        key: v,
-                        value: v,
-                        category: schema.enumCategories?.[v],
-                        label: schema.enumLabels?.[v] ?? v,
-                        keywords: schema.enumKeywords?.[v],
-                        description: schema.enumDescriptions?.[v],
-                        link: schema.enumLinks?.[v],
-                    };
-                });
+            const options = schema.enum.map((v) => {
+                return {
+                    key: v,
+                    value: v,
+                    category: schema.enumCategories?.[v],
+                    label: schema.enumLabels?.[v] ?? v,
+                    keywords: schema.enumKeywords?.[v],
+                    description: schema.enumDescriptions?.[v],
+                    link: schema.enumLinks?.[v],
+                };
+            });
 
-                const search = new Search({
-                    options,
-                    value: {
-                        value: this.value,
-                        key: this.value,
-                        category: schema.enumCategories?.[this.value],
-                        label: schema.enumLabels?.[this.value],
-                        keywords: schema.enumKeywords?.[this.value],
-                    },
-                    showAllWhenEmpty: false,
-                    listMode: "input",
-                    onSelect: async ({ value, key }) => {
-                        const result = value ?? key;
-                        this.#updateData(fullPath, result);
-                        if (validateOnChange) await this.#triggerValidation(name, path);
-                    },
-                });
+            const search = new Search({
+                options,
+                strict: schema.strict,
+                value: {
+                    value: this.value,
+                    key: this.value,
+                    category: schema.enumCategories?.[this.value],
+                    label: schema.enumLabels?.[this.value],
+                    keywords: schema.enumKeywords?.[this.value],
+                },
+                showAllWhenEmpty: false,
+                listMode: "input",
+                onSelect: async ({ value, key }) => {
+                    const result = value ?? key;
+                    this.#updateData(fullPath, result);
+                    if (validateOnChange) await this.#triggerValidation(name, path);
+                },
+            });
 
-                search.classList.add("schema-input");
-                search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
 
-                search.addEventListener("keydown", this.#moveToNextInput);
+            search.classList.add("schema-input");
+            search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
 
-                return search;
-            }
+            search.addEventListener("keydown", this.#moveToNextInput);
+            this.style.width = "100%";
+            return search;
 
-            const enumItems = [...schema.enum];
-
-            const noSelection = "No Selection";
-            if (!this.required) enumItems.unshift(noSelection);
-
-            const selectedItem = enumItems.find((item) => this.value === item);
-
-            return html`
-                <select
-                    class="guided--input schema-input"
-                    @input=${(ev) => {
-                        const index = ev.target.value;
-                        const value = enumItems[index];
-                        this.#updateData(fullPath, value === noSelection ? undefined : value);
-                    }}
-                    @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
-                    @keydown=${this.#moveToNextInput}
-                >
-                    <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
-                    ${enumItems.map(
-                        (item, i) =>
-                            html`<option
-                                value=${i}
-                                ?selected=${selectedItem === item || (selectedItem === -1 && item === noSelection)}
-                            >
-                                ${schema.enumLabels?.[item] ?? item}
-                            </option>`
-                    )}
-                </select>
-            `;
         } else if (schema.type === "boolean") {
             const optional = new OptionalSection({
                 value: this.value ?? false,

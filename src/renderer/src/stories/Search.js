@@ -17,6 +17,7 @@ export class Search extends LitElement {
         headerStyles = {},
         disabledLabel,
         onSelect,
+        strict = false,
     } = {}) {
         super();
         this.#value = value;
@@ -25,6 +26,7 @@ export class Search extends LitElement {
         this.disabledLabel = disabledLabel;
         this.listMode = listMode;
         this.headerStyles = headerStyles;
+        this.strict = strict;
         if (onSelect) this.onSelect = onSelect;
 
         // document.addEventListener("click", () => this.#close());
@@ -45,10 +47,21 @@ export class Search extends LitElement {
         return value && typeof value === "object";
     }
 
+    #getOption = ({
+        label,
+        value
+    } = {}) => {
+
+        return this.options.find((item) => {
+            if (label && item.label === label) return true;
+            if (value && value === item.value) return true;
+        });
+    }
+
     getSelectedOption = () => {
-        const value = (this.shadowRoot.querySelector("input") ?? this).value;
-        const matched = this.options.find((item) => item.label === value);
-        return matched ?? { value };
+        const inputValue = (this.shadowRoot.querySelector("input") ?? this).value;
+        const matched = this.#getOption({ label: inputValue })
+        return matched ?? { value: inputValue };
     };
 
     get value() {
@@ -218,6 +231,7 @@ export class Search extends LitElement {
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
             listMode: { type: String, reflect: true },
+            strict: { type: Boolean, reflect: true },
         };
     }
 
@@ -245,11 +259,22 @@ export class Search extends LitElement {
     };
 
     #onSelect = (option) => {
+
+        const inputMode = this.listMode === "input";
         const input = this.shadowRoot.querySelector("input");
 
-        if (this.listMode === "input") {
+        const selectedOption = this.#getOption({ value: option.value })
+
+        if (inputMode) this.setAttribute("active", false);
+
+        if (this.strict && !selectedOption) {
+            input.value = this.#value.label
+            return
+        }
+
+        if (inputMode) {
+            this.value = selectedOption ?? option;
             input.value = this.#displayValue(option);
-            this.setAttribute("active", false);
             return this.onSelect(option);
         }
 

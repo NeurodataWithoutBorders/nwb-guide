@@ -58,7 +58,8 @@
                 ]
             },
             "maxItems": 1,
-            "uniqueItems": true
+            "uniqueItems": true,
+            "strict": true
         },
 
         "nih_award_number": {
