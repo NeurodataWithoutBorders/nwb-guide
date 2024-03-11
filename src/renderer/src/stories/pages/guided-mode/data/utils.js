@@ -25,7 +25,7 @@ export const getInfoFromId = (key) => {
 };
 
 export function resolveGlobalOverrides(subject, globalState, resolveMultiSessionOverrides = true) {
-    const subjectMetadataCopy = { ...globalState.subjects?.[subject] ?? {} };
+    const subjectMetadataCopy = { ...(globalState.subjects?.[subject] ?? {}) };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata
 
     if (resolveMultiSessionOverrides) {
