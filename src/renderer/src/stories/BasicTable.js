@@ -122,6 +122,7 @@ export class BasicTable extends LitElement {
         validateOnChange,
         onStatusChange,
         onLoaded,
+        onUpdate,
     } = {}) {
         super();
         this.name = name ?? "data_table";
@@ -134,6 +135,7 @@ export class BasicTable extends LitElement {
         this.ignore = ignore ?? {};
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
+        if (onUpdate) this.onUpdate = onUpdate;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
     }
@@ -380,6 +382,8 @@ export class BasicTable extends LitElement {
             }, {})
         );
 
+        console.log('Got', structuredData)
+
         Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
@@ -387,7 +391,7 @@ export class BasicTable extends LitElement {
             Object.entries(cols).forEach(([key, value]) => (key in this.#itemProps ? (latest[key] = value) : "")); // Only include data from schema
         });
 
-        this.onUpdate(null, null, value); // Update the whole table
+        if (this.onUpdate) this.onUpdate([], data); // Update the whole table
     }
 
     // Render Code
