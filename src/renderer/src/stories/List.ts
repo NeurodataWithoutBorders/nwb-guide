@@ -401,7 +401,7 @@ export class List extends LitElement {
           // Ensure no duplicate keys
           let kI = 0;
           while (resolvedKey in this.object) {
-              i++;
+              kI++;
               resolvedKey = `${key}_${kI}`;
           }
 
