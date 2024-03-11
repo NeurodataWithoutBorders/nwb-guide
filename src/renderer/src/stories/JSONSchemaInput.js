@@ -871,8 +871,8 @@ export class JSONSchemaInput extends LitElement {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
                 if (!("type" in schema.items) && !hasItemsRef) {
-                    const itemToCheck = this.value?.[0]
-                    schema.items.type = itemToCheck ? this.#getType(itemToCheck) : 'string';
+                    const itemToCheck = this.value?.[0];
+                    schema.items.type = itemToCheck ? this.#getType(itemToCheck) : "string";
                 }
             }
 
