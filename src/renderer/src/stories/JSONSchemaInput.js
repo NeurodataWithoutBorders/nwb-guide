@@ -503,16 +503,18 @@ export class JSONSchemaInput extends LitElement {
     required = false;
     validateOnChange = true;
 
-
     // Print the default value of the schema if not caught
     onUncaughtSchema = (schema) => {
         if (schema.default) return `<pre>${JSON.stringify(schema.default, null, 2)}</pre>`;
 
-        const error = new InspectorListItem({ message: "<h3 style='margin: 0'>Internal GUIDE Error</h3><span>Cannot render this property because of a misformatted schema.</span>" })
+        const error = new InspectorListItem({
+            message:
+                "<h3 style='margin: 0'>Internal GUIDE Error</h3><span>Cannot render this property because of a misformatted schema.</span>",
+        });
         error.style.width = "100%";
 
-        return error
-    }
+        return error;
+    };
 
     constructor(props) {
         super();
@@ -883,15 +885,14 @@ export class JSONSchemaInput extends LitElement {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
                 if (!("type" in schema.items) && !hasItemsRef) {
-
                     // Guess the type of the first item
                     if (this.value) {
                         const itemToCheck = this.value[0];
                         schema.items.type = itemToCheck ? this.#getType(itemToCheck) : "string";
-                    } 
-                    
+                    }
+
                     // If no value, handle uncaught schema
-                    else return this.onUncaughtSchema(schema)
+                    else return this.onUncaughtSchema(schema);
                 }
             }
 
@@ -1156,7 +1157,7 @@ export class JSONSchemaInput extends LitElement {
             }
         }
 
-        return this.onUncaughtSchema(schema)
+        return this.onUncaughtSchema(schema);
     }
 }
 
