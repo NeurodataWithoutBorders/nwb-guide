@@ -640,7 +640,7 @@ export class SimpleTable extends LitElement {
             this.#rendered(true);
         }
 
-        console.log(this)
+        console.log(this);
     }
 
     #updateRows(row, nRows) {
@@ -885,7 +885,6 @@ export class SimpleTable extends LitElement {
     }
 
     render() {
-
         this.#updateRendered();
         this.#resetLoadState();
 
