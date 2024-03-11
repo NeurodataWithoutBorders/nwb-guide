@@ -168,8 +168,6 @@ export class BasicTable extends LitElement {
     #renderHeader = (prop, { description, title = prop } = {}) => {
         const th = document.createElement("th");
 
-
-
         const required = this.#itemSchema.required ? this.#itemSchema.required.includes(prop) : false;
         const container = document.createElement("div");
         container.classList.add("relative");

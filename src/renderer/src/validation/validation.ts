@@ -299,7 +299,7 @@ schema.Ecephys.Electrodes = {
 
                         const properties = schema.items.properties
                         const oldRef = properties[currentName]
-                        
+
                         if (row) delete properties[currentName] // Delete previous name from schema
 
                         properties[resolvedName] = {
