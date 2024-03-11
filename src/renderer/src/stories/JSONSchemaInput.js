@@ -351,11 +351,7 @@ export class JSONSchemaInput extends LitElement {
             * {
                 box-sizing: border-box;
             }
-
-            :host {
-                margin-top: 1.45rem;
-            }
-
+            
             :host(.invalid) .guided--input {
                 background: rgb(255, 229, 228) !important;
             }
