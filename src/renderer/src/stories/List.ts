@@ -6,7 +6,8 @@ type ListItemType = {
   key: string,
   content: string,
   value: any,
-  controls: HTMLElement[]
+  controls: HTMLElement[],
+  originalKey?: string
 }
 
 export interface ListProps {
@@ -140,11 +141,14 @@ export class List extends LitElement {
       return this.items.map(item => item.value)
     }
 
+    #previousItems = []
     #items: ListItemType[] = []
 
-    set items(value) {
-      const oldList = this.#items
+    set items(value: ListItemType[]) {
+      
+      const oldList = this.#previousItems
       this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
+      this.#previousItems = this.#items.map(item => ({...item})) // Clone items
       const oldObject = this.object
       this.#updateObject()
 
@@ -236,6 +240,9 @@ export class List extends LitElement {
 
     #renderListItem = (item: ListItemType, i: number) => {
       const { key, value, content = value } = item;
+
+      if (!item.originalKey) item.originalKey = key
+
       const li = document.createElement("li");
       li.id = `item-${i}`;
 
@@ -357,8 +364,9 @@ export class List extends LitElement {
                     this.items[i].key = newKey
                   } else {
                     this.items[i].value = newKey
-                    this.items = this.items
                   }
+                  this.items = this.items
+
             }
         };
 
@@ -407,8 +415,7 @@ export class List extends LitElement {
     }
 
     render() {
-
-      console.error('RENDR', this.items)
+      
 
       this.removeAttribute('unordered')
       if (this.unordered) this.setAttribute('unordered', '')
