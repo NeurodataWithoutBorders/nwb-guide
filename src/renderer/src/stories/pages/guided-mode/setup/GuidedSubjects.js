@@ -43,6 +43,14 @@ export class GuidedSubjectsPage extends Page {
         controls: [this.#globalButton],
     };
 
+    workflow = {
+        multiple_sessions: {
+            skip: () => {
+
+            }
+        }
+    }
+
     // Abort save if subject structure is invalid
     beforeSave = () => {
         try {
@@ -113,6 +121,7 @@ export class GuidedSubjectsPage extends Page {
     }
 
     render() {
+
         const hasMultipleSessions = this.workflow.multiple_sessions.value;
 
         const subjects = (this.localState = structuredClone(this.info.globalState.subjects ?? {}));

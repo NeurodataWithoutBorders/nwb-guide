@@ -237,8 +237,8 @@ export class Dashboard extends LitElement {
                 });
 
                 // Skip right over the page if configured as such
-                if (previous.info.previous === this.page) this.back();
-                else this.next();
+                if (previous.info.previous === this.page) this.page.onTransition(-1);
+                else this.page.onTransition(1);
             }
         });
     }
