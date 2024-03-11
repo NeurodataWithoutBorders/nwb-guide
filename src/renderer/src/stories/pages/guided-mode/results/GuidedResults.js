@@ -11,7 +11,7 @@ export class GuidedResultsPage extends Page {
     footer = {};
 
     updated() {
-        this.save() // Save the current state
+        this.save(); // Save the current state
     }
 
     render() {
