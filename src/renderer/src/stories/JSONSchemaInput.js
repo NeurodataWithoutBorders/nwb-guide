@@ -870,7 +870,10 @@ export class JSONSchemaInput extends LitElement {
             if (isArray) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
-                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value?.[0]);
+                if (!("type" in schema.items) && !hasItemsRef) {
+                    const itemToCheck = this.value?.[0]
+                    schema.items.type = itemToCheck ? this.#getType(itemToCheck) : 'string';
+                }
             }
 
             const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
