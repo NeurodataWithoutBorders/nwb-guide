@@ -1002,7 +1002,7 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
 
     for property_name, property_info in EXTRA_RECORDING_INTERFACE_PROPERTIES.items():
         description = property_info.get("description", None)
-        if (description):
+        if description:
             property_descriptions[property_name] = description
 
     # default_column_metadata =  interface.get_metadata()["Ecephys"]["ElectrodeColumns"]["properties"] # NOTE: This doesn't exist...
