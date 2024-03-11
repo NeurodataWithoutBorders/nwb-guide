@@ -43,6 +43,7 @@ export class OptionalSection extends LitElement {
         this.altContent = props.altContent ?? "";
         this.value = props.value;
         this.size = props.size;
+        this.color = props.color;
 
         if (props.onChange) this.onChange = props.onChange;
         this.addEventListener("change", () => this.onChange(this.value));
@@ -99,6 +100,11 @@ export class OptionalSection extends LitElement {
     render() {
         this.yes.size = this.size;
         this.no.size = this.size;
+
+        if (this.color) {
+            this.yes.color = this.color;
+            this.no.color = this.color;
+        }
 
         return html`
             <div class="optional-section__header">
