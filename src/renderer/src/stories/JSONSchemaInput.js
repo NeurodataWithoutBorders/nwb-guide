@@ -14,6 +14,7 @@ import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
 import { merge } from "./pages/utils";
+import { InspectorListItem } from "./preview/inspector/InspectorList";
 
 const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
 
@@ -502,6 +503,17 @@ export class JSONSchemaInput extends LitElement {
     required = false;
     validateOnChange = true;
 
+
+    // Print the default value of the schema if not caught
+    onUncaughtSchema = (schema) => {
+        if (schema.default) return `<pre>${JSON.stringify(schema.default, null, 2)}</pre>`;
+
+        const error = new InspectorListItem({ message: "<h3 style='margin: 0'>Internal GUIDE Error</h3><span>Cannot render this property because of a misformatted schema.</span>" })
+        error.style.width = "100%";
+
+        return error
+    }
+
     constructor(props) {
         super();
         Object.assign(this, props);
@@ -871,8 +883,15 @@ export class JSONSchemaInput extends LitElement {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
                 if (!("type" in schema.items) && !hasItemsRef) {
-                    const itemToCheck = this.value?.[0];
-                    schema.items.type = itemToCheck ? this.#getType(itemToCheck) : "string";
+
+                    // Guess the type of the first item
+                    if (this.value) {
+                        const itemToCheck = this.value[0];
+                        schema.items.type = itemToCheck ? this.#getType(itemToCheck) : "string";
+                    } 
+                    
+                    // If no value, handle uncaught schema
+                    else return this.onUncaughtSchema(schema)
                 }
             }
 
@@ -1137,8 +1156,7 @@ export class JSONSchemaInput extends LitElement {
             }
         }
 
-        // Print out the immutable default value
-        return html`<pre>${schema.default ? JSON.stringify(schema.default, null, 2) : "No default value"}</pre>`;
+        return this.onUncaughtSchema(schema)
     }
 }
 
