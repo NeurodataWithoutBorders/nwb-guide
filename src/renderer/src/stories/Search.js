@@ -47,20 +47,16 @@ export class Search extends LitElement {
         return value && typeof value === "object";
     }
 
-    #getOption = ({
-        label,
-        value
-    } = {}) => {
-
+    #getOption = ({ label, value } = {}) => {
         return this.options.find((item) => {
             if (label && item.label === label) return true;
             if (value && value === item.value) return true;
         });
-    }
+    };
 
     getSelectedOption = () => {
         const inputValue = (this.shadowRoot.querySelector("input") ?? this).value;
-        const matched = this.#getOption({ label: inputValue })
+        const matched = this.#getOption({ label: inputValue });
         return matched ?? { value: inputValue };
     };
 
@@ -259,17 +255,16 @@ export class Search extends LitElement {
     };
 
     #onSelect = (option) => {
-
         const inputMode = this.listMode === "input";
         const input = this.shadowRoot.querySelector("input");
 
-        const selectedOption = this.#getOption({ value: option.value })
+        const selectedOption = this.#getOption({ value: option.value });
 
         if (inputMode) this.setAttribute("active", false);
 
         if (this.strict && !selectedOption) {
-            input.value = this.#value.label
-            return
+            input.value = this.#value.label;
+            return;
         }
 
         if (inputMode) {

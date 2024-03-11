@@ -847,7 +847,7 @@ export class JSONSchemaInput extends LitElement {
                 value: this.value?.[0],
                 schema: {
                     ...schema.items,
-                    strict: schema.strict
+                    strict: schema.strict,
                 },
                 path: fullPath,
                 validateEmptyValue: this.validateEmptyValue,
@@ -1028,7 +1028,6 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (schema.enum && schema.enum.length) {
-
             const options = schema.enum.map((v) => {
                 return {
                     key: v,
@@ -1060,14 +1059,12 @@ export class JSONSchemaInput extends LitElement {
                 },
             });
 
-
             search.classList.add("schema-input");
             search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
 
             search.addEventListener("keydown", this.#moveToNextInput);
             this.style.width = "100%";
             return search;
-
         } else if (schema.type === "boolean") {
             const optional = new OptionalSection({
                 value: this.value ?? false,
