@@ -21,7 +21,6 @@ export class OptionalSection extends LitElement {
             .optional-section__content {
                 text-align: left;
             }
-
         `;
     }
 
@@ -46,7 +45,7 @@ export class OptionalSection extends LitElement {
         this.size = props.size;
 
         if (props.onChange) this.onChange = props.onChange;
-        this.addEventListener("change", () => this.onChange(this.value))
+        this.addEventListener("change", () => this.onChange(this.value));
     }
 
     onChange = () => {}; // User-defined function
@@ -59,7 +58,7 @@ export class OptionalSection extends LitElement {
         this.value = state;
 
         if (state === undefined) state = !content.classList.contains("hidden");
-        
+
         this.onChange(state);
 
         if (state) {
@@ -98,7 +97,6 @@ export class OptionalSection extends LitElement {
     }
 
     render() {
-        
         this.yes.size = this.size;
         this.no.size = this.size;
 

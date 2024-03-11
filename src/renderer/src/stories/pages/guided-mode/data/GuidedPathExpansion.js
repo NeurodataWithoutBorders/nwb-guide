@@ -404,7 +404,6 @@ export class GuidedPathExpansionPage extends Page {
     localState = {};
 
     render() {
-
         const structureState = (this.localState = merge(this.info.globalState.structure, {
             results: {},
             keep_existing_data: true,

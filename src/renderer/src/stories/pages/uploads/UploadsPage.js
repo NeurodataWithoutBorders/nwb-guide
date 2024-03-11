@@ -58,7 +58,7 @@ export async function createDandiset(results = {}) {
     const updateNIHInput = (state) => {
         const nihInput = form.getFormElement(["nih_award_number"]);
 
-        const isEmbargoed = !!state
+        const isEmbargoed = !!state;
 
         // Show the NIH input if embargo is set
         if (isEmbargoed) nihInput.removeAttribute("hidden");
