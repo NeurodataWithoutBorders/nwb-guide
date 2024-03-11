@@ -205,7 +205,7 @@ export class List extends LitElement {
       this.items.splice(draggedIdx, 1)
       this.items.splice(i, 0, movedItem)
 
-      this.items = [...this.items]
+      this.items = this.items
     }
 
 
@@ -225,7 +225,8 @@ export class List extends LitElement {
     }
 
     add = (item: ListItemType) => {
-      this.items = [...this.items, item]
+      this.items.push(item) // Update original
+      this.items = this.items
     }
 
     #removePlaceholder = () => {
@@ -352,9 +353,11 @@ export class List extends LitElement {
                   delete this.object[oKey];
                   this.object[newKey] = value;
 
-                  if (!isUnordered) {
+                  if (isUnordered) {
+                    this.items[i].key = newKey
+                  } else {
                     this.items[i].value = newKey
-                    this.items = [...this.items]
+                    this.items = this.items
                   }
             }
         };
@@ -367,11 +370,13 @@ export class List extends LitElement {
 
     delete = (i: number) => {
       this.items.splice(i, 1)
-      this.items = [...this.items]
+      this.items = this.items
     }
 
     clear = () => {
-      this.items = []
+      // Remove items in original list
+      for (let i = this.items.length - 1; i >= 0; i--) this.items.splice(i, 1)
+      this.items = this.items
     }
 
     #updateObject = () => {
@@ -402,6 +407,8 @@ export class List extends LitElement {
     }
 
     render() {
+
+      console.error('RENDR', this.items)
 
       this.removeAttribute('unordered')
       if (this.unordered) this.setAttribute('unordered', '')
