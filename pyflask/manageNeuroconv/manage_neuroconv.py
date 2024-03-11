@@ -19,7 +19,7 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 announcer = MessageAnnouncer()
 
 
-EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes"]
+EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group"]
 
 
 def is_path_contained(child, parent):

@@ -4,6 +4,8 @@ import { header, replaceRefsWithValue } from '../src/renderer/src/stories/forms/
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
+const uvMathFormat = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
+
 function getSpeciesNameComponents(arr: any[]) {
     const split = arr[arr.length - 1].split(' - ')
     return {
@@ -11,6 +13,7 @@ function getSpeciesNameComponents(arr: any[]) {
         label: split[1]
     }
 }
+
 
 
 function getSpeciesInfo(species: any[][] = []) {
@@ -102,7 +105,15 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         const electrodesProp = ecephys.properties["Electrodes"]
         for (let name in electrodesProp.properties) {
             const interfaceProps = electrodesProp.properties[name].properties
-            interfaceProps["Electrodes"].items.order = ["channel_name", "group_name", "shank_electrode_number"];
+            const electrodeItems = interfaceProps["Electrodes"].items.properties
+            const uvProperties = ["gain_to_uV", "offset_to_uV"]
+
+            uvProperties.forEach(prop => {
+                electrodeItems[prop] = {}
+                electrodeItems[prop].title = prop.replace('uV', uvMathFormat)
+                console.log(electrodeItems[prop])
+            })
+            interfaceProps["Electrodes"].items.order = ["channel_name", "group_name", "shank_electrode_number", ...uvProperties];
             interfaceProps["ElectrodeColumns"].items.order = ["name", "description", "data_type"];
 
         }

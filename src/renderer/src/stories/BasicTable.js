@@ -165,14 +165,16 @@ export class BasicTable extends LitElement {
         return html`<div class="relative"><span>${header(str)}</span></div>`;
     };
 
-    #renderHeader = (str, { description }) => {
+    #renderHeader = (prop, { description, title = prop } = {}) => {
         const th = document.createElement("th");
 
-        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(str) : false;
+
+
+        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(prop) : false;
         const container = document.createElement("div");
         container.classList.add("relative");
         const span = document.createElement("span");
-        span.textContent = header(str);
+        span.innerHTML = header(title);
         if (required) span.setAttribute("required", "");
         container.appendChild(span);
 
@@ -395,9 +397,6 @@ export class BasicTable extends LitElement {
         this.#updateRendered();
 
         this.schema = this.schema; // Always update the schema
-
-        console.warn("RERENDERING");
-
         const entries = this.#itemProps;
 
         // Add existing additional properties to the entries variable if necessary

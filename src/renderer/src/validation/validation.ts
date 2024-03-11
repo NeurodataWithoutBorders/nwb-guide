@@ -297,11 +297,15 @@ schema.Ecephys.Electrodes = {
                     const schemaToEdit = [electrodesSchema, globalElectrodeSchema]
                     schemaToEdit.forEach(schema => {
 
-                        if (row) delete schema.items.properties[currentName] // Delete previous name from schema
+                        const properties = schema.items.properties
+                        const oldRef = properties[currentName]
+                        
+                        if (row) delete properties[currentName] // Delete previous name from schema
 
-                        schema.items.properties[resolvedName] = {
+                        properties[resolvedName] = {
+                            ...oldRef ?? {},
                             description: propName === 'description' ? value : row?.description,
-                            data_type: propName === 'data_type' ? value : row?.data_type
+                            data_type: propName === 'data_type' ? value : row?.data_type,
                         }
                     })
 
