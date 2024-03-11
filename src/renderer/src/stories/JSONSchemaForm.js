@@ -69,6 +69,9 @@ const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
 import { Button } from "./Button";
+import { Tabs } from "./tabs/Tabs";
+import { TabItem } from "./tabs/TabItem";
+import { ContextMenu } from "./table/ContextMenu";
 
 var validator = new Validator();
 
@@ -98,7 +101,8 @@ const componentCSS = `
 
     :host {
       display: inline-block;
-      width:100%;
+      width: 100%;
+      height: 100%;
     }
 
     #empty {
@@ -206,6 +210,7 @@ const componentCSS = `
     small {
         font-size: 0.8em;
     }
+
 `;
 
 document.addEventListener("dragover", (dragEvent) => {
@@ -237,6 +242,25 @@ export class JSONSchemaForm extends LitElement {
     tables = {};
     #nErrors = 0;
     #nWarnings = 0;
+
+    getActiveForms = () =>
+        Object.entries(this.forms)
+            .filter(([k, v]) => !this.tabs[k] || !this.tabs[k].disabled)
+            .map(([_, v]) => v);
+
+    get nErrors() {
+        const reducer = (acc, item) => acc + item.nErrors;
+        const tableErrors = Object.values(this.tables).reduce(reducer, 0);
+        const activeFormErrors = this.getActiveForms().reduce(reducer, 0);
+        return this.#nErrors + tableErrors + activeFormErrors;
+    }
+
+    get nWarnings() {
+        const reducer = (acc, item) => acc + item.nWarnings;
+        const tableWarnings = Object.values(this.tables).reduce(reducer, 0);
+        const activeFormWarnings = this.getActiveForms().reduce(reducer, 0);
+        return this.#nWarnings + tableWarnings + activeFormWarnings;
+    }
 
     #toggleRendered;
     #rendered;
@@ -290,6 +314,7 @@ export class JSONSchemaForm extends LitElement {
         if (props.onOverride) this.onOverride = props.onOverride;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
+        if (props.onStatusUpdate) this.onStatusUpdate = props.onStatusUpdate;
 
         if (props.base) this.base = props.base;
     }
@@ -403,21 +428,15 @@ export class JSONSchemaForm extends LitElement {
 
     status;
     checkStatus = () => {
-        checkStatus.call(this, this.#nWarnings, this.#nErrors, [
-            ...Object.entries(this.forms)
-                .filter(([k, v]) => {
-                    const accordion = this.accordions[k];
-                    return !accordion || !accordion.disabled;
-                })
-                .map(([_, v]) => v),
-            ...Object.values(this.tables),
-        ]);
+        return checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
     throw = (message) => {
         this.onThrow(message, this.identifier);
         throw new Error(message);
     };
+
+    #contextMenus = [];
 
     validateSchema = (resolved, schema, name) => {
         return validator
@@ -444,8 +463,9 @@ export class JSONSchemaForm extends LitElement {
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if ((resolvedValue === "NaN") | (resolvedValue === null)) return;
-                    else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                    if (resolvedValue === "NaN") return;
+                    else if (resolvedValue === null) {
+                    } else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
                 }
 
                 const prevHeader = name ? header(name) : "Row";
@@ -526,9 +546,8 @@ export class JSONSchemaForm extends LitElement {
 
         // Validate nested forms (skip disabled)
         for (let name in this.forms) {
-            const accordion = this.accordions[name];
-            if (!accordion || !accordion.disabled)
-                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
+            const tab = this.tabs[name];
+            if (!tab || !tab.disabled) await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
 
         for (let key in this.tables) {
@@ -645,7 +664,7 @@ export class JSONSchemaForm extends LitElement {
         for (let name in requirements) {
             let isRequired = this.#isRequired(name, requirements);
 
-            if (this.accordions[name]?.disabled) continue; // Skip disabled accordions
+            if (this.tabs[name]?.disabled) continue; // Skip disabled tabs
 
             // // NOTE: Uncomment to block checking requirements inside optional properties
             // if (!requirements[name][selfRequiredSymbol] && !resolved[name]) continue; // Do not continue checking requirements if absent and not required
@@ -724,6 +743,7 @@ export class JSONSchemaForm extends LitElement {
 
     validateOnChange = () => {};
     onStatusChange = () => {};
+    onStatusUpdate = () => {};
     onThrow = () => {};
     renderTable = () => {};
     renderCustomHTML = () => {};
@@ -923,7 +943,6 @@ export class JSONSchemaForm extends LitElement {
 
         this.#nErrors += updatedErrors.length;
         this.#nWarnings += updatedWarnings.length;
-        this.checkStatus();
 
         // Show aggregated errors and warnings (if any)
         updatedWarnings.forEach((info) => (onWarning ? "" : this.#addMessage(localPath, info, "warnings")));
@@ -936,7 +955,9 @@ export class JSONSchemaForm extends LitElement {
             groupEl.classList[warnings.length ? "add" : "remove"]("warning");
         }
 
-        if (isValid && updatedErrors.length === 0) {
+        const result = isValid && updatedErrors.length === 0;
+
+        if (result) {
             input.classList.remove("invalid");
 
             await this.#applyToLinkedProperties((path, element) => {
@@ -944,8 +965,6 @@ export class JSONSchemaForm extends LitElement {
             }, localPath);
 
             if (isFunction) valid(); // Run if returned value is a function
-
-            return true;
         } else {
             // Add new invalid classes and errors
             input.classList.add("invalid");
@@ -958,12 +977,14 @@ export class JSONSchemaForm extends LitElement {
 
             updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
-
-            return false;
         }
+
+        setTimeout(() => this.checkStatus()); // Check the status after a short delay since the Tables rely on updating element attributes
+
+        return result;
     };
 
-    accordions = {};
+    tabs = {};
 
     #render = (schema, results, required = {}, ignore = {}, path = []) => {
         let isLink = Symbol("isLink");
@@ -1052,10 +1073,12 @@ export class JSONSchemaForm extends LitElement {
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
+        const tabItems = [];
+
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
 
-            const hasPatternProperties = !!info.patternProperties;
+            // const hasPatternProperties = !!info.patternProperties;
 
             // Render linked properties
             if (entry[isLink]) {
@@ -1071,11 +1094,10 @@ export class JSONSchemaForm extends LitElement {
                 `;
             }
 
-            // Directly render the interactive property element
+            // ------------------------- Directly render the interactive property element -------------------------
             if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
 
-            const hasMany = renderable.length > 1; // How many siblings?
-
+            // ------------------------- Create tabs -------------------------
             const localPath = [...path, name];
 
             // Check properties that will be rendered before creating the accordion
@@ -1134,10 +1156,8 @@ export class JSONSchemaForm extends LitElement {
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
-                    onStatusChange: (status) => {
-                        accordion.setStatus(status);
-                        this.checkStatus();
-                    }, // Forward status changes to the parent form
+                    onStatusUpdate: ({ errors, warnings }) => (tabItem.status = { errors, warnings }),
+                    onStatusChange: () => this.checkStatus(), // Forward status changes to the parent form,
                     onInvalid: (...args) => this.onInvalid(...args),
                     onLoaded: () => {
                         this.nLoaded++;
@@ -1154,94 +1174,98 @@ export class JSONSchemaForm extends LitElement {
                 }));
             }
 
-            const oldStates = this.accordions[name];
-
-            const disableText = "Skip";
-            const enableText = "Enable";
-
             const disabledPath = [...path, "__disabled"];
             const interactedPath = [...disabledPath, "__interacted"];
 
-            const enableToggle = new Button({
-                label: isDisabled ? enableText : disableText,
-                size: "extra-small",
-                onClick: (ev) => {
-                    ev.stopPropagation();
-
-                    const willEnable = enableToggle.label === enableText;
-
-                    // Reset parameters on interaction
-                    isGlobalEffect = false;
-
-                    enableToggle.label = willEnable ? disableText : enableText;
-
-                    willEnable ? enable() : disable();
-                    this.updateData([...interactedPath, name], true, true);
-
-                    this.onUpdate(localPath, this.results[name]);
-                },
-            });
-
-            // const enableToggle = document.createElement("input");
-            const enableToggleContainer = document.createElement("div");
-            Object.assign(enableToggleContainer.style, { position: "relative" });
-            enableToggleContainer.append(enableToggle);
-            Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
-
-            const accordion = (this.accordions[name] = new Accordion({
+            const tabItem = (this.tabs[name] = new TabItem({
                 name: headerName,
-                toggleable: hasMany,
-                subtitle: html`<div style="display:flex; align-items: center;">
-                    ${explicitlyRequired ? "" : enableToggleContainer}
-                </div>`,
                 content: this.forms[name],
-
-                // States
-                open: oldStates?.open ?? !hasMany,
                 disabled: isDisabled,
-                status: oldStates?.status ?? "valid", // Always show a status
             }));
 
-            accordion.id = name; // assign name to accordion id
+            tabItem.id = name; // assign name to accordion id
 
-            const disable = () => {
-                accordion.disabled = true;
+            const isOptionalProperty = !explicitlyRequired;
 
-                const target = this.results;
-                const value = target[name] ?? {};
+            if (isOptionalProperty) {
+                const context = new ContextMenu({
+                    target: tabItem,
+                    items: [
+                        {
+                            id: "enable-property",
+                            label: "Enable",
+                            disabled: !isDisabled,
+                            onclick: (path) => {
+                                isGlobalEffect = false;
+                                enable();
+                                this.updateData([...interactedPath, name], true, true);
+                                this.onUpdate(localPath, this.results[name]);
+                            },
+                        },
+                        {
+                            id: "disable-property",
+                            label: "Disable",
+                            disabled: isDisabled,
+                            onclick: (path) => {
+                                isGlobalEffect = false;
+                                disable();
+                                this.updateData([...interactedPath, name], true, true);
+                                this.onUpdate(localPath, this.results[name]);
+                            },
+                        },
+                    ],
+                });
 
-                let update = true;
-                if (target.__disabled?.[name] && isGlobalEffect) update = false;
+                this.#contextMenus.push(context);
+                document.body.append(context);
 
-                // Disabled path is set to actual value
-                if (update) this.updateData([...disabledPath, name], value);
+                const disable = () => {
+                    tabItem.disabled = true;
 
-                // Actual data is set to undefined
-                this.updateData(localPath, undefined);
+                    const enableButton = context.shadowRoot.querySelector("#enable-property");
+                    const disableButton = context.shadowRoot.querySelector("#disable-property");
+                    if (disableButton) disableButton.setAttribute("disabled", "");
+                    if (enableButton) enableButton.removeAttribute("disabled");
 
-                this.checkStatus();
-            };
+                    const target = this.results;
+                    const value = target[name] ?? {};
 
-            const enable = () => {
-                accordion.disabled = false;
+                    let update = true;
+                    if (target.__disabled?.[name] && isGlobalEffect) update = false;
 
-                const { __disabled = {} } = this.results;
+                    // Disabled path is set to actual value
+                    if (update) this.updateData([...disabledPath, name], value);
 
-                // Actual value is restored to the cached value
-                if (__disabled[name]) this.updateData(localPath, __disabled[name]);
+                    // Actual data is set to undefined
+                    this.updateData(localPath, undefined);
 
-                // Cached value is cleared
-                this.updateData([...disabledPath, name], undefined);
+                    this.checkStatus();
+                };
 
-                this.checkStatus();
-            };
+                const enable = () => {
+                    tabItem.disabled = false;
 
-            if (isGlobalEffect) {
-                isDisabled ? disable() : enable();
-                Object.assign(enableToggle.style, { accentColor: "gray" });
+                    const enableButton = context.shadowRoot.querySelector("#enable-property");
+                    const disableButton = context.shadowRoot.querySelector("#disable-property");
+                    if (enableButton) enableButton.setAttribute("disabled", "");
+                    if (disableButton) disableButton.removeAttribute("disabled");
+
+                    const { __disabled = {} } = this.results;
+
+                    // Actual value is restored to the cached value
+                    if (__disabled[name]) this.updateData(localPath, __disabled[name]);
+
+                    // Cached value is cleared
+                    this.updateData([...disabledPath, name], undefined);
+
+                    this.checkStatus();
+                };
+
+                if (isGlobalEffect) isDisabled ? disable() : enable();
             }
 
-            return accordion;
+            tabItems.push(tabItem);
+            return "";
         });
 
         if (hasPatternProperties) {
@@ -1260,6 +1284,11 @@ export class JSONSchemaForm extends LitElement {
             });
 
             rendered = [...rendered, ...patternProps];
+        }
+
+        if (tabItems.length) {
+            const tabs = new Tabs({ items: tabItems, contentPadding: "25px" });
+            rendered.push(tabs);
         }
 
         const additionalProps = getEditableItems(results, additionalPropPattern, { schema });
@@ -1339,8 +1368,21 @@ export class JSONSchemaForm extends LitElement {
         return isRendered;
     }
 
+    #resetContextMenus = () => {
+        this.#contextMenus.forEach((o) => o.remove());
+        this.#contextMenus = [];
+    };
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#resetContextMenus();
+    }
+
     render() {
         this.#updateRendered(); // Create a new promise to check on the rendered state
+
+        // Remove context menus
+        this.#resetContextMenus();
 
         this.#resetLoadState();
 

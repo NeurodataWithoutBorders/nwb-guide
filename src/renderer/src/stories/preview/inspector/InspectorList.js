@@ -34,12 +34,16 @@ const aggregateMessages = (items) => {
 export class InspectorList extends List {
     static get styles() {
         return [
-            super.styles,
             css`
-            :host {
-                display: block;
-            }
-        }`,
+                :host {
+                    display: block;
+                }
+
+                ol {
+                    margin: 0 !important;
+                }
+            `,
+            super.styles,
         ];
     }
 

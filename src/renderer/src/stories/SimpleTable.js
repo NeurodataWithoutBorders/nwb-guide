@@ -189,6 +189,7 @@ export class SimpleTable extends LitElement {
         validateOnChange,
         validateEmptyCells,
         onStatusChange,
+        onStatusUpdate,
         onLoaded,
         onUpdate,
         onThrow,
@@ -213,6 +214,7 @@ export class SimpleTable extends LitElement {
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
+        if (onStatusUpdate) this.onStatusUpdate = onStatusUpdate;
         if (onLoaded) this.onLoaded = onLoaded;
         if (onThrow) this.onThrow = onThrow;
         if (onUpdate) this.onUpdate = onUpdate;
@@ -407,10 +409,16 @@ export class SimpleTable extends LitElement {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
+    get nErrors() {
+        return this.shadowRoot.querySelectorAll("[error]").length;
+    }
+
+    get nWarnings() {
+        return this.shadowRoot.querySelectorAll("[warning]").length;
+    }
+
     #checkStatus = () => {
-        const hasWarning = this.shadowRoot.querySelector("[warning]");
-        const hasError = this.shadowRoot.querySelector("[error]");
-        checkStatus.call(this, hasWarning, hasError);
+        checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
     validate = () => {
@@ -436,6 +444,7 @@ export class SimpleTable extends LitElement {
 
     status;
     onStatusChange = () => {};
+    onStatusUpdate = () => {};
     onLoaded = () => {};
     onThrow = () => {};
 

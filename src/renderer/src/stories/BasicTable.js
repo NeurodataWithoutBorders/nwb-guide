@@ -114,6 +114,7 @@ export class BasicTable extends LitElement {
         validateEmptyCells,
         validateOnChange,
         onStatusChange,
+        onStatusUpdate,
         onLoaded,
     } = {}) {
         super();
@@ -128,6 +129,7 @@ export class BasicTable extends LitElement {
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
         if (onStatusChange) this.onStatusChange = onStatusChange;
+        if (onStatusUpdate) this.onStatusUpdate = onStatusUpdate;
         if (onLoaded) this.onLoaded = onLoaded;
     }
 
@@ -186,10 +188,16 @@ export class BasicTable extends LitElement {
 
     // Validation Code
 
+    get nErrors() {
+        return this.shadowRoot.querySelectorAll("[error]").length;
+    }
+
+    get nWarnings() {
+        return his.shadowRoot.querySelectorAll("[warning]").length;
+    }
+
     #checkStatus = () => {
-        const hasWarning = this.shadowRoot.querySelector("[warning]");
-        const hasError = this.shadowRoot.querySelector("[error]");
-        checkStatus.call(this, hasWarning, hasError);
+        checkStatus.call(this, this.nWarnings, this.nErrors);
     };
 
     validate = () => {
@@ -207,6 +215,7 @@ export class BasicTable extends LitElement {
     };
 
     status;
+    onStatusUpdate = () => {};
     onStatusChange = () => {};
     onLoaded = () => {};
 

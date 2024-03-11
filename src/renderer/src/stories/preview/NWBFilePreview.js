@@ -136,7 +136,7 @@ export class NWBFilePreview extends LitElement {
                                 return acc;
                             }, {});
 
-                            return new InstanceManager({ instances });
+                            return new InstanceManager({ instances, contentPadding: "15px" });
                         }
                     })()}
                 </div>

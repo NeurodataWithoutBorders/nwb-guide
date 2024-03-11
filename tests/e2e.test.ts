@@ -238,8 +238,6 @@ describe('E2E Test', () => {
         const page = dashboard.page
         page.optional.yes.onClick()
 
-        Object.values(page.form.accordions).forEach(accordion => accordion.toggle(true))
-
       }, testInterfaceInfo)
 
       await takeScreenshot('pathexpansion-selected')
@@ -335,10 +333,10 @@ describe('E2E Test', () => {
       await evaluate(() => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
-        page.forms[0].form.accordions["Subject"].toggle(true)
+        page.forms[0].form.tabs["Subject"].select()
       })
 
-      await takeScreenshot('metadata-open', 100)
+      await takeScreenshot('metadata-subject', 100)
 
       await toNextPage('inspect')
 
