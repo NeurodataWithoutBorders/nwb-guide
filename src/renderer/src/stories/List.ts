@@ -145,7 +145,7 @@ export class List extends LitElement {
     #items: ListItemType[] = []
 
     set items(value: ListItemType[]) {
-      
+
       const oldList = this.#previousItems
       this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
       this.#previousItems = this.#items.map(item => ({...item})) // Clone items
@@ -415,7 +415,7 @@ export class List extends LitElement {
     }
 
     render() {
-      
+
 
       this.removeAttribute('unordered')
       if (this.unordered) this.setAttribute('unordered', '')

@@ -54,7 +54,7 @@ export class GuidedStructurePage extends Page {
 
     list = new List({
         emptyMessage: defaultEmptyMessage,
-        onChange: () => (this.unsavedUpdates = "conversions")
+        onChange: () => (this.unsavedUpdates = "conversions"),
     });
 
     addButton = new Button();
@@ -84,14 +84,13 @@ export class GuidedStructurePage extends Page {
     };
 
     beforeSave = async () => {
-
-        const interfaces = this.info.globalState.interfaces = { ...this.list.object };
+        const interfaces = (this.info.globalState.interfaces = { ...this.list.object });
 
         // Remove or reassign extra interfaces in results
         if (this.info.globalState.results) {
             this.mapSessions(({ info }) => {
-                const metadata = [ info.source_data ];
-                metadata.forEach(results => {
+                const metadata = [info.source_data];
+                metadata.forEach((results) => {
                     Object.keys(results).forEach((key) => {
                         if (!interfaces[key]) {
                             const renamed = this.list.items.find((item) => item.originalKey === key);
@@ -99,7 +98,7 @@ export class GuidedStructurePage extends Page {
                             delete results[key];
                         }
                     });
-                })
+                });
             });
         }
 
