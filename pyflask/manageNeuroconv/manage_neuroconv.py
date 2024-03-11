@@ -19,7 +19,14 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 announcer = MessageAnnouncer()
 
 
-EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group"]
+EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
+EXTRA_RECORDING_INTERFACE_PROPERTIES = {
+    "brain_area": {
+        "data_type": "str",
+        "description": "The brain area where the electrode is located.",
+        "default": "unknown",
+    }
+}
 
 
 def is_path_contained(child, parent):
@@ -950,7 +957,10 @@ def map_dtype(dtype: str) -> str:
 
 
 def get_property_dtype(recording_extractor, property_name: str, channel_ids: list):
-    dtype = str(recording_extractor.get_property(key=property_name, ids=channel_ids).dtype)
+    if property_name in EXTRA_RECORDING_INTERFACE_PROPERTIES:
+        dtype = EXTRA_RECORDING_INTERFACE_PROPERTIES[property_name]["data_type"]
+    else:
+        dtype = str(recording_extractor.get_property(key=property_name, ids=channel_ids).dtype)
 
     # return type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
     # return dtype
@@ -967,6 +977,10 @@ def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
         for property_name in property_names
         if property_name not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
     }
+
+    for property_name, property_info in EXTRA_RECORDING_INTERFACE_PROPERTIES.items():
+        if property_name not in properties:
+            properties[property_name] = property_info
 
     return properties
 
@@ -985,6 +999,11 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
         gain_to_uV="The scaling factor from the data type to microVolts, applied before the offset.",
         offset_to_uV="The offset from the data type to microVolts, applied after the gain.",
     )
+
+    for property_name, property_info in EXTRA_RECORDING_INTERFACE_PROPERTIES.items():
+        description = property_info.get("description", None)
+        if (description):
+            property_descriptions[property_name] = description
 
     # default_column_metadata =  interface.get_metadata()["Ecephys"]["ElectrodeColumns"]["properties"] # NOTE: This doesn't exist...
     # property_descriptions = {column_name: column_fields["description"] for column_name, column_fields in default_column_metadata}
@@ -1029,17 +1048,20 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
 
     recording = interface.recording_extractor
 
-    property_names = get_recording_interface_properties(interface)
+    properties = get_recording_interface_properties(interface)
 
     electrode_ids = recording.get_channel_ids()
 
     table = list()
     for electrode_id in electrode_ids:
         electrode_column = dict()
-        for property_name in property_names:
-            recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[
-                0  # First axis is always electodes in SI
-            ]  # Since only fetching one electrode at a time, use trivial zero-index
+        for property_name in properties:
+            if property_name in EXTRA_RECORDING_INTERFACE_PROPERTIES:
+                recording_property_value = properties[property_name]["default"]
+            else:
+                recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[
+                    0  # First axis is always electodes in SI
+                ]  # Since only fetching one electrode at a time, use trivial zero-index
             electrode_column.update({property_name: recording_property_value})
         table.append(electrode_column)
     table_as_json = json.loads(json.dumps(table, cls=NWBMetaDataEncoder))
