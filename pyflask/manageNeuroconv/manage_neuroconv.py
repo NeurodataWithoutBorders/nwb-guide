@@ -412,7 +412,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             defs["Electrode"] = {
                 "type": "object",
                 "properties": new_electrodes_properties,
-                "additionalProperties": True,  # Allow for new columns
             }
 
     return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))

@@ -397,11 +397,8 @@ export class GuidedMetadataPage extends ManagedPage {
             renderTable: function (name, metadata, fullPath) {
                 const updatedSchema = structuredClone(metadata.schema);
                 metadata.schema = updatedSchema;
-
-                // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
-                if (name !== "Electrodes") return new SimpleTable(metadata);
-                else return true; // All other tables are handled by the default behavior
-                // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
+                if (name === "Electrodes") metadata.deferLoading = true;
+                return new SimpleTable(metadata);
             },
             onThrow,
         });

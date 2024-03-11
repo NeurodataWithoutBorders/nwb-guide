@@ -56,7 +56,10 @@ export class SimpleTable extends LitElement {
 
             :host([loading]) tfoot {
                 display: block;
-                position: relative;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
             }
 
             :host([loading]) tfoot td {
@@ -102,6 +105,7 @@ export class SimpleTable extends LitElement {
             }
 
             .table-container {
+                position: relative;
                 overflow: auto;
                 max-height: 400px;
                 border: 1px solid gray;
@@ -579,10 +583,10 @@ export class SimpleTable extends LitElement {
 
         // Add cells to body after the initial table render
         const body = this.shadowRoot.querySelector("tbody");
-        body.innerHTML = ""; // Clear existing render
 
         if (!this.#loaded) {
             const tStart = performance.now();
+
             body.append(
                 ...Object.values(this.#cells).map((row) => {
                     const tr = document.createElement("tr");
@@ -635,6 +639,8 @@ export class SimpleTable extends LitElement {
             cells.forEach((c) => c.validate());
             this.#rendered(true);
         }
+
+        console.log(this)
     }
 
     #updateRows(row, nRows) {
@@ -879,6 +885,7 @@ export class SimpleTable extends LitElement {
     }
 
     render() {
+
         this.#updateRendered();
         this.#resetLoadState();
 
