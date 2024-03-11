@@ -1,14 +1,15 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, unsafeCSS } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { header } from "./forms/utils";
 import { checkStatus } from "../validation";
-import { errorHue, warningHue } from "./globals";
+import { emojiFontFamily, errorHue, warningHue } from "./globals";
 
 import * as promises from "../promises";
 
 import "./Button";
 import { sortTable } from "./Table";
 import tippy from "tippy.js";
+import { getIgnore } from "./JSONSchemaForm";
 
 export class BasicTable extends LitElement {
     static get styles() {
@@ -63,6 +64,12 @@ export class BasicTable extends LitElement {
                 position: relative;
                 padding: 2px 8px;
                 user-select: none;
+            }
+
+            .relative .info {
+                margin: 0px 5px;
+                font-size: 80%;
+                font-family: ${unsafeCSS(emojiFontFamily)};
             }
 
             th span {
@@ -159,8 +166,28 @@ export class BasicTable extends LitElement {
     };
 
     #renderHeader = (str, { description }) => {
-        if (description) return html`<th title="${description}">${this.#renderHeaderContent(str)}</th>`;
-        return html`<th>${this.#renderHeaderContent(str)}</th>`;
+        const th = document.createElement("th");
+
+        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(str) : false;
+        const container = document.createElement("div");
+        container.classList.add("relative");
+        const span = document.createElement("span");
+        span.textContent = header(str);
+        if (required) span.setAttribute("required", "");
+        container.appendChild(span);
+
+        // Add Description Tooltip
+        if (description) {
+            const span = document.createElement("span");
+            span.classList.add("info");
+            span.innerText = "ℹ️";
+            container.append(span);
+            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}`, allowHTML: true });
+        }
+
+        th.appendChild(container);
+
+        return th;
     };
 
     #getRowData(row, cols = this.colHeaders) {
@@ -169,13 +196,12 @@ export class BasicTable extends LitElement {
             let value;
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
-                else return "";
+                else return;
             } else
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
                     // this.globals[col] ??
-                    this.#itemSchema.properties[col].default ??
-                    "";
+                    this.#itemSchema.properties[col]?.default;
             return value;
         });
     }
@@ -210,7 +236,7 @@ export class BasicTable extends LitElement {
     onStatusChange = () => {};
     onLoaded = () => {};
 
-    #validateCell = (value, col, parent) => {
+    #validateCell = (value, col, row, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
@@ -243,11 +269,12 @@ export class BasicTable extends LitElement {
         else if (value !== "" && type && inferredType !== type) {
             result = [{ message: `${col} is expected to be of type ${ogType}, not ${inferredType}`, type: "error" }];
         }
+
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange(col, parent, value, this.#itemProps[col]);
+        else result = this.validateOnChange([row, col], parent, value, this.#itemProps[col]);
 
         // Will run synchronously if not a promise result
-        return promises.resolve(result, () => {
+        return promises.resolve(result, (result) => {
             let info = {
                 title: undefined,
                 warning: undefined,
@@ -278,7 +305,7 @@ export class BasicTable extends LitElement {
 
         const results = this.#data.map((v, i) => {
             return v.map((vv, j) => {
-                const info = this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] }); // Could be a promise or a basic response
+                const info = this.#validateCell(vv, this.colHeaders[j], i, { ...this.data[rows[i]] }); // Could be a promise or a basic response
                 return promises.resolve(info, (info) => {
                     if (info === true) return;
                     const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
@@ -367,9 +394,11 @@ export class BasicTable extends LitElement {
     render() {
         this.#updateRendered();
 
+        this.schema = this.schema; // Always update the schema
+
+        console.warn("RERENDERING");
+
         const entries = this.#itemProps;
-        for (let key in this.ignore) delete entries[key];
-        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Add existing additional properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties) {
@@ -384,6 +413,10 @@ export class BasicTable extends LitElement {
                 return acc;
             }, entries);
         }
+
+        // Ignore any additions in the ignore configuration
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Sort Columns by Key Column and Requirement
         const keys =
@@ -419,7 +452,9 @@ export class BasicTable extends LitElement {
                         ${data.map(
                             (row, i) =>
                                 html`<tr>
-                                    ${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${col}</div></td>`)}
+                                    ${row.map(
+                                        (col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`
+                                    )}
                                 </tr>`
                         )}
                     </tbody>

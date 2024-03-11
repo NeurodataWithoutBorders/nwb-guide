@@ -101,7 +101,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         // Change rendering order for electrode table columns
         const electrodesProp = ecephys.properties["Electrodes"]
         for (let name in electrodesProp.properties) {
-            electrodesProp.properties[name].items.order = ["channel_name", "group_name", "shank_electrode_number"];
+            const interfaceProps = electrodesProp.properties[name].properties
+            interfaceProps["Electrodes"].items.order = ["channel_name", "group_name", "shank_electrode_number"];
+            interfaceProps["ElectrodeColumns"].items.order = ["name", "description", "data_type"];
+
         }
 
     }

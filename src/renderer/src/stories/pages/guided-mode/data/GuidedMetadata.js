@@ -28,7 +28,6 @@ import globalIcon from "../../../assets/global.svg?raw";
 const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
     Ophys: {
-        // NOTE: Get this to work
         "*": {
             starting_time: true,
             rate: true,
@@ -59,6 +58,13 @@ const propsToIgnore = {
         UnitProperties: true,
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
+        Electrodes: {
+            "*": {
+                location: true,
+                group: true,
+                contact_vector: true,
+            },
+        },
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)
@@ -202,6 +208,7 @@ export class GuidedMetadataPage extends ManagedPage {
             );
         }
 
+        console.log("schema", structuredClone(schema), structuredClone(results));
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
@@ -392,7 +399,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 metadata.schema = updatedSchema;
 
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
-                if (fullPath.slice(-1)[0] !== "Electrodes") return new SimpleTable(metadata);
+                if (name !== "Electrodes") return new SimpleTable(metadata);
                 else return true; // All other tables are handled by the default behavior
                 // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
             },

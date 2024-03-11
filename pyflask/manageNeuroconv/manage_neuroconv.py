@@ -11,11 +11,15 @@ from datetime import datetime
 from typing import Dict, Optional
 from shutil import rmtree, copytree
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from sse import MessageAnnouncer
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
+
+
+EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes"]
 
 
 def is_path_contained(child, parent):
@@ -302,22 +306,6 @@ def map_recording_interfaces(callback, converter):
     return output
 
 
-def is_supported_recording_interface(recording_interface, metadata):
-    """
-    Temporary conditioned access to functionality still in development on NeuroConv.
-
-    Used to determine display of ecephys metadata depending on the environment.
-
-    Alpha build release should therefore always return False for this.
-    """
-    return (
-        recording_interface
-        and recording_interface.get_electrode_table_json
-        and metadata["Ecephys"].get("Electrodes")
-        # and all(row.get("data_type") for row in metadata["Ecephys"]["Electrodes"])
-    )
-
-
 def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[str, dict]:
     """Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data."""
     from neuroconv.utils import NWBMetaDataEncoder
@@ -332,23 +320,41 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # Clear the Electrodes information for being set as a collection of Interfaces
     has_ecephys = "Ecephys" in metadata
+
     if has_ecephys:
         metadata["Ecephys"]["Electrodes"] = {}
 
+        schema["properties"]["Ecephys"]["required"].append("Electrodes")
         ecephys_properties = schema["properties"]["Ecephys"]["properties"]
         original_electrodes_schema = ecephys_properties["Electrodes"]
 
-        ecephys_properties["Electrodes"] = {"type": "object", "properties": {}}
+        ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
     def on_recording_interface(name, recording_interface):
 
-        metadata["Ecephys"]["Electrodes"][name] = recording_interface.get_electrode_table_json()
+        metadata["Ecephys"]["Electrodes"][name] = dict(
+            Electrodes=get_electrode_table_json(recording_interface),
+            ElectrodeColumns=get_electrode_columns_json(recording_interface),
+        )
 
-        ecephys_properties["Electrodes"]["properties"][name] = {
-            "type": "array",
-            "minItems": 0,
-            "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
-        }
+        ecephys_properties["Electrodes"]["properties"][name] = dict(
+            type="object",
+            properties=dict(
+                Electrodes={
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
+                },
+                ElectrodeColumns={
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
+                },
+            ),
+            required=["Electrodes", "ElectrodeColumns"],
+        )
+
+        ecephys_properties["Electrodes"]["required"].append(name)
 
         return recording_interface
 
@@ -364,18 +370,36 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             defs = ecephys_properties["definitions"]
             electrode_def = defs["Electrodes"]
 
+            dtype_descriptions = {
+                "bool": "logical",
+                "str": "string",
+                "ndarray": "n-dimensional array",
+                "float8": "8-bit number",
+                "float16": "16-bit number",
+                "float32": "32-bit number",
+                "float64": "64-bit number",
+                "int8": "8-bit integer",
+                "int16": "16-bit integer",
+                "int32": "32-bit integer",
+                "int64": "64-bit integer",
+            }
+
             # NOTE: Update to output from NeuroConv
-            electrode_def["properties"]["dtype"] = {"type": "string", "enum": ["array", "int", "float", "bool", "str"]}
+            electrode_def["properties"]["data_type"] = {
+                "type": "string",
+                "strict": False,
+                "enum": list(dtype_descriptions.keys()),
+                "enumLabels": dtype_descriptions,
+            }
 
             # Configure electrode columns
-            # NOTE: Update to output ALL columns and associated dtypes...
-            metadata["Ecephys"]["ElectrodeColumns"] = original_electrodes_schema["default"]
-            ecephys_properties["ElectrodeColumns"] = {"type": "array", "items": electrode_def}
-            ecephys_properties["ElectrodeColumns"]["items"]["required"] = list(electrode_def["properties"].keys())
+            defs["ElectrodeColumn"] = electrode_def
+            defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
             new_electrodes_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
                 for properties in original_electrodes_schema["default"]
+                if properties["name"] not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
             }
 
             defs["Electrode"] = {
@@ -533,27 +557,23 @@ def convert_to_nwb(info: dict) -> str:
         else None
     )
 
-    if "Ecephys" not in info["metadata"]:
-        info["metadata"].update(Ecephys=dict())
-
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
 
-    ecephys_metadata = resolved_metadata["Ecephys"]
-    electrode_column_results = ecephys_metadata[
-        "ElectrodeColumns"
-    ]  # NOTE: Need more specificity from the ElectrodeColumns (e.g. dtype, not always provided...)
+    ecephys_metadata = resolved_metadata.get("Ecephys")
 
-    for interface_name, electrode_results in ecephys_metadata["Electrodes"].items():
-        interface = converter.data_interface_objects[interface_name]
+    if ecephys_metadata:
 
-        # NOTE: Must have a method to update the electrode table
-        # interface.update_electrode_table(electrode_table_json=electrode_results, electrode_column_info=electrode_column_results)
+        for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+            interface = converter.data_interface_objects[interface_name]
 
-    # Update with the latest metadata for the electrodes
-    ecephys_metadata["Electrodes"] = electrode_column_results
+            update_recording_properties_from_table_as_json(
+                interface,
+                electrode_table_json=interface_electrode_results["Electrodes"],
+                electrode_column_info=interface_electrode_results["ElectrodeColumns"],
+            )
 
-    ecephys_metadata.pop("ElectrodeColumns", dict())
+        del ecephys_metadata["Electrodes"]  # NOTE: Not sure what this should be now...
 
     # Actually run the conversion
     converter.run_conversion(
@@ -603,10 +623,16 @@ def upload_folder_to_dandi(
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
+    ignore_cache: bool = False,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+
+    if ignore_cache:
+        os.environ["DANDI_CACHE"] = "ignore"
+    else:
+        os.environ["DANDI_CACHE"] = ""
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
@@ -626,12 +652,18 @@ def upload_project_to_dandi(
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
+    ignore_cache: bool = False,
 ):
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+
+    if ignore_cache:
+        os.environ["DANDI_CACHE"] = "ignore"
+    else:
+        os.environ["DANDI_CACHE"] = ""
 
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
@@ -908,3 +940,165 @@ def generate_test_data(output_path: str):
     export_to_phy(
         waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
     )
+
+
+def map_dtype(dtype: str) -> str:
+    if "<U" in dtype:
+        return "str"
+    else:
+        return dtype
+
+
+def get_property_dtype(recording_extractor, property_name: str, channel_ids: list):
+    dtype = str(recording_extractor.get_property(key=property_name, ids=channel_ids).dtype)
+
+    # return type(recording.get_property(key=property_name)[0]).__name__.replace("_", "")
+    # return dtype
+    return map_dtype(dtype)
+
+
+# Ecephys Helper Functions
+def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
+    """A convenience function for uniformly excluding certain properties of the provided recording extractor."""
+    property_names = list(recording_interface.recording_extractor.get_property_keys())
+
+    properties = {
+        property_name: recording_interface.recording_extractor.get_property(key=property_name)
+        for property_name in property_names
+        if property_name not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
+    }
+
+    return properties
+
+
+def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
+    """A convenience function for collecting and organizing the properties of the underlying recording extractor."""
+    properties = get_recording_interface_properties(interface)
+
+    # Hardcuded for SpikeGLX (NOTE: Update for more interfaces)
+    property_descriptions = dict(
+        channel_name="The name of this channel.",
+        group_name="The name of the ElectrodeGroup this channel's electrode is a part of.",
+        shank_electrode_number="0-based index of the electrode on the shank.",
+        contact_shapes="The shape of the electrode.",
+        inter_sample_shift="Time-delay of each channel sampling in proportion to the per-frame sampling period.",
+        gain_to_uV="The scaling factor from the data type to microVolts, applied before the offset.",
+        offset_to_uV="The offset from the data type to microVolts, applied after the gain.",
+    )
+
+    # default_column_metadata =  interface.get_metadata()["Ecephys"]["ElectrodeColumns"]["properties"] # NOTE: This doesn't exist...
+    # property_descriptions = {column_name: column_fields["description"] for column_name, column_fields in default_column_metadata}
+
+    recording_extractor = interface.recording_extractor
+    channel_ids = recording_extractor.get_channel_ids()
+
+    electrode_columns = [
+        dict(
+            name=property_name,
+            description=property_descriptions.get(property_name, "No description."),
+            data_type=get_property_dtype(
+                recording_extractor=recording_extractor, property_name=property_name, channel_ids=[channel_ids[0]]
+            ),
+        )
+        for property_name in properties.keys()
+    ]
+
+    # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+    # contact_vector = properties.pop("contact_vector", None)
+    # if contact_vector is None:
+    #     return json.loads(json.dumps(obj=electrode_columns))
+    # # Unpack contact vector
+    # for property_name in contact_vector.dtype.names:
+    #     electrode_columns.append(
+    #         dict(
+    #             name=property_name,
+    #             description=property_descriptions.get(property_name, ""),
+    #             data_type=str(contact_vector.dtype.fields[property_name][0]),
+    #         )
+    #     )
+
+    return json.loads(json.dumps(obj=electrode_columns))
+
+
+def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
+    """
+    A convenience function for collecting and organizing the property values of the underlying recording extractor.
+    """
+
+    from neuroconv.utils import NWBMetaDataEncoder
+
+    recording = interface.recording_extractor
+
+    property_names = get_recording_interface_properties(interface)
+
+    electrode_ids = recording.get_channel_ids()
+
+    table = list()
+    for electrode_id in electrode_ids:
+        electrode_column = dict()
+        for property_name in property_names:
+            recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[
+                0  # First axis is always electodes in SI
+            ]  # Since only fetching one electrode at a time, use trivial zero-index
+            electrode_column.update({property_name: recording_property_value})
+        table.append(electrode_column)
+    table_as_json = json.loads(json.dumps(table, cls=NWBMetaDataEncoder))
+
+    return table_as_json
+
+
+def update_recording_properties_from_table_as_json(
+    recording_interface, electrode_column_info: dict, electrode_table_json: List[Dict[str, Any]]
+):
+    import numpy as np
+
+    # # Extract contact vector properties
+    properties = get_recording_interface_properties(recording_interface)
+
+    # TODO: uncomment and adapt when neuroconv supports contact vectors (probe interface)
+    # contact_vector = properties.pop("contact_vector", None)
+    # contact_vector_dtypes = {}
+    # if contact_vector is not None:
+    #     # Remove names from contact vector from the electrode_column_info and add to reconstructed_contact_vector_info
+    #     contact_vector_dtypes = contact_vector.dtype
+    #     # contact_vector_dtypes = { property_name: next((item for item in electrode_column_info if item['name'] == property_name), None)["data_type"] for property_name in contact_vector.dtype.names}
+    #     # Remove contact vector properties from electrode_column_info
+    #     for property_name in contact_vector.dtype.names:
+    #         found = next((item for item in electrode_column_info if item["name"] == property_name), None)
+    #         if found:
+    #             electrode_column_info.remove(found)
+
+    # Organize dtypes
+    electrode_column_data_types = {column["name"]: column["data_type"] for column in electrode_column_info}
+    # electrode_column_data_types["contact_vector"] = contact_vector_dtypes  # Provide contact vector information
+
+    recording_extractor = recording_interface.recording_extractor
+    channel_ids = recording_extractor.get_channel_ids()
+    stream_prefix = channel_ids[0].split("#")[0]  # TODO: see if this generalized across formats
+
+    # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+    # property_names = recording_extractor.get_property_keys()
+    # if "contact_vector" in property_names:
+    #     modified_contact_vector = np.array(recording_extractor.get_property(key="contact_vector"))  # copy
+    #     contact_vector_property_names = list(modified_contact_vector.dtype.names)
+
+    for entry_index, entry in enumerate(electrode_table_json):
+        electrode_properties = dict(entry)  # copy
+        channel_name = electrode_properties.pop("channel_name")
+        for property_name, property_value in electrode_properties.items():
+            if property_name not in electrode_column_data_types:  # Skip data with missing column information
+                continue
+            # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+            # elif property_name in contact_vector_property_names:
+            #     property_index = contact_vector_property_names.index(property_name)
+            #     modified_contact_vector[entry_index][property_index] = property_value
+            else:
+                recording_extractor.set_property(
+                    key=property_name,
+                    values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
+                    ids=[stream_prefix + "#" + channel_name],
+                )
+
+    # TODO: uncomment when neuroconv supports contact vectors (probe interface)
+    # if "contact_vector" in property_names:
+    #     recording_extractor.set_property(key="contact_vector", values=modified_contact_vector)
