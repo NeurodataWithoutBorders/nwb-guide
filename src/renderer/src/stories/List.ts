@@ -6,7 +6,8 @@ type ListItemType = {
   key: string,
   content: string,
   value: any,
-  controls: HTMLElement[]
+  controls: HTMLElement[],
+  originalKey?: string
 }
 
 export interface ListProps {
@@ -144,11 +145,14 @@ export class List extends LitElement {
       return this.items.map(item => item.value)
     }
 
+    #previousItems = []
     #items: ListItemType[] = []
 
-    set items(value) {
-      const oldList = this.#items
+    set items(value: ListItemType[]) {
+
+      const oldList = this.#previousItems
       this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
+      this.#previousItems = this.#items.map(item => ({...item})) // Clone items
       const oldObject = this.object
       this.#updateObject()
 
@@ -209,7 +213,7 @@ export class List extends LitElement {
       this.items.splice(draggedIdx, 1)
       this.items.splice(i, 0, movedItem)
 
-      this.items = [...this.items]
+      this.items = this.items
     }
 
 
@@ -229,7 +233,8 @@ export class List extends LitElement {
     }
 
     add = (item: ListItemType) => {
-      this.items = [...this.items, item]
+      this.items.push({ ...item }) // Update original
+      this.items = this.items
     }
 
     #removePlaceholder = () => {
@@ -239,6 +244,9 @@ export class List extends LitElement {
 
     #renderListItem = (item: ListItemType, i: number) => {
       const { key, value, content = value } = item;
+
+      if (!item.originalKey) item.originalKey = key
+
       const li = document.createElement("li");
       li.id = `item-${i}`;
 
@@ -287,7 +295,7 @@ export class List extends LitElement {
         let i = 0;
         while (resolvedKey in this.object) {
             i++;
-            resolvedKey = `${originalValue}_${i}`;
+            resolvedKey = `${originalValue} (${i})`;
         }
 
         const keyEl = editableElement
@@ -356,10 +364,13 @@ export class List extends LitElement {
                   delete this.object[oKey];
                   this.object[newKey] = value;
 
-                  if (!isUnordered) {
+                  if (isUnordered) {
+                    this.items[i].key = newKey
+                  } else {
                     this.items[i].value = newKey
-                    this.items = [...this.items]
                   }
+                  this.items = this.items
+
             }
         };
 
@@ -371,11 +382,13 @@ export class List extends LitElement {
 
     delete = (i: number) => {
       this.items.splice(i, 1)
-      this.items = [...this.items]
+      this.items = this.items
     }
 
     clear = () => {
-      this.items = []
+      // Remove items in original list
+      for (let i = this.items.length - 1; i >= 0; i--) this.items.splice(i, 1)
+      this.items = this.items
     }
 
     #updateObject = () => {
@@ -392,8 +405,8 @@ export class List extends LitElement {
           // Ensure no duplicate keys
           let kI = 0;
           while (resolvedKey in this.object) {
-              i++;
-              resolvedKey = `${key}_${kI}`;
+              kI++;
+              resolvedKey = `${key} (${kI})`;
           }
 
           this.object[resolvedKey] = value
