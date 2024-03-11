@@ -422,7 +422,6 @@ export class JSONSchemaInput extends LitElement {
                 color: dimgray !important;
                 margin: 0 0 1em;
                 line-height: 1.4285em;
-                user-select: all;
             }
 
             .nan-handler {
