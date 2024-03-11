@@ -37,7 +37,7 @@
 
         "license": {
             "type": "array",
-            "description": "Provide a set of licenses for this Dandiset. If you are unsure which license to use, we recommend using the <a href='https://creativecommons.org/public-domain/cc0/' target='_blank'>CC0 1.0</a> license.",
+            "description": "Provide a set of licenses for this Dandiset. Review the individual licenses and select the one that best fits your needs.",
             "items": {
                 "type": "string",
                 "enumLinks": {
