@@ -382,7 +382,7 @@ export class BasicTable extends LitElement {
             }, {})
         );
 
-        console.log('Got', structuredData)
+        console.log("Got", structuredData);
 
         Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
         Object.keys(data).forEach((row) => {
