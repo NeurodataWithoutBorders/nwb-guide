@@ -14,6 +14,7 @@ import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
 import { merge } from "./pages/utils";
+import { OptionalSection } from "./OptionalSection";
 
 const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
 
@@ -1086,13 +1087,19 @@ export class JSONSchemaInput extends LitElement {
                 </select>
             `;
         } else if (schema.type === "boolean") {
-            return html`<input
-                type="checkbox"
-                class="schema-input"
-                @input=${(ev) => this.#updateData(fullPath, ev.target.checked)}
-                ?checked=${this.value ?? false}
-                @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
-            />`;
+
+            const optional = new OptionalSection({
+                value: this.value ?? false,
+                size: "small",
+                onChange: (value) => {
+                    this.#updateData(fullPath, value);
+                    if (validateOnChange) this.#triggerValidation(name, path);
+                }
+            })
+
+            optional.classList.add("schema-input");
+            return optional
+            
         } else if (schema.type === "string" || schema.type === "number" || schema.type === "integer") {
             const isInteger = schema.type === "integer";
             if (isInteger) schema.type = "number";

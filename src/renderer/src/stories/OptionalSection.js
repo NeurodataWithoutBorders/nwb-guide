@@ -15,13 +15,13 @@ export class OptionalSection extends LitElement {
             }
 
             .optional-section__toggle {
-                margin: 10px 0px;
-                margin-bottom: 20px;
+                margin-bottom: 5px;
             }
 
             .optional-section__content {
                 text-align: left;
             }
+
         `;
     }
 
@@ -31,7 +31,7 @@ export class OptionalSection extends LitElement {
 
     attributeChangedCallback(...args) {
         super.attributeChangedCallback(...args);
-        if (args[0] === "state") this.requestUpdate();
+        if (args[0] === "value") this.requestUpdate();
     }
 
     changed;
@@ -42,9 +42,11 @@ export class OptionalSection extends LitElement {
         this.description = props.description ?? "";
         this.content = props.content ?? "";
         this.altContent = props.altContent ?? "";
-        this.state = props.state;
+        this.value = props.value;
+        this.size = props.size;
 
         if (props.onChange) this.onChange = props.onChange;
+        this.addEventListener("change", () => this.onChange(this.value))
     }
 
     onChange = () => {}; // User-defined function
@@ -54,11 +56,11 @@ export class OptionalSection extends LitElement {
         const content = this.shadowRoot.querySelector(".optional-section__content");
         const altContent = this.shadowRoot.querySelector("#altContent");
 
-        if (this.changed === undefined) this.changed = false;
-        else this.changed = true;
+        this.value = state;
 
         if (state === undefined) state = !content.classList.contains("hidden");
-        else if (this.changed && this.hidden === state) this.onChange();
+        
+        this.onChange(state);
 
         if (state) {
             content.removeAttribute("hidden");
@@ -90,12 +92,17 @@ export class OptionalSection extends LitElement {
     });
 
     updated() {
-        if (this.state === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
-        else if (this.state) this.yes.onClick();
+        console.log(this);
+        if (this.value === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
+        else if (this.value) this.yes.onClick();
         else this.no.onClick();
     }
 
     render() {
+        
+        this.yes.size = this.size;
+        this.no.size = this.size;
+
         return html`
             <div class="optional-section__header">
                 ${this.header ? html`<h2>${this.header}</h2>` : ""}

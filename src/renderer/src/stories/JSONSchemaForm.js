@@ -317,9 +317,6 @@ export class JSONSchemaForm extends LitElement {
         } else if (!updatedPath.length && forms) return form;
 
         // Check Inputs
-        // const inputContainer = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
-        // if (inputContainer && inputs) return inputContainer.querySelector("jsonschema-input");;
-
         const foundInput = this.inputs[path.join(".")]; // Check Inputs
         if (foundInput && inputs) return foundInput;
 

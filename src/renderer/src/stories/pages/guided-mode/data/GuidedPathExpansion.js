@@ -404,21 +404,19 @@ export class GuidedPathExpansionPage extends Page {
     localState = {};
 
     render() {
-        this.optional = new OptionalSection({
-            header: "Will you locate your files programmatically?",
-            description: infoBox,
-            onChange: () => (this.unsavedUpdates = "conversions"),
-            // altContent: this.altForm,
-        });
 
         const structureState = (this.localState = merge(this.info.globalState.structure, {
             results: {},
             keep_existing_data: true,
         }));
 
-        const state = structureState.state;
-
-        this.optional.state = state;
+        this.optional = new OptionalSection({
+            header: "Will you locate your files programmatically?",
+            description: infoBox,
+            value: structureState.state,
+            onChange: () => (this.unsavedUpdates = "conversions"),
+            // altContent: this.altForm,
+        });
 
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {}, additionalProperties: false };

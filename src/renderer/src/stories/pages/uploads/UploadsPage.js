@@ -55,15 +55,17 @@ export async function createDandiset(results = {}) {
         paddingBottom: "0px",
     });
 
-    const updateNIHInput = (embargoed) => {
+    const updateNIHInput = (state) => {
         const nihInput = form.getFormElement(["nih_award_number"]);
 
+        const isEmbargoed = !!state
+
         // Show the NIH input if embargo is set
-        if (embargoed) nihInput.removeAttribute("hidden");
+        if (isEmbargoed) nihInput.removeAttribute("hidden");
         else nihInput.setAttribute("hidden", "");
 
         // Make the NIH input required if embargo is set
-        nihInput.required = embargoed;
+        nihInput.required = isEmbargoed;
     };
 
     const form = new JSONSchemaForm({
