@@ -291,7 +291,7 @@ export class List extends LitElement {
         let i = 0;
         while (resolvedKey in this.object) {
             i++;
-            resolvedKey = `${originalValue}_${i}`;
+            resolvedKey = `${originalValue} (${i})`;
         }
 
         const keyEl = editableElement
@@ -402,7 +402,7 @@ export class List extends LitElement {
           let kI = 0;
           while (resolvedKey in this.object) {
               kI++;
-              resolvedKey = `${key}_${kI}`;
+              resolvedKey = `${key} (${kI})`;
           }
 
           this.object[resolvedKey] = value
