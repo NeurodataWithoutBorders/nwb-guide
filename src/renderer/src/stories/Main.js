@@ -97,7 +97,6 @@ export class Main extends LitElement {
 
                 // Go to home screen if there is no next page
                 if (!info.next) {
-                    console.log("setting", info);
                     footer = Object.assign(
                         {
                             exit: false,

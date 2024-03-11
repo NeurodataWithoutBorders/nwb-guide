@@ -10,6 +10,10 @@ export class GuidedResultsPage extends Page {
 
     footer = {};
 
+    updated() {
+        this.save() // Save the current state
+    }
+
     render() {
         const { conversion } = this.info.globalState;
 

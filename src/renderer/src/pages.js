@@ -10,7 +10,6 @@ import { GuidedSubjectsPage } from "./stories/pages/guided-mode/setup/GuidedSubj
 import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSourceData";
 import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata";
 import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload";
-// import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions";
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./stories/Dashboard";
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
