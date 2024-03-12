@@ -42,7 +42,10 @@ onServerOpen(async () => {
 });
 
 // Resolve Dandiset Information Asynchronously
-export const regenerateDandisets = async () => {
+export const regenerateDandisets = async ({
+    newPromise = true
+} = {}) => {
+    if (newPromise) ready.dandisets = createPromise("dandiset")
     delete idSchema.enum
     delete idSchema.enumLabels
     delete idSchema.enumKeywords
@@ -120,6 +123,6 @@ export const addDandiset = async (info) => {
     return idInfo
 }
 
-regenerateDandisets()
+regenerateDandisets({ newPromise: false })
 
 export default schema

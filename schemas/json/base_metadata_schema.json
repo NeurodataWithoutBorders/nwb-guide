@@ -178,7 +178,7 @@
         "species": {
           "type": "string",
           "description": "Species of subject. Use latin name.",
-          "pattern": "^[A-Z][a-z]+ [a-z]+|http://purl.obolibrary.org/obo/NCBITaxon_[0-9]+"
+          "pattern": "^[A-Z][a-z]+ [a-z]+"
         },
         "subject_id": {
           "type": "string",

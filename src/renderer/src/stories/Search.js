@@ -455,8 +455,7 @@ export class Search extends LitElement {
       }}
 
       @blur=${(blurEvent) => {
-          const relatedTarget = blurEvent.relatedTarget;
-          if (relatedTarget && relatedTarget.classList.contains("option")) return;
+          if (blurEvent.relatedTarget.classList.contains("option")) return;
           this.submit();
       }}
 

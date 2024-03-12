@@ -101,7 +101,7 @@ export class Main extends LitElement {
                     footer = Object.assign(
                         {
                             exit: false,
-                            next: "Exit Pipeline",
+                            next: "Complete Pipeline",
                             onNext: () => this.toRender.page.to("/"),
                         },
                         footer && typeof footer === "object" ? footer : {}
