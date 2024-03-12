@@ -262,7 +262,7 @@ export class Page extends LitElement {
                         else if (k === "preview") return this.convert({ preview: true });
                     }
                 })
-            );
+            )
         }
     };
 

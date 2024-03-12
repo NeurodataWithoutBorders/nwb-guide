@@ -1070,10 +1070,8 @@ export class JSONSchemaInput extends LitElement {
                 value: this.value ?? false,
                 color: "rgb(32,32,32)",
                 size: "small",
-                onChange: (value) => {
-                    this.#updateData(fullPath, value);
-                    if (validateOnChange) this.#triggerValidation(name, path);
-                },
+                onSelect: (value) => this.#updateData(fullPath, value),
+                onChange: () => validateOnChange && this.#triggerValidation(name, path),
             });
 
             optional.classList.add("schema-input");

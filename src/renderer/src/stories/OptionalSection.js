@@ -46,22 +46,24 @@ export class OptionalSection extends LitElement {
         this.color = props.color;
 
         if (props.onChange) this.onChange = props.onChange;
+        if (props.onSelect) this.onSelect = props.onSelect;
+
         this.addEventListener("change", () => this.onChange(this.value));
+
     }
 
     onChange = () => {}; // User-defined function
+    onSelect = () => {}; // User-defined function
 
-    show(state) {
-        this.toggled = true;
+    #show = (state) => {
+
         const content = this.shadowRoot.querySelector(".optional-section__content");
         const altContent = this.shadowRoot.querySelector("#altContent");
 
-        this.value = state;
+        this.yes.primary = !!state;
+        this.no.primary = !state;
 
         if (state === undefined) state = !content.classList.contains("hidden");
-
-        this.onChange(state);
-
         if (state) {
             content.removeAttribute("hidden");
             altContent.setAttribute("hidden", true);
@@ -69,32 +71,34 @@ export class OptionalSection extends LitElement {
             content.setAttribute("hidden", true);
             altContent.removeAttribute("hidden");
         }
+
+    }
+
+    show(state) {
+        this.toggled = true;
+        this.#show(state);
+        this.value = state;
+        this.onSelect(state);
+        const event = new Event("change"); // Create a new change event
+        this.dispatchEvent(event);
     }
 
     yes = new Button({
         label: "Yes",
         color: "green",
-        onClick: () => {
-            this.show(true);
-            this.yes.primary = true;
-            this.no.primary = false;
-        },
+        onClick: () => this.show(true)
     });
 
     no = new Button({
         label: "No",
         color: "red",
-        onClick: () => {
-            this.show(false);
-            this.yes.primary = false;
-            this.no.primary = true;
-        },
+        onClick: () => this.show(false)
     });
 
     updated() {
         if (this.value === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
-        else if (this.value) this.yes.onClick();
-        else this.no.onClick();
+        else this.#show(this.value);
+
     }
 
     render() {
@@ -105,6 +109,7 @@ export class OptionalSection extends LitElement {
             this.yes.color = this.color;
             this.no.color = this.color;
         }
+        
 
         return html`
             <div class="optional-section__header">
