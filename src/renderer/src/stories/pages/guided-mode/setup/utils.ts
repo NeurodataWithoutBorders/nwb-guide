@@ -1,12 +1,14 @@
 
 export const updateResultsFromSubjects = (results: any, subjects: any, sourceDataObject = {}, nameMap: {[x:string]: string} = {}) => {
 
+    const oldResults = structuredClone(results);
 
     const toRemove = Object.keys(results).filter((sub) => !Object.keys(subjects).includes(sub));
     for (let sub of toRemove) {
         if (sub in nameMap) results[nameMap[sub]] = results[sub];
         delete results[sub]; // Delete extra subjects from results
     }
+
 
     for (let subject in subjects) {
         const { sessions = [] } = subjects[subject];
@@ -15,7 +17,17 @@ export const updateResultsFromSubjects = (results: any, subjects: any, sourceDat
         if (!subObj) subObj = results[subject] = {};
         else {
             const toRemove = Object.keys(subObj).filter((s) => !sessions.includes(s));
-            for (let s of toRemove) delete subObj[s]; // Delete extra sessions from results
+            for (let s of toRemove) {
+
+                // Skip removal if your data has been mapped
+                if (subject in nameMap) {
+                    const oldSessionInfo = oldResults[subject]
+                    const newSubResults = results[nameMap[subject]]
+                    if (s in oldSessionInfo) newSubResults[s] = oldSessionInfo[s];
+                }
+
+                delete subObj[s]; // Delete extra sessions from results
+            }
             if (!sessions.length && !Object.keys(subObj).length) delete results[subject]; // Delete subjects without sessions
         }
 
