@@ -43,7 +43,7 @@ export class InspectorList extends List {
         ];
     }
 
-    constructor(props) {
+    constructor(props = {}) {
         const { items } = props;
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
@@ -115,7 +115,7 @@ export class InspectorListItem extends LitElement {
         `;
     }
 
-    constructor(props) {
+    constructor(props = {}) {
         super();
         this.ORIGINAL_TYPE = props.type;
         Object.assign(this, props);

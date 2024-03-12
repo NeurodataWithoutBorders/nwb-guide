@@ -230,6 +230,11 @@ function initialize() {
       return { action: 'deny' };
     });
 
+    globals.mainWindow.webContents.on('will-prevent-unload', () => {
+        return true // Avoid page refresh on Appzi feedback form submission
+    });
+
+
     // globals.mainWindow.webContents.once("dom-ready", () => {
     //   if (updatechecked == false) {
     //     autoUpdater.checkForUpdatesAndNotify();
