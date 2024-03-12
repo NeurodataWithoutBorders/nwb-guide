@@ -373,7 +373,7 @@ export class BasicTable extends LitElement {
         let data = text.split("\n").map((row) =>
             row.split("\t").map((v) => {
                 try {
-                    return JSON.parse(v);
+                    return eval(v)
                 } catch {
                     return v.trim();
                 }
@@ -388,8 +388,6 @@ export class BasicTable extends LitElement {
                 return acc;
             }, {})
         );
-
-        console.log("Got", structuredData);
 
         Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
         Object.keys(data).forEach((row) => {
