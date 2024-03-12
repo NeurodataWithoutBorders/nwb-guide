@@ -1,29 +1,30 @@
 {
     "required": [],
     "properties": {
-        "SpikeGLXNIDQInterface": {
+        "TdtRecordingInterface": {
             "required": [
-                "file_path"
+                "folder_path",
+                "gain"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "description": "Path to SpikeGLX .nidq file.",
+                "folder_path": {
+                    "format": "directory",
                     "type": "string"
                 },
+                "gain": {
+                    "type": "number"
+                },
+                "stream_id": {
+                    "type": "string",
+                    "default": "0"
+                },
                 "verbose": {
-                    "description": "Whether to output verbose text.",
                     "type": "boolean",
                     "default": true
                 },
-                "load_sync_channel": {
-                    "description": "Whether to load the last channel in the stream, which is typically used for synchronization.\nIf True, then the probe is not loaded.",
-                    "type": "boolean",
-                    "default": false
-                },
                 "es_key": {
                     "type": "string",
-                    "default": "ElectricalSeriesNIDQ"
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",
