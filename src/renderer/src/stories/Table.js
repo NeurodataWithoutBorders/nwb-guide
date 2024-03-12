@@ -217,17 +217,17 @@ export class Table extends LitElement {
         this.#itemProps = { ...this.#itemSchema.properties };
     }
 
-    getRowName = (row) => (this.keyColumn ? Object.entries(this.data).find(([k, v]) => v[rowSymbol] === row)?.[0] : row);
+    getRowName = (row) =>
+        this.keyColumn ? Object.entries(this.data).find(([k, v]) => v[rowSymbol] === row)?.[0] : row;
 
     revalidate = (skipped = []) => {
         this.table.getData().forEach((rowData, i) => {
             rowData.forEach((value, j) => {
-                const isSkipped = skipped.find(( { row, prop } ) => row === i && j === prop);
+                const isSkipped = skipped.find(({ row, prop }) => row === i && j === prop);
                 if (!isSkipped) this.table.setDataAtCell(i, j, value);
-            })
-        })
-
-    }
+            });
+        });
+    };
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -543,7 +543,7 @@ export class Table extends LitElement {
                         delete target[rowName];
                         delete unresolved[row];
                         Object.defineProperty(this.data[value], rowSymbol, { value: row, configurable: true }); // Setting row tracker
-                        this.revalidate([ { row, prop } ]);
+                        this.revalidate([{ row, prop }]);
                     }
                 }
 
@@ -569,7 +569,6 @@ export class Table extends LitElement {
                 }
 
                 this.onUpdate(rowName, header, value);
-
             }
 
             validated++;
