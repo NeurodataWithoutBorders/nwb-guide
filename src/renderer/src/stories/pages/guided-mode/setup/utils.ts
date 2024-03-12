@@ -1,8 +1,12 @@
 
-export const updateResultsFromSubjects = (results: any, subjects: any, sourceDataObject = {}) => {
+export const updateResultsFromSubjects = (results: any, subjects: any, sourceDataObject = {}, nameMap: {[x:string]: string} = {}) => {
+
 
     const toRemove = Object.keys(results).filter((sub) => !Object.keys(subjects).includes(sub));
-    for (let sub of toRemove) delete results[sub]; // Delete extra subjects from results
+    for (let sub of toRemove) {
+        if (sub in nameMap) results[nameMap[sub]] = results[sub];
+        delete results[sub]; // Delete extra subjects from results
+    }
 
     for (let subject in subjects) {
         const { sessions = [] } = subjects[subject];

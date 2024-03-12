@@ -73,7 +73,7 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
 
                 results: {
                     [subjectId]: sessions.reduce((acc, sessionId) => {
-                        acc[subjectId] = {
+                        acc[sessionId] = {
                             metadata: {
                                 Subject: {
                                     subject_id: subjectId,

@@ -1,7 +1,7 @@
 const toCapitalizeAll = ['nwb', 'api', 'id']
 const toCapitalizeNone = ['or', 'and']
 
-const createRandomString = () => Math.random().toString(36).substring(7);
+export const createRandomString = () => Math.random().toString(36).substring(7);
 export const tempPropertyKey = createRandomString();
 export const tempPropertyValueKey = createRandomString();
 
