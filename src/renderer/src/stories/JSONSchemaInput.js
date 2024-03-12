@@ -15,6 +15,9 @@ import { Search } from "./Search";
 import tippy from "tippy.js";
 import { merge } from "./pages/utils";
 import { OptionalSection } from "./OptionalSection";
+import { InspectorListItem } from "./preview/inspector/InspectorList";
+
+const isDevelopment = !!import.meta.env;
 
 const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
 
@@ -499,6 +502,27 @@ export class JSONSchemaInput extends LitElement {
     // required;
     validateOnChange = true;
 
+    // Print the default value of the schema if not caught
+    onUncaughtSchema = (schema) => {
+        // In development, show uncaught schemas
+        if (!isDevelopment) {
+            if (this.form) {
+                const inputContainer = this.form.shadowRoot.querySelector(`#${this.path.slice(-1)[0]}`);
+                inputContainer.style.display = "none";
+            }
+        }
+
+        if (schema.default) return `<pre>${JSON.stringify(schema.default, null, 2)}</pre>`;
+
+        const error = new InspectorListItem({
+            message:
+                "<h3 style='margin: 0'>Internal GUIDE Error</h3><span>Cannot render this property because of a misformatted schema.</span>",
+        });
+        error.style.width = "100%";
+
+        return error;
+    };
+
     constructor(props) {
         super();
         Object.assign(this, props);
@@ -865,13 +889,22 @@ export class JSONSchemaInput extends LitElement {
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
 
             // Provide default item types
-            if (isArray) {
+               // Provide default item types
+               if (isArray) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
-                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value?.[0]);
+                if (!("type" in schema.items) && !hasItemsRef) {
+                    // Guess the type of the first item
+                    if (this.value) {
+                        const itemToCheck = this.value[0];
+                        schema.items.type = itemToCheck ? this.#getType(itemToCheck) : "string";
+                    }
+
+                    // If no value, handle uncaught schema
+                    else return this.onUncaughtSchema(schema);
+                }
             }
 
-            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -951,6 +984,7 @@ export class JSONSchemaInput extends LitElement {
 
                 if (table) return table;
             }
+            
 
             const addButton = new Button({
                 size: "small",
@@ -1178,8 +1212,7 @@ export class JSONSchemaInput extends LitElement {
             }
         }
 
-        // Print out the immutable default value
-        return html`<pre>${schema.default ? JSON.stringify(schema.default, null, 2) : "No default value"}</pre>`;
+        return this.onUncaughtSchema(schema);
     }
 }
 
