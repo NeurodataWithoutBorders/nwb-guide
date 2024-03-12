@@ -8,8 +8,8 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string",
-                    "description": "Path to CED data file."
+                    "description": "Path to CED data file.",
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",

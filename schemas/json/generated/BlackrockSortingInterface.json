@@ -8,13 +8,15 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string",
-                    "description": "Path to Blackrock file."
+                    "description": "Path to Blackrock file.",
+                    "type": "string"
                 },
                 "sampling_frequency": {
+                    "description": "The sampling frequency for the sorting extractor. When the signal data is available (.ncs) those files will be",
                     "type": "number"
                 },
                 "verbose": {
+                    "description": "Enables verbosity",
                     "type": "boolean",
                     "default": true
                 }

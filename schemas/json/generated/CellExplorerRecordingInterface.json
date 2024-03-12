@@ -1,23 +1,24 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "CellExplorerRecordingInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "folder_path"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
-                },
-                "sampling_frequency": {
-                    "type": "number"
+                "folder_path": {
+                    "format": "directory",
+                    "description": "The folder where the session data is located. It should contain a\n`{folder.name}.session.mat` file and the binary files `{folder.name}.dat`\nor `{folder.name}.lfp` for the LFP interface.",
+                    "type": "string"
                 },
                 "verbose": {
+                    "description": "Whether to output verbose text.",
                     "type": "boolean",
                     "default": true
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",

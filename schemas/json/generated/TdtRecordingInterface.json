@@ -1,23 +1,30 @@
 {
     "required": [],
     "properties": {
-        "TiffImagingInterface": {
+        "TdtRecordingInterface": {
             "required": [
-                "file_path",
-                "sampling_frequency"
+                "folder_path",
+                "gain"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "type": "string",
-                    "description": "Path to Tiff file."
+                "folder_path": {
+                    "format": "directory",
+                    "type": "string"
                 },
-                "sampling_frequency": {
+                "gain": {
                     "type": "number"
+                },
+                "stream_id": {
+                    "type": "string",
+                    "default": "0"
                 },
                 "verbose": {
                     "type": "boolean",
                     "default": true
+                },
+                "es_key": {
+                    "type": "string",
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",

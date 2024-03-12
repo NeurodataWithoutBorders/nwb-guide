@@ -10,6 +10,13 @@
                     "format": "file",
                     "type": "string"
                 },
+                "radius": {
+                    "type": "number"
+                },
+                "configuration_file_path": {
+                    "format": "file",
+                    "type": "string"
+                },
                 "verbose": {
                     "type": "boolean",
                     "default": true

@@ -8,10 +8,11 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string",
-                    "description": "Path to SpikeGLX ap.bin or lf.bin file."
+                    "description": "Path to SpikeGLX ap.bin or lf.bin file.",
+                    "type": "string"
                 },
                 "verbose": {
+                    "description": "Whether to output verbose text.",
                     "type": "boolean",
                     "default": true
                 },
