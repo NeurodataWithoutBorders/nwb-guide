@@ -49,14 +49,12 @@ export class OptionalSection extends LitElement {
         if (props.onSelect) this.onSelect = props.onSelect;
 
         this.addEventListener("change", () => this.onChange(this.value));
-
     }
 
     onChange = () => {}; // User-defined function
     onSelect = () => {}; // User-defined function
 
     #show = (state) => {
-
         const content = this.shadowRoot.querySelector(".optional-section__content");
         const altContent = this.shadowRoot.querySelector("#altContent");
 
@@ -71,8 +69,7 @@ export class OptionalSection extends LitElement {
             content.setAttribute("hidden", true);
             altContent.removeAttribute("hidden");
         }
-
-    }
+    };
 
     show(state) {
         this.toggled = true;
@@ -86,19 +83,18 @@ export class OptionalSection extends LitElement {
     yes = new Button({
         label: "Yes",
         color: "green",
-        onClick: () => this.show(true)
+        onClick: () => this.show(true),
     });
 
     no = new Button({
         label: "No",
         color: "red",
-        onClick: () => this.show(false)
+        onClick: () => this.show(false),
     });
 
     updated() {
         if (this.value === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
         else this.#show(this.value);
-
     }
 
     render() {
@@ -109,7 +105,6 @@ export class OptionalSection extends LitElement {
             this.yes.color = this.color;
             this.no.color = this.color;
         }
-        
 
         return html`
             <div class="optional-section__header">
