@@ -20,7 +20,6 @@
     "build:mac": "npm run build && npm run build:flask && npm run build:electron:mac",
     "build:linux": "npm run build && npm run build:flask && npm run build:electron:linux",
     "build:flask": "python -m PyInstaller nwb-guide.spec --log-level DEBUG --clean --noconfirm --distpath ./build/flask",
-    "build:flask:spec": "npm run build:flask:spec:base && python prepare_pyinstaller_spec.py",
     "build:electron:win": "electron-builder build --win --publish never",
     "build:electron:mac": "electron-builder build --mac --publish never",
     "build:electron:linux": "electron-builder build --linux --publish never",
