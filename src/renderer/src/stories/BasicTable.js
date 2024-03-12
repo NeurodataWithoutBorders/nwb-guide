@@ -238,6 +238,31 @@ export class BasicTable extends LitElement {
     onStatusChange = () => {};
     onLoaded = () => {};
 
+    #getType = (value, { type, data_type} = {}) => {
+        let inferred = typeof value;
+        if (Array.isArray(value)) inferred = "array";
+        if (value == undefined) inferred = "null";
+
+        const original = type || data_type
+        let resolved = original;
+
+        // Handle based on JSON Schema types
+        if (type) {
+            if (resolved === "integer") resolved = "number"; // Map to javascript type
+        } else if (data_type) {
+            if (resolved.includes("array")) resolved = "array";
+            if (resolved.includes("int") || resolved.includes("float")) resolved = "number";
+            if (resolved.startsWith("bool")) resolved = "boolean";
+            if (resolved.startsWith("str")) resolved = "string";
+        }
+
+        return {
+            type: resolved,
+            original,
+            inferred
+        }
+    }
+
     #validateCell = (value, col, row, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
@@ -245,32 +270,14 @@ export class BasicTable extends LitElement {
         let result;
 
         const propInfo = this.#itemProps[col] ?? {};
-        let inferredType = typeof value;
-        let ogType;
-        let type = (ogType = propInfo.type || propInfo.data_type);
-
-        // Handle based on JSON Schema types
-        if ("type" in propInfo) {
-            // Map to javascript type
-            if (type === "integer") type = "number";
-
-            // Convert to json schema type
-            if (Array.isArray(value)) inferredType = "array";
-            if (value == undefined) inferredType = "null";
-        } else if ("data_type" in propInfo) {
-            if (type.includes("array")) type = "array";
-            if (type.includes("int") || type.includes("float")) type = "number";
-            if (type.startsWith("bool")) type = "boolean";
-            if (type.startsWith("str")) type = "string";
-        }
+        
+        let { type, original, inferred } = this.#getType(value, propInfo);
 
         // Check if required
         if (!value && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
         // If not required, check matching types (if provided) for values that are defined
-        else if (value !== "" && type && inferredType !== type) {
-            result = [{ message: `${col} is expected to be of type ${ogType}, not ${inferredType}`, type: "error" }];
-        }
+        else if (value !== "" && type && inferred !== type) result = [{ message: `${col} is expected to be of type ${original}, not ${inferred}`, type: "error" }];
 
         // Otherwise validate using the specified onChange function
         else result = this.validateOnChange([row, col], parent, value, this.#itemProps[col]);
@@ -388,7 +395,13 @@ export class BasicTable extends LitElement {
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
-            Object.entries(cols).forEach(([key, value]) => (key in this.#itemProps ? (latest[key] = value) : "")); // Only include data from schema
+            Object.entries(cols).forEach(([key, value]) => {
+                if (key in this.#itemProps) {
+                    const { type } = this.#getType(value, this.#itemProps[key]);
+                    if (type === 'string') value = `${value}`; // Convert to string if necessary
+                    latest[key] = value;
+                }
+            }); // Only include data from schema
         });
 
         if (this.onUpdate) this.onUpdate([], data); // Update the whole table
