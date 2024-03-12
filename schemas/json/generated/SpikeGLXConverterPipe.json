@@ -8,10 +8,11 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string",
-                    "description": "Path to the folder containing SpikeGLX streams."
+                    "description": "Path to the folder containing SpikeGLX streams.",
+                    "type": "string"
                 },
                 "verbose": {
+                    "description": "Whether to output verbose text.",
                     "type": "boolean",
                     "default": false
                 }
