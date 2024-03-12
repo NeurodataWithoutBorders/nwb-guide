@@ -8,6 +8,8 @@ import { emojiFontFamily } from "./globals";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
+const rowSymbol = Symbol("row");
+
 const maxRows = 20;
 
 const isRequired = (col, schema) => {
@@ -215,7 +217,17 @@ export class Table extends LitElement {
         this.#itemProps = { ...this.#itemSchema.properties };
     }
 
-    getRowName = (row) => (this.keyColumn ? Object.entries(this.data).find(([k, v]) => v.row === row)?.[0] : row);
+    getRowName = (row) => (this.keyColumn ? Object.entries(this.data).find(([k, v]) => v[rowSymbol] === row)?.[0] : row);
+
+    revalidate = (skipped = []) => {
+        this.table.getData().forEach((rowData, i) => {
+            rowData.forEach((value, j) => {
+                const isSkipped = skipped.find(( { row, prop } ) => row === i && j === prop);
+                if (!isSkipped) this.table.setDataAtCell(i, j, value);
+            })
+        })
+
+    }
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -259,7 +271,7 @@ export class Table extends LitElement {
         }
 
         Object.keys(this.data).forEach((row, i) =>
-            Object.defineProperty(this.data[row], "row", { value: i, configurable: true })
+            Object.defineProperty(this.data[row], rowSymbol, { value: i, configurable: true })
         ); // Set initial row trackers
 
         const displayHeaders = [...colHeaders].map(header);
@@ -335,9 +347,9 @@ export class Table extends LitElement {
                 }
 
                 if (value && k === instanceThis.keyColumn) {
-                    if (value in instanceThis.data && instanceThis.data[value]?.row !== this.row) {
+                    if (value in instanceThis.data && instanceThis.data[value]?.[rowSymbol] !== this.row) {
                         // Convert previously valid value to unresolved
-                        const previousKey = Object.entries(instanceThis.data).find(([k, v]) => v.row === this.row)?.[0];
+                        const previousKey = instanceThis.getRowName(this.row);
                         if (previousKey) {
                             unresolved[this.row] = instanceThis.data[previousKey];
                             delete instanceThis.data[previousKey];
@@ -530,7 +542,8 @@ export class Table extends LitElement {
                         this.data[value] = old;
                         delete target[rowName];
                         delete unresolved[row];
-                        Object.defineProperty(this.data[value], "row", { value: row, configurable: true }); // Setting row tracker
+                        Object.defineProperty(this.data[value], rowSymbol, { value: row, configurable: true }); // Setting row tracker
+                        this.revalidate([ { row, prop } ]);
                     }
                 }
 
@@ -556,6 +569,7 @@ export class Table extends LitElement {
                 }
 
                 this.onUpdate(rowName, header, value);
+
             }
 
             validated++;
