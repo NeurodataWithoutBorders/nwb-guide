@@ -889,8 +889,8 @@ export class JSONSchemaInput extends LitElement {
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
 
             // Provide default item types
-               // Provide default item types
-               if (isArray) {
+            // Provide default item types
+            if (isArray) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
                 if (!("type" in schema.items) && !hasItemsRef) {
@@ -904,7 +904,6 @@ export class JSONSchemaInput extends LitElement {
                     else return this.onUncaughtSchema(schema);
                 }
             }
-
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -984,7 +983,6 @@ export class JSONSchemaInput extends LitElement {
 
                 if (table) return table;
             }
-            
 
             const addButton = new Button({
                 size: "small",
