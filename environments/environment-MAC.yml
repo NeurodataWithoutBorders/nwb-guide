@@ -11,6 +11,7 @@ dependencies:
   - jsonschema = 4.18.0  # installs jsonschema-specifications
   - pip
   - pip:
+      - pyinstaller-hooks-contrib == 2024.2  # Fix needed for scipy._lib._testutils
       - chardet == 5.1.0
       - configparser == 6.0.0
       - flask == 2.3.2
