@@ -93,6 +93,7 @@ export class InspectPage extends Page {
         schema: {
             type: "array",
             items: {
+                type: "string",
                 format: ["file", "directory"],
                 multiple: true,
             },
