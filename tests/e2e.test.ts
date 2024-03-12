@@ -59,6 +59,12 @@ const testInterfaceInfo = {
   }
 }
 
+const subjectInfo = {
+  sex: 'M',
+  species: 'Mus musculus',
+  age: 'P30D'
+}
+
 const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
 
 const dandiInfo = {
@@ -254,7 +260,8 @@ describe('E2E Test', () => {
       await takeScreenshot('all-interfaces-added')
 
       // await toNextPage('locate')
-      await toNextPage('subjects')
+      // await toNextPage('subjects')
+      await toNextPage('sourcedata')
 
     })
 
@@ -296,7 +303,8 @@ describe('E2E Test', () => {
     })
 
 
-    test('Provide subject information', async () => {
+    // NOTE: Subject information is skipped in single session mode
+    test.skip('Provide subject information', async () => {
 
       await takeScreenshot('subject-page', 300)
 
@@ -328,12 +336,7 @@ describe('E2E Test', () => {
         const data = { ...table.data }
 
         for (let name in data) {
-          data[name] = {
-            ...data[name],
-            sex: 'M',
-            species: 'Mus musculus',
-            age: 'P30D'
-          }
+          data[name] = { ...data[name], ...subjectInfo }
         }
 
         table.data = data // This changes the render but not the update flag
@@ -359,7 +362,7 @@ describe('E2E Test', () => {
       await references.page.evaluate(async () => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
-        Object.values(page.forms[0].form).forEach(accordion => accordion.toggle(true))
+        Object.values(page.forms[0].form.accordions).forEach(accordion => accordion.toggle(true))
       })
 
       await takeScreenshot('sourcedata-page', 100)
@@ -395,6 +398,18 @@ describe('E2E Test', () => {
         const page = dashboard.page
         page.forms[0].form.accordions["Subject"].toggle(true)
       })
+
+      // Update for single session
+      await evaluate((subjectInfo) => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        const form = page.forms[0].form.forms['Subject']
+
+        for (let key in subjectInfo) {
+          const input = form.getFormElement([ key ])
+          input.updateData(subjectInfo[key])
+        }
+      }, subjectInfo)
 
       await takeScreenshot('metadata-open', 100)
 
