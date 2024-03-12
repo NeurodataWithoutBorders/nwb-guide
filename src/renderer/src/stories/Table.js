@@ -215,8 +215,7 @@ export class Table extends LitElement {
         this.#itemProps = { ...this.#itemSchema.properties };
     }
 
-
-    getRowName = (row) => this.keyColumn ? Object.entries(this.data).find(([k, v]) => v.row === row)?.[0] : row;
+    getRowName = (row) => (this.keyColumn ? Object.entries(this.data).find(([k, v]) => v.row === row)?.[0] : row);
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -258,8 +257,10 @@ export class Table extends LitElement {
             const foundKey = Object.keys(value).find((k) => value[k] === key);
             if (foundKey) this.keyColumn = foundKey;
         }
-    
-        Object.keys(this.data).forEach((row, i) => Object.defineProperty(this.data[row], 'row', { value: i, configurable: true })) // Set initial row trackers
+
+        Object.keys(this.data).forEach((row, i) =>
+            Object.defineProperty(this.data[row], "row", { value: i, configurable: true })
+        ); // Set initial row trackers
 
         const displayHeaders = [...colHeaders].map(header);
 
@@ -334,9 +335,7 @@ export class Table extends LitElement {
                 }
 
                 if (value && k === instanceThis.keyColumn) {
-
                     if (value in instanceThis.data && instanceThis.data[value]?.row !== this.row) {
-
                         // Convert previously valid value to unresolved
                         const previousKey = Object.entries(instanceThis.data).find(([k, v]) => v.row === this.row)?.[0];
                         if (previousKey) {
@@ -355,7 +354,7 @@ export class Table extends LitElement {
                     }
                 }
 
-                if (name === 'subject_id') {
+                if (name === "subject_id") {
                     if (v) {
                         if (Object.values(this.data).filter((s) => s.subject_id === v).length > 1) {
                             return [
@@ -531,7 +530,7 @@ export class Table extends LitElement {
                         this.data[value] = old;
                         delete target[rowName];
                         delete unresolved[row];
-                        Object.defineProperty(this.data[value], 'row', { value: row, configurable: true }) // Setting row tracker
+                        Object.defineProperty(this.data[value], "row", { value: row, configurable: true }); // Setting row tracker
                     }
                 }
 
@@ -589,7 +588,6 @@ export class Table extends LitElement {
             nRows += amount;
             const physicalRows = Array.from({ length: amount }, (_, i) => index + i);
             physicalRows.forEach((row) => this.#setRow(row, this.#getRowData(row)));
-
         });
 
         // Trigger validation on all cells
@@ -617,12 +615,10 @@ export class Table extends LitElement {
     };
 
     #setRow(row, data) {
-
         data.forEach((value, j) => {
             value = this.#getRenderedValue(value, this.#itemSchema.properties[this.colHeaders[j]]);
             this.table.setDataAtCell(row, j, value);
         });
-
     }
 
     #handleValidationResult = (result, row, prop) => {

@@ -44,9 +44,11 @@ export class GuidedSubjectsPage extends Page {
         const localState = this.table.data;
 
         // Create map of original names to new names
-        const nameMap = {}
+        const nameMap = {};
         for (let key in this.#originalState) {
-            const renamed = Object.keys(localState).find(k => localState[k].identifier === this.#originalState[key].identifier);
+            const renamed = Object.keys(localState).find(
+                (k) => localState[k].identifier === this.#originalState[key].identifier
+            );
             nameMap[key] = renamed;
         }
 
@@ -54,7 +56,7 @@ export class GuidedSubjectsPage extends Page {
         for (let key in localState) delete localState[key].identifier;
 
         // Local state is the source of truth
-        this.info.globalState.subjects = localState
+        this.info.globalState.subjects = localState;
 
         const { results, subjects } = this.info.globalState;
 
@@ -117,7 +119,7 @@ export class GuidedSubjectsPage extends Page {
         for (let subject in subjects) {
             const sessions = Object.keys(this.info.globalState.results[subject]);
             subjects[subject].sessions = sessions;
-            subjects[subject].identifier = this.#originalState[subject].identifier = Symbol('subject'); // Add identifier to subject
+            subjects[subject].identifier = this.#originalState[subject].identifier = Symbol("subject"); // Add identifier to subject
         }
 
         this.table = new Table({
@@ -140,7 +142,7 @@ export class GuidedSubjectsPage extends Page {
                 this.unsavedUpdates = "conversions";
             },
             validateOnChange: (localPath, parent, v) => {
-                const name = localPath[localPath.length - 1]; 
+                const name = localPath[localPath.length - 1];
                 if (name === "sessions") {
                     if (v?.length) return true;
                     else {
