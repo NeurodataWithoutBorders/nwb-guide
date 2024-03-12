@@ -238,12 +238,12 @@ export class BasicTable extends LitElement {
     onStatusChange = () => {};
     onLoaded = () => {};
 
-    #getType = (value, { type, data_type} = {}) => {
+    #getType = (value, { type, data_type } = {}) => {
         let inferred = typeof value;
         if (Array.isArray(value)) inferred = "array";
         if (value == undefined) inferred = "null";
 
-        const original = type || data_type
+        const original = type || data_type;
         let resolved = original;
 
         // Handle based on JSON Schema types
@@ -259,9 +259,9 @@ export class BasicTable extends LitElement {
         return {
             type: resolved,
             original,
-            inferred
-        }
-    }
+            inferred,
+        };
+    };
 
     #validateCell = (value, col, row, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
@@ -270,15 +270,15 @@ export class BasicTable extends LitElement {
         let result;
 
         const propInfo = this.#itemProps[col] ?? {};
-        
+
         let { type, original, inferred } = this.#getType(value, propInfo);
 
         // Check if required
         if (!value && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
         // If not required, check matching types (if provided) for values that are defined
-        else if (value !== "" && type && inferred !== type) result = [{ message: `${col} is expected to be of type ${original}, not ${inferred}`, type: "error" }];
-
+        else if (value !== "" && type && inferred !== type)
+            result = [{ message: `${col} is expected to be of type ${original}, not ${inferred}`, type: "error" }];
         // Otherwise validate using the specified onChange function
         else result = this.validateOnChange([row, col], parent, value, this.#itemProps[col]);
 
@@ -398,7 +398,7 @@ export class BasicTable extends LitElement {
             Object.entries(cols).forEach(([key, value]) => {
                 if (key in this.#itemProps) {
                     const { type } = this.#getType(value, this.#itemProps[key]);
-                    if (type === 'string') value = `${value}`; // Convert to string if necessary
+                    if (type === "string") value = `${value}`; // Convert to string if necessary
                     latest[key] = value;
                 }
             }); // Only include data from schema
