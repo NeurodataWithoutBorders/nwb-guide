@@ -511,7 +511,6 @@ export class JSONSchemaInput extends LitElement {
         if (props.validateEmptyValue === false) this.validateEmptyValue = true; // False is treated as required but not triggered if empty
     }
 
-
     // Print the default value of the schema if not caught
     onUncaughtSchema = (schema) => {
         // In development, show uncaught schemas

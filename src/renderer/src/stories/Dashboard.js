@@ -127,15 +127,15 @@ export class Dashboard extends LitElement {
                 if (page === this.page) return; // Do not rerender current page
                 this.setMain(page);
             }
-        }
+        };
 
         window.history.pushState = function (state) {
             pushPopListener({ state: state });
             return pushState.apply(window.history, arguments);
         };
 
-        window.addEventListener("popstate", pushPopListener)
-        window.addEventListener("pushstate", pushPopListener)
+        window.addEventListener("popstate", pushPopListener);
+        window.addEventListener("pushstate", pushPopListener);
 
         this.#updated();
     }

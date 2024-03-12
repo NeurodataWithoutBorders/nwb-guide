@@ -870,7 +870,7 @@ export class SimpleTable extends LitElement {
     set schema(schema = {}) {
         this.#schema = schema;
         this.#itemSchema = this.#schema.items ?? {};
-        this.#itemProps = { ...this.#itemSchema.properties ?? {} };
+        this.#itemProps = { ...(this.#itemSchema.properties ?? {}) };
     }
 
     render() {

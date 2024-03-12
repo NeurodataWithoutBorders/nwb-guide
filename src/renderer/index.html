@@ -52,7 +52,7 @@
         })
 
       }, 100)
-      
+
       window.addEventListener('beforeunload', (ev) => {
           const isOpen = appziFeedbackWidget ? ! appziFeedbackWidget.parentElement.parentElement.classList.length : false
           if (!isOpen) return // Allow reload if feedback widget is closed (e.g. hot reloading)
