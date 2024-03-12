@@ -12,7 +12,7 @@ from PyInstaller.utils.hooks import collect_all
 
 datas = [('./paths.config.json', '.'), ('./package.json', '.')]
 binaries = []
-hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]
+hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), *collect_submodules('scipy._lib._testutils'), '.libs')]
 
 datas += collect_data_files('jsonschema_specifications')
 tmp_ret = collect_all('dandi')
