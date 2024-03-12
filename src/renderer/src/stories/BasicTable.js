@@ -373,7 +373,7 @@ export class BasicTable extends LitElement {
         let data = text.split("\n").map((row) =>
             row.split("\t").map((v) => {
                 try {
-                    return eval(v)
+                    return eval(v);
                 } catch {
                     return v.trim();
                 }
