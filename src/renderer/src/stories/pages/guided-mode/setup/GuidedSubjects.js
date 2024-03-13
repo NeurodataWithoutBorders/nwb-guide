@@ -58,24 +58,24 @@ export class GuidedSubjectsPage extends Page {
             throw error;
         }
 
-        // Delete old subjects before merging
-        const { subjects: globalSubjects } = this.info.globalState;
-
         const localState = this.table.data;
 
-        for (let key in globalSubjects) {
-            if (!localState[key]) delete globalSubjects[key];
+        // Create map of original names to new names
+        const nameMap = {};
+        for (let key in this.#originalState) {
+            const renamed = Object.keys(localState).find(
+                (k) => localState[k].identifier === this.#originalState[key].identifier
+            );
+            nameMap[key] = renamed;
         }
 
-        this.info.globalState.subjects = merge(localState, globalSubjects); // Merge the local and global states
+        // Remove identifiers
+        for (let key in localState) delete localState[key].identifier;
+
+        // Local state is the source of truth
+        this.info.globalState.subjects = localState;
 
         const { results, subjects } = this.info.globalState;
-
-        // Object.keys(subjects).forEach((sub) => {
-        //     if (!subjects[sub].sessions?.length) {
-        //         delete subjects[sub]
-        //     }
-        // });
 
         const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => {
             acc[key] = {};
@@ -83,7 +83,7 @@ export class GuidedSubjectsPage extends Page {
         }, {});
 
         // Modify the results object to track new subjects / sessions
-        updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
+        updateResultsFromSubjects(results, subjects, sourceDataObject, nameMap); // NOTE: This directly mutates the results object
     };
 
     footer = {};
@@ -118,6 +118,8 @@ export class GuidedSubjectsPage extends Page {
         if (this.#globalModal) this.#globalModal.remove();
     }
 
+    #originalState = {};
+
     render() {
         const hasMultipleSessions = this.workflow.multiple_sessions.value;
 
@@ -129,9 +131,12 @@ export class GuidedSubjectsPage extends Page {
         toRemove.forEach((sub) => delete subjects[sub]);
         toHave.forEach((sub) => (subjects[sub] = subjects[sub] ?? {}));
 
+        this.#originalState = structuredClone(subjects);
+
         for (let subject in subjects) {
             const sessions = Object.keys(this.info.globalState.results[subject]);
             subjects[subject].sessions = sessions;
+            subjects[subject].identifier = this.#originalState[subject].identifier = Symbol("subject"); // Add identifier to subject
         }
 
         const contextMenuConfig = { ignore: ["row_below"] };
@@ -156,7 +161,8 @@ export class GuidedSubjectsPage extends Page {
                 this.unsavedUpdates = "conversions";
             },
             validateOnChange: (localPath, parent, v) => {
-                if (localPath.slice(-1)[0] === "sessions") {
+                const name = localPath[localPath.length - 1];
+                if (name === "sessions") {
                     if (v?.length) return true;
                     else {
                         return [
