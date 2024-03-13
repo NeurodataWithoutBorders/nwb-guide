@@ -97,8 +97,8 @@ export class DandiResults extends LitElement {
                                       .map((item) => Object.values(item))
                                       .flat()
                                       .map(({ file }) => {
-                                        const truncated = file.split(this.id)[1].slice(1)
-                                        return html`<li>${truncated}</li>`
+                                          const truncated = file.split(this.id)[1].slice(1);
+                                          return html`<li>${truncated}</li>`;
                                       })}
                               </ol>`
                         : ""}

@@ -19,11 +19,16 @@ export class GuidedResultsPage extends Page {
         const { info = {}, results } = this.info.globalState.upload ?? {};
         const { dandiset } = info;
 
-        return html`<div style="padding: 10px 20px;">${new DandiResults({ id: dandiset, files: {
-            subject: results.map(file => {
-                return { file }
-            })
-        } })}</div>`;
+        return html`<div style="padding: 10px 20px;">
+            ${new DandiResults({
+                id: dandiset,
+                files: {
+                    subject: results.map((file) => {
+                        return { file };
+                    }),
+                },
+            })}
+        </div>`;
     }
 }
 
