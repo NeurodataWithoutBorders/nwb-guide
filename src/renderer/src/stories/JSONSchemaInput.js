@@ -541,6 +541,8 @@ export class JSONSchemaInput extends LitElement {
         if (!forceValidate) {
             // Update the actual input element
             const inputElement = this.getElement();
+            if (!inputElement) return false;
+
             if (inputElement.type === "checkbox") inputElement.checked = value;
             else if (inputElement.classList.contains("list")) {
                 const list = inputElement.children[0];

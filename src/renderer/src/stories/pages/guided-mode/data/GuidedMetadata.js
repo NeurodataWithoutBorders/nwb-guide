@@ -100,17 +100,23 @@ export class GuidedMetadataPage extends ManagedPage {
 
     form;
 
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Metadata",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project);
+            this.#globalModal.open = true;
+        },
+    });
+
+    workflow = {
+        multiple_sessions: {
+            elements: [this.#globalButton],
+        },
+    };
+
     header = {
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Metadata",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project);
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [this.#globalButton],
         subtitle: "Edit all metadata for this conversion at the session level",
     };
 
@@ -156,6 +162,8 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     createForm = ({ subject, session, info }) => {
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
+
         // const results = createResults({ subject, info }, this.info.globalState);
 
         const { globalState } = this.info;
@@ -163,7 +171,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const results = info.metadata; // Edited form info
 
         // Define the appropriate global metadata to fill empty values in the form
-        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, globalState);
+        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, globalState, hasMultipleSessions);
 
         // Define the correct instance identifier
         const instanceId = `sub-${subject}/ses-${session}`;

@@ -27,6 +27,7 @@ import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 import { InspectPage } from "./stories/pages/inspect/InspectPage";
 import { PreviewPage } from "./stories/pages/preview/PreviewPage";
+import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -90,6 +91,12 @@ const pages = {
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
+                section: sections[0],
+            }),
+
+            workflow: new GuidedPreform({
+                title: "Pipeline Workflow",
+                label: "Pipeline workflow",
                 section: sections[0],
             }),
 
