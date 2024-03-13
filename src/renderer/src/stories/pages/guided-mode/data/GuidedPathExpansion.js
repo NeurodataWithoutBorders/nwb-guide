@@ -115,7 +115,10 @@ export async function autocompleteFormatString(path) {
                     }
                 }
             } else {
-                if (!parent.path || !parent.path.includes(value))
+                if (!parent.path) return;
+                if (!value) return;
+
+                if (!parent.path.includes(value))
                     return [
                         {
                             type: "error",
@@ -339,28 +342,26 @@ export class GuidedPathExpansionPage extends Page {
 
         const globalResults = globalState.results;
 
-        if (!keepExistingData) {
-            for (let sub in globalResults) {
-                const subRef = results[sub];
-                if (!subRef)
-                    delete globalResults[sub]; // Delete removed subjects
-                else {
-                    for (let ses in globalResults[sub]) {
-                        const sesRef = subRef[ses];
+        for (let sub in globalResults) {
+            const subRef = results[sub];
+            if (!subRef)
+                delete globalResults[sub]; // Delete removed subjects
+            else {
+                for (let ses in globalResults[sub]) {
+                    const sesRef = subRef[ses];
 
-                        if (!sesRef)
-                            delete globalResults[sub][ses]; // Delete removed sessions
-                        else {
-                            const globalSesRef = globalResults[sub][ses];
+                    if (!sesRef)
+                        delete globalResults[sub][ses]; // Delete removed sessions
+                    else {
+                        const globalSesRef = globalResults[sub][ses];
 
-                            for (let name in globalSesRef.source_data) {
-                                if (!sesRef.source_data[name]) delete globalSesRef.source_data[name]; // Delete removed interfaces
-                            }
+                        for (let name in globalSesRef.source_data) {
+                            if (!sesRef.source_data[name]) delete globalSesRef.source_data[name]; // Delete removed interfaces
                         }
                     }
-
-                    if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]; // Delete empty subjects
                 }
+
+                if (Object.keys(globalResults[sub]).length === 0) delete globalResults[sub]; // Delete empty subjects
             }
         }
     };
