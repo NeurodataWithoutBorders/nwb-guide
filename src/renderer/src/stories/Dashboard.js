@@ -157,6 +157,8 @@ export class Dashboard extends LitElement {
 
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page
 
+            // Update sidebar states
+
             this.sidebar.selectItem(latest); // Just highlight the item
             this.sidebar.initialize = false;
             this.#activatePage(latest);
@@ -214,8 +216,6 @@ export class Dashboard extends LitElement {
         this.page.set(toPass, false);
 
         this.page.checkSyncState().then(() => {
-            this.page.requestUpdate(); // Re-render page
-
             const projectName = info.globalState?.project?.name;
 
             this.subSidebar.header = projectName
@@ -228,6 +228,18 @@ export class Dashboard extends LitElement {
             });
 
             if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
+
+            const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
+            if (skipped) {
+                // Run skip functions
+                Object.entries(page.workflow).forEach(([key, state]) => {
+                    if (typeof state.skip === "function") state.skip();
+                });
+
+                // Skip right over the page if configured as such
+                if (previous.info.previous === this.page) this.page.onTransition(-1);
+                else this.page.onTransition(1);
+            }
         });
     }
 
@@ -259,6 +271,17 @@ export class Dashboard extends LitElement {
 
                 state.active = false;
                 pageState.active = false;
+
+                // Check if page is skipped based on workflow state (if applicable)
+                if (page.workflow) {
+                    const workflow = page.workflow;
+                    const workflowValues = globalState.project?.workflow ?? {};
+                    const skipped = Object.entries(workflow).some(([key, state]) => {
+                        if (!workflowValues[key]) return state.skip;
+                    });
+
+                    pageState.skipped = skipped;
+                }
 
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 

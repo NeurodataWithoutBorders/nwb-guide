@@ -32,15 +32,18 @@ export const textToArray = (value: string) => value.split("\n")
                 const prop = copy[propName];
                 if (prop && typeof prop === "object" && !Array.isArray(prop)) {
                     const internalCopy = (copy[propName] = { ...prop });
-                    if (internalCopy["$ref"]) {
-                        const prevItem = path.slice(-1)[0];
-                        const resolved = parent.properties.definitions?.[prevItem];
+                    const refValue = internalCopy["$ref"]
+                    if (refValue) {
+
+                        const refPath = refValue.split('/').slice(1) // NOTE: Assume from base
+                        const resolved = refPath.reduce((acc, key) => acc[key], parent)
+
                         if (resolved) copy[propName] = resolved;
                         else delete copy[propName]
                     } else {
                         for (let key in internalCopy) {
                             const fullPath = [...path, propName, key];
-                            internalCopy[key] = replaceRefsWithValue(internalCopy[key], fullPath, copy);
+                            internalCopy[key] = replaceRefsWithValue(internalCopy[key], fullPath, parent);
                         }
                     }
                 }
