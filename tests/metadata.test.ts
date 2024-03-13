@@ -205,35 +205,16 @@ test('pop-up inputs work correctly', async () => {
 
     // Validate that changes to keywords are valid
     const keywordsInput = form.getFormElement(['keywords'])
-    const keywordsButton = keywordsInput.shadowRoot.querySelector('nwb-button')
-    const keywordsModal = keywordsButton.onClick()
-    const keywordsNestedElement = keywordsModal.children[0].children[0]
-    const keywordsSubmitButton = keywordsModal.footer
+    const input = keywordsInput.shadowRoot.querySelector('input')
+    const submitButton = keywordsInput.shadowRoot.querySelector('nwb-button')
+    const list = keywordsInput.shadowRoot.querySelector('nwb-list')
+    expect(list.items.length).toBe(0) // No items
 
-    // No empty keyword
-    try {
-        await keywordsSubmitButton.onClick()
-        modalFailed = false
-    } catch (e) {
-        modalFailed = true
-    }
+    input.value = 'test'
+    await submitButton.onClick()
 
-    expect(modalFailed).toBe(true) // Is invalid
-
-    keywordsNestedElement.updateData([tempPropertyKey], 'test')
-
-    keywordsNestedElement.requestUpdate()
-
-    await keywordsNestedElement.rendered
-
-    try {
-        await keywordsSubmitButton.onClick()
-        modalFailed = false
-    } catch (e) {
-        modalFailed = true
-    }
-
-    expect(modalFailed).toBe(false) // Is valid
+    expect(list.items.length).toBe(1) // Has item
+    expect(input.value).toBe('') // Input is cleared
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate(form.results).then(res => false).catch(() => true)

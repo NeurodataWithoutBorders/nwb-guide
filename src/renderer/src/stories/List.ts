@@ -38,12 +38,13 @@ export class List extends LitElement {
 
 
       #empty {
+        margin: 1rem;
         margin-left: -40px;
         color: gray;
       }
 
       :host([unordered]) #empty {
-        margin: 0;
+        margin-left: calc(1rem - 40px) !important;
       }
 
       li {
@@ -74,12 +75,15 @@ export class List extends LitElement {
         margin: 0px;
       }
 
+      :host([unordered]) ol:has(li) {
+        padding: 0px;
+      }
+
 
       :host([unordered]) ol {
         list-style-type: none;
         display: flex;
         flex-wrap: wrap;
-        padding: 0;
       }
 
       :host([unordered]) ol > li {
@@ -124,7 +128,7 @@ export class List extends LitElement {
 
         unordered: {
           type: Boolean,
-          // reflect: true
+          reflect: true
         },
         emptyMessage: {
           type: String,
@@ -416,17 +420,13 @@ export class List extends LitElement {
 
     render() {
 
-
-      this.removeAttribute('unordered')
-      if (this.unordered) this.setAttribute('unordered', '')
-
       this.object = {}
 
       const { items, emptyMessage} = this
 
       return html`
       <ol style=${styleMap(this.listStyles)}>
-        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<li id="empty">${emptyMessage}</li>`}
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
       </ol>`
     }
   }

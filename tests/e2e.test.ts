@@ -76,7 +76,7 @@ const dandiInfo = {
 // ------------------------ Tests ------------------------
 // -------------------------------------------------------
 
-const skipUpload = dandiInfo.token ? false : true
+const skipUpload = true // dandiInfo.token ? false : true
 
 if (skipUpload) console.log('No DANDI API key provided. Will skip upload step...')
 

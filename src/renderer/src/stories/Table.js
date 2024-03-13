@@ -8,6 +8,8 @@ import { emojiFontFamily } from "./globals";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
+const rowSymbol = Symbol("row");
+
 const maxRows = 20;
 
 const isRequired = (col, schema) => {
@@ -166,7 +168,7 @@ export class Table extends LitElement {
         });
     }
 
-    #getData(rows = this.rowHeaders, cols = this.colHeaders) {
+    #getData(rows = Object.keys(this.data), cols = this.colHeaders) {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
@@ -215,6 +217,18 @@ export class Table extends LitElement {
         this.#itemProps = { ...(this.#itemSchema.properties ?? {}) };
     }
 
+    getRowName = (row) =>
+        this.keyColumn ? Object.entries(this.data).find(([k, v]) => v[rowSymbol] === row)?.[0] : row;
+
+    revalidate = (skipped = []) => {
+        this.table.getData().forEach((rowData, i) => {
+            rowData.forEach((value, j) => {
+                const isSkipped = skipped.find(({ row, prop }) => row === i && j === prop);
+                if (!isSkipped) this.table.setDataAtCell(i, j, value);
+            });
+        });
+    };
+
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
 
@@ -256,7 +270,9 @@ export class Table extends LitElement {
             if (foundKey) this.keyColumn = foundKey;
         }
 
-        const rowHeaders = (this.rowHeaders = Object.keys(this.data));
+        Object.keys(this.data).forEach((row, i) =>
+            Object.defineProperty(this.data[row], rowSymbol, { value: i, configurable: true })
+        ); // Set initial row trackers
 
         const displayHeaders = [...colHeaders].map(header);
 
@@ -296,7 +312,7 @@ export class Table extends LitElement {
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
                               [k],
-                              { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
+                              { ...this.data[this.getRowName(row)] }, // Validate on a copy of the parent
                               value,
                               info
                           )
@@ -330,8 +346,16 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (value && k === instanceThis.keyColumn && unresolved[this.row]) {
-                    if (value in instanceThis.data) {
+                if (value && k === instanceThis.keyColumn) {
+                    if (value in instanceThis.data && instanceThis.data[value]?.[rowSymbol] !== this.row) {
+                        // Convert previously valid value to unresolved
+                        const previousKey = instanceThis.getRowName(this.row);
+                        if (previousKey) {
+                            unresolved[this.row] = instanceThis.data[previousKey];
+                            delete instanceThis.data[previousKey];
+                        }
+
+                        // Throw error
                         instanceThis.#handleValidationResult(
                             [{ message: `${header(k)} already exists`, type: "error" }],
                             this.row,
@@ -339,6 +363,19 @@ export class Table extends LitElement {
                         );
                         callback(false);
                         return;
+                    }
+                }
+
+                if (name === "subject_id") {
+                    if (v) {
+                        if (Object.values(this.data).filter((s) => s.subject_id === v).length > 1) {
+                            return [
+                                {
+                                    message: "Subject ID must be unique",
+                                    type: "error",
+                                },
+                            ];
+                        }
                     }
                 }
 
@@ -421,7 +458,7 @@ export class Table extends LitElement {
 
         const data = this.#getData();
 
-        let nRows = rowHeaders.length;
+        let nRows = Object.keys(data).length;
 
         let contextMenu = ["row_below", "remove_row"];
         if (this.#itemSchema.additionalProperties) contextMenu.push("col_right", "remove_col");
@@ -476,9 +513,10 @@ export class Table extends LitElement {
         table.addHook("afterValidate", (isValid, value, row, prop) => {
             const isUserUpdate = initialCellsToUpdate <= validated;
 
+            let rowName = this.getRowName(row);
+
             if (isUserUpdate) {
                 const header = typeof prop === "number" ? colHeaders[prop] : prop;
-                let rowName = this.keyColumn ? rowHeaders[row] : row;
 
                 // NOTE: We would like to allow invalid values to mutate the results
                 // if (isValid) {
@@ -504,7 +542,8 @@ export class Table extends LitElement {
                         this.data[value] = old;
                         delete target[rowName];
                         delete unresolved[row];
-                        rowHeaders[row] = value;
+                        Object.defineProperty(this.data[value], rowSymbol, { value: row, configurable: true }); // Setting row tracker
+                        this.revalidate([{ row, prop }]);
                     }
                 }
 
@@ -548,11 +587,11 @@ export class Table extends LitElement {
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
             physicalRows.map(async (row) => {
-                const rowName = rowHeaders[row];
+                const rowName = this.getRowName(row);
                 // const cols = this.data[rowHeaders[row]]
                 // Object.keys(cols).map(k => cols[k] = '')
                 // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange([ k ], { ...cols },  cols[k])) // Validate with empty values before removing
-                delete this.data[rowHeaders[row]];
+                delete this.data[rowName];
                 delete unresolved[row];
                 this.onUpdate(rowName, null, undefined); // NOTE: Global metadata PR might simply set all data values to undefined
             });

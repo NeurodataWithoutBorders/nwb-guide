@@ -23,9 +23,9 @@ Download `NWB-GUIDE-arm64.dmg <https://github.com/NeurodataWithoutBorders/nwb-gu
 Linux
 -----
 
-Please clone the :linux-fix:`linux-fix <>` branch of the NWB GUIDE and follow the :ref:`Developer Installation instructions<developer_installation>` after the "Clone the Repo" step.
+Please clone the :linux-latest:`linux-latest <>` branch of the NWB GUIDE and follow the :ref:`Developer Installation instructions<developer_installation>` after the "Clone the Repo" step.
 
 .. code-block:: bash
 
-   git clone --branch linux-fix https://github.com/NeurodataWithoutBorders/nwb-guide
+   git clone --branch linux-latest https://github.com/NeurodataWithoutBorders/nwb-guide
    cd nwb-guide
