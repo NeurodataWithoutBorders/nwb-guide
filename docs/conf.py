@@ -66,6 +66,26 @@ autodoc_default_options = {
 }
 add_module_names = False
 
+html_theme_options = {
+    "use_edit_page_button": True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/NeurodataWithoutBorders/nwb-guide",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+    ],
+}
+
+html_context = {
+    # "github_url": "https://github.com", # or your GitHub Enterprise site
+    "github_user": "NeurodataWithoutBorders",
+    "github_repo": "nwb-guide",
+    "github_version": "main",
+    "doc_path": "docs",
+}
+
 
 def _correct_signatures(app, what, name, obj, options, signature, return_annotation):
     if what == "class":

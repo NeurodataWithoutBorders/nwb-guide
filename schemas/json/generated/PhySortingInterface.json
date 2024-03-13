@@ -11,7 +11,10 @@
                     "type": "string"
                 },
                 "exclude_cluster_groups": {
-                    "type": "array"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "verbose": {
                     "type": "boolean",
