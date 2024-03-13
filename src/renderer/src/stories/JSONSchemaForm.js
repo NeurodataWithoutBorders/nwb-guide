@@ -21,6 +21,47 @@ const encode = (str) => {
     }
 };
 
+export const get = (path, object, omitted = [], skipped = []) => {
+    // path = path.slice(this.base.length); // Correct for base path
+    if (!path) throw new Error("Path not specified");
+    return path.reduce((acc, curr, i) => {
+        const tempAcc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str] && acc[str][curr])]?.[curr];
+        if (tempAcc) return tempAcc;
+        else {
+            const level1 = acc?.[skipped.find((str) => acc[str])];
+            if (level1) {
+                // Handle items-like objects
+                const result = get(path.slice(i), level1, omitted, skipped);
+                if (result) return result;
+
+                // Handle pattern properties objects
+                const got = Object.keys(level1).find((key) => {
+                    const result = get(path.slice(i + 1), level1[key], omitted, skipped);
+                    if (result && typeof result === "object") return result; // Schema are objects...
+                });
+
+                if (got) return level1[got];
+            }
+        }
+    }, object);
+};
+
+export const getSchema = (path, schema, base = []) => {
+    if (typeof path === "string") path = path.split(".");
+
+    // NOTE: Still must correct for the base here
+    if (base.length) {
+        const indexOf = path.indexOf(base.slice(-1)[0]);
+        if (indexOf !== -1) path = path.slice(indexOf + 1);
+    }
+
+    // NOTE: Refs are now pre-resolved
+    const resolved = get(path, schema, ["properties", "patternProperties"], ["patternProperties", "items"]);
+    // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
+
+    return resolved;
+};
+
 const additionalPropPattern = "additional";
 
 const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
@@ -235,7 +276,7 @@ export class JSONSchemaForm extends LitElement {
 
         this.groups = props.groups ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
-        this.validateEmptyValues = props.validateEmptyValues ?? true;
+        this.validateEmptyValues = props.validateEmptyValues === undefined ? true : props.validateEmptyValues; // false = validate when not empty, true = always validate, null = never validate
 
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.sort) this.sort = props.sort;
@@ -253,6 +294,62 @@ export class JSONSchemaForm extends LitElement {
         if (props.base) this.base = props.base;
     }
 
+    // Handle wildcards to grab multiple form elements
+    getAllFormElements = (path, config = { forms: true, tables: true, inputs: true }) => {
+        const name = path[0];
+        const upcomingPath = path.slice(1);
+
+        const isWildcard = name === "*";
+        const last = !upcomingPath.length;
+
+        if (isWildcard) {
+            if (last) {
+                const allElements = [];
+                if (config.forms) allElements.push(...this.forms.values());
+                if (config.tables) allElements.push(...this.tables.values());
+                if (config.inputs) allElements.push(...this.inputs.values());
+                return allElements;
+            } else
+                return Object.values(this.forms)
+                    .map((form) => form.getAllFormElements(upcomingPath, config))
+                    .flat();
+        }
+
+        // Get Single element
+        else {
+            const result = this.#getElementOnForm(path);
+            if (!result) return [];
+
+            if (last) {
+                if (result instanceof JSONSchemaForm && config.forms) return [result];
+                else if (result instanceof JSONSchemaInput && config.inputs) return [result];
+                else if (config.tables) return [result];
+
+                return [];
+            } else {
+                if (result instanceof JSONSchemaForm) return result.getAllFormElements(upcomingPath, config);
+                else return [result];
+            }
+        }
+    };
+
+    // Single later only
+    #getElementOnForm = (path, { forms = true, tables = true, inputs = true } = {}) => {
+        if (typeof path === "string") path = path.split(".");
+        if (!path.length) return this;
+
+        const name = path[0];
+
+        const form = this.forms[name];
+        if (form && forms) return form;
+
+        const table = this.tables[name];
+        if (table && tables) return table;
+
+        const foundInput = this.inputs[path.join(".")]; // Check Inputs
+        if (foundInput && inputs) return foundInput;
+    };
+
     // Get the form element defined by the path (stops before table cells)
     getFormElement = (
         path,
@@ -265,24 +362,15 @@ export class JSONSchemaForm extends LitElement {
         if (typeof path === "string") path = path.split(".");
         if (!path.length) return this;
 
-        const name = path[0];
         const updatedPath = path.slice(1);
 
-        const form = this.forms[name]; // Check forms
-        if (!form) {
-            const table = this.tables[name]; // Check tables
-            if (table && tables) return table; // Skip table cells
-        } else if (!updatedPath.length && forms) return form;
+        const result = this.#getElementOnForm(path, { forms, tables, inputs });
+        if (result instanceof JSONSchemaForm) {
+            if (!updatedPath.length) return result;
+            else return result.getFormElement(updatedPath, { forms, tables, inputs });
+        }
 
-        // Check Inputs
-        // const inputContainer = this.shadowRoot.querySelector(`#${encode(path.join("-"))}`);
-        // if (inputContainer && inputs) return inputContainer.querySelector("jsonschema-input");;
-
-        const foundInput = this.inputs[path.join(".")]; // Check Inputs
-        if (foundInput && inputs) return foundInput;
-
-        // Check Nested Form Inputs
-        return form?.getFormElement(updatedPath, { forms, tables, inputs });
+        return result;
     };
 
     #requirements = {};
@@ -387,24 +475,29 @@ export class JSONSchemaForm extends LitElement {
 
                 const isRow = typeof rowName === "number";
 
-                const resolvedValue = e.path.reduce((acc, token) => acc[token], resolved);
+                const resolvedValue = e.instance; // Get offending value
+                const resolvedSchema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
-
                 // Allow for constructing types from object types
-                if (e.message.includes("is not of a type(s)") && "properties" in schema && schema.type === "string")
+                if (
+                    e.message.includes("is not of a type(s)") &&
+                    "properties" in resolvedSchema &&
+                    resolvedSchema.type === "string"
+                )
                     return;
 
                 // Ignore required errors if value is empty
-                if (e.name === "required" && !this.validateEmptyValues && !(e.property in e.instance)) return;
+                if (e.name === "required" && this.validateEmptyValues === null && !(e.property in e.instance)) return;
 
                 // Non-Strict Rule
-                if (schema.strict === false && e.message.includes("is not one of enum values")) return;
+                if (resolvedSchema.strict === false && e.message.includes("is not one of enum values")) return;
 
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
-                    if ((resolvedValue === "NaN") | (resolvedValue === null)) return;
-                    else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                    if (resolvedValue === "NaN") return;
+                    else if (resolvedValue === null) {
+                    } else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
                 }
 
                 const prevHeader = name ? header(name) : "Row";
@@ -422,6 +515,8 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
+        if (this.validateEmptyValues === false) this.validateEmptyValues = true;
+
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
         delete copy.__disabled;
@@ -505,30 +600,7 @@ export class JSONSchemaForm extends LitElement {
         return true;
     };
 
-    #get = (path, object = this.resolved, omitted = [], skipped = []) => {
-        // path = path.slice(this.base.length); // Correct for base path
-        if (!path) throw new Error("Path not specified");
-        return path.reduce((acc, curr, i) => {
-            const tempAcc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str] && acc[str][curr])]?.[curr];
-            if (tempAcc) return tempAcc;
-            else {
-                const level1 = acc?.[skipped.find((str) => acc[str])];
-                if (level1) {
-                    // Handle items-like objects
-                    const result = this.#get(path.slice(i), level1, omitted, skipped);
-                    if (result) return result;
-
-                    // Handle pattern properties objects
-                    const got = Object.keys(level1).find((key) => {
-                        const result = this.#get(path.slice(i + 1), level1[key], omitted, skipped);
-                        if (result && typeof result === "object") return result; // Schema are objects...
-                    });
-
-                    if (got) return level1[got];
-                }
-            }
-        }, object);
-    };
+    #get = (path, object = this.resolved, omitted = [], skipped = []) => get(path, object, omitted, skipped);
 
     #checkRequiredAfterChange = async (localPath) => {
         const path = [...localPath];
@@ -549,22 +621,7 @@ export class JSONSchemaForm extends LitElement {
         return this.#schema;
     }
 
-    getSchema(path, schema = this.schema) {
-        if (typeof path === "string") path = path.split(".");
-
-        // NOTE: Still must correct for the base here
-        if (this.base.length) {
-            const base = this.base.slice(-1)[0];
-            const indexOf = path.indexOf(base);
-            if (indexOf !== -1) path = path.slice(indexOf + 1);
-        }
-
-        // NOTE: Refs are now pre-resolved
-        const resolved = this.#get(path, schema, ["properties", "patternProperties"], ["patternProperties", "items"]);
-        // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
-
-        return resolved;
-    }
+    getSchema = (path, schema = this.schema) => getSchema(path, schema, this.base);
 
     #renderInteractiveElement = (name, info, required, path = [], value, propertyType) => {
         let isRequired = this.#isRequired([...path, name]);
@@ -652,7 +709,7 @@ export class JSONSchemaForm extends LitElement {
                 // if (typeof isRequired === "object" && !Array.isArray(isRequired))
                 //     invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
                 // else
-                if (this.isUndefined(resolved[name]) && this.validateEmptyValues) invalid.push(path);
+                if (this.isUndefined(resolved[name]) && this.validateEmptyValues !== null) invalid.push(path);
             }
         }
 
@@ -874,7 +931,7 @@ export class JSONSchemaForm extends LitElement {
                             type: "error",
                             missing: true,
                         });
-                    } else {
+                    } else if (this.validateEmptyValues === null) {
                         warnings.push({
                             message: `${schema.title ?? header(name)} is a suggested property.`,
                             type: "warning",
