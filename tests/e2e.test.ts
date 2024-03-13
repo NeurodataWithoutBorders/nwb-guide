@@ -16,7 +16,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const screenshotPath = join(__dirname, 'screenshots')
 const guideRootPath = join(homedir(), paths.root)
 const testRootPath = join(guideRootPath, '.test')
-const testDataPath = join(testRootPath, 'test-data')
+const testDataRootPath = join(testRootPath, 'test-data')
+const testDataPath = join(testDataRootPath, 'data')
+const testDatasetPath = join(testDataRootPath, 'dataset')
 
 const alwaysDelete = [
   join(testRootPath, 'pipelines'),
@@ -31,15 +33,39 @@ const alwaysDelete = [
 // -----------------------------------------------------------------------
 
 const testInterfaceInfo = {
-  SpikeGLXRecordingInterface: {
-    format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin'
+  common: {
+    SpikeGLXRecordingInterface: {
+      id: 'SpikeGLX Recording',
+    },
+    PhySortingInterface: {
+      id: 'Phy Sorting'
+    }
   },
-  PhySortingInterface: {
-    format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy'
+  multi: {
+    SpikeGLXRecordingInterface: {
+      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin'
+    },
+    PhySortingInterface: {
+      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy'
+    }
+  },
+  single: {
+    SpikeGLXRecordingInterface: {
+      file_path: join(testDataPath, 'spikeglx', 'Session1_g0', 'Session1_g0_imec0', 'Session1_g0_t0.imec0.ap.bin')
+    },
+    PhySortingInterface: {
+      folder_path: join(testDataPath, 'phy')
+    }
   }
 }
 
-const regenerateTestData = !existsSync(testDataPath) || false // Generate only if doesn't exist
+const subjectInfo = {
+  sex: 'M',
+  species: 'Mus musculus',
+  age: 'P30D'
+}
+
+const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
 
 const dandiInfo = {
   id: '212750',
@@ -57,7 +83,7 @@ if (skipUpload) console.log('No DANDI API key provided. Will skip upload step...
 beforeAll(() => {
 
   if (regenerateTestData) {
-    if (existsSync(testDataPath)) rmSync(testDataPath, { recursive: true })
+    if (existsSync(testDataRootPath)) rmSync(testDataRootPath, { recursive: true })
   }
 
   alwaysDelete.forEach(path => existsSync(path) ? rmSync(path, { recursive: true }) : '')
@@ -183,7 +209,15 @@ describe('E2E Test', () => {
       await takeScreenshot('valid-name', 300)
 
       // Advance to formats page
-      await toNextPage('structure')
+      await toNextPage('workflow')
+
+    })
+
+    test('View the pre-form workflow page', async () => {
+
+        await takeScreenshot('workflow-page', 300)
+        await toNextPage('structure')
+
 
     })
 
@@ -211,38 +245,36 @@ describe('E2E Test', () => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         const [name, info] = Object.entries(interfaces)[0]
-        page.list.add({ key: name, value: name });
+        page.list.add({ key: info.id, value: name });
         page.searchModal.toggle(false);
-      }, testInterfaceInfo)
+      }, testInterfaceInfo.common)
 
       await takeScreenshot('interface-added', 1000)
 
       await evaluate((interfaces) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
-        Object.keys(interfaces).slice(1).forEach(name => page.list.add({ key: name, value: name }))
-      }, testInterfaceInfo)
+        Object.entries(interfaces).slice(1).forEach(([ name, info ]) => page.list.add({ key: info.id, value: name }))
+      }, testInterfaceInfo.common)
 
       await takeScreenshot('all-interfaces-added')
 
-      await toNextPage('locate')
+      // await toNextPage('locate')
+      // await toNextPage('subjects')
+      await toNextPage('sourcedata')
 
     })
 
-    test('Locate all your source data programmatically', async () => {
-
-      await takeScreenshot('pathexpansion-page', 300)
+    // NOTE: Locate data is skipped in single session mode
+    test.skip('Locate all your source data programmatically', async () => {
 
       await evaluate(async () => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
-        page.optional.yes.onClick()
-
         Object.values(page.form.accordions).forEach(accordion => accordion.toggle(true))
+      }, testInterfaceInfo.multi)
 
-      }, testInterfaceInfo)
-
-      await takeScreenshot('pathexpansion-selected')
+      await takeScreenshot('pathexpansion-page')
 
       // Fill out the path expansion information
       await evaluate((interfaceInfo, basePath) => {
@@ -260,8 +292,8 @@ describe('E2E Test', () => {
         dashboard.main.querySelector('main > section').scrollTop = 200
 
       },
-      testInterfaceInfo,
-      join(testDataPath, 'dataset')
+      testInterfaceInfo.multi,
+      testDatasetPath
       )
 
 
@@ -271,7 +303,8 @@ describe('E2E Test', () => {
     })
 
 
-    test('Provide subject information', async () => {
+    // NOTE: Subject information is skipped in single session mode
+    test.skip('Provide subject information', async () => {
 
       await takeScreenshot('subject-page', 300)
 
@@ -303,12 +336,7 @@ describe('E2E Test', () => {
         const data = { ...table.data }
 
         for (let name in data) {
-          data[name] = {
-            ...data[name],
-            sex: 'M',
-            species: 'Mus musculus',
-            age: 'P30D'
-          }
+          data[name] = { ...data[name], ...subjectInfo }
         }
 
         table.data = data // This changes the render but not the update flag
@@ -321,9 +349,42 @@ describe('E2E Test', () => {
 
     })
 
-    test('Review source data information', async () => {
+    // NOTE: This isn't pre-filled in single session mode
+    test.skip('Review source data information', async () => {
 
       await takeScreenshot('sourcedata-page', 100)
+      await toNextPage('metadata')
+
+    })
+
+    test('Specify source data information', async () => {
+
+      await references.page.evaluate(async () => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        Object.values(page.forms[0].form.accordions).forEach(accordion => accordion.toggle(true))
+      })
+
+      await takeScreenshot('sourcedata-page', 100)
+
+      await references.page.evaluate(({ single, common }) => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+
+        Object.entries(common).forEach(([name, info]) => {
+          const form = page.forms[0].form.forms[info.id]
+
+          const interfaceInfo = single[name]
+          for (let key in single[name]) {
+            const input = form.getFormElement([ key ])
+            input.updateData(interfaceInfo[key])
+          }
+        })
+      }, testInterfaceInfo)
+
+      await takeScreenshot('sourcedata-page-specified', 100)
+
+
       await toNextPage('metadata')
 
     })
@@ -337,6 +398,18 @@ describe('E2E Test', () => {
         const page = dashboard.page
         page.forms[0].form.accordions["Subject"].toggle(true)
       })
+
+      // Update for single session
+      await evaluate((subjectInfo) => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        const form = page.forms[0].form.forms['Subject']
+
+        for (let key in subjectInfo) {
+          const input = form.getFormElement([ key ])
+          input.updateData(subjectInfo[key])
+        }
+      }, subjectInfo)
 
       await takeScreenshot('metadata-open', 100)
 

@@ -10,7 +10,6 @@ import { GuidedSubjectsPage } from "./stories/pages/guided-mode/setup/GuidedSubj
 import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSourceData";
 import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata";
 import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload";
-// import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions";
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./stories/Dashboard";
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
@@ -28,6 +27,7 @@ import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 import { InspectPage } from "./stories/pages/inspect/InspectPage";
 import { PreviewPage } from "./stories/pages/preview/PreviewPage";
+import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -91,6 +91,12 @@ const pages = {
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
+                section: sections[0],
+            }),
+
+            workflow: new GuidedPreform({
+                title: "Pipeline Workflow",
+                label: "Pipeline workflow",
                 section: sections[0],
             }),
 

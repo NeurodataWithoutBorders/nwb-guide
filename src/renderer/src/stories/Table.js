@@ -311,7 +311,7 @@ export class Table extends LitElement {
                 try {
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
-                              k,
+                              [k],
                               { ...this.data[this.getRowName(row)] }, // Validate on a copy of the parent
                               value,
                               info
@@ -590,7 +590,7 @@ export class Table extends LitElement {
                 const rowName = this.getRowName(row);
                 // const cols = this.data[rowHeaders[row]]
                 // Object.keys(cols).map(k => cols[k] = '')
-                // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k])) // Validate with empty values before removing
+                // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange([ k ], { ...cols },  cols[k])) // Validate with empty values before removing
                 delete this.data[rowName];
                 delete unresolved[row];
                 this.onUpdate(rowName, null, undefined); // NOTE: Global metadata PR might simply set all data values to undefined

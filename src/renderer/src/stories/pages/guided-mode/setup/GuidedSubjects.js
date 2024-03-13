@@ -18,18 +18,35 @@ export class GuidedSubjectsPage extends Page {
         super(...args);
     }
 
+    #addButton = new Button({
+        label: "Add Subject",
+        onClick: () => this.table.table.alter("insert_row_below"),
+    });
+
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Metadata",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
+            this.#globalModal.open = true;
+        },
+    });
+
+    workflow = {
+        multiple_sessions: {
+            elements: [this.#globalButton, this.#addButton],
+        },
+    };
+
     header = {
         subtitle: "Enter all metadata known about each experiment subject",
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Metadata",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [this.#globalButton],
+    };
+
+    workflow = {
+        multiple_sessions: {
+            skip: () => {},
+        },
     };
 
     // Abort save if subject structure is invalid
@@ -72,8 +89,6 @@ export class GuidedSubjectsPage extends Page {
     footer = {};
 
     updated() {
-        const add = this.query("#addButton");
-        add.onclick = () => this.table.table.alter("insert_row_below");
         super.updated(); // Call if updating data
     }
 
@@ -106,6 +121,8 @@ export class GuidedSubjectsPage extends Page {
     #originalState = {};
 
     render() {
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
+
         const subjects = (this.localState = structuredClone(this.info.globalState.subjects ?? {}));
 
         // Ensure all the proper subjects are in the global state
@@ -122,18 +139,20 @@ export class GuidedSubjectsPage extends Page {
             subjects[subject].identifier = this.#originalState[subject].identifier = Symbol("subject"); // Add identifier to subject
         }
 
+        const contextMenuConfig = { ignore: ["row_below"] };
+
+        if (!hasMultipleSessions) contextMenuConfig.ignore.push("remove_row");
+
         this.table = new Table({
             schema: {
                 type: "array",
                 items: getSubjectSchema(),
             },
             data: subjects,
-            globals: this.info.globalState.project.Subject,
+            globals: hasMultipleSessions ? this.info.globalState.project.Subject : undefined,
             keyColumn: "subject_id",
             validateEmptyCells: ["subject_id", "sessions"],
-            contextMenu: {
-                ignore: ["row_below"],
-            },
+            contextMenu: contextMenuConfig,
             onThrow: (message, type) => this.notify(message, type),
             onOverride: (name) => {
                 this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
@@ -163,7 +182,7 @@ export class GuidedSubjectsPage extends Page {
         return html`
             <div style="display: flex; justify-content: center; flex-wrap: wrap;">
                 <div style="width: 100%;">${this.table}</div>
-                <nwb-button id="addButton">Add Subject</nwb-button>
+                ${this.#addButton}
             </div>
         `;
     }
