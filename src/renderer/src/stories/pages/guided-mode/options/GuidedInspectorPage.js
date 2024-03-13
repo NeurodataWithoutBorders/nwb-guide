@@ -9,7 +9,7 @@ import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../prev
 const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
 import { run } from "./utils.js";
-import { InspectorList } from "../../../preview/inspector/InspectorList.js";
+import { InspectorList, InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { path as nodePath } from "../../../../electron";
@@ -19,6 +19,37 @@ import { InfoBox } from "../../../InfoBox";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
+
+const legendEntries = [
+    { type: "error", header: "Error", message: "Must be fixed" },
+    { type: "warning", header: "Warning", message: "Can be safely ignored" },
+];
+
+const legend = html`
+    <div style="padding-top: 20px;">
+        <h4>Legend</h4>
+        <div style="display: flex; gap: 25px;">
+            ${legendEntries.map(({ type, header, message }) => {
+                const item = new InspectorListItem({
+                    type,
+                    message: html`<h3 style="margin: 0;">${header}</h3>
+                        <span>${message}</span>`,
+                });
+                item.style.width = "max-content";
+                return item;
+            })}
+            <div>
+                <p>
+                    To fix issues specific to a single file, you can edit the <b>file metadata</b> on the previous page.
+                </p>
+                <p>
+                    To fix issues across many files, you may want to edit the <b>global metadata</b> on the previous
+                    page.
+                </p>
+            </div>
+        </div>
+    </div>
+`;
 
 const filter = (list, toFilter) => {
     return list.filter((item) => {
@@ -39,9 +70,10 @@ export class GuidedInspectorPage extends Page {
     constructor(...args) {
         super(...args);
         this.style.height = "100%"; // Fix main section
+
         Object.assign(this.style, {
-            display: "flex",
-            flexDirection: "column",
+            display: "grid",
+            gridTemplateRows: "calc(100% - 140px) 1fr",
         });
     }
 
@@ -112,14 +144,7 @@ export class GuidedInspectorPage extends Page {
                 })
             )
             .flat();
-        return html` ${new InfoBox({
-                header: "How do I fix these suggestions?",
-                content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues
-                    shared across files.`,
-            })}
-
-            <br />
-
+        return html`
             ${until(
                 (async () => {
                     if (fileArr.length <= 1) {
@@ -142,7 +167,14 @@ export class GuidedInspectorPage extends Page {
 
                         const items = this.report.messages;
 
-                        return new InspectorList({ items, emptyMessage });
+                        const list = new InspectorList({ items, emptyMessage });
+                        const listBorder = "1px solid gainsboro";
+                        Object.assign(list.style, {
+                            height: "100%",
+                            borderBottom: listBorder,
+                        });
+
+                        return html`${list}${legend}`;
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
@@ -183,7 +215,8 @@ export class GuidedInspectorPage extends Page {
                     }, {});
 
                     Object.keys(instances).forEach((subLabel) => {
-                        const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                        // const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                        const subItems = filter(items, { file_path: `${subLabel}_ses-` }); // NOTE: This will not run on web-only now
                         const path = getSharedPath(subItems.map((item) => item.file_path));
                         const filtered = truncateFilePaths(subItems, path);
 
@@ -208,10 +241,11 @@ export class GuidedInspectorPage extends Page {
                         instances: allInstances,
                     });
 
-                    return manager;
+                    return html`${manager}${legend}`;
                 })(),
                 "Loading inspector report..."
-            )}`;
+            )}
+        `;
     }
 }
 
