@@ -1,14 +1,14 @@
 {
     "required": [],
     "properties": {
-        "SpikeGLXNIDQInterface": {
+        "CellExplorerRecordingInterface": {
             "required": [
-                "file_path"
+                "folder_path"
             ],
             "properties": {
-                "file_path": {
-                    "format": "file",
-                    "description": "Path to SpikeGLX .nidq file.",
+                "folder_path": {
+                    "format": "directory",
+                    "description": "The folder where the session data is located. It should contain a\n`{folder.name}.session.mat` file and the binary files `{folder.name}.dat`\nor `{folder.name}.lfp` for the LFP interface.",
                     "type": "string"
                 },
                 "verbose": {
@@ -16,14 +16,9 @@
                     "type": "boolean",
                     "default": true
                 },
-                "load_sync_channel": {
-                    "description": "Whether to load the last channel in the stream, which is typically used for synchronization.\nIf True, then the probe is not loaded.",
-                    "type": "boolean",
-                    "default": false
-                },
                 "es_key": {
                     "type": "string",
-                    "default": "ElectricalSeriesNIDQ"
+                    "default": "ElectricalSeries"
                 }
             },
             "type": "object",

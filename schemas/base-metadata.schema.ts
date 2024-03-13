@@ -4,6 +4,8 @@ import { header, replaceRefsWithValue } from '../src/renderer/src/stories/forms/
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
+const uvMathFormat = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
+
 function getSpeciesNameComponents(arr: any[]) {
     const split = arr[arr.length - 1].split(' - ')
     return {
@@ -11,6 +13,7 @@ function getSpeciesNameComponents(arr: any[]) {
         label: split[1]
     }
 }
+
 
 
 function getSpeciesInfo(species: any[][] = []) {
@@ -32,6 +35,10 @@ function getSpeciesInfo(species: any[][] = []) {
         enum: species.map(arr => getSpeciesNameComponents(arr).name), // Remove common names so this passes the validator
     }
 
+}
+
+const propsToInclude = {
+    ecephys: ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"]
 }
 
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
@@ -89,8 +96,29 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     // Override description of keywords
     nwbProps.keywords.description = 'Terms to describe your dataset (e.g. Neural circuits, V1, etc.)' // Add description to keywords
 
-
+    const ecephys = copy.properties.Ecephys
     const ophys = copy.properties.Ophys
+
+    if (ecephys) {
+
+        // Change rendering order for electrode table columns
+        const electrodesProp = ecephys.properties["Electrodes"]
+        for (let name in electrodesProp.properties) {
+            const interfaceProps = electrodesProp.properties[name].properties
+            const electrodeItems = interfaceProps["Electrodes"].items.properties
+            const uvProperties = ["gain_to_uV", "offset_to_uV"]
+
+            uvProperties.forEach(prop => {
+                electrodeItems[prop] = {}
+                electrodeItems[prop].title = prop.replace('uV', uvMathFormat)
+                console.log(electrodeItems[prop])
+            })
+            interfaceProps["Electrodes"].items.order = ["channel_name", "group_name", "shank_electrode_number", ...uvProperties];
+            interfaceProps["ElectrodeColumns"].items.order = ["name", "description", "data_type"];
+
+        }
+
+    }
 
     if (ophys) {
 
@@ -98,8 +126,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
         const getProp = (name: string) => ophys.properties[name]
 
-        if (getProp("TwoPhotonSeries")) {
-            const tpsItemSchema = getProp("TwoPhotonSeries").items
+        const tpsItemSchema = getProp("TwoPhotonSeries")?.items
+
+        if (tpsItemSchema) {
+
             tpsItemSchema.order = [
                 "name",
                 "description",
@@ -111,8 +141,9 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         }
 
 
-        if (getProp("ImagingPlane")) {
-            const imagingPlaneItems = getProp("ImagingPlane").items
+        const imagingPlaneItems = getProp("ImagingPlane")?.items
+
+        if (imagingPlaneItems) {
             imagingPlaneItems.order = [
                 "name",
                 "description",
