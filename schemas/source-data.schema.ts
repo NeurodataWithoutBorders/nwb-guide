@@ -5,14 +5,12 @@ export default function preprocessSourceDataSchema (schema) {
     // Abstract across different interfaces
     Object.entries(schema.properties ?? {}).forEach(([key, schema]: [string, any]) => {
 
-            if (key === 'VideoInterface' || key === 'AudioInterface') {
-                if (schema.properties.file_paths) {
-                    Object.assign(schema.properties.file_paths, {
-                        items: { type: 'string' },
-                        description: '<b>Only one file supported at this time.</b> Multiple file support coming soon.',
-                        maxItems: 1,
-                    })
-                }
+            if (schema.properties.file_paths) {
+                Object.assign(schema.properties.file_paths, {
+                    items: { type: 'string' },
+                    description: '<b>Only one file supported at this time.</b> Multiple file support coming soon.',
+                    maxItems: 1,
+                })
             }
 
             // Do not show steps
