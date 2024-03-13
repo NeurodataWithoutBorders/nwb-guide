@@ -129,7 +129,7 @@ export class NavigationSidebar extends LitElement {
               class="
                 guided--nav-bar-section-page
                 hidden
-                ${state.visited ? " completed" : " not-completed"}
+                ${state.visited && !state.skipped ? " completed" : " not-completed"}
                 ${state.active ? "active" : ""}"f
               "
               @click=${() => this.onClick(id)}

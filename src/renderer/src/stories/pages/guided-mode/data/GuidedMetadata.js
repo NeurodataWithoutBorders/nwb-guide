@@ -28,7 +28,6 @@ import globalIcon from "../../../assets/global.svg?raw";
 const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
     Ophys: {
-        // NOTE: Get this to work
         "*": {
             starting_time: true,
             rate: true,
@@ -53,6 +52,18 @@ const propsToIgnore = {
             resolution: true,
             dimension: true,
             device: true,
+        },
+    },
+    Ecephys: {
+        UnitProperties: true,
+        ElectricalSeriesLF: true,
+        ElectricalSeriesAP: true,
+        Electrodes: {
+            "*": {
+                location: true,
+                group: true,
+                contact_vector: true,
+            },
         },
     },
     Icephys: true, // Always ignore icephys metadata (for now)
@@ -89,17 +100,23 @@ export class GuidedMetadataPage extends ManagedPage {
 
     form;
 
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Metadata",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project);
+            this.#globalModal.open = true;
+        },
+    });
+
+    workflow = {
+        multiple_sessions: {
+            elements: [this.#globalButton],
+        },
+    };
+
     header = {
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Metadata",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project);
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [this.#globalButton],
         subtitle: "Edit all metadata for this conversion at the session level",
     };
 
@@ -145,6 +162,8 @@ export class GuidedMetadataPage extends ManagedPage {
     }
 
     createForm = ({ subject, session, info }) => {
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
+
         // const results = createResults({ subject, info }, this.info.globalState);
 
         const { globalState } = this.info;
@@ -152,35 +171,16 @@ export class GuidedMetadataPage extends ManagedPage {
         const results = info.metadata; // Edited form info
 
         // Define the appropriate global metadata to fill empty values in the form
-        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, globalState);
+        const aggregateGlobalMetadata = resolveGlobalOverrides(subject, globalState, hasMultipleSessions);
 
         // Define the correct instance identifier
         const instanceId = `sub-${subject}/ses-${session}`;
 
         // Ignore specific metadata in the form by removing their schema value
-        const schema = globalState.schema.metadata[subject][session];
+        const schema = preprocessMetadataSchema(globalState.schema.metadata[subject][session]);
         delete schema.description;
 
-        // Only include a select group of Ecephys metadata here
-        if ("Ecephys" in schema.properties) {
-            const toInclude = ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"];
-            const ecephysProps = schema.properties.Ecephys.properties;
-            Object.keys(ecephysProps).forEach((k) => (!toInclude.includes(k) ? delete ecephysProps[k] : ""));
-
-            // Change rendering order for electrode table columns
-            const ogElectrodeItemSchema = ecephysProps["Electrodes"].items.properties;
-            const order = ["channel_name", "group_name", "shank_electrode_number"];
-            const sortedProps = Object.keys(ogElectrodeItemSchema).sort((a, b) => {
-                const iA = order.indexOf(a);
-                if (iA === -1) return 1;
-                const iB = order.indexOf(b);
-                if (iB === -1) return -1;
-                return iA - iB;
-            });
-
-            const newElectrodeItemSchema = (ecephysProps["Electrodes"].items.properties = {});
-            sortedProps.forEach((k) => (newElectrodeItemSchema[k] = ogElectrodeItemSchema[k]));
-        }
+        const ephys = schema.properties.Ecephys;
 
         resolveMetadata(subject, session, globalState);
 
@@ -188,12 +188,11 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
-        const resolvedSchema = preprocessMetadataSchema(schema);
-        const ophys = resolvedSchema.properties.Ophys;
+        const ophys = schema.properties.Ophys;
         if (ophys) {
             // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
             drillSchemaProperties(
-                resolvedSchema,
+                schema,
                 (path, schema, target, isPatternProperties, parentSchema) => {
                     if (path[0] === "Ophys") {
                         const name = path.slice(-1)[0];
@@ -217,10 +216,11 @@ export class GuidedMetadataPage extends ManagedPage {
             );
         }
 
+        console.log("schema", structuredClone(schema), structuredClone(results));
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
-            schema: resolvedSchema,
+            schema,
             results,
             globals: aggregateGlobalMetadata,
 
@@ -402,9 +402,8 @@ export class GuidedMetadataPage extends ManagedPage {
                 }
             },
 
-            renderTable: function (name, metadata) {
+            renderTable: function (name, metadata, fullPath) {
                 const updatedSchema = structuredClone(metadata.schema);
-
                 metadata.schema = updatedSchema;
 
                 // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors

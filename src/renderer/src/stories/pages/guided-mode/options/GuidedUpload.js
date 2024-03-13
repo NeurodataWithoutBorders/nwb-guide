@@ -121,6 +121,8 @@ export class GuidedUploadPage extends Page {
                 project: globalState.project.name,
             });
 
+            this.unsavedUpdates = true;
+
             return this.to(1);
         },
     };
