@@ -33,6 +33,7 @@ function resolveDateTime(value) {
 export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
+    const relativePath = this.form?.base ? fullPath.slice(this.form.base.length) : fullPath;
 
     const schema = this.schema;
     const validateOnChange = this.validateOnChange;
@@ -230,6 +231,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         };
 
         const table = this.renderTable(id, tableMetadata, fullPath);
+
         return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
     };
 
@@ -266,10 +268,10 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         ignore: nestedIgnore, // According to schema
 
         onUpdate: function () {
-            return onUpdate.call(this, fullPath, this.data); // Update all table data
+            return onUpdate.call(this, relativePath, this.data); // Update all table data
         },
 
-        validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
+        validateOnChange: (...args) => commonValidationFunction(relativePath, ...args),
 
         ...commonTableMetadata,
     };
@@ -922,7 +924,9 @@ export class JSONSchemaInput extends LitElement {
                     });
                 }
 
-                const table = createTable.call(this, resolvedFullPath, {
+                const externalPath = this.form ? [...this.form.base, ...resolvedFullPath] : resolvedFullPath;
+
+                const table = createTable.call(this, externalPath, {
                     onUpdate: updateFunction,
                     onThrow: this.#onThrow,
                 }); // Ensure change propagates
