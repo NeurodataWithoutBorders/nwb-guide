@@ -66,10 +66,7 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
                     return acc;
                 }, {}),
 
-                structure: {
-                    keep_existing_data: true,
-                    state: false,
-                },
+                structure: {},
 
                 results: {
                     [subjectId]: sessions.reduce((acc, sessionId) => {

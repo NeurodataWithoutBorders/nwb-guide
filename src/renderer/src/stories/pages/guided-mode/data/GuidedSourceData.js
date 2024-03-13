@@ -42,19 +42,25 @@ export class GuidedSourceDataPage extends ManagedPage {
         merge(this.localState, this.info.globalState);
     };
 
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Source Data",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
+            this.#globalModal.open = true;
+        },
+    });
+
     header = {
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Source Data",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [this.#globalButton],
         subtitle:
             "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
+    };
+
+    workflow = {
+        multiple_sessions: {
+            elements: [this.#globalButton],
+        },
     };
 
     footer = {
@@ -151,6 +157,8 @@ export class GuidedSourceDataPage extends ManagedPage {
     };
 
     createForm = ({ subject, session, info }) => {
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
+
         const instanceId = `sub-${subject}/ses-${session}`;
 
         const schema = this.info.globalState.schema.source_data;
@@ -162,7 +170,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             results: info.source_data,
             emptyMessage: "No source data required for this session.",
             ignore: propsToIgnore,
-            globals: this.info.globalState.project.SourceData,
+            globals: hasMultipleSessions ? this.info.globalState.project.SourceData : undefined,
             onOverride: (name) => {
                 this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
@@ -209,6 +217,15 @@ export class GuidedSourceDataPage extends ManagedPage {
     disconnectedCallback() {
         super.disconnectedCallback();
         if (this.#globalModal) this.#globalModal.remove();
+    }
+
+    updated() {
+        const dashboard = document.querySelector("nwb-dashboard");
+        const page = dashboard.page;
+        setTimeout(() => {
+            console.log(page.forms[0].form.accordions["SpikeGLX Recording"]);
+        });
+        console.log(page.forms[0].form.accordions);
     }
 
     render() {

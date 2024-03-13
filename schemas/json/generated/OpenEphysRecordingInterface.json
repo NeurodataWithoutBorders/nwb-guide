@@ -13,6 +13,9 @@
                 "stream_name": {
                     "type": "string"
                 },
+                "block_index": {
+                    "type": "number"
+                },
                 "verbose": {
                     "type": "boolean",
                     "default": true

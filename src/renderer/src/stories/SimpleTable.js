@@ -119,8 +119,13 @@ export class SimpleTable extends LitElement {
                 z-index: 1;
             }
 
+            table tr:first-child td {
+                border-top: 0px;
+            }
+
             th {
                 border-right: 1px solid gray;
+                border-bottom: 1px solid gray;
                 color: #222;
                 font-weight: 400;
                 text-align: center;
@@ -503,7 +508,7 @@ export class SimpleTable extends LitElement {
                     Object.keys(cols).map((k) => (cols[k] = ""));
                     if (this.validateOnChange)
                         Object.keys(cols).map((k) => {
-                            const res = this.validateOnChange(k, { ...cols }, cols[k]);
+                            const res = this.validateOnChange([k], { ...cols }, cols[k]);
                             if (typeof res === "function") res();
                         });
 
