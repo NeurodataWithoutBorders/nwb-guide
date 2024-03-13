@@ -6,6 +6,8 @@ import searchSVG from "./assets/search.svg?raw";
 import tippy from "tippy.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+const ALTERNATIVE_MODES = ["input", "append"];
+
 export class Search extends LitElement {
     constructor({
         value,
@@ -15,6 +17,7 @@ export class Search extends LitElement {
         headerStyles = {},
         disabledLabel,
         onSelect,
+        strict = false,
     } = {}) {
         super();
         this.#value = value;
@@ -23,15 +26,18 @@ export class Search extends LitElement {
         this.disabledLabel = disabledLabel;
         this.listMode = listMode;
         this.headerStyles = headerStyles;
+        this.strict = strict;
         if (onSelect) this.onSelect = onSelect;
 
-        document.addEventListener("click", () => this.submit());
+        // document.addEventListener("click", () => this.#close());
     }
 
-    submit = () => {
-        if (this.listMode === "click" && this.getAttribute("interacted") === "true") {
+    #close = () => {
+        if (this.listMode === "input" && this.getAttribute("interacted") === "true") {
             this.setAttribute("interacted", false);
             this.#onSelect(this.getSelectedOption());
+        } else if (this.listMode !== "list") {
+            this.setAttribute("active", false);
         }
     };
 
@@ -41,10 +47,17 @@ export class Search extends LitElement {
         return value && typeof value === "object";
     }
 
+    #getOption = ({ label, value } = {}) => {
+        return this.options.find((item) => {
+            if (label && item.label === label) return true;
+            if (value && value === item.value) return true;
+        });
+    };
+
     getSelectedOption = () => {
-        const value = (this.shadowRoot.querySelector("input") ?? this).value;
-        const matched = this.options.find((item) => item.label === value);
-        return matched ?? { value };
+        const inputValue = (this.shadowRoot.querySelector("input") ?? this).value;
+        const matched = this.#getOption({ label: inputValue });
+        return matched ?? { value: inputValue };
     };
 
     get value() {
@@ -104,7 +117,8 @@ export class Search extends LitElement {
                 overflow: auto;
             }
 
-            :host([listmode="click"]) ul {
+            :host([listmode="input"]) ul,
+            :host([listmode="append"]) ul {
                 position: absolute;
                 top: 38px;
                 left: 0;
@@ -125,7 +139,18 @@ export class Search extends LitElement {
                 height: 20px;
             }
 
-            :host([listmode="click"]) svg {
+            a {
+                text-decoration: none;
+            }
+
+            a:after {
+                content: "🔗";
+                padding-left: 2px;
+                font-size: 60%;
+            }
+
+            :host([listmode="input"]) svg,
+            :host([listmode="append"]) svg {
                 position: absolute;
                 top: 50%;
                 padding: 0px;
@@ -202,6 +227,7 @@ export class Search extends LitElement {
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
             listMode: { type: String, reflect: true },
+            strict: { type: Boolean, reflect: true },
         };
     }
 
@@ -218,7 +244,8 @@ export class Search extends LitElement {
         });
 
         this.#initialize();
-        if (this.listMode !== "click") this.#populate();
+
+        if (!ALTERNATIVE_MODES.includes(this.listMode)) this.#populate();
     }
 
     onSelect = (id, value) => {};
@@ -228,11 +255,21 @@ export class Search extends LitElement {
     };
 
     #onSelect = (option) => {
+        const inputMode = this.listMode === "input";
         const input = this.shadowRoot.querySelector("input");
 
-        if (this.listMode === "click") {
+        const selectedOption = this.#getOption({ value: option.value });
+
+        if (inputMode) this.setAttribute("active", false);
+
+        if (this.strict && !selectedOption) {
+            input.value = this.#value.label;
+            return;
+        }
+
+        if (inputMode) {
+            this.value = selectedOption ?? option;
             input.value = this.#displayValue(option);
-            this.setAttribute("active", false);
             return this.onSelect(option);
         }
 
@@ -303,6 +340,8 @@ export class Search extends LitElement {
         this.setAttribute("interacted", true);
     };
 
+    #ignore = false;
+
     render() {
         this.categories = {};
 
@@ -352,6 +391,7 @@ export class Search extends LitElement {
 
                     listItemElement.addEventListener("click", (clickEvent) => {
                         clickEvent.stopPropagation();
+                        if (this.#ignore) return (this.#ignore = false);
                         this.#onSelect(option);
                     });
 
@@ -363,17 +403,23 @@ export class Search extends LitElement {
                     label.classList.add("label");
                     label.innerText = option.label;
 
-                    const info = document.createElement("span");
+                    if (option.description || option.link) {
+                        const info = option.link ? document.createElement("a") : document.createElement("span");
+                        if (option.link) {
+                            info.setAttribute("data-link", true);
+                            info.href = option.link;
+                            info.target = "_blank";
+                        }
 
-                    if (option.description) {
                         info.innerText = "ℹ️";
                         label.append(info);
 
-                        tippy(info, {
-                            content: `<p>${option.description}</p>`,
-                            allowHTML: true,
-                            placement: "right",
-                        });
+                        if (option.description)
+                            tippy(info, {
+                                content: `<p>${option.description}</p>`,
+                                allowHTML: true,
+                                placement: "right",
+                            });
                     }
 
                     container.appendChild(label);
@@ -443,7 +489,7 @@ export class Search extends LitElement {
     })}>
       <input placeholder="Type here to search" value=${valueToDisplay} @click=${(clickEvent) => {
           clickEvent.stopPropagation();
-          if (this.listMode === "click") {
+          if (ALTERNATIVE_MODES.includes(this.listMode)) {
               const input = clickEvent.target.value;
               this.#populate(input);
           }
@@ -456,8 +502,15 @@ export class Search extends LitElement {
 
       @blur=${(blurEvent) => {
           const relatedTarget = blurEvent.relatedTarget;
-          if (relatedTarget && relatedTarget.classList.contains("option")) return;
-          this.submit();
+          if (relatedTarget) {
+              if (relatedTarget.classList.contains("option")) return;
+              if (relatedTarget.hasAttribute("data-link")) {
+                  this.#ignore = true;
+                  return;
+              }
+          }
+
+          this.#close();
       }}
 
       ></input>
