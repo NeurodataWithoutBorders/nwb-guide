@@ -158,8 +158,6 @@ async function getAPIKey(staging = false) {
 
     const isInvalid = !errors || errors.length;
 
-    console.log("GETTING API KEY", DANDI, api_key, staging, isInvalid, errors);
-
     if (isInvalid) {
         const modal = new Modal({
             header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
@@ -335,8 +333,7 @@ export class UploadsPage extends Page {
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
 
-                const files = this.form.resolved.filesystem_paths;
-                await uploadToDandi.call(this, { ...global.data.uploads });
+                const results = await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
 
@@ -345,7 +342,7 @@ export class UploadsPage extends Page {
                 const summary = new DandiResults({
                     id: globalState.dandiset,
                     files: {
-                        subject: files.map((file) => {
+                        subject: results.map((file) => {
                             return { file };
                         }),
                     },
@@ -366,6 +363,7 @@ export class UploadsPage extends Page {
                 return (this.form = new JSONSchemaForm({
                     results: globalState,
                     schema: dandiSchema,
+                    validateEmptyValues: false,
                     controls: {
                         dandiset: [
                             new Button({

@@ -569,9 +569,9 @@ def upload_multiple_filesystem_objects_to_dandi(**kwargs):
     innerKwargs = {**kwargs}
     del innerKwargs["filesystem_paths"]
     innerKwargs["nwb_folder_path"] = tmp_folder_path
-    result = upload_folder_to_dandi(**innerKwargs)
+    results = upload_folder_to_dandi(**innerKwargs)
     rmtree(tmp_folder_path)
-    return result
+    return results
 
 
 def upload_folder_to_dandi(
