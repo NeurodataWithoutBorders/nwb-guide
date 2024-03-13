@@ -55,11 +55,27 @@ export async function createDandiset(results = {}) {
         paddingBottom: "0px",
     });
 
+    const updateNIHInput = (state) => {
+        const nihInput = form.getFormElement(["nih_award_number"]);
+
+        const isEmbargoed = !!state;
+
+        // Show the NIH input if embargo is set
+        if (isEmbargoed) nihInput.removeAttribute("hidden");
+        else nihInput.setAttribute("hidden", "");
+
+        // Make the NIH input required if embargo is set
+        nihInput.required = isEmbargoed;
+    };
+
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
         results,
+        validateEmptyValues: false, // Only show errors after submission
         validateOnChange: async (name, parent) => {
             const value = parent[name];
+
+            if (name === "embargo_status") return updateNIHInput(value);
 
             if (name === "nih_award_number") {
                 if (value)
@@ -157,8 +173,6 @@ async function getAPIKey(staging = false) {
     const errors = await validateDANDIApiKey(api_key, staging);
 
     const isInvalid = !errors || errors.length;
-
-    console.log("GETTING API KEY", DANDI, api_key, staging, isInvalid, errors);
 
     if (isInvalid) {
         const modal = new Modal({
@@ -335,8 +349,7 @@ export class UploadsPage extends Page {
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
 
-                const files = this.form.resolved.filesystem_paths;
-                await uploadToDandi.call(this, { ...global.data.uploads });
+                const results = await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
 
@@ -345,7 +358,7 @@ export class UploadsPage extends Page {
                 const summary = new DandiResults({
                     id: globalState.dandiset,
                     files: {
-                        subject: files.map((file) => {
+                        subject: results.map((file) => {
                             return { file };
                         }),
                     },
@@ -366,6 +379,7 @@ export class UploadsPage extends Page {
                 return (this.form = new JSONSchemaForm({
                     results: globalState,
                     schema: dandiSchema,
+                    validateEmptyValues: false,
                     controls: {
                         dandiset: [
                             new Button({
