@@ -454,6 +454,8 @@ export class JSONSchemaForm extends LitElement {
         if (!localPath.length) return;
 
         const parent = this.shadowRoot.querySelector(`#${encode(localPath)}`);
+        if (!parent) return;
+
         const container = parent.querySelector(`.${type}`);
         if (!container) return;
 
