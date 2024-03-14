@@ -101,6 +101,12 @@ const componentCSS = `
       width:100%;
     }
 
+    .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
     #empty {
         display: flex;
         align-items: center;
@@ -427,7 +433,15 @@ export class JSONSchemaForm extends LitElement {
 
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
-        const container = this.shadowRoot.querySelector(`#${encode(name)} .${type}`);
+        const parent = this.shadowRoot.querySelector(`#${encode(name)}`);
+        let container = parent.querySelector(`.${type}`);
+
+        if (!container) {
+            container = document.createElement("div");
+            container.classList.add(type);
+            parent.append(container);
+        }
+
         const item = new InspectorListItem(message);
         container.appendChild(item);
     };
@@ -437,16 +451,16 @@ export class JSONSchemaForm extends LitElement {
 
         if (!localPath.length) return;
 
-        const container = this.shadowRoot.querySelector(`#${encode(localPath)} .${type}`);
+        const parent = this.shadowRoot.querySelector(`#${encode(localPath)}`);
+        const container = parent.querySelector(`.${type}`);
+        if (!container) return 
 
-        if (container) {
-            const nChildren = container.children.length;
-            container.innerHTML = "";
+        const nChildren = container.children.length;
+        container.innerHTML = "";
 
-            // Track errors and warnings
-            if (type === "errors") this.#nErrors -= nChildren;
-            if (type === "warnings") this.#nWarnings -= nChildren;
-        }
+        // Track errors and warnings
+        if (type === "errors") this.#nErrors -= nChildren;
+        if (type === "warnings") this.#nWarnings -= nChildren;
     };
 
     status;
@@ -668,9 +682,6 @@ export class JSONSchemaForm extends LitElement {
         return html`
             <div id=${encode(localPath.join("-"))} class="form-section">
                 ${interactiveInput}
-                <div class="errors"></div>
-                <div class="warnings"></div>
-                <div class="info"></div>
             </div>
         `;
     };
