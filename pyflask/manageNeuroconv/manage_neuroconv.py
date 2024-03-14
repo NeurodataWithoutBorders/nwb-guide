@@ -12,12 +12,17 @@ from typing import Dict, Optional
 from shutil import rmtree, copytree
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from tqdm_publisher import TQDMPublisher
 
 from sse import MessageAnnouncer
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 announcer = MessageAnnouncer()
 
+class TQDMProgressBar(TQDMPublisher):
+    def __init__(self, iterable, on_progress_update: callable, **tqdm_kwargs):
+        super().__init__(iterable, **tqdm_kwargs)
+        self.subscribe(lambda format_dict: on_progress_update(dict(progress_bar_id=self.id, format_dict=format_dict)))
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 EXTRA_RECORDING_INTERFACE_PROPERTIES = {
@@ -736,7 +741,7 @@ def inspect_nwb_file(payload):
     from nwbinspector import inspect_nwbfile, load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
+    
     messages = list(
         inspect_nwbfile(
             ignore=[
@@ -764,8 +769,16 @@ def inspect_nwb_folder(payload):
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
+    request_id = payload.get("request_id")
+    if request_id:
+        payload.pop("request_id")
+
     kwargs = dict(
         n_jobs=-2,  # uses number of CPU - 1
+        progress_bar_class = TQDMProgressBar,
+        progress_bar_options= dict(
+            on_progress_update = lambda message: announcer.announce(dict(request_id=request_id, **message))
+        ),
         ignore=[
             "check_description",
             "check_data_orientation",
@@ -811,9 +824,9 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
     return folder_path
 
 
-def inspect_multiple_filesystem_objects(paths):
+def inspect_multiple_filesystem_objects(paths, **kwargs):
     tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
-    result = inspect_nwb_folder({"path": tmp_folder_path})
+    result = inspect_nwb_folder({"path": tmp_folder_path, **kwargs})
     rmtree(tmp_folder_path)
     return result
 

@@ -6,16 +6,14 @@ export default {
 
 const Template = (args) => new ProgressBar(args);
 
-const b = 0;
-const tsize = 50;
-const bsize = 1;
+const n = 0;
+const total = 50;
 
 export const Default = Template.bind({});
 Default.args = {
     value: {
-        b,
-        bsize,
-        tsize,
+        n,
+        total,
     },
 };
 
@@ -25,8 +23,8 @@ function sleep(ms) {
 
 Default.play = async ({ canvasElement }) => {
     const progressBar = canvasElement.querySelector("nwb-progress");
-    for (let i = 1; i <= tsize; i++) {
+    for (let i = 1; i <= total; i++) {
         await sleep(1000);
-        progressBar.value = { b: i, tsize };
+        progressBar.value = { n: i, total };
     }
 };

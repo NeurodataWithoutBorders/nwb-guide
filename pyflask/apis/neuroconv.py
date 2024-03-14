@@ -252,7 +252,7 @@ class InspectNWBFolder(Resource):
                     return inspect_nwb_folder({"path": paths[0], **kwargs})
 
             else:
-                return inspect_multiple_filesystem_objects(paths)
+                return inspect_multiple_filesystem_objects(paths, **kwargs)
 
         except Exception as exception:
             if notBadRequestException(exception):

@@ -1,12 +1,13 @@
 import { LitElement, html } from "lit";
-import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
+import { runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
 import { randomizeElements, mapSessions, merge } from "./utils.js";
 
-import { ProgressBar } from "../ProgressBar";
 import { resolveMetadata } from "./guided-mode/data/utils.js";
 import Swal from "sweetalert2";
+import { createProgressPopup } from "../utils/progress.js";
+
 
 export class Page extends LitElement {
     // static get styles() {
@@ -152,38 +153,19 @@ export class Page extends LitElement {
 
         const results = {};
 
-        if (!("showCancelButton" in options)) {
-            options.showCancelButton = true;
-            options.customClass = { actions: "swal-conversion-actions" };
-        }
-
-        const cancelController = new AbortController();
-
-        const popup = await openProgressSwal({ title: `Running conversion`, ...options }, (result) => {
-            if (!result.isConfirmed) cancelController.abort();
-        });
-
         const isMultiple = toRun.length > 1;
 
-        let elements = {};
-        popup.hideLoading();
-        const element = popup.getHtmlContainer();
-        element.innerText = "";
-        Object.assign(element.style, {
-            textAlign: "left",
-            display: "block",
-        });
+        const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
+        const { close: closeProgressPopup, elements } = swalOpts
 
-        const progressBar = new ProgressBar();
-        elements.progress = progressBar;
-        element.append(progressBar);
-        element.insertAdjacentHTML(
+
+        elements.container.insertAdjacentHTML(
             "beforeend",
             `<small><small><b>Note:</b> This may take a while to complete...</small></small><hr style="margin-bottom: 0;">`
         );
 
         let completed = 0;
-        elements.progress.value = { b: completed, tsize: toRun.length };
+        elements.progress.value = { n: completed, total: toRun.length };
 
         for (let info of toRun) {
             const { subject, session, globalState = this.info.globalState } = info;
@@ -213,7 +195,7 @@ export class Page extends LitElement {
 
                     interfaces: globalState.interfaces,
                 },
-                { swal: popup, fetch: { signal: cancelController.signal }, ...options }
+                swalOpts
             ).catch((error) => {
                 let message = error.message;
 
@@ -223,13 +205,13 @@ export class Page extends LitElement {
                 }
 
                 this.notify(message, "error");
-                popup.close();
+                closeProgressPopup();
                 throw error;
             });
 
             completed++;
             if (isMultiple) {
-                const progressInfo = { b: completed, bsize: 1, tsize: toRun.length };
+                const progressInfo = { n: completed, total: toRun.length };
                 elements.progress.value = progressInfo;
             }
 
@@ -237,8 +219,8 @@ export class Page extends LitElement {
             subRef[session] = result;
         }
 
-        popup.close();
-        element.style.textAlign = ""; // Clear style update
+        closeProgressPopup();
+        elements.container.style.textAlign = ""; // Clear style update
 
         return results;
     }

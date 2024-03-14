@@ -1,16 +1,19 @@
 
 
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 
 export type ProgressProps = {
     value?: {
-        b: number,
-        bsize?: number,
-        tsize: number
+        n: number,
+        total: number
     },
 }
 
+const animationDuration = 500 // ms
+
 export class ProgressBar extends LitElement {
+
+    static animationDuration = animationDuration // ms
 
     static get styles() {
     return css`
@@ -31,7 +34,7 @@ export class ProgressBar extends LitElement {
             width: 0%;
             height: 100%;
             background-color: #029CFD;
-            transition: width 0.5s;
+            transition: width ${unsafeCSS((animationDuration / 1000).toFixed(2))}s;
         }
 
         small {
@@ -55,16 +58,16 @@ export class ProgressBar extends LitElement {
 
     constructor(props: ProgressProps = {}) {
         super();
-
         this.value = props.value ?? {}
-        if (!('b' in this.value)) this.value.b = 0
-        if (!('tsize' in this.value)) this.value.tsize = 0
-
+        if (!('n' in this.value)) this.value.n = 0
+        if (!('total' in this.value)) this.value.total = 0
     }
 
     render() {
-        const value = this.value.b / this.value.tsize * 100
-        return html`<div><div style="width: ${value}%"></div></div><small>${this.value.b}/${this.value.tsize} ${isNaN(value) ? '' : `(${value.toFixed(0)}%)`}</small>`
+        const hasOne = this.value.n || this.value.total
+        const value = this.value.n / this.value.total * 100
+        const displayedValue = hasOne ? `${this.value.n}/${this.value.total}` : ''
+        return html`<div><div style="width: ${value}%"></div></div><small>${displayedValue} ${!hasOne || isNaN(value) ? '' : `(${value.toFixed(0)}%)`}</small>`
     }
 }
 

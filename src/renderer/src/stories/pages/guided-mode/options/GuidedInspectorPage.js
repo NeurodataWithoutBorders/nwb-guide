@@ -17,6 +17,7 @@ import { getMessageType } from "../../../../validation/index.js";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
+import { createProgressPopup } from "../../../utils/progress.js";
 
 const filter = (list, toFilter) => {
     return list.filter((item) => {
@@ -115,15 +116,19 @@ export class GuidedInspectorPage extends Page {
         return html`
             ${until(
                 (async () => {
+    
                     if (fileArr.length <= 1) {
                         this.report = inspector;
 
                         if (!this.report) {
                             const result = await run(
                                 "inspect_file",
-                                { nwbfile_path: fileArr[0].info.file, ...options },
+                                { nwbfile_path: fileArr[0].info.file, ...options}, 
                                 { title }
-                            );
+                            ).catch((error) => {
+                                this.notify(error.message, "error");
+                                throw error;
+                            })
 
                             this.report = globalState.preview.inspector = {
                                 ...result,
@@ -147,7 +152,23 @@ export class GuidedInspectorPage extends Page {
 
                     this.report = inspector;
                     if (!this.report) {
-                        const result = await run("inspect_folder", { path, ...options }, { title: title + "s" });
+
+                        const swalOpts = await createProgressPopup({ title: `${title}s` });
+            
+                        const { close: closeProgressPopup } = swalOpts
+                        
+                        const result = await run(
+                            "inspect_folder", 
+                            { path, ...options, request_id: swalOpts.id }, 
+                            swalOpts
+                        ).catch((error) => {
+                            this.notify(error.message, "error");
+                            closeProgressPopup();
+                            throw error;
+                        });
+
+                        closeProgressPopup()
+
                         this.report = globalState.preview.inspector = {
                             ...result,
                             messages: truncateFilePaths(result.messages, path),
