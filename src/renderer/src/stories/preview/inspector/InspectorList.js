@@ -205,10 +205,6 @@ export class InspectorLegend extends LitElement{
         super()
     }
 
-    updated() {
-        console.log("updated", this)
-    }
-
     render() {
         return html`
         <h4>Legend</h4>
