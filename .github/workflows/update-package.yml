@@ -2,6 +2,7 @@ name: Update package.lock
 
 on:
     workflow_dispatch:
+    push:
 
 jobs:
   deploy:
