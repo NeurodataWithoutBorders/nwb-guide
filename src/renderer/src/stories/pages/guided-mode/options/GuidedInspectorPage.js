@@ -9,7 +9,7 @@ import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../prev
 const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
 import { run } from "./utils.js";
-import { InspectorList, InspectorListItem } from "../../../preview/inspector/InspectorList.js";
+import { InspectorList, InspectorLegend } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { getMessageType } from "../../../../validation/index.js";
@@ -17,37 +17,6 @@ import { getMessageType } from "../../../../validation/index.js";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
-
-const legendEntries = [
-    { type: "error", header: "Error", message: "Must be fixed" },
-    { type: "warning", header: "Warning", message: "Can be safely ignored" },
-];
-
-export const legend = html`
-    <div style="padding-top: 20px;">
-        <h4>Legend</h4>
-        <div style="display: flex; gap: 25px;">
-            ${legendEntries.map(({ type, header, message }) => {
-                const item = new InspectorListItem({
-                    type,
-                    message: html`<h3 style="margin: 0;">${header}</h3>
-                        <span>${message}</span>`,
-                });
-                item.style.width = "max-content";
-                return item;
-            })}
-            <div>
-                <p>
-                    To fix issues specific to a single file, you can edit the <b>file metadata</b> on the previous page.
-                </p>
-                <p>
-                    To fix issues across many files, you may want to edit the <b>global metadata</b> on the previous
-                    page.
-                </p>
-            </div>
-        </div>
-    </div>
-`;
 
 const filter = (list, toFilter) => {
     return list.filter((item) => {
@@ -70,8 +39,6 @@ export class GuidedInspectorPage extends Page {
         this.style.height = "100%"; // Fix main section
 
         Object.assign(this.style, {
-            // display: "grid",
-            // gridTemplateRows: "calc(100% - 140px) 1fr",
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
@@ -169,14 +136,11 @@ export class GuidedInspectorPage extends Page {
                         const items = this.report.messages;
                         const extraItems = [...items, ...items.map((o, i) => { return {...o, message: `Test ${i}`} })];
                         const list = new InspectorList({ items: extraItems, emptyMessage });
-                        console.log(extraItems)
-                        const listBorder = "1px solid gainsboro";
                         Object.assign(list.style, {
                             height: "100%",
-                            borderBottom: listBorder,
                         });
 
-                        return html`${list}${legend}`;
+                        return html`${list}${new InspectorLegend()}`;
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
@@ -243,7 +207,7 @@ export class GuidedInspectorPage extends Page {
                         instances: allInstances,
                     });
 
-                    return html`${manager}${legend}`;
+                    return html`${manager}${new InspectorLegend()}`;
                 })(),
                 "Loading inspector report..."
             )}

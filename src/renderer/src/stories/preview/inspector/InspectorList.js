@@ -159,3 +159,82 @@ export class InspectorListItem extends LitElement {
 }
 
 customElements.get("inspector-list-item") || customElements.define("inspector-list-item", InspectorListItem);
+
+
+
+const legendEntries = [
+    { type: "error", header: "Error", message: "Must be fixed" },
+    { type: "warning", header: "Warning", message: "Can be safely ignored" },
+];
+
+export class InspectorLegend extends LitElement{
+
+    static get styles() {
+        return css`
+            :host {
+                display: block;
+                font-size: 80%;
+            }
+
+            inspector-list-item {
+                margin: 0;
+            }
+
+            :host > div {
+                padding: 5px 10px;
+                display: flex;
+                gap: 25px;
+                align-items: center;
+                border: 1px solid gray;
+                border-radius: 0 0 10px 10px;
+            }
+
+            h4 {
+                margin: 0;
+                padding: 5px 10px;
+                width: 100%;
+                background: black;
+                color: white;
+                border-radius: 10px 10px 0 0;
+                box-sizing: border-box;
+            }
+        `
+    }
+
+    constructor() {
+        super()
+    }
+
+    updated() {
+        console.log("updated", this)
+    }
+
+    render() {
+        return html`
+        <h4>Legend</h4>
+        <div>
+            ${legendEntries.map(({ type, header, message }) => {
+                const item = new InspectorListItem({
+                    type,
+                    message: html`<h3 style="margin: 0;">${header}</h3>
+                        <span>${message}</span>`,
+                });
+                item.style.width = "max-content";
+                return item;
+            })}
+            <div>
+                <p>
+                    To fix issues specific to a single file, you can edit the <b>file metadata</b> on the previous page.
+                </p>
+                <p>
+                    To fix issues across many files, you may want to edit the <b>global metadata</b> on the previous
+                    page.
+                </p>
+            </div>
+        </div>
+    `;
+        }
+}
+
+customElements.get("nwbguide-inspector-legend") || customElements.define("nwbguide-inspector-legend", InspectorLegend);
+

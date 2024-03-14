@@ -7,8 +7,9 @@ import { run } from "../guided-mode/options/utils.js";
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { Modal } from "../../Modal";
 import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.js";
-import { InspectorList } from "../../preview/inspector/InspectorList.js";
+import { InspectorList, InspectorLegend } from "../../preview/inspector/InspectorList.js";
 import { download } from "./utils.js";
+
 
 export class InspectPage extends Page {
     constructor(...args) {
@@ -46,14 +47,18 @@ export class InspectPage extends Page {
             throw new Error(message);
         }
 
+        const legend = new InspectorLegend()
+
         const result = await this.inspect(value);
 
         const messages = result.messages;
 
         const items = truncateFilePaths(messages, getSharedPath(messages.map((item) => item.file_path)));
+        
+        // const list = new InspectorList({ items });
 
-        const list = new InspectorList({ items });
-        list.style.padding = "25px";
+        const extraItems = [...items, ...items.map((o, i) => ({ ...o, message: `Test ${i}` }))];
+        const list = new InspectorList({ items: extraItems })
 
         // const buttons = document.createElement('div')
         // buttons.style.display = 'flex'
@@ -80,9 +85,20 @@ export class InspectPage extends Page {
         const modal = new Modal({
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
             controls: [downloadJSONButton, downloadTextButton],
+            footer: legend
         });
 
-        modal.append(list);
+        const container = document.createElement("div");
+        Object.assign(container.style, {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: '20px'
+        });
+
+        container.append(list);
+
+        modal.append(container);
         document.body.append(modal);
 
         modal.toggle(true);
