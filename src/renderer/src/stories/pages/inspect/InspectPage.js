@@ -10,7 +10,6 @@ import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.j
 import { InspectorList, InspectorLegend } from "../../preview/inspector/InspectorList.js";
 import { download } from "./utils.js";
 
-
 export class InspectPage extends Page {
     constructor(...args) {
         super(...args);
@@ -47,7 +46,7 @@ export class InspectPage extends Page {
             throw new Error(message);
         }
 
-        const legend = new InspectorLegend()
+        const legend = new InspectorLegend();
 
         const result = await this.inspect(value);
 
@@ -82,15 +81,15 @@ export class InspectPage extends Page {
         const modal = new Modal({
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
             controls: [downloadJSONButton, downloadTextButton],
-            footer: legend
+            footer: legend,
         });
 
         const container = document.createElement("div");
         Object.assign(container.style, {
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            padding: '20px'
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            padding: "20px",
         });
 
         container.append(list);

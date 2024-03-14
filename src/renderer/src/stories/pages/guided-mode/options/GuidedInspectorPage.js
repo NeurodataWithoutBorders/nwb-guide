@@ -39,9 +39,9 @@ export class GuidedInspectorPage extends Page {
         this.style.height = "100%"; // Fix main section
 
         Object.assign(this.style, {
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
         });
     }
 
