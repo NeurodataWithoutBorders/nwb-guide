@@ -72,9 +72,9 @@ export class GuidedInspectorPage extends Page {
         Object.assign(this.style, {
             // display: "grid",
             // gridTemplateRows: "calc(100% - 140px) 1fr",
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
         });
     }
 
@@ -167,9 +167,14 @@ export class GuidedInspectorPage extends Page {
                         if (!inspector) await this.save();
 
                         const items = this.report.messages;
-                        const extraItems = [...items, ...items.map((o, i) => { return {...o, message: `Test ${i}`} })];
+                        const extraItems = [
+                            ...items,
+                            ...items.map((o, i) => {
+                                return { ...o, message: `Test ${i}` };
+                            }),
+                        ];
                         const list = new InspectorList({ items: extraItems, emptyMessage });
-                        console.log(extraItems)
+                        console.log(extraItems);
                         const listBorder = "1px solid gainsboro";
                         Object.assign(list.style, {
                             height: "100%",
