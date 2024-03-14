@@ -453,7 +453,7 @@ export class JSONSchemaForm extends LitElement {
 
         const parent = this.shadowRoot.querySelector(`#${encode(localPath)}`);
         const container = parent.querySelector(`.${type}`);
-        if (!container) return 
+        if (!container) return;
 
         const nChildren = container.children.length;
         container.innerHTML = "";
@@ -679,11 +679,7 @@ export class JSONSchemaForm extends LitElement {
 
         this.inputs[localPath.join("-")] = interactiveInput;
 
-        return html`
-            <div id=${encode(localPath.join("-"))} class="form-section">
-                ${interactiveInput}
-            </div>
-        `;
+        return html` <div id=${encode(localPath.join("-"))} class="form-section">${interactiveInput}</div> `;
     };
 
     load = () => {
