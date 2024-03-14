@@ -134,7 +134,12 @@ export class GuidedInspectorPage extends Page {
                         if (!inspector) await this.save();
 
                         const items = this.report.messages;
-                        const extraItems = [...items, ...items.map((o, i) => { return {...o, message: `Test ${i}`} })];
+                        const extraItems = [
+                            ...items,
+                            ...items.map((o, i) => {
+                                return { ...o, message: `Test ${i}` };
+                            }),
+                        ];
                         const list = new InspectorList({ items: extraItems, emptyMessage });
                         Object.assign(list.style, {
                             height: "100%",
