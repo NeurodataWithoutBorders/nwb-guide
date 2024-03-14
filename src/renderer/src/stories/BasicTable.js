@@ -148,10 +148,10 @@ export class BasicTable extends LitElement {
         return this.#schema;
     }
 
-    set schema(schema) {
+    set schema(schema = {}) {
         this.#schema = schema;
-        this.#itemSchema = schema.items;
-        this.#itemProps = { ...this.#itemSchema.properties };
+        this.#itemSchema = schema.items ?? {};
+        this.#itemProps = { ...(this.#itemSchema.properties ?? {}) };
     }
 
     #rendered;

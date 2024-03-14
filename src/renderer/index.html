@@ -32,5 +32,36 @@
     <nwb-dashboard></nwb-dashboard>
 
     <script type="module" src="./src/index"></script>
+    <script async src="https://w.appzi.io/w.js?token=hUmCm"></script>
+    <script defer>
+
+      let appziFeedbackWidget
+
+      function iframe(title) {
+          const iframes =  Array.from(document.querySelectorAll('iframe'))  // get all iframes
+          return Array.from(iframes).find((iframe) => iframe.title === title);
+      }
+
+      const interval = setInterval(() => {
+        const appziFeedbackButton = iframe('Feedback Button');
+        if (appziFeedbackButton) clearInterval(interval)
+        else return
+
+        appziFeedbackButton.contentWindow.document.querySelector('div').addEventListener('click', () => {
+          if (!appziFeedbackWidget) setTimeout(() => appziFeedbackWidget = iframe('Feedback Widget'), 200)
+        })
+
+      }, 100)
+
+      window.addEventListener('beforeunload', (ev) => {
+          const isOpen = appziFeedbackWidget ? ! appziFeedbackWidget.parentElement.parentElement.classList.length : false
+          if (!isOpen) return // Allow reload if feedback widget is closed (e.g. hot reloading)
+          const message = "You have unsaved changes. Are you sure you want to leave?";
+          event.returnValue = message;
+          return message;
+        });
+
+    </script>
+
   </body>
 </html>

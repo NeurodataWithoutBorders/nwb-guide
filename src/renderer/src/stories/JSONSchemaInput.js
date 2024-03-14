@@ -504,6 +504,12 @@ export class JSONSchemaInput extends LitElement {
     // required;
     validateOnChange = true;
 
+    constructor(props = {}) {
+        super();
+        Object.assign(this, props);
+        if (props.validateEmptyValue === false) this.validateEmptyValue = true; // False is treated as required but not triggered if empty
+    }
+
     // Print the default value of the schema if not caught
     onUncaughtSchema = (schema) => {
         // In development, show uncaught schemas
@@ -524,12 +530,6 @@ export class JSONSchemaInput extends LitElement {
 
         return error;
     };
-
-    constructor(props) {
-        super();
-        Object.assign(this, props);
-        if (props.validateEmptyValue === false) this.validateEmptyValue = true; // False is treated as required but not triggered if empty
-    }
 
     // onUpdate = () => {}
     // onValidate = () => {}

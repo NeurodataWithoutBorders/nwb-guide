@@ -12,7 +12,7 @@ export class DandiResults extends LitElement {
         `;
     }
 
-    constructor(props) {
+    constructor(props = {}) {
         super();
         Object.assign(this, props);
     }

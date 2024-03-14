@@ -35,7 +35,7 @@ export class OptionalSection extends LitElement {
 
     changed;
 
-    constructor(props) {
+    constructor(props = {}) {
         super();
         this.header = props.header ?? "";
         this.description = props.description ?? "";

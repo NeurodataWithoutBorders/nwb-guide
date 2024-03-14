@@ -213,8 +213,8 @@ export class Table extends LitElement {
 
     set schema(schema) {
         this.#schema = schema;
-        this.#itemSchema = schema.items;
-        this.#itemProps = { ...this.#itemSchema.properties };
+        this.#itemSchema = schema.items ?? {};
+        this.#itemProps = { ...(this.#itemSchema.properties ?? {}) };
     }
 
     getRowName = (row) =>
