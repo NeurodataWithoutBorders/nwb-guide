@@ -55,7 +55,7 @@ const propsToIgnore = {
         },
     },
     Ecephys: {
-        UnitProperties: true,
+        ElectricalSeries: true,
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
         Electrodes: {
