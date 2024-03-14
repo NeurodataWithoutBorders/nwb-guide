@@ -39,9 +39,9 @@ export class GuidedInspectorPage extends Page {
         this.style.height = "100%"; // Fix main section
 
         Object.assign(this.style, {
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
+            display: "grid",
+            gridTemplateRows: "calc(100% - 120px) 1fr",
+            rowGap: "10px"
         });
     }
 
@@ -136,6 +136,7 @@ export class GuidedInspectorPage extends Page {
                         const items = this.report.messages;
 
                         const list = new InspectorList({ items, emptyMessage });
+
                         Object.assign(list.style, {
                             height: "100%",
                         });
