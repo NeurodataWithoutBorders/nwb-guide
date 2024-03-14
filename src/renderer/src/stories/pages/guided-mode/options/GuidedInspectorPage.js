@@ -9,13 +9,11 @@ import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../prev
 const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
 import { run } from "./utils.js";
-import { InspectorList } from "../../../preview/inspector/InspectorList.js";
+import { InspectorList, InspectorLegend } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
-import { path as nodePath } from "../../../../electron";
 import { getMessageType } from "../../../../validation/index.js";
 
-import { InfoBox } from "../../../InfoBox";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
@@ -39,9 +37,11 @@ export class GuidedInspectorPage extends Page {
     constructor(...args) {
         super(...args);
         this.style.height = "100%"; // Fix main section
+
         Object.assign(this.style, {
             display: "flex",
             flexDirection: "column",
+            justifyContent: "space-between",
         });
     }
 
@@ -112,14 +112,7 @@ export class GuidedInspectorPage extends Page {
                 })
             )
             .flat();
-        return html` ${new InfoBox({
-                header: "How do I fix these suggestions?",
-                content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues
-                    shared across files.`,
-            })}
-
-            <br />
-
+        return html`
             ${until(
                 (async () => {
                     if (fileArr.length <= 1) {
@@ -142,7 +135,12 @@ export class GuidedInspectorPage extends Page {
 
                         const items = this.report.messages;
 
-                        return new InspectorList({ items, emptyMessage });
+                        const list = new InspectorList({ items, emptyMessage });
+                        Object.assign(list.style, {
+                            height: "100%",
+                        });
+
+                        return html`${list}${new InspectorLegend()}`;
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
@@ -183,7 +181,8 @@ export class GuidedInspectorPage extends Page {
                     }, {});
 
                     Object.keys(instances).forEach((subLabel) => {
-                        const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                        // const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                        const subItems = filter(items, { file_path: `${subLabel}_ses-` }); // NOTE: This will not run on web-only now
                         const path = getSharedPath(subItems.map((item) => item.file_path));
                         const filtered = truncateFilePaths(subItems, path);
 
@@ -208,10 +207,11 @@ export class GuidedInspectorPage extends Page {
                         instances: allInstances,
                     });
 
-                    return manager;
+                    return html`${manager}${new InspectorLegend()}`;
                 })(),
                 "Loading inspector report..."
-            )}`;
+            )}
+        `;
     }
 }
 
