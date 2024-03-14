@@ -134,7 +134,7 @@ export class GuidedInspectorPage extends Page {
                         if (!inspector) await this.save();
 
                         const items = this.report.messages;
- 
+
                         const list = new InspectorList({ items, emptyMessage });
                         Object.assign(list.style, {
                             height: "100%",

@@ -53,7 +53,7 @@ export class InspectPage extends Page {
         const messages = result.messages;
 
         const items = truncateFilePaths(messages, getSharedPath(messages.map((item) => item.file_path)));
-        
+
         const list = new InspectorList({ items });
 
         // const buttons = document.createElement('div')
