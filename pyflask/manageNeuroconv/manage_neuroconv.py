@@ -19,14 +19,16 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 announcer = MessageAnnouncer()
 
 
-EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
-EXTRA_RECORDING_INTERFACE_PROPERTIES = {
+EXCLUDED_RECORDING_INTERFACE_PROPERTIES = [ "contact_vector", "contact_shapes", "group", "location" ]
+EXTRA_RECORDING_INTERFACE_PROPERTIES = EXTRA_SORTING_INTERFACE_PROPERTIES = {
     "brain_area": {
         "data_type": "str",
         "description": "The brain area where the electrode is located.",
         "default": "unknown",
     }
 }
+
+EXCLUDED_SORTING_INTERFACE_PROPERTIES = [ "location" ]
 
 
 def is_path_contained(child, parent):
@@ -300,8 +302,7 @@ def get_source_schema(interface_class_dict: dict) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def map_recording_interfaces(callback, converter):
-    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
+def map_interfaces(BaseRecordingExtractorInterface, callback, converter):
 
     output = []
 
@@ -327,6 +328,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # Clear the Electrodes information for being set as a collection of Interfaces
     has_ecephys = "Ecephys" in metadata
+    has_electrodes = False
 
     if has_ecephys:
         metadata["Ecephys"]["Electrodes"] = {}
@@ -334,45 +336,65 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         schema["properties"]["Ecephys"]["required"].append("Electrodes")
         ecephys_properties = schema["properties"]["Ecephys"]["properties"]
         original_electrodes_schema = ecephys_properties["Electrodes"]
+        has_electrodes = True # original_electrodes_schema.get('default')
 
-        ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
+        # Add Electrodes to the schema
+        if has_electrodes:
+            ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
+
+    def on_sorting_interface(name, sorting_interface):
+            
+            # metadata["Ecephys"]["Units"][name] = dict(
+            #     Units=get_unit_table_json(sorting_interface),
+            #     UnitColumns=get_unit_columns_json(sorting_interface),
+            # )
+    
+        return sorting_interface
+    
     def on_recording_interface(name, recording_interface):
 
-        metadata["Ecephys"]["Electrodes"][name] = dict(
-            Electrodes=get_electrode_table_json(recording_interface),
-            ElectrodeColumns=get_electrode_columns_json(recording_interface),
-        )
+        if has_electrodes:
 
-        ecephys_properties["Electrodes"]["properties"][name] = dict(
-            type="object",
-            properties=dict(
-                Electrodes={
-                    "type": "array",
-                    "minItems": 0,
-                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
-                },
-                ElectrodeColumns={
-                    "type": "array",
-                    "minItems": 0,
-                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
-                },
-            ),
-            required=["Electrodes", "ElectrodeColumns"],
-        )
+            metadata["Ecephys"]["Electrodes"][name] = dict(
+                Electrodes=get_electrode_table_json(recording_interface),
+                ElectrodeColumns=get_electrode_columns_json(recording_interface),
+            )
 
-        ecephys_properties["Electrodes"]["required"].append(name)
+            ecephys_properties["Electrodes"]["properties"][name] = dict(
+                type="object",
+                properties=dict(
+                    Electrodes={
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
+                    },
+                    ElectrodeColumns={
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
+                    },
+                ),
+                required=["Electrodes", "ElectrodeColumns"],
+            )
+
+            ecephys_properties["Electrodes"]["required"].append(name)
 
         return recording_interface
 
-    recording_interfaces = map_recording_interfaces(on_recording_interface, converter)
+    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
 
-    # Delete Ecephys metadata if ElectrodeTable helper function is not available
+    # Map recording interfaces to metadata
+    map_interfaces(BaseRecordingExtractorInterface, on_recording_interface, converter)
+
+    # Map sorting interfaces to metadata
+    map_interfaces(BaseSortingExtractorInterface, on_sorting_interface, converter)
+
+    # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
-        if len(recording_interfaces) == 0:
-            schema["properties"].pop("Ecephys", dict())
-
-        else:
+            
+        if (has_electrodes):
 
             defs = ecephys_properties["definitions"]
             electrode_def = defs["Electrodes"]
@@ -405,7 +427,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
             new_electrodes_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-                for properties in original_electrodes_schema["default"]
+                for properties in original_electrodes_schema.get('default', {})
                 if properties["name"] not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
             }
 
@@ -984,6 +1006,87 @@ def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
 
     return properties
 
+def get_sorting_interface_properties(sorting_interface) -> Dict[str, Any]:
+    """A convenience function for uniformly excluding certain properties of the provided sorting extractor."""
+    property_names = list(sorting_interface.sorting_extractor.get_property_keys())
+
+    properties = {
+        property_name: sorting_interface.sorting_extractor.get_property(key=property_name)
+        for property_name in property_names
+        if property_name not in EXCLUDED_SORTING_INTERFACE_PROPERTIES
+    }
+
+    for property_name, property_info in EXTRA_SORTING_INTERFACE_PROPERTIES.items():
+        if property_name not in properties:
+            properties[property_name] = property_info
+
+    return properties
+
+
+def get_unit_columns_json(interface) -> List[Dict[str, Any]]:
+    """A convenience function for collecting and organizing the properties of the underlying sorting extractor."""
+    properties = get_sorting_interface_properties(interface)
+
+    # Hardcoded for Phy (NOTE: Update for more interfaces)
+    property_descriptions = dict(
+        # spike_times="The times of the spikes, in seconds.",
+        # spike_clusters="The cluster IDs of the spikes.",
+        # spike_templates="The template IDs of the spikes.",
+        # spike_amplitudes="The amplitudes of the spikes.",
+        # spike_depths="The depths of the spikes.",
+        # spike_widths="The widths of the spikes.",
+    )
+
+    for property_name, property_info in EXTRA_SORTING_INTERFACE_PROPERTIES.items():
+        description = property_info.get("description", None)
+        if description:
+            property_descriptions[property_name] = description
+
+    sorting_extractor = interface.sorting_extractor
+    unit_ids = sorting_extractor.get_unit_ids()
+
+    unit_columns = [
+        dict(
+            name=property_name,
+            description=property_descriptions.get(property_name, "No description."),
+            data_type=get_property_dtype(
+                recording_extractor=sorting_extractor, property_name=property_name, channel_ids=[unit_ids[0]]
+            ),
+        )
+        for property_name in properties.keys()
+    ]
+
+    return json.loads(json.dumps(obj=unit_columns))
+
+def get_unit_table_json(interface) -> List[Dict[str, Any]]:
+    """
+    A convenience function for collecting and organizing the property values of the underlying sorting extractor.
+    """
+
+    from neuroconv.utils import NWBMetaDataEncoder
+
+    sorting = interface.sorting_extractor
+
+    properties = get_sorting_interface_properties(interface)
+
+    unit_ids = sorting.get_unit_ids()
+
+    table = list()
+    for unit_id in unit_ids:
+        unit_column = dict()
+        for property_name in properties:
+            if property_name in EXTRA_SORTING_INTERFACE_PROPERTIES:
+                sorting_property_value = properties[property_name]["default"]
+            else:
+                sorting_property_value = sorting.get_property(key=property_name, ids=[unit_id])[
+                    0  # First axis is always units in SI
+                ]  # Since only fetching one unit at a time, use trivial zero-index
+            unit_column.update({property_name: sorting_property_value})
+        table.append(unit_column)
+    table_as_json = json.loads(json.dumps(table, cls=NWBMetaDataEncoder))
+
+    return table_as_json
+
 
 def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
     """A convenience function for collecting and organizing the properties of the underlying recording extractor."""
@@ -1057,7 +1160,10 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
         electrode_column = dict()
         for property_name in properties:
             if property_name in EXTRA_RECORDING_INTERFACE_PROPERTIES:
-                recording_property_value = properties[property_name]["default"]
+                try:
+                    recording_property_value = properties[property_name].get('default') # Get default value
+                except:
+                    recording_property_value = properties[property_name][0] # Get first value
             else:
                 recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[
                     0  # First axis is always electodes in SI
