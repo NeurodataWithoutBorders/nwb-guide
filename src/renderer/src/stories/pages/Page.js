@@ -8,7 +8,6 @@ import { resolveMetadata } from "./guided-mode/data/utils.js";
 import Swal from "sweetalert2";
 import { createProgressPopup } from "../utils/progress.js";
 
-
 export class Page extends LitElement {
     // static get styles() {
     //     return useGlobalStyles(
@@ -156,8 +155,7 @@ export class Page extends LitElement {
         const isMultiple = toRun.length > 1;
 
         const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
-        const { close: closeProgressPopup, elements } = swalOpts
-
+        const { close: closeProgressPopup, elements } = swalOpts;
 
         elements.container.insertAdjacentHTML(
             "beforeend",

@@ -4,9 +4,7 @@ import { baseUrl } from "../../server/globals";
 import { createRandomString } from "../forms/utils";
 
 export const createProgressPopup = async (options, tqdmCallback) => {
-
     const cancelController = new AbortController();
-
 
     if (!("showCancelButton" in options)) {
         options.showCancelButton = true;
@@ -19,7 +17,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
 
     let elements = {};
     popup.hideLoading();
-    const element = elements.container = popup.getHtmlContainer();
+    const element = (elements.container = popup.getHtmlContainer());
     element.innerText = "";
     Object.assign(element.style, {
         textAlign: "left",
@@ -30,26 +28,24 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     elements.progress = progressBar;
     element.append(progressBar);
 
-
     const commonReturnValue = { swal: popup, fetch: { signal: cancelController.signal }, elements, ...options };
 
     // Provide a default callback
-    if (!tqdmCallback) tqdmCallback = ({ format_dict }) => progressBar.value = format_dict
+    if (!tqdmCallback) tqdmCallback = ({ format_dict }) => (progressBar.value = format_dict);
 
     let lastUpdate;
 
-    const id = createRandomString()
+    const id = createRandomString();
 
     const onProgressMessage = ({ data }) => {
-        const parsed = JSON.parse(data)
-        const { request_id, ...update } = parsed
-        if (request_id && request_id !== id) return
+        const parsed = JSON.parse(data);
+        const { request_id, ...update } = parsed;
+        if (request_id && request_id !== id) return;
         lastUpdate = Date.now();
-        tqdmCallback(update)
-    }
+        tqdmCallback(update);
+    };
 
-    progressHandler.addEventListener('message', onProgressMessage)
-
+    progressHandler.addEventListener("message", onProgressMessage);
 
     const close = () => {
         if (lastUpdate) {
@@ -60,13 +56,11 @@ export const createProgressPopup = async (options, tqdmCallback) => {
             else popup.close();
         } else popup.close();
 
-        progressHandler.removeEventListener('message', onProgressMessage)
-    }
+        progressHandler.removeEventListener("message", onProgressMessage);
+    };
 
-
-    return  { ...commonReturnValue, id, close }
-
-}
+    return { ...commonReturnValue, id, close };
+};
 
 const eventsURL = new URL("/neuroconv/events", baseUrl).href;
 
@@ -74,23 +68,22 @@ class ProgressHandler {
     constructor(props) {
         const { url, callbacks, ...otherProps } = props;
 
-        const source = this.source = new EventSource(url);
+        const source = (this.source = new EventSource(url));
         Object.assign(this, otherProps);
 
-        source.addEventListener('error', this.onerror(), false);
+        source.addEventListener("error", this.onerror(), false);
 
         source.addEventListener("open", () => this.onopen(), false);
 
         source.addEventListener("message", (event) => this.onmessage(event), false);
     }
-    
+
     onopen = () => {};
     onmessage = () => {};
     onerror = () => {};
 
     addEventListener = (...args) => this.source.addEventListener(...args);
     removeEventListener = (...args) => this.source.removeEventListener(...args);
-
 }
 
-export const progressHandler = new ProgressHandler({ url: eventsURL })
+export const progressHandler = new ProgressHandler({ url: eventsURL });

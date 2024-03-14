@@ -116,19 +116,18 @@ export class GuidedInspectorPage extends Page {
         return html`
             ${until(
                 (async () => {
-    
                     if (fileArr.length <= 1) {
                         this.report = inspector;
 
                         if (!this.report) {
                             const result = await run(
                                 "inspect_file",
-                                { nwbfile_path: fileArr[0].info.file, ...options}, 
+                                { nwbfile_path: fileArr[0].info.file, ...options },
                                 { title }
                             ).catch((error) => {
                                 this.notify(error.message, "error");
                                 throw error;
-                            })
+                            });
 
                             this.report = globalState.preview.inspector = {
                                 ...result,
@@ -152,14 +151,13 @@ export class GuidedInspectorPage extends Page {
 
                     this.report = inspector;
                     if (!this.report) {
-
                         const swalOpts = await createProgressPopup({ title: `${title}s` });
-            
-                        const { close: closeProgressPopup } = swalOpts
-                        
+
+                        const { close: closeProgressPopup } = swalOpts;
+
                         const result = await run(
-                            "inspect_folder", 
-                            { path, ...options, request_id: swalOpts.id }, 
+                            "inspect_folder",
+                            { path, ...options, request_id: swalOpts.id },
                             swalOpts
                         ).catch((error) => {
                             this.notify(error.message, "error");
@@ -167,7 +165,7 @@ export class GuidedInspectorPage extends Page {
                             throw error;
                         });
 
-                        closeProgressPopup()
+                        closeProgressPopup();
 
                         this.report = globalState.preview.inspector = {
                             ...result,

@@ -19,10 +19,12 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 
 announcer = MessageAnnouncer()
 
+
 class TQDMProgressBar(TQDMPublisher):
     def __init__(self, iterable, on_progress_update: callable, **tqdm_kwargs):
         super().__init__(iterable, **tqdm_kwargs)
         self.subscribe(lambda format_dict: on_progress_update(dict(progress_bar_id=self.id, format_dict=format_dict)))
+
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 EXTRA_RECORDING_INTERFACE_PROPERTIES = {
@@ -741,7 +743,7 @@ def inspect_nwb_file(payload):
     from nwbinspector import inspect_nwbfile, load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-    
+
     messages = list(
         inspect_nwbfile(
             ignore=[
@@ -775,9 +777,9 @@ def inspect_nwb_folder(payload):
 
     kwargs = dict(
         n_jobs=-2,  # uses number of CPU - 1
-        progress_bar_class = TQDMProgressBar,
-        progress_bar_options= dict(
-            on_progress_update = lambda message: announcer.announce(dict(request_id=request_id, **message))
+        progress_bar_class=TQDMProgressBar,
+        progress_bar_options=dict(
+            on_progress_update=lambda message: announcer.announce(dict(request_id=request_id, **message))
         ),
         ignore=[
             "check_description",

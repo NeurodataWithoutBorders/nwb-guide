@@ -11,7 +11,6 @@ import { InspectorList, InspectorLegend } from "../../preview/inspector/Inspecto
 import { download } from "./utils.js";
 import { createProgressPopup } from "../../utils/progress.js";
 
-
 export class InspectPage extends Page {
     constructor(...args) {
         super(...args);
@@ -23,19 +22,14 @@ export class InspectPage extends Page {
     };
 
     inspect = async (paths, kwargs = {}, options = {}) => {
-
         const swalOpts = await createProgressPopup(
-            { title: "Inspecting selected filesystem entries.", ...options }, 
-            ({ format_dict }) => elements.progress.value = format_dict
+            { title: "Inspecting selected filesystem entries.", ...options },
+            ({ format_dict }) => (elements.progress.value = format_dict)
         );
 
-        const { close: closeProgressPopup, elements } = swalOpts
+        const { close: closeProgressPopup, elements } = swalOpts;
 
-        const result = await run(
-            "inspect",
-            { request_id: swalOpts.id, paths, ...kwargs },
-            swalOpts
-        ).catch((error) => {
+        const result = await run("inspect", { request_id: swalOpts.id, paths, ...kwargs }, swalOpts).catch((error) => {
             this.notify(error.message, "error");
             closeProgressPopup();
             throw error;
