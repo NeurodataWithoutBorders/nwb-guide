@@ -12,7 +12,7 @@ jobs:
       - name: Checkout New Branch
         run: git checkout -b update_package_lock
       - name: Update package.lock file
-        run: npm install
+        run: npm install --verbose
       - name: Commit Changes and Create Pull Request
         run: |
           git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
