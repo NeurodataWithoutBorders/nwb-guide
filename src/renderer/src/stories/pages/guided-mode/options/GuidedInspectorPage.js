@@ -41,7 +41,7 @@ export class GuidedInspectorPage extends Page {
         Object.assign(this.style, {
             display: "grid",
             gridTemplateRows: "calc(100% - 120px) 1fr",
-            rowGap: "10px"
+            rowGap: "10px",
         });
     }
 
