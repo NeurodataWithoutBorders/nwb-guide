@@ -434,6 +434,8 @@ export class JSONSchemaForm extends LitElement {
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
         const parent = this.shadowRoot.querySelector(`#${encode(name)}`);
+        if (!parent) return;
+        
         let container = parent.querySelector(`.${type}`);
 
         if (!container) {
