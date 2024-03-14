@@ -12,10 +12,8 @@ import { run } from "./utils.js";
 import { InspectorList, InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
-import { path as nodePath } from "../../../../electron";
 import { getMessageType } from "../../../../validation/index.js";
 
-import { InfoBox } from "../../../InfoBox";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
@@ -25,7 +23,7 @@ const legendEntries = [
     { type: "warning", header: "Warning", message: "Can be safely ignored" },
 ];
 
-const legend = html`
+export const legend = html`
     <div style="padding-top: 20px;">
         <h4>Legend</h4>
         <div style="display: flex; gap: 25px;">
@@ -72,8 +70,11 @@ export class GuidedInspectorPage extends Page {
         this.style.height = "100%"; // Fix main section
 
         Object.assign(this.style, {
-            display: "grid",
-            gridTemplateRows: "calc(100% - 140px) 1fr",
+            // display: "grid",
+            // gridTemplateRows: "calc(100% - 140px) 1fr",
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
         });
     }
 
@@ -166,8 +167,9 @@ export class GuidedInspectorPage extends Page {
                         if (!inspector) await this.save();
 
                         const items = this.report.messages;
-
-                        const list = new InspectorList({ items, emptyMessage });
+                        const extraItems = [...items, ...items.map((o, i) => { return {...o, message: `Test ${i}`} })];
+                        const list = new InspectorList({ items: extraItems, emptyMessage });
+                        console.log(extraItems)
                         const listBorder = "1px solid gainsboro";
                         Object.assign(list.style, {
                             height: "100%",
