@@ -42,12 +42,12 @@ jobs:
             prefix: C:\Miniconda3\envs\nwb-guide
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: git fetch --prune --unshallow --tags
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
@@ -60,7 +60,7 @@ jobs:
         shell: bash
 
       - name: Cache Mamba env
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ env.CONDA }}/envs
           key:
@@ -73,10 +73,10 @@ jobs:
         name: Update environment
         run: mamba env update -f ${{ matrix.label }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
 
       - run: npm ci --verbose
 
