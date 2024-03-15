@@ -1,4 +1,4 @@
-import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
+import { JSONSchemaForm, getSchema } from "../../../JSONSchemaForm.js";
 
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
@@ -28,6 +28,16 @@ import globalIcon from "../../../assets/global.svg?raw";
 const tableRenderConfig = {
     "*": (metadata) => new SimpleTable(metadata),
     Electrodes: true,
+    ElectrodeColumns: function (metadata, fullPath) {
+
+        const electrodeSchema = getSchema([...fullPath.slice(0, -1), 'Electrodes'], this.schema)
+        return new SimpleTable({
+            ...metadata,
+            editable: {
+                name: (value) => !electrodeSchema.items.required.includes(value)
+            }
+        })
+    },
     Units: (metadata) => {
         metadata.editable = false;
         return true;
@@ -422,7 +432,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 metadata.schema = updatedSchema;
 
                 const tableConfig = tableRenderConfig[name] ?? tableRenderConfig["*"] ?? true;
-                if (typeof tableConfig === "function") return tableConfig(metadata);
+                if (typeof tableConfig === "function") return tableConfig.call(form, metadata, [...fullPath, name]);
                 else return tableConfig;
             },
             onThrow,

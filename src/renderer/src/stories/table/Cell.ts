@@ -20,6 +20,7 @@ type OnValidateFunction = (info: ValidationResult) => void
 
 type TableCellProps = {
     value: string,
+    editable: boolean,
     info: { col: string }
     ignore: { [key: string]: boolean },
     schema: {[key: string]: any},
@@ -33,6 +34,7 @@ export class TableCell extends LitElement {
 
     declare schema: TableCellProps['schema']
     declare info: TableCellProps['info']
+    declare editable: TableCellProps['editable']
 
     static get styles() {
         return css`
@@ -77,12 +79,13 @@ export class TableCell extends LitElement {
 
     type = 'text'
 
-    constructor({ info, value, schema, validateOnChange, ignore, onValidate }: TableCellProps) {
+    constructor({ info, value, editable = true, schema, validateOnChange, ignore, onValidate }: TableCellProps) {
         super()
         this.#value = value
 
         this.schema = schema
         this.info = info
+        this.editable = editable
 
         if (validateOnChange) this.validateOnChange = validateOnChange
         if (ignore) this.ignore = ignore
@@ -102,7 +105,9 @@ export class TableCell extends LitElement {
 
     }
 
-    toggle = (v: boolean) => this.input.toggle(v)
+    toggle = (v: boolean) => {
+        if (this.editable) this.input.toggle(v)
+    }
 
     get value() {
         let v = this.input ? this.input.getValue() : this.#value
@@ -216,6 +221,7 @@ export class TableCell extends LitElement {
         // Only actually rerender if new class type
         if (cls !== this.#cls) {
             this.input = new cls({
+                editable: this.editable,
                 onChange: async (v) => {
                     if (this.input.interacted) this.interacted = true
                     const result = await this.validate()

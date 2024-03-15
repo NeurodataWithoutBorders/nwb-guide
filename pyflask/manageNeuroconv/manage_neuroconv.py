@@ -371,12 +371,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         # Populate Units metadata
         metadata["Ecephys"]["Units"] = {}
         schema["properties"]["Ecephys"]["required"].append("Units")
-        original_units_schema = ecephys_properties.get("UnitProperties", None)  # NOTE: Not specific to interface
+        original_units_schema = ecephys_properties.pop("UnitProperties", None) # Remove UnitProperties from schema. NOTE: Not specific to interface
         has_units = original_units_schema is not None
 
+        metadata["Ecephys"].pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
+
         if has_units:
-            metadata["Ecephys"].pop("UnitProperties", None)  # Remove UnitProperties from metadata (if exists)
-            ecephys_properties.pop("UnitProperties")  # Remove UnitProperties from schema
             ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
 
     def on_sorting_interface(name, sorting_interface):
@@ -395,7 +395,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                     "type": "array",
                     "minItems": n_units,
                     "maxItems": n_units,
-                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
+                    "items": {
+                        "allOf": [
+                            { "$ref": "#/properties/Ecephys/properties/definitions/Unit" },
+                            {"required": list(map(lambda info: info["name"], units_data["UnitColumns"]))}
+                        ]
+                    },
                 },
                 UnitColumns={
                     "type": "array",
@@ -426,7 +431,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                     "type": "array",
                     "minItems": n_electrodes,
                     "maxItems": n_electrodes,
-                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
+                    "items": {
+                        "allOf": [
+                            { "$ref": "#/properties/Ecephys/properties/definitions/Electrode" },
+                            {"required": list(map(lambda info: info["name"], electrode_data["ElectrodeColumns"]))}
+                        ]
+                    },
                 },
                 ElectrodeColumns={
                     "type": "array",
@@ -462,7 +472,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         # Configure electrode columns
         defs["ElectrodeColumn"] = electrode_def
-        defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
         new_electrodes_properties = {
             properties["name"]: {key: value for key, value in properties.items() if key != "name"}

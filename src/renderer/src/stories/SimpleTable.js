@@ -11,7 +11,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 import "./Button";
 import tippy from "tippy.js";
-import { sortTable } from "./Table";
+import { sortTable, getEditable } from "./Table";
 import { NestedInputCell } from "./table/cells/input";
 import { getIgnore } from "./JSONSchemaForm";
 
@@ -23,6 +23,7 @@ const isVisible = function (ele, container) {
 
     return top <= containerRect.top ? containerRect.top - top <= height : bottom - containerRect.bottom <= height;
 };
+
 
 export class SimpleTable extends LitElement {
     validateOnChange;
@@ -201,6 +202,7 @@ export class SimpleTable extends LitElement {
         maxHeight,
         contextOptions = {},
         ignore = {},
+        editable = {}
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -213,6 +215,7 @@ export class SimpleTable extends LitElement {
         this.maxHeight = maxHeight ?? "";
 
         this.ignore = ignore;
+        this.editable = editable
 
         this.contextOptions = contextOptions;
 
@@ -780,6 +783,7 @@ export class SimpleTable extends LitElement {
         const schema = this.#itemProps[fullInfo.col];
 
         const ignore = getIgnore(this.ignore, [fullInfo.col]);
+        const isEditable = getEditable(value, this.editable, fullInfo.col)
 
         // Track the cell renderer
         const cell = new TableCell({
@@ -791,6 +795,7 @@ export class SimpleTable extends LitElement {
                 ),
                 col: this.colHeaders[info.j],
             },
+            editable: isEditable,
             value,
             schema,
             ignore,

@@ -9,7 +9,6 @@ import * as promises from "../promises";
 import "./Button";
 import { sortTable } from "./Table";
 import tippy from "tippy.js";
-import { getIgnore } from "./JSONSchemaForm";
 
 export class BasicTable extends LitElement {
     static get styles() {
@@ -276,11 +275,13 @@ export class BasicTable extends LitElement {
 
         let { type, original, inferred } = this.#getType(value, propInfo);
 
+        const isUndefined = value === undefined || value === ''
+
         // Check if required
-        if (!value && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
+        if (isUndefined && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
         // If not required, check matching types (if provided) for values that are defined
-        else if (value !== "" && type && inferred !== type)
+        else if (!isUndefined && type && inferred !== type)
             result = [{ message: `${col} is expected to be of type ${original}, not ${inferred}`, type: "error" }];
         // Otherwise validate using the specified onChange function
         else result = this.validateOnChange([row, col], parent, value, this.#itemProps[col]);

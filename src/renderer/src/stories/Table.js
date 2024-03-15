@@ -16,6 +16,13 @@ const isRequired = (col, schema) => {
     return schema.required?.includes(col);
 };
 
+export const getEditable = (value, config, colName) => {
+    if (typeof config === 'boolean') return config
+    if (typeof config === 'function') return config(value)
+    return getEditable(value, config?.[colName] ?? true)
+}
+
+
 export function sortTable(schema, keyColumn, order) {
     const cols = Object.keys(schema.properties)
 
@@ -384,7 +391,9 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (!value && required) {
+                const isUndefined = value == ''
+
+                if (isUndefined && required) {
                     instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         this.row,

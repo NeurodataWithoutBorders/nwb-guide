@@ -57,7 +57,6 @@ export const getSchema = (path, schema, base = []) => {
 
     // NOTE: Refs are now pre-resolved
     const resolved = get(path, schema, ["properties", "patternProperties"], ["patternProperties", "items"]);
-    // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
     return resolved;
 };
