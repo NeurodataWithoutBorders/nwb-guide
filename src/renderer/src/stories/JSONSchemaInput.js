@@ -361,9 +361,12 @@ export class JSONSchemaInput extends LitElement {
                 background: rgb(255, 229, 228) !important;
             }
 
+            jsonschema-input {
+                width: 100%;
+            }
+
             main {
                 display: flex;
-                margin-top: 0.5rem;
             }
 
             #controls {
@@ -425,7 +428,7 @@ export class JSONSchemaInput extends LitElement {
                 width: 100%;
                 padding-top: 4px;
                 color: dimgray !important;
-                margin: 0 0 1em;
+                margin: 0 0;
                 line-height: 1.4285em;
             }
 
@@ -449,6 +452,7 @@ export class JSONSchemaInput extends LitElement {
                 display: block;
                 width: 100%;
                 margin: 0;
+                margin-bottom: 10px;
                 color: black;
                 font-weight: 600;
                 font-size: 1.2em !important;
@@ -630,16 +634,15 @@ export class JSONSchemaInput extends LitElement {
                 }
                 </label>
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
-                <p class="guided--text-input-instructions">
-                    ${
-                        schema.description
-                            ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] ===
-                              "."
+                ${
+                    schema.description
+                        ? html`<p class="guided--text-input-instructions">
+                              ${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
                                   ? ""
-                                  : "."}`
-                            : ""
-                    }
-                </p>
+                                  : "."}
+                          </p>`
+                        : ""
+                }
             </div>
         `;
     }
