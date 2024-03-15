@@ -282,6 +282,8 @@ export class GuidedMetadataPage extends ManagedPage {
 
             renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
                 if (name === "TwoPhotonSeries" && (!this.value || !this.value.length)) return null;
+                if (name === "Device" && (!this.value || !this.value.length)) return null;
+                if (name === "ElectrodeGroup" && (!this.value || !this.value.length)) return null;
 
                 const isAdditional = isAdditionalProperties(this.pattern);
                 const isPattern = isPatternProperties(this.pattern);

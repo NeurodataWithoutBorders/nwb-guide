@@ -349,31 +349,33 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # Clear the Electrodes information for being set as a collection of Interfaces
     has_ecephys = "Ecephys" in metadata
-    has_electrodes = False
     has_units = False
 
     if has_ecephys:
 
-        ecephys_properties = schema["properties"]["Ecephys"]["properties"]
+        ecephys_schema = schema["properties"]["Ecephys"]
+
+        if not ecephys_schema.get("required"):
+            ecephys_schema["required"] = []
+
+        ecephys_properties = ecephys_schema["properties"]
 
         # Populate Electrodes metadata
-        metadata["Ecephys"]["Electrodes"] = {}
-        schema["properties"]["Ecephys"]["required"].append("Electrodes")
         original_electrodes_schema = ecephys_properties["Electrodes"]
-        has_electrodes = True  # original_electrodes_schema.get('default')
 
         # Add Electrodes to the schema
-        if has_electrodes:
-            ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
+        metadata["Ecephys"]["Electrodes"] = {}
+        ecephys_schema["required"].append("Electrodes")
+        ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
         # Populate Units metadata
         metadata["Ecephys"]["Units"] = {}
         schema["properties"]["Ecephys"]["required"].append("Units")
-        original_units_schema = ecephys_properties.get("UnitProperties")  # NOTE: Not specific to interface
+        original_units_schema = ecephys_properties.get("UnitProperties", None)  # NOTE: Not specific to interface
         has_units = original_units_schema is not None
 
         if has_units:
-            metadata["Ecephys"].pop("UnitProperties")  # Remove UnitProperties from metadata
+            metadata["Ecephys"].pop("UnitProperties", None)  # Remove UnitProperties from metadata (if exists)
             ecephys_properties.pop("UnitProperties")  # Remove UnitProperties from schema
             ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
 
@@ -410,34 +412,32 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     def on_recording_interface(name, recording_interface):
 
-        if has_electrodes:
+        electrode_data = metadata["Ecephys"]["Electrodes"][name] = dict(
+            Electrodes=get_electrode_table_json(recording_interface),
+            ElectrodeColumns=get_electrode_columns_json(recording_interface),
+        )
 
-            electrode_data = metadata["Ecephys"]["Electrodes"][name] = dict(
-                Electrodes=get_electrode_table_json(recording_interface),
-                ElectrodeColumns=get_electrode_columns_json(recording_interface),
-            )
+        n_electrodes = len(electrode_data["Electrodes"])
 
-            n_electrodes = len(electrode_data["Electrodes"])
+        ecephys_properties["Electrodes"]["properties"][name] = dict(
+            type="object",
+            properties=dict(
+                Electrodes={
+                    "type": "array",
+                    "minItems": n_electrodes,
+                    "maxItems": n_electrodes,
+                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
+                },
+                ElectrodeColumns={
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
+                },
+            ),
+            required=["Electrodes", "ElectrodeColumns"],
+        )
 
-            ecephys_properties["Electrodes"]["properties"][name] = dict(
-                type="object",
-                properties=dict(
-                    Electrodes={
-                        "type": "array",
-                        "minItems": n_electrodes,
-                        "maxItems": n_electrodes,
-                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
-                    },
-                    ElectrodeColumns={
-                        "type": "array",
-                        "minItems": 0,
-                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
-                    },
-                ),
-                required=["Electrodes", "ElectrodeColumns"],
-            )
-
-            ecephys_properties["Electrodes"]["required"].append(name)
+        ecephys_properties["Electrodes"]["required"].append(name)
 
         return recording_interface
 
@@ -455,28 +455,26 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         defs = ecephys_properties["definitions"]
 
-        if has_electrodes:
+        electrode_def = defs["Electrodes"]
 
-            electrode_def = defs["Electrodes"]
+        # NOTE: Update to output from NeuroConv
+        electrode_def["properties"]["data_type"] = DTYPE_SCHEMA
 
-            # NOTE: Update to output from NeuroConv
-            electrode_def["properties"]["data_type"] = DTYPE_SCHEMA
+        # Configure electrode columns
+        defs["ElectrodeColumn"] = electrode_def
+        defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
-            # Configure electrode columns
-            defs["ElectrodeColumn"] = electrode_def
-            defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
+        new_electrodes_properties = {
+            properties["name"]: {key: value for key, value in properties.items() if key != "name"}
+            for properties in original_electrodes_schema.get("default", {})
+            if properties["name"] not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
+        }
 
-            new_electrodes_properties = {
-                properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-                for properties in original_electrodes_schema.get("default", {})
-                if properties["name"] not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
-            }
-
-            defs["Electrode"] = {
-                "type": "object",
-                "properties": new_electrodes_properties,
-                "additionalProperties": True,  # Allow for new columns
-            }
+        defs["Electrode"] = {
+            "type": "object",
+            "properties": new_electrodes_properties,
+            "additionalProperties": True,  # Allow for new columns
+        }
 
         if has_units:
 

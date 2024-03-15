@@ -45,6 +45,7 @@ function updateEcephysTable(propName, schema, schemaToMerge) {
 
     // Change rendering order for electrode table columns
     const electrodesProp = ecephys.properties[propName]
+    if (!electrodesProp) return false
     for (let name in electrodesProp.properties) {
         const interfaceProps = electrodesProp.properties[name].properties
 
@@ -65,6 +66,8 @@ function updateEcephysTable(propName, schema, schemaToMerge) {
 
         }
     }
+
+    return true
 
 }
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
