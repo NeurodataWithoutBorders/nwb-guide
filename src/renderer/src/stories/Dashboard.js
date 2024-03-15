@@ -235,6 +235,8 @@ export class Dashboard extends LitElement {
 
             const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
             if (skipped) {
+                if (isStorybook) return; // Do not skip on storybook
+
                 // Run skip functions
                 Object.entries(page.workflow).forEach(([key, state]) => {
                     if (typeof state.skip === "function") state.skip();
