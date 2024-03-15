@@ -78,7 +78,7 @@ jobs:
         with:
           node-version: "18"
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts --verbose
 
       # fix for macos build
       - if: matrix.os == 'macos-latest'
