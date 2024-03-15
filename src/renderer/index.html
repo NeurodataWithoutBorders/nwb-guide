@@ -47,7 +47,10 @@
         if (appziFeedbackButton) clearInterval(interval)
         else return
 
-        appziFeedbackButton.contentWindow.document.querySelector('div').addEventListener('click', () => {
+        const div = appziFeedbackButton.contentWindow.document.querySelector('div')
+        if (!div) return
+
+        div.addEventListener('click', () => {
           if (!appziFeedbackWidget) setTimeout(() => appziFeedbackWidget = iframe('Feedback Widget'), 200)
         })
 
