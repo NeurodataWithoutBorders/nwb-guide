@@ -1242,9 +1242,12 @@ export class JSONSchemaForm extends LitElement {
             enableToggleContainer.append(enableToggle);
             Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
 
+            // Skip if accordion will be empty
+            if (!renderableInside.length) return
+    
             const accordion = (this.accordions[name] = new Accordion({
                 name: headerName,
-                toggleable: hasMany,
+                toggleable: hasMany, // Only show toggle if there are multiple siblings
                 subtitle: html`<div style="display:flex; align-items: center;">
                     ${explicitlyRequired ? "" : enableToggleContainer}
                 </div>`,
