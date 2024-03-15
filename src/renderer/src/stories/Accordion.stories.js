@@ -6,36 +6,37 @@ export default {
 
 const Template = (args) => new Accordion(args);
 
-export const Default = Template.bind({});
-Default.args = {
-    sections: {
-        NWBFile: {
-            open: true,
-            status: "valid",
-            content: "WOOHOO",
-            subtitle: "General NWB File Properties",
-        },
-        Subject: {
-            status: "warning",
-            content: "OOO",
-        },
-        Ecephys: {
-            status: "error",
-            content: "BOO",
-        },
-        Standard: {
-            content: "Whatever you want",
-        },
-    },
+const base = {
+    name: "NWBFile",
+    open: true,
+    status: "valid",
+    content: "Whatever you want",
+    subtitle: "General NWB File Properties",
 };
 
-// {
-// pages: {
-//   'Page 1': {
-//     active: true
-//   },
-//   'Page 2': {
-//     active: false
-//   },
-// }
-// }
+export const Basic = Template.bind({});
+Basic.args = {
+    ...base,
+    content: "Whatever you want",
+};
+
+export const Valid = Template.bind({});
+Valid.args = {
+    ...base,
+    status: "valid",
+    content: "WOOHOO!",
+};
+
+export const Warning = Template.bind({});
+Warning.args = {
+    ...base,
+    status: "warning",
+    content: "OOO",
+};
+
+export const Error = Template.bind({});
+Error.args = {
+    ...base,
+    status: "error",
+    content: "BOO",
+};

@@ -6,16 +6,17 @@ import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
 import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
-const { shell } = electron;
+const { ipcRenderer } = electron;
 
 export const getStubArray = (stubs) =>
     Object.values(stubs)
-        .map((o) => Object.values(o))
+        .map((item) => Object.values(item))
         .flat();
 
 export class GuidedStubPreviewPage extends Page {
     constructor(...args) {
         super(...args);
+        this.style.height = "100%"; // Fix main section
     }
 
     header = {
@@ -23,12 +24,13 @@ export class GuidedStubPreviewPage extends Page {
         controls: () =>
             html`<nwb-button
                 size="small"
-                @click=${() =>
-                    shell
-                        ? shell.showItemInFolder(
-                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((o) => o.file))
-                          )
-                        : ""}
+                @click=${() => {
+                    if (ipcRenderer)
+                        ipcRenderer.send(
+                            "showItemInFolder",
+                            getSharedPath(getStubArray(this.info.globalState.preview.stubs).map((item) => item.file))
+                        );
+                }}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
     };
@@ -38,11 +40,10 @@ export class GuidedStubPreviewPage extends Page {
         next: "Run Conversion",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-            delete this.info.globalState.conversion;
-            this.info.globalState.conversion = await this.runConversions({}, true, {
-                title: "Running all conversions",
-            });
-            this.to(1);
+
+            await this.convert();
+
+            return this.to(1);
         },
     };
 

@@ -8,15 +8,31 @@ export class GuidedResultsPage extends Page {
         super(...args);
     }
 
+    footer = {};
+
+    updated() {
+        this.save(); // Save the current state
+    }
+
     render() {
         const { conversion } = this.info.globalState;
 
         if (!conversion)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
-        const { dandiset_id } = this.info.globalState.upload?.info ?? {};
+        const { info = {}, results } = this.info.globalState.upload ?? {};
+        const { dandiset } = info;
 
-        return html`<div style="padding: 10px 20px;">${new DandiResults({ id: dandiset_id, files: conversion })}</div>`;
+        return html`<div style="padding: 10px 20px;">
+            ${new DandiResults({
+                id: dandiset,
+                files: {
+                    subject: results.map((file) => {
+                        return { file };
+                    }),
+                },
+            })}
+        </div>`;
     }
 }
 

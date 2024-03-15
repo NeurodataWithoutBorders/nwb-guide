@@ -1,12 +1,15 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, unsafeCSS } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { header } from "./forms/utils";
 import { checkStatus } from "../validation";
-import { errorHue, warningHue } from "./globals";
+import { emojiFontFamily, errorHue, warningHue } from "./globals";
 
 import * as promises from "../promises";
 
 import "./Button";
+import { sortTable } from "./Table";
+import tippy from "tippy.js";
+import { getIgnore } from "./JSONSchemaForm";
 
 export class BasicTable extends LitElement {
     static get styles() {
@@ -63,6 +66,12 @@ export class BasicTable extends LitElement {
                 user-select: none;
             }
 
+            .relative .info {
+                margin: 0px 5px;
+                font-size: 80%;
+                font-family: ${unsafeCSS(emojiFontFamily)};
+            }
+
             th span {
                 display: inline-block;
             }
@@ -105,6 +114,7 @@ export class BasicTable extends LitElement {
     constructor({
         name,
         schema,
+        ignore,
         data,
         keyColumn,
         maxHeight,
@@ -112,6 +122,7 @@ export class BasicTable extends LitElement {
         validateOnChange,
         onStatusChange,
         onLoaded,
+        onUpdate,
     } = {}) {
         super();
         this.name = name ?? "data_table";
@@ -121,9 +132,26 @@ export class BasicTable extends LitElement {
         this.maxHeight = maxHeight ?? "";
         this.validateEmptyCells = validateEmptyCells ?? true;
 
+        this.ignore = ignore ?? {};
+
         if (validateOnChange) this.validateOnChange = validateOnChange;
+        if (onUpdate) this.onUpdate = onUpdate;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
+    }
+
+    #schema = {};
+    #itemSchema = {};
+    #itemProps = {};
+
+    get schema() {
+        return this.#schema;
+    }
+
+    set schema(schema = {}) {
+        this.#schema = schema;
+        this.#itemSchema = schema.items ?? {};
+        this.#itemProps = { ...(this.#itemSchema.properties ?? {}) };
     }
 
     #rendered;
@@ -134,14 +162,34 @@ export class BasicTable extends LitElement {
     rendered = this.#updateRendered(true);
 
     #renderHeaderContent = (str) => {
-        const required = this.schema.required ? this.schema.required.includes(str) : false;
+        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(str) : false;
         if (required) return html`<div class="relative"><span required>${header(str)}</span></div>`;
         return html`<div class="relative"><span>${header(str)}</span></div>`;
     };
 
-    #renderHeader = (str, { description }) => {
-        if (description) return html`<th title="${description}">${this.#renderHeaderContent(str)}</th>`;
-        return html`<th>${this.#renderHeaderContent(str)}</th>`;
+    #renderHeader = (prop, { description, title = prop } = {}) => {
+        const th = document.createElement("th");
+
+        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(prop) : false;
+        const container = document.createElement("div");
+        container.classList.add("relative");
+        const span = document.createElement("span");
+        span.innerHTML = header(title);
+        if (required) span.setAttribute("required", "");
+        container.appendChild(span);
+
+        // Add Description Tooltip
+        if (description) {
+            const span = document.createElement("span");
+            span.classList.add("info");
+            span.innerText = "ℹ️";
+            container.append(span);
+            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}`, allowHTML: true });
+        }
+
+        th.appendChild(container);
+
+        return th;
     };
 
     #getRowData(row, cols = this.colHeaders) {
@@ -150,13 +198,12 @@ export class BasicTable extends LitElement {
             let value;
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
-                else return "";
+                else return;
             } else
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
-                    // this.template[col] ??
-                    this.schema.properties[col].default ??
-                    "";
+                    // this.globals[col] ??
+                    this.#itemSchema.properties[col]?.default;
             return value;
         });
     }
@@ -181,7 +228,7 @@ export class BasicTable extends LitElement {
         if (len === 1) message = errors[0].title || "Error found";
         else if (len) {
             message = `${len} errors exist on this table.`;
-            console.error(Array.from(errors).map((o) => o.title));
+            console.error(Array.from(errors).map((error) => error.title));
         }
 
         if (message) throw new Error(message);
@@ -191,43 +238,52 @@ export class BasicTable extends LitElement {
     onStatusChange = () => {};
     onLoaded = () => {};
 
-    #validateCell = (value, col, parent) => {
+    #getType = (value, { type, data_type } = {}) => {
+        let inferred = typeof value;
+        if (Array.isArray(value)) inferred = "array";
+        if (value == undefined) inferred = "null";
+
+        const original = type || data_type;
+        let resolved = original;
+
+        // Handle based on JSON Schema types
+        if (type) {
+            if (resolved === "integer") resolved = "number"; // Map to javascript type
+        } else if (data_type) {
+            if (resolved.includes("array")) resolved = "array";
+            if (resolved.includes("int") || resolved.includes("float")) resolved = "number";
+            if (resolved.startsWith("bool")) resolved = "boolean";
+            if (resolved.startsWith("str")) resolved = "string";
+        }
+
+        return {
+            type: resolved,
+            original,
+            inferred,
+        };
+    };
+
+    #validateCell = (value, col, row, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
         let result;
 
-        const propInfo = this.schema.properties[col] ?? {};
-        let thisTypeOf = typeof value;
-        let ogType;
-        let type = (ogType = propInfo.type || propInfo.data_type);
+        const propInfo = this.#itemProps[col] ?? {};
 
-        // Handle based on JSON Schema types
-        if ("type" in propInfo) {
-            // Map to javascript type
-            if (type === "integer") type = "number";
-
-            // Convert to json schema type
-            if (Array.isArray(value)) thisTypeOf = "array";
-            if (value == undefined) thisTypeOf = "null";
-        } else if ("data_type" in propInfo) {
-            if (type.includes("array")) type = "array";
-            if (type.includes("int") || type.includes("float")) type = "number";
-            if (type.startsWith("bool")) type = "boolean";
-            if (type.startsWith("str")) type = "string";
-        }
+        let { type, original, inferred } = this.#getType(value, propInfo);
 
         // Check if required
-        if (!value && "required" in this.schema && this.schema.required.includes(col))
+        if (!value && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
-        // If not required, check matching types for values that are defined
-        else if (value !== "" && thisTypeOf !== type)
-            result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
+        // If not required, check matching types (if provided) for values that are defined
+        else if (value !== "" && type && inferred !== type)
+            result = [{ message: `${col} is expected to be of type ${original}, not ${inferred}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange(col, parent, value);
+        else result = this.validateOnChange([row, col], parent, value, this.#itemProps[col]);
 
         // Will run synchronously if not a promise result
-        return promises.resolve(result, () => {
+        return promises.resolve(result, (result) => {
             let info = {
                 title: undefined,
                 warning: undefined,
@@ -239,14 +295,12 @@ export class BasicTable extends LitElement {
 
             if (result === false) errors.push({ message: "Cell is invalid" });
 
-            if (warnings.length) {
-                info.warning = "";
-                info.title = warnings.map((o) => o.message).join("\n");
-            }
-
             if (errors.length) {
                 info.error = "";
-                info.title = errors.map((o) => o.message).join("\n"); // Class switching handled automatically
+                info.title = errors.map((error) => error.message).join("\n"); // Class switching handled automatically
+            } else if (warnings.length) {
+                info.warning = "";
+                info.title = warnings.map((warning) => warning.message).join("\n");
             }
 
             if (typeof result === "function") result(); // Run if returned value is a function
@@ -260,11 +314,24 @@ export class BasicTable extends LitElement {
 
         const results = this.#data.map((v, i) => {
             return v.map((vv, j) => {
-                const info = this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] }); // Could be a promise or a basic response
+                const info = this.#validateCell(vv, this.colHeaders[j], i, { ...this.data[rows[i]] }); // Could be a promise or a basic response
                 return promises.resolve(info, (info) => {
                     if (info === true) return;
                     const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
                     if (td) {
+                        const message = info.title;
+                        delete info.title;
+
+                        if (td._tippy) {
+                            td._tippy.destroy();
+                            td.removeAttribute("data-message");
+                        }
+
+                        if (message !== undefined) {
+                            tippy(td, { content: message, allowHTML: true });
+                            td.setAttribute("data-message", message);
+                        }
+
                         for (let key in info) {
                             const value = info[key];
                             if (value === undefined) td.removeAttribute(key);
@@ -306,7 +373,7 @@ export class BasicTable extends LitElement {
         let data = text.split("\n").map((row) =>
             row.split("\t").map((v) => {
                 try {
-                    return JSON.parse(v);
+                    return eval(v);
                 } catch {
                     return v.trim();
                 }
@@ -326,22 +393,27 @@ export class BasicTable extends LitElement {
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
-            Object.entries(cols).forEach(([key, value]) =>
-                key in this.schema.properties ? (latest[key] = value) : ""
-            ); // Only include data from schema
+            Object.entries(cols).forEach(([key, value]) => {
+                if (key in this.#itemProps) {
+                    const { type } = this.#getType(value, this.#itemProps[key]);
+                    if (type === "string") value = `${value}`; // Convert to string if necessary
+                    latest[key] = value;
+                }
+            }); // Only include data from schema
         });
 
-        this.onUpdate(null, null, value); // Update the whole table
+        if (this.onUpdate) this.onUpdate([], data); // Update the whole table
     }
 
     // Render Code
     render() {
         this.#updateRendered();
 
-        const entries = { ...this.schema.properties };
+        this.schema = this.schema; // Always update the schema
+        const entries = this.#itemProps;
 
         // Add existing additional properties to the entries variable if necessary
-        if (this.schema.additionalProperties) {
+        if (this.#itemSchema.additionalProperties) {
             Object.values(this.data).reduce((acc, v) => {
                 Object.keys(v).forEach((k) =>
                     !(k in entries)
@@ -354,17 +426,22 @@ export class BasicTable extends LitElement {
             }, entries);
         }
 
+        // Ignore any additions in the ignore configuration
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
+
         // Sort Columns by Key Column and Requirement
         const keys =
             (this.#keys =
             this.colHeaders =
-                Object.keys(entries).sort((a, b) => {
-                    if (a === this.keyColumn) return -1;
-                    if (b === this.keyColumn) return 1;
-                    if (entries[a].required && !entries[b].required) return -1;
-                    if (!entries[a].required && entries[b].required) return 1;
-                    return 0;
-                }));
+                sortTable(
+                    {
+                        ...this.#itemSchema,
+                        properties: entries,
+                    },
+                    this.keyColumn,
+                    this.#itemSchema.order
+                ));
 
         // Try to guess the key column if unspecified
         if (!Array.isArray(this.data) && !this.keyColumn) {
@@ -387,7 +464,9 @@ export class BasicTable extends LitElement {
                         ${data.map(
                             (row, i) =>
                                 html`<tr>
-                                    ${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${col}</div></td>`)}
+                                    ${row.map(
+                                        (col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`
+                                    )}
                                 </tr>`
                         )}
                     </tbody>

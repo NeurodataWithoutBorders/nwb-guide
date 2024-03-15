@@ -3,6 +3,7 @@
 
 dist
 out
+tests/screenshots
 
 coverage
 
@@ -35,3 +36,6 @@ src/build
 .env
 .env.local
 .env.production
+
+# Spyder
+.spyproject/

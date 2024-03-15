@@ -2,6 +2,8 @@ import { html } from "lit";
 import { Page } from "../Page.js";
 import "./GuidedFooter";
 import { InfoBox } from "../../InfoBox.js";
+import { InspectorListItem } from "../../preview/inspector/InspectorList.js";
+import { sections } from "../globals.js";
 
 export class GuidedStartPage extends Page {
     constructor(...args) {
@@ -47,27 +49,62 @@ export class GuidedStartPage extends Page {
 
     render() {
         return html`
-            <div id="guided-mode-starting-container" class="guided--main-tab" data-parent-tab-name="Dataset Structure">
-                <div class="guided--panel" id="guided-intro-page" style="flex-grow: 1">
+                <div class="guided--panel" style="flex-grow: 1">
                     <div class="title-border">
-                        <h1 class="guided--text-sub-step">Welcome to Guided Mode!</h1>
+                        <h1 class="guided--text-sub-step">Designing a Conversion Pipeline: A Look Ahead</h1>
                     </div>
-                    <div class="guided--section">
-                        <p class="guided--help-text">
-                            Guided Mode is divided into four high-level sections. During the first three sections, you
-                            will be directed to specify the data formats and files to include in your dataset and
-                            provide information about your conversion pipeline. In the final section, NWB GUIDE will
-                            automatically generate a valid NWB file and ask for your review before uploading to DANDI.
-                            Note that none of your local data files will ever be modified or moved.
+                    <div>
+                        <br>
+                        <p>
+                           In the GUIDE, the process of running a conversion pipeline is broken into four high-level sections.
+                        <p>
+                        <h4>1. ${sections[0]}</h4>
+                        <p>
+                            The first section will direct you to specify the high-level structure of your conversion pipeline, including data formats and global metadata.
                         </p>
+                        <h4>2. ${sections[1]}</h4>
+                        <p>
+                            The second section will have you provide your source data files and NWB File metadata on a per-subject basis to populate your files.
+                        </p>
+
+                        ${new InspectorListItem({
+                            message: html`Red boxes are <b>Error</b> messages. These will block your conversion progress
+                                until resolved.`,
+                            type: "error",
+                        })}
+                        ${new InspectorListItem({
+                            message: html`Yellow boxes are <b>Warning</b> messages. Fixing them will align your NWB
+                                files with best practices.`,
+                            type: "warning",
+                        })}
+
+                        <p>
+                            Throughout the forms found in the GUIDE, asterisks (<span style="color:red;">*</span>) represent required properties.
+                            Attempting to move forward will throw an <b>Error</b> until these properties are filled in.
+                        </p>
+                        <p>
+                            Gray asterisks (<span style="color:gray;">*</span>) are sometimes used to represent loose requirements, where missing this property will throw an <b>Error</b>
+                            — though you don't need to specify a value at the current stage.
+                        </p>
+
+                        <h4>3. ${sections[2]}</h4>
+                        <p>
+                            In the third section, you will preview your conversion before uploading to DANDI.
+                        </p>
+                        <h4>4. ${sections[3]}</h4>
+                        <p>
+                            Finally, you will upload your conversion to DANDI and review the resulting Dandiset.
+                        </p>
+
+                        <h2 style="padding: 0; font-size: 20px;">Additional Resources</h2>
+                        <hr>
                         ${new InfoBox({
-                            header: "Learn more about the conversion process",
-                            content: html`
-                                Although not required to use Guided Mode, you can learn more about the NWB conversion
+                            header: "Where can I learn more about the conversion process?",
+                            content: `
+                                Although not required to use the GUIDE, you can learn more about the NWB conversion
                                 process in the
                                 <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
-                                    >neuroconv documentation page</a
-                                >
+                                    >neuroconv documentation page</a>.
                             `,
                         })}
                     </div>

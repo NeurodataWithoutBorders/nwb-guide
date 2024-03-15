@@ -1,4 +1,4 @@
-name: PyFlask build and distributable tests
+name: Build Tests — Flask
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -24,12 +24,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
-          - python-version: "3.9"
-            os: ubuntu-latest
-            label: environments/environment-Linux.yml
-            prefix: /usr/share/miniconda3/envs/nwb-guide
+          # current linux installation instructions use dev mode instead of distributable
+          # - python-version: "3.9"
+          #   os: ubuntu-latest
+          #   label: environments/environment-Linux.yml
+          #   prefix: /usr/share/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
             os: macos-latest
@@ -78,7 +78,7 @@ jobs:
         with:
           node-version: "20"
 
-      - run: npm ci
+      - run: npm ci --verbose
 
       # fix for macos build
       - if: matrix.os == 'macos-latest'

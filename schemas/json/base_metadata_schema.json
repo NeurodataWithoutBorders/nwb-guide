@@ -1,8 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "base_metafile.schema.json",
-  "title": "Base schema for the metafile",
-  "description": "Base schema for the metafile",
   "version": "0.1.0",
   "type": "object",
   "required": ["NWBFile"],
@@ -13,6 +11,7 @@
       "required": ["session_start_time"],
       "properties": {
         "keywords": {
+          "title": "Keyword",
           "description": "Terms to search over",
           "type": "array",
           "items": {
@@ -32,9 +31,31 @@
           "description": "Name of person/people who performed experiment",
           "type": "array",
           "items": {
+            "title": "Experimenter",
             "type": "string",
-            "title": "experimenter"
-          }
+            "format": "{last_name}, {first_name} {middle_name_or_initial}",
+            "properties": {
+              "first_name": {
+                "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                "type": "string",
+                "flags": "u"
+              },
+              "last_name": {
+                  "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                  "type": "string",
+                  "flags": "u"
+              },
+              "middle_name_or_initial": {
+                "pattern": "^[\\p{L}\\s\\-\\.']+$",
+                "type": "string",
+                "flags": "u"
+              }
+            },
+            "required": [
+                "first_name",
+                "last_name"
+            ]
+        }
         },
         "identifier": {
           "type": "string",
@@ -71,9 +92,20 @@
         },
         "related_publications": {
           "type": "array",
+          "description": "Provide a DOI for each publication.",
           "items": {
-            "title": "related publication",
-            "type": "string"
+            "title": "Related Publication",
+            "type": "string",
+            "format": "{doi}",
+            "properties": {
+              "doi": {
+                "title": "DOI",
+                "pattern": "^(doi:|http:\/\/dx\\.doi\\.org/|https:\/\/doi\\.org\/)\\b(10[.][0-9]{4,}(?:[.][0-9]+)*\\/(?:(?![\"&\\'<>])\\S)+)\\b$",
+                "type": "string",
+                "description": "Provide your publication formatted as a digital object identifier (DOI), e.g., doi:10.1038/nn.1234 or https://doi.org/10.1038/nn.1234."
+              }
+            },
+            "required": [ "doi" ]
           }
         },
         "slices": {
@@ -94,7 +126,7 @@
         },
         "virus": {
           "type": "string",
-          "description": "Narrative description about surgery/surgeries, including date(s) and who performed surgery."
+          "description": "Information about virus(es) used in experiments, including virus ID, source, date made, injection location, volume, etc."
         },
         "data_collection": {
           "type": "string",
@@ -102,7 +134,7 @@
         },
         "stimulus_notes": {
           "type": "string",
-          "description": "Notes about data collection and analysis."
+          "description": "Notes about stimuli, such as how and where presented."
         }
       }
     },
@@ -146,7 +178,7 @@
         "species": {
           "type": "string",
           "description": "Species of subject. Use latin name.",
-          "pattern": "^[A-Z][a-z]+ [a-z]+"
+          "pattern": "^[A-Z][a-z]+ [a-z]+|http://purl.obolibrary.org/obo/NCBITaxon_[0-9]+"
         },
         "subject_id": {
           "type": "string",

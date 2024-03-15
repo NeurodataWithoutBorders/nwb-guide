@@ -6,6 +6,7 @@ import { run } from "../pages/guided-mode/options/utils";
 import { until } from "lit/directives/until.js";
 import { InstanceManager } from "../InstanceManager";
 import { path } from "../../electron";
+import { FullScreenToggle } from "../FullScreenToggle";
 
 export function getSharedPath(array) {
     array = array.map((str) => str.replace(/\\/g, "/")); // Convert to Mac-style path
@@ -20,22 +21,22 @@ export function getSharedPath(array) {
         }
     });
 
-    return shared ? path.normalize(shared.join("/")) : ''; // Convert back to OS-specific path
+    return shared ? path.normalize(shared.join("/")) : ""; // Convert back to OS-specific path
 }
 
 export function truncateFilePaths(items, basepath) {
-    return items.map((o) => {
-        o = { ...o };
-        o.file_path = o.file_path
+    return items.map((item) => {
+        item = { ...item };
+        item.file_path = item.file_path
             .replace(`${basepath}/`, "") // Mac
             .replace(`${basepath}\\`, ""); // Windows
-        return o;
+        return item;
     });
 }
 
-export const removeFilePaths = (arr) => {
-    return arr.map((o) => {
-        const copy = { ...o };
+export const removeFilePaths = (items) => {
+    return items.map((item) => {
+        const copy = { ...item };
         delete copy.file_path;
         return copy;
     });
@@ -55,7 +56,7 @@ class NWBPreviewInstance extends LitElement {
         const isOnline = navigator.onLine;
 
         return isOnline
-            ? new Neurosift({ url: getURLFromFilePath(this.file, this.project) })
+            ? new Neurosift({ url: getURLFromFilePath(this.file, this.project), fullscreen: false })
             : until(
                   (async () => {
                       const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
@@ -71,10 +72,26 @@ customElements.get("nwb-preview-instance") || customElements.define("nwb-preview
 export class NWBFilePreview extends LitElement {
     static get styles() {
         return css`
+            :host {
+                display: block;
+                width: 100%;
+                height: 100%;
+                background: white;
+                position: relative;
+            }
+
             iframe {
                 width: 100%;
                 height: 100%;
                 border: 0;
+            }
+
+            #inspect {
+                display: flex;
+                flex-direction: column;
+                border-left: 1px solid gray;
+                box-shadow: -5px 0 5px -5px rgba(0, 0, 0, 0.5);
+                z-index: 1;
             }
         `;
     }
@@ -105,58 +122,69 @@ export class NWBFilePreview extends LitElement {
 
         const onlyFirstFile = fileArr.length <= 1;
 
-        return html`<div style="display: flex; height: 100%;">
-            <div style="flex-grow: 1;">
-                ${(() => {
-                    if (onlyFirstFile) return new NWBPreviewInstance(fileArr[0].info, this.project);
-                    else {
-                        const _instances = fileArr.map(this.createInstance);
+        return html` ${new FullScreenToggle({ target: this })}
+            <div style="display: flex; height: 100%;">
+                <div style="flex-grow: 1;">
+                    ${(() => {
+                        if (onlyFirstFile) return new NWBPreviewInstance(fileArr[0].info, this.project);
+                        else {
+                            const _instances = fileArr.map(this.createInstance);
 
-                        const instances = _instances.reduce((acc, { subject, session, display }) => {
-                            if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
-                            acc[`sub-${subject}`][`ses-${session}`] = display;
-                            return acc;
-                        }, {});
+                            const instances = _instances.reduce((acc, { subject, session, display }) => {
+                                if (!acc[`sub-${subject}`]) acc[`sub-${subject}`] = {};
+                                acc[`sub-${subject}`][`ses-${session}`] = display;
+                                return acc;
+                            }, {});
 
-                        return new InstanceManager({ instances });
-                    }
-                })()}
-            </div>
-            ${this.inspect
-                ? html`<div style="padding-left: 20px; display: flex; flex-direction: column;">
-                      <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
-                      ${until(
-                          (async () => {
-                              const opts = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
+                            return new InstanceManager({ instances });
+                        }
+                    })()}
+                </div>
+                ${this.inspect
+                    ? html`<div id="inspect">
+                          <h3 style="padding: 10px; margin: 0; background: black; color: white;">Inspector Report</h3>
+                          ${until(
+                              (async () => {
+                                  const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
 
-                              const title = "Inspecting your file";
+                                  const title = "Inspecting your file";
 
-                              const items = onlyFirstFile
-                                  ? removeFilePaths(
-                                        await run(
+                                  const report = onlyFirstFile
+                                      ? await run(
                                             "inspect_file",
-                                            { nwbfile_path: fileArr[0].info.file, ...opts },
+                                            { nwbfile_path: fileArr[0].info.file, ...options },
                                             { title }
-                                        )
-                                    ) // Inspect the first file
-                                  : await (async () =>
-                                        truncateFilePaths(
-                                            await run("inspect_folder", { path, ...opts }, { title: title + "s" }),
-                                            getSharedPath(fileArr.map((o) => o.info.file))
-                                        ))();
+                                        ) // Inspect the first file
+                                      : await run("inspect_folder", { path, ...options }, { title: title + "s" }); // Inspect the folder
 
-                              const list = new InspectorList({
-                                  items: items,
-                                  listStyles: { maxWidth: "350px" },
-                              });
-                              list.style.padding = "10px";
-                              return list;
-                          })(),
-                          html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
-                      )}
-                  </div>`
-                : ""}
-        </div>`;
+                                  const result = onlyFirstFile
+                                      ? {
+                                            ...report,
+                                            messages: removeFilePaths(report.messages),
+                                        }
+                                      : {
+                                            ...report,
+                                            messages: truncateFilePaths(
+                                                report.messages,
+                                                getSharedPath(fileArr.map(({ info }) => info.file))
+                                            ),
+                                        };
+
+                                  const items = result.messages;
+
+                                  const list = new InspectorList({
+                                      items: items,
+                                      listStyles: { minWidth: "300px", maxWidth: "350px" },
+                                      emptyMessage: "No issues found.",
+                                  });
+                                  list.style.padding = "10px";
+                                  return list;
+                              })(),
+                              html`<small style="padding: 10px 25px;">Loading inspector report...</small>`
+                          )}
+                      </div>`
+                    : ""}
+            </div>`;
     }
 }
 

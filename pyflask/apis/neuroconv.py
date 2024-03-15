@@ -1,4 +1,5 @@
 """API endpoint definitions for interacting with NeuroConv."""
+
 import traceback
 
 from flask_restx import Namespace, Resource, reqparse
@@ -6,19 +7,21 @@ from flask import Response
 
 from manageNeuroconv import (
     get_all_interface_info,
+    get_all_converter_info,
     locate_data,
+    autocomplete_format_string,
     get_source_schema,
     get_metadata_schema,
     convert_to_nwb,
     validate_metadata,
     listen_to_neuroconv_events,
-    generate_dataset,
     inspect_nwb_file,
     inspect_nwb_folder,
     inspect_multiple_filesystem_objects,
-    upload_to_dandi,
+    upload_project_to_dandi,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
+    get_interface_alignment,
 )
 
 from errorHandlers import notBadRequestException
@@ -40,11 +43,17 @@ class AllInterfaces(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
         try:
-            return get_all_interface_info()
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
-            raise e
+            # return get_all_interface_info()
+            # return get_all_converter_info()
+
+            return {
+                **get_all_interface_info(),
+                **get_all_converter_info(),
+            }
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
+            raise exception
 
 
 @neuroconv_api.route("/schema")
@@ -53,9 +62,9 @@ class Schemas(Resource):
     def post(self):
         try:
             return get_source_schema(neuroconv_api.payload)
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/locate")
@@ -64,9 +73,20 @@ class Locate(Resource):
     def post(self):
         try:
             return locate_data(neuroconv_api.payload)
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
+
+
+@neuroconv_api.route("/locate/autocomplete")
+class Locate(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return autocomplete_format_string(neuroconv_api.payload)
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/metadata")
@@ -76,9 +96,9 @@ class Metadata(Resource):
         # try:
         return get_metadata_schema(neuroconv_api.payload.get("source_data"), neuroconv_api.payload.get("interfaces"))
 
-    # except Exception as e:
-    #     if notBadRequestException(e):
-    #         neuroconv_api.abort(500, str(e))
+    # except Exception as exception:
+    #     if notBadRequestException(exception):
+    #         neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/convert")
@@ -88,9 +108,21 @@ class Convert(Resource):
         try:
             return convert_to_nwb(neuroconv_api.payload)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
+
+
+@neuroconv_api.route("/alignment")
+class Alignment(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            return get_interface_alignment(neuroconv_api.payload)
+
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 validate_parser = neuroconv_api.parser()
@@ -110,33 +142,49 @@ class Validate(Resource):
             args = validate_parser.parse_args()
             return validate_metadata(args.get("parent"), args.get("function_name"))
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload/project")
-class Upload(Resource):
+class UploadProject(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return upload_to_dandi(**neuroconv_api.payload)
+            import psutil
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+            upload_options = neuroconv_api.payload
+            if "number_of_jobs" not in upload_options:
+                upload_options.update(number_of_jobs=1)
+            if "number_of_threads" not in upload_options:
+                upload_options.update(number_of_threads=1)
+
+            return upload_project_to_dandi(**upload_options)
+
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload/folder")
-class Upload(Resource):
+class UploadFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return upload_folder_to_dandi(**neuroconv_api.payload)
+            import psutil
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+            upload_options = neuroconv_api.payload
+            if "number_of_jobs" not in upload_options:
+                upload_options.update(number_of_jobs=1)
+            if "number_of_threads" not in upload_options:
+                upload_options.update(number_of_threads=1)
+
+            return upload_folder_to_dandi(**upload_options)
+
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload")
@@ -157,9 +205,9 @@ class Upload(Resource):
             else:
                 return upload_multiple_filesystem_objects_to_dandi(**neuroconv_api.payload)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect_file")
@@ -168,9 +216,9 @@ class InspectNWBFile(Resource):
     def post(self):
         try:
             return inspect_nwb_file(neuroconv_api.payload)
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect_folder")
@@ -180,9 +228,9 @@ class InspectNWBFolder(Resource):
         try:
             return inspect_nwb_folder(neuroconv_api.payload)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect")
@@ -194,18 +242,21 @@ class InspectNWBFolder(Resource):
         try:
             paths = neuroconv_api.payload["paths"]
 
+            kwargs = {**neuroconv_api.payload}
+            del kwargs["paths"]
+
             if len(paths) == 1:
                 if isfile(paths[0]):
-                    return inspect_nwb_file({"nwbfile_path": paths[0]})
+                    return inspect_nwb_file({"nwbfile_path": paths[0], **kwargs})
                 else:
-                    return inspect_nwb_folder({"path": paths[0]})
+                    return inspect_nwb_folder({"path": paths[0], **kwargs})
 
             else:
                 return inspect_multiple_filesystem_objects(paths)
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/html")
@@ -219,21 +270,9 @@ class NWBToHTML(Resource):
                 html = io.read()._repr_html_()
             return html
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
-
-
-@neuroconv_api.route("/generate_dataset")
-class GenerateDataset(Resource):
-    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        try:
-            return generate_dataset(**neuroconv_api.payload)
-
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 # Create an events endpoint
@@ -245,6 +284,6 @@ class Events(Resource):
         try:
             return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
 
-        except Exception as e:
-            if notBadRequestException(e):
-                neuroconv_api.abort(500, str(e))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))

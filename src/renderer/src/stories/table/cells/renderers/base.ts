@@ -10,11 +10,10 @@ export class BaseRenderer extends LitElement {
         }
     }
 
-    constructor({ value = []} = {}) {
+    constructor({ value }: { value: any } = {}) {
         super()
         this.value = value
     }
-
 
     render() {
         return html`${this.value}`

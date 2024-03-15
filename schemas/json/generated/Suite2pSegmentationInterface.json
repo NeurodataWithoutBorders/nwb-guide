@@ -1,0 +1,45 @@
+{
+    "required": [],
+    "properties": {
+        "Suite2pSegmentationInterface": {
+            "required": [
+                "folder_path"
+            ],
+            "properties": {
+                "folder_path": {
+                    "format": "directory",
+                    "type": "string"
+                },
+                "channel_name": {
+                    "type": "string"
+                },
+                "plane_name": {
+                    "type": "string"
+                },
+                "plane_segmentation_name": {
+                    "type": "string"
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "combined": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "plane_no": {
+                    "type": "number"
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "source.schema.json",
+    "title": "Source data schema",
+    "description": "Schema for the source data, files and directories",
+    "version": "0.1.0"
+}

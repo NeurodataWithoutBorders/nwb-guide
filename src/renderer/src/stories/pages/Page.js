@@ -2,10 +2,10 @@ import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, notify } from "../../dependencies/globals.js";
-import { merge, randomizeElements, mapSessions } from "./utils.js";
+import { randomizeElements, mapSessions, merge } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
-import { resolveResults } from "./guided-mode/data/utils.js";
+import { resolveMetadata } from "./guided-mode/data/utils.js";
 import Swal from "sweetalert2";
 
 export class Page extends LitElement {
@@ -22,9 +22,6 @@ export class Page extends LitElement {
     constructor(info = {}) {
         super();
         Object.assign(this.info, info);
-
-        this.style.height = "100%";
-        this.style.color = "black";
     }
 
     createRenderRoot() {
@@ -37,11 +34,11 @@ export class Page extends LitElement {
 
     onSet = () => {}; // User-defined function
 
-    set = (info) => {
+    set = (info, rerender = true) => {
         if (info) {
             Object.assign(this.info, info);
             this.onSet();
-            this.requestUpdate();
+            if (rerender) this.requestUpdate();
         }
     };
 
@@ -56,13 +53,12 @@ export class Page extends LitElement {
     };
 
     notify = (...args) => {
-        const note = notify(...args);
-        this.#notifications.push(note);
+        const ref = notify(...args);
+        this.#notifications.push(ref);
+        return ref;
     };
 
     to = async (transition) => {
-        this.beforeTransition();
-
         // Otherwise note unsaved updates if present
         if (
             this.unsavedUpdates ||
@@ -70,9 +66,10 @@ export class Page extends LitElement {
                 transition === 1 && // Only ensure save for standard forward progression
                 !this.info.states.saved)
         ) {
-            if (transition === 1) await this.save(); // Save before a single forward transition
+            if (transition === 1)
+                await this.save(); // Save before a single forward transition
             else {
-                Swal.fire({
+                await Swal.fire({
                     title: "You have unsaved data on this page.",
                     text: "Would you like to save your changes?",
                     icon: "warning",
@@ -82,20 +79,16 @@ export class Page extends LitElement {
                     cancelButtonText: "Ignore Changes",
                 }).then(async (result) => {
                     if (result && result.isConfirmed) await this.save();
-                    this.onTransition(transition);
                 });
-
-                return;
             }
         }
 
-        this.onTransition(transition);
+        return await this.onTransition(transition);
     };
 
     onTransition = () => {}; // User-defined function
     updatePages = () => {}; // User-defined function
     beforeSave = () => {}; // User-defined function
-    beforeTransition = () => {}; // User-defined function
 
     save = async (overrides, runBeforeSave = true) => {
         if (runBeforeSave) await this.beforeSave();
@@ -123,35 +116,71 @@ export class Page extends LitElement {
 
     mapSessions = (callback, data = this.info.globalState) => mapSessions(callback, data);
 
+    async convert({ preview } = {}) {
+        const key = preview ? "preview" : "conversion";
+
+        delete this.info.globalState[key]; // Clear the preview results
+
+        if (preview) {
+            const stubs = await this.runConversions({ stub_test: true }, undefined, {
+                title: "Running stub conversion on all sessions...",
+            });
+            this.info.globalState[key] = { stubs };
+        } else {
+            this.info.globalState[key] = await this.runConversions({}, true, { title: "Running all conversions" });
+        }
+
+        this.unsavedUpdates = true;
+
+        // Indicate conversion has run successfully
+        const { desyncedData } = this.info.globalState;
+        if (desyncedData) {
+            delete desyncedData[key];
+            if (Object.keys(desyncedData).length === 0) delete this.info.globalState.desyncedData;
+        }
+    }
+
     async runConversions(conversionOptions = {}, toRun, options = {}) {
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
         // Filter the sessions to run
-        if (typeof original === "number") toRun = randomizeElements(toRun, original); // Grab a random set of sessions
+        if (typeof original === "number")
+            toRun = randomizeElements(toRun, original); // Grab a random set of sessions
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
         const results = {};
 
-        const popup = await openProgressSwal({ title: `Running conversion`, ...options });
+        if (!("showCancelButton" in options)) {
+            options.showCancelButton = true;
+            options.customClass = { actions: "swal-conversion-actions" };
+        }
+
+        const cancelController = new AbortController();
+
+        const popup = await openProgressSwal({ title: `Running conversion`, ...options }, (result) => {
+            if (!result.isConfirmed) cancelController.abort();
+        });
 
         const isMultiple = toRun.length > 1;
 
         let elements = {};
-        // if (isMultiple) {
         popup.hideLoading();
         const element = popup.getHtmlContainer();
         element.innerText = "";
-        element.style.textAlign = "left";
+        Object.assign(element.style, {
+            textAlign: "left",
+            display: "block",
+        });
+
         const progressBar = new ProgressBar();
         elements.progress = progressBar;
         element.append(progressBar);
         element.insertAdjacentHTML(
             "beforeend",
-            `<small><small><b>Note:</b> This may take a while to complete...</small></small>`
+            `<small><small><b>Note:</b> This may take a while to complete...</small></small><hr style="margin-bottom: 0;">`
         );
-        // }
 
         let completed = 0;
         elements.progress.value = { b: completed, tsize: toRun.length };
@@ -160,17 +189,22 @@ export class Page extends LitElement {
             const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, preview_output_folder, name } = globalState.project;
+            const { conversion_output_folder, name, SourceData } = globalState.project;
+
+            const sessionResults = globalState.results[subject][session];
+
+            const sourceDataCopy = structuredClone(sessionResults.source_data);
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
-                ...globalState.results[subject][session],
-                metadata: resolveResults(subject, session, globalState),
+                ...sessionResults,
+                metadata: resolveMetadata(subject, session, globalState),
+                source_data: merge(SourceData, sourceDataCopy),
             };
 
             const result = await runConversion(
                 {
-                    output_folder: conversionOptions.stub_test ? preview_output_folder : conversion_output_folder,
+                    output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
@@ -179,11 +213,18 @@ export class Page extends LitElement {
 
                     interfaces: globalState.interfaces,
                 },
-                { swal: popup, ...options }
-            ).catch((e) => {
-                this.notify(e.message, "error");
+                { swal: popup, fetch: { signal: cancelController.signal }, ...options }
+            ).catch((error) => {
+                let message = error.message;
+
+                if (message.includes("The user aborted a request.")) {
+                    this.notify("Conversion was cancelled.", "warning");
+                    throw error;
+                }
+
+                this.notify(message, "error");
                 popup.close();
-                throw e;
+                throw error;
             });
 
             completed++;
@@ -209,7 +250,31 @@ export class Page extends LitElement {
         this.updatePages();
     };
 
-    unsavedUpdates = false; // Track unsaved updates
+    checkSyncState = async (info = this.info, sync = info.sync) => {
+        if (!sync) return;
+
+        const { desyncedData } = info.globalState;
+        if (desyncedData) {
+            return Promise.all(
+                sync.map((k) => {
+                    if (desyncedData[k]) {
+                        if (k === "conversion") return this.convert();
+                        else if (k === "preview") return this.convert({ preview: true });
+                    }
+                })
+            );
+        }
+    };
+
+    #unsaved = false;
+    get unsavedUpdates() {
+        return this.#unsaved;
+    }
+
+    set unsavedUpdates(value) {
+        this.#unsaved = !!value;
+        if (value === "conversions") this.info.globalState.desyncedData = { preview: true, conversion: true };
+    }
 
     // NOTE: Make sure you call this explicitly if a child class overwrites this AND data is updated
     updated() {

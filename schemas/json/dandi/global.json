@@ -6,15 +6,18 @@
                 "main_api_key": {
                     "type": "string",
                     "format": "password",
-                    "description": "From the <a href='https://dandiarchive.org' target='_blank'>main archive</a>"
+                    "description": "Your DANDI API key from the <a href='https://dandiarchive.org' target='_blank'>main archive</a>"
                 },
                 "staging_api_key": {
                     "type": "string",
                     "format": "password",
-                    "description": "From the <a href='https://gui-staging.dandiarchive.org' target='_blank'>staging (testing) server</a>"
+                    "description": "Your DANDI API key from the <a href='https://gui-staging.dandiarchive.org' target='_blank'>staging server</a>"
                 }
             },
-            "required": ["main_api_key", "staging_api_key"]
+            "additionalProperties": false,
+            "required": ["main_api_key"]
         }
-    }
+    },
+    "required": ["api_keys"],
+    "additionalProperties": false
 }

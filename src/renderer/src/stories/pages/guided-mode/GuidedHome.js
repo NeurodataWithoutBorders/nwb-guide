@@ -139,17 +139,16 @@ export class GuidedHomePage extends Page {
         }
     };
 
-    resume = async (resumeProgressButton) => {
+    resume = (resumeProgressButton) => {
         resumeProgressButton.classList.add("loading");
         const datasetNameToResume =
             resumeProgressButton.parentNode.parentNode.querySelector(".progress-file-name").innerText;
 
         progress.resume.call(this, datasetNameToResume);
+        resumeProgressButton.classList.remove("loading");
     };
 
     async updated() {
-        this.info.globalState = {}; // Reset global state when navigating back to this page
-
         const htmlBase = this.shadowRoot ?? this;
         // this.content = (this.shadowRoot ?? this).querySelector("#content");
         const lottieContainer = htmlBase.querySelector("#new-dataset-lottie-container");
@@ -164,7 +163,7 @@ export class GuidedHomePage extends Page {
 
         const guidedSavedProgressFiles = progress.getEntries();
 
-        //render progress resumption cards from progress file array on first page of guided mode
+        //render progress resumption cards from progress file array
         if (guidedSavedProgressFiles.length != 0) {
             datasetCardsRadioButtonsContainer.removeAttribute("hidden");
             const progressFileData = progress.getAll(guidedSavedProgressFiles);
@@ -178,54 +177,50 @@ export class GuidedHomePage extends Page {
 
     render() {
         return html`
-            <div id="guided-home" class="guided--main-tab">
-                <div class="guided--panel">
-                    <h1 class="guided--text-sub-step">Guided Mode</h1>
-                    <p class="guided--help-text" style="margin-bottom: 2rem">
-                        The NWB GUIDE walks users step-by-step through all the requirements for converting their data to
-                        the NWB format and uploading datasets to the DANDI Archive. Each stage of Guided Mode is
-                        designed to conveniently guide users through the conversion process and include all necessary
-                        information such that no prior knowledge of the NWB data standard is required.
-                    </p>
+            <div id="curate-new-home" style="display:flex; flex-direction:column; align-items: center">
+                <div style="padding-bottom: 20px;">
+                    <h3 style="margin-bottom: 0; padding-bottom: 0;">
+                        Your one-stop tool for converting data to NWB and uploading it to the DANDI Archive.
+                    </h3>
+                    <small
+                        >Don't know where to go next?
+                        <a
+                            href=""
+                            @click="${(clickEvent) => {
+                                clickEvent.preventDefault();
+                                this.to("docs");
+                            }}"
+                            >Learn more about the NWB GUIDE</a
+                        >.</small
+                    >
+                </div>
 
-                    <div class="justify-center" id="curate-new-home" style="align-items: center">
-                        <div
-                            class="container--dashed"
-                            id="guided-button-start-new-curate"
-                            style="width: 320px; margin: 5px; width: 28rem; height: 16.5rem"
-                            @click="${() => this.to(1)}"
-                        >
-                            <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
-                            <h2 class="guided--text-sub-step" style="width: 100%;">Convert a new dataset</h2>
-                        </div>
-                    </div>
+                <div class="create-button" @click="${() => this.to(1)}">
+                    <div id="new-dataset-lottie-container" style="height: 150px; width: 150px"></div>
+                    <h2 class="guided--text-sub-step" style="width: 100%;">Create a new conversion pipeline</h2>
+                </div>
 
-                    <div style="max-width: 800px; width: 100%;">
+                <div style="max-width: 800px; width: 100%;">
+                    <div id="continue-curating-existing" style="margin-top: 20px; width: 100%">
+                        <h2 class="guided--text-sub-step" id="guided-continue-curation-header"></h2>
                         <div
-                            class="guided--panel"
-                            id="continue-curating-existing"
-                            style="margin-top: 20px; width: 100%"
+                            class="guided--radio-button-container guided--button-tab-container"
+                            hidden
+                            id="guided-div-dataset-cards-radio-buttons"
+                            style="justify-content: space-evenly"
                         >
-                            <h2 class="guided--text-sub-step" id="guided-continue-curation-header"></h2>
-                            <div
-                                class="guided--radio-button-container guided--button-tab-container"
-                                hidden
-                                id="guided-div-dataset-cards-radio-buttons"
-                                style="justify-content: space-evenly"
+                            <button
+                                class="ui button guided--radio-button guided--tab-button"
+                                id="guided-button-view-datasets-in-progress"
+                                data-next-element="guided-div-resume-progress-cards"
+                                style="width: 250px"
                             >
-                                <button
-                                    class="ui button guided--radio-button guided--tab-button"
-                                    id="guided-button-view-datasets-in-progress"
-                                    data-next-element="guided-div-resume-progress-cards"
-                                    style="width: 250px"
-                                >
-                                    Existing Conversions
-                                </button>
-                            </div>
+                                Existing Conversions
+                            </button>
                         </div>
-                        <div class="guided--section" hidden id="guided-div-resume-progress-cards"></div>
-                        <div class="guided--section" hidden id="guided-div-update-uploaded-cards"></div>
                     </div>
+                    <div class="guided--section" hidden id="guided-div-resume-progress-cards"></div>
+                    <div class="guided--section" hidden id="guided-div-update-uploaded-cards"></div>
                 </div>
             </div>
         `;

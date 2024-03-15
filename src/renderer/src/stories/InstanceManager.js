@@ -124,6 +124,10 @@ export class InstanceManager extends LitElement {
             #new-info > input {
                 margin-right: 10px;
             }
+
+            nwb-accordion {
+                margin-bottom: 0.5em;
+            }
         `;
     }
 
@@ -161,7 +165,7 @@ export class InstanceManager extends LitElement {
             const id = path.slice(0, i + 1).join("/");
             const accordion = this.#accordions[id];
             target = target[path[i]]; // Progressively check the deeper nested instances
-            if (accordion) accordion.setSectionStatus(id, checkStatus(false, false, [...Object.values(target)]));
+            if (accordion) accordion.setStatus(checkStatus(false, false, [...Object.values(target)]));
         }
     };
 
@@ -182,13 +186,13 @@ export class InstanceManager extends LitElement {
             const input = this.shadowRoot.querySelector("#new-info input");
             input.focus();
 
-            const mousePress = (e) => {
-                if (!e.composedPath().includes(newInfoDiv)) {
+            const onPointerDown = (pointerEvent) => {
+                if (!pointerEvent.composedPath().includes(newInfoDiv)) {
                     this.#onKeyDone();
-                    document.removeEventListener("pointerdown", mousePress);
+                    document.removeEventListener("pointerdown", onPointerDown);
                 }
             };
-            document.addEventListener("pointerdown", mousePress);
+            document.addEventListener("pointerdown", onPointerDown);
         }
     };
 
@@ -214,9 +218,9 @@ export class InstanceManager extends LitElement {
     updated = () => {
         const selected = Array.from(this.shadowRoot.querySelectorAll("[selected]"));
         if (selected.length > 0)
-            selected.slice(1).forEach((el) => {
-                const instance = el.getAttribute("data-instance");
-                el.removeAttribute("selected");
+            selected.slice(1).forEach((element) => {
+                const instance = element.getAttribute("data-instance");
+                element.removeAttribute("selected");
                 this.shadowRoot.querySelector(`div[data-instance="${instance}"]`).setAttribute("hidden", "");
             });
 
@@ -224,11 +228,9 @@ export class InstanceManager extends LitElement {
 
         setTimeout(() => {
             Object.entries(this.#info).forEach(([id, { status }]) => {
-                if (status) this.updateState(id, status) 
-            })
-        }) // NOTE: Why is this not possible without waiting?
-
-
+                if (status) this.updateState(id, status);
+            });
+        }); // NOTE: Why is this not possible without waiting?
     };
 
     #isCategory(value) {
@@ -266,13 +268,13 @@ export class InstanceManager extends LitElement {
         this.requestUpdate();
     }
 
-    #hideAll(element) {
-        Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((el) => {
-            if (el !== element) el.hidden = true;
+    #hideAll(chosenInstanceElement) {
+        Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((instanceElement) => {
+            if (instanceElement !== chosenInstanceElement) instanceElement.hidden = true;
         });
     }
 
-    #ids = {}
+    #ids = {};
     #accordions = {};
 
     #onSelected = () => {
@@ -301,11 +303,8 @@ export class InstanceManager extends LitElement {
                 const list = this.#render(value, [...path, key]);
 
                 const accordion = new Accordion({
-                    sections: {
-                        [key]: {
-                            content: list,
-                        },
-                    },
+                    name: key,
+                    content: list,
                     contentPadding: "10px",
                 });
 
@@ -338,14 +337,16 @@ export class InstanceManager extends LitElement {
 
                     const instances = Array.from(this.shadowRoot.querySelectorAll("div[data-instance]"));
 
-                    const element = instances.find((el) => el.getAttribute("data-instance") === this.#selected);
+                    const selectedInstanceElement = instances.find(
+                        (instanceElement) => instanceElement.getAttribute("data-instance") === this.#selected
+                    );
 
-                    if (element) {
-                        element.hidden = false;
-                        this.#hideAll(element);
+                    if (selectedInstanceElement) {
+                        selectedInstanceElement.hidden = false;
+                        this.#hideAll(selectedInstanceElement);
 
-                        this.#items.forEach((el) => {
-                            if (el !== item) el.removeAttribute("selected");
+                        this.#items.forEach((element) => {
+                            if (element !== item) element.removeAttribute("selected");
                         });
                     }
 
@@ -359,10 +360,9 @@ export class InstanceManager extends LitElement {
 
         return list;
     }
-    
 
     render() {
-        this.#info = {}
+        this.#info = {};
         this.#items = [];
 
         const instances = this.#render();
@@ -403,8 +403,8 @@ export class InstanceManager extends LitElement {
 
                       // Trigger new update
                       this.requestUpdate();
-                  } catch (e) {
-                      notify(e.message, "error");
+                  } catch (error) {
+                      notify(error.message, "error");
                   }
                   input.value = "";
               }
@@ -430,18 +430,22 @@ export class InstanceManager extends LitElement {
                     <div class="controls">
                         <span id="selectedName"></span>
                         <div>
-                            ${this.controls.map((o) => {
+                            ${this.controls.map(({ name, icon, primary, onClick }) => {
                                 return html`<nwb-button
                                     size="small"
-                                    icon=${o.icon}
-                                    .primary=${o.primary ?? false}
+                                    icon=${icon}
+                                    .primary=${primary ?? false}
                                     @click=${function () {
-                                        const el = this.shadowRoot.querySelector(
+                                        const activeContentElement = this.shadowRoot.querySelector(
                                             "#instance-display > div:not([hidden])"
                                         );
-                                        o.onClick.call(this, el.getAttribute("data-instance"), el);
+                                        onClick.call(
+                                            this,
+                                            activeContentElement.getAttribute("data-instance"),
+                                            activeContentElement
+                                        );
                                     }}
-                                    >${o.name}</nwb-button
+                                    >${name}</nwb-button
                                 >`;
                             })}
                         </div>

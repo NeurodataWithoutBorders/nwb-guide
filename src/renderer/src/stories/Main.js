@@ -48,6 +48,9 @@ export class Main extends LitElement {
     onTransition = () => {}; // user-defined function
     updatePages = () => {}; // user-defined function
 
+    next = () => (this.footer ? this.footer.onNext() : this.toRender.page.to(1));
+    back = () => (this.footer ? this.footer.onBack() : this.toRender.page.to(-1));
+
     #queue = [];
 
     set(toRender) {
@@ -56,6 +59,24 @@ export class Main extends LitElement {
         if (typeof page === "function") page = new page();
         page.onTransition = this.onTransition;
         page.updatePages = this.updatePages;
+
+        // Constrain based on workflow configuration
+        const workflowConfig = page.workflow ?? (page.workflow = {});
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+
+        Object.entries(workflowConfig).forEach(([key, state]) => {
+            workflowConfig[key].value = workflowValues[key];
+
+            const value = workflowValues[key];
+
+            if (state.elements) {
+                const elements = state.elements;
+                if (value) elements.forEach((el) => el.removeAttribute("hidden"));
+                else elements.forEach((el) => el.setAttribute("hidden", true));
+            }
+        });
+
+        page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
 
         if (this.content) this.toRender = toRender.page ? toRender : { page };
         else this.#queue.push(page);
@@ -70,6 +91,10 @@ export class Main extends LitElement {
 
         this.style.overflow = "hidden";
         this.content.style.height = "100%";
+
+        // Reset scroll position on page change
+        const section = this.content.children[0];
+        section.scrollTop = 0;
     }
 
     render() {
@@ -85,36 +110,44 @@ export class Main extends LitElement {
             const info = page.info ?? {};
 
             // Default Footer Behavior
-            if (footer === true || (!("footer" in page) && info.parent)) {
+            if (info.parent) {
+                if (!("footer" in page)) footer = true; // Allow navigating laterally if there is a next page
+
                 // Go to home screen if there is no next page
-                if (!info.next)
-                    footer = {
-                        next: "Back to Home Screen",
-                        exit: false,
-                        onNext: () => this.toRender.page.to("/"),
-                    };
-                // Allow navigating laterally if there is a next page
-                else footer = true;
+                if (!info.next) {
+                    footer = Object.assign(
+                        {
+                            exit: false,
+                            next: "Exit Pipeline",
+                            onNext: () => this.toRender.page.to("/"),
+                        },
+                        footer && typeof footer === "object" ? footer : {}
+                    );
+                }
             }
 
             if (footer === true) footer = {};
-            if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Save and Continue";
+            if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Next";
 
             // Default Capsules Behavior
             const section = sections[info.section];
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
                     let pages = Object.values(section.pages);
-                    if (pages.length > 1)
-                        capsules = {
+                    const pageIds = Object.keys(section.pages);
+                    if (pages.length > 1) {
+                        const capsulesProps = {
                             n: pages.length,
-                            selected: pages.map((o) => o.pageLabel).indexOf(page.info.label),
+                            selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
                         };
+
+                        capsules = new GuidedCapsules(capsulesProps);
+                        capsules.onClick = (i) => this.toRender.page.to(pageIds[i]);
+                    }
                 }
 
                 if (header === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.keys(sections);
-
                     header = page.header && typeof page.header === "object" ? page.header : {};
                     header.sections = sectionNames;
                     header.selected = sectionNames.indexOf(info.section);
@@ -122,10 +155,9 @@ export class Main extends LitElement {
             }
         }
 
-        const headerEl = header ? new GuidedHeader(header) : html`<div></div>`; // Render for grid
+        const headerEl = header ? (this.header = new GuidedHeader(header)) : html`<div></div>`; // Render for grid
 
-        const capsuleEl = capsules ? new GuidedCapsules(capsules) : "";
-        const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
+        const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
 
         const title = header?.title ?? page.info?.title;
 
@@ -137,28 +169,34 @@ export class Main extends LitElement {
 
         return html`
             ${headerEl}
-            ${capsules
-                ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsuleEl}</div>`
-                : html`<div style="height: 25px;"></div>`}
-            <main id="content" class="js-content" style="overflow: hidden; display: flex;">
-                <section class="section js-section u-category-windows">
-                    ${title
-                        ? html`<div style="position: sticky; top: 0; left: 0; background: white; z-index: 1;">
-                              <div
-                                  style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;"
-                              >
-                                  <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                      <h1 class="title" style="margin: 0; padding: 0;">${title}</h1>
-                                      <small style="color: gray;">${unsafeHTML(subtitle)}</small>
-                                  </div>
-                                  <div style="padding-left: 25px">${controls}</div>
+            ${
+                capsules
+                    ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
+                    : html``
+            }
+            ${
+                title
+                    ? html`<div
+                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${capsules
+                              ? ""
+                              : "padding-top: 35px;"}"
+                      >
+                          <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
+                              <div style="line-height: 1em; color: gray;">
+                                  <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
+                                  <small>${unsafeHTML(subtitle)}</small>
                               </div>
-                              <hr style="margin-bottom: 0;" />
-                          </div>`
-                        : ""}
+                              <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
+                          </div>
+                          <hr style="margin-bottom: 0;" />
+                      </div>`
+                    : ""
+            }
 
-                    <div style="padding-top: 10px; height: 100%; width: 100%;">${page}</div>
-                </section>
+            <main id="content" class="js-content" style="overflow: hidden; ${
+                capsules || title ? "" : "padding-top: 35px;"
+            }"">
+                <section class="section">${page}</section>
             </main>
             ${footerEl}
         `;
