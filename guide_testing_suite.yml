@@ -33,7 +33,7 @@ pipelines:
   TDT:
     TdtRecordingInterface:
       folder_path: ephy_testing_data/tdt/aep_05
-      
+
   CellExplorer:
     CellExplorerRecordingInterface:
       folder_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed
@@ -45,4 +45,4 @@ pipelines:
     CellExplorerSortingInterface:
       file_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed/Peter_MS22_180629_110319_concat_stubbed.spikes.cellinfo.mat
 
-    
+

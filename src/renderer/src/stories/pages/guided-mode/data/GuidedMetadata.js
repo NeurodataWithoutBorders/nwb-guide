@@ -26,17 +26,17 @@ import { Button } from "../../../Button.js";
 import globalIcon from "../../../assets/global.svg?raw";
 
 const tableRenderConfig = {
-    '*': (metadata) => new SimpleTable(metadata),
+    "*": (metadata) => new SimpleTable(metadata),
     Electrodes: true,
     Units: (metadata) => {
         metadata.editable = false;
-        return true
+        return true;
     },
     UnitColumns: (metadata) => {
         metadata.editable = false;
-        return true
-    }
-}
+        return true;
+    },
+};
 
 const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
@@ -421,7 +421,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
                 const tableConfig = tableRenderConfig[name] ?? tableRenderConfig["*"] ?? true;
                 if (typeof tableConfig === "function") return tableConfig(metadata);
-                else return tableConfig
+                else return tableConfig;
             },
             onThrow,
         });

@@ -19,7 +19,7 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 announcer = MessageAnnouncer()
 
 
-EXCLUDED_RECORDING_INTERFACE_PROPERTIES = [ "contact_vector", "contact_shapes", "group", "location" ]
+EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 EXTRA_RECORDING_INTERFACE_PROPERTIES = EXTRA_SORTING_INTERFACE_PROPERTIES = {
     "brain_area": {
         "data_type": "str",
@@ -28,10 +28,7 @@ EXTRA_RECORDING_INTERFACE_PROPERTIES = EXTRA_SORTING_INTERFACE_PROPERTIES = {
     }
 }
 
-EXCLUDED_SORTING_INTERFACE_PROPERTIES = [ 
-    "location",
-    "spike_times", "electrodes" # Not validated
-]
+EXCLUDED_SORTING_INTERFACE_PROPERTIES = ["location", "spike_times", "electrodes"]  # Not validated
 
 DTYPE_DESCRIPTIONS = {
     "bool": "logical",
@@ -359,32 +356,29 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         ecephys_properties = schema["properties"]["Ecephys"]["properties"]
 
-
         # Populate Electrodes metadata
         metadata["Ecephys"]["Electrodes"] = {}
         schema["properties"]["Ecephys"]["required"].append("Electrodes")
         original_electrodes_schema = ecephys_properties["Electrodes"]
-        has_electrodes = True # original_electrodes_schema.get('default')
+        has_electrodes = True  # original_electrodes_schema.get('default')
 
         # Add Electrodes to the schema
         if has_electrodes:
             ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
-
         # Populate Units metadata
         metadata["Ecephys"]["Units"] = {}
         schema["properties"]["Ecephys"]["required"].append("Units")
-        original_units_schema = ecephys_properties.get("UnitProperties") # NOTE: Not specific to interface
+        original_units_schema = ecephys_properties.get("UnitProperties")  # NOTE: Not specific to interface
         has_units = original_units_schema is not None
 
         if has_units:
-            metadata["Ecephys"].pop("UnitProperties") # Remove UnitProperties from metadata
-            ecephys_properties.pop("UnitProperties") # Remove UnitProperties from schema
+            metadata["Ecephys"].pop("UnitProperties")  # Remove UnitProperties from metadata
+            ecephys_properties.pop("UnitProperties")  # Remove UnitProperties from schema
             ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
 
-
     def on_sorting_interface(name, sorting_interface):
-            
+
         units_data = metadata["Ecephys"]["Units"][name] = dict(
             Units=get_unit_table_json(sorting_interface),
             UnitColumns=get_unit_columns_json(sorting_interface),
@@ -393,27 +387,27 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         n_units = len(units_data["Units"])
 
         ecephys_properties["Units"]["properties"][name] = dict(
-                type="object",
-                properties=dict(
-                    Units={
-                        "type": "array",
-                        "minItems": n_units,
-                        "maxItems": n_units,
-                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
-                    },
-                    UnitColumns={
-                        "type": "array",
-                        "minItems": 0,
-                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/UnitColumn"},
-                    },
-                ),
-                required=["Units", "UnitColumns"],
+            type="object",
+            properties=dict(
+                Units={
+                    "type": "array",
+                    "minItems": n_units,
+                    "maxItems": n_units,
+                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
+                },
+                UnitColumns={
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/UnitColumn"},
+                },
+            ),
+            required=["Units", "UnitColumns"],
         )
 
         ecephys_properties["Units"]["required"].append(name)
 
         return sorting_interface
-    
+
     def on_recording_interface(name, recording_interface):
 
         if has_electrodes:
@@ -458,10 +452,10 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
-            
+
         defs = ecephys_properties["definitions"]
 
-        if (has_electrodes):
+        if has_electrodes:
 
             electrode_def = defs["Electrodes"]
 
@@ -474,7 +468,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
             new_electrodes_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-                for properties in original_electrodes_schema.get('default', {})
+                for properties in original_electrodes_schema.get("default", {})
                 if properties["name"] not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
             }
 
@@ -497,7 +491,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
             new_units_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
-                for properties in original_units_schema.get('default', {})
+                for properties in original_units_schema.get("default", {})
                 if properties["name"] not in EXCLUDED_SORTING_INTERFACE_PROPERTIES
             }
 
@@ -506,7 +500,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "properties": new_units_properties,
                 "additionalProperties": True,  # Allow for new columns
             }
-
 
     return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
 
@@ -1082,6 +1075,7 @@ def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
 
     return properties
 
+
 def get_sorting_interface_properties(sorting_interface) -> Dict[str, Any]:
     """A convenience function for uniformly excluding certain properties of the provided sorting extractor."""
     property_names = list(sorting_interface.sorting_extractor.get_property_keys())
@@ -1133,6 +1127,7 @@ def get_unit_columns_json(interface) -> List[Dict[str, Any]]:
     ]
 
     return json.loads(json.dumps(obj=unit_columns))
+
 
 def get_unit_table_json(interface) -> List[Dict[str, Any]]:
     """
@@ -1237,9 +1232,9 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
         for property_name in properties:
             if property_name in EXTRA_RECORDING_INTERFACE_PROPERTIES:
                 try:
-                    recording_property_value = properties[property_name].get('default') # Get default value
+                    recording_property_value = properties[property_name].get("default")  # Get default value
                 except:
-                    recording_property_value = properties[property_name][0] # Get first value
+                    recording_property_value = properties[property_name][0]  # Get first value
             else:
                 recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[
                     0  # First axis is always electodes in SI
@@ -1297,7 +1292,9 @@ def update_recording_properties_from_table_as_json(
             #     property_index = contact_vector_property_names.index(property_name)
             #     modified_contact_vector[entry_index][property_index] = property_value
             else:
-                ids = [stream_prefix + "#" + channel_name] if channel_name else [] # Correct for minimal metadata (e.g. CellExplorer)
+                ids = (
+                    [stream_prefix + "#" + channel_name] if channel_name else []
+                )  # Correct for minimal metadata (e.g. CellExplorer)
                 recording_extractor.set_property(
                     key=property_name,
                     values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
