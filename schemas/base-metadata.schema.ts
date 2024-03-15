@@ -4,7 +4,11 @@ import { header, replaceRefsWithValue } from '../src/renderer/src/stories/forms/
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
-const uvMathFormat = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
+import { merge } from '../src/renderer/src/stories/pages/utils'
+
+const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
+const UV_PROPERTIES = ["gain_to_uV", "offset_to_uV"]
+const COLUMN_SCHEMA_ORDER = ["name", "description", "data_type"]
 
 function getSpeciesNameComponents(arr: any[]) {
     const split = arr[arr.length - 1].split(' - ')
@@ -13,8 +17,6 @@ function getSpeciesNameComponents(arr: any[]) {
         label: split[1]
     }
 }
-
-
 
 function getSpeciesInfo(species: any[][] = []) {
 
@@ -37,10 +39,34 @@ function getSpeciesInfo(species: any[][] = []) {
 
 }
 
-const propsToInclude = {
-    ecephys: ["Device", "ElectrodeGroup", "Electrodes", "ElectrodeColumns", "definitions"]
-}
+function updateEcephysTable(propName, schema, schemaToMerge) {
 
+    const ecephys = schema.properties.Ecephys
+
+    // Change rendering order for electrode table columns
+    const electrodesProp = ecephys.properties[propName]
+    for (let name in electrodesProp.properties) {
+        const interfaceProps = electrodesProp.properties[name].properties
+
+        for (let subProp in schemaToMerge) {
+            if (interfaceProps[subProp]) {
+                const itemSchema = interfaceProps[subProp].items
+
+                // Do not add new items
+                const updateCopy = structuredClone(schemaToMerge[subProp])
+                const updateProps = updateCopy.properties
+                for (let itemProp in updateProps) {
+                    if (!itemSchema.properties[itemProp]) delete updateProps[itemProp]
+                }
+
+                // Merge into existing items
+                merge(updateCopy, itemSchema)
+            }
+
+        }
+    }
+
+}
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
@@ -101,20 +127,27 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ecephys) {
 
-        // Change rendering order for electrode table columns
-        const electrodesProp = ecephys.properties["Electrodes"]
-        for (let name in electrodesProp.properties) {
-            const interfaceProps = electrodesProp.properties[name].properties
-            const electrodeItems = interfaceProps["Electrodes"].items.properties
-            const uvProperties = ["gain_to_uV", "offset_to_uV"]
+        updateEcephysTable("Electrodes", copy, {
+            Electrodes: {
+                properties: UV_PROPERTIES.reduce((acc, prop) => {
+                    acc[prop] = { title: prop.replace('uV', UV_MATH_FORMAT) }
+                    return acc
+                }, {}),
+                order: ["channel_name", "group_name", "shank_electrode_number", ...UV_PROPERTIES]
+            },
+            ElectrodeColumns: {
+                order: COLUMN_SCHEMA_ORDER
+            }
+        })
 
-            uvProperties.forEach(prop => {
-                if (electrodeItems[prop]) electrodeItems[prop].title = prop.replace('uV', uvMathFormat)
-            })
-            interfaceProps["Electrodes"].items.order = ["channel_name", "group_name", "shank_electrode_number", ...uvProperties];
-            interfaceProps["ElectrodeColumns"].items.order = ["name", "description", "data_type"];
-
-        }
+        updateEcephysTable("Units", copy, {
+            Units: {
+                order: ["clu_id", "group_id"]
+            },
+            UnitColumns: {
+                order: COLUMN_SCHEMA_ORDER
+            }
+        })
 
     }
 

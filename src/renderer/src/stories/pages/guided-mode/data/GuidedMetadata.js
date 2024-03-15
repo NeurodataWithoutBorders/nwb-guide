@@ -25,6 +25,19 @@ import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
 
+const tableRenderConfig = {
+    '*': (metadata) => new SimpleTable(metadata),
+    Electrodes: true,
+    Units: (metadata) => {
+        metadata.editable = false;
+        return true
+    },
+    UnitColumns: (metadata) => {
+        metadata.editable = false;
+        return true
+    }
+}
+
 const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
     Ophys: {
@@ -406,10 +419,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 const updatedSchema = structuredClone(metadata.schema);
                 metadata.schema = updatedSchema;
 
-                // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
-                if (name !== "Electrodes") return new SimpleTable(metadata);
-                else return true; // All other tables are handled by the default behavior
-                // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
+                const tableConfig = tableRenderConfig[name] ?? tableRenderConfig["*"] ?? true;
+                if (typeof tableConfig === "function") return tableConfig(metadata);
+                else return tableConfig
             },
             onThrow,
         });

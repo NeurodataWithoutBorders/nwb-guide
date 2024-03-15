@@ -28,7 +28,31 @@ EXTRA_RECORDING_INTERFACE_PROPERTIES = EXTRA_SORTING_INTERFACE_PROPERTIES = {
     }
 }
 
-EXCLUDED_SORTING_INTERFACE_PROPERTIES = [ "location" ]
+EXCLUDED_SORTING_INTERFACE_PROPERTIES = [ 
+    "location",
+    "spike_times", "electrodes" # Not validated
+]
+
+DTYPE_DESCRIPTIONS = {
+    "bool": "logical",
+    "str": "string",
+    "ndarray": "n-dimensional array",
+    "float8": "8-bit number",
+    "float16": "16-bit number",
+    "float32": "32-bit number",
+    "float64": "64-bit number",
+    "int8": "8-bit integer",
+    "int16": "16-bit integer",
+    "int32": "32-bit integer",
+    "int64": "64-bit integer",
+}
+
+DTYPE_SCHEMA = {
+    "type": "string",
+    "strict": False,
+    "enum": list(DTYPE_DESCRIPTIONS.keys()),
+    "enumLabels": DTYPE_DESCRIPTIONS,
+}
 
 
 def is_path_contained(child, parent):
@@ -329,12 +353,16 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Clear the Electrodes information for being set as a collection of Interfaces
     has_ecephys = "Ecephys" in metadata
     has_electrodes = False
+    has_units = False
 
     if has_ecephys:
-        metadata["Ecephys"]["Electrodes"] = {}
 
-        schema["properties"]["Ecephys"]["required"].append("Electrodes")
         ecephys_properties = schema["properties"]["Ecephys"]["properties"]
+
+
+        # Populate Electrodes metadata
+        metadata["Ecephys"]["Electrodes"] = {}
+        schema["properties"]["Ecephys"]["required"].append("Electrodes")
         original_electrodes_schema = ecephys_properties["Electrodes"]
         has_electrodes = True # original_electrodes_schema.get('default')
 
@@ -343,30 +371,67 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
 
+        # Populate Units metadata
+        metadata["Ecephys"]["Units"] = {}
+        schema["properties"]["Ecephys"]["required"].append("Units")
+        original_units_schema = ecephys_properties.get("UnitProperties") # NOTE: Not specific to interface
+        has_units = original_units_schema is not None
+
+        if has_units:
+            metadata["Ecephys"].pop("UnitProperties") # Remove UnitProperties from metadata
+            ecephys_properties.pop("UnitProperties") # Remove UnitProperties from schema
+            ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
+
+
     def on_sorting_interface(name, sorting_interface):
             
-            # metadata["Ecephys"]["Units"][name] = dict(
-            #     Units=get_unit_table_json(sorting_interface),
-            #     UnitColumns=get_unit_columns_json(sorting_interface),
-            # )
-    
+        units_data = metadata["Ecephys"]["Units"][name] = dict(
+            Units=get_unit_table_json(sorting_interface),
+            UnitColumns=get_unit_columns_json(sorting_interface),
+        )
+
+        n_units = len(units_data["Units"])
+
+        ecephys_properties["Units"]["properties"][name] = dict(
+                type="object",
+                properties=dict(
+                    Units={
+                        "type": "array",
+                        "minItems": n_units,
+                        "maxItems": n_units,
+                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
+                    },
+                    UnitColumns={
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {"$ref": "#/properties/Ecephys/properties/definitions/UnitColumn"},
+                    },
+                ),
+                required=["Units", "UnitColumns"],
+        )
+
+        ecephys_properties["Units"]["required"].append(name)
+
         return sorting_interface
     
     def on_recording_interface(name, recording_interface):
 
         if has_electrodes:
 
-            metadata["Ecephys"]["Electrodes"][name] = dict(
+            electrode_data = metadata["Ecephys"]["Electrodes"][name] = dict(
                 Electrodes=get_electrode_table_json(recording_interface),
                 ElectrodeColumns=get_electrode_columns_json(recording_interface),
             )
+
+            n_electrodes = len(electrode_data["Electrodes"])
 
             ecephys_properties["Electrodes"]["properties"][name] = dict(
                 type="object",
                 properties=dict(
                     Electrodes={
                         "type": "array",
-                        "minItems": 0,
+                        "minItems": n_electrodes,
+                        "maxItems": n_electrodes,
                         "items": {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
                     },
                     ElectrodeColumns={
@@ -394,32 +459,14 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
             
+        defs = ecephys_properties["definitions"]
+
         if (has_electrodes):
 
-            defs = ecephys_properties["definitions"]
             electrode_def = defs["Electrodes"]
 
-            dtype_descriptions = {
-                "bool": "logical",
-                "str": "string",
-                "ndarray": "n-dimensional array",
-                "float8": "8-bit number",
-                "float16": "16-bit number",
-                "float32": "32-bit number",
-                "float64": "64-bit number",
-                "int8": "8-bit integer",
-                "int16": "16-bit integer",
-                "int32": "32-bit integer",
-                "int64": "64-bit integer",
-            }
-
             # NOTE: Update to output from NeuroConv
-            electrode_def["properties"]["data_type"] = {
-                "type": "string",
-                "strict": False,
-                "enum": list(dtype_descriptions.keys()),
-                "enumLabels": dtype_descriptions,
-            }
+            electrode_def["properties"]["data_type"] = DTYPE_SCHEMA
 
             # Configure electrode columns
             defs["ElectrodeColumn"] = electrode_def
@@ -436,6 +483,30 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "properties": new_electrodes_properties,
                 "additionalProperties": True,  # Allow for new columns
             }
+
+        if has_units:
+
+            unitprops_def = defs["UnitProperties"]
+
+            # NOTE: Update to output from NeuroConv
+            unitprops_def["properties"]["data_type"] = DTYPE_SCHEMA
+
+            # Configure electrode columns
+            defs["UnitColumn"] = unitprops_def
+            defs["UnitColumn"]["required"] = list(unitprops_def["properties"].keys())
+
+            new_units_properties = {
+                properties["name"]: {key: value for key, value in properties.items() if key != "name"}
+                for properties in original_units_schema.get('default', {})
+                if properties["name"] not in EXCLUDED_SORTING_INTERFACE_PROPERTIES
+            }
+
+            defs["Unit"] = {
+                "type": "object",
+                "properties": new_units_properties,
+                "additionalProperties": True,  # Allow for new columns
+            }
+
 
     return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
 
@@ -592,6 +663,11 @@ def convert_to_nwb(info: dict) -> str:
     ecephys_metadata = resolved_metadata.get("Ecephys")
 
     if ecephys_metadata:
+
+        # Quick fix to remove units
+        has_units = "Units" in ecephys_metadata
+        if has_units:
+            del ecephys_metadata["Units"]
 
         for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
             interface = converter.data_interface_objects[interface_name]
@@ -1212,7 +1288,7 @@ def update_recording_properties_from_table_as_json(
 
     for entry_index, entry in enumerate(electrode_table_json):
         electrode_properties = dict(entry)  # copy
-        channel_name = electrode_properties.pop("channel_name")
+        channel_name = electrode_properties.pop("channel_name", None)
         for property_name, property_value in electrode_properties.items():
             if property_name not in electrode_column_data_types:  # Skip data with missing column information
                 continue
@@ -1221,10 +1297,11 @@ def update_recording_properties_from_table_as_json(
             #     property_index = contact_vector_property_names.index(property_name)
             #     modified_contact_vector[entry_index][property_index] = property_value
             else:
+                ids = [stream_prefix + "#" + channel_name] if channel_name else [] # Correct for minimal metadata (e.g. CellExplorer)
                 recording_extractor.set_property(
                     key=property_name,
                     values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
-                    ids=[stream_prefix + "#" + channel_name],
+                    ids=ids,
                 )
 
     # TODO: uncomment when neuroconv supports contact vectors (probe interface)

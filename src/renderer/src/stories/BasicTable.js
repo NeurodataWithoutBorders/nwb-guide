@@ -123,6 +123,7 @@ export class BasicTable extends LitElement {
         onStatusChange,
         onLoaded,
         onUpdate,
+        editable = true,
     } = {}) {
         super();
         this.name = name ?? "data_table";
@@ -138,6 +139,8 @@ export class BasicTable extends LitElement {
         if (onUpdate) this.onUpdate = onUpdate;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
+
+        this.editable = editable
     }
 
     #schema = {};
@@ -472,7 +475,8 @@ export class BasicTable extends LitElement {
                     </tbody>
                 </table>
             </div>
-            <div id="buttons">
+            ${this.editable ? 
+                html`<div id="buttons">
                 <nwb-button
                     primary
                     size="small"
@@ -511,7 +515,7 @@ export class BasicTable extends LitElement {
                     }}
                     >Download TSV File</nwb-button
                 >
-            </div>
+            </div>` : ''}
         `;
     }
 }
