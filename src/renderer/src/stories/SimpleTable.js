@@ -24,7 +24,6 @@ const isVisible = function (ele, container) {
     return top <= containerRect.top ? containerRect.top - top <= height : bottom - containerRect.bottom <= height;
 };
 
-
 export class SimpleTable extends LitElement {
     validateOnChange;
     onUpdate = () => {};
@@ -202,7 +201,7 @@ export class SimpleTable extends LitElement {
         maxHeight,
         contextOptions = {},
         ignore = {},
-        editable = {}
+        editable = {},
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -215,7 +214,7 @@ export class SimpleTable extends LitElement {
         this.maxHeight = maxHeight ?? "";
 
         this.ignore = ignore;
-        this.editable = editable
+        this.editable = editable;
 
         this.contextOptions = contextOptions;
 
@@ -783,7 +782,7 @@ export class SimpleTable extends LitElement {
         const schema = this.#itemProps[fullInfo.col];
 
         const ignore = getIgnore(this.ignore, [fullInfo.col]);
-        const isEditable = getEditable(value, this.editable, fullInfo.col)
+        const isEditable = getEditable(value, this.editable, fullInfo.col);
 
         // Track the cell renderer
         const cell = new TableCell({

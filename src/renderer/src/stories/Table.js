@@ -17,11 +17,10 @@ const isRequired = (col, schema) => {
 };
 
 export const getEditable = (value, config, colName) => {
-    if (typeof config === 'boolean') return config
-    if (typeof config === 'function') return config(value)
-    return getEditable(value, config?.[colName] ?? true)
-}
-
+    if (typeof config === "boolean") return config;
+    if (typeof config === "function") return config(value);
+    return getEditable(value, config?.[colName] ?? true);
+};
 
 export function sortTable(schema, keyColumn, order) {
     const cols = Object.keys(schema.properties)
@@ -391,7 +390,7 @@ export class Table extends LitElement {
                     return;
                 }
 
-                const isUndefined = value == ''
+                const isUndefined = value == "";
 
                 if (isUndefined && required) {
                     instanceThis.#handleValidationResult(

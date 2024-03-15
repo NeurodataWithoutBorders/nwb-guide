@@ -29,14 +29,13 @@ const tableRenderConfig = {
     "*": (metadata) => new SimpleTable(metadata),
     Electrodes: true,
     ElectrodeColumns: function (metadata, fullPath) {
-
-        const electrodeSchema = getSchema([...fullPath.slice(0, -1), 'Electrodes'], this.schema)
+        const electrodeSchema = getSchema([...fullPath.slice(0, -1), "Electrodes"], this.schema);
         return new SimpleTable({
             ...metadata,
             editable: {
-                name: (value) => !electrodeSchema.items.required.includes(value)
-            }
-        })
+                name: (value) => !electrodeSchema.items.required.includes(value),
+            },
+        });
     },
     Units: (metadata) => {
         metadata.editable = false;

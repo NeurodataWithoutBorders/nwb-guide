@@ -275,7 +275,7 @@ export class BasicTable extends LitElement {
 
         let { type, original, inferred } = this.#getType(value, propInfo);
 
-        const isUndefined = value === undefined || value === ''
+        const isUndefined = value === undefined || value === "";
 
         // Check if required
         if (isUndefined && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))

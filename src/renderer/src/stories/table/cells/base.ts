@@ -121,7 +121,7 @@ export class TableCellBase extends LitElement {
         if (state) {
 
             if (!this.editable && this.#initialValue) return // Non-editability does not apply to new rows
-            
+
             this.setAttribute('editing', '')
 
             const listenForEnter = (ev: KeyboardEvent) => {
@@ -175,7 +175,7 @@ export class TableCellBase extends LitElement {
     #update = (current: any, forceUpdate = false, runOnChange = true) => {
         let value = this.getValue(current)
 
-        if (!this.#firstUpdated) this.#initialValue = value 
+        if (!this.#firstUpdated) this.#initialValue = value
 
         // NOTE: Forcing change registration for all cells
         if (this.value !== value || forceUpdate) {
