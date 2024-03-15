@@ -1242,8 +1242,8 @@ export class JSONSchemaForm extends LitElement {
             Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
 
             // Skip if accordion will be empty
-            if (!renderableInside.length) return
-    
+            if (!renderableInside.length) return;
+
             const accordion = (this.accordions[name] = new Accordion({
                 name: headerName,
                 toggleable: hasMany, // Only show toggle if there are multiple siblings
