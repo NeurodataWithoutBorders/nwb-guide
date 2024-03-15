@@ -100,6 +100,12 @@ const componentCSS = `
       width:100%;
     }
 
+    .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
     #empty {
         display: flex;
         align-items: center;
@@ -426,7 +432,17 @@ export class JSONSchemaForm extends LitElement {
 
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
-        const container = this.shadowRoot.querySelector(`#${encode(name)} .${type}`);
+        const parent = this.shadowRoot.querySelector(`#${encode(name)}`);
+        if (!parent) return;
+
+        let container = parent.querySelector(`.${type}`);
+
+        if (!container) {
+            container = document.createElement("div");
+            container.classList.add(type);
+            parent.append(container);
+        }
+
         const item = new InspectorListItem(message);
         container.appendChild(item);
     };
@@ -436,16 +452,18 @@ export class JSONSchemaForm extends LitElement {
 
         if (!localPath.length) return;
 
-        const container = this.shadowRoot.querySelector(`#${encode(localPath)} .${type}`);
+        const parent = this.shadowRoot.querySelector(`#${encode(localPath)}`);
+        if (!parent) return;
 
-        if (container) {
-            const nChildren = container.children.length;
-            container.innerHTML = "";
+        const container = parent.querySelector(`.${type}`);
+        if (!container) return;
 
-            // Track errors and warnings
-            if (type === "errors") this.#nErrors -= nChildren;
-            if (type === "warnings") this.#nWarnings -= nChildren;
-        }
+        const nChildren = container.children.length;
+        container.innerHTML = "";
+
+        // Track errors and warnings
+        if (type === "errors") this.#nErrors -= nChildren;
+        if (type === "warnings") this.#nWarnings -= nChildren;
     };
 
     status;
@@ -664,14 +682,7 @@ export class JSONSchemaForm extends LitElement {
 
         this.inputs[localPath.join("-")] = interactiveInput;
 
-        return html`
-            <div id=${encode(localPath.join("-"))} class="form-section">
-                ${interactiveInput}
-                <div class="errors"></div>
-                <div class="warnings"></div>
-                <div class="info"></div>
-            </div>
-        `;
+        return html` <div id=${encode(localPath.join("-"))} class="form-section">${interactiveInput}</div> `;
     };
 
     load = () => {

@@ -117,12 +117,8 @@ export class Dashboard extends LitElement {
 
         // Handle all pop and push state updates
         const pushState = window.history.pushState;
-        window.history.pushState = function (state) {
-            if (typeof window.onpushstate == "function") window.onpushstate({ state: state });
-            return pushState.apply(window.history, arguments);
-        };
 
-        window.onpushstate = window.onpopstate = (popEvent) => {
+        const pushPopListener = (popEvent) => {
             if (popEvent.state) {
                 const titleString = popEvent.state.title ?? popEvent.state.label;
                 document.title = `${titleString} - ${this.name}`;
@@ -132,6 +128,14 @@ export class Dashboard extends LitElement {
                 this.setMain(page);
             }
         };
+
+        window.history.pushState = function (state) {
+            pushPopListener({ state: state });
+            return pushState.apply(window.history, arguments);
+        };
+
+        window.addEventListener("popstate", pushPopListener);
+        window.addEventListener("pushstate", pushPopListener);
 
         this.#updated();
     }
@@ -231,13 +235,15 @@ export class Dashboard extends LitElement {
 
             const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
             if (skipped) {
+                if (isStorybook) return; // Do not skip on storybook
+
                 // Run skip functions
                 Object.entries(page.workflow).forEach(([key, state]) => {
                     if (typeof state.skip === "function") state.skip();
                 });
 
                 // Skip right over the page if configured as such
-                if (previous.info.previous === this.page) this.page.onTransition(-1);
+                if (previous && previous.info.previous === this.page) this.page.onTransition(-1);
                 else this.page.onTransition(1);
             }
         });

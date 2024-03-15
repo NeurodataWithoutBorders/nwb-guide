@@ -30,7 +30,7 @@ jobs:
           node-version: "18"
 
       - name: Install package.json modules and their dependencies
-        run: npm install --ignore-scripts
+        run: npm install --verbose
 
       - name: Build and deploy on Windows
         env:
