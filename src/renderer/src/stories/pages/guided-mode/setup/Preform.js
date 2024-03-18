@@ -15,7 +15,7 @@ const questions = {
     },
     locate_data: {
         type: "boolean",
-        title: "Would you like to locate these sessions programmatically?",
+        title: "Would you like to locate the source data programmatically?",
         dependencies: ["multiple_sessions"],
         default: false,
     },
@@ -43,6 +43,7 @@ const projectWorkflowSchema = {
         acc[name] = info;
         return acc;
     }, {}),
+    order: Object.keys(questions),
 };
 
 // ----------------------------------------------------------------------
@@ -92,12 +93,12 @@ export class GuidedPreform extends Page {
             },
             onUpdate: () => (this.unsavedUpdates = true),
             onThrow,
-            groups: [
-                {
-                    name: "Session Workflow",
-                    properties: [["multiple_sessions"], ["locate_data"]],
-                },
-            ],
+            // groups: [
+            //     {
+            //         name: "Session Workflow",
+            //         properties: [["multiple_sessions"], ["locate_data"]],
+            //     },
+            // ],
         });
 
         return this.form;
