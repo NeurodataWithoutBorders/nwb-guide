@@ -9,7 +9,6 @@ import * as promises from "../promises";
 import "./Button";
 import { sortTable } from "./Table";
 import tippy from "tippy.js";
-import { getIgnore } from "./JSONSchemaForm";
 
 export class BasicTable extends LitElement {
     static get styles() {
@@ -39,6 +38,11 @@ export class BasicTable extends LitElement {
                 position: relative;
                 overflow: auto;
                 max-height: 400px;
+                border: 1px solid gray;
+            }
+
+            table tr:first-child td {
+                border-top: 0px;
             }
 
             table {
@@ -53,7 +57,8 @@ export class BasicTable extends LitElement {
             }
 
             th {
-                border: 1px solid silver;
+                border-right: 1px solid gray;
+                border-bottom: 1px solid gray;
                 color: #222;
                 font-weight: 400;
                 text-align: center;
@@ -81,7 +86,9 @@ export class BasicTable extends LitElement {
             }
 
             td {
-                border: 1px solid gainsboro;
+                border: 1px solid gray;
+                border-left: none;
+                border-bottom: none;
                 background: white;
                 user-select: none;
             }
