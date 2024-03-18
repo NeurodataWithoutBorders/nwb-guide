@@ -68,7 +68,7 @@ class Schemas(Resource):
 
 
 @neuroconv_api.route("/locate")
-class Locate(Resource):
+class LocateData(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
@@ -79,7 +79,7 @@ class Locate(Resource):
 
 
 @neuroconv_api.route("/locate/autocomplete")
-class Locate(Resource):
+class AutoCompleteFormatString(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
@@ -93,12 +93,11 @@ class Locate(Resource):
 class Metadata(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        # try:
-        return get_metadata_schema(neuroconv_api.payload.get("source_data"), neuroconv_api.payload.get("interfaces"))
-
-    # except Exception as exception:
-    #     if notBadRequestException(exception):
-    #         neuroconv_api.abort(500, str(exception))
+        try:
+            return get_metadata_schema(neuroconv_api.payload.get("source_data"), neuroconv_api.payload.get("interfaces"))
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/convert")
