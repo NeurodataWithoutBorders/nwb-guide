@@ -141,7 +141,7 @@ async function safeRename (this: JSONSchemaForm, name, parent, path, value, opti
     if (prevUniqueError) return true // Register as valid
 
     const resolvedSwalOptions = {}
-    for (const key in swalOptions) resolvedSwalOptions[key] = typeof swalOptions[key] === 'function' ? swalOptions[key](value, prevValue) : swalOptions[key]
+    for (const key in swalOptions) resolvedSwalOptions[key] = typeof swalOptions[key] === 'function' ? swalOptions[key](value, prevValue, info.modality) : swalOptions[key]
 
     const result = await Swal.fire({
         ...resolvedSwalOptions,
@@ -162,7 +162,6 @@ async function safeRename (this: JSONSchemaForm, name, parent, path, value, opti
     modalityDependencies.forEach(({ key, path }) => {
         const fullPath = [info.modality, ...path]
         const tables = this.getAllFormElements(fullPath, { tables: true })
-        console.log('Got all tables', tables, fullPath)
         tables.forEach(table => {
             const data = table.data
             data.forEach(row => {
@@ -185,7 +184,7 @@ schema.Ophys.Device = schema.Ecephys.Device = {
                 dependencies: { Ophys: dependencies.Ophys.devices, Ecephys: dependencies.Ecephys.devices },
                 swalOptions: {
                     title: (current, prev) => `Are you sure you want to rename the ${prev} device?`,
-                    text: () => `We will attempt to auto-update your Ophys devices to reflect this.`,
+                    text: (_, __, modality) => `We will attempt to auto-update your ${modality} devices to reflect this.`,
                 }
             })
         },
