@@ -135,7 +135,7 @@ def replace_none_with_nan(json_object, json_schema):
 def autocomplete_format_string(info: dict) -> str:
     from neuroconv.tools.path_expansion import construct_path_template
     from neuroconv.utils.json_schema import NWBMetaDataEncoder
-    
+
     base_directory = info["base_directory"]
     filesystem_entry_path = info["path"]
 
