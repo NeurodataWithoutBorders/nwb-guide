@@ -163,7 +163,7 @@ def autocomplete_format_string(info: dict) -> str:
 
     all_matched = locate_data(dict(autocomplete=to_locate_info))
 
-    return json.dumps(obj=dict(matched=all_matched, format_string=format_string), cls=NWBMetaDataEncoder)
+    return json.loads(json.dumps(obj=dict(matched=all_matched, format_string=format_string), cls=NWBMetaDataEncoder))
 
 
 def locate_data(info: dict) -> dict:
@@ -193,7 +193,7 @@ def locate_data(info: dict) -> dict:
 
         organized_output[subject_id][session_id] = item
 
-    return json.dumps(obj=organized_output, cls=NWBMetaDataEncoder)
+    return json.loads(json.dumps(obj=organized_output, cls=NWBMetaDataEncoder))
 
 
 def module_to_dict(my_module):
