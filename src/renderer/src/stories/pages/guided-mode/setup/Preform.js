@@ -114,6 +114,7 @@ export class GuidedPreform extends Page {
         this.form = new JSONSchemaForm({
             schema,
             results: this.state,
+            validateEmptyValues: false, // Only show errors after submission
             validateOnChange: function (name, parent, path, value) {
                 dependents[name].forEach((dependent) => {
                     const dependencies = questions[dependent.name].dependencies;

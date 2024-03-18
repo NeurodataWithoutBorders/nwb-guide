@@ -278,7 +278,7 @@ export class GuidedPathExpansionPage extends Page {
                 const session_id = this.workflow.session_id.value;
 
                 // Map existing results to new subject information (if available)
-                const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0];
+                const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
                 const existingMetadata = existingResults.metadata;
                 const existingSourceData = existingResults.source_data;
 
@@ -436,7 +436,7 @@ export class GuidedPathExpansionPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
             onThrow,
-            validateEmptyValues: null,
+            validateEmptyValues: false,
 
             controls,
 

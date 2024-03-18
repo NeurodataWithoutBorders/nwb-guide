@@ -498,6 +498,26 @@ export class JSONSchemaInput extends LitElement {
         };
     }
 
+    // Enforce dynamic required properties
+    attributeChangedCallback(key, _, latest) {
+        super.attributeChangedCallback(...arguments);
+
+        const formSchema = this.form.schema
+
+        if (latest !== null) {
+            const requirements = formSchema.required ?? (formSchema.required = [])
+            if (!requirements.includes(key)) requirements.push(key)
+        } else {
+            if (formSchema.requirements && formSchema.requirements.includes(key)) {
+                // Remove key form requirements
+                const set = new Set(formSchema.requirements)
+                set.remove(key)
+                formSchema.requirements = Array.from(set)
+            }
+        }
+
+    }
+
     // schema,
     // parent,
     // path,
