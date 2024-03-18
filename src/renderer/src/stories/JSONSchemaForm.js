@@ -465,14 +465,11 @@ export class JSONSchemaForm extends LitElement {
         if (!container) return;
 
         const nChildren = container.children.length;
-        container.remove()
+        container.remove();
 
         // Track errors and warnings
         if (type === "errors") this.#nErrors -= nChildren;
         if (type === "warnings") this.#nWarnings -= nChildren;
-
-        
-
     };
 
     status;
