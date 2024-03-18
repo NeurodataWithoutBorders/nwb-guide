@@ -86,14 +86,14 @@ const propsToIgnore = {
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
         Units: {
-            '*': {
+            "*": {
                 UnitColumns: {
-                    '*': {
-                        data_type: true // Do not show data_type
-                    } 
-                }
-            }
-        }
+                    "*": {
+                        data_type: true, // Do not show data_type
+                    },
+                },
+            },
+        },
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)

@@ -22,7 +22,7 @@ announcer = MessageAnnouncer()
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 
 EXTRA_INTERFACE_PROPERTIES = {
-     "brain_area": {
+    "brain_area": {
         "data_type": "str",
         "default": "unknown",
     }
@@ -31,19 +31,16 @@ EXTRA_INTERFACE_PROPERTIES = {
 EXTRA_RECORDING_INTERFACE_PROPERTIES = {
     "brain_area": {
         "description": "The brain area where the electrode is located.",
-        **EXTRA_INTERFACE_PROPERTIES["brain_area"]
+        **EXTRA_INTERFACE_PROPERTIES["brain_area"],
     }
 }
 
 EXTRA_SORTING_INTERFACE_PROPERTIES = {
-    "name": {
-        "description": "The unique name for the unit",
-        "data_type": "string"
-    },
-     "brain_area": {
+    "name": {"description": "The unique name for the unit", "data_type": "string"},
+    "brain_area": {
         "description": "The brain area where the unit is located.",
-        **EXTRA_INTERFACE_PROPERTIES["brain_area"]
-    }
+        **EXTRA_INTERFACE_PROPERTIES["brain_area"],
+    },
 }
 
 EXCLUDED_SORTING_INTERFACE_PROPERTIES = ["location", "spike_times", "electrodes"]  # Not validated
@@ -701,7 +698,6 @@ def convert_to_nwb(info: dict) -> str:
 
             del ecephys_metadata["Units"]
 
-
         for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
             interface = converter.data_interface_objects[interface_name]
 
@@ -1137,10 +1133,7 @@ def get_unit_columns_json(interface) -> List[Dict[str, Any]]:
     """A convenience function for collecting and organizing the properties of the underlying sorting extractor."""
     properties = get_sorting_interface_properties(interface)
 
-    property_descriptions = dict(
-        clu_id="The cluster ID for the unit",
-        group_id="The group ID for the unit"
-    )
+    property_descriptions = dict(clu_id="The cluster ID for the unit", group_id="The group ID for the unit")
 
     for property_name, property_info in EXTRA_SORTING_INTERFACE_PROPERTIES.items():
         description = property_info.get("description", None)
@@ -1155,7 +1148,10 @@ def get_unit_columns_json(interface) -> List[Dict[str, Any]]:
             name=property_name,
             description=property_descriptions.get(property_name, "No description."),
             data_type=get_property_dtype(
-                extractor=sorting_extractor, property_name=property_name, ids=[unit_ids[0]], extra_props=EXTRA_SORTING_INTERFACE_PROPERTIES
+                extractor=sorting_extractor,
+                property_name=property_name,
+                ids=[unit_ids[0]],
+                extra_props=EXTRA_SORTING_INTERFACE_PROPERTIES,
             ),
         )
         for property_name in properties.keys()
@@ -1183,10 +1179,10 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
         unit_column = dict()
 
         for property_name in properties:
-            if property_name is 'name':
+            if property_name is "name":
                 sorting_property_value = unit_id
             elif property_name in EXTRA_SORTING_INTERFACE_PROPERTIES:
-                sorting_property_value = properties[property_name].get('default')
+                sorting_property_value = properties[property_name].get("default")
             else:
                 sorting_property_value = sorting.get_property(key=property_name, ids=[unit_id])[
                     0  # First axis is always units in SI
@@ -1229,7 +1225,10 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
             name=property_name,
             description=property_descriptions.get(property_name, "No description."),
             data_type=get_property_dtype(
-                extractor=recording_extractor, property_name=property_name, ids=[channel_ids[0]], extra_props=EXTRA_RECORDING_INTERFACE_PROPERTIES
+                extractor=recording_extractor,
+                property_name=property_name,
+                ids=[channel_ids[0]],
+                extra_props=EXTRA_RECORDING_INTERFACE_PROPERTIES,
             ),
         )
         for property_name in properties.keys()
@@ -1349,22 +1348,25 @@ def update_sorting_properties_from_table_as_json(
     sorting_interface, unit_column_info: dict, unit_table_json: List[Dict[str, Any]]
 ):
     import numpy as np
+
     unit_column_data_types = {column["name"]: column["data_type"] for column in unit_column_info}
     unit_column_descriptions = {column["name"]: column["description"] for column in unit_column_info}
     sorting_extractor = sorting_interface.sorting_extractor
 
-    for entry_index, entry in enumerate(unit_table_json):  
+    for entry_index, entry in enumerate(unit_table_json):
         unit_properties = dict(entry)  # copy
 
-        unit_id = unit_properties.pop("name", None) # NOTE: Is called unit_name in the actual units table
+        unit_id = unit_properties.pop("name", None)  # NOTE: Is called unit_name in the actual units table
 
         for property_name, property_value in unit_properties.items():
 
-            if (property_name is "name"):
+            if property_name is "name":
                 continue
 
             sorting_extractor.set_property(
                 key=property_name,
-                values=np.array([property_value], dtype=unit_column_data_types[property_name]), #, description=unit_column_descriptions[property_name]),
-                ids=[unit_id]
+                values=np.array(
+                    [property_value], dtype=unit_column_data_types[property_name]
+                ),  # , description=unit_column_descriptions[property_name]),
+                ids=[unit_id],
             )

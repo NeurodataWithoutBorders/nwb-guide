@@ -174,7 +174,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         merge(overrides.schema, schemaCopy, { arrays: true });
 
-        console.log(schemaPath, nestedIgnore)
+        console.log(schemaPath, nestedIgnore);
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
