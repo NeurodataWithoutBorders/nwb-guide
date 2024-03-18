@@ -51,6 +51,10 @@ export class InstanceManager extends LitElement {
                 justify-content: space-between;
             }
 
+            #instance-sidebar[hidden] {
+                border: unset;
+            }
+
             #instance-header {
                 background: #e5e5e5;
                 border-bottom: 1px solid #c3c3c3;
@@ -164,6 +168,9 @@ export class InstanceManager extends LitElement {
         for (let i = 0; i < path.length; i++) {
             const id = path.slice(0, i + 1).join("/");
             const accordion = this.#accordions[id];
+
+            if (!this.#hasMultiple()) return // Skip status update if accordion is not rendered
+
             target = target[path[i]]; // Progressively check the deeper nested instances
             if (accordion) accordion.setStatus(checkStatus(false, false, [...Object.values(target)]));
         }
@@ -216,6 +223,8 @@ export class InstanceManager extends LitElement {
 
     // Correct bug where multiple instances are selected
     updated = () => {
+
+        console.log(this)
         const selected = Array.from(this.shadowRoot.querySelectorAll("[selected]"));
         if (selected.length > 0)
             selected.slice(1).forEach((element) => {
@@ -361,15 +370,23 @@ export class InstanceManager extends LitElement {
         return list;
     }
 
+    #hasMultiple = () => this.#items.length > 1
+
+
     render() {
         this.#info = {};
         this.#items = [];
 
         const instances = this.#render();
+        console.log(this.#items)
+
+        const hasMultiple = this.#hasMultiple()
 
         return html`
             <div>
-                <div id="instance-sidebar">
+            <div id="instance-sidebar" ?hidden=${!hasMultiple}>
+            ${hasMultiple ? 
+                html`
                     ${this.header ? html`<div id="instance-header"><h2>${this.header}</h2></div>` : ""}
                     <ul id="instance-list">
                         ${instances}
@@ -424,8 +441,10 @@ export class InstanceManager extends LitElement {
             }}>Add ${this.instanceType}</nwb-button>
         </div>
       </div>`
-                        : ""}
-                </div>
+        : ""}
+    ` : ""}
+    </div>
+
                 <div id="content">
                     <div class="controls">
                         <span id="selectedName"></span>
