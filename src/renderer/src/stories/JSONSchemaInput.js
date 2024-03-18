@@ -502,7 +502,7 @@ export class JSONSchemaInput extends LitElement {
     attributeChangedCallback(key, _, latest) {
         super.attributeChangedCallback(...arguments);
 
-        const formSchema = this.form.schema
+        const formSchema = this.form.schema;
 
         if (key === 'required') {
 
@@ -520,7 +520,6 @@ export class JSONSchemaInput extends LitElement {
                 }
             }
         }
-
     }
 
     // schema,
