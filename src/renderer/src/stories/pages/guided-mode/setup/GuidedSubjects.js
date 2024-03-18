@@ -5,7 +5,6 @@ import { validateOnChange } from "../../../../validation/index.js";
 import { Table } from "../../../Table.js";
 
 import { updateResultsFromSubjects } from "./utils";
-import { merge } from "../../utils.js";
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 import { Button } from "../../../Button.js";
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
@@ -68,6 +67,7 @@ export class GuidedSubjectsPage extends Page {
             );
             nameMap[key] = renamed;
         }
+        
 
         // Remove identifiers
         for (let key in localState) delete localState[key].identifier;

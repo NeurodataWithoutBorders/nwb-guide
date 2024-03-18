@@ -37,6 +37,8 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
     const subjectId = "mouse1";
     const sessions = ["session1"];
 
+    const hasMultipleSessions = sessions.length > 1
+
     const resolvedSourceData = structuredClone(sourceData);
     Object.values(resolvedSourceData).forEach((info) => {
         propertiesToTransform.forEach((property) => {
@@ -52,12 +54,23 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
 
     remove(updatedName, true);
 
+    const workflowInfo = {
+        multiple_sessions: hasMultipleSessions,
+    }
+
+    if (!workflowInfo.multiple_sessions) {
+        workflowInfo.subject_id = subjectId
+        workflowInfo.session_id = sessions[0]
+    }
+
+
     save({
         info: {
             globalState: {
                 project: {
                     name: updatedName,
                     initialized: true,
+                    workflow: workflowInfo,
                 },
 
                 // provide data for all supported interfaces

@@ -637,7 +637,7 @@ export class JSONSchemaInput extends LitElement {
                 ${
                     schema.description
                         ? html`<p class="guided--text-input-instructions">
-                              ${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
+                              ${unsafeHTML(capitalize(schema.description))}${['.', '?', '!'].includes(schema.description.slice(-1)[0])
                                   ? ""
                                   : "."}
                           </p>`

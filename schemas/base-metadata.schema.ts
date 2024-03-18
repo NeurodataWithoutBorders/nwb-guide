@@ -111,8 +111,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
             uvProperties.forEach(prop => {
                 electrodeItems[prop] = {}
                 electrodeItems[prop].title = prop.replace('uV', uvMathFormat)
-                console.log(electrodeItems[prop])
             })
+            
             interfaceProps["Electrodes"].items.order = ["channel_name", "group_name", "shank_electrode_number", ...uvProperties];
             interfaceProps["ElectrodeColumns"].items.order = ["name", "description", "data_type"];
 

@@ -263,19 +263,26 @@ export class GuidedPathExpansionPage extends Page {
     #initialize = () => (this.localState = merge(this.info.globalState.structure, { results: {} }));
 
     workflow = {
+        subject_id: {},
+        session_id: {},
         locate_data: {
             skip: () => {
                 this.#initialize();
                 const globalState = this.info.globalState;
                 merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
-                // Force single subject/session if not keeping existing data
-                if (!globalState.results) {
-                    const existingMetadata =
-                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
 
-                    const existingSourceData =
-                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
+                
+                // Force single subject/session if not keeping existing data
+                // if (!globalState.results) {
+
+                    const subject_id = this.workflow.subject_id.value
+                    const session_id = this.workflow.session_id.value
+
+                    // Map existing results to new subject information (if available)
+                    const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0]
+                    const existingMetadata = existingResults.metadata;
+                    const existingSourceData = existingResults.source_data;
 
                     const source_data = {};
                     for (let key in globalState.interfaces) {
@@ -284,23 +291,23 @@ export class GuidedPathExpansionPage extends Page {
                     }
 
                     globalState.results = {
-                        [this.altInfo.subject_id]: {
-                            [this.altInfo.session_id]: {
+                        [subject_id]: {
+                            [session_id]: {
                                 source_data,
                                 metadata: {
                                     NWBFile: {
-                                        session_id: this.altInfo.session_id,
+                                        session_id: session_id,
                                         ...(existingMetadata?.NWBFile ?? {}),
                                     },
                                     Subject: {
-                                        subject_id: this.altInfo.subject_id,
+                                        subject_id: subject_id,
                                         ...(existingMetadata?.Subject ?? {}),
                                     },
                                 },
                             },
                         },
                     };
-                }
+                // }
             },
         },
     };
@@ -380,11 +387,6 @@ export class GuidedPathExpansionPage extends Page {
 
             return this.to(1);
         },
-    };
-
-    altInfo = {
-        subject_id: "001",
-        session_id: "1",
     };
 
     // altForm = new JSONSchemaForm({
