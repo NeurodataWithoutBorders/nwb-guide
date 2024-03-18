@@ -37,7 +37,7 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
     const subjectId = "mouse1";
     const sessions = ["session1"];
 
-    const hasMultipleSessions = sessions.length > 1
+    const hasMultipleSessions = sessions.length > 1;
 
     const resolvedSourceData = structuredClone(sourceData);
     Object.values(resolvedSourceData).forEach((info) => {
@@ -56,13 +56,12 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
 
     const workflowInfo = {
         multiple_sessions: hasMultipleSessions,
-    }
+    };
 
     if (!workflowInfo.multiple_sessions) {
-        workflowInfo.subject_id = subjectId
-        workflowInfo.session_id = sessions[0]
+        workflowInfo.subject_id = subjectId;
+        workflowInfo.session_id = sessions[0];
     }
-
 
     save({
         info: {

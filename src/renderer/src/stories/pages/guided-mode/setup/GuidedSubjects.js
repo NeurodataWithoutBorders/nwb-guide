@@ -67,7 +67,6 @@ export class GuidedSubjectsPage extends Page {
             );
             nameMap[key] = renamed;
         }
-        
 
         // Remove identifiers
         for (let key in localState) delete localState[key].identifier;

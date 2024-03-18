@@ -271,42 +271,40 @@ export class GuidedPathExpansionPage extends Page {
                 const globalState = this.info.globalState;
                 merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
-
-                
                 // Force single subject/session if not keeping existing data
                 // if (!globalState.results) {
 
-                    const subject_id = this.workflow.subject_id.value
-                    const session_id = this.workflow.session_id.value
+                const subject_id = this.workflow.subject_id.value;
+                const session_id = this.workflow.session_id.value;
 
-                    // Map existing results to new subject information (if available)
-                    const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0]
-                    const existingMetadata = existingResults.metadata;
-                    const existingSourceData = existingResults.source_data;
+                // Map existing results to new subject information (if available)
+                const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0];
+                const existingMetadata = existingResults.metadata;
+                const existingSourceData = existingResults.source_data;
 
-                    const source_data = {};
-                    for (let key in globalState.interfaces) {
-                        const existing = existingSourceData?.[key];
-                        if (existing) source_data[key] = existing ?? {};
-                    }
+                const source_data = {};
+                for (let key in globalState.interfaces) {
+                    const existing = existingSourceData?.[key];
+                    if (existing) source_data[key] = existing ?? {};
+                }
 
-                    globalState.results = {
-                        [subject_id]: {
-                            [session_id]: {
-                                source_data,
-                                metadata: {
-                                    NWBFile: {
-                                        session_id: session_id,
-                                        ...(existingMetadata?.NWBFile ?? {}),
-                                    },
-                                    Subject: {
-                                        subject_id: subject_id,
-                                        ...(existingMetadata?.Subject ?? {}),
-                                    },
+                globalState.results = {
+                    [subject_id]: {
+                        [session_id]: {
+                            source_data,
+                            metadata: {
+                                NWBFile: {
+                                    session_id: session_id,
+                                    ...(existingMetadata?.NWBFile ?? {}),
+                                },
+                                Subject: {
+                                    subject_id: subject_id,
+                                    ...(existingMetadata?.Subject ?? {}),
                                 },
                             },
                         },
-                    };
+                    },
+                };
                 // }
             },
         },
