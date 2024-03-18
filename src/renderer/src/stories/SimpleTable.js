@@ -948,7 +948,7 @@ export class SimpleTable extends LitElement {
                     </tfoot>
                 </table>
             </div>
-            <p style="margin: 10px 0px">
+            <p style="margin: 0; margin-top: 10px">
                 <small style="color: gray;">Right click to add or remove rows.</small>
             </p>
         `;
