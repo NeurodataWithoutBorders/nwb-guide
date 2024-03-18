@@ -504,10 +504,12 @@ export class JSONSchemaInput extends LitElement {
 
         const formSchema = this.form.schema;
 
+
         if (key === "required") {
+
             const name = this.path.slice(-1)[0];
 
-            if (latest !== null) {
+            if (latest !== null && !this.conditional) {
                 const requirements = formSchema.required ?? (formSchema.required = []);
                 if (!requirements.includes(name)) requirements.push(name);
             } else {
