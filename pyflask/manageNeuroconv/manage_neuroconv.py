@@ -169,6 +169,7 @@ def autocomplete_format_string(info: dict) -> str:
 def locate_data(info: dict) -> dict:
     """Locate data from the specifies directories using fstrings."""
     from neuroconv.tools import LocalPathExpander
+    from neuroconv.utils.json_schema import NWBMetaDataEncoder
 
     expander = LocalPathExpander()
 
@@ -192,7 +193,7 @@ def locate_data(info: dict) -> dict:
 
         organized_output[subject_id][session_id] = item
 
-    return organized_output
+    return json.dumps(obj=organized_output, cls=NWBMetaDataEncoder)
 
 
 def module_to_dict(my_module):
