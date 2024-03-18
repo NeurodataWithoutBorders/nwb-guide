@@ -504,15 +504,20 @@ export class JSONSchemaInput extends LitElement {
 
         const formSchema = this.form.schema
 
-        if (latest !== null) {
-            const requirements = formSchema.required ?? (formSchema.required = [])
-            if (!requirements.includes(key)) requirements.push(key)
-        } else {
-            if (formSchema.requirements && formSchema.requirements.includes(key)) {
-                // Remove key form requirements
-                const set = new Set(formSchema.requirements)
-                set.remove(key)
-                formSchema.requirements = Array.from(set)
+        if (key === 'required') {
+
+            const name = this.path.slice(-1)[0]
+            
+            if (latest !== null) {
+                const requirements = formSchema.required ?? (formSchema.required = [])
+                if (!requirements.includes(name)) requirements.push(name)
+            } else {
+                if (formSchema.requirements && formSchema.requirements.includes(name)) {
+                    // Remove key form requirements
+                    const set = new Set(formSchema.requirements)
+                    set.remove(name)
+                    formSchema.requirements = Array.from(set)
+                }
             }
         }
 

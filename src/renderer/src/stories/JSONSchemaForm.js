@@ -98,7 +98,7 @@ const componentCSS = `
 
     :host {
       display: inline-block;
-      width:100%;
+      width: 100%;
     }
 
     .form-section {

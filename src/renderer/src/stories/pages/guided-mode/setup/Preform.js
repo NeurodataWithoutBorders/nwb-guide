@@ -145,7 +145,6 @@ export class GuidedPreform extends Page {
                         if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
                         dependentEl.updateData(dependent.default);
                         dependentEl.setAttribute(attr, true);
-
                         if ("required" in dependent) dependentEl.required = !dependent.required;
                     }
                 });
