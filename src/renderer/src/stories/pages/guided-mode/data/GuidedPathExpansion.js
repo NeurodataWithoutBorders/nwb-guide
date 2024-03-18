@@ -307,7 +307,7 @@ export class GuidedPathExpansionPage extends Page {
                 };
                 // }
 
-                this.save({}, false) // Ensure this structure is saved
+                this.save({}, false); // Ensure this structure is saved
             },
         },
     };
