@@ -43,7 +43,7 @@ const projectWorkflowSchema = {
         acc[name] = info;
         return acc;
     }, {}),
-    order: Object.keys(questions)
+    order: Object.keys(questions),
 };
 
 // ----------------------------------------------------------------------
