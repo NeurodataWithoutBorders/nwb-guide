@@ -41,9 +41,14 @@ const tableRenderConfig = {
         metadata.editable = false;
         return true;
     },
-    UnitColumns: (metadata) => {
-        metadata.editable = false;
-        return true;
+    UnitColumns: function (metadata, fullPath) {
+        const unitSchema = getSchema([...fullPath.slice(0, -1), "Units"], this.schema);
+        return new SimpleTable({
+            ...metadata,
+            editable: {
+                name: (value) => !unitSchema.items.required.includes(value),
+            },
+        });
     },
 };
 
@@ -80,13 +85,15 @@ const propsToIgnore = {
         ElectricalSeries: true,
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
-        Electrodes: {
-            "*": {
-                location: true,
-                group: true,
-                contact_vector: true,
-            },
-        },
+        Units: {
+            '*': {
+                UnitColumns: {
+                    '*': {
+                        data_type: true // Do not show data_type
+                    } 
+                }
+            }
+        }
     },
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)

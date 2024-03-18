@@ -229,23 +229,20 @@ schema.Ecephys.ElectrodeGroup = {
 // Label columns as invalid if not registered on the ElectrodeColumns table
 // NOTE: If not present in the schema, these are not being rendered...
 
-schema.Ecephys.Electrodes = {
-
-    // All interfaces
-    ["*"]: {
-
-        Electrodes: {
+const generateLinkedTableInteractions = (tableName, colTableName, additionalColumnValidation = {}) => {
+    return {
+        [ tableName ]: {
 
             // All other column
             ['*']: function (this: JSONSchemaForm, name, _, path) {
 
                 const commonPath = path.slice(0, -2)
 
-                const colPath = [...commonPath, 'ElectrodeColumns']
+                const colPath = [...commonPath, colTableName]
 
-                const { value: electrodeColumns } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
+                const { value } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
 
-                if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) {
+                if (value && !value.find((row: any) => row.name === name)) {
                     return [
                         {
                             message: 'Not a valid column',
@@ -255,46 +252,32 @@ schema.Ecephys.Electrodes = {
                 }
             },
 
-            // Group name column
-            group_name: function (this: JSONSchemaForm, _, __, ___, value) {
-
-                const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
-
-                if (groups.includes(value)) return true
-                else {
-                    return [
-                        {
-                            message: 'Not a valid group name',
-                            type: 'error'
-                        }
-                    ]
-                }
-            }
+            ...additionalColumnValidation
         },
 
-        // Update the columns available on the Electrodes table when there is a new name in the ElectrodeColumns table
-        ElectrodeColumns: {
+        // Update the columns available on the table when there is a new name in the columns table
+        [ colTableName ]: {
             ['*']: {
                 '*': function (this: JSONSchemaForm, propName, __, path, value) {
 
                     const commonPath = path.slice(0, -2)
-                    const electrodesTablePath = [ ...commonPath, 'Electrodes']
-                    const electrodesTable = this.getFormElement(electrodesTablePath)
-                    const electrodesSchema = electrodesTable.schema // Manipulate the schema that is on the table
-                    const globalElectrodeSchema = getSchema(electrodesTablePath, this.schema)
+                    const tablePath = [ ...commonPath, tableName]
+                    const table = this.getFormElement(tablePath)
+                    const tableSchema = table.schema // Manipulate the schema that is on the table
+                    const globalSchema = getSchema(tablePath, this.schema)
 
                     const { value: row } = get(this.results, path)
 
                     const currentName = row?.['name']
 
-                    const hasNameUpdate = propName == 'name' && !(value in electrodesSchema.items.properties)
+                    const hasNameUpdate = propName == 'name' && !(value in tableSchema.items.properties)
 
                     const resolvedName = hasNameUpdate ? value : currentName
 
                     if (value === currentName) return true // No change
                     if (!resolvedName) return true // Only set when name is actually present
 
-                    const schemaToEdit = [electrodesSchema, globalElectrodeSchema]
+                    const schemaToEdit = [tableSchema, globalSchema]
                     schemaToEdit.forEach(schema => {
 
                         const properties = schema.items.properties
@@ -311,19 +294,44 @@ schema.Ecephys.Electrodes = {
 
                     //  Swap the new and current name information
                     if (hasNameUpdate) {
-                        const electrodesTable = this.getFormElement([ ...commonPath, 'Electrodes'])
-                        electrodesTable.data.forEach(row => {
+                        const table = this.getFormElement([ ...commonPath, tableName])
+                        table.data.forEach(row => {
                             if (!(value in row)) row[value] = row[currentName] // Initialize new column with old values
                             delete row[currentName] // Delete old column
                         })
                     }
 
-                    // Always re-render the Electrodes table on column changes
-                    electrodesTable.requestUpdate()
+                    // Always re-render the table on column changes
+                    table.requestUpdate()
                 }
             },
         }
     }
+}
+
+schema.Ecephys.Units = {
+    ["*"]: generateLinkedTableInteractions('Units', 'UnitColumns', {})
+}
+
+schema.Ecephys.Electrodes = {
+
+    // All interfaces
+    ["*"]: generateLinkedTableInteractions('Electrodes', 'ElectrodeColumns', {
+        group_name: function (this: JSONSchemaForm, _, __, ___, value) {
+
+            const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
+
+            if (groups.includes(value)) return true
+            else {
+                return [
+                    {
+                        message: 'Not a valid group name',
+                        type: 'error'
+                    }
+                ]
+            }
+        }
+    })
 }
 
 // ----------------- Ophys Validation ----------------- //

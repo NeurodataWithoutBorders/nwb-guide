@@ -80,9 +80,15 @@ export const getIgnore = (o, path) => {
     return path.reduce((acc, key) => {
         const info = acc[key] ?? {};
 
+        const accWildcard = acc["*"] ?? {}
+        const infoWildcard = info["*"] ?? {}
+        const mergedWildcards = { ...accWildcard, ...infoWildcard }
+        
+        if (key in mergedWildcards) return {...info, ...mergedWildcards[key]}
+
         return {
             ...info,
-            "*": { ...(acc["*"] ?? {}), ...(info["*"] ?? {}) }, // Accumulate ignore values
+            "*": mergedWildcards, // Accumulate ignore values
         };
     }, o);
 };
@@ -768,12 +774,15 @@ export class JSONSchemaForm extends LitElement {
             else return [key, value];
         };
 
+
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore["*"]?.[key])
-                    return false; // Skip all properties with this name
+
+                // If conclusively ignored
+                if (this.ignore["*"]?.[key] === true) return false; // Skip all properties with this name
                 else if (this.ignore[key] === true) return false; // Skip this property
+                
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);

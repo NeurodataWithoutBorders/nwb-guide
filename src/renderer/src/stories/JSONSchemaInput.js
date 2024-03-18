@@ -174,6 +174,8 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         merge(overrides.schema, schemaCopy, { arrays: true });
 
+        console.log(schemaPath, nestedIgnore)
+
         const tableMetadata = {
             keyColumn: tempPropertyKey,
             schema: schemaCopy,
@@ -254,7 +256,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     }
 
     const nestedIgnore = getIgnore(ignore, fullPath);
-
     Object.assign(nestedIgnore, overrides.ignore ?? {});
 
     merge(overrides.ignore, nestedIgnore);
