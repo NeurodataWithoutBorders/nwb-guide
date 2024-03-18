@@ -512,9 +512,11 @@ export class JSONSchemaInput extends LitElement {
             if (latest !== null && !this.conditional) {
                 const requirements = formSchema.required ?? (formSchema.required = []);
                 if (!requirements.includes(name)) requirements.push(name);
-            } else {
+            } 
+            
+            // Remove requirement from form schema (and force if conditional requirement)
+            else {
                 if (formSchema.requirements && formSchema.requirements.includes(name)) {
-                    // Remove key form requirements
                     const set = new Set(formSchema.requirements);
                     set.remove(name);
                     formSchema.requirements = Array.from(set);
