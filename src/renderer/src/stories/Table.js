@@ -706,7 +706,7 @@ export class Table extends LitElement {
     render() {
         return html`
             <div></div>
-            <p style="width: 100%; margin: 10px 0px">
+            <p style="width: 100%; margin: 0; margin-top: 10px;">
                 <small id="description" style="color: gray;"></small>
             </p>
         `;
