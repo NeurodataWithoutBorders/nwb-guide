@@ -13,10 +13,11 @@ from shutil import rmtree, copytree
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sse import MessageAnnouncer
+from sse import format_sse
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
-announcer = MessageAnnouncer()
+from tqdm_publisher import TQDMProgressHandler
+progress_handler = TQDMProgressHandler()
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 EXTRA_RECORDING_INTERFACE_PROPERTIES = {
@@ -547,9 +548,6 @@ def convert_to_nwb(info: dict) -> str:
 
     converter = instantiate_custom_converter(resolved_source_data, info["interfaces"])
 
-    def update_conversion_progress(**kwargs):
-        announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
-
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
@@ -685,10 +683,10 @@ def upload_project_to_dandi(
 
 # Create an events endpoint
 def listen_to_neuroconv_events():
-    messages = announcer.listen()  # returns a queue.Queue
+    messages = progress_handler.listen()  # returns a queue.Queue
     while True:
         msg = messages.get()  # blocks until a new message arrives
-        yield msg
+        yield format_sse(msg)
 
 
 def generate_dataset(input_path: str, output_path: str):
@@ -765,17 +763,17 @@ def inspect_nwb_folder(payload):
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
-    from tqdm_publisher import TQDMProgressSubscriber
-
     request_id = payload.get("request_id")
     if request_id:
         payload.pop("request_id")
 
     kwargs = dict(
         n_jobs=-2,  # uses number of CPU - 1
-        progress_bar_class=TQDMProgressSubscriber,
+        progress_bar_class=progress_handler.create,
         progress_bar_options=dict(
-            on_progress_update=lambda message: announcer.announce(dict(request_id=request_id, **message))
+            additional_metadata = dict(
+                request_id = request_id
+            )
         ),
         ignore=[
             "check_description",
