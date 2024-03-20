@@ -17,6 +17,7 @@ from sse import format_sse
 from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 from tqdm_publisher import TQDMProgressHandler
+
 progress_handler = TQDMProgressHandler()
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
@@ -770,11 +771,7 @@ def inspect_nwb_folder(payload):
     kwargs = dict(
         n_jobs=-2,  # uses number of CPU - 1
         progress_bar_class=progress_handler.create,
-        progress_bar_options=dict(
-            additional_metadata = dict(
-                request_id = request_id
-            )
-        ),
+        progress_bar_options=dict(additional_metadata=dict(request_id=request_id)),
         ignore=[
             "check_description",
             "check_data_orientation",
