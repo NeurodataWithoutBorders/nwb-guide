@@ -30,21 +30,21 @@ const parentTableRenderConfig = {
     Units: (metadata) => {
         metadata.editable = false;
         return true;
-    }
-}
+    },
+};
 
 function getAggregateRequirements(path) {
-    const electrodeSchema = getSchema(path, this.schema)
+    const electrodeSchema = getSchema(path, this.schema);
     return Object.values(electrodeSchema.properties).reduce((set, schema) => {
-        schema.items.required.forEach(item => set.add(item))
-        return set
-    }, new Set())
+        schema.items.required.forEach((item) => set.add(item));
+        return set;
+    }, new Set());
 }
 
 const tableRenderConfig = {
     "*": (metadata) => new SimpleTable(metadata),
     ElectrodeColumns: function (metadata) {
-        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", 'Electrodes'])
+        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Electrodes"]);
 
         return new SimpleTable({
             ...metadata,
@@ -54,16 +54,15 @@ const tableRenderConfig = {
         });
     },
     UnitColumns: function (metadata) {
-
-        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", 'Units'])
+        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Units"]);
 
         return new SimpleTable({
             ...metadata,
             contextOptions: {
                 row: {
                     add: false,
-                    remove: false
-                }
+                    remove: false,
+                },
             },
             editable: {
                 name: (value) => !aggregateRequirements.has(value),
@@ -457,9 +456,10 @@ export class GuidedMetadataPage extends ManagedPage {
                 const updatedSchema = structuredClone(metadata.schema);
                 metadata.schema = updatedSchema;
 
-                const parentName = fullPath[fullPath.length - 1]
+                const parentName = fullPath[fullPath.length - 1];
 
-                const tableConfig = tableRenderConfig[name] ?? parentTableRenderConfig[parentName] ?? tableRenderConfig["*"] ?? true;
+                const tableConfig =
+                    tableRenderConfig[name] ?? parentTableRenderConfig[parentName] ?? tableRenderConfig["*"] ?? true;
                 if (typeof tableConfig === "function") return tableConfig.call(form, metadata, [...fullPath, name]);
                 else return tableConfig;
             },

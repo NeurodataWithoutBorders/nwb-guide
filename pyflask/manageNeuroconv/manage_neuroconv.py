@@ -393,13 +393,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         ecephys_schema["required"].append("ElectrodeColumns")
 
-
         ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
         # Populate Units metadata
         metadata["Ecephys"]["Units"] = {}
         schema["properties"]["Ecephys"]["required"].append("Units")
-        original_units_schema = ecephys_properties.pop("UnitProperties", None) 
+        original_units_schema = ecephys_properties.pop("UnitProperties", None)
         metadata["Ecephys"].pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
 
         has_units = original_units_schema is not None
@@ -420,7 +419,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         unit_columns = get_unit_columns_json(sorting_interface)
 
         # Aggregate electrode column information across recording interfaces
-        existing_unit_columns = metadata["Ecephys"].get('UnitColumns')
+        existing_unit_columns = metadata["Ecephys"].get("UnitColumns")
         if existing_unit_columns:
             for entry in unit_columns:
                 if any(obj["name"] == entry["name"] for obj in existing_unit_columns):
@@ -458,7 +457,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         electrode_columns = get_electrode_columns_json(recording_interface)
 
         # Aggregate electrode column information across recording interfaces
-        existing_electrode_columns = metadata["Ecephys"].get('ElectrodeColumns')
+        existing_electrode_columns = metadata["Ecephys"].get("ElectrodeColumns")
         if existing_electrode_columns:
             for entry in electrode_columns:
                 if any(obj["name"] == entry["name"] for obj in existing_electrode_columns):
@@ -481,13 +480,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                     {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
                     {"required": list(map(lambda info: info["name"], electrode_columns))},
                 ]
-            }
+            },
         }
 
         ecephys_properties["Electrodes"]["required"].append(name)
 
         return recording_interface
-    
 
     from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
     from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
