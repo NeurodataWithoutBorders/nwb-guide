@@ -47,29 +47,25 @@ function updateEcephysTable(propName, schema, schemaToMerge) {
     const electrodesProp = ecephys.properties[propName]
     if (!electrodesProp) return false
     for (let name in electrodesProp.properties) {
-        const interfaceProps = electrodesProp.properties[name].properties
 
-        for (let subProp in schemaToMerge) {
-            if (interfaceProps[subProp]) {
-                const itemSchema = interfaceProps[subProp].items
+        const itemSchema = electrodesProp.properties[name].items
 
-                // Do not add new items
-                const updateCopy = structuredClone(schemaToMerge[subProp])
-                const updateProps = updateCopy.properties
-                for (let itemProp in updateProps) {
-                    if (!itemSchema.properties[itemProp]) delete updateProps[itemProp]
-                }
-
-                // Merge into existing items
-                merge(updateCopy, itemSchema)
-            }
-
+        // Do not add new items
+        const updateCopy = structuredClone(schemaToMerge)
+        const updateProps = updateCopy.properties
+        for (let itemProp in updateProps) {
+            if (!itemSchema.properties[itemProp]) delete updateProps[itemProp]
         }
+
+        // Merge into existing items
+        merge(updateCopy, itemSchema)
     }
+
 
     return true
 
 }
+
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
@@ -130,26 +126,20 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ecephys) {
 
+        if (ecephys.properties.ElectrodeColumns)  ecephys.properties.ElectrodeColumns.order = COLUMN_SCHEMA_ORDER
+        if (ecephys.properties.UnitProperties)  ecephys.properties.UnitProperties.order = COLUMN_SCHEMA_ORDER
+
+
         updateEcephysTable("Electrodes", copy, {
-            Electrodes: {
-                properties: UV_PROPERTIES.reduce((acc, prop) => {
-                    acc[prop] = { title: prop.replace('uV', UV_MATH_FORMAT) }
-                    return acc
-                }, {}),
-                order: ["channel_name", "group_name", "shank_electrode_number", ...UV_PROPERTIES]
-            },
-            ElectrodeColumns: {
-                order: COLUMN_SCHEMA_ORDER
-            }
+            properties: UV_PROPERTIES.reduce((acc, prop) => {
+                acc[prop] = { title: prop.replace('uV', UV_MATH_FORMAT) }
+                return acc
+            }, {}),
+            order: ["channel_name", "group_name", "shank_electrode_number", ...UV_PROPERTIES]
         })
 
         updateEcephysTable("Units", copy, {
-            Units: {
-                order: ["name", "clu_id", "group_id"]
-            },
-            UnitColumns: {
-                order: COLUMN_SCHEMA_ORDER
-            }
+            order: ["name", "clu_id", "group_id"]
         })
 
     }

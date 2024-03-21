@@ -25,28 +25,48 @@ import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
 
-const tableRenderConfig = {
-    "*": (metadata) => new SimpleTable(metadata),
+const parentTableRenderConfig = {
     Electrodes: true,
-    ElectrodeColumns: function (metadata, fullPath) {
-        const electrodeSchema = getSchema([...fullPath.slice(0, -1), "Electrodes"], this.schema);
-        return new SimpleTable({
-            ...metadata,
-            editable: {
-                name: (value) => !electrodeSchema.items.required.includes(value),
-            },
-        });
-    },
     Units: (metadata) => {
         metadata.editable = false;
         return true;
-    },
-    UnitColumns: function (metadata, fullPath) {
-        const unitSchema = getSchema([...fullPath.slice(0, -1), "Units"], this.schema);
+    }
+}
+
+function getAggregateRequirements(path) {
+    const electrodeSchema = getSchema(path, this.schema)
+    return Object.values(electrodeSchema.properties).reduce((set, schema) => {
+        schema.items.required.forEach(item => set.add(item))
+        return set
+    }, new Set())
+}
+
+const tableRenderConfig = {
+    "*": (metadata) => new SimpleTable(metadata),
+    ElectrodeColumns: function (metadata) {
+        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", 'Electrodes'])
+
         return new SimpleTable({
             ...metadata,
             editable: {
-                name: (value) => !unitSchema.items.required.includes(value),
+                name: (value) => !aggregateRequirements.has(value),
+            },
+        });
+    },
+    UnitColumns: function (metadata) {
+
+        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", 'Units'])
+
+        return new SimpleTable({
+            ...metadata,
+            contextOptions: {
+                row: {
+                    add: false,
+                    remove: false
+                }
+            },
+            editable: {
+                name: (value) => !aggregateRequirements.has(value),
             },
         });
     },
@@ -437,7 +457,9 @@ export class GuidedMetadataPage extends ManagedPage {
                 const updatedSchema = structuredClone(metadata.schema);
                 metadata.schema = updatedSchema;
 
-                const tableConfig = tableRenderConfig[name] ?? tableRenderConfig["*"] ?? true;
+                const parentName = fullPath[fullPath.length - 1]
+
+                const tableConfig = tableRenderConfig[name] ?? parentTableRenderConfig[parentName] ?? tableRenderConfig["*"] ?? true;
                 if (typeof tableConfig === "function") return tableConfig.call(form, metadata, [...fullPath, name]);
                 else return tableConfig;
             },

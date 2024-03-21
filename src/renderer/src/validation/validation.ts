@@ -228,110 +228,112 @@ schema.Ecephys.ElectrodeGroup = {
 // Label columns as invalid if not registered on the ElectrodeColumns table
 // NOTE: If not present in the schema, these are not being rendered...
 
-const generateLinkedTableInteractions = (tableName, colTableName, additionalColumnValidation = {}) => {
-    return {
-        [ tableName ]: {
+const generateLinkedTableInteractions = (tablesPath, colTablePath, additionalColumnValidation = {}) => {
 
-            // All other column
-            ['*']: function (this: JSONSchemaForm, name, _, path) {
+    const tableConfiguration = {
 
-                const commonPath = path.slice(0, -2)
+        ['*']: function (this: JSONSchemaForm, name, _, path) {
 
-                const colPath = [...commonPath, colTableName]
+            const { value } = get(this.results, colTablePath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
 
-                const { value } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
-
-                if (value && !value.find((row: any) => row.name === name)) {
-                    return [
-                        {
-                            message: 'Not a valid column',
-                            type: 'error'
-                        }
-                    ]
-                }
-            },
-
-            ...additionalColumnValidation
-        },
-
-        // Update the columns available on the table when there is a new name in the columns table
-        [ colTableName ]: {
-            ['*']: {
-                '*': function (this: JSONSchemaForm, propName, __, path, value) {
-
-                    const commonPath = path.slice(0, -2)
-                    const tablePath = [ ...commonPath, tableName]
-                    const table = this.getFormElement(tablePath)
-                    const tableSchema = table.schema // Manipulate the schema that is on the table
-                    const globalSchema = getSchema(tablePath, this.schema)
-
-                    const { value: row } = get(this.results, path)
-
-                    const currentName = row?.['name']
-
-                    const hasNameUpdate = propName == 'name' && !(value in tableSchema.items.properties)
-
-                    const resolvedName = hasNameUpdate ? value : currentName
-
-                    if (value === currentName) return true // No change
-                    if (!resolvedName) return true // Only set when name is actually present
-
-                    const schemaToEdit = [tableSchema, globalSchema]
-                    schemaToEdit.forEach(schema => {
-
-                        const properties = schema.items.properties
-                        const oldRef = properties[currentName]
-
-                        if (row) delete properties[currentName] // Delete previous name from schema
-
-                        properties[resolvedName] = {
-                            ...oldRef ?? {},
-                            description: propName === 'description' ? value : row?.description,
-                            data_type: propName === 'data_type' ? value : row?.data_type,
-                        }
-                    })
-
-                    //  Swap the new and current name information
-                    if (hasNameUpdate) {
-                        const table = this.getFormElement([ ...commonPath, tableName])
-                        table.data.forEach(row => {
-                            if (!(value in row)) row[value] = row[currentName] // Initialize new column with old values
-                            delete row[currentName] // Delete old column
-                        })
-                    }
-
-                    // Always re-render the table on column changes
-                    table.requestUpdate()
-                }
-            },
-        }
-    }
-}
-
-schema.Ecephys.Units = {
-    ["*"]: generateLinkedTableInteractions('Units', 'UnitColumns', {})
-}
-
-schema.Ecephys.Electrodes = {
-
-    // All interfaces
-    ["*"]: generateLinkedTableInteractions('Electrodes', 'ElectrodeColumns', {
-        group_name: function (this: JSONSchemaForm, _, __, ___, value) {
-
-            const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
-
-            if (groups.includes(value)) return true
-            else {
+            if (value && !value.find((row: any) => row.name === name)) {
                 return [
                     {
-                        message: 'Not a valid group name',
+                        message: 'Not a valid column',
                         type: 'error'
                     }
                 ]
             }
+        },
+
+        ...additionalColumnValidation
+    }
+
+
+    // Update the columns available on the table when there is a new name in the columns table
+    const columnTableConfig = {
+        '*': function (this: JSONSchemaForm, propName, __, path, value) {
+
+            const form = this.getFormElement(tablesPath)
+            Object.entries(form.tables).forEach(([tableName, table]: [ string, any ]) => {
+
+                const fullPath = [...tablesPath, tableName]
+
+                const tableSchema = table.schema // Manipulate the schema that is on the table
+                const globalSchema = getSchema(fullPath, this.schema)
+
+                const { value: row } = get(this.results, path)
+
+                const currentName = row?.['name']
+
+                const hasNameUpdate = propName == 'name' && !(value in tableSchema.items.properties)
+
+                const resolvedName = hasNameUpdate ? value : currentName
+
+                if (value === currentName) return true // No change
+                if (!resolvedName) return true // Only set when name is actually present
+
+                const schemaToEdit = [tableSchema, globalSchema]
+                schemaToEdit.forEach(schema => {
+
+                    const properties = schema.items.properties
+                    const oldRef = properties[currentName]
+
+                    if (row) delete properties[currentName] // Delete previous name from schema
+
+                    properties[resolvedName] = {
+                        ...oldRef ?? {},
+                        description: propName === 'description' ? value : row?.description,
+                        data_type: propName === 'data_type' ? value : row?.data_type,
+                    }
+                })
+
+                //  Swap the new and current name information
+                if (hasNameUpdate) {
+                    const table = this.getFormElement(fullPath) // NOTE: Must request the table this way to update properly
+                    table.data.forEach(row => {
+                        if (!(value in row)) row[value] = row[currentName] // Initialize new column with old values
+                        delete row[currentName] // Delete old column
+                    })
+                }
+
+                // Always re-render the table on column changes
+                table.requestUpdate()
+            })
         }
-    })
+    }
+
+
+    return {
+        main: tableConfiguration,
+        columns: columnTableConfig
+    }
 }
+
+schema.Ecephys.Units = {
+    ["*"]: generateLinkedTableInteractions(['Ecephys','Units'], ['Ecephys', 'UnitColumns'])
+}
+
+
+const linkedTableOutput = generateLinkedTableInteractions(['Ecephys', 'Electrodes'], ['Ecephys', 'ElectrodeColumns'], {
+    group_name: function (this: JSONSchemaForm, _, __, ___, value) {
+
+        const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
+
+        if (groups.includes(value)) return true
+        else {
+            return [
+                {
+                    message: 'Not a valid group name',
+                    type: 'error'
+                }
+            ]
+        }
+    }
+})
+
+schema.Ecephys.ElectrodeColumns = linkedTableOutput.columns
+schema.Ecephys.Electrodes = { ["*"]: linkedTableOutput.main }
 
 // ----------------- Ophys Validation ----------------- //
 

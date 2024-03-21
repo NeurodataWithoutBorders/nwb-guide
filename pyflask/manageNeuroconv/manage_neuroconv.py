@@ -36,7 +36,7 @@ EXTRA_RECORDING_INTERFACE_PROPERTIES = {
 }
 
 EXTRA_SORTING_INTERFACE_PROPERTIES = {
-    "name": {"description": "The unique name for the unit", "data_type": "string"},
+    "name": {"description": "The unique name for the unit", "data_type": "str"},
     "brain_area": {
         "description": "The brain area where the unit is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
@@ -45,6 +45,7 @@ EXTRA_SORTING_INTERFACE_PROPERTIES = {
 
 EXCLUDED_SORTING_INTERFACE_PROPERTIES = ["location", "spike_times", "electrodes"]  # Not validated
 
+# NOTE: These are the only accepted dtypes...
 DTYPE_DESCRIPTIONS = {
     "bool": "logical",
     "str": "string",
@@ -61,7 +62,7 @@ DTYPE_DESCRIPTIONS = {
 
 DTYPE_SCHEMA = {
     "type": "string",
-    "strict": False,
+    # "strict": False,
     "enum": list(DTYPE_DESCRIPTIONS.keys()),
     "enumLabels": DTYPE_DESCRIPTIONS,
 }
@@ -383,92 +384,110 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         # Add Electrodes to the schema
         metadata["Ecephys"]["Electrodes"] = {}
         ecephys_schema["required"].append("Electrodes")
+
+        ecephys_properties["ElectrodeColumns"] = {
+            "type": "array",
+            "minItems": 0,
+            "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
+        }
+
+        ecephys_schema["required"].append("ElectrodeColumns")
+
+
         ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
         # Populate Units metadata
         metadata["Ecephys"]["Units"] = {}
         schema["properties"]["Ecephys"]["required"].append("Units")
-        original_units_schema = ecephys_properties.pop(
-            "UnitProperties", None
-        )  # Remove UnitProperties from schema. NOTE: Not specific to interface
-        has_units = original_units_schema is not None
-
+        original_units_schema = ecephys_properties.pop("UnitProperties", None) 
         metadata["Ecephys"].pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
 
+        has_units = original_units_schema is not None
+
         if has_units:
+            metadata["Ecephys"]
+            ecephys_properties["UnitColumns"] = {
+                "type": "array",
+                "minItems": 0,
+                "items": {"$ref": "#/properties/Ecephys/properties/definitions/UnitColumn"},
+            }
+
+            schema["properties"]["Ecephys"]["required"].append("UnitColumns")
             ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
 
     def on_sorting_interface(name, sorting_interface):
 
-        units_data = metadata["Ecephys"]["Units"][name] = dict(
-            Units=get_unit_table_json(sorting_interface),
-            UnitColumns=get_unit_columns_json(sorting_interface),
-        )
+        unit_columns = get_unit_columns_json(sorting_interface)
 
-        n_units = len(units_data["Units"])
+        # Aggregate electrode column information across recording interfaces
+        existing_unit_columns = metadata["Ecephys"].get('UnitColumns')
+        if existing_unit_columns:
+            for entry in unit_columns:
+                if any(obj["name"] == entry["name"] for obj in existing_unit_columns):
+                    continue
+                else:
+                    existing_unit_columns.append(entry)
+        else:
+            metadata["Ecephys"]["UnitColumns"] = unit_columns
 
-        ecephys_properties["Units"]["properties"][name] = dict(
-            type="object",
-            properties=dict(
-                Units={
-                    "type": "array",
-                    "minItems": n_units,
-                    "maxItems": n_units,
-                    "items": {
-                        "allOf": [
-                            {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
-                            {"required": list(map(lambda info: info["name"], units_data["UnitColumns"]))},
-                        ]
-                    },
-                },
-                UnitColumns={
-                    "type": "array",
-                    "minItems": 0,
-                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/UnitColumn"},
-                },
-            ),
-            required=["Units", "UnitColumns"],
-        )
+        units_data = metadata["Ecephys"]["Units"][name] = get_unit_table_json(sorting_interface)
+
+        n_units = len(units_data)
+
+        ecephys_properties["Units"]["properties"][name] = {
+            "type": "array",
+            "minItems": n_units,
+            "maxItems": n_units,
+            "items": {
+                "allOf": [
+                    {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
+                    {"required": list(map(lambda info: info["name"], unit_columns))},
+                ]
+            },
+        }
 
         ecephys_properties["Units"]["required"].append(name)
 
         return sorting_interface
 
+    aggregate_electrode_info = {}
+
     def on_recording_interface(name, recording_interface):
+        global aggregate_electrode_columns
 
-        electrode_data = metadata["Ecephys"]["Electrodes"][name] = dict(
-            Electrodes=get_electrode_table_json(recording_interface),
-            ElectrodeColumns=get_electrode_columns_json(recording_interface),
-        )
+        electrode_columns = get_electrode_columns_json(recording_interface)
 
-        n_electrodes = len(electrode_data["Electrodes"])
+        # Aggregate electrode column information across recording interfaces
+        existing_electrode_columns = metadata["Ecephys"].get('ElectrodeColumns')
+        if existing_electrode_columns:
+            for entry in electrode_columns:
+                if any(obj["name"] == entry["name"] for obj in existing_electrode_columns):
+                    continue
+                else:
+                    existing_electrode_columns.append(entry)
+        else:
+            metadata["Ecephys"]["ElectrodeColumns"] = electrode_columns
 
-        ecephys_properties["Electrodes"]["properties"][name] = dict(
-            type="object",
-            properties=dict(
-                Electrodes={
-                    "type": "array",
-                    "minItems": n_electrodes,
-                    "maxItems": n_electrodes,
-                    "items": {
-                        "allOf": [
-                            {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
-                            {"required": list(map(lambda info: info["name"], electrode_data["ElectrodeColumns"]))},
-                        ]
-                    },
-                },
-                ElectrodeColumns={
-                    "type": "array",
-                    "minItems": 0,
-                    "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
-                },
-            ),
-            required=["Electrodes", "ElectrodeColumns"],
-        )
+        electrode_data = metadata["Ecephys"]["Electrodes"][name] = get_electrode_table_json(recording_interface)
+
+        n_electrodes = len(electrode_data)
+
+        ecephys_properties["Electrodes"]["properties"][name] = {
+            "type": "array",
+            "minItems": n_electrodes,
+            "maxItems": n_electrodes,
+            "items": {
+                "allOf": [
+                    {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
+                    {"required": list(map(lambda info: info["name"], electrode_columns))},
+                ]
+            }
+        }
 
         ecephys_properties["Electrodes"]["required"].append(name)
 
         return recording_interface
+    
 
     from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
     from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
@@ -491,6 +510,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         # Configure electrode columns
         defs["ElectrodeColumn"] = electrode_def
+        defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
         new_electrodes_properties = {
             properties["name"]: {key: value for key, value in properties.items() if key != "name"}

@@ -569,6 +569,7 @@ export class JSONSchemaForm extends LitElement {
 
         const allErrors = Array.from(flaggedInputs)
             .map((inputElement) => {
+                if (!inputElement.nextElementSibling) return // Skip tables
                 return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
             })
             .flat();
