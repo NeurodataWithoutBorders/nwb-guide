@@ -310,12 +310,13 @@ const generateLinkedTableInteractions = (tablesPath, colTablePath, additionalCol
     }
 }
 
-schema.Ecephys.Units = {
-    ["*"]: generateLinkedTableInteractions(['Ecephys','Units'], ['Ecephys', 'UnitColumns'])
-}
+const linkedUnitsTableOutput = generateLinkedTableInteractions(['Ecephys','Units'], ['Ecephys', 'UnitColumns'])
+
+schema.Ecephys.Units = { ["*"]: linkedUnitsTableOutput.main }
+schema.Ecephys.UnitColumns = linkedUnitsTableOutput.columns
 
 
-const linkedTableOutput = generateLinkedTableInteractions(['Ecephys', 'Electrodes'], ['Ecephys', 'ElectrodeColumns'], {
+const linkedElectrodesTableOutput = generateLinkedTableInteractions(['Ecephys', 'Electrodes'], ['Ecephys', 'ElectrodeColumns'], {
     group_name: function (this: JSONSchemaForm, _, __, ___, value) {
 
         const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
@@ -332,8 +333,8 @@ const linkedTableOutput = generateLinkedTableInteractions(['Ecephys', 'Electrode
     }
 })
 
-schema.Ecephys.ElectrodeColumns = linkedTableOutput.columns
-schema.Ecephys.Electrodes = { ["*"]: linkedTableOutput.main }
+schema.Ecephys.ElectrodeColumns = linkedElectrodesTableOutput.columns
+schema.Ecephys.Electrodes = { ["*"]: linkedElectrodesTableOutput.main }
 
 // ----------------- Ophys Validation ----------------- //
 
