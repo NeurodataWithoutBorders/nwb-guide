@@ -382,7 +382,7 @@ export class BasicTable extends LitElement {
     };
 
     #readTSV(text) {
-        console.log(text, text.split("\n"))
+        console.log(text, text.split("\n"));
         let data = text.split("\n").map((row) =>
             row.split("\t").map((v) => {
                 try {
@@ -392,7 +392,7 @@ export class BasicTable extends LitElement {
                 }
             })
         ); // Map to actual values using JSON.parse
-        console.log(data)
+        console.log(data);
         let header = data.shift();
 
         const structuredData = data.map((row) =>
@@ -409,14 +409,14 @@ export class BasicTable extends LitElement {
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
             Object.entries(cols).forEach(([key, value]) => {
                 // if (key in this.#itemProps) {
-                    const { type } = this.#getType(value, this.#itemProps[key]);
-                    if (type === "string") value = `${value}`; // Convert to string if necessary
-                    latest[key] = value;
+                const { type } = this.#getType(value, this.#itemProps[key]);
+                if (type === "string") value = `${value}`; // Convert to string if necessary
+                latest[key] = value;
                 // }
             }); // Only include data from schema
         });
 
-        console.log(header, data, structuredData, this.data, this.#itemProps)
+        console.log(header, data, structuredData, this.data, this.#itemProps);
 
         if (this.onUpdate) this.onUpdate([], data); // Update the whole table
     }
