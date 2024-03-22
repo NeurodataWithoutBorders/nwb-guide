@@ -101,6 +101,12 @@ const componentCSS = `
       width:100%;
     }
 
+
+
+    .form-section:not(:last-child), .link:not(:last-child){
+        margin-bottom: 15px;
+    }
+
     .form-section {
         display: flex;
         flex-direction: column;
@@ -127,7 +133,6 @@ const componentCSS = `
     }
 
     .link {
-      margin: 20px 0px;
       border: 1px solid black;
       border-radius: 4px;
       position: relative;
@@ -460,7 +465,7 @@ export class JSONSchemaForm extends LitElement {
         if (!container) return;
 
         const nChildren = container.children.length;
-        container.innerHTML = "";
+        container.remove();
 
         // Track errors and warnings
         if (type === "errors") this.#nErrors -= nChildren;

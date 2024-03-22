@@ -78,6 +78,9 @@ export class InspectorListItem extends LitElement {
                 text-wrap: wrap;
                 padding: 10px;
                 font-size: 12px;
+            }
+
+            :host(:not(:last-child)) {
                 margin: 0 0 1em;
             }
 
