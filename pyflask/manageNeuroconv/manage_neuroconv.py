@@ -898,7 +898,7 @@ def generate_test_data(output_path: str):
     duration_in_s = 3.0
     number_of_units = 50
     number_of_channels = 385  # Have to include 'sync' channel to be proper SpikeGLX. TODO: artificiate sync pulses
-    ap_conversion_factor_to_uV = 2.34375
+    conversion_factor_to_uV = 2.34375
     ap_sampling_frequency = 30_000.0
     lf_sampling_frequency = 2_500.0
     downsample_factor = int(ap_sampling_frequency / lf_sampling_frequency)
@@ -912,19 +912,19 @@ def generate_test_data(output_path: str):
         num_units=number_of_units,
         seed=0,  # Fixed seed for reproducibility
     )
-    artificial_ap_band.set_channel_gains(gains=ap_conversion_factor_to_uV)
-    waveform_extractor = spikeinterface.extract_waveforms(recording=artificial_ap_band, sorting=spiking, mode="memory")
-    int16_artificial_ap_band = artificial_ap_band.astype(dtype="int16")
 
-    # Approximate behavior of LF band with filter and downsampling
-    # TODO: currently looks a little out of scale?
+    artificial_ap_band = artificial_ap_band.scale(gain=1/conversion_factor_to_uV)
+    int16_artificial_ap_band = artificial_ap_band.astype(dtype="int16")
+    int16_artificial_ap_band.set_channel_gains(conversion_factor_to_uV)
+
     artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
-        recording=artificial_ap_band, freq_min=10, freq_max=300
+          recording=artificial_ap_band, freq_min=0.5, freq_max=1_000
+     )
+    artificial_lf_band = spikeinterface.preprocessing.resample(
+          recording=artificial_lf_band, resample_rate=2_500
     )
-    int16_artificial_lf_band = NumpyRecording(
-        traces_list=artificial_lf_filter.get_traces()[::downsample_factor],
-        sampling_frequency=lf_sampling_frequency,
-    )
+    int16_artificial_lf_band = artificial_lf_band.astype(dtype="int16")
+    int16_artificial_lf_band.set_channel_gains(conversion_factor_to_uV)
 
     ap_file_path = spikeglx_output_folder / "Session1_g0" / "Session1_g0_imec0" / "Session1_g0_t0.imec0.ap.bin"
     ap_meta_file_path = spikeglx_output_folder / "Session1_g0" / "Session1_g0_imec0" / "Session1_g0_t0.imec0.ap.meta"
@@ -946,6 +946,8 @@ def generate_test_data(output_path: str):
         io.write(lf_meta_content)
 
     # Make Phy folder
+    waveform_extractor = spikeinterface.extract_waveforms(recording=artificial_ap_band, sorting=spiking, mode="memory")
+    
     export_to_phy(
         waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
     )
