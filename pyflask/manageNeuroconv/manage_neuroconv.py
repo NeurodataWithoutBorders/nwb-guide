@@ -913,16 +913,14 @@ def generate_test_data(output_path: str):
         seed=0,  # Fixed seed for reproducibility
     )
 
-    artificial_ap_band = artificial_ap_band.scale(gain=1/conversion_factor_to_uV)
+    artificial_ap_band = artificial_ap_band.scale(gain=1 / conversion_factor_to_uV)
     int16_artificial_ap_band = artificial_ap_band.astype(dtype="int16")
     int16_artificial_ap_band.set_channel_gains(conversion_factor_to_uV)
 
     artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
-          recording=artificial_ap_band, freq_min=0.5, freq_max=1_000
-     )
-    artificial_lf_band = spikeinterface.preprocessing.resample(
-          recording=artificial_lf_band, resample_rate=2_500
+        recording=artificial_ap_band, freq_min=0.5, freq_max=1_000
     )
+    artificial_lf_band = spikeinterface.preprocessing.resample(recording=artificial_lf_band, resample_rate=2_500)
     int16_artificial_lf_band = artificial_lf_band.astype(dtype="int16")
     int16_artificial_lf_band.set_channel_gains(conversion_factor_to_uV)
 
@@ -947,7 +945,7 @@ def generate_test_data(output_path: str):
 
     # Make Phy folder
     waveform_extractor = spikeinterface.extract_waveforms(recording=artificial_ap_band, sorting=spiking, mode="memory")
-    
+
     export_to_phy(
         waveform_extractor=waveform_extractor, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
     )
