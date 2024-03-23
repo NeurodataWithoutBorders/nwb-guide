@@ -1215,7 +1215,7 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
         unit_column = dict()
 
         for property_name in properties:
-            if property_name is "name":
+            if property_name == "name":
                 sorting_property_value = str(unit_id)  # Insert unit_id as name (str)
             elif property_name in EXTRA_SORTING_INTERFACE_PROPERTIES:
                 try:
