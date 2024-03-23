@@ -263,6 +263,8 @@ export class GuidedPathExpansionPage extends Page {
     #initialize = () => (this.localState = merge(this.info.globalState.structure, { results: {} }));
 
     workflow = {
+        subject_id: {},
+        session_id: {},
         locate_data: {
             skip: () => {
                 this.#initialize();
@@ -270,37 +272,42 @@ export class GuidedPathExpansionPage extends Page {
                 merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
                 // Force single subject/session if not keeping existing data
-                if (!globalState.results) {
-                    const existingMetadata =
-                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
+                // if (!globalState.results) {
 
-                    const existingSourceData =
-                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
+                const subject_id = this.workflow.subject_id.value;
+                const session_id = this.workflow.session_id.value;
 
-                    const source_data = {};
-                    for (let key in globalState.interfaces) {
-                        const existing = existingSourceData?.[key];
-                        if (existing) source_data[key] = existing ?? {};
-                    }
+                // Map existing results to new subject information (if available)
+                const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
+                const existingMetadata = existingResults.metadata;
+                const existingSourceData = existingResults.source_data;
 
-                    globalState.results = {
-                        [this.altInfo.subject_id]: {
-                            [this.altInfo.session_id]: {
-                                source_data,
-                                metadata: {
-                                    NWBFile: {
-                                        session_id: this.altInfo.session_id,
-                                        ...(existingMetadata?.NWBFile ?? {}),
-                                    },
-                                    Subject: {
-                                        subject_id: this.altInfo.subject_id,
-                                        ...(existingMetadata?.Subject ?? {}),
-                                    },
+                const source_data = {};
+                for (let key in globalState.interfaces) {
+                    const existing = existingSourceData?.[key];
+                    if (existing) source_data[key] = existing ?? {};
+                }
+
+                globalState.results = {
+                    [subject_id]: {
+                        [session_id]: {
+                            source_data,
+                            metadata: {
+                                NWBFile: {
+                                    session_id: session_id,
+                                    ...(existingMetadata?.NWBFile ?? {}),
+                                },
+                                Subject: {
+                                    subject_id: subject_id,
+                                    ...(existingMetadata?.Subject ?? {}),
                                 },
                             },
                         },
-                    };
-                }
+                    },
+                };
+                // }
+
+                this.save({}, false); // Ensure this structure is saved
             },
         },
     };
@@ -382,11 +389,6 @@ export class GuidedPathExpansionPage extends Page {
         },
     };
 
-    altInfo = {
-        subject_id: "001",
-        session_id: "1",
-    };
-
     // altForm = new JSONSchemaForm({
     //   results: this.altInfo,
     //   schema: {
@@ -436,7 +438,7 @@ export class GuidedPathExpansionPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
             onThrow,
-            validateEmptyValues: null,
+            validateEmptyValues: false,
 
             controls,
 
