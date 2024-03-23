@@ -215,7 +215,20 @@ describe('E2E Test', () => {
 
     test('View the pre-form workflow page', async () => {
 
+        await references.page.evaluate(() => {
+          const dashboard = document.querySelector('nwb-dashboard')
+          const page = dashboard.page
+
+          const subjectId = page.form.getFormElement(['subject_id'])
+          subjectId.updateData('subject1')
+
+          const sessionId = page.form.getFormElement(['session_id'])
+          sessionId.updateData('session1')
+        })
+
         await takeScreenshot('workflow-page', 300)
+
+
         await toNextPage('structure')
 
 

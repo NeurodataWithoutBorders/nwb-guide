@@ -222,10 +222,6 @@ export class GuidedSourceDataPage extends ManagedPage {
     updated() {
         const dashboard = document.querySelector("nwb-dashboard");
         const page = dashboard.page;
-        setTimeout(() => {
-            console.log(page.forms[0].form.accordions["SpikeGLX Recording"]);
-        });
-        console.log(page.forms[0].form.accordions);
     }
 
     render() {
