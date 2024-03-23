@@ -13,10 +13,36 @@ const questions = {
         title: "Will this pipeline be run on multiple sessions?",
         default: false,
     },
+    subject_id: {
+        type: "string",
+        description: "Provide an identifier for your subject",
+        dependencies: {
+            multiple_sessions: {
+                condition: [false, undefined],
+                default: "",
+                required: true,
+                attribute: "hidden",
+            },
+        },
+    },
+    session_id: {
+        type: "string",
+        description: "Provide an identifier for your session",
+        dependencies: {
+            multiple_sessions: {
+                condition: [false, undefined],
+                default: "",
+                required: true,
+                attribute: "hidden",
+            },
+        },
+    },
     locate_data: {
         type: "boolean",
         title: "Would you like to locate the source data programmatically?",
-        dependencies: ["multiple_sessions"],
+        dependencies: {
+            multiple_sessions: { default: false },
+        },
         default: false,
     },
 };
@@ -28,11 +54,19 @@ const questions = {
 const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
     acc[name] = [];
 
-    if (info.dependencies) {
-        info.dependencies.forEach((dep) => {
-            if (!acc[dep]) acc[dep] = [];
-            acc[dep].push(name);
-        });
+    const deps = info.dependencies;
+
+    if (deps) {
+        if (Array.isArray(deps))
+            deps.forEach((dep) => {
+                if (!acc[dep]) acc[dep] = [];
+                acc[dep].push({ name });
+            });
+        else
+            Object.entries(deps).forEach(([dep, opts]) => {
+                if (!acc[dep]) acc[dep] = [];
+                acc[dep].push({ name, ...opts });
+            });
     }
     return acc;
 }, {});
@@ -80,14 +114,38 @@ export class GuidedPreform extends Page {
         this.form = new JSONSchemaForm({
             schema,
             results: this.state,
+            validateEmptyValues: false, // Only show errors after submission
             validateOnChange: function (name, parent, path, value) {
                 dependents[name].forEach((dependent) => {
-                    const dependencies = questions[dependent].dependencies;
-                    const dependentEl = this.inputs[dependent];
-                    if (dependencies.every((dep) => parent[dep])) dependentEl.removeAttribute("disabled");
-                    else {
-                        dependentEl.updateData(false);
-                        dependentEl.setAttribute("disabled", true);
+                    const dependencies = questions[dependent.name].dependencies;
+                    const uniformDeps = Array.isArray(dependencies)
+                        ? dependencies.map((name) => {
+                              return { name };
+                          })
+                        : Object.entries(dependencies).map(([name, info]) => {
+                              return { name, ...info };
+                          });
+
+                    const dependentEl = this.inputs[dependent.name];
+
+                    const attr = dependent.attribute ?? "disabled";
+
+                    let condition = (v) => !!v;
+                    if (!("condition" in dependent)) {
+                    } else if (typeof dependent.condition === "boolean") condition = (v) => v == dependent.condition;
+                    else if (Array.isArray(dependent.condition))
+                        condition = (v) => dependent.condition.some((condition) => v == condition);
+                    else console.warn("Invalid condition", dependent.condition);
+
+                    if (uniformDeps.every(({ name }) => condition(parent[name]))) {
+                        dependentEl.removeAttribute(attr);
+                        if ("required" in dependent) dependentEl.required = dependent.required;
+                        if ("__cached" in dependent) dependentEl.updateData(dependent.__cached);
+                    } else {
+                        if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
+                        dependentEl.updateData(dependent.default);
+                        dependentEl.setAttribute(attr, true);
+                        if ("required" in dependent) dependentEl.required = !dependent.required;
                     }
                 });
             },

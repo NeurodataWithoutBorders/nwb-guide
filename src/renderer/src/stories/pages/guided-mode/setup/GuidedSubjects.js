@@ -5,7 +5,6 @@ import { validateOnChange } from "../../../../validation/index.js";
 import { Table } from "../../../Table.js";
 
 import { updateResultsFromSubjects } from "./utils";
-import { merge } from "../../utils.js";
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 import { Button } from "../../../Button.js";
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
