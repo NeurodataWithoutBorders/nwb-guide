@@ -1407,19 +1407,10 @@ def update_sorting_properties_from_table_as_json(
                 property_value = [property_value]
                 dtype = "object"  # Should allow the array to go through
 
-            try:
+            sorting_extractor.set_property(
+                key=property_name,
+                values=np.array([property_value], dtype=dtype),
+                ids=[int(unit_id)],
+            )
 
-                sorting_extractor.set_property(
-                    key=property_name,
-                    values=np.array([property_value], dtype=dtype),
-                    ids=[unit_id],
-                )
 
-            except Exception as e:
-                if property_name == "original_cluster_id":
-                    continue
-
-                raise Exception(
-                    f"Error setting property {property_name} for unit {unit_id} ({property_value}): {e}",
-                    type(property_value),
-                )
