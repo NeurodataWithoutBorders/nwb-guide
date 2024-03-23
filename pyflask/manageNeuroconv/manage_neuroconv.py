@@ -41,6 +41,9 @@ EXTRA_SORTING_INTERFACE_PROPERTIES = {
         "description": "The brain area where the unit is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
     },
+    "quality": {
+        "data_type": "str",
+    }
 }
 
 EXCLUDED_SORTING_INTERFACE_PROPERTIES = ["location", "spike_times", "electrodes"]  # Not validated
@@ -429,6 +432,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         else:
             metadata["Ecephys"]["UnitColumns"] = unit_columns
 
+
         units_data = metadata["Ecephys"]["Units"][name] = get_unit_table_json(sorting_interface)
 
         n_units = len(units_data)
@@ -448,8 +452,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["Units"]["required"].append(name)
 
         return sorting_interface
-
-    aggregate_electrode_info = {}
 
     def on_recording_interface(name, recording_interface):
         global aggregate_electrode_columns
@@ -705,27 +707,32 @@ def convert_to_nwb(info: dict) -> str:
         has_units = "Units" in ecephys_metadata
 
         if has_units:
+            shared_units_columns = ecephys_metadata["UnitColumns"]
             for interface_name, interface_unit_results in ecephys_metadata["Units"].items():
                 interface = converter.data_interface_objects[interface_name]
 
                 update_sorting_properties_from_table_as_json(
                     interface,
-                    unit_table_json=interface_unit_results["Units"],
-                    unit_column_info=interface_unit_results["UnitColumns"],
+                    unit_table_json=interface_unit_results,
+                    unit_column_info=shared_units_columns,
                 )
 
+            del ecephys_metadata["UnitColumns"]
             del ecephys_metadata["Units"]
+
+        shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
         for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
             interface = converter.data_interface_objects[interface_name]
 
             update_recording_properties_from_table_as_json(
                 interface,
-                electrode_table_json=interface_electrode_results["Electrodes"],
-                electrode_column_info=interface_electrode_results["ElectrodeColumns"],
+                electrode_table_json=interface_electrode_results,
+                electrode_column_info=shared_electrode_columns,
             )
 
-        del ecephys_metadata["Electrodes"]  # NOTE: Not sure what this should be now...
+        del ecephys_metadata["ElectrodeColumns"]
+        del ecephys_metadata["Electrodes"]
 
     # Actually run the conversion
     converter.run_conversion(
@@ -1152,25 +1159,30 @@ def get_unit_columns_json(interface) -> List[Dict[str, Any]]:
     properties = get_sorting_interface_properties(interface)
 
     property_descriptions = dict(clu_id="The cluster ID for the unit", group_id="The group ID for the unit")
+    property_data_types = dict()
 
     for property_name, property_info in EXTRA_SORTING_INTERFACE_PROPERTIES.items():
         description = property_info.get("description", None)
+        data_type = property_info.get("data_type", None)
         if description:
             property_descriptions[property_name] = description
+        if data_type:
+            property_data_types[property_name] = data_type
 
     sorting_extractor = interface.sorting_extractor
     unit_ids = sorting_extractor.get_unit_ids()
+
 
     unit_columns = [
         dict(
             name=property_name,
             description=property_descriptions.get(property_name, "No description."),
-            data_type=get_property_dtype(
+            data_type=property_data_types.get(property_name, get_property_dtype(
                 extractor=sorting_extractor,
                 property_name=property_name,
                 ids=[unit_ids[0]],
                 extra_props=EXTRA_SORTING_INTERFACE_PROPERTIES,
-            ),
+            )),
         )
         for property_name in properties.keys()
     ]
@@ -1198,9 +1210,12 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
 
         for property_name in properties:
             if property_name is "name":
-                sorting_property_value = unit_id
+                sorting_property_value = str(unit_id) # Insert unit_id as name (str)
             elif property_name in EXTRA_SORTING_INTERFACE_PROPERTIES:
-                sorting_property_value = properties[property_name].get("default")
+                try:
+                    sorting_property_value = properties[property_name].get("default")  # Get default value
+                except:
+                    sorting_property_value = properties[property_name][0]  # Get first value
             else:
                 sorting_property_value = sorting.get_property(key=property_name, ids=[unit_id])[
                     0  # First axis is always units in SI
@@ -1378,13 +1393,27 @@ def update_sorting_properties_from_table_as_json(
 
         for property_name, property_value in unit_properties.items():
 
-            if property_name is "name":
-                continue
+            if property_name == "name":
+                continue  # Already controlling unit_id with the above variable
 
-            sorting_extractor.set_property(
-                key=property_name,
-                values=np.array(
-                    [property_value], dtype=unit_column_data_types[property_name]
-                ),  # , description=unit_column_descriptions[property_name]),
-                ids=[unit_id],
-            )
+            dtype = unit_column_data_types[property_name]
+            if property_name == 'quality':
+                property_value = [ property_value ]
+                dtype = 'object' # Should allow the array to go through
+
+            try:
+
+                sorting_extractor.set_property(
+                    key=property_name,
+                    values=np.array(
+                        [property_value], dtype=dtype
+                    ),
+                    ids=[unit_id],
+                )
+
+            except Exception as e:
+                if property_name == 'original_cluster_id':
+                    continue
+
+                raise Exception(f"Error setting property {property_name} for unit {unit_id} ({property_value}): {e}", type(property_value))
+                
