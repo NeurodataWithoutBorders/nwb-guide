@@ -717,8 +717,9 @@ def convert_to_nwb(info: dict) -> str:
                     unit_column_info=shared_units_columns,
                 )
 
-            del ecephys_metadata["UnitColumns"]
+            ecephys_metadata["UnitProperties"] = [ { "name": entry["name"], "description": entry["description"] } for entry in shared_units_columns ]
             del ecephys_metadata["Units"]
+            del ecephys_metadata["UnitColumns"]
 
         shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
@@ -731,8 +732,8 @@ def convert_to_nwb(info: dict) -> str:
                 electrode_column_info=shared_electrode_columns,
             )
 
+        ecephys_metadata["Electrodes"] = [ { "name": entry["name"], "description": entry["description"] } for entry in shared_electrode_columns ]
         del ecephys_metadata["ElectrodeColumns"]
-        del ecephys_metadata["Electrodes"]
 
     # Actually run the conversion
     converter.run_conversion(
@@ -1375,7 +1376,7 @@ def update_recording_properties_from_table_as_json(
     # TODO: uncomment when neuroconv supports contact vectors (probe interface)
     # if "contact_vector" in property_names:
     #     recording_extractor.set_property(key="contact_vector", values=modified_contact_vector)
-
+    
 
 def update_sorting_properties_from_table_as_json(
     sorting_interface, unit_column_info: dict, unit_table_json: List[Dict[str, Any]]
@@ -1383,7 +1384,7 @@ def update_sorting_properties_from_table_as_json(
     import numpy as np
 
     unit_column_data_types = {column["name"]: column["data_type"] for column in unit_column_info}
-    unit_column_descriptions = {column["name"]: column["description"] for column in unit_column_info}
+   
     sorting_extractor = sorting_interface.sorting_extractor
 
     for entry_index, entry in enumerate(unit_table_json):
@@ -1416,4 +1417,3 @@ def update_sorting_properties_from_table_as_json(
                     continue
 
                 raise Exception(f"Error setting property {property_name} for unit {unit_id} ({property_value}): {e}", type(property_value))
-                
