@@ -499,6 +499,31 @@ export class JSONSchemaInput extends LitElement {
         };
     }
 
+    // Enforce dynamic required properties
+    attributeChangedCallback(key, _, latest) {
+        super.attributeChangedCallback(...arguments);
+
+        const formSchema = this.form.schema;
+
+        if (key === "required") {
+            const name = this.path.slice(-1)[0];
+
+            if (latest !== null && !this.conditional) {
+                const requirements = formSchema.required ?? (formSchema.required = []);
+                if (!requirements.includes(name)) requirements.push(name);
+            }
+
+            // Remove requirement from form schema (and force if conditional requirement)
+            else {
+                if (formSchema.requirements && formSchema.requirements.includes(name)) {
+                    const set = new Set(formSchema.requirements);
+                    set.remove(name);
+                    formSchema.requirements = Array.from(set);
+                }
+            }
+        }
+    }
+
     // schema,
     // parent,
     // path,
@@ -638,7 +663,9 @@ export class JSONSchemaInput extends LitElement {
                 ${
                     schema.description
                         ? html`<p class="guided--text-input-instructions">
-                              ${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] === "."
+                              ${unsafeHTML(capitalize(schema.description))}${[".", "?", "!"].includes(
+                                  schema.description.slice(-1)[0]
+                              )
                                   ? ""
                                   : "."}
                           </p>`
