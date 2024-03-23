@@ -1412,5 +1412,3 @@ def update_sorting_properties_from_table_as_json(
                 values=np.array([property_value], dtype=dtype),
                 ids=[int(unit_id)],
             )
-
-
