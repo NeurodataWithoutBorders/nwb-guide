@@ -126,6 +126,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ecephys) {
 
+        ecephys.order = ["Device", "ElectrodeGroup"]
+        ecephys.properties.Device.title = 'Devices'
+        ecephys.properties.ElectrodeGroup.title = 'Electrode Groups'
+
         if (ecephys.properties.ElectrodeColumns)  ecephys.properties.ElectrodeColumns.order = COLUMN_SCHEMA_ORDER
         if (ecephys.properties.UnitProperties)  ecephys.properties.UnitProperties.order = COLUMN_SCHEMA_ORDER
 
