@@ -114,7 +114,7 @@ export class Page extends LitElement {
         delete this.info.globalState.results[subject][session];
     }
 
-    mapSessions = (callback, data = this.info.globalState) => mapSessions(callback, data);
+    mapSessions = (callback, data = this.info.globalState.results) => mapSessions(callback, data);
 
     async convert({ preview } = {}) {
         const key = preview ? "preview" : "conversion";

@@ -43,6 +43,11 @@ const questions = {
         },
         default: false,
     },
+    upload_to_dandi: {
+        type: "boolean",
+        title: "Would you like to upload your data to DANDI?",
+        default: true,
+    },
 };
 
 // -------------------------------------------------------------------------------------------

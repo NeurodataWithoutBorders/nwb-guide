@@ -48,6 +48,12 @@ export class GuidedUploadPage extends Page {
         ],
     };
 
+    workflow = {
+        upload_to_dandi: {
+            skip: true
+        }
+    }
+
     globalModal = null;
     #saveNotification;
 
