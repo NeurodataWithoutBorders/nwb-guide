@@ -37,6 +37,7 @@
         "AlphaOmegaRecordingInterface",
         "DeepLabCutInterface",
         "SLEAPInterface",
+        "AbfInterface",
         "FicTracDataInterface",
         "AudioInterface",
         "MiniscopeBehaviorInterface",
