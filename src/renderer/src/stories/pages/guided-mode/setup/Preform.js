@@ -125,7 +125,7 @@ export class GuidedPreform extends Page {
                           });
 
                     const dependentEl = this.inputs[dependent.name];
-                    const dependentParent = dependentEl.parentElement
+                    const dependentParent = dependentEl.parentElement;
 
                     const attr = dependent.attribute ?? "hidden";
 
