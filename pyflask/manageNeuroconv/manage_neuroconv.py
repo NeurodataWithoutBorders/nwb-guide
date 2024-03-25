@@ -28,22 +28,36 @@ EXTRA_INTERFACE_PROPERTIES = {
     }
 }
 
-EXTRA_RECORDING_INTERFACE_PROPERTIES = {
+EXTRA_RECORDING_INTERFACE_PROPERTIES = list(EXTRA_INTERFACE_PROPERTIES.keys())
+
+RECORDING_INTERFACE_PROPERTY_OVERRIDES = {
     "brain_area": {
         "description": "The brain area where the electrode is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
     }
 }
 
-EXTRA_SORTING_INTERFACE_PROPERTIES = {
+EXTRA_SORTING_INTERFACE_PROPERTIES = ["name", *EXTRA_INTERFACE_PROPERTIES.keys()]
+
+SORTING_INTERFACE_PROPERTIES_TO_RECAST = {
+    "quality": {
+        "data_type": "str",
+    },
+    "KSLabel": {
+        "data_type": "str",
+    },
+    "KSLabel_repeat": {
+        "data_type": "str",
+    }
+}
+
+SORTING_INTERFACE_PROPERTY_OVERRIDES = {
     "name": {"description": "The unique name for the unit", "data_type": "str"},
     "brain_area": {
         "description": "The brain area where the unit is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
     },
-    "quality": {
-        "data_type": "str",
-    },
+    **SORTING_INTERFACE_PROPERTIES_TO_RECAST
 }
 
 EXCLUDED_SORTING_INTERFACE_PROPERTIES = ["location", "spike_times", "electrodes"]  # Not validated
@@ -1134,9 +1148,9 @@ def get_recording_interface_properties(recording_interface) -> Dict[str, Any]:
         if property_name not in EXCLUDED_RECORDING_INTERFACE_PROPERTIES
     }
 
-    for property_name, property_info in EXTRA_RECORDING_INTERFACE_PROPERTIES.items():
+    for property_name in EXTRA_RECORDING_INTERFACE_PROPERTIES:
         if property_name not in properties:
-            properties[property_name] = property_info
+            properties[property_name] = {}
 
     return properties
 
@@ -1151,9 +1165,9 @@ def get_sorting_interface_properties(sorting_interface) -> Dict[str, Any]:
         if property_name not in EXCLUDED_SORTING_INTERFACE_PROPERTIES
     }
 
-    for property_name, property_info in EXTRA_SORTING_INTERFACE_PROPERTIES.items():
+    for property_name in EXTRA_SORTING_INTERFACE_PROPERTIES:
         if property_name not in properties:
-            properties[property_name] = property_info
+            properties[property_name] = {}
 
     return properties
 
@@ -1165,7 +1179,7 @@ def get_unit_columns_json(interface) -> List[Dict[str, Any]]:
     property_descriptions = dict(clu_id="The cluster ID for the unit", group_id="The group ID for the unit")
     property_data_types = dict()
 
-    for property_name, property_info in EXTRA_SORTING_INTERFACE_PROPERTIES.items():
+    for property_name, property_info in SORTING_INTERFACE_PROPERTY_OVERRIDES.items():
         description = property_info.get("description", None)
         data_type = property_info.get("data_type", None)
         if description:
@@ -1186,7 +1200,7 @@ def get_unit_columns_json(interface) -> List[Dict[str, Any]]:
                     extractor=sorting_extractor,
                     property_name=property_name,
                     ids=[unit_ids[0]],
-                    extra_props=EXTRA_SORTING_INTERFACE_PROPERTIES,
+                    extra_props=SORTING_INTERFACE_PROPERTY_OVERRIDES,
                 ),
             ),
         )
@@ -1217,11 +1231,11 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
         for property_name in properties:
             if property_name == "name":
                 sorting_property_value = str(unit_id)  # Insert unit_id as name (str)
-            elif property_name in EXTRA_SORTING_INTERFACE_PROPERTIES:
+            elif property_name in SORTING_INTERFACE_PROPERTY_OVERRIDES:
                 try:
-                    sorting_property_value = properties[property_name].get("default")  # Get default value
+                    sorting_property_value = SORTING_INTERFACE_PROPERTY_OVERRIDES[property_name]["default"]  # Get default value
                 except:
-                    sorting_property_value = properties[property_name][0]  # Get first value
+                    sorting_property_value = sorting.get_property(key=property_name, ids=[unit_id])[0]
             else:
                 sorting_property_value = sorting.get_property(key=property_name, ids=[unit_id])[
                     0  # First axis is always units in SI
@@ -1248,7 +1262,7 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
         offset_to_uV="The offset from the data type to microVolts, applied after the gain.",
     )
 
-    for property_name, property_info in EXTRA_RECORDING_INTERFACE_PROPERTIES.items():
+    for property_name, property_info in RECORDING_INTERFACE_PROPERTY_OVERRIDES.items():
         description = property_info.get("description", None)
         if description:
             property_descriptions[property_name] = description
@@ -1267,7 +1281,7 @@ def get_electrode_columns_json(interface) -> List[Dict[str, Any]]:
                 extractor=recording_extractor,
                 property_name=property_name,
                 ids=[channel_ids[0]],
-                extra_props=EXTRA_RECORDING_INTERFACE_PROPERTIES,
+                extra_props=RECORDING_INTERFACE_PROPERTY_OVERRIDES,
             ),
         )
         for property_name in properties.keys()
@@ -1307,11 +1321,11 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
     for electrode_id in electrode_ids:
         electrode_column = dict()
         for property_name in properties:
-            if property_name in EXTRA_RECORDING_INTERFACE_PROPERTIES:
+            if property_name in RECORDING_INTERFACE_PROPERTY_OVERRIDES:
                 try:
-                    recording_property_value = properties[property_name].get("default")  # Get default value
+                    recording_property_value = RECORDING_INTERFACE_PROPERTY_OVERRIDES[property_name]["default"]  # Get default value
                 except:
-                    recording_property_value = properties[property_name][0]  # Get first value
+                    recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[0]
             else:
                 recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[
                     0  # First axis is always electodes in SI
@@ -1403,7 +1417,7 @@ def update_sorting_properties_from_table_as_json(
                 continue  # Already controlling unit_id with the above variable
 
             dtype = unit_column_data_types[property_name]
-            if property_name == "quality":
+            if property_name in SORTING_INTERFACE_PROPERTIES_TO_RECAST:
                 property_value = [property_value]
                 dtype = "object"  # Should allow the array to go through
 
