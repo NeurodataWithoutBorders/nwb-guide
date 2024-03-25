@@ -511,7 +511,7 @@ export class JSONSchemaForm extends LitElement {
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message === "is not of a type(s) number") {
                     if (resolvedValue === "NaN") return;
-                    else if (resolvedValue === null) return
+                    else if (resolvedValue === null) return;
                     else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
 
                     if ("properties" in resolvedSchema && resolvedSchema.type === "string") return; // Allow for constructing types from object types
@@ -522,7 +522,6 @@ export class JSONSchemaForm extends LitElement {
 
                 // Non-Strict Rule
                 if (resolvedSchema.strict === false && e.message.includes("is not one of enum values")) return;
-
 
                 const prevHeader = name ? header(name) : "Row";
 
