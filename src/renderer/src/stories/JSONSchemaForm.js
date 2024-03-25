@@ -113,6 +113,10 @@ const componentCSS = `
         gap: 10px;
     }
 
+    .form-section[hidden] {
+        display: none;
+    }
+
     #empty {
         display: flex;
         align-items: center;
