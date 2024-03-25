@@ -48,7 +48,7 @@ SORTING_INTERFACE_PROPERTIES_TO_RECAST = {
     },
     "KSLabel_repeat": {
         "data_type": "str",
-    }
+    },
 }
 
 SORTING_INTERFACE_PROPERTY_OVERRIDES = {
@@ -57,7 +57,7 @@ SORTING_INTERFACE_PROPERTY_OVERRIDES = {
         "description": "The brain area where the unit is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
     },
-    **SORTING_INTERFACE_PROPERTIES_TO_RECAST
+    **SORTING_INTERFACE_PROPERTIES_TO_RECAST,
 }
 
 EXCLUDED_SORTING_INTERFACE_PROPERTIES = ["location", "spike_times", "electrodes"]  # Not validated
@@ -1233,7 +1233,9 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
                 sorting_property_value = str(unit_id)  # Insert unit_id as name (str)
             elif property_name in SORTING_INTERFACE_PROPERTY_OVERRIDES:
                 try:
-                    sorting_property_value = SORTING_INTERFACE_PROPERTY_OVERRIDES[property_name]["default"]  # Get default value
+                    sorting_property_value = SORTING_INTERFACE_PROPERTY_OVERRIDES[property_name][
+                        "default"
+                    ]  # Get default value
                 except:
                     sorting_property_value = sorting.get_property(key=property_name, ids=[unit_id])[0]
             else:
@@ -1323,7 +1325,9 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
         for property_name in properties:
             if property_name in RECORDING_INTERFACE_PROPERTY_OVERRIDES:
                 try:
-                    recording_property_value = RECORDING_INTERFACE_PROPERTY_OVERRIDES[property_name]["default"]  # Get default value
+                    recording_property_value = RECORDING_INTERFACE_PROPERTY_OVERRIDES[property_name][
+                        "default"
+                    ]  # Get default value
                 except:
                     recording_property_value = recording.get_property(key=property_name, ids=[electrode_id])[0]
             else:
