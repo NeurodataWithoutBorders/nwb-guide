@@ -508,13 +508,14 @@ export class JSONSchemaForm extends LitElement {
                 const resolvedSchema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
-                // Allow for constructing types from object types
-                if (
-                    e.message.includes("is not of a type(s)") &&
-                    "properties" in resolvedSchema &&
-                    resolvedSchema.type === "string"
-                )
-                    return;
+                // Allow referring to floats as null (i.e. JSON NaN representation)
+                if (e.message === "is not of a type(s) number") {
+                    if (resolvedValue === "NaN") return;
+                    else if (resolvedValue === null) return
+                    else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+
+                    if ("properties" in resolvedSchema && resolvedSchema.type === "string") return; // Allow for constructing types from object types
+                }
 
                 // Ignore required errors if value is empty
                 if (e.name === "required" && this.validateEmptyValues === null && !(e.property in e.instance)) return;
@@ -522,12 +523,6 @@ export class JSONSchemaForm extends LitElement {
                 // Non-Strict Rule
                 if (resolvedSchema.strict === false && e.message.includes("is not one of enum values")) return;
 
-                // Allow referring to floats as null (i.e. JSON NaN representation)
-                if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN") return;
-                    else if (resolvedValue === null) {
-                    } else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
-                }
 
                 const prevHeader = name ? header(name) : "Row";
 

@@ -23,15 +23,14 @@ export class GuidedResultsPage extends Page {
         const { info = {}, results } = this.info.globalState.upload ?? {};
         const { dandiset } = info;
 
-        console.log(conversion)
         if (!results) return html`
             <p>Your data was successfully converted to NWB!</p>
             ${Object.entries(conversion).map(([subject, sessions]) => {
                 return html`
-                <h3 style="margin: 0; padding: 0; margin-bottom: 10px;">sub-${subject}</h3>
-                <ol style="margin: 0; padding-top: 0;">${
+                <h3 style="margin: 0; padding: 0;">sub-${subject}</h3>
+                <ol style="margin: 10px 0px; padding-top: 0;">${
                     Object.entries(sessions).map(([session, info]) => {
-                        return html`<li>${info.file}</li>`;
+                        return html`<li><b>ses-${session}</b> — ${info.file}</li>`;
                     })
                 }</ol>`;
             }).flat()
