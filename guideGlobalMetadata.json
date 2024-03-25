@@ -8,6 +8,7 @@
         "NeuroScopeSortingInterface",
         "BiocamRecordingInterface",
         "IntanRecordingInterface",
+        "SpikeGadgetsRecordingInterface",
         "OpenEphysRecordingInterface",
         "BlackrockRecordingInterface",
         "BlackrockSortingInterface",
