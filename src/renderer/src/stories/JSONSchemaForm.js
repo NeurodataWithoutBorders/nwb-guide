@@ -225,6 +225,7 @@ document.addEventListener("dragover", (dragEvent) => {
     dragEvent.stopPropagation();
 });
 
+
 export class JSONSchemaForm extends LitElement {
     static get styles() {
         return css([componentCSS]);
@@ -288,6 +289,7 @@ export class JSONSchemaForm extends LitElement {
 
         this.groups = props.groups ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
+        // NOTE: Documentation for validateEmptyValues
         this.validateEmptyValues = props.validateEmptyValues === undefined ? true : props.validateEmptyValues; // false = validate when not empty, true = always validate, null = never validate
 
         if (props.onInvalid) this.onInvalid = props.onInvalid;
@@ -934,7 +936,15 @@ export class JSONSchemaForm extends LitElement {
             if (isUndefined) {
                 // Throw at least a basic warning if a non-linked property is required and missing
                 if (!hasLinks && isRequired) {
-                    if (this.validateEmptyValues) {
+                    if (this.validateEmptyValues === null) {
+                        warnings.push({
+                            message: `${schema.title ?? header(name)} is a suggested property.`,
+                            type: "warning",
+                            missing: true,
+                        });
+                    }
+                    else {
+
                         const rowName = pathToValidate.slice(-1)[0];
                         const isRow = typeof rowName === "number";
 
@@ -947,12 +957,6 @@ export class JSONSchemaForm extends LitElement {
                                     : ""
                             }`,
                             type: "error",
-                            missing: true,
-                        });
-                    } else if (this.validateEmptyValues === null) {
-                        warnings.push({
-                            message: `${schema.title ?? header(name)} is a suggested property.`,
-                            type: "warning",
                             missing: true,
                         });
                     }
@@ -995,7 +999,7 @@ export class JSONSchemaForm extends LitElement {
         this.#nWarnings += updatedWarnings.length;
         this.checkStatus();
 
-        // Show aggregated errors and warnings (if any)
+        // Show aggregated errors and warnings (if allowed)
         updatedWarnings.forEach((info) => (onWarning ? "" : this.#addMessage(localPath, info, "warnings")));
         info.forEach((info) => (onInfo ? onInfo(info) : this.#addMessage(localPath, info, "info")));
 
@@ -1017,16 +1021,21 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
-            // Add new invalid classes and errors
-            input.classList.add("invalid");
 
-            // Only add the conditional class for linked elements
-            await this.#applyToLinkedProperties(
-                (name, element) => element.classList.add("required", "conditional"),
-                [...path, name]
-            );
+            if (this.validateEmptyValues) {
 
-            updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
+                // Add new invalid classes and errors
+                input.classList.add("invalid");
+
+                // Only add the conditional class for linked elements
+                await this.#applyToLinkedProperties(
+                    (name, element) => element.classList.add("required", "conditional"),
+                    [...path, name]
+                );
+
+            
+                updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
+            }
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;
@@ -1365,6 +1374,7 @@ export class JSONSchemaForm extends LitElement {
     };
 
     #registerRequirements = (schema, requirements = {}, acc = this.#requirements, path = []) => {
+        
         if (!schema) return;
 
         const isItem = (schema) => schema.items && schema.items.properties;
@@ -1410,6 +1420,7 @@ export class JSONSchemaForm extends LitElement {
     }
 
     render() {
+
         this.#updateRendered(); // Create a new promise to check on the rendered state
 
         this.#resetLoadState();
@@ -1423,7 +1434,7 @@ export class JSONSchemaForm extends LitElement {
 
         // // Delete extraneous results
         // this.#deleteExtraneousResults(this.results, this.schema);
-
+        this.#requirements = {}
         this.#registerRequirements(this.schema, this.required);
 
         return html`
