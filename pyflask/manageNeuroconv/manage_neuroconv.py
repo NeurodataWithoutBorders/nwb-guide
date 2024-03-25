@@ -37,7 +37,7 @@ RECORDING_INTERFACE_PROPERTY_OVERRIDES = {
     }
 }
 
-EXTRA_SORTING_INTERFACE_PROPERTIES = ["name", *EXTRA_INTERFACE_PROPERTIES.keys()]
+EXTRA_SORTING_INTERFACE_PROPERTIES = ["unit_name", *EXTRA_INTERFACE_PROPERTIES.keys()]
 
 SORTING_INTERFACE_PROPERTIES_TO_RECAST = {
     "quality": {
@@ -52,7 +52,7 @@ SORTING_INTERFACE_PROPERTIES_TO_RECAST = {
 }
 
 SORTING_INTERFACE_PROPERTY_OVERRIDES = {
-    "name": {"description": "The unique name for the unit", "data_type": "str"},
+    "unit_name": {"description": "The unique name for the unit", "data_type": "str"},
     "brain_area": {
         "description": "The brain area where the unit is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
@@ -435,7 +435,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         unit_columns = get_unit_columns_json(sorting_interface)
 
-        # Aggregate electrode column information across recording interfaces
+        # Aggregate unit column information across sorting interfaces
         existing_unit_columns = metadata["Ecephys"].get("UnitColumns")
         if existing_unit_columns:
             for entry in unit_columns:
@@ -1229,7 +1229,7 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
         unit_column = dict()
 
         for property_name in properties:
-            if property_name == "name":
+            if property_name == "unit_name":
                 sorting_property_value = str(unit_id)  # Insert unit_id as name (str)
             elif property_name in SORTING_INTERFACE_PROPERTY_OVERRIDES:
                 try:
@@ -1413,11 +1413,11 @@ def update_sorting_properties_from_table_as_json(
     for entry_index, entry in enumerate(unit_table_json):
         unit_properties = dict(entry)  # copy
 
-        unit_id = unit_properties.pop("name", None)  # NOTE: Is called unit_name in the actual units table
+        unit_id = unit_properties.pop("unit_name", None)  # NOTE: Is called unit_name in the actual units table
 
         for property_name, property_value in unit_properties.items():
 
-            if property_name == "name":
+            if property_name == "unit_name":
                 continue  # Already controlling unit_id with the above variable
 
             dtype = unit_column_data_types[property_name]

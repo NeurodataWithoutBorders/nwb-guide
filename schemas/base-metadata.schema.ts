@@ -143,7 +143,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         })
 
         updateEcephysTable("Units", copy, {
-            order: ["name", "clu_id", "group_id"]
+            order: ["unit_name", "clu_id", "group_id"]
         })
 
     }
