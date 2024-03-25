@@ -225,7 +225,6 @@ document.addEventListener("dragover", (dragEvent) => {
     dragEvent.stopPropagation();
 });
 
-
 export class JSONSchemaForm extends LitElement {
     static get styles() {
         return css([componentCSS]);
@@ -942,9 +941,7 @@ export class JSONSchemaForm extends LitElement {
                             type: "warning",
                             missing: true,
                         });
-                    }
-                    else {
-
+                    } else {
                         const rowName = pathToValidate.slice(-1)[0];
                         const isRow = typeof rowName === "number";
 
@@ -1021,9 +1018,7 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
-
             if (this.validateEmptyValues) {
-
                 // Add new invalid classes and errors
                 input.classList.add("invalid");
 
@@ -1033,7 +1028,6 @@ export class JSONSchemaForm extends LitElement {
                     [...path, name]
                 );
 
-            
                 updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
             }
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
@@ -1374,7 +1368,6 @@ export class JSONSchemaForm extends LitElement {
     };
 
     #registerRequirements = (schema, requirements = {}, acc = this.#requirements, path = []) => {
-        
         if (!schema) return;
 
         const isItem = (schema) => schema.items && schema.items.properties;
@@ -1420,7 +1413,6 @@ export class JSONSchemaForm extends LitElement {
     }
 
     render() {
-
         this.#updateRendered(); // Create a new promise to check on the rendered state
 
         this.#resetLoadState();
@@ -1434,7 +1426,7 @@ export class JSONSchemaForm extends LitElement {
 
         // // Delete extraneous results
         // this.#deleteExtraneousResults(this.results, this.schema);
-        this.#requirements = {}
+        this.#requirements = {};
         this.#registerRequirements(this.schema, this.required);
 
         return html`

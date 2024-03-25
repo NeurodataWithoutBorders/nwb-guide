@@ -332,7 +332,8 @@ export class GuidedPathExpansionPage extends Page {
         }
 
         if (Object.keys(finalStructure).length === 0) {
-            const message = "Please configure at least one interface. <br/><small>Otherwise, revisit <b>Pipeline Workflow</b> to update your configuration.</small>";
+            const message =
+                "Please configure at least one interface. <br/><small>Otherwise, revisit <b>Pipeline Workflow</b> to update your configuration.</small>";
             this.#notification = this.notify(message, "error");
             throw message;
         }
