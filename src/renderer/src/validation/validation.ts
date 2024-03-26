@@ -66,6 +66,11 @@ const getTablePathInfo = (path: string[]) => {
     return { modality, table, row }
 }
 
+// ----------------- Subject Validation ----------------- //
+
+// Validate the same in rows and tables
+schema.Subject['*'] = { ...schema.Subject }
+
 
 // ----------------- Joint Ophys and Ecephys Validation ----------------- //
 
