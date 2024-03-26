@@ -508,7 +508,7 @@ export class SimpleTable extends LitElement {
                     Object.keys(cols).map((k) => (cols[k] = ""));
                     if (this.validateOnChange)
                         Object.keys(cols).map((k) => {
-                            const res = this.validateOnChange([k], { ...cols }, cols[k]);
+                            const res = this.validateOnChange([k], { ...cols }, cols[k]); // NOTE: This is likely incorrect
                             if (typeof res === "function") res();
                         });
 

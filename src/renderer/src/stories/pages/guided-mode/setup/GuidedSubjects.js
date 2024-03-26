@@ -152,6 +152,13 @@ export class GuidedSubjectsPage extends Page {
             keyColumn: "subject_id",
             validateEmptyCells: ["subject_id", "sessions"],
             contextMenu: contextMenuConfig,
+            groups: [
+                [
+                    "sex", 
+                    'species', 
+                    // 'age'
+                ], // Validate both when one is changed
+            ],
             onThrow: (message, type) => this.notify(message, type),
             onOverride: (name) => {
                 this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
@@ -159,8 +166,9 @@ export class GuidedSubjectsPage extends Page {
             onUpdate: () => {
                 this.unsavedUpdates = "conversions";
             },
-            validateOnChange: (localPath, parent, v) => {
+            validateOnChange: function (localPath, parent, v ) {
                 const name = localPath[localPath.length - 1];
+
                 if (name === "sessions") {
                     if (v?.length) return true;
                     else {
@@ -173,7 +181,7 @@ export class GuidedSubjectsPage extends Page {
                     }
                 } else {
                     delete parent.sessions; // Delete sessions from parent copy
-                    return validateOnChange(localPath, parent, ["Subject"], v);
+                    return validateOnChange.call(this, name, parent, ["Subject", ...localPath.slice(0, -1)], v);
                 }
             },
         });
