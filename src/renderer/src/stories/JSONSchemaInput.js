@@ -872,7 +872,7 @@ export class JSONSchemaInput extends LitElement {
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
         const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
-        const isTable = itemSchema?.type === "object" && this.renderTable
+        const isTable = itemSchema?.type === "object" && this.renderTable;
 
         const canAddProperties = isEditableObject(this.schema, this.value);
 
@@ -903,7 +903,6 @@ export class JSONSchemaInput extends LitElement {
             return filesystemSelectorElement;
         };
 
- 
         // Transform to single item if maxItems is 1
         if (isArray && schema.maxItems === 1 && !isTable) {
             return new JSONSchemaInput({
@@ -946,10 +945,8 @@ export class JSONSchemaInput extends LitElement {
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-
             // Create tables if possible
             else if (itemSchema?.type === "string" && !itemSchema.properties) {
-
                 const list = new List({
                     items: this.value,
                     emptyMessage: "No items",

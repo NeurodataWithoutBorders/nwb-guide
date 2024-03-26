@@ -514,9 +514,7 @@ export class JSONSchemaForm extends LitElement {
                         if (resolvedValue === "NaN") return;
                         else if (resolvedValue === null) return;
                         else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
-                    }
-
-                    else if (resolvedSchema.type === "string") {
+                    } else if (resolvedSchema.type === "string") {
                         if ("properties" in resolvedSchema) return; // Allow for constructing types from object types
                     }
                 }
