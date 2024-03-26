@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "./utils/useGlobalStyles.js";
 
-import { Main } from "./Main.js";
+import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
 import { NavigationSidebar } from "./NavigationSidebar.js";
 
@@ -250,6 +250,7 @@ export class Dashboard extends LitElement {
         });
     }
 
+
     // Populate the sections tracked for this page by using the global state as a model
     #getSections = (pages = {}, globalState = {}) => {
         if (!globalState.sections) globalState.sections = {};
@@ -280,15 +281,7 @@ export class Dashboard extends LitElement {
                 pageState.active = false;
 
                 // Check if page is skipped based on workflow state (if applicable)
-                if (page.workflow) {
-                    const workflow = page.workflow;
-                    const workflowValues = globalState.project?.workflow ?? {};
-                    const skipped = Object.entries(workflow).some(([key, state]) => {
-                        if (!workflowValues[key]) return state.skip;
-                    });
-
-                    pageState.skipped = skipped;
-                }
+                pageState.skipped = checkIfPageIsSkipped(page, globalState.project?.workflow)
 
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 

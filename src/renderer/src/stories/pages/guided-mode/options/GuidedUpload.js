@@ -50,6 +50,7 @@ export class GuidedUploadPage extends Page {
 
     workflow = {
         upload_to_dandi: {
+            condition: (v) => v === false,
             skip: true,
         },
     };

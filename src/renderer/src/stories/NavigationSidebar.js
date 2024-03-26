@@ -129,6 +129,7 @@ export class NavigationSidebar extends LitElement {
               class="
                 guided--nav-bar-section-page
                 hidden
+                ${state.skipped ? " skipped" : ""}
                 ${state.visited && !state.skipped ? " completed" : " not-completed"}
                 ${state.active ? "active" : ""}"f
               "

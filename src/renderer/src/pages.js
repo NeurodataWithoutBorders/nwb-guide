@@ -28,6 +28,7 @@ import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 import { InspectPage } from "./stories/pages/inspect/InspectPage";
 import { PreviewPage } from "./stories/pages/preview/PreviewPage";
 import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
+import { GuidedDandiResultsPage } from "./stories/pages/guided-mode/results/GuidedDandiResults";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -132,16 +133,22 @@ const pages = {
 
             inspect: new GuidedInspectorPage({
                 title: "Inspector Report",
-                label: "Inspect files",
+                label: "Validate metadata",
                 section: sections[2],
                 sync: ["preview"],
             }),
 
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
-                label: "Preview files",
+                label: "Preview NWB files",
                 section: sections[2],
                 sync: ["preview"],
+            }),
+
+            conversion: new GuidedResultsPage({
+                title: "Conversion Review",
+                label: "Review conversion",
+                section: sections[2],
             }),
 
             upload: new GuidedUploadPage({
@@ -151,9 +158,9 @@ const pages = {
                 sync: ["conversion"],
             }),
 
-            review: new GuidedResultsPage({
-                title: "Conversion Review",
-                label: "View conversion report",
+            review: new GuidedDandiResultsPage({
+                title: "Upload Review",
+                label: "Review published data",
                 section: sections[3],
             }),
         },

@@ -1,8 +1,6 @@
 import { html } from "lit";
 import { Page } from "../../Page.js";
 
-import { DandiResults } from "../../../DandiResults.js";
-
 export class GuidedResultsPage extends Page {
     constructor(...args) {
         super(...args);
@@ -20,11 +18,7 @@ export class GuidedResultsPage extends Page {
         if (!conversion)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
-        const { info = {}, results } = this.info.globalState.upload ?? {};
-        const { dandiset } = info;
-
-        if (!results)
-            return html`
+        return html`
                 <p>Your data was successfully converted to NWB!</p>
                 ${Object.entries(conversion)
                     .map(([subject, sessions]) => {
@@ -37,17 +31,6 @@ export class GuidedResultsPage extends Page {
                     })
                     .flat()}
             `;
-
-        return html`<div style="padding: 10px 20px;">
-            ${new DandiResults({
-                id: dandiset,
-                files: {
-                    subject: results.map((file) => {
-                        return { file };
-                    }),
-                },
-            })}
-        </div>`;
     }
 }
 
