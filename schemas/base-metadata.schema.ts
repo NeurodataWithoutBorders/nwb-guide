@@ -64,11 +64,12 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         M: 'Male',
         F: 'Female',
         U: 'Unknown',
-        O: 'Other'
+        O: 'Other',
+        XX: 'Hermaphrodite — C. elegans',
+        XO: 'Male — C. elegans'
     }
 
-
-      subjectProps.species = {
+    subjectProps.species = {
         type: 'string',
         strict: false,
         description: 'The species of your subject.'
