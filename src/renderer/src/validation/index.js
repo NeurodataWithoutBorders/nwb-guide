@@ -54,10 +54,8 @@ export async function validateOnChange(name, parent, path, value) {
         functions = overridden && functions !== true ? false : matches; // Disable if not promised to exist—or use matches
     }
 
-
     if (!functions || (Array.isArray(functions) && functions.length === 0)) return; // No validation for this field
     if (!Array.isArray(functions)) functions = [functions];
-
 
     // Validate multiple conditions. May be able to offload this to a single server-side call
     const results = functions.map((func) => {
@@ -79,7 +77,6 @@ export async function validateOnChange(name, parent, path, value) {
     });
 
     const res = resolveAll(results, (arr) => {
-
         arr = arr.map((v, i) => {
             const func = functions[i];
             if (typeof func === "function") return v;

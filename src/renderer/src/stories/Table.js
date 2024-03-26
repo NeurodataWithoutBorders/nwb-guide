@@ -119,7 +119,7 @@ export class Table extends LitElement {
         onThrow,
         contextMenu,
         ignore,
-        groups // NOTE: All groups must be non-overlapping
+        groups, // NOTE: All groups must be non-overlapping
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -230,8 +230,8 @@ export class Table extends LitElement {
             });
         });
     };
-    
-    #info = {}
+
+    #info = {};
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -281,8 +281,7 @@ export class Table extends LitElement {
         const displayHeaders = [...colHeaders].map(header);
 
         const columns = colHeaders.map((k, i) => {
-            const info = this.#info[k] = { type: "text", stopPersonalUpdates: {}, stopGroupUpdates: {} };
-            
+            const info = (this.#info[k] = { type: "text", stopPersonalUpdates: {}, stopGroupUpdates: {} });
 
             const colInfo = entries[k];
             if (colInfo.unit) displayHeaders[i] = `${displayHeaders[i]} (${colInfo.unit})`;
@@ -314,7 +313,7 @@ export class Table extends LitElement {
 
             const runThisValidator = async (value, row, prop) => {
                 try {
-                    const path = [row, k]
+                    const path = [row, k];
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
                               path,
@@ -334,14 +333,12 @@ export class Table extends LitElement {
             const required = isRequired(k, this.#itemSchema);
 
             const validator = async function (value, callback) {
-
-
                 const row = this.row;
                 // if (info.stopPersonalUpdates[row]) {
                 //     callback(true)
                 //     return
                 // }
-                
+
                 const validateEmptyCells = instanceThis.validateEmptyCells;
                 const willValidate =
                     validateEmptyCells === true ||
@@ -380,7 +377,6 @@ export class Table extends LitElement {
                     }
                 }
 
-    
                 if (!(await runThisValidator(value, row, this.col))) {
                     callback(false);
                     return;
@@ -514,26 +510,23 @@ export class Table extends LitElement {
         const initialCellsToUpdate = data.reduce((acc, arr) => acc + arr.length, 0);
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
-
             const header = typeof prop === "number" ? colHeaders[prop] : prop;
             const info = this.#info[header];
 
             // Update other columns in the group
 
             const skipUpdate = info.stopPersonalUpdates[row] || info.stopGroupUpdates[row];
-            
+
             // Decrement counters
             if (info.stopPersonalUpdates[row]) info.stopPersonalUpdates[row]--;
-            if (info.stopGroupUpdates[row]) info.stopGroupUpdates[row]--
+            if (info.stopGroupUpdates[row]) info.stopGroupUpdates[row]--;
 
             if (!skipUpdate) {
-
                 const isUserUpdate = initialCellsToUpdate <= validated;
 
                 let rowName = this.getRowName(row);
 
                 if (isUserUpdate) {
-
                     // NOTE: We would like to allow invalid values to mutate the results
                     // if (isValid) {
                     const isResolved = rowName in this.data;
@@ -595,22 +588,20 @@ export class Table extends LitElement {
                     if (group.includes(header)) {
                         const otherGroup = group.filter((col) => col !== header);
 
-                        info.stopPersonalUpdates[row] = otherGroup.length
+                        info.stopPersonalUpdates[row] = otherGroup.length;
 
                         otherGroup.forEach((col) => {
                             const j = colHeaders.indexOf(col);
-                            const value = table.getDataAtCell(row, j)
+                            const value = table.getDataAtCell(row, j);
                             const depInfo = this.#info[col];
-                            const otherGroups = group.filter((c) => c !== col)
+                            const otherGroups = group.filter((c) => c !== col);
                             depInfo.stopGroupUpdates[row] = otherGroups.length; // Expecting this many updates from other members of the group
                             table.setDataAtCell(row, j, value);
-                        })
+                        });
 
-                        return
+                        return;
                     }
                 }
-                            
-
             }
 
             if (typeof isValid === "function") isValid();

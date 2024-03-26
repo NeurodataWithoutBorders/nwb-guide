@@ -154,8 +154,8 @@ export class GuidedSubjectsPage extends Page {
             contextMenu: contextMenuConfig,
             groups: [
                 [
-                    "sex", 
-                    'species', 
+                    "sex",
+                    "species",
                     // 'age'
                 ], // Validate both when one is changed
             ],
@@ -166,7 +166,7 @@ export class GuidedSubjectsPage extends Page {
             onUpdate: () => {
                 this.unsavedUpdates = "conversions";
             },
-            validateOnChange: function (localPath, parent, v ) {
+            validateOnChange: function (localPath, parent, v) {
                 const name = localPath[localPath.length - 1];
 
                 if (name === "sessions") {
