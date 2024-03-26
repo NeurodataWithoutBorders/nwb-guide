@@ -5,7 +5,7 @@ import { GuidedCapsules } from "./pages/guided-mode/GuidedCapsules.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-export const checkIfPageIsSkipped = (page, workflowValues) => {
+export const checkIfPageIsSkipped = (page, workflowValues = {}) => {
     if (page.workflow) {
         const workflow = page.workflow;
         const skipped = Object.entries(workflow).some(([key, state]) => {

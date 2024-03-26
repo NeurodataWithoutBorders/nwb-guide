@@ -871,6 +871,9 @@ export class JSONSchemaInput extends LitElement {
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
+        const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
+        const isTable = itemSchema?.type === "object" && this.renderTable
+
         const canAddProperties = isEditableObject(this.schema, this.value);
 
         if (this.renderCustomHTML) {
@@ -900,8 +903,9 @@ export class JSONSchemaInput extends LitElement {
             return filesystemSelectorElement;
         };
 
+ 
         // Transform to single item if maxItems is 1
-        if (isArray && schema.maxItems === 1) {
+        if (isArray && schema.maxItems === 1 && !isTable) {
             return new JSONSchemaInput({
                 value: this.value?.[0],
                 schema: {
@@ -940,12 +944,12 @@ export class JSONSchemaInput extends LitElement {
                 }
             }
 
-            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
-
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
+
             // Create tables if possible
             else if (itemSchema?.type === "string" && !itemSchema.properties) {
+
                 const list = new List({
                     items: this.value,
                     emptyMessage: "No items",
@@ -1002,7 +1006,7 @@ export class JSONSchemaInput extends LitElement {
                         ${list}
                     </div>`;
                 }
-            } else if (itemSchema?.type === "object" && this.renderTable) {
+            } else if (isTable) {
                 const instanceThis = this;
 
                 function updateFunction(path, value = this.data) {

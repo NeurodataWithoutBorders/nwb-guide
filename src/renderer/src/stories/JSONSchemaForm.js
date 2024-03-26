@@ -509,12 +509,16 @@ export class JSONSchemaForm extends LitElement {
 
                 // ------------ Exclude Certain Errors ------------
                 // Allow referring to floats as null (i.e. JSON NaN representation)
-                if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN") return;
-                    else if (resolvedValue === null) return;
-                    else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                if (e.message.includes("is not of a type(s)")) {
+                    if (resolvedSchema.type === "number") {
+                        if (resolvedValue === "NaN") return;
+                        else if (resolvedValue === null) return;
+                        else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                    }
 
-                    if ("properties" in resolvedSchema && resolvedSchema.type === "string") return; // Allow for constructing types from object types
+                    else if (resolvedSchema.type === "string") {
+                        if ("properties" in resolvedSchema) return; // Allow for constructing types from object types
+                    }
                 }
 
                 // Ignore required errors if value is empty

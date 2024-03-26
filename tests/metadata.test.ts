@@ -56,91 +56,6 @@ test('removing all existing sessions will maintain the related subject entry on 
 })
 
 
-// TODO: Convert an integration
-test('inter-table updates are triggered', async () => {
-
-    const results = {
-        Ecephys: { // NOTE: This layer is required to place the properties at the right level for the hardcoded validation function
-            ElectrodeGroup: [{ name: 's1' }],
-            Electrodes: [{ group_name: 's1' }]
-        }
-    }
-
-    const schema = {
-        properties: {
-            Ecephys: {
-                properties: {
-                    ElectrodeGroup: {
-                        type: "array",
-                        items: {
-                            required: ["name"],
-                            properties: {
-                                name: {
-                                    type: "string"
-                                },
-                            },
-                            type: "object",
-                        },
-                    },
-                    Electrodes: {
-                        type: "array",
-                        items: {
-                            type: "object",
-                            properties: {
-                                group_name: {
-                                    type: "string",
-                                },
-                            },
-                        }
-                    },
-                }
-            }
-        }
-    }
-
-
-
-    // Add invalid electrode
-    const randomStringId = Math.random().toString(36).substring(7)
-    results.Ecephys.Electrodes.push({ group_name: randomStringId })
-
-    // Create the form
-    const form = new JSONSchemaForm({
-        schema,
-        results,
-        validateOnChange,
-        renderTable: (name, metadata, path) => {
-            if (name !== "Electrodes") return new SimpleTable(metadata);
-            else return true
-        },
-    })
-
-    document.body.append(form)
-
-    await form.rendered
-
-    // Validate that the results are incorrect
-    const errors = await form.validate().catch(() => true).catch(() => true)
-    expect(errors).toBe(true) // Is invalid
-
-    // Update the table with the missing electrode group
-    const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
-    const row = table.addRow()
-
-    const baseRow = table.getRow(0)
-    row.forEach((cell, i) => {
-        if (cell.simpleTableInfo.col === 'name') cell.setInput(randomStringId) // Set name to random string id
-        else cell.setInput(baseRow[i].value) // Otherwise carry over info
-    })
-
-    // Wait a second for new row values to resolve as table data (async)
-    await new Promise((res) => setTimeout(() => res(true), 1000))
-
-    // Validate that the new structure is correct
-    const hasErrors = await form.validate().then(() => false).catch((e) => true)
-    expect(hasErrors).toBe(false) // Is valid
-})
-
 const popupSchemas = {
     "type": "object",
     "required": ["keywords", "experimenter"],
@@ -221,7 +136,6 @@ test('pop-up inputs work correctly', async () => {
 
     expect(hasErrors).toBe(false) // Is valid
 })
-
 
 // TODO: Convert an integration
 test('inter-table updates are triggered', async () => {
