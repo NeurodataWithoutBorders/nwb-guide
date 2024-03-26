@@ -11,9 +11,9 @@ export class GuidedDandiResultsPage extends Page {
     footer = {};
 
     workflow = {
-        upload_to_dandi: { 
+        upload_to_dandi: {
             condition: (v) => v === false,
-            skip: true 
+            skip: true,
         },
     };
 

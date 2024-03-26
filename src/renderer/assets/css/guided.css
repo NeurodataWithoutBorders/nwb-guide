@@ -66,7 +66,6 @@
     opacity: 0.5;
 }
 
-
 .guided--nav-bar-section-page.active {
     border-left: 3px solid rgb(0, 133, 210);
     background-color: var(--color-transparent-soda-green);

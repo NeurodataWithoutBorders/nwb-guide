@@ -17,8 +17,8 @@ export const checkIfPageIsSkipped = (page, workflowValues) => {
         return skipped;
     }
 
-    return false
-}
+    return false;
+};
 
 const componentCSS = `
     :host {
@@ -110,21 +110,21 @@ export class Main extends LitElement {
         const section = this.content.children[0];
         section.scrollTop = 0;
     }
-    
+
     #hasAvailableNextPages = (page) => {
-        const allNext = []
-        let currentPage = page
+        const allNext = [];
+        let currentPage = page;
         const workflowValues = page.info.globalState?.project?.workflow ?? {};
         while (currentPage.info.next) {
-            const nextPage = currentPage.info.next
-            const skipped = checkIfPageIsSkipped(nextPage, workflowValues)
-            if (!skipped) allNext.push(nextPage)
-            currentPage = nextPage
+            const nextPage = currentPage.info.next;
+            const skipped = checkIfPageIsSkipped(nextPage, workflowValues);
+            if (!skipped) allNext.push(nextPage);
+            currentPage = nextPage;
         }
 
-        return allNext.length > 0
-    }
- 
+        return allNext.length > 0;
+    };
+
     render() {
         let { page = "", sections = {} } = this.toRender ?? {};
 
@@ -141,7 +141,7 @@ export class Main extends LitElement {
             if (info.parent) {
                 if (!("footer" in page)) footer = true; // Allow navigating laterally if there is a next page
 
-                const hasAvailableNextPages = this.#hasAvailableNextPages(page)
+                const hasAvailableNextPages = this.#hasAvailableNextPages(page);
 
                 // Go to home screen if there is no next page
                 if (!info.next || !hasAvailableNextPages) {

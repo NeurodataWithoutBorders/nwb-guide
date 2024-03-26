@@ -250,7 +250,6 @@ export class Dashboard extends LitElement {
         });
     }
 
-
     // Populate the sections tracked for this page by using the global state as a model
     #getSections = (pages = {}, globalState = {}) => {
         if (!globalState.sections) globalState.sections = {};
@@ -281,7 +280,7 @@ export class Dashboard extends LitElement {
                 pageState.active = false;
 
                 // Check if page is skipped based on workflow state (if applicable)
-                pageState.skipped = checkIfPageIsSkipped(page, globalState.project?.workflow)
+                pageState.skipped = checkIfPageIsSkipped(page, globalState.project?.workflow);
 
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 
