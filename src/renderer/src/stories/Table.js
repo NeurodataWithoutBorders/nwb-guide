@@ -281,7 +281,7 @@ export class Table extends LitElement {
         const displayHeaders = [...colHeaders].map(header);
 
         const columns = colHeaders.map((k, i) => {
-            const info = (this.#info[k] = { type: "text", stopPersonalUpdates: {}, stopGroupUpdates: {} });
+            const info = (this.#info[k] = { type: "text", stopGroupUpdates: {} });
 
             const colInfo = entries[k];
             if (colInfo.unit) displayHeaders[i] = `${displayHeaders[i]} (${colInfo.unit})`;
@@ -334,10 +334,6 @@ export class Table extends LitElement {
 
             const validator = async function (value, callback) {
                 const row = this.row;
-                // if (info.stopPersonalUpdates[row]) {
-                //     callback(true)
-                //     return
-                // }
 
                 const validateEmptyCells = instanceThis.validateEmptyCells;
                 const willValidate =
@@ -515,11 +511,10 @@ export class Table extends LitElement {
 
             // Update other columns in the group
 
-            const skipUpdate = info.stopPersonalUpdates[row] || info.stopGroupUpdates[row];
+            const skipUpdate = info.stopGroupUpdates[row];
 
             // Decrement counters
-            if (info.stopPersonalUpdates[row]) info.stopPersonalUpdates[row]--;
-            if (info.stopGroupUpdates[row]) info.stopGroupUpdates[row]--;
+            if (skipUpdate) info.stopGroupUpdates[row]--;
 
             if (!skipUpdate) {
                 const isUserUpdate = initialCellsToUpdate <= validated;
@@ -587,8 +582,6 @@ export class Table extends LitElement {
                     const table = this.table;
                     if (group.includes(header)) {
                         const otherGroup = group.filter((col) => col !== header);
-
-                        info.stopPersonalUpdates[row] = otherGroup.length;
 
                         otherGroup.forEach((col) => {
                             const j = colHeaders.indexOf(col);

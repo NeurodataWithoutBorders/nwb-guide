@@ -77,6 +77,7 @@ export async function validateOnChange(name, parent, path, value) {
     });
 
     const res = resolveAll(results, (arr) => {
+        
         arr = arr.map((v, i) => {
             const func = functions[i];
             if (typeof func === "function") return v;
