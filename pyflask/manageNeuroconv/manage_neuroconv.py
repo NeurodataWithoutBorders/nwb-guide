@@ -18,7 +18,6 @@ from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLD
 
 announcer = MessageAnnouncer()
 
-
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 EXTRA_RECORDING_INTERFACE_PROPERTIES = {
     "brain_area": {
@@ -766,8 +765,18 @@ def inspect_nwb_folder(payload):
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
+    from tqdm_publisher import TQDMProgressSubscriber
+
+    request_id = payload.get("request_id")
+    if request_id:
+        payload.pop("request_id")
+
     kwargs = dict(
         n_jobs=-2,  # uses number of CPU - 1
+        progress_bar_class=TQDMProgressSubscriber,
+        progress_bar_options=dict(
+            on_progress_update=lambda message: announcer.announce(dict(request_id=request_id, **message))
+        ),
         ignore=[
             "check_description",
             "check_data_orientation",
@@ -813,9 +822,9 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
     return folder_path
 
 
-def inspect_multiple_filesystem_objects(paths):
+def inspect_multiple_filesystem_objects(paths, **kwargs):
     tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
-    result = inspect_nwb_folder({"path": tmp_folder_path})
+    result = inspect_nwb_folder({"path": tmp_folder_path, **kwargs})
     rmtree(tmp_folder_path)
     return result
 
