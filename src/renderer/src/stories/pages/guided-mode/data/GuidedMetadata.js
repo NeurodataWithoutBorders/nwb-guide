@@ -55,6 +55,7 @@ const tableRenderConfig = {
             editable: {
                 name: (value) => !aggregateRequirements.has(value),
                 data_type: (_, row) => !aggregateRequirements.has(row.name),
+                __row_remove: (_, row) => !aggregateRequirements.has(row.name),
             },
         });
     },
@@ -71,7 +72,7 @@ const tableRenderConfig = {
             },
             editable: {
                 name: (value) => !aggregateRequirements.has(value),
-                data_type: (_, row) => !aggregateRequirements.has(row.name),
+                data_type: (_, row) => !aggregateRequirements.has(row.name)
             },
         });
     },
