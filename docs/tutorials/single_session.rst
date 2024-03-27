@@ -20,7 +20,8 @@ Project Setup
 The Project Setup page will have you define two pieces of information about your pipeline: the **name** and, optionally, the **output location** for your NWB files.
 
 .. note::
-   Choosing a good output location is important for two reasons, namely conversion speed and disk space.
+   Choosing a good output location is important for two reasons, namely **conversion speed** and **disk space**.
+
    1. SSDs will be much faster than HDDs. We’d recommend moving the output location to an SSD if available.
    2. If you don’t have much disk space available on your main drive, we recommend changing the output location to a drive that has ample space.
 
