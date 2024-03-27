@@ -13,7 +13,7 @@ import paths from "../paths.config.json" assert { type: "json" };
 // ------------------------------------------------------------------
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const screenshotPath = join(__dirname, 'screenshots')
+const screenshotPath = join(__dirname, '..', 'docs', 'tutorials', 'screenshots')
 const guideRootPath = join(homedir(), paths.root)
 const testRootPath = join(guideRootPath, '.test')
 const testDataRootPath = join(testRootPath, 'test-data')
@@ -65,7 +65,8 @@ const subjectInfo = {
   age: 'P30D'
 }
 
-const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
+// const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
+const regenerateTestData = true // Force regeneration
 
 const dandiInfo = {
   id: '212750',

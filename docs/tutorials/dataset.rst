@@ -1,4 +1,4 @@
-The Tutorial Dataset
+The Dataset
 =======================================
 
 Our tutorials focus on converting extracellular electrophysiology data in the SpikeGLX and Phy formats. 
@@ -11,7 +11,13 @@ To get you started as quickly as possible, we’ve created a way to generate thi
 Navigate to the **Settings** page using the main sidebar and initiate the dataset generation 
 by pressing the Generate button in the top-right corner. 
 
-This dataset will be organized in the following way:
+.. figure:: ./screenshots/1-dataset-creation.png
+  :align: center
+  :alt: Dataset Creation Screen
+
+  Press the Generate button on this screen to create the dataset.
+
+The generated dataset will be organized as follows:
 
 .. code-block:: bash
 

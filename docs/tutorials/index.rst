@@ -4,18 +4,14 @@ The NWB Graphical User Interface for Data Entry (GUIDE) is a desktop tool for co
 to the Neurodata Without Borders (NWB) format and uploading to the DANDI Archive. In these tutorials, we detail this 
 process from initial setup to final upload.
 
-.. toctree::
-   :maxdepth: 2
+Before you begin these tutorials, **you'll need to generate the tutorial dataset** using the instructions on the Dataset page.
 
-   single_session
-   multiple_sessions
-   dataset_publication
-   next_steps
-
-
-**Before you begin, you'll need to generate the tutorial dataset** using the instructions defined here.
 
 .. toctree::
    :maxdepth: 2
 
    dataset
+   single_session
+   multiple_sessions
+   dataset_publication
+   next_steps
