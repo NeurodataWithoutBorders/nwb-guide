@@ -279,8 +279,9 @@ export class GuidedPathExpansionPage extends Page {
 
                 // Map existing results to new subject information (if available)
                 const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
+
                 const existingMetadata = existingResults.metadata;
-                const existingSourceData = existingResults.source_data;
+                const existingSourceData =existingResults.source_data;
 
                 const source_data = {};
                 for (let key in globalState.interfaces) {
@@ -350,6 +351,8 @@ export class GuidedPathExpansionPage extends Page {
             this.#notification = this.notify(message, "error");
             throw message;
         }
+
+        // globalState.results = {} // Clear existing results
 
         // Save an overall results object organized by subject and session
         merge({ results }, globalState);

@@ -1,12 +1,42 @@
 import { html } from "lit";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import folderOpenSVG from "../../../assets/folder_open.svg?raw";
+
 import { Page } from "../../Page.js";
+import { getStubArray } from "../options/GuidedStubPreview.js";
+import { getSharedPath } from "../../../preview/NWBFilePreview.js";
+
+
+import { electron, path } from "../../../../electron/index.js";
+const { ipcRenderer } = electron;
 
 export class GuidedResultsPage extends Page {
     constructor(...args) {
         super(...args);
     }
 
+    header = {
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => {
+                    if (ipcRenderer)
+                        ipcRenderer.send(
+                            "showItemInFolder",
+                            this.#sharedPath()
+                        );
+                }}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
+        }
+
     footer = {};
+
+    #sharedPath = () => {
+        const { conversion } = this.info.globalState;
+        if (!conversion) return '';
+        return getSharedPath(getStubArray(conversion).map((item) => item.file));
+    }
 
     updated() {
         this.save(); // Save the current state
@@ -18,18 +48,12 @@ export class GuidedResultsPage extends Page {
         if (!conversion)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
+
         return html`
             <p>Your data was successfully converted to NWB!</p>
-            ${Object.entries(conversion)
-                .map(([subject, sessions]) => {
-                    return html` <h3 style="margin: 0; padding: 0;">sub-${subject}</h3>
-                        <ol style="margin: 10px 0px; padding-top: 0;">
-                            ${Object.entries(sessions).map(([session, info]) => {
-                                return html`<li><b>ses-${session}</b> — ${info.file}</li>`;
-                            })}
-                        </ol>`;
-                })
-                .flat()}
+            <ol style="margin: 10px 0px; padding-top: 0;">
+            ${getStubArray(conversion).map(({ file }) => file.split(path.sep).slice(-1)[0]).sort().map((id) => html`<li>${id}</li>`)}
+            </ol>
         `;
     }
 }
