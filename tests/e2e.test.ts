@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
 
 import paths from "../paths.config.json" assert { type: "json" };
+import { ScreenshotOptions } from 'puppeteer'
 
 // ------------------------------------------------------------------
 // ------------------------ Path Definitions ------------------------
@@ -19,6 +20,11 @@ const testRootPath = join(guideRootPath, '.test')
 const testDataRootPath = join(testRootPath, 'test-data')
 const testDataPath = join(testDataRootPath, 'data')
 const testDatasetPath = join(testDataRootPath, 'dataset')
+
+const windowDims = {
+  width: 1280,
+  height: 800
+}
 
 const alwaysDelete = [
   join(testRootPath, 'pipelines'),
@@ -97,11 +103,14 @@ describe('E2E Test', () => {
 
   const references = connect()
 
-  let nScreenshots = 0
-  const takeScreenshot = async (label, delay = 0) => {
+  const takeScreenshot = async (label, delay = 0, options: ScreenshotOptions = { fullPage: true }) => {
     if (delay) await sleep(delay)
-    await references.page.screenshot({ path: join(screenshotPath, `${nScreenshots}-${label}.png`), fullPage: true });
-    nScreenshots++
+    
+    const pathToScreenshot = join(screenshotPath, `${label}.png`)
+
+    if (existsSync(pathToScreenshot)) return console.error(`Screenshot already exists: ${pathToScreenshot}`)
+
+    await references.page.screenshot({ path: pathToScreenshot, ...options });
   }
 
   const evaluate = async (...args) => await references.page.evaluate(...args)
@@ -163,8 +172,18 @@ describe('E2E Test', () => {
         return await page.generateTestData()
       })
 
+      const x = 250 // Sidebar size
+      const width = windowDims.width - x
+
       // Take image after dataset generation
-      await takeScreenshot('dataset-creation', 500)
+      await takeScreenshot('dataset-creation', 500, {
+        clip: {
+          x,
+          y: 0,
+          width,
+          height: 220
+        }
+      })
 
       expect(existsSync(outputLocation)).toBe(true)
 
@@ -504,7 +523,7 @@ describe('E2E Test', () => {
     })
 
     test('Ensure there is one completed pipeline', async () => {
-      await takeScreenshot('home-page', 100)
+      await takeScreenshot('home-page-complete', 100)
       const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
       expect(nPipelines).toBe(1)
     })
