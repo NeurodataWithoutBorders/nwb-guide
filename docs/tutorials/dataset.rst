@@ -9,14 +9,13 @@ To get you started as quickly as possible, we’ve created a way to generate thi
 
   The **Phy** data format stores spike sorting results.
 
-Navigate to the **Settings** page using the main sidebar and initiate the dataset generation
-by pressing the **Generate** button in the top-right corner.
+Navigate to the **Settings** page using the main sidebar. Then press the **Generate** button in the top-right corner to initiate the dataset creation.
 
-.. figure:: ./screenshots/1-dataset-creation.png
+.. figure:: ./screenshots/dataset-creation.png
   :align: center
   :alt: Dataset Creation Screen
 
-  Press the Generate button on this screen to create the dataset.
+  Press the Generate button on the Settings page to create the dataset.
 
 The generated dataset will be organized as follows:
 
