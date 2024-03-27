@@ -1,6 +1,7 @@
 *.[oa]
 *~
 
+_build
 dist
 out
 tests/screenshots
