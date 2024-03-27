@@ -1,1 +1,1 @@
-export const sections = ["Project Structure", "Data Entry", "Conversion Preview", "Upload & Review"];
+export const sections = ["Project Structure", "Data Entry", "File Conversion", "Dataset Publication"];

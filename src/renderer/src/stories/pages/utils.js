@@ -63,8 +63,8 @@ export function merge(toMerge = {}, target = {}, mergeOptions = {}) {
     return target;
 }
 
-export function mapSessions(callback = (value) => value, globalState) {
-    return Object.entries(globalState.results)
+export function mapSessions(callback = (value) => value, toIterate = {}) {
+    return Object.entries(toIterate)
         .map(([subject, sessions]) => {
             return Object.entries(sessions).map(([session, info], i) => callback({ subject, session, info }, i));
         })

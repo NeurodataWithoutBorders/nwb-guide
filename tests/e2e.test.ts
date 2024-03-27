@@ -230,8 +230,6 @@ describe('E2E Test', () => {
 
 
         await toNextPage('structure')
-
-
     })
 
     test('Specify data formats', async () => {
@@ -438,13 +436,17 @@ describe('E2E Test', () => {
     })
 
     test('Review Neurosift visualization', async () => {
-
       await takeScreenshot('preview-page', 1000) // Finish loading Neurosift
-      await toNextPage('upload')
+      await toNextPage('conversion')
+    })
 
+    test('View the conversion results', async () => {
+
+      await takeScreenshot('conversion-results-page', 1000)
+      await toNextPage('upload')
       if (skipUpload) await toHome()
 
-    }) // Wait for full conversion to complete
+  })
 
     const uploadDescribe = skipUpload ? describe.skip: describe
 
