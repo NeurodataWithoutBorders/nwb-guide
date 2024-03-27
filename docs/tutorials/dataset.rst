@@ -5,11 +5,12 @@ Our tutorials focus on converting extracellular electrophysiology data in the Sp
 To get you started as quickly as possible, we’ve created a way to generate this Neuropixel-like dataset at the click of a button!
 
 .. note::
-  The **SpikeGLX** data format stores electrophysiology recordings
+  The **SpikeGLX** data format stores electrophysiology recordings.
+  
   The **Phy** data format stores spike sorting results.
 
 Navigate to the **Settings** page using the main sidebar and initiate the dataset generation
-by pressing the Generate button in the top-right corner.
+by pressing the **Generate** button in the top-right corner.
 
 .. figure:: ./screenshots/1-dataset-creation.png
   :align: center
