@@ -1,5 +1,5 @@
-The Dataset
-=======================================
+Dataset Generation
+==================
 
 Our tutorials focus on converting extracellular electrophysiology data in the SpikeGLX and Phy formats.
 To get you started as quickly as possible, we’ve created a way to generate this Neuropixel-like dataset at the click of a button!
