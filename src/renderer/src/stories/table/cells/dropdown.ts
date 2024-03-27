@@ -48,14 +48,14 @@ class Dropdown extends LitElement {
     li:hover {
         background-color: #f1f1f1;
     }
-    
+
   `;
 
   constructor(props: Partial<DropdownProps>) {
     super();
     Object.assign(this, props);
   }
-  
+
   static get properties() {
     return {
         open: { type: Boolean, reflect: true },
@@ -136,7 +136,7 @@ export class EnumEditor extends BaseRenderer {
         super(props);
         Object.assign(this, props);
 
-        this.INPUT.setAttribute("size", "1") 
+        this.INPUT.setAttribute("size", "1")
 
         const dropdown = this.DROPDOWN = new Dropdown({ items: this.schema.enum })
 

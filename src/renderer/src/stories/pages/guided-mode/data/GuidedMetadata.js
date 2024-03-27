@@ -27,12 +27,12 @@ import globalIcon from "../../../assets/global.svg?raw";
 
 const parentTableRenderConfig = {
     Electrodes: (metadata) => {
-        metadata.schema.description = "Download, modify, and re-upload data to change the electrode information."
-        return true
+        metadata.schema.description = "Download, modify, and re-upload data to change the electrode information.";
+        return true;
     },
     Units: (metadata) => {
         metadata.editable = false;
-        metadata.schema.description = "Update unit information directly on your source data."
+        metadata.schema.description = "Update unit information directly on your source data.";
         return true;
     },
 };
@@ -54,7 +54,7 @@ const tableRenderConfig = {
             ...metadata,
             editable: {
                 name: (value) => !aggregateRequirements.has(value),
-                data_type: (_, row) => !aggregateRequirements.has(row.name)
+                data_type: (_, row) => !aggregateRequirements.has(row.name),
             },
         });
     },
@@ -71,7 +71,7 @@ const tableRenderConfig = {
             },
             editable: {
                 name: (value) => !aggregateRequirements.has(value),
-                data_type: (_, row) => !aggregateRequirements.has(row.name)
+                data_type: (_, row) => !aggregateRequirements.has(row.name),
             },
         });
     },
@@ -466,7 +466,8 @@ export class GuidedMetadataPage extends ManagedPage {
 
                 const tableConfig =
                     tableRenderConfig[name] ?? parentTableRenderConfig[parentName] ?? tableRenderConfig["*"] ?? true;
-                if (typeof tableConfig === "function") return tableConfig.call(form, metadata, [...fullPath, name], this);
+                if (typeof tableConfig === "function")
+                    return tableConfig.call(form, metadata, [...fullPath, name], this);
                 else return tableConfig;
             },
             onThrow,

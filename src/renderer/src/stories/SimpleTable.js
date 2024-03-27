@@ -509,7 +509,6 @@ export class SimpleTable extends LitElement {
                     if (!cell) return; // No cell selected
 
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
-                    
 
                     // Validate with empty values before removing (to trigger any dependent validations)
                     const cols = this.#data[row];
@@ -862,7 +861,7 @@ export class SimpleTable extends LitElement {
 
         cell.simpleTableInfo.td = td;
 
-        td.setAttribute('editable', cell.editable);
+        td.setAttribute("editable", cell.editable);
 
         td.onmouseover = () => {
             if (this.#selecting) this.#selectCells(cell);

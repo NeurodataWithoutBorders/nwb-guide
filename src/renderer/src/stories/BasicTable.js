@@ -411,7 +411,7 @@ export class BasicTable extends LitElement {
                 // if (key in this.#itemProps) {
                 const { type } = this.#getType(value, this.#itemProps[key]);
                 if (type === "string") {
-                    if (value === undefined) value = ''
+                    if (value === undefined) value = "";
                     else value = `${value}`; // Convert to string if necessary
                 }
                 latest[key] = value;
@@ -535,12 +535,11 @@ export class BasicTable extends LitElement {
                       >
                   </div>`
                 : ""}
-
-            ${description ? 
-                html`<p style="margin: 0; margin-top: 10px">
-                    <small style="color: gray;">${description}</small>
-                </p>` : ''
-            }
+            ${description
+                ? html`<p style="margin: 0; margin-top: 10px">
+                      <small style="color: gray;">${description}</small>
+                  </p>`
+                : ""}
         `;
     }
 }
