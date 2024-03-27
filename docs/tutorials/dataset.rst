@@ -6,7 +6,7 @@ To get you started as quickly as possible, we’ve created a way to generate thi
 
 .. note::
   The **SpikeGLX** data format stores electrophysiology recordings.
-  
+
   The **Phy** data format stores spike sorting results.
 
 Navigate to the **Settings** page using the main sidebar and initiate the dataset generation

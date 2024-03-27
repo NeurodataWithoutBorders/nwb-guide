@@ -72,7 +72,7 @@ Then, select the relevant formats—in this case, **SpikeGLX Recording** and **P
   :align: center
   :alt: Searching for SpikeGLX in the format pop-up
 
-The selected formats will then display above the button. 
+The selected formats will then display above the button.
 
 
 .. figure:: ./screenshots/10-interface-added.png
@@ -135,7 +135,7 @@ As before, yellow boxes indicate suggestions that are encouraged but not require
 
 Conversion Preview
 ^^^^^^^^^^^^^^^^^^
-On the Conversion Preview, Neurosift allows you to explore the structure of the NWB file and ensure your data matches your expectations. 
+On the Conversion Preview, Neurosift allows you to explore the structure of the NWB file and ensure your data matches your expectations.
 
 
 .. figure:: ./screenshots/17-preview-page.png
