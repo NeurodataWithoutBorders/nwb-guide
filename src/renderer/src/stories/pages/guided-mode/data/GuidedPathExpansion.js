@@ -281,7 +281,7 @@ export class GuidedPathExpansionPage extends Page {
                 const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
 
                 const existingMetadata = existingResults.metadata;
-                const existingSourceData =existingResults.source_data;
+                const existingSourceData = existingResults.source_data;
 
                 const source_data = {};
                 for (let key in globalState.interfaces) {
