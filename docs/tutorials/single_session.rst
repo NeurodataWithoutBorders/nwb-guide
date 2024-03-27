@@ -108,7 +108,7 @@ The General Metadata for the GUIDE has already been specified because the Sessio
   :alt: Metadata page with invalid Subject information
 
 
-However, we still need to add the Subject information—as noted by the red accents around that item. Let’s say that our subject is a male (sex) mouse (species) that was born on January 10th of this year (DOB).
+However, we still need to add the Subject information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P30D.
 
 .. figure:: ./screenshots/15-metadata-open.png
   :align: center
