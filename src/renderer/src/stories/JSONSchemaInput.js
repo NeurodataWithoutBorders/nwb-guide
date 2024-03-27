@@ -531,6 +531,7 @@ export class JSONSchemaInput extends LitElement {
     // form,
     // pattern
     // showLabel
+    // description
     controls = [];
     // required;
     validateOnChange = true;
@@ -646,6 +647,8 @@ export class JSONSchemaInput extends LitElement {
 
         if (input === null) return null; // Hide rendering
 
+        const description = this.description ?? schema.description;
+
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
                 this.conditional ? "conditional" : ""
@@ -662,10 +665,10 @@ export class JSONSchemaInput extends LitElement {
                 </label>
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
                 ${
-                    schema.description
+                    description
                         ? html`<p class="guided--text-input-instructions">
-                              ${unsafeHTML(capitalize(schema.description))}${[".", "?", "!"].includes(
-                                  schema.description.slice(-1)[0]
+                              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(
+                                description.slice(-1)[0]
                               )
                                   ? ""
                                   : "."}

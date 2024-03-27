@@ -16,10 +16,10 @@ const isRequired = (col, schema) => {
     return schema.required?.includes(col);
 };
 
-export const getEditable = (value, config, colName) => {
+export const getEditable = (value, rowData = {}, config, colName) => {
     if (typeof config === "boolean") return config;
-    if (typeof config === "function") return config(value);
-    return getEditable(value, config?.[colName] ?? true);
+    if (typeof config === "function") return config(value, rowData);
+    return getEditable(value, rowData, config?.[colName] ?? true);
 };
 
 export function sortTable(schema, keyColumn, order) {

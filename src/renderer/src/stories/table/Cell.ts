@@ -4,7 +4,7 @@ import { NestedInputCell } from "./cells/input"
 
 import { TableCellBase } from "./cells/base"
 import { DateTimeCell } from "./cells/date-time"
-
+import { DropdownCell } from "./cells/dropdown"
 
 import { getValue, renderValue } from './convert'
 
@@ -71,11 +71,11 @@ export class TableCell extends LitElement {
         `
     }
 
-    // static get properties() {
-    //     return {
-    //         value: { reflect: true }
-    //     }
-    // }
+    static get properties() {
+        return {
+            editable: { reflect: true }
+        }
+    }
 
     type = 'text'
 
@@ -115,6 +115,10 @@ export class TableCell extends LitElement {
     }
 
     set value(value) {
+
+
+        if (!this.editable && this.interacted === true) return // Don't set value if not editable
+
         if (this.input) this.input.set(renderValue(value, this.schema)) // Allow null to be set directly
         this.#value = this.input
                             ? this.input.getValue() // Ensure all operations are undoable / value is coerced
@@ -173,6 +177,8 @@ export class TableCell extends LitElement {
         this.interacted = persistentInteraction
         // this.value = value
 
+        if (!this.editable) return // Don't set value if not editable
+
         if (this.input) this.input.set(value)  // Ensure all operations are undoable
         else this.#value = value // Silently set value if not rendered yet
     }
@@ -216,6 +222,11 @@ export class TableCell extends LitElement {
         } else if (this.schema.type === "object") {
             cls = NestedInputCell
             this.type = "table"
+        }
+
+        else if (this.schema.enum) {
+            cls = DropdownCell
+            this.type = "dropdown"
         }
 
         // Only actually rerender if new class type

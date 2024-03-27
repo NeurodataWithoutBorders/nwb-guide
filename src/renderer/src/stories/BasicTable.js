@@ -392,7 +392,7 @@ export class BasicTable extends LitElement {
                 }
             })
         ); // Map to actual values using JSON.parse
-        console.log(data);
+
         let header = data.shift();
 
         const structuredData = data.map((row) =>
@@ -410,7 +410,10 @@ export class BasicTable extends LitElement {
             Object.entries(cols).forEach(([key, value]) => {
                 // if (key in this.#itemProps) {
                 const { type } = this.#getType(value, this.#itemProps[key]);
-                if (type === "string") value = `${value}`; // Convert to string if necessary
+                if (type === "string") {
+                    if (value === undefined) value = ''
+                    else value = `${value}`; // Convert to string if necessary
+                }
                 latest[key] = value;
                 // }
             }); // Only include data from schema
@@ -467,6 +470,8 @@ export class BasicTable extends LitElement {
         }
 
         const data = (this.#data = this.#getData());
+
+        const description = this.#schema.description;
 
         return html`
             <div class="table-container">
@@ -530,6 +535,12 @@ export class BasicTable extends LitElement {
                       >
                   </div>`
                 : ""}
+
+            ${description ? 
+                html`<p style="margin: 0; margin-top: 10px">
+                    <small style="color: gray;">${description}</small>
+                </p>` : ''
+            }
         `;
     }
 }

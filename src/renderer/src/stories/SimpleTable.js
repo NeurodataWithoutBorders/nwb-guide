@@ -68,6 +68,10 @@ export class SimpleTable extends LitElement {
                 border: none;
             }
 
+            td[editable="false"] {
+                background: whitesmoke;
+            }
+
             :host([loading]:not([waiting])) table {
                 height: 250px;
             }
@@ -490,10 +494,11 @@ export class SimpleTable extends LitElement {
                 id: "add-row",
                 label: "Add Row",
                 onclick: (path) => {
-                    const cell = this.#getCellFromPath(path);
-                    if (!cell) return this.addRow(); // No cell selected
-                    const { i } = cell.simpleTableInfo;
-                    this.addRow(i); //2) // TODO: Support adding more than one row
+                    // const cell = this.#getCellFromPath(path);
+                    // if (!cell) return this.addRow(); // No cell selected
+                    // const { i } = cell.simpleTableInfo;
+                    const lastRow = this.#cells.length - 1;
+                    this.addRow(lastRow); // Just insert row at the end
                 },
             },
             remove: {
@@ -504,6 +509,7 @@ export class SimpleTable extends LitElement {
                     if (!cell) return; // No cell selected
 
                     const { i, row } = cell.simpleTableInfo; // TODO: Support detecting when the user would like to remove more than one row
+                    
 
                     // Validate with empty values before removing (to trigger any dependent validations)
                     const cols = this.#data[row];
@@ -782,7 +788,8 @@ export class SimpleTable extends LitElement {
         const schema = this.#itemProps[fullInfo.col];
 
         const ignore = getIgnore(this.ignore, [fullInfo.col]);
-        const isEditable = getEditable(value, this.editable, fullInfo.col);
+        const rowData = this.#data[row];
+        const isEditable = getEditable(value, rowData, this.editable, fullInfo.col);
 
         // Track the cell renderer
         const cell = new TableCell({
@@ -850,9 +857,13 @@ export class SimpleTable extends LitElement {
 
     #renderCell = (value, info) => {
         const td = document.createElement("td");
+
         const cell = value instanceof TableCell ? value : this.#createCell(value, info);
 
         cell.simpleTableInfo.td = td;
+
+        td.setAttribute('editable', cell.editable);
+
         td.onmouseover = () => {
             if (this.#selecting) this.#selectCells(cell);
         };

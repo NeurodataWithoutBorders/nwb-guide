@@ -116,6 +116,7 @@ export class TableCellBase extends LitElement {
     #editableClose = () => this.editToggle(false)
 
     toggle (state = !this.#active) {
+
         if (state === this.#active) return
 
         if (state) {
@@ -125,6 +126,8 @@ export class TableCellBase extends LitElement {
             this.setAttribute('editing', '')
 
             const listenForEnter = (ev: KeyboardEvent) => {
+                console.log(ev)
+
                 if (ev.key === 'Enter') {
                     ev.preventDefault()
                     ev.stopPropagation()
@@ -158,6 +161,7 @@ export class TableCellBase extends LitElement {
                 document.removeEventListener('click', this.#editableClose)
             } else {
                 current = this.#editor.value
+                console.log('Editor value', current)
                 this.interacted = true
                 if (this.#editor && this.#editor.onEditEnd) this.#editor.onEditEnd()
             }
