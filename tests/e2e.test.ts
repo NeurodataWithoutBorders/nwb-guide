@@ -105,7 +105,7 @@ describe('E2E Test', () => {
 
   const takeScreenshot = async (label, delay = 0, options: ScreenshotOptions = { fullPage: true }) => {
     if (delay) await sleep(delay)
-    
+
     const pathToScreenshot = join(screenshotPath, `${label}.png`)
 
     if (existsSync(pathToScreenshot)) return console.error(`Screenshot already exists: ${pathToScreenshot}`)
