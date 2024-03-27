@@ -160,7 +160,18 @@ describe('E2E Test', () => {
 
     datasetTestFunction('Create tutorial dataset', async () => {
 
-      const outputLocation = await evaluate(async () => {
+      const x = 250 // Sidebar size
+      const width = windowDims.width - x
+
+      const screenshotClip = {
+        x,
+        y: 0,
+        width,
+        height: 220
+      }
+
+
+      await evaluate(async () => {
 
         // Transition to settings page
         const dashboard = document.querySelector('nwb-dashboard')
@@ -169,21 +180,20 @@ describe('E2E Test', () => {
         // Generate test data
         const page = dashboard.page
         page.deleteTestData()
-        return await page.generateTestData()
       })
+      
+      await takeScreenshot('dataset-creation', 300, { clip: screenshotClip })
 
-      const x = 250 // Sidebar size
-      const width = windowDims.width - x
+      const outputLocation = await evaluate(async () => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        const outputLocation = await page.generateTestData()
+        page.requestUpdate()
+        return outputLocation
+      })
 
       // Take image after dataset generation
-      await takeScreenshot('dataset-creation', 500, {
-        clip: {
-          x,
-          y: 0,
-          width,
-          height: 220
-        }
-      })
+      await takeScreenshot('dataset-created', 500, { clip: screenshotClip })
 
       expect(existsSync(outputLocation)).toBe(true)
 
