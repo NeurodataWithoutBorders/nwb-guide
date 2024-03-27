@@ -181,7 +181,7 @@ describe('E2E Test', () => {
         const page = dashboard.page
         page.deleteTestData()
       })
-      
+
       await takeScreenshot('dataset-creation', 300, { clip: screenshotClip })
 
       const outputLocation = await evaluate(async () => {
