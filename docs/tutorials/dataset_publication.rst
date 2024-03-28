@@ -8,14 +8,14 @@ Resume the conversion on the home page, then navigate back to the **Workflow** p
 Change your original selection to specify that you’d like to publish your data to the DANDI Archive.
 
 .. note::
-    Gaining access to the DANDI Archive can involve a long approval process. Make sure you’ve created an account on the :dandi-staging:`DANDI staging instance <>` before starting this section of the tutorial. 
+    Gaining access to the DANDI Archive can involve a long approval process. Make sure you’ve created an account on the :dandi-staging:`DANDI staging instance <>` before starting this section of the tutorial.
 
     We’re going use the Staging instance for this tutorial so we don’t crowd the DANDI Archive with tutorial outputs! However, you’ll likely want to publish real data on the main instance—which will require a separate approval process.
 
     Once you receive notice that your account was approved, you can move on to the next steps.
 
 
-Navigate back to the **Conversion Review** page and ensure that you save the workflow change as you do. 
+Navigate back to the **Conversion Review** page and ensure that you save the workflow change as you do.
 
 You'll now notice that the **Exit Pipeline** button has been replaced with **Next**, allowing you to move forward with publication on the DANDI Archive.
 
@@ -34,7 +34,7 @@ To get your API key, visit the :dandi-staging:`staging website <>` and click on 
   :alt: DANDI staging API key added
 
 
-Once you have specified your Staging API Key, the **Dandiset** input will allow you to select any existing Dandiset associated with your account by ID (e.g. 207698) or name (e.g. NWB GUIDE Test). 
+Once you have specified your Staging API Key, the **Dandiset** input will allow you to select any existing Dandiset associated with your account by ID (e.g. 207698) or name (e.g. NWB GUIDE Test).
 
 Continue to the next page to trigger your upload to the DANDI Archive.
 

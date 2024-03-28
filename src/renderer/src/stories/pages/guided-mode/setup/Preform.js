@@ -102,7 +102,7 @@ export class GuidedPreform extends Page {
     beforeSave = async () => {
         await this.form.validate();
         this.info.globalState.project.workflow = this.state;
-    }
+    };
 
     footer = {
         onNext: async () => {
@@ -156,7 +156,7 @@ export class GuidedPreform extends Page {
                     }
                 });
             },
-            onUpdate: () => this.unsavedUpdates = true,
+            onUpdate: () => (this.unsavedUpdates = true),
 
             // // Save on each workflow change
             // onUpdate: async () => {

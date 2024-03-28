@@ -18,7 +18,7 @@ const datasetScreenshotClip = {
   height: 220
 }
 
-  
+
 beforeAll(() => {
 
   if (config.regenerateTestData) {
@@ -132,18 +132,18 @@ describe('E2E Test', () => {
         await evaluate(async ( workflow ) => {
           const dashboard = document.querySelector('nwb-dashboard')
           const page = dashboard.page
-    
+
           for (let key in workflow) {
             const input = page.form.getFormElement([ key ])
             input.updateData(workflow[key])
           }
-    
+
           page.form.requestUpdate() // Ensure the form is updated visually
 
           await page.save()
-    
-        }, { upload_to_dandi: true })    
-        
+
+        }, { upload_to_dandi: true })
+
         await toNextPage('structure') // Save data without a popup
         await to('//conversion')
 
