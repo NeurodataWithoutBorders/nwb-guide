@@ -21,7 +21,7 @@ This page helps you automatically identify source data for multiple subjects / s
 File locations are specified as **format strings** that define source data paths of each selected data format.
 
 .. note::
-    Format strings are one component of NeuroConv's **path expansion language**, which has some nifty features for manually specifying complex paths. Complete documentation of the path expansion feature of NeuroConv can be found :path-expansion-guide:`here <>` .
+    Format strings are one component of NeuroConv's **path expansion language**, which has some nifty features for manually specifying complex paths. Complete documentation of the path expansion feature of NeuroConv can be found :path-expansion-guide:`here <>`.
 
 While you don’t have to specify a format strings for all of the pipeline’s data formats, we’re going to find all of our data here for this tutorial.
 
