@@ -53,7 +53,7 @@ Additionally, we’ll turn off the option to upload to the DANDI Archive and app
 
 Data Formats
 ^^^^^^^^^^^^
-Next, you’ll specify the data formats you’re working with on the Data Formats page. The GUIDE supports 40+ total neurophysiology formats. A full registry of available formats is available here.
+Next, you’ll specify the data formats you’re working with on the Data Formats page. The GUIDE supports 40+ total neurophysiology formats. A full registry of available formats is available :doc:`here </format_support>`.
 
 .. figure:: ../assets/tutorials/single/formats-page.png
   :align: center
@@ -91,6 +91,10 @@ Data Entry
 Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
 On this page, specify the relevant **.bin** (Spikeglx) file and **phy** folder so that the GUIDE can find this source data to complete the conversion.
+
+As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the `~/NWB_GUIDE/test-data/data` directory.
+
+You can either click the file selector to navigate to the file or drag-and-drop into the GUIDE from your file navigator.
 
 .. figure:: ../assets/tutorials/single/sourcedata-page-specified.png
   :align: center

@@ -17,32 +17,41 @@ Navigate to the **Settings** page using the main sidebar. Then press the **Gener
 
   Press the Generate button on the Settings page to create the dataset.
 
-The generated dataset will be organized as follows:
+The generated data will populate in the `~/NWB_GUIDE/test_data` directory and include a `data` folder with the original data as well as a `dataset` folder that duplicates this `data` across multiple subjects and sessions.
 
 .. code-block:: bash
 
-    dataset/
-    ├── mouse1/
-    │   ├── mouse1_Session1/
-    │   │   ├── mouse1_Session1_g0/
-    │   │   │   ├── mouse1_Session1_g0_imec/
-    │   │   │   │   ├── mouse1_Session1_g0_imec.ap.bin
-    │   │   │   │   ├── mouse1_Session1_g0_imec.ap.meta
-    │   │   │   │   ├── mouse1_Session1_g0_imec.lf.bin
-    │   │   │   │   └── mouse1_Session1_g0_imec.lf.meta
-    │   │   │   └── mouse1_Session1_phy/
-    │   │   │
-    │   │   └── mouse1_Session2/
-    │   │       ├── mouse1_Session2_g0/
-    │   │       │   ...
-    │   │       └── mouse1_Session2_phy/
-    │   │           ...
-    │   │
-    └── mouse2/
-        ├── mouse2_Session1/
-        │   ...
-        │
-        └── mouse2_Session2/
-            ...
+  test-data/
+  ├── data/
+  │   ├── spikeglx/
+  │   │   ├── Session1_g0/
+  │   │   │   ├── Session1_g0_imec0/
+  │   │   │   │   ├── Session1_g0_t0.imec0.ap.bin
+  │   │   │   │   ├── Session1_g0_t0.imec0.ap.meta
+  │   │   │   │   ├── Session1_g0_t0.imec0.lf.bin
+  │   │   │   │   └── Session1_g0_t0.imec0.lf.meta
+  │   │   └── phy/
+  ├── dataset/
+  │   ├── mouse1/
+  │   │   ├── mouse1_Session1/
+  │   │   │   ├── mouse1_Session1_g0/
+  │   │   │   │   ├── mouse1_Session1_g0_imec0/
+  │   │   │   │   │   ├── mouse1_Session1_g0_t0.imec0.ap.bin
+  │   │   │   │   │   ├── mouse1_Session1_g0_t0.imec0.ap.meta
+  │   │   │   │   │   ├── mouse1_Session1_g0_t0.imec0.lf.bin
+  │   │   │   │   │   └── mouse1_Session1_g0_t0.imec0.lf.meta
+  │   │   │   │   └── mouse1_Session1_phy/
+  │   │   │   └── mouse1_Session2/
+  │   │   │       ├── mouse1_Session2_g0/
+  │   │   │       │   ...
+  │   │   │       └── mouse1_Session2_phy/
+  │   │   │           ...
+  │   ├── mouse2/
+  │   │   ├── mouse2_Session1/
+  │   │   │   ...
+  │   │   └── mouse2_Session2/
+  │   │       ...
+
+
 
 Now you’re ready to start your first conversion using the NWB GUIDE!
