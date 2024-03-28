@@ -39,7 +39,8 @@
     "deploy:electron:linux": "electron-builder build --linux --publish always",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "chromatic": "npx chromatic"
+    "chromatic": "npx chromatic",
+    "build:docs": "sphinx-build -b html docs/ _build/html/"
   },
   "lint-staged": {
     "./**/*.{html|css|js|md|yml}": [

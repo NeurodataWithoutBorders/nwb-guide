@@ -7,18 +7,24 @@ import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
 
 import paths from "../paths.config.json" assert { type: "json" };
+import { ScreenshotOptions } from 'puppeteer'
 
 // ------------------------------------------------------------------
 // ------------------------ Path Definitions ------------------------
 // ------------------------------------------------------------------
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const screenshotPath = join(__dirname, 'screenshots')
+const screenshotPath = join(__dirname, '..', 'docs', 'tutorials', 'screenshots')
 const guideRootPath = join(homedir(), paths.root)
 const testRootPath = join(guideRootPath, '.test')
 const testDataRootPath = join(testRootPath, 'test-data')
 const testDataPath = join(testDataRootPath, 'data')
 const testDatasetPath = join(testDataRootPath, 'dataset')
+
+const windowDims = {
+  width: 1280,
+  height: 800
+}
 
 const alwaysDelete = [
   join(testRootPath, 'pipelines'),
@@ -65,7 +71,8 @@ const subjectInfo = {
   age: 'P30D'
 }
 
-const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
+// const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
+const regenerateTestData = true // Force regeneration
 
 const dandiInfo = {
   id: '212750',
@@ -96,11 +103,14 @@ describe('E2E Test', () => {
 
   const references = connect()
 
-  let nScreenshots = 0
-  const takeScreenshot = async (label, delay = 0) => {
+  const takeScreenshot = async (label, delay = 0, options: ScreenshotOptions = { fullPage: true }) => {
     if (delay) await sleep(delay)
-    await references.page.screenshot({ path: join(screenshotPath, `${nScreenshots}-${label}.png`), fullPage: true });
-    nScreenshots++
+
+    const pathToScreenshot = join(screenshotPath, `${label}.png`)
+
+    if (existsSync(pathToScreenshot)) return console.error(`Screenshot already exists: ${pathToScreenshot}`)
+
+    await references.page.screenshot({ path: pathToScreenshot, ...options });
   }
 
   const evaluate = async (...args) => await references.page.evaluate(...args)
@@ -150,7 +160,18 @@ describe('E2E Test', () => {
 
     datasetTestFunction('Create tutorial dataset', async () => {
 
-      const outputLocation = await evaluate(async () => {
+      const x = 250 // Sidebar size
+      const width = windowDims.width - x
+
+      const screenshotClip = {
+        x,
+        y: 0,
+        width,
+        height: 220
+      }
+
+
+      await evaluate(async () => {
 
         // Transition to settings page
         const dashboard = document.querySelector('nwb-dashboard')
@@ -159,11 +180,20 @@ describe('E2E Test', () => {
         // Generate test data
         const page = dashboard.page
         page.deleteTestData()
-        return await page.generateTestData()
+      })
+
+      await takeScreenshot('dataset-creation', 300, { clip: screenshotClip })
+
+      const outputLocation = await evaluate(async () => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        const outputLocation = await page.generateTestData()
+        page.requestUpdate()
+        return outputLocation
       })
 
       // Take image after dataset generation
-      await takeScreenshot('dataset-creation', 500)
+      await takeScreenshot('dataset-created', 500, { clip: screenshotClip })
 
       expect(existsSync(outputLocation)).toBe(true)
 
@@ -503,7 +533,7 @@ describe('E2E Test', () => {
     })
 
     test('Ensure there is one completed pipeline', async () => {
-      await takeScreenshot('home-page', 100)
+      await takeScreenshot('home-page-complete', 100)
       const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
       expect(nPipelines).toBe(1)
     })
