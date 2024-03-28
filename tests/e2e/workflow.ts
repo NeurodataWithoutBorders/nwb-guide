@@ -179,7 +179,7 @@ export default async function runWorkflow (name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'subject-error'), 500)
 
-    await evaluate(( subjectInfo ) => {
+    await evaluate(( { common, multiple } ) => {
       const dashboard = document.querySelector('nwb-dashboard')
 
       const page = dashboard.page
@@ -191,6 +191,7 @@ export default async function runWorkflow (name, workflow, identifier) {
 
 
       for (let name in data) {
+        const subjectInfo = { ...common, ...( multiple[name] ?? {} )}
         data[name] = { ...data[name], ...subjectInfo }
       }
 
@@ -276,11 +277,13 @@ export default async function runWorkflow (name, workflow, identifier) {
     if (!willProvideSubjectInfo) {
 
       // Update for single session
-      await evaluate((subjectInfo) => {
+      await evaluate(({ common, single = {} }) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         const firstSessionForm = page.forms[0].form
         const form = firstSessionForm.forms['Subject']
+
+        const subjectInfo = { ...common, ...single }
 
         for (let key in subjectInfo) {
           const input = form.getFormElement([key])
