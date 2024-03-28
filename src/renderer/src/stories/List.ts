@@ -155,15 +155,19 @@ export class List extends LitElement {
       this.#previousItems = this.#items.map(item => ({...item})) // Clone items
       const oldObject = this.object
       this.#updateObject()
+      
+      if (this.#initialized) {
 
-      this.onChange({
-        items: this.#items,
-        object: this.object
-      },
-      {
-        items: oldList,
-        object: oldObject
-      })
+        this.onChange({
+          items: this.#items,
+          object: this.object
+        },
+        {
+          items: oldList,
+          object: oldObject
+        })
+      }
+
       this.requestUpdate('items', oldList)
     }
 
@@ -176,6 +180,8 @@ export class List extends LitElement {
     declare unordered: boolean
 
     declare listStyles: any
+
+    #initialized = false
 
     allowDrop = (ev) => ev.preventDefault();
 
@@ -229,6 +235,8 @@ export class List extends LitElement {
       this.transform = props.transform
 
       if (props.onChange) this.onChange = props.onChange
+
+      this.#initialized = true
 
     }
 
