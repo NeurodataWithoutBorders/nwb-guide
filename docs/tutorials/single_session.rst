@@ -53,7 +53,7 @@ Additionally, we’ll turn off the option to upload to the DANDI Archive and app
 
 Data Formats
 ^^^^^^^^^^^^
-Next, you’ll specify the data formats you’re working with on the Data Formats page. The GUIDE supports 40+ total neurophysiology formats. A full registry of available formats is available here.
+Next, you’ll specify the data formats you’re working with on the Data Formats page. The GUIDE supports 40+ total neurophysiology formats. A full registry of available formats is available :doc:`here </format_support>`.
 
 .. figure:: ../assets/tutorials/single/formats-page.png
   :align: center
@@ -92,6 +92,10 @@ Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
 On this page, specify the relevant **.bin** (Spikeglx) file and **phy** folder so that the GUIDE can find this source data to complete the conversion.
 
+As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the `~/NWB_GUIDE/test-data/data` directory.
+
+You can either click the file selector to navigate to the file or drag-and-drop into the GUIDE from your file navigator.
+
 .. figure:: ../assets/tutorials/single/sourcedata-page-specified.png
   :align: center
   :alt: Source Data page with source locations specified
@@ -101,7 +105,7 @@ Session Metadata
 ^^^^^^^^^^^^^^^^
 The file metadata page is a great opportunity to add rich annotations to the file, which will be read by anyone reusing your data in the future!
 
-The General Metadata for the GUIDE has already been specified because the Session Start Time was automatically extracted from the SpikeGLX source data.
+The Session Start Time in the General Metadata section is already specified because this field was automatically extracted from the SpikeGLX source data.
 
 .. figure:: ../assets/tutorials/single/metadata-nwbfile.png
   :align: center
@@ -126,7 +130,7 @@ This dataset will also have **Ecephys** metadata extracted from the SpikeGLX sou
 
 Let's leave this as-is and advance to the next page.
 
-As you advance, you’ll trigger a stub conversion and be shown a progress bar that indicates how many files are left.
+The next step generates a preview file and displays real-time progress throughout the conversion process.
 
 File Conversion
 ---------------
@@ -134,18 +138,17 @@ File Conversion
 Inspector Report
 ^^^^^^^^^^^^^^^^
 
-The Inspector Report page allows you to validate the generated stub NWB files against the latest Best Practices and determine whether you’ve provided all the metadata for your files. Using the internal sidebar, you can scope the displayed errors by a particular subject or session.
+The Inspector Report page allows you to validate the preview file against the latest Best Practices and make suggestions to improve the content or representations.
 
 .. figure:: ../assets/tutorials/single/inspect-page.png
   :align: center
   :alt: NWB Inspector report
 
-As before, yellow boxes indicate suggestions that are encouraged but not required.
 
 
 Conversion Preview
 ^^^^^^^^^^^^^^^^^^
-On the Conversion Preview, Neurosift allows you to explore the structure of the NWB file and ensure your data matches your expectations.
+On the Conversion Preview, Neurosift allows you to explore the structure of the NWB file and ensure the packaged data matches your expectations.
 
 
 .. figure:: ../assets/tutorials/single/preview-page.png
@@ -163,4 +166,4 @@ Congratulations on finishing your first conversion of neurophysiology files usin
   :align: center
   :alt: Conversion results page with a list of converted files
 
-This was a pretty simple workflow. But what if you have multiple sessions to convert?
+This was a straightforward workflow with only a single session... But what if you have multiple sessions to convert?
