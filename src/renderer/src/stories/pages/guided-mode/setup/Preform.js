@@ -21,7 +21,6 @@ const questions = {
                 condition: [false, undefined],
                 default: "",
                 required: true,
-                attribute: "hidden",
             },
         },
     },
@@ -33,7 +32,6 @@ const questions = {
                 condition: [false, undefined],
                 default: "",
                 required: true,
-                attribute: "hidden",
             },
         },
     },
@@ -44,6 +42,11 @@ const questions = {
             multiple_sessions: { default: false },
         },
         default: false,
+    },
+    upload_to_dandi: {
+        type: "boolean",
+        title: "Would you like to upload your data to DANDI?",
+        default: true,
     },
 };
 
@@ -127,8 +130,9 @@ export class GuidedPreform extends Page {
                           });
 
                     const dependentEl = this.inputs[dependent.name];
+                    const dependentParent = dependentEl.parentElement;
 
-                    const attr = dependent.attribute ?? "disabled";
+                    const attr = dependent.attribute ?? "hidden";
 
                     let condition = (v) => !!v;
                     if (!("condition" in dependent)) {
@@ -138,13 +142,13 @@ export class GuidedPreform extends Page {
                     else console.warn("Invalid condition", dependent.condition);
 
                     if (uniformDeps.every(({ name }) => condition(parent[name]))) {
-                        dependentEl.removeAttribute(attr);
+                        dependentParent.removeAttribute(attr);
                         if ("required" in dependent) dependentEl.required = dependent.required;
                         if ("__cached" in dependent) dependentEl.updateData(dependent.__cached);
                     } else {
                         if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
                         dependentEl.updateData(dependent.default);
-                        dependentEl.setAttribute(attr, true);
+                        dependentParent.setAttribute(attr, true);
                         if ("required" in dependent) dependentEl.required = !dependent.required;
                     }
                 });

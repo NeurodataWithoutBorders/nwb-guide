@@ -229,7 +229,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     render() {
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
-        this.forms = this.mapSessions(this.createForm, this.localState);
+        this.forms = this.mapSessions(this.createForm, this.localState.results);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {

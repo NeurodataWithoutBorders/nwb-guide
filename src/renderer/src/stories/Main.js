@@ -3,8 +3,22 @@ import useGlobalStyles from "./utils/useGlobalStyles.js";
 import { GuidedFooter } from "./pages/guided-mode/GuidedFooter";
 import { GuidedCapsules } from "./pages/guided-mode/GuidedCapsules.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
-
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
+export const checkIfPageIsSkipped = (page, workflowValues = {}) => {
+    if (page.workflow) {
+        const workflow = page.workflow;
+        const skipped = Object.entries(workflow).some(([key, state]) => {
+            const value = workflowValues[key];
+            if (state.condition) return state.condition(value) ? state.skip : false;
+            if (!value) return state.skip;
+        });
+
+        return skipped;
+    }
+
+    return false;
+};
 
 const componentCSS = `
     :host {
@@ -97,6 +111,20 @@ export class Main extends LitElement {
         section.scrollTop = 0;
     }
 
+    #hasAvailableNextPages = (page) => {
+        const allNext = [];
+        let currentPage = page;
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+        while (currentPage.info.next) {
+            const nextPage = currentPage.info.next;
+            const skipped = checkIfPageIsSkipped(nextPage, workflowValues);
+            if (!skipped) allNext.push(nextPage);
+            currentPage = nextPage;
+        }
+
+        return allNext.length > 0;
+    };
+
     render() {
         let { page = "", sections = {} } = this.toRender ?? {};
 
@@ -113,8 +141,10 @@ export class Main extends LitElement {
             if (info.parent) {
                 if (!("footer" in page)) footer = true; // Allow navigating laterally if there is a next page
 
+                const hasAvailableNextPages = this.#hasAvailableNextPages(page);
+
                 // Go to home screen if there is no next page
-                if (!info.next) {
+                if (!info.next || !hasAvailableNextPages) {
                     footer = Object.assign(
                         {
                             exit: false,

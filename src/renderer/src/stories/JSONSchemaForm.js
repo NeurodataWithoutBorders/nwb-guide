@@ -118,6 +118,10 @@ const componentCSS = `
         gap: 10px;
     }
 
+    .form-section[hidden] {
+        display: none;
+    }
+
     #empty {
         display: flex;
         align-items: center;
@@ -509,26 +513,22 @@ export class JSONSchemaForm extends LitElement {
                 const resolvedSchema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
-                // Allow for constructing types from object types
-                if (
-                    e.message.includes("is not of a type(s)") &&
-                    "properties" in resolvedSchema &&
-                    resolvedSchema.type === "string"
-                )
-                    return;
+                // Allow referring to floats as null (i.e. JSON NaN representation)
+                if (e.message.includes("is not of a type(s)")) {
+                    if (resolvedSchema.type === "number") {
+                        if (resolvedValue === "NaN") return;
+                        else if (resolvedValue === null) return;
+                        else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                    } else if (resolvedSchema.type === "string") {
+                        if ("properties" in resolvedSchema) return; // Allow for constructing types from object types
+                    }
+                }
 
                 // Ignore required errors if value is empty
                 if (e.name === "required" && this.validateEmptyValues === null && !(e.property in e.instance)) return;
 
                 // Non-Strict Rule
                 if (resolvedSchema.strict === false && e.message.includes("is not one of enum values")) return;
-
-                // Allow referring to floats as null (i.e. JSON NaN representation)
-                if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN") return;
-                    else if (resolvedValue === null) {
-                    } else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
-                }
 
                 const prevHeader = name ? header(name) : "Row";
 

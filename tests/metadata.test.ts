@@ -31,7 +31,7 @@ describe('metadata is specified correctly', () => {
         // Allow mouse (full list populated from server)
         baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
 
-        const result = mapSessions(info => createResults(info, globalState), globalState)
+        const result = mapSessions(info => createResults(info, globalState), globalState.results)
         const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
@@ -135,7 +135,6 @@ test('pop-up inputs work correctly', async () => {
 
     expect(hasErrors).toBe(false) // Is valid
 })
-
 
 // TODO: Convert an integration
 test('inter-table updates are triggered', async () => {
