@@ -1,10 +1,9 @@
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
-import { existsSync } from 'node:fs'
 
 import paths from "../../paths.config.json" assert { type: "json" };
-import { connect } from '../puppeteer';
+import { connect as connectToElectron } from '../puppeteer';
 
 // ------------------------------------------------------------------
 // ------------------------ Path Definitions ------------------------
@@ -97,4 +96,4 @@ export const publish = dandiInfo.token ? true : false
 if (!publish) console.log('No DANDI API key provided. Will skip dataset publication step...')
 
 
-export const references = connect()
+export const references = connectToElectron()
