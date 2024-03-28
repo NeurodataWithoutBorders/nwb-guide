@@ -214,8 +214,7 @@ test('inter-table updates are triggered', async () => {
         else cell.setInput(baseRow[i].value) // Otherwise carry over info
     })
 
-    // Wait a second for new row values to resolve as table data (async)
-    await new Promise((res) => setTimeout(() => res(true), 1000))
+    form.requestUpdate() // Re-render the form to update the table
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate().then(() => false).catch((e) => true)
