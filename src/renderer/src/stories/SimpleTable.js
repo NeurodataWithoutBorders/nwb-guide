@@ -566,23 +566,21 @@ export class SimpleTable extends LitElement {
                 target: this.shadowRoot.querySelector("table"),
                 items,
                 onOpen: (path) => {
-
                     const checks = {
                         row_remove: {
                             check: this.editable.__row_remove,
-                            element: this.#context.shadowRoot.querySelector("#remove-row")
+                            element: this.#context.shadowRoot.querySelector("#remove-row"),
                         },
 
                         row_add: {
                             check: this.editable.__row_add,
-                            element: this.#context.shadowRoot.querySelector("#add-row")
-                        }
-                    }
+                            element: this.#context.shadowRoot.querySelector("#add-row"),
+                        },
+                    };
 
                     const hasChecks = Object.values(checks).some(({ check }) => check);
 
                     if (hasChecks) {
-
                         const cell = this.#getCellFromPath(path);
                         const info = cell.simpleTableInfo;
                         const rowNames = Object.keys(this.#data);
@@ -593,15 +591,15 @@ export class SimpleTable extends LitElement {
                                 const canRemove = check(cell.value, this.#data[row]);
                                 if (canRemove) element.removeAttribute("disabled");
                                 else element.setAttribute("disabled", "");
-                                return canRemove
-                            } else return true
-                        })
+                                return canRemove;
+                            } else return true;
+                        });
 
-                        return !results.every((r) => r === false) // If all are hidden, don't show the context menu
+                        return !results.every((r) => r === false); // If all are hidden, don't show the context menu
                     }
 
-                    return true
-                }
+                    return true;
+                },
             });
 
             this.#context.updated = () => this.#updateContextMenuRendering(); // Run when done rendering
