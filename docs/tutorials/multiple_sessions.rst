@@ -1,3 +1,3 @@
-Handling Multiple Sessions
-=======================================
+Managing Multiple Sessions
+==========================
 Coming soon...
