@@ -18,7 +18,7 @@ This page helps you automatically identify source data for multiple subjects / s
   :align: center
   :alt: Blank path expansion page
 
-File locations are specified as **format strings** that define source data paths of each selected data format. 
+File locations are specified as **format strings** that define source data paths of each selected data format.
 
 .. note::
     Format strings are one component of NeuroConv's **path expansion language**, which has some nifty features for manually specifying complex paths. Complete documentation of the path expansion feature of NeuroConv can be found **here**.
@@ -41,15 +41,15 @@ Advance to the next page when you have entered the data locations for both forma
 
 Subject Metadata
 ----------------
-On this page you’ll edit subject-level metadata across all related sessions. Unlike the previous few pages, you’ll notice that 
-Sex and Species both have gray asterisks next to their name; this means they are **loose requirements**, which aren’t currently required 
+On this page you’ll edit subject-level metadata across all related sessions. Unlike the previous few pages, you’ll notice that
+Sex and Species both have gray asterisks next to their name; this means they are **loose requirements**, which aren’t currently required
 but could later block progress if left unspecified.
 
 .. figure:: ../assets/tutorials/multiple/subject-page.png
   :align: center
   :alt: Blank subject table
 
-In this case, we have two subjects with two sessions each. Let’s say that each of their sessions happened close enough in time 
+In this case, we have two subjects with two sessions each. Let’s say that each of their sessions happened close enough in time
 that they can be identified using the same **age** entry: P29W for mouse1 and P30W for mouse2.
 
 Let’s also say that both of our subjects share some properties: both are male mice.
@@ -59,11 +59,11 @@ Let’s also say that both of our subjects share some properties: both are male 
   :alt: Complete subject table
 
 .. note::
-    If you're trying to specify metadata that is shared across sessions, you can use the **Global Metadata** feature. 
+    If you're trying to specify metadata that is shared across sessions, you can use the **Global Metadata** feature.
 
     Pressing the Edit Global Metadata button at the top of the page will show a pop-up form which allows you to provide a
     single default value for each property, as long as it’s expected not to be unique.
-    
+
     These values will take effect as soon as the pop-up form has been submitted.
 
     While Global Metadata is less relevant when we’re working with two subjeccts, this feature can be very powerful when you’re working with tens or even hundreds of subjects in one conversion.

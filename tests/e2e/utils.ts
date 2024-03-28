@@ -54,5 +54,3 @@ export const takeScreenshot = async (relativePath, delay = 0, options: Screensho
 
     expect(pageId).toBe('/') // Ensure you are on the home page
   }
-
-

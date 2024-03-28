@@ -184,7 +184,6 @@ export class Main extends LitElement {
                 }
             }
         }
-        
 
         const headerEl = header ? (this.header = new GuidedHeader(header)) : html`<div></div>`; // Render for grid
         if (!header) delete this.header; // Reset header
