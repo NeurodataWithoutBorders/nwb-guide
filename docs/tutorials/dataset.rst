@@ -11,7 +11,7 @@ To get you started as quickly as possible, we’ve created a way to generate thi
 
 Navigate to the **Settings** page using the main sidebar. Then press the **Generate** button in the top-right corner to initiate the dataset creation.
 
-.. figure:: ./screenshots/dataset-creation.png
+.. figure:: ../assets/tutorials/dataset-creation.png
   :align: center
   :alt: Dataset Creation Screen
 
