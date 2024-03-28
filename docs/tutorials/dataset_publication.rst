@@ -1,7 +1,11 @@
 Dataset Publication
 =======================================
 
-On the Workflow page, select that you’d like to publish your data to the DANDI Archive.
+For this tutorial, we'll be adapting the previous :ref:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
+
+Resume the conversion on the home page, then navigate back to the **Workflow** page.
+
+Change your original selection to specify that you’d like to publish your data to the DANDI Archive.
 
 .. note::
     Gaining access to the DANDI Archive can involve a long approval process. Make sure you’ve created an account on the :dandi-staging:`DANDI staging instance <>` before starting this section of the tutorial. 
@@ -10,6 +14,10 @@ On the Workflow page, select that you’d like to publish your data to the DANDI
 
     Once you receive notice that your account was approved, you can move on to the next steps.
 
+
+Navigate back to the **Conversion Review** page and ensure that you save the workflow change as you do. 
+
+You'll now notice that the **Exit Pipeline** button has been replaced with **Next**, allowing you to move forward with publication on the DANDI Archive.
 
 DANDI Upload
 ------------

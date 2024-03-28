@@ -49,7 +49,7 @@ export const uploadToDandi = (subdirectory, forceSkip = false) => {
 
       await toNextPage('review')
 
-    }) // Wait for upload to finish (~2min on M2)
+    }, 5 * 60 * 1000) // Wait for upload to finish (~2min on M2). Ensure 5min of possible wait
 
 
     test('Review upload results', async () => {

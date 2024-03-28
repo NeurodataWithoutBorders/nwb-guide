@@ -54,7 +54,10 @@ export class GuidedStructurePage extends Page {
 
     list = new List({
         emptyMessage: defaultEmptyMessage,
-        onChange: () => (this.unsavedUpdates = "conversions"),
+        onChange: (v) => {
+            console.error('AHH', v)
+        }
+        // onChange: () => (this.unsavedUpdates = "conversions"),
     });
 
     addButton = new Button();
