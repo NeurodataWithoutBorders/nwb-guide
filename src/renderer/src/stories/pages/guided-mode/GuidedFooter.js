@@ -48,7 +48,7 @@ export class GuidedFooter extends LitElement {
     }
 
     updated() {
-        this.to = (transition) => this.parentElement.to(transition);
+        this.to = (transition) => this.parentElement.to(transition); // Run main page's transition function
     }
 
     render() {

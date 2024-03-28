@@ -63,9 +63,21 @@ export const testInterfaceInfo = {
 }
 
 export const subjectInfo = {
-  sex: 'M',
-  species: 'Mus musculus',
-  age: 'P30D'
+  common: {
+    sex: 'M',
+    species: 'Mus musculus',
+    age: 'P30W'
+  },
+
+  single: {
+    age: 'P25W'
+  },
+
+  multiple: {
+    mouse1: {
+      age: 'P29W'
+    }
+  }
 }
 
 // export const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
