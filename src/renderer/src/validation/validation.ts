@@ -233,102 +233,113 @@ schema.Ecephys.ElectrodeGroup = {
 // Label columns as invalid if not registered on the ElectrodeColumns table
 // NOTE: If not present in the schema, these are not being rendered...
 
-schema.Ecephys.Electrodes = {
+const generateLinkedTableInteractions = (tablesPath, colTablePath, additionalColumnValidation = {}) => {
 
-    // All interfaces
-    ["*"]: {
+    const tableConfiguration = {
 
-        Electrodes: {
+        ['*']: function (this: JSONSchemaForm, name, _, path) {
 
-            // All other column
-            ['*']: function (this: JSONSchemaForm, name, _, path) {
+            const { value } = get(this.results, colTablePath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
 
-                const commonPath = path.slice(0, -2)
-
-                const colPath = [...commonPath, 'ElectrodeColumns']
-
-                const { value: electrodeColumns } = get(this.results, colPath) // NOTE: this.results is out of sync with the actual row contents at the moment of validation
-
-                if (electrodeColumns && !electrodeColumns.find((row: any) => row.name === name)) {
-                    return [
-                        {
-                            message: 'Not a valid column',
-                            type: 'error'
-                        }
-                    ]
-                }
-            },
-
-            // Group name column
-            group_name: function (this: JSONSchemaForm, _, __, ___, value) {
-
-                const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
-
-                if (groups.includes(value)) return true
-                else {
-                    return [
-                        {
-                            message: 'Not a valid group name',
-                            type: 'error'
-                        }
-                    ]
-                }
+            if (value && !value.find((row: any) => row.name === name)) {
+                return [
+                    {
+                        message: 'Not a valid column',
+                        type: 'error'
+                    }
+                ]
             }
         },
 
-        // Update the columns available on the Electrodes table when there is a new name in the ElectrodeColumns table
-        ElectrodeColumns: {
-            ['*']: {
-                '*': function (this: JSONSchemaForm, propName, __, path, value) {
+        ...additionalColumnValidation
+    }
 
-                    const commonPath = path.slice(0, -2)
-                    const electrodesTablePath = [ ...commonPath, 'Electrodes']
-                    const electrodesTable = this.getFormElement(electrodesTablePath)
-                    const electrodesSchema = electrodesTable.schema // Manipulate the schema that is on the table
-                    const globalElectrodeSchema = getSchema(electrodesTablePath, this.schema)
 
-                    const { value: row } = get(this.results, path)
+    // Update the columns available on the table when there is a new name in the columns table
+    const columnTableConfig = {
+        '*': function (this: JSONSchemaForm, propName, __, path, value) {
 
-                    const currentName = row?.['name']
+            const form = this.getFormElement(tablesPath)
+            Object.entries(form.tables).forEach(([tableName, table]: [ string, any ]) => {
 
-                    const hasNameUpdate = propName == 'name' && !(value in electrodesSchema.items.properties)
+                const fullPath = [...tablesPath, tableName]
 
-                    const resolvedName = hasNameUpdate ? value : currentName
+                const tableSchema = table.schema // Manipulate the schema that is on the table
+                const globalSchema = getSchema(fullPath, this.schema)
 
-                    if (value === currentName) return true // No change
-                    if (!resolvedName) return true // Only set when name is actually present
+                const { value: row } = get(this.results, path)
 
-                    const schemaToEdit = [electrodesSchema, globalElectrodeSchema]
-                    schemaToEdit.forEach(schema => {
+                const currentName = row?.['name']
 
-                        const properties = schema.items.properties
-                        const oldRef = properties[currentName]
+                const hasNameUpdate = propName == 'name' && !(value in tableSchema.items.properties)
 
-                        if (row) delete properties[currentName] // Delete previous name from schema
+                const resolvedName = hasNameUpdate ? value : currentName
 
-                        properties[resolvedName] = {
-                            ...oldRef ?? {},
-                            description: propName === 'description' ? value : row?.description,
-                            data_type: propName === 'data_type' ? value : row?.data_type,
-                        }
-                    })
+                if (value === currentName) return true // No change
+                if (!resolvedName) return true // Only set when name is actually present
 
-                    //  Swap the new and current name information
-                    if (hasNameUpdate) {
-                        const electrodesTable = this.getFormElement([ ...commonPath, 'Electrodes'])
-                        electrodesTable.data.forEach(row => {
-                            if (!(value in row)) row[value] = row[currentName] // Initialize new column with old values
-                            delete row[currentName] // Delete old column
-                        })
+                const schemaToEdit = [tableSchema, globalSchema]
+                schemaToEdit.forEach(schema => {
+
+                    const properties = schema.items.properties
+                    const oldRef = properties[currentName]
+
+                    if (row) delete properties[currentName] // Delete previous name from schema
+
+                    properties[resolvedName] = {
+                        ...oldRef ?? {},
+                        description: propName === 'description' ? value : row?.description,
+                        data_type: propName === 'data_type' ? value : row?.data_type,
                     }
+                })
 
-                    // Always re-render the Electrodes table on column changes
-                    electrodesTable.requestUpdate()
+                //  Swap the new and current name information
+                if (hasNameUpdate) {
+                    const table = this.getFormElement(fullPath) // NOTE: Must request the table this way to update properly
+                    table.data.forEach(row => {
+                        if (!(value in row)) row[value] = row[currentName] // Initialize new column with old values
+                        delete row[currentName] // Delete old column
+                    })
                 }
-            },
+
+                // Always re-render the table on column changes
+                table.requestUpdate()
+            })
         }
     }
+
+
+    return {
+        main: tableConfiguration,
+        columns: columnTableConfig
+    }
 }
+
+const linkedUnitsTableOutput = generateLinkedTableInteractions(['Ecephys','Units'], ['Ecephys', 'UnitColumns'])
+
+schema.Ecephys.Units = { ["*"]: linkedUnitsTableOutput.main }
+schema.Ecephys.UnitColumns = linkedUnitsTableOutput.columns
+
+
+const linkedElectrodesTableOutput = generateLinkedTableInteractions(['Ecephys', 'Electrodes'], ['Ecephys', 'ElectrodeColumns'], {
+    group_name: function (this: JSONSchemaForm, _, __, ___, value) {
+
+        const groups = this.results.Ecephys.ElectrodeGroup.map(({ name }) => name) // Groups are validated across all interfaces
+
+        if (groups.includes(value)) return true
+        else {
+            return [
+                {
+                    message: 'Not a valid group name',
+                    type: 'error'
+                }
+            ]
+        }
+    }
+})
+
+schema.Ecephys.ElectrodeColumns = linkedElectrodesTableOutput.columns
+schema.Ecephys.Electrodes = { ["*"]: linkedElectrodesTableOutput.main }
 
 // ----------------- Ophys Validation ----------------- //
 

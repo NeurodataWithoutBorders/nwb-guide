@@ -1,5 +1,8 @@
+import { merge } from '../pages/utils'
+
 const toCapitalizeAll = ['nwb', 'api', 'id']
 const toCapitalizeNone = ['or', 'and']
+
 
 export const createRandomString = () => Math.random().toString(36).substring(7);
 export const tempPropertyKey = createRandomString();
@@ -33,7 +36,15 @@ export const textToArray = (value: string) => value.split("\n")
                 if (prop && typeof prop === "object" && !Array.isArray(prop)) {
                     const internalCopy = (copy[propName] = { ...prop });
                     const refValue = internalCopy["$ref"]
-                    if (refValue) {
+                    const allOfValue = internalCopy['allOf']
+                    if (allOfValue) {
+                        copy [propName]= allOfValue.reduce((acc, curr) => {
+                            const result = replaceRefsWithValue({ _temp: curr}, path, parent)
+                            const resolved = result._temp
+                            return merge(resolved, acc)
+                        }, {})
+                    }
+                    else if (refValue) {
 
                         const refPath = refValue.split('/').slice(1) // NOTE: Assume from base
                         const resolved = refPath.reduce((acc, key) => acc[key], parent)
