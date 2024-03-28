@@ -213,8 +213,8 @@ export default async function runWorkflow (name, workflow, identifier) {
 
     })
 
-  } 
-  
+  }
+
   else {
 
     test('Specify source data information', async () => {

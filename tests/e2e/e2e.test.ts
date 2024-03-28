@@ -106,7 +106,7 @@ describe('E2E Test', () => {
         await takeScreenshot(join(subdirectory, 'home-page-complete'), 100)
         const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
         expect(nPipelines).toBe(2)
-      })  
+      })
     })
 
 
