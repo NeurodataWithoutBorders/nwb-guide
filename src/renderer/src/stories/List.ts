@@ -155,7 +155,7 @@ export class List extends LitElement {
       this.#previousItems = this.#items.map(item => ({...item})) // Clone items
       const oldObject = this.object
       this.#updateObject()
-      
+
       if (this.#initialized) {
 
         this.onChange({
