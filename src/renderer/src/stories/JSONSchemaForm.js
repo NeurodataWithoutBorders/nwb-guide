@@ -57,7 +57,6 @@ export const getSchema = (path, schema, base = []) => {
 
     // NOTE: Refs are now pre-resolved
     const resolved = get(path, schema, ["properties", "patternProperties"], ["patternProperties", "items"]);
-    // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
     return resolved;
 };
@@ -81,9 +80,15 @@ export const getIgnore = (o, path) => {
     return path.reduce((acc, key) => {
         const info = acc[key] ?? {};
 
+        const accWildcard = acc["*"] ?? {};
+        const infoWildcard = info["*"] ?? {};
+        const mergedWildcards = { ...accWildcard, ...infoWildcard };
+
+        if (key in mergedWildcards) return { ...info, ...mergedWildcards[key] };
+
         return {
             ...info,
-            "*": { ...(acc["*"] ?? {}), ...(info["*"] ?? {}) }, // Accumulate ignore values
+            "*": mergedWildcards, // Accumulate ignore values
         };
     }, o);
 };
@@ -565,6 +570,7 @@ export class JSONSchemaForm extends LitElement {
 
         const allErrors = Array.from(flaggedInputs)
             .map((inputElement) => {
+                if (!inputElement.nextElementSibling) return; // Skip tables
                 return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
             })
             .flat();
@@ -778,9 +784,12 @@ export class JSONSchemaForm extends LitElement {
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore["*"]?.[key])
+
+                // If conclusively ignored
+                if (this.ignore["*"]?.[key] === true)
                     return false; // Skip all properties with this name
                 else if (this.ignore[key] === true) return false; // Skip this property
+
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
@@ -1261,9 +1270,12 @@ export class JSONSchemaForm extends LitElement {
             enableToggleContainer.append(enableToggle);
             Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
 
+            // Skip if accordion will be empty
+            if (!renderableInside.length) return;
+
             const accordion = (this.accordions[name] = new Accordion({
                 name: headerName,
-                toggleable: hasMany,
+                toggleable: hasMany, // Only show toggle if there are multiple siblings
                 subtitle: html`<div style="display:flex; align-items: center;">
                     ${explicitlyRequired ? "" : enableToggleContainer}
                 </div>`,
