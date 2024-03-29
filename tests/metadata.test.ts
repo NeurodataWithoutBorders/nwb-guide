@@ -55,7 +55,6 @@ test('removing all existing sessions will maintain the related subject entry on 
     expect(Object.keys(results)).toEqual(Object.keys(copy))
 })
 
-
 const popupSchemas = {
     "type": "object",
     "required": ["keywords", "experimenter"],
@@ -201,7 +200,8 @@ test('inter-table updates are triggered', async () => {
     await form.rendered
 
     // Validate that the results are incorrect
-    const errors = await form.validate().catch(() => true).catch(() => true)
+    const errors = await form.validate().catch(() => true).catch((e) => e)
+    console.log(errors)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
@@ -214,8 +214,7 @@ test('inter-table updates are triggered', async () => {
         else cell.setInput(baseRow[i].value) // Otherwise carry over info
     })
 
-    // Wait a second for new row values to resolve as table data (async)
-    await new Promise((res) => setTimeout(() => res(true), 1000))
+    form.requestUpdate() // Re-render the form to update the table
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate().then(() => false).catch((e) => true)

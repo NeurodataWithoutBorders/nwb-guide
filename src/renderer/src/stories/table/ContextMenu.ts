@@ -66,12 +66,14 @@ export class ContextMenu extends LitElement{
 
     declare target: Document | HTMLElement
     declare items: any[]
+    declare onOpen: () => boolean | void
 
-    constructor({ target, items }: any){
+    constructor({ target, items, onOpen }: any){
         super()
 
         this.target = target ?? document
         this.items = items ?? []
+        this.onOpen = onOpen ?? (() => {})
 
         document.addEventListener('click', () => this.#hide()) // Hide at the last step of any click
         document.addEventListener('contextmenu', () => this.#hide())
@@ -88,7 +90,12 @@ export class ContextMenu extends LitElement{
     #open(mouseEvent: MouseEvent) {
         mouseEvent.preventDefault()
         mouseEvent.stopPropagation()
+
         this.#activePath = mouseEvent.path || mouseEvent.composedPath()
+
+        const result = this.onOpen(this.#activePath)
+        if (result === false) return
+
         this.style.display = 'block';
         this.style.left = mouseEvent.pageX + "px";
         this.style.top = mouseEvent.pageY + "px";
