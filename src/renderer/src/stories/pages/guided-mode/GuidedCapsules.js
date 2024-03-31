@@ -40,7 +40,9 @@ export class GuidedCapsules extends LitElement {
                         (_, i) =>
                             html`<div
                                 @click=${() => this.onClick(i)}
-                                class="guided--capsule ${i === this.selected ? `active` : ""} ${this.skipped[i] ? `skipped` : ""}"
+                                class="guided--capsule ${i === this.selected ? `active` : ""} ${this.skipped[i]
+                                    ? `skipped`
+                                    : ""}"
                             ></div>`
                     )}
                 </div>

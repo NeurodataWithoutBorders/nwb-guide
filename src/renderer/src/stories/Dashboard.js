@@ -191,7 +191,7 @@ export class Dashboard extends LitElement {
         const { sections } = this.subSidebar;
 
         if (main) {
-            if (this.page.header) delete this.page.header.sections // Ensure sections are updated
+            if (this.page.header) delete this.page.header.sections; // Ensure sections are updated
             this.main.set({
                 page: this.page,
                 sections,
@@ -307,8 +307,7 @@ export class Dashboard extends LitElement {
             }
         });
 
-        return globalState.sections = { ...globalState.sections }; // Update global state with new reference (to ensure re-render)
-         
+        return (globalState.sections = { ...globalState.sections }); // Update global state with new reference (to ensure re-render)
     };
 
     #transitionPromise = {};

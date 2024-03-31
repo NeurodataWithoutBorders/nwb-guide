@@ -268,8 +268,8 @@ export class Page extends LitElement {
 
     updateSections = () => {
         const dashboard = document.querySelector("nwb-dashboard");
-        dashboard.updateSections({ sidebar: true, main: true })
-    }
+        dashboard.updateSections({ sidebar: true, main: true });
+    };
 
     #unsaved = false;
     get unsavedUpdates() {
