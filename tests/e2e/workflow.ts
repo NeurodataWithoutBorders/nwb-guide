@@ -17,7 +17,7 @@ export default async function runWorkflow (name, workflow, identifier) {
     // Advance to instructions page
     await toNextPage('start')
 
-    await takeScreenshot(join(identifier, 'intro-page'), 300)
+    await takeScreenshot(join(identifier, 'intro-page'), 500)
 
     // Advance to general information page
     await toNextPage('details')
@@ -312,7 +312,7 @@ export default async function runWorkflow (name, workflow, identifier) {
 
   test('Review NWB Inspector output', async () => {
 
-    await takeScreenshot(join(identifier, 'inspect-page'), 2000) // Finish file inspection
+    await takeScreenshot(join(identifier, 'inspect-page'), 5000) // Finish file inspection and allow full load of Neurosift page
     await toNextPage('preview')
 
   })
