@@ -1,7 +1,7 @@
 Managing Multiple Sessions
 ==========================
 
-Now, let’s say that you’ve fallen behind and have a weeks worth of experiments to convert. This is where a multi-session workflow will come in handy.
+Now, let’s say that you’ve already run some of your experiments and now you want to convert them all at the same time. This is where a multi-session workflow will come in handy.
 
 Workflow Configuration
 ----------------------
@@ -27,13 +27,13 @@ File locations are specified as **format strings** that define source data paths
 .. note::
     Format strings are one component of NeuroConv's **path expansion language**, which has some nifty features for manually specifying complex paths. Complete documentation of the path expansion feature of NeuroConv can be found :path-expansion-guide:`here <>` .
 
-While you don’t have to specify a format strings for all of the pipeline’s data formats, we’re going to find all of our data here for this tutorial.
+While you don’t have to specify format strings for all of the pipeline’s data formats, we’re going to find all of our data here for this tutorial. You'll always be able to confirm or manually select the final paths on the Source Data page later in the workflow.
 
 Format strings are specified using two components: the **base directory**, which is the directory to search in, and the **format string path**, where the source data is within that directory.
 
-Given the structure of the tutorial dataset, we’ll select **~/NWB_GUIDE/test-data/dataset** as the base_directory.
+Given the structure of the tutorial dataset, we’ll select **~/NWB_GUIDE/test-data/dataset** as the base_directory, where `~` is the home directory of your system.
 
-We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the Autocomplete button and provide an example source data path (e.g. the mouse1_Session2_g0_t0.imec0.lf.bin file for SpikeGLX). Then, indicate the Subject  (mouse1) and Session ID (Session2) for this particular path. When you submit this form, you’ll notice that the Format String Path input has been auto-filled with a pattern for all the sessions.
+We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the Autocomplete button and provide an example source data path (for example, the ``mouse1_Session2_g0_t0.imec0.lf.bin`` file for SpikeGLX). Then, indicate the Subject  (``mouse1``) and Session ID (``Session2``) for this particular path. When you submit this form, you’ll notice that the Format String Path input has been auto-filled with a pattern for all the sessions.
 
 Repeat this process for Phy, where mouse1_Session2_phy will be the example source data path.
 
@@ -53,10 +53,9 @@ but could later block progress if left unspecified.
   :align: center
   :alt: Blank subject table
 
-In this case, we have two subjects with two sessions each. Let’s say that each of their sessions happened close enough in time
-that they can be identified using the same **age** entry: P29W for mouse1 and P30W for mouse2.
+In this case, we have two subjects with two sessions each. Let’s say that each of their sessions happened close enough in time that they can be identified using the same **age** entry: ``P29W`` for ``mouse1`` and ``P30W`` for ``mouse2``.
 
-Let’s also say that both of our subjects share some properties: both are male mice.
+We should also indicate the ``sex`` of each subject since this is a requirement for `uploading to the DANDI Archive <https://www.dandiarchive.org/handbook/135_validation/#missing-dandi-metadata>`_.
 
 .. figure:: ../assets/tutorials/multiple/subject-complete.png
   :align: center
@@ -76,11 +75,10 @@ Let’s also say that both of our subjects share some properties: both are male 
 
     You’ll be able to specify Global Metadata on the Source Data and File Metadata pages as well.
 
-Now that we’ve specified all of the required and suggested metadata—which will be required later—we can move onto the next page.
 
 Source Data Information
 -----------------------
-Because we used the Locate Data page to programmatically identify our source data, this page will largely be complete.
+Because we used the Locate Data page to programmatically identify our source data, this page should mostly be complete. You can use this opportunity to verify that the identified paths appear as expected for each session.
 
 .. figure:: ../assets/tutorials/multiple/sourcedata-page.png
   :align: center
@@ -110,4 +108,4 @@ When advancing to the next page, a progress bar will begin to show how many file
 
 Continuing Forward
 ------------------
-The rest of this workflow is identical to the single-session version, except that multiple sessions will be available to view on subsequent pages.
+Similar to the File Metadata page, the rest of this workflow is identical to the single-session version, except that multiple sessions will be available to view on subsequent pages.
