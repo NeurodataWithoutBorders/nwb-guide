@@ -39,6 +39,16 @@
     border-radius: 5px;
     padding: 0px 10px;
 }
+
+.guided--nav-bar-dropdown.skipped {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.guided--nav-bar-dropdown.skipped .fa-chevron-right {
+    display: none;
+}
+
 .guided--nav-bar-dropdown:hover {
     cursor: pointer;
     background-color: var(--color-transparent-soda-green);
@@ -309,9 +319,10 @@
 }
 
 .dot {
-    height: 30px;
-    width: 30px;
-    margin: 5px;
+    height: 20px;
+    width: 20px;
+    margin: 0px 5px;
+    font-size: 11px;
     border-radius: 50%;
     border: 1px solid;
     display: flex;
@@ -354,7 +365,7 @@
 .guided--progression-tab-labels {
     display: flex;
     flex-direction: column;
-    margin-left: 7px;
+    margin-left: 3px;
     justify-content: flex-start;
 }
 
@@ -904,6 +915,10 @@ h1.guided--text-sub-step {
 
 .guided--capsule.active {
     background-color: var(--color-light-green);
+}
+
+.guided--capsule.skipped {
+    background-color: rgb(36, 36, 36);
 }
 
 .guided--capsule-container-sub-page {

@@ -99,11 +99,14 @@ export class GuidedPreform extends Page {
         subtitle: "Answer the following questions to simplify your workflow through the GUIDE",
     };
 
+    beforeSave = async () => {
+        await this.form.validate();
+        this.info.globalState.project.workflow = this.state;
+    }
+
     footer = {
         onNext: async () => {
-            await this.form.validate();
-            this.info.globalState.project.workflow = this.state;
-            this.save();
+            await this.save();
             return this.to(1);
         },
     };
@@ -153,7 +156,12 @@ export class GuidedPreform extends Page {
                     }
                 });
             },
-            onUpdate: () => (this.unsavedUpdates = true),
+            onUpdate: async () => {
+                this.unsavedUpdates = true
+                this.info.globalState.project.workflow = this.state;
+                await this.save({}, false);
+                this.updateSections()
+            },
             onThrow,
             // groups: [
             //     {

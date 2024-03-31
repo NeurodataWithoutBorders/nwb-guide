@@ -53,6 +53,11 @@ export class NavigationSidebar extends LitElement {
 
         Object.entries(this.sections).map(([sectionName, info]) => {
             const isActive = Object.values(info.pages).find((state) => state.active);
+
+            const isAllSkipped = Object.values(info.pages).every((state) => state.skipped);
+            this.#updateClass("skipped", this.querySelector("[data-section-name='" + sectionName + "']"), !isAllSkipped);
+
+
             if (isActive) this.#toggleDropdown(sectionName, true);
             else this.#toggleDropdown(sectionName, false);
         });

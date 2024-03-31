@@ -1,11 +1,11 @@
 import { LitElement, html } from "lit";
 
 export class GuidedCapsules extends LitElement {
-    constructor({ n = 0, selected = 0 } = {}) {
+    constructor({ n = 0, selected = 0, skipped = [] } = {}) {
         super();
         this.n = n;
         this.selected = selected;
-
+        this.skipped = skipped;
         this.style.width = "100%";
     }
 
@@ -13,6 +13,7 @@ export class GuidedCapsules extends LitElement {
         return {
             n: { type: Number, reflect: true },
             selected: { type: Number, reflect: true },
+            skipped: { type: Array },
         };
     }
 
@@ -39,7 +40,7 @@ export class GuidedCapsules extends LitElement {
                         (_, i) =>
                             html`<div
                                 @click=${() => this.onClick(i)}
-                                class="guided--capsule ${i === this.selected ? `active` : ""}"
+                                class="guided--capsule ${i === this.selected ? `active` : ""} ${this.skipped[i] ? `skipped` : ""}"
                             ></div>`
                     )}
                 </div>
