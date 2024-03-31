@@ -66,7 +66,6 @@ export const subjectInfo = {
   common: {
     sex: 'M',
     species: 'Mus musculus',
-    age: 'P30W'
   },
 
   single: {
@@ -75,7 +74,11 @@ export const subjectInfo = {
 
   multiple: {
     mouse1: {
-      age: 'P29W'
+      age: 'P29W',
+      sex: 'F'
+    },
+    mouse2: {
+      age: 'P30W'
     }
   }
 }

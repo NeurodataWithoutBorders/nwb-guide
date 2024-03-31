@@ -6,7 +6,11 @@ Now, let’s say that you’ve fallen behind and have a weeks worth of experimen
 Workflow Configuration
 ----------------------
 
-On the Workflow page, confirm that this pipeline will be run on multiple sessions. After this, also select that you’d like to locate the source data programmatically.
+On the Workflow page, confirm that this pipeline will be run on multiple sessions. After this, also select that you’d like to locate the source data programmatically and skip dataset publication.
+
+.. figure:: ../assets/tutorials/multiple/workflow-page.png
+  :align: center
+  :alt: Workflow page with multiple sessions and locate data selected
 
 Complete the first section of the GUIDE as normal until you reach a new **Locate Data** page after the Data Formats page.
 
