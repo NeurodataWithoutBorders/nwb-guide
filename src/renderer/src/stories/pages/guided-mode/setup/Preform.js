@@ -156,11 +156,15 @@ export class GuidedPreform extends Page {
                     }
                 });
             },
-            onUpdate: async () => {
-                this.unsavedUpdates = true
-                this.info.globalState.project.workflow = this.state;
-                await this.save({}, false);
-                this.updateSections()
+
+            // Immediately re-render boolean values
+            onUpdate: async (path, value) => {
+                if (typeof value === 'boolean') {
+                    this.unsavedUpdates = true
+                    this.info.globalState.project.workflow = this.state;
+                    await this.save({}, false);
+                    this.updateSections()
+                }
             },
             onThrow,
             // groups: [

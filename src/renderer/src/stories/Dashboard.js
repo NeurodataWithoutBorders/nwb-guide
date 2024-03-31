@@ -191,7 +191,7 @@ export class Dashboard extends LitElement {
         const { sections } = this.subSidebar;
 
         if (main) {
-            delete this.page.header.sections // Ensure sections are updated
+            if (this.page.header) delete this.page.header.sections // Ensure sections are updated
             this.main.set({
                 page: this.page,
                 sections,
