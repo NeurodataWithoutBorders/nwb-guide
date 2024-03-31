@@ -105,7 +105,7 @@ Session Metadata
 ^^^^^^^^^^^^^^^^
 The file metadata page is a great opportunity to add rich annotations to the file, which will be read by anyone reusing your data in the future!
 
-The Session Start Time in the General Metadata section is already specified because this field was automatically extracted from the SpikeGLX source data.
+The Session Start Time in the **General Metadata** section is already specified because this field was automatically extracted from the SpikeGLX source data.
 
 .. figure:: ../assets/tutorials/single/metadata-nwbfile.png
   :align: center
@@ -116,7 +116,7 @@ However, we still need to add the Subject information—as noted by the red acce
 
 .. figure:: ../assets/tutorials/single/metadata-subject-complete.png
   :align: center
-  :alt: Metadata page with valid Subject information
+  :alt: Metadata page with valid **Subject** information
 
   The status of the Subject information will update in real-time as you fill out the form.
 

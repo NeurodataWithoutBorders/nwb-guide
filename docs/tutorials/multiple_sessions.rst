@@ -86,12 +86,11 @@ Because we used the Locate Data page to programmatically identify our source dat
   :align: center
   :alt: Complete source data forms
 
+One notable difference between this and the single-session workflow, however, is that the next few pages will allow you to toggle between sessions using the **session manager** sidebar on the left.
 
 Session Metadata
 ----------------
-The file metadata page is a great opportunity to add rich annotations to the file, which will be read by anyone reusing your data in the future!
-
-In conjunction with the subject information declared previously, all the required metadata to convert our dataset to NWB has already been specified—particularly because the Session Start Time has automatically been extracted from the SpikeGLX source data.
+Aside from the session manager and global metadata features noted above, the file metadata page in the multi-session workflow is nearly identical to the single-session version.
 
 .. figure:: ../assets/tutorials/multiple/metadata-nwbfile.png
   :align: center
@@ -99,15 +98,14 @@ In conjunction with the subject information declared previously, all the require
 
   A complete General Metadata form
 
+Acting as global metadata, the information supplied on the subject metadata page has pre-filled the Subject metadata for each session.
+
 .. figure:: ../assets/tutorials/multiple/metadata-subject-complete.png
   :align: center
   :alt: Complete Subject metadata form
 
   A complete Subject metadata form
 
+Finish the rest of the workflow as you would for a single session by completing a full conversion after you review the preview files with the NWB Inspector and Neurosift.
 
-When advancing to the next page, a progress bar will begin to show how many files are left to run a stub conversion on.
-
-Continuing Forward
-------------------
-The rest of this workflow is identical to the single-session version, except that multiple sessions will be available to view on subsequent pages.
+Congratulations on completing your first multi-session conversion! You can now convert multiple sessions at once, saving you time and effort.
