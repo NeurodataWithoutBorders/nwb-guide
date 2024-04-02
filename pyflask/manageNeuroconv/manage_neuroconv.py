@@ -1082,7 +1082,7 @@ def generate_test_data(output_path: str):
         seed=0,  # Fixed seed for reproducibility
     )
 
-    unscaled_artificial_ap_band = scale(recording=artificial_ap_band, gain=1 / conversion_factor_to_uV)
+    unscaled_artificial_ap_band = scale(recording=artificial_ap_band_in_uV, gain=1 / conversion_factor_to_uV)
     int16_artificial_ap_band = unscaled_artificial_ap_band.astype(dtype="int16")
     int16_artificial_ap_band.set_channel_gains(conversion_factor_to_uV)
 
