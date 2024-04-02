@@ -1057,6 +1057,7 @@ def generate_test_data(output_path: str):
     import spikeinterface
     from spikeinterface.extractors import NumpyRecording
     from spikeinterface.exporters import export_to_phy
+    from spikeinterface.preprocessing import scale, bandpass_filter, resample
 
     base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
@@ -1081,16 +1082,16 @@ def generate_test_data(output_path: str):
         seed=0,  # Fixed seed for reproducibility
     )
 
-    unscaled_artificial_ap_band = spikeinterface.preprocessing.ScaleRecording(
+    unscaled_artificial_ap_band = scale(
         recording=artificial_ap_band, gain=1 / conversion_factor_to_uV
     )
     int16_artificial_ap_band = unscaled_artificial_ap_band.astype(dtype="int16")
     int16_artificial_ap_band.set_channel_gains(conversion_factor_to_uV)
 
-    unscaled_artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
+    unscaled_artificial_lf_filter = bandpass_filter(
         recording=unscaled_artificial_ap_band, freq_min=0.5, freq_max=1_000
     )
-    unscaled_artificial_lf_band = spikeinterface.preprocessing.resample(
+    unscaled_artificial_lf_band = resample(
         recording=unscaled_artificial_lf_filter, resample_rate=2_500
     )
     int16_artificial_lf_band = unscaled_artificial_lf_band.astype(dtype="int16")
