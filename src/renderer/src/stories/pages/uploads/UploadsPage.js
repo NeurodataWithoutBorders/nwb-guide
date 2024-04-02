@@ -52,7 +52,6 @@ export async function createDandiset(results = {}) {
     const content = document.createElement("div");
     Object.assign(content.style, {
         padding: "25px",
-        paddingBottom: "0px",
     });
 
     const updateNIHInput = (state) => {

@@ -20,6 +20,8 @@ import { header } from "../../../forms/utils";
 
 import autocompleteIcon from "../../../assets/inspect.svg?raw";
 
+const propOrder = ["path", "subject_id", "session_id"];
+
 export async function autocompleteFormatString(path) {
     let notification;
 
@@ -50,10 +52,8 @@ export async function autocompleteFormatString(path) {
     const content = document.createElement("div");
     Object.assign(content.style, {
         padding: "25px",
-        paddingBottom: "0px",
     });
 
-    const propOrder = ["path", "subject_id", "session_id"];
     const form = new JSONSchemaForm({
         validateEmptyValues: false,
         schema: {
@@ -263,6 +263,8 @@ export class GuidedPathExpansionPage extends Page {
     #initialize = () => (this.localState = merge(this.info.globalState.structure, { results: {} }));
 
     workflow = {
+        subject_id: {},
+        session_id: {},
         locate_data: {
             skip: () => {
                 this.#initialize();
@@ -270,37 +272,43 @@ export class GuidedPathExpansionPage extends Page {
                 merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
                 // Force single subject/session if not keeping existing data
-                if (!globalState.results) {
-                    const existingMetadata =
-                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.metadata;
+                // if (!globalState.results) {
 
-                    const existingSourceData =
-                        globalState.results?.[this.altInfo.subject_id]?.[this.altInfo.session_id]?.source_data;
+                const subject_id = this.workflow.subject_id.value;
+                const session_id = this.workflow.session_id.value;
 
-                    const source_data = {};
-                    for (let key in globalState.interfaces) {
-                        const existing = existingSourceData?.[key];
-                        if (existing) source_data[key] = existing ?? {};
-                    }
+                // Map existing results to new subject information (if available)
+                const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
 
-                    globalState.results = {
-                        [this.altInfo.subject_id]: {
-                            [this.altInfo.session_id]: {
-                                source_data,
-                                metadata: {
-                                    NWBFile: {
-                                        session_id: this.altInfo.session_id,
-                                        ...(existingMetadata?.NWBFile ?? {}),
-                                    },
-                                    Subject: {
-                                        subject_id: this.altInfo.subject_id,
-                                        ...(existingMetadata?.Subject ?? {}),
-                                    },
+                const existingMetadata = existingResults.metadata;
+                const existingSourceData = existingResults.source_data;
+
+                const source_data = {};
+                for (let key in globalState.interfaces) {
+                    const existing = existingSourceData?.[key];
+                    if (existing) source_data[key] = existing ?? {};
+                }
+
+                globalState.results = {
+                    [subject_id]: {
+                        [session_id]: {
+                            source_data,
+                            metadata: {
+                                NWBFile: {
+                                    session_id: session_id,
+                                    ...(existingMetadata?.NWBFile ?? {}),
+                                },
+                                Subject: {
+                                    subject_id: subject_id,
+                                    ...(existingMetadata?.Subject ?? {}),
                                 },
                             },
                         },
-                    };
-                }
+                    },
+                };
+                // }
+
+                this.save({}, false); // Ensure this structure is saved
             },
         },
     };
@@ -324,6 +332,13 @@ export class GuidedPathExpansionPage extends Page {
             finalStructure[key] = entry;
         }
 
+        if (Object.keys(finalStructure).length === 0) {
+            const message =
+                "Please configure at least one interface. <br/><small>Otherwise, revisit <b>Pipeline Workflow</b> to update your configuration.</small>";
+            this.#notification = this.notify(message, "error");
+            throw message;
+        }
+
         const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
             this.notify(error.message, "error");
             throw error;
@@ -336,6 +351,8 @@ export class GuidedPathExpansionPage extends Page {
             this.#notification = this.notify(message, "error");
             throw message;
         }
+
+        // globalState.results = {} // Clear existing results
 
         // Save an overall results object organized by subject and session
         merge({ results }, globalState);
@@ -380,11 +397,6 @@ export class GuidedPathExpansionPage extends Page {
 
             return this.to(1);
         },
-    };
-
-    altInfo = {
-        subject_id: "001",
-        session_id: "1",
     };
 
     // altForm = new JSONSchemaForm({

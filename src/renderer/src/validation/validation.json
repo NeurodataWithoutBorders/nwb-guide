@@ -4,7 +4,8 @@
     "conversion_output_folder": false,
 
     "NWBFile": {
-        "*": "check_{*}",
+        "description": "check_description",
+        "experiment_description": "check_experiment_description",
         "identifier": false,
         "session_description": false,
         "lab": false,
@@ -42,12 +43,12 @@
     "Behavior": false,
 
     "Subject": {
-        "*": "check_subject_{*}",
         "sessions": false,
         "description": false,
         "genotype": false,
         "strain": false,
         "weight": false,
+        "sex": ["check_subject_sex"],
         "age__reference": false,
         "subject_id": "check_subject_id_exists",
         "species": ["check_subject_species_form", "check_subject_species_exists"],

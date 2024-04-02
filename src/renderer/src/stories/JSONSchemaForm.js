@@ -57,7 +57,6 @@ export const getSchema = (path, schema, base = []) => {
 
     // NOTE: Refs are now pre-resolved
     const resolved = get(path, schema, ["properties", "patternProperties"], ["patternProperties", "items"]);
-    // if (resolved?.["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
 
     return resolved;
 };
@@ -81,9 +80,15 @@ export const getIgnore = (o, path) => {
     return path.reduce((acc, key) => {
         const info = acc[key] ?? {};
 
+        const accWildcard = acc["*"] ?? {};
+        const infoWildcard = info["*"] ?? {};
+        const mergedWildcards = { ...accWildcard, ...infoWildcard };
+
+        if (key in mergedWildcards) return { ...info, ...mergedWildcards[key] };
+
         return {
             ...info,
-            "*": { ...(acc["*"] ?? {}), ...(info["*"] ?? {}) }, // Accumulate ignore values
+            "*": mergedWildcards, // Accumulate ignore values
         };
     }, o);
 };
@@ -98,7 +103,7 @@ const componentCSS = `
 
     :host {
       display: inline-block;
-      width:100%;
+      width: 100%;
     }
 
 
@@ -111,6 +116,10 @@ const componentCSS = `
         display: flex;
         flex-direction: column;
         gap: 10px;
+    }
+
+    .form-section[hidden] {
+        display: none;
     }
 
     #empty {
@@ -288,6 +297,7 @@ export class JSONSchemaForm extends LitElement {
 
         this.groups = props.groups ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
+        // NOTE: Documentation for validateEmptyValues
         this.validateEmptyValues = props.validateEmptyValues === undefined ? true : props.validateEmptyValues; // false = validate when not empty, true = always validate, null = never validate
 
         if (props.onInvalid) this.onInvalid = props.onInvalid;
@@ -503,26 +513,22 @@ export class JSONSchemaForm extends LitElement {
                 const resolvedSchema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
-                // Allow for constructing types from object types
-                if (
-                    e.message.includes("is not of a type(s)") &&
-                    "properties" in resolvedSchema &&
-                    resolvedSchema.type === "string"
-                )
-                    return;
+                // Allow referring to floats as null (i.e. JSON NaN representation)
+                if (e.message.includes("is not of a type(s)")) {
+                    if (resolvedSchema.type === "number") {
+                        if (resolvedValue === "NaN") return;
+                        else if (resolvedValue === null) return;
+                        else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                    } else if (resolvedSchema.type === "string") {
+                        if ("properties" in resolvedSchema) return; // Allow for constructing types from object types
+                    }
+                }
 
                 // Ignore required errors if value is empty
                 if (e.name === "required" && this.validateEmptyValues === null && !(e.property in e.instance)) return;
 
                 // Non-Strict Rule
                 if (resolvedSchema.strict === false && e.message.includes("is not one of enum values")) return;
-
-                // Allow referring to floats as null (i.e. JSON NaN representation)
-                if (e.message === "is not of a type(s) number") {
-                    if (resolvedValue === "NaN") return;
-                    else if (resolvedValue === null) {
-                    } else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
-                }
 
                 const prevHeader = name ? header(name) : "Row";
 
@@ -564,6 +570,7 @@ export class JSONSchemaForm extends LitElement {
 
         const allErrors = Array.from(flaggedInputs)
             .map((inputElement) => {
+                if (!inputElement.nextElementSibling) return; // Skip tables
                 return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
             })
             .flat();
@@ -777,9 +784,12 @@ export class JSONSchemaForm extends LitElement {
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore["*"]?.[key])
+
+                // If conclusively ignored
+                if (this.ignore["*"]?.[key] === true)
                     return false; // Skip all properties with this name
                 else if (this.ignore[key] === true) return false; // Skip this property
+
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
@@ -934,7 +944,13 @@ export class JSONSchemaForm extends LitElement {
             if (isUndefined) {
                 // Throw at least a basic warning if a non-linked property is required and missing
                 if (!hasLinks && isRequired) {
-                    if (this.validateEmptyValues) {
+                    if (this.validateEmptyValues === null) {
+                        warnings.push({
+                            message: `${schema.title ?? header(name)} is a suggested property.`,
+                            type: "warning",
+                            missing: true,
+                        });
+                    } else {
                         const rowName = pathToValidate.slice(-1)[0];
                         const isRow = typeof rowName === "number";
 
@@ -947,12 +963,6 @@ export class JSONSchemaForm extends LitElement {
                                     : ""
                             }`,
                             type: "error",
-                            missing: true,
-                        });
-                    } else if (this.validateEmptyValues === null) {
-                        warnings.push({
-                            message: `${schema.title ?? header(name)} is a suggested property.`,
-                            type: "warning",
                             missing: true,
                         });
                     }
@@ -995,7 +1005,7 @@ export class JSONSchemaForm extends LitElement {
         this.#nWarnings += updatedWarnings.length;
         this.checkStatus();
 
-        // Show aggregated errors and warnings (if any)
+        // Show aggregated errors and warnings (if allowed)
         updatedWarnings.forEach((info) => (onWarning ? "" : this.#addMessage(localPath, info, "warnings")));
         info.forEach((info) => (onInfo ? onInfo(info) : this.#addMessage(localPath, info, "info")));
 
@@ -1017,16 +1027,18 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
-            // Add new invalid classes and errors
-            input.classList.add("invalid");
+            if (this.validateEmptyValues) {
+                // Add new invalid classes and errors
+                input.classList.add("invalid");
 
-            // Only add the conditional class for linked elements
-            await this.#applyToLinkedProperties(
-                (name, element) => element.classList.add("required", "conditional"),
-                [...path, name]
-            );
+                // Only add the conditional class for linked elements
+                await this.#applyToLinkedProperties(
+                    (name, element) => element.classList.add("required", "conditional"),
+                    [...path, name]
+                );
 
-            updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
+                updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
+            }
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;
@@ -1258,9 +1270,12 @@ export class JSONSchemaForm extends LitElement {
             enableToggleContainer.append(enableToggle);
             Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
 
+            // Skip if accordion will be empty
+            if (!renderableInside.length) return;
+
             const accordion = (this.accordions[name] = new Accordion({
                 name: headerName,
-                toggleable: hasMany,
+                toggleable: hasMany, // Only show toggle if there are multiple siblings
                 subtitle: html`<div style="display:flex; align-items: center;">
                     ${explicitlyRequired ? "" : enableToggleContainer}
                 </div>`,
@@ -1423,7 +1438,7 @@ export class JSONSchemaForm extends LitElement {
 
         // // Delete extraneous results
         // this.#deleteExtraneousResults(this.results, this.schema);
-
+        this.#requirements = {};
         this.#registerRequirements(this.schema, this.required);
 
         return html`

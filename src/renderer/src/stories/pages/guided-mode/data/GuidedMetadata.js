@@ -1,4 +1,4 @@
-import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
+import { JSONSchemaForm, getSchema } from "../../../JSONSchemaForm.js";
 
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
@@ -24,6 +24,59 @@ import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
+
+const parentTableRenderConfig = {
+    Electrodes: (metadata) => {
+        metadata.schema.description = "Download, modify, and re-upload data to change the electrode information.";
+        return true;
+    },
+    Units: (metadata) => {
+        metadata.editable = false;
+        metadata.schema.description = "Update unit information directly on your source data.";
+        return true;
+    },
+};
+
+function getAggregateRequirements(path) {
+    const electrodeSchema = getSchema(path, this.schema);
+    return Object.values(electrodeSchema.properties).reduce((set, schema) => {
+        schema.items.required.forEach((item) => set.add(item));
+        return set;
+    }, new Set());
+}
+
+const tableRenderConfig = {
+    "*": (metadata) => new SimpleTable(metadata),
+    ElectrodeColumns: function (metadata) {
+        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Electrodes"]);
+
+        return new SimpleTable({
+            ...metadata,
+            editable: {
+                name: (value) => !aggregateRequirements.has(value),
+                data_type: (_, row) => !aggregateRequirements.has(row.name),
+                __row_remove: (_, row) => !aggregateRequirements.has(row.name),
+            },
+        });
+    },
+    UnitColumns: function (metadata) {
+        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Units"]);
+
+        return new SimpleTable({
+            ...metadata,
+            contextOptions: {
+                row: {
+                    add: false,
+                    remove: false,
+                },
+            },
+            editable: {
+                name: (value) => !aggregateRequirements.has(value),
+                data_type: (_, row) => !aggregateRequirements.has(row.name),
+            },
+        });
+    },
+};
 
 const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
@@ -55,14 +108,16 @@ const propsToIgnore = {
         },
     },
     Ecephys: {
-        UnitProperties: true,
+        ElectricalSeries: true,
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
-        Electrodes: {
+        Units: {
             "*": {
-                location: true,
-                group: true,
-                contact_vector: true,
+                UnitColumns: {
+                    "*": {
+                        data_type: true, // Do not show data_type
+                    },
+                },
             },
         },
     },
@@ -269,6 +324,8 @@ export class GuidedMetadataPage extends ManagedPage {
 
             renderCustomHTML: function (name, inputSchema, localPath, { onUpdate, onThrow }) {
                 if (name === "TwoPhotonSeries" && (!this.value || !this.value.length)) return null;
+                if (name === "Device" && (!this.value || !this.value.length)) return null;
+                if (name === "ElectrodeGroup" && (!this.value || !this.value.length)) return null;
 
                 const isAdditional = isAdditionalProperties(this.pattern);
                 const isPattern = isPatternProperties(this.pattern);
@@ -406,10 +463,13 @@ export class GuidedMetadataPage extends ManagedPage {
                 const updatedSchema = structuredClone(metadata.schema);
                 metadata.schema = updatedSchema;
 
-                // NOTE: Handsontable will occasionally have a context menu that doesn't actually trigger any behaviors
-                if (name !== "Electrodes") return new SimpleTable(metadata);
-                else return true; // All other tables are handled by the default behavior
-                // if (name !== "ElectrodeColumns" && name !== "Electrodes") return new Table(metadata);
+                const parentName = fullPath[fullPath.length - 1];
+
+                const tableConfig =
+                    tableRenderConfig[name] ?? parentTableRenderConfig[parentName] ?? tableRenderConfig["*"] ?? true;
+                if (typeof tableConfig === "function")
+                    return tableConfig.call(form, metadata, [...fullPath, name], this);
+                else return tableConfig;
             },
             onThrow,
         });
@@ -443,7 +503,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
-        this.forms = this.mapSessions(this.createForm, this.localState);
+        this.forms = this.mapSessions(this.createForm, this.localState.results);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {

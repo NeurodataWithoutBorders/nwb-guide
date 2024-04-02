@@ -3,8 +3,22 @@ import useGlobalStyles from "./utils/useGlobalStyles.js";
 import { GuidedFooter } from "./pages/guided-mode/GuidedFooter";
 import { GuidedCapsules } from "./pages/guided-mode/GuidedCapsules.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
-
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
+export const checkIfPageIsSkipped = (page, workflowValues = {}) => {
+    if (page.workflow) {
+        const workflow = page.workflow;
+        const skipped = Object.entries(workflow).some(([key, state]) => {
+            const value = workflowValues[key];
+            if (state.condition) return state.condition(value) ? state.skip : false;
+            if (!value) return state.skip;
+        });
+
+        return skipped;
+    }
+
+    return false;
+};
 
 const componentCSS = `
     :host {
@@ -78,7 +92,8 @@ export class Main extends LitElement {
 
         page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
 
-        if (this.content) this.toRender = toRender.page ? toRender : { page };
+        if (this.content)
+            this.toRender = toRender.page ? toRender : { page }; // Ensure re-render in either case
         else this.#queue.push(page);
     }
 
@@ -97,6 +112,20 @@ export class Main extends LitElement {
         section.scrollTop = 0;
     }
 
+    #hasAvailableNextPages = (page) => {
+        const allNext = [];
+        let currentPage = page;
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+        while (currentPage.info.next) {
+            const nextPage = currentPage.info.next;
+            const skipped = checkIfPageIsSkipped(nextPage, workflowValues);
+            if (!skipped) allNext.push(nextPage);
+            currentPage = nextPage;
+        }
+
+        return allNext.length > 0;
+    };
+
     render() {
         let { page = "", sections = {} } = this.toRender ?? {};
 
@@ -113,8 +142,10 @@ export class Main extends LitElement {
             if (info.parent) {
                 if (!("footer" in page)) footer = true; // Allow navigating laterally if there is a next page
 
+                const hasAvailableNextPages = this.#hasAvailableNextPages(page);
+
                 // Go to home screen if there is no next page
-                if (!info.next) {
+                if (!info.next || !hasAvailableNextPages) {
                     footer = Object.assign(
                         {
                             exit: false,
@@ -138,6 +169,7 @@ export class Main extends LitElement {
                     if (pages.length > 1) {
                         const capsulesProps = {
                             n: pages.length,
+                            skipped: pages.map((page) => page.skipped),
                             selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
                         };
 
@@ -147,7 +179,9 @@ export class Main extends LitElement {
                 }
 
                 if (header === true || !("header" in page) || !("sections" in page.header)) {
-                    const sectionNames = Object.keys(sections);
+                    const sectionNames = Object.entries(sections)
+                        .filter(([name, info]) => !Object.values(info.pages).every((state) => state.skipped))
+                        .map(([name]) => name);
                     header = page.header && typeof page.header === "object" ? page.header : {};
                     header.sections = sectionNames;
                     header.selected = sectionNames.indexOf(info.section);
@@ -156,6 +190,8 @@ export class Main extends LitElement {
         }
 
         const headerEl = header ? (this.header = new GuidedHeader(header)) : html`<div></div>`; // Render for grid
+
+        if (!header) delete this.header; // Reset header
 
         const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
 
