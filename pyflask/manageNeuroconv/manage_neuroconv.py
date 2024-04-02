@@ -1072,7 +1072,7 @@ def generate_test_data(output_path: str):
     downsample_factor = int(ap_sampling_frequency / lf_sampling_frequency)
 
     # Generate synthetic spiking and voltage traces with waveforms around them
-    artificial_ap_band, spiking = spikeinterface.generate_ground_truth_recording(
+    artificial_ap_band_in_uV, spiking = spikeinterface.generate_ground_truth_recording(
         durations=[duration_in_s],
         sampling_frequency=ap_sampling_frequency,
         num_channels=number_of_channels,
@@ -1081,15 +1081,15 @@ def generate_test_data(output_path: str):
         seed=0,  # Fixed seed for reproducibility
     )
 
-    artificial_ap_band = artificial_ap_band.scale(gain=1 / conversion_factor_to_uV)
-    int16_artificial_ap_band = artificial_ap_band.astype(dtype="int16")
+    unscaled_artificial_ap_band = spikeinterface.preprocessing.ScaleRecording(recording=artificial_ap_band, gain=1 / conversion_factor_to_uV)
+    int16_artificial_ap_band = unscaled_artificial_ap_band.astype(dtype="int16")
     int16_artificial_ap_band.set_channel_gains(conversion_factor_to_uV)
 
-    artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
-        recording=artificial_ap_band, freq_min=0.5, freq_max=1_000
+    unscaled_artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
+        recording=unscaled_artificial_ap_band, freq_min=0.5, freq_max=1_000
     )
-    artificial_lf_band = spikeinterface.preprocessing.resample(recording=artificial_lf_band, resample_rate=2_500)
-    int16_artificial_lf_band = artificial_lf_band.astype(dtype="int16")
+    unscaled_artificial_lf_band = spikeinterface.preprocessing.resample(recording=unscaled_artificial_lf_filter, resample_rate=2_500)
+    int16_artificial_lf_band = unscaled_artificial_lf_band.astype(dtype="int16")
     int16_artificial_lf_band.set_channel_gains(conversion_factor_to_uV)
 
     ap_file_path = spikeglx_output_folder / "Session1_g0" / "Session1_g0_imec0" / "Session1_g0_t0.imec0.ap.bin"
