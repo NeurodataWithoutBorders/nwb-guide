@@ -13,7 +13,7 @@ env:
 
 jobs:
   testing:
-    name: Dev tests on ${{ matrix.os }}
+    name: ${{ matrix.os }}  # Will read on the dashboard as 'Dev Tests / {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:

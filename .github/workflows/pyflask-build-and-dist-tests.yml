@@ -1,4 +1,4 @@
-name: Build Tests — Flask
+name: Build Tests
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -15,7 +15,7 @@ env:
 
 jobs:
   testing:
-    name: PyFlask build and distributable tests on ${{ matrix.os }}
+    name: PyInstaller on ${{ matrix.os }}  # Will read on the dashboard as 'Build Tests / PyInstaller on {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
