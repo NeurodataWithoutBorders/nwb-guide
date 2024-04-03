@@ -257,12 +257,8 @@ export class GuidedMetadataPage extends ManagedPage {
 
                         if (schema.type === "array") {
                             if (name !== "Device" && target) {
-                                
                                 // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
-                                if (name in target)
-                                    schema.minItems = schema.maxItems = target[name].length;
-
-
+                                if (name in target) schema.minItems = schema.maxItems = target[name].length;
                                 // Remove Ophys property requirement if left initially undefined
                                 else {
                                     target[name] = []; // Initialize empty array
