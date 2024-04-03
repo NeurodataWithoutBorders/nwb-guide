@@ -190,10 +190,12 @@ export class Main extends LitElement {
         }
 
         const headerEl = header ? (this.header = new GuidedHeader(header)) : html`<div></div>`; // Render for grid
+        if (!header) delete this.header; // Reset header
 
         if (!header) delete this.header; // Reset header
 
         const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
+        if (!footer) delete this.footer; // Reset footer
 
         const title = header?.title ?? page.info?.title;
 
