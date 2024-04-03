@@ -35,6 +35,13 @@ export const alwaysDelete = [
 // ------------------------ Configuration Options ------------------------
 // -----------------------------------------------------------------------
 
+const autocompleteOptions = {
+  subject_id: 'mouse1',
+  session_id: 'Session1'
+}
+
+const { subject_id, session_id } = autocompleteOptions
+
 export const testInterfaceInfo = {
   common: {
     SpikeGLXRecordingInterface: {
@@ -46,10 +53,12 @@ export const testInterfaceInfo = {
   },
   multi: {
     SpikeGLXRecordingInterface: {
-      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin'
+      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin',
+      autocomplete: {}
     },
     PhySortingInterface: {
-      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy'
+      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_phy',
+      autocomplete: {}
     }
   },
   single: {
@@ -62,11 +71,20 @@ export const testInterfaceInfo = {
   }
 }
 
+// Add autocomplete options
+Object.entries(testInterfaceInfo.multi).forEach(([key, value]) => {
+  const format = value.format
+  value.autocomplete = {
+    path: join(testDatasetPath, format.replace(/{subject_id}/g, subject_id).replace(/{session_id}/g, session_id)),
+    ...autocompleteOptions,
+  }
+})
+
+
 export const subjectInfo = {
   common: {
     sex: 'M',
     species: 'Mus musculus',
-    age: 'P30W'
   },
 
   single: {
@@ -75,13 +93,17 @@ export const subjectInfo = {
 
   multiple: {
     mouse1: {
-      age: 'P29W'
+      age: 'P29W',
+      sex: 'F'
+    },
+    mouse2: {
+      age: 'P30W'
     }
   }
 }
 
-// export const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
-export const regenerateTestData = true // Force regeneration
+export const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
+// export const regenerateTestData = true // Force regeneration
 
 export const dandiInfo = {
   id: '212750',
