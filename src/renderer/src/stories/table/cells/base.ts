@@ -126,7 +126,6 @@ export class TableCellBase extends LitElement {
             this.setAttribute('editing', '')
 
             const listenForEnter = (ev: KeyboardEvent) => {
-                console.log(ev)
 
                 if (ev.key === 'Enter') {
                     ev.preventDefault()

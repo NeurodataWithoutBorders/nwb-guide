@@ -517,7 +517,9 @@ export class JSONSchemaForm extends LitElement {
                 if (e.message.includes("is not of a type(s)")) {
                     if (resolvedSchema.type === "number") {
                         if (resolvedValue === "NaN") return;
-                        else if (resolvedValue === null) return;
+                        else if (resolvedValue === null){
+                            if (schema.type !== "array") return // Allow null in non-tables
+                        }
                         else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
                     } else if (resolvedSchema.type === "string") {
                         if ("properties" in resolvedSchema) return; // Allow for constructing types from object types
@@ -904,6 +906,7 @@ export class JSONSchemaForm extends LitElement {
         const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
 
+
         if (valid === null) return null; // Skip validation / data change if the value is null
 
         const isRequired = this.#isRequired(localPath) || (!input.table && input.required); // Do not trust required status of table validations
@@ -1153,6 +1156,7 @@ export class JSONSchemaForm extends LitElement {
                 `;
             }
 
+
             // Directly render the interactive property element
             if (!info.properties) return this.#renderInteractiveElement(name, info, required, path);
 
@@ -1188,6 +1192,7 @@ export class JSONSchemaForm extends LitElement {
 
             if (renderableInside.length) {
                 const ignore = getIgnore(this.ignore, name);
+
 
                 const ogContext = this;
                 const nested = (this.forms[name] = new JSONSchemaForm({
@@ -1329,6 +1334,7 @@ export class JSONSchemaForm extends LitElement {
             return accordion;
         });
 
+
         if (hasPatternProperties) {
             const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
                 return this.#renderInteractiveElement(
@@ -1351,6 +1357,7 @@ export class JSONSchemaForm extends LitElement {
 
         // Render additional properties
         if (allowAdditionalProperties) {
+
             // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
             if (!additionalProps.length) return rendered;
 
