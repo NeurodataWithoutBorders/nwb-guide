@@ -33,13 +33,29 @@ Format strings are specified using two components: the **base directory**, which
 
 Given the structure of the tutorial dataset, we’ll select **~/NWB_GUIDE/test-data/dataset** as the **base directory**, where **~** is the home directory of your system.
 
-We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the **Autocomplete** button and provide an example source data path (for example, the ``mouse1_Session2_g0_t0.imec0.lf.bin`` file for SpikeGLX). Then, indicate the Subject  (``mouse1``) and Session ID (``Session2``) for this particular path. When you submit this form, you’ll notice that the Format String Path input has been auto-filled with a pattern for all the sessions.
+We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the **Autocomplete** button to open a pop-up form that will derive the format string from a single example path.
+
+.. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-open.png
+  :align: center
+  :alt: Autocomplete modal on path expansion page
+
+Provide an example source data path (for example, the ``mouse1_Session1_g0_t0.imec0.lf.bin`` file for SpikeGLX), followed by the Subject (``mouse1``) and Session ID (``Session1``) for this particular path. 
+
+.. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-filled.png
+  :align: center
+  :alt: Autocomplete modal completed
+
+When you submit this form, you’ll notice that the Format String Path input has been auto-filled with a pattern for all the sessions.
+
+.. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-submitted.png
+  :align: center
+  :alt: Path expansion page with autocompleted format string
 
 Repeat this process for Phy, where ``mouse1_Session2_phy`` will be the example source data path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-completed.png
   :align: center
-  :alt: Blank path expansion page
+  :alt: Completed path expansion information
 
 Advance to the next page when you have entered the data locations for both formats.
 

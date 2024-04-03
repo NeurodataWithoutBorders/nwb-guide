@@ -124,29 +124,77 @@ export default async function runWorkflow (name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'pathexpansion-page'))
 
-    // Fill out the path expansion information
-    await evaluate(({ multi, common }, basePath) => {
+    // Provide base path for all interfaces
+    await evaluate(({ common }, basePath) => {
       const dashboard = document.querySelector('nwb-dashboard')
       const form = dashboard.page.form
 
       Object.entries(common).forEach(([ name, info ]) => {
-
         const id = info.id
         const baseInput = form.getFormElement([id, 'base_directory'])
         baseInput.updateData(basePath)
+      })
 
+      dashboard.main.querySelector('main > section').scrollTop = 200 // Scroll down to see all interfaces
+
+    },
+      testInterfaceInfo,
+      testDatasetPath
+    )
+
+    await takeScreenshot(join(identifier, 'pathexpansion-basepath'), 300)
+
+    const name = Object.keys(testInterfaceInfo.common)[0]
+    const interfaceId = testInterfaceInfo.common[name].id
+    const autocompleteInfo = testInterfaceInfo.multi[name].autocomplete
+
+    await evaluate(id => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      const form = dashboard.page.form
+      const formatInput = form.getFormElement([id, 'format_string_path'])
+      const autocompleteButton = formatInput.controls[0]
+      autocompleteButton.onClick()
+    }, interfaceId)
+
+    await takeScreenshot(join(identifier, 'pathexpansion-autocomplete-open'), 300)
+
+    await evaluate(info => {
+      const modal = document.querySelector('nwb-modal') as any
+      const form = modal.querySelector('nwb-jsonschema-form')
+
+      Object.entries(info).forEach(([key, value]) => {
+        const formatInput = form.getFormElement([ key ])
+        formatInput.updateData(value)
+      })
+
+    }, autocompleteInfo)
+
+    await takeScreenshot(join(identifier, 'pathexpansion-autocomplete-filled'), 300)
+
+    // Submit the autocomplete information
+    await evaluate(() => {
+      const modal = document.querySelector('nwb-modal') as any
+      modal.footer.onClick()
+    }, autocompleteInfo)
+
+    await takeScreenshot(join(identifier, 'pathexpansion-autocomplete-submitted'), 1000)
+
+    // Fill out the other path expansion information
+    await evaluate(({ multi, common }) => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      const form = dashboard.page.form
+
+      // Fill out the path expansion information for non-autocompleted interfaces
+      Object.entries(common).slice(1).forEach(([ name, info ]) => {
+        const id = info.id
         const { format } = multi[name]
-
         const formatInput = form.getFormElement([id, 'format_string_path'])
         formatInput.updateData(format)
       })
 
       dashboard.main.querySelector('main > section').scrollTop = 200
 
-    },
-      testInterfaceInfo,
-      testDatasetPath
-    )
+    }, testInterfaceInfo)
 
 
     await takeScreenshot(join(identifier, 'pathexpansion-completed'), 300)
