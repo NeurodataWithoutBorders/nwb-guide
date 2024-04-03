@@ -413,15 +413,13 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
 
         # Populate Units metadata
-        metadata["Ecephys"]["Units"] = {}
-        schema["properties"]["Ecephys"]["required"].append("Units")
         original_units_schema = ecephys_properties.pop("UnitProperties", None)
         metadata["Ecephys"].pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
 
         has_units = original_units_schema is not None
 
         if has_units:
-            metadata["Ecephys"]
+
             ecephys_properties["UnitColumns"] = {
                 "type": "array",
                 "minItems": 0,
@@ -429,7 +427,11 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             }
 
             schema["properties"]["Ecephys"]["required"].append("UnitColumns")
+            
             ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
+            metadata["Ecephys"]["Units"] = {}
+            schema["properties"]["Ecephys"]["required"].append("Units")
+
 
     def on_sorting_interface(name, sorting_interface):
 
