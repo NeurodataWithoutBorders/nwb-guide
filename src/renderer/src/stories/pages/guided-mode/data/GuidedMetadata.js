@@ -263,7 +263,7 @@ export class GuidedMetadataPage extends ManagedPage {
                                     schema.minItems = schema.maxItems = target[name].length;
 
 
-                                // Remove Ophys property (+ related requirement) if left initially undefined
+                                // Remove Ophys property requirement if left initially undefined
                                 else {
                                     target[name] = []; // Initialize empty array
                                     if (parentSchema.required.includes(name))
