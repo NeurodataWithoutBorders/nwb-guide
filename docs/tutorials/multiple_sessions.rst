@@ -39,7 +39,7 @@ We can take advantage of the **Autocomplete** feature of this page. Instead of m
   :align: center
   :alt: Autocomplete modal on path expansion page
 
-Provide an example source data path (for example, the ``mouse1_Session1_g0_t0.imec0.lf.bin`` file for SpikeGLX), followed by the Subject (``mouse1``) and Session ID (``Session1``) for this particular path. 
+Provide an example source data path (for example, the ``mouse1_Session1_g0_t0.imec0.lf.bin`` file for SpikeGLX), followed by the Subject (``mouse1``) and Session ID (``Session1``) for this particular path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-filled.png
   :align: center
