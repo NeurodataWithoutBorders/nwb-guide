@@ -427,11 +427,10 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             }
 
             schema["properties"]["Ecephys"]["required"].append("UnitColumns")
-            
+
             ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
             metadata["Ecephys"]["Units"] = {}
             schema["properties"]["Ecephys"]["required"].append("Units")
-
 
     def on_sorting_interface(name, sorting_interface):
 
