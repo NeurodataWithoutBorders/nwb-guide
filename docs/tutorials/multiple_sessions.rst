@@ -31,7 +31,7 @@ While you don’t have to specify format strings for all of the pipeline’s dat
 
 Format strings are specified using two components: the **base directory**, which is the directory to search in, and the **format string path**, where the source data is within that directory.
 
-Given the structure of the tutorial dataset, we’ll select **~/NWB_GUIDE/test-data/dataset** as the **base directory**, where **~** is the home directory of your system.
+Given the structure of the tutorial dataset, we’ll select ``~/NWB_GUIDE/test-data/dataset`` as the **base directory**, where **~** is the home directory of your system.
 
 We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the **Autocomplete** button to open a pop-up form that will derive the format string from a single example path.
 
