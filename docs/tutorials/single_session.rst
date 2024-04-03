@@ -3,7 +3,7 @@ Converting a Single Session
 
 As a researcher, you’ve just completed an experimental session and you’d like to convert your data to NWB right away.
 
-Upon launching the GUIDE, you'll begin on the Conversions page. If you’re opening the application for the first time, there should be no pipelines listed on this page.
+Upon launching the GUIDE, you'll begin on the Convert page. If you’re opening the application for the first time, there should be no pipelines listed on this page.
 
 .. figure:: ../assets/tutorials/home-page.png
   :align: center
@@ -18,13 +18,6 @@ Project Setup
 ^^^^^^^^^^^^^
 
 The Project Setup page will have you define two pieces of information about your pipeline: the **name** and, optionally, the **output location** for your NWB files.
-
-.. note::
-   Choosing a good output location is important for two reasons, namely **conversion speed** and **disk space**.
-
-   1. SSDs will be much faster than HDDs. We’d recommend moving the output location to an SSD if available.
-   2. If you don’t have much disk space available on your main drive, we recommend changing the output location to a drive that has ample space.
-
 
 You’ll notice that the name property has a red asterisk next to it, which identifies it as a required property.
 
@@ -59,7 +52,7 @@ Next, you’ll specify the data formats you’re working with on the Data Format
   :align: center
   :alt: Date Formats page
 
-The tutorial we're working with uses the SpikeGLX and Phy formats, a common output for NeuroPixel recordings and subsequent spike sorting. To specify that your pipeline will handle these files, you’ll press the “Add Format” button.
+The tutorial we're working with uses the SpikeGLX and Phy formats, a common output for Neuropixels recordings and subsequent spike sorting. To specify that your pipeline will handle these files, you’ll press the “Add Format” button.
 
 .. figure:: ../assets/tutorials/single/format-options.png
   :align: center
@@ -92,7 +85,7 @@ Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
 On this page, specify the relevant **.bin** (Spikeglx) file and **phy** folder so that the GUIDE can find this source data to complete the conversion.
 
-As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the `~/NWB_GUIDE/test-data/data` directory.
+As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/data`` directory.
 
 You can either click the file selector to navigate to the file or drag-and-drop into the GUIDE from your file navigator.
 
@@ -112,7 +105,7 @@ The Session Start Time in the General Metadata section is already specified beca
   :alt: Metadata page with invalid Subject information
 
 
-However, we still need to add the Subject information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P30D.
+However, we still need to add the Subject information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P30D, which represents 30 days old.
 
 .. figure:: ../assets/tutorials/single/metadata-subject-complete.png
   :align: center
