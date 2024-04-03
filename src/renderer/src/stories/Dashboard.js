@@ -180,12 +180,12 @@ export class Dashboard extends LitElement {
         else if (typeof page === "object") return this.getPage(Object.values(page)[0]);
     }
 
-    updateSections({ sidebar = true, main = false } = {}) {
+    updateSections({ sidebar = true, main = false } = {}, globalState = this.page.info.globalState) {
         const info = this.page.info;
         let parent = info.parent;
 
         if (sidebar) {
-            this.subSidebar.sections = this.#getSections(parent.info.pages, info.globalState); // Update sidebar items (if changed)
+            this.subSidebar.sections = this.#getSections(parent.info.pages, globalState); // Update sidebar items (if changed)
         }
 
         const { sections } = this.subSidebar;
@@ -229,7 +229,7 @@ export class Dashboard extends LitElement {
         if (isNested) {
             let parent = info.parent;
             while (parent.info.parent) parent = parent.info.parent; // Lock sections to the top-level parent
-            this.updateSections({ sidebar: true });
+            this.updateSections({ sidebar: true }, toPass.globalState);
             this.subSidebar.active = info.id; // Update active item (if changed)
             this.sidebar.hide(true);
             this.subSidebar.show();
