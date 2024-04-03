@@ -274,7 +274,7 @@ export class GuidedPathExpansionPage extends Page {
                 // Force single subject/session if not keeping existing data
                 // if (!globalState.results) {
 
-                const subject_id = this.workflow.subject_id.value;
+                const subject_id = this.workflow.subject_id.value; 
                 const session_id = this.workflow.session_id.value;
 
                 // Map existing results to new subject information (if available)
@@ -289,24 +289,33 @@ export class GuidedPathExpansionPage extends Page {
                     if (existing) source_data[key] = existing ?? {};
                 }
 
-                globalState.results = {
-                    [subject_id]: {
-                        [session_id]: {
-                            source_data,
-                            metadata: {
-                                NWBFile: {
-                                    session_id: session_id,
-                                    ...(existingMetadata?.NWBFile ?? {}),
-                                },
-                                Subject: {
-                                    subject_id: subject_id,
-                                    ...(existingMetadata?.Subject ?? {}),
-                                },
+                const sub_id = subject_id ?? ''
+                const ses_id = session_id ?? ''
+
+                // Skip if results already exist without manual IDs
+                if ((!subject_id || !session_id) && globalState.results) return
+
+                // Otherwise reset the results to the new subject/session
+                else {
+                    globalState.results = {}
+
+                    globalState.results[sub_id] = {}
+    
+                    globalState.results[sub_id][ses_id] = {
+                        source_data,
+                        metadata: {
+                            NWBFile: {
+                                session_id: ses_id,
+                                ...(existingMetadata?.NWBFile ?? {}),
                             },
-                        },
-                    },
-                };
-                // }
+                            Subject: {
+                                subject_id: sub_id,
+                                ...(existingMetadata?.Subject ?? {}),
+                            },
+                        }
+                    };
+    
+                }
 
                 this.save({}, false); // Ensure this structure is saved
             },
