@@ -17,7 +17,7 @@ Navigate to the **Settings** page using the main sidebar. Then press the **Gener
 
   Press the Generate button on the Settings page to create the dataset.
 
-The generated data will populate in the ``~/NWB_GUIDE/test_data`` directory and include a `data` folder with the original data as well as a `dataset` folder that duplicates this `data` across multiple subjects and sessions.
+The generated data will populate in the ``~/NWB_GUIDE/test_data`` directory and include a ``data`` folder with the original data as well as a ``dataset`` folder that duplicates this ``data`` across multiple subjects and sessions.
 
 .. code-block:: bash
 
