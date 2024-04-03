@@ -274,7 +274,7 @@ export class GuidedPathExpansionPage extends Page {
                 // Force single subject/session if not keeping existing data
                 // if (!globalState.results) {
 
-                const subject_id = this.workflow.subject_id.value; 
+                const subject_id = this.workflow.subject_id.value;
                 const session_id = this.workflow.session_id.value;
 
                 // Map existing results to new subject information (if available)
@@ -289,18 +289,17 @@ export class GuidedPathExpansionPage extends Page {
                     if (existing) source_data[key] = existing ?? {};
                 }
 
-                const sub_id = subject_id ?? ''
-                const ses_id = session_id ?? ''
+                const sub_id = subject_id ?? "";
+                const ses_id = session_id ?? "";
 
                 // Skip if results already exist without manual IDs
-                if ((!subject_id || !session_id) && globalState.results) return
-
+                if ((!subject_id || !session_id) && globalState.results) return;
                 // Otherwise reset the results to the new subject/session
                 else {
-                    globalState.results = {}
+                    globalState.results = {};
 
-                    globalState.results[sub_id] = {}
-    
+                    globalState.results[sub_id] = {};
+
                     globalState.results[sub_id][ses_id] = {
                         source_data,
                         metadata: {
@@ -312,9 +311,8 @@ export class GuidedPathExpansionPage extends Page {
                                 subject_id: sub_id,
                                 ...(existingMetadata?.Subject ?? {}),
                             },
-                        }
+                        },
                     };
-    
                 }
 
                 this.save({}, false); // Ensure this structure is saved
