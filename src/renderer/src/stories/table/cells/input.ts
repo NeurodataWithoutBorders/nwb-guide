@@ -44,6 +44,8 @@ export class NestedEditor extends LitElement {
         const schema = this.schema
 
 
+        console.log('schema', schema, 'data', data)
+        const container = document.createElement('div')
         const input = this.#input = new JSONSchemaInput({
             schema,
             value: data,
@@ -59,9 +61,10 @@ export class NestedEditor extends LitElement {
             renderTable: (name, metadata, path) => new SimpleTable(metadata) // NOTE: Would be most ideal to have a reference to the containing input...
         })
 
-        input.style.padding = '25px 50px'
+        container.style.padding = '25px'
+        container.append(input)
 
-        modal.append(input)
+        modal.append(container)
 
         modal.open = true
     }

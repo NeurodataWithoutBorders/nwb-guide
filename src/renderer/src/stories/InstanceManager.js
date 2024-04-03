@@ -223,7 +223,6 @@ export class InstanceManager extends LitElement {
 
     // Correct bug where multiple instances are selected
     updated = () => {
-        console.log(this);
         const selected = Array.from(this.shadowRoot.querySelectorAll("[selected]"));
         if (selected.length > 0)
             selected.slice(1).forEach((element) => {
@@ -376,7 +375,6 @@ export class InstanceManager extends LitElement {
         this.#items = [];
 
         const instances = this.#render();
-        console.log(this.#items);
 
         const hasMultiple = this.#hasMultiple();
 

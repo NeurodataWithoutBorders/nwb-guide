@@ -5,6 +5,7 @@ import { header, replaceRefsWithValue } from '../src/renderer/src/stories/forms/
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
 import { merge } from '../src/renderer/src/stories/pages/utils'
+import { drillSchemaProperties } from '../src/renderer/src/stories/pages/guided-mode/data/utils'
 
 const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
 const UV_PROPERTIES = ["gain_to_uV", "offset_to_uV"]
@@ -71,8 +72,20 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     const copy = replaceRefsWithValue(structuredClone(schema))
 
-    copy.additionalProperties = false
+    // NEUROCONV PATCH: Correct for incorrect array schema
+    drillSchemaProperties(
+        copy,
+        (_, schema) => {
+            if (schema.properties && schema.type === "array") {
+                schema.items = { type: "object", properties: schema.properties, required: schema.required };
+                delete schema.properties;
+                delete schema.required;
+            }
+        },
+        {}
+    );
 
+    copy.additionalProperties = false
 
 
     copy.required = Object.keys(copy.properties) // Require all properties at the top level
