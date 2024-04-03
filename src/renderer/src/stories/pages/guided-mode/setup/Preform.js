@@ -162,8 +162,8 @@ export class GuidedPreform extends Page {
                 if (typeof value === "boolean") {
                     this.unsavedUpdates = true;
                     this.info.globalState.project.workflow = this.state;
-                    await this.save({}, false);
-                    this.updateSections();
+                    this.updateSections(); // Trigger section changes with new workflow
+                    await this.save({}, false); // Save new workflow and section changes
                 }
             },
             onThrow,
