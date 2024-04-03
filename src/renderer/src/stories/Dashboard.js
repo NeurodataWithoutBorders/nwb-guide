@@ -283,13 +283,14 @@ export class Dashboard extends LitElement {
                 if (!state) state = globalState.sections[section] = { open: false, active: false, pages: {} };
 
                 let pageState = state.pages[id];
-                if (!pageState) pageState = state.pages[id] = {
-                    visited: false,
-                    active: false,
-                    saved: false,
-                    pageLabel: page.info.label,
-                    pageTitle: page.info.title,
-                };
+                if (!pageState)
+                    pageState = state.pages[id] = {
+                        visited: false,
+                        active: false,
+                        saved: false,
+                        pageLabel: page.info.label,
+                        pageTitle: page.info.title,
+                    };
 
                 info.states = pageState;
 
