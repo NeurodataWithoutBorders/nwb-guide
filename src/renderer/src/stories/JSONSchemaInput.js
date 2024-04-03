@@ -174,7 +174,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         merge(overrides.schema, schemaCopy, { arrays: true });
 
-
         const tableMetadata = {
             keyColumn: tempPropertyKey,
             schema: schemaCopy,
@@ -932,7 +931,6 @@ export class JSONSchemaInput extends LitElement {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
                 if (!("type" in schema.items) && !hasItemsRef) {
-
                     // Guess the type of the first item
                     if (this.value) {
                         const itemToCheck = this.value[0];
