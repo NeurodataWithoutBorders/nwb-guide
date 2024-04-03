@@ -1062,7 +1062,7 @@ def generate_test_data(output_path: str):
     spikeglx_output_folder = base_path / "spikeglx"
     phy_output_folder = base_path / "phy"
 
-    # Define NeuroPixel-like values for sampling rates and conversion factors
+    # Define Neuropixels-like values for sampling rates and conversion factors
     duration_in_s = 3.0
     number_of_units = 50
     number_of_channels = 385  # Have to include 'sync' channel to be proper SpikeGLX. TODO: artificiate sync pulses
