@@ -20,6 +20,8 @@ import { header } from "../../../forms/utils";
 
 import autocompleteIcon from "../../../assets/inspect.svg?raw";
 
+const propOrder = ["path", "subject_id", "session_id"];
+
 export async function autocompleteFormatString(path) {
     let notification;
 
@@ -50,10 +52,8 @@ export async function autocompleteFormatString(path) {
     const content = document.createElement("div");
     Object.assign(content.style, {
         padding: "25px",
-        paddingBottom: "0px",
     });
 
-    const propOrder = ["path", "subject_id", "session_id"];
     const form = new JSONSchemaForm({
         validateEmptyValues: false,
         schema: {
@@ -279,6 +279,7 @@ export class GuidedPathExpansionPage extends Page {
 
                 // Map existing results to new subject information (if available)
                 const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
+
                 const existingMetadata = existingResults.metadata;
                 const existingSourceData = existingResults.source_data;
 
@@ -331,6 +332,13 @@ export class GuidedPathExpansionPage extends Page {
             finalStructure[key] = entry;
         }
 
+        if (Object.keys(finalStructure).length === 0) {
+            const message =
+                "Please configure at least one interface. <br/><small>Otherwise, revisit <b>Pipeline Workflow</b> to update your configuration.</small>";
+            this.#notification = this.notify(message, "error");
+            throw message;
+        }
+
         const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
             this.notify(error.message, "error");
             throw error;
@@ -343,6 +351,8 @@ export class GuidedPathExpansionPage extends Page {
             this.#notification = this.notify(message, "error");
             throw message;
         }
+
+        // globalState.results = {} // Clear existing results
 
         // Save an overall results object organized by subject and session
         merge({ results }, globalState);
@@ -438,7 +448,7 @@ export class GuidedPathExpansionPage extends Page {
         const form = (this.form = new JSONSchemaForm({
             ...structureState,
             onThrow,
-            validateEmptyValues: false,
+            validateEmptyValues: null,
 
             controls,
 

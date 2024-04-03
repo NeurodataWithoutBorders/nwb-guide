@@ -5,6 +5,7 @@ type BaseTableProps = {
     info: {
         col: string,
     },
+    editable: boolean,
     toggle: (state?: boolean) => void,
     schema: any,
     onOpen: Function,
@@ -31,6 +32,9 @@ export class TableCellBase extends LitElement {
     #editor?: HTMLElement
     #renderer?: HTMLElement
 
+    // Internal variables
+    #firstUpdated = false
+    #initialValue: undefined | any
 
     static get styles() {
         return css`
@@ -64,6 +68,8 @@ export class TableCellBase extends LitElement {
     info: BaseTableProps['info'];
     editToggle: BaseTableProps['toggle']
 
+    editable: BaseTableProps['editable'];
+
     interacted = false
 
     constructor({
@@ -73,14 +79,14 @@ export class TableCellBase extends LitElement {
         onClose,
         onChange,
         toggle,
-        nestedProps
+        nestedProps,
+        editable = true
     }: Partial<BaseTableProps> = {}) {
 
         super()
 
         this.info = info ?? {}
         this.schema = schema ?? {}
-
         this.nestedProps = nestedProps ?? {}
 
         this.editToggle = toggle ?? (() => {});
@@ -88,6 +94,8 @@ export class TableCellBase extends LitElement {
         if (onOpen) this.onOpen = onOpen
         if (onChange) this.onChange = onChange
         if (onClose) this.onClose = onClose
+
+        this.editable = editable
 
         this.#editable.addEventListener('input', (ev: InputEvent) => {
             this.interacted = true
@@ -106,16 +114,20 @@ export class TableCellBase extends LitElement {
     onChange: BaseTableProps['onChange'] = () => {}
 
     #editableClose = () => this.editToggle(false)
-    #originalEditorValue = undefined
 
     toggle (state = !this.#active) {
+
         if (state === this.#active) return
 
         if (state) {
 
+            if (!this.editable && this.#initialValue) return // Non-editability does not apply to new rows
+
             this.setAttribute('editing', '')
 
             const listenForEnter = (ev: KeyboardEvent) => {
+                console.log(ev)
+
                 if (ev.key === 'Enter') {
                     ev.preventDefault()
                     ev.stopPropagation()
@@ -149,6 +161,7 @@ export class TableCellBase extends LitElement {
                 document.removeEventListener('click', this.#editableClose)
             } else {
                 current = this.#editor.value
+                console.log('Editor value', current)
                 this.interacted = true
                 if (this.#editor && this.#editor.onEditEnd) this.#editor.onEditEnd()
             }
@@ -163,8 +176,10 @@ export class TableCellBase extends LitElement {
 
     getValue = (input: any = this.value) => input // Process inputs from the editor
 
-    #update(current: any, forceUpdate = false, runOnChange = true) {
+    #update = (current: any, forceUpdate = false, runOnChange = true) => {
         let value = this.getValue(current)
+
+        if (!this.#firstUpdated) this.#initialValue = value
 
         // NOTE: Forcing change registration for all cells
         if (this.value !== value || forceUpdate) {
@@ -175,7 +190,6 @@ export class TableCellBase extends LitElement {
 
     setText(value: any, setOnInput = true, runOnChange = true) {
         if (setOnInput) [ this.#editor, this.#renderer ].forEach(element => this.setChild(element, value)) // RESETS HISTORY
-
         if (this.schema.type === 'array' || this.schema.type === 'object') this.#update(value, true, runOnChange) // Ensure array values are not coerced
         else this.#update(`${value}`, undefined, runOnChange) // Coerce to string
     }
@@ -208,6 +222,7 @@ export class TableCellBase extends LitElement {
 
     // Initialize values
     firstUpdated() {
+        this.#firstUpdated = true
         const elements = [ this.#editor, this.#renderer ]
         elements.forEach(element => this.setChild(element))
     }

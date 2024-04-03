@@ -174,6 +174,8 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         merge(overrides.schema, schemaCopy, { arrays: true });
 
+        console.log(schemaPath, nestedIgnore);
+
         const tableMetadata = {
             keyColumn: tempPropertyKey,
             schema: schemaCopy,
@@ -254,7 +256,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     }
 
     const nestedIgnore = getIgnore(ignore, fullPath);
-
     Object.assign(nestedIgnore, overrides.ignore ?? {});
 
     merge(overrides.ignore, nestedIgnore);
@@ -502,7 +503,8 @@ export class JSONSchemaInput extends LitElement {
     attributeChangedCallback(key, _, latest) {
         super.attributeChangedCallback(...arguments);
 
-        const formSchema = this.form.schema;
+        const formSchema = this.form?.schema;
+        if (!formSchema) return;
 
         if (key === "required") {
             const name = this.path.slice(-1)[0];
@@ -529,6 +531,7 @@ export class JSONSchemaInput extends LitElement {
     // form,
     // pattern
     // showLabel
+    // description
     controls = [];
     // required;
     validateOnChange = true;
@@ -644,6 +647,8 @@ export class JSONSchemaInput extends LitElement {
 
         if (input === null) return null; // Hide rendering
 
+        const description = this.description ?? schema.description;
+
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
                 this.conditional ? "conditional" : ""
@@ -660,11 +665,9 @@ export class JSONSchemaInput extends LitElement {
                 </label>
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
                 ${
-                    schema.description
+                    description
                         ? html`<p class="guided--text-input-instructions">
-                              ${unsafeHTML(capitalize(schema.description))}${[".", "?", "!"].includes(
-                                  schema.description.slice(-1)[0]
-                              )
+                              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
                                   ? ""
                                   : "."}
                           </p>`
@@ -870,6 +873,9 @@ export class JSONSchemaInput extends LitElement {
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
+        const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
+        const isTable = itemSchema?.type === "object" && this.renderTable;
+
         const canAddProperties = isEditableObject(this.schema, this.value);
 
         if (this.renderCustomHTML) {
@@ -900,7 +906,7 @@ export class JSONSchemaInput extends LitElement {
         };
 
         // Transform to single item if maxItems is 1
-        if (isArray && schema.maxItems === 1) {
+        if (isArray && schema.maxItems === 1 && !isTable) {
             return new JSONSchemaInput({
                 value: this.value?.[0],
                 schema: {
@@ -938,8 +944,6 @@ export class JSONSchemaInput extends LitElement {
                     else return this.onUncaughtSchema(schema);
                 }
             }
-
-            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -1001,7 +1005,7 @@ export class JSONSchemaInput extends LitElement {
                         ${list}
                     </div>`;
                 }
-            } else if (itemSchema?.type === "object" && this.renderTable) {
+            } else if (isTable) {
                 const instanceThis = this;
 
                 function updateFunction(path, value = this.data) {

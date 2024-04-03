@@ -21,7 +21,6 @@ const questions = {
                 condition: [false, undefined],
                 default: "",
                 required: true,
-                attribute: "hidden",
             },
         },
     },
@@ -33,7 +32,6 @@ const questions = {
                 condition: [false, undefined],
                 default: "",
                 required: true,
-                attribute: "hidden",
             },
         },
     },
@@ -44,6 +42,11 @@ const questions = {
             multiple_sessions: { default: false },
         },
         default: false,
+    },
+    upload_to_dandi: {
+        type: "boolean",
+        title: "Would you like to upload your data to DANDI?",
+        default: true,
     },
 };
 
@@ -96,11 +99,14 @@ export class GuidedPreform extends Page {
         subtitle: "Answer the following questions to simplify your workflow through the GUIDE",
     };
 
+    beforeSave = async () => {
+        await this.form.validate();
+        this.info.globalState.project.workflow = this.state;
+    };
+
     footer = {
         onNext: async () => {
-            await this.form.validate();
-            this.info.globalState.project.workflow = this.state;
-            this.save();
+            await this.save();
             return this.to(1);
         },
     };
@@ -127,8 +133,9 @@ export class GuidedPreform extends Page {
                           });
 
                     const dependentEl = this.inputs[dependent.name];
+                    const dependentParent = dependentEl.parentElement;
 
-                    const attr = dependent.attribute ?? "disabled";
+                    const attr = dependent.attribute ?? "hidden";
 
                     let condition = (v) => !!v;
                     if (!("condition" in dependent)) {
@@ -138,18 +145,27 @@ export class GuidedPreform extends Page {
                     else console.warn("Invalid condition", dependent.condition);
 
                     if (uniformDeps.every(({ name }) => condition(parent[name]))) {
-                        dependentEl.removeAttribute(attr);
+                        dependentParent.removeAttribute(attr);
                         if ("required" in dependent) dependentEl.required = dependent.required;
                         if ("__cached" in dependent) dependentEl.updateData(dependent.__cached);
                     } else {
                         if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
                         dependentEl.updateData(dependent.default);
-                        dependentEl.setAttribute(attr, true);
+                        dependentParent.setAttribute(attr, true);
                         if ("required" in dependent) dependentEl.required = !dependent.required;
                     }
                 });
             },
-            onUpdate: () => (this.unsavedUpdates = true),
+
+            // Immediately re-render boolean values
+            onUpdate: async (path, value) => {
+                if (typeof value === "boolean") {
+                    this.unsavedUpdates = true;
+                    this.info.globalState.project.workflow = this.state;
+                    this.updateSections(); // Trigger section changes with new workflow
+                    await this.save({}, false); // Save new workflow and section changes
+                }
+            },
             onThrow,
             // groups: [
             //     {
