@@ -15,7 +15,7 @@ env:
 
 jobs:
   testing:
-    name: PyFlask build and distributable tests on ${{ matrix.os }}
+    name: ${{ matrix.os }}  # Will read on the dashboard as 'Build tests - Flask / {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
