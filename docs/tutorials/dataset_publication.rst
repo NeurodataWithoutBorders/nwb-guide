@@ -1,7 +1,7 @@
 Dataset Publication
 =======================================
 
-For this tutorial, we'll be adapting the previous :ref:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
+For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
 Resume the conversion on the home page, then navigate back to the **Workflow** page.
 
@@ -29,7 +29,7 @@ You’ll need to specify your DANDI API keys if you haven’t uploaded from the 
 
 To get your API key, visit the :dandi-staging:`staging website <>` and click on the profile icon in the top-right corner. This will show a dropdown with a copy button, which will assign your API key to the clipboard. Submit this to the Staging API Key input on the GUIDE.
 
-.. figure:: ../assets/tutorials/dandi/api-tokens-added.png
+.. figure:: ../assets/tutorials/dandi/api-token-added.png
   :align: center
   :alt: DANDI staging API key added
 
