@@ -31,11 +31,11 @@ While you don’t have to specify format strings for all of the pipeline’s dat
 
 Format strings are specified using two components: the **base directory**, which is the directory to search in, and the **format string path**, where the source data is within that directory.
 
-Given the structure of the tutorial dataset, we’ll select **~/NWB_GUIDE/test-data/dataset** as the base_directory, where `~` is the home directory of your system.
+Given the structure of the tutorial dataset, we’ll select **~/NWB_GUIDE/test-data/dataset** as the **base directory**, where **~** is the home directory of your system.
 
-We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the Autocomplete button and provide an example source data path (for example, the ``mouse1_Session2_g0_t0.imec0.lf.bin`` file for SpikeGLX). Then, indicate the Subject  (``mouse1``) and Session ID (``Session2``) for this particular path. When you submit this form, you’ll notice that the Format String Path input has been auto-filled with a pattern for all the sessions.
+We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the **Autocomplete** button and provide an example source data path (for example, the ``mouse1_Session2_g0_t0.imec0.lf.bin`` file for SpikeGLX). Then, indicate the Subject  (``mouse1``) and Session ID (``Session2``) for this particular path. When you submit this form, you’ll notice that the Format String Path input has been auto-filled with a pattern for all the sessions.
 
-Repeat this process for Phy, where mouse1_Session2_phy will be the example source data path.
+Repeat this process for Phy, where ``mouse1_Session2_phy`` will be the example source data path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-completed.png
   :align: center
