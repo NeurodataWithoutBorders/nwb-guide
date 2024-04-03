@@ -106,7 +106,7 @@ export class GuidedPreform extends Page {
 
     footer = {
         onNext: async () => {
-            this.save();
+            await this.save();
             return this.to(1);
         },
     };
@@ -156,15 +156,16 @@ export class GuidedPreform extends Page {
                     }
                 });
             },
-            onUpdate: () => (this.unsavedUpdates = true),
 
-            // // Save on each workflow change
-            // onUpdate: async () => {
-            //     await this.form.validate();
-            //     this.info.globalState.project.workflow = this.state;
-            //     this.save()
-            // },
-
+            // Immediately re-render boolean values
+            onUpdate: async (path, value) => {
+                if (typeof value === "boolean") {
+                    this.unsavedUpdates = true;
+                    this.info.globalState.project.workflow = this.state;
+                    this.updateSections(); // Trigger section changes with new workflow
+                    await this.save({}, false); // Save new workflow and section changes
+                }
+            },
             onThrow,
             // groups: [
             //     {

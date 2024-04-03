@@ -130,13 +130,14 @@ export class BasicTable extends LitElement {
         onStatusChange,
         onLoaded,
         onUpdate,
+        editable = true,
     } = {}) {
         super();
         this.name = name ?? "data_table";
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
-        this.maxHeight = maxHeight ?? "";
+        this.maxHeight = maxHeight ?? "unset";
         this.validateEmptyCells = validateEmptyCells ?? true;
 
         this.ignore = ignore ?? {};
@@ -145,6 +146,8 @@ export class BasicTable extends LitElement {
         if (onUpdate) this.onUpdate = onUpdate;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
+
+        this.editable = editable;
     }
 
     #schema = {};
@@ -280,11 +283,13 @@ export class BasicTable extends LitElement {
 
         let { type, original, inferred } = this.#getType(value, propInfo);
 
+        const isUndefined = value === undefined || value === "";
+
         // Check if required
-        if (!value && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
+        if (isUndefined && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
         // If not required, check matching types (if provided) for values that are defined
-        else if (value !== "" && type && inferred !== type)
+        else if (!isUndefined && type && inferred !== type)
             result = [{ message: `${col} is expected to be of type ${original}, not ${inferred}`, type: "error" }];
         // Otherwise validate using the specified onChange function
         else result = this.validateOnChange([row, col], parent, value, this.#itemProps[col]);
@@ -377,6 +382,7 @@ export class BasicTable extends LitElement {
     };
 
     #readTSV(text) {
+        console.log(text, text.split("\n"));
         let data = text.split("\n").map((row) =>
             row.split("\t").map((v) => {
                 try {
@@ -397,17 +403,23 @@ export class BasicTable extends LitElement {
         );
 
         Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
+
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
             Object.entries(cols).forEach(([key, value]) => {
-                if (key in this.#itemProps) {
-                    const { type } = this.#getType(value, this.#itemProps[key]);
-                    if (type === "string") value = `${value}`; // Convert to string if necessary
-                    latest[key] = value;
+                // if (key in this.#itemProps) {
+                const { type } = this.#getType(value, this.#itemProps[key]);
+                if (type === "string") {
+                    if (value === undefined) value = "";
+                    else value = `${value}`; // Convert to string if necessary
                 }
+                latest[key] = value;
+                // }
             }); // Only include data from schema
         });
+
+        console.log(header, data, structuredData, this.data, this.#itemProps);
 
         if (this.onUpdate) this.onUpdate([], data); // Update the whole table
     }
@@ -459,6 +471,8 @@ export class BasicTable extends LitElement {
 
         const data = (this.#data = this.#getData());
 
+        const description = this.#schema.description;
+
         return html`
             <div class="table-container">
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
@@ -479,46 +493,53 @@ export class BasicTable extends LitElement {
                     </tbody>
                 </table>
             </div>
-            <div id="buttons">
-                <nwb-button
-                    primary
-                    size="small"
-                    @click=${() => {
-                        const input = document.createElement("input");
-                        input.type = "file";
-                        input.accept = "text/tab-separated-values";
-                        input.click();
-                        input.onchange = () => {
-                            const file = input.files[0];
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                                this.#readTSV(reader.result);
-                                this.requestUpdate();
-                            };
-                            reader.readAsText(file);
-                        };
-                    }}
-                    >Upload TSV File</nwb-button
-                >
-                <nwb-button
-                    size="small"
-                    @click=${() => {
-                        const tsv = this.#getTSV();
+            ${this.editable
+                ? html`<div id="buttons">
+                      <nwb-button
+                          primary
+                          size="small"
+                          @click=${() => {
+                              const input = document.createElement("input");
+                              input.type = "file";
+                              input.accept = "text/tab-separated-values";
+                              input.click();
+                              input.onchange = () => {
+                                  const file = input.files[0];
+                                  const reader = new FileReader();
+                                  reader.onload = () => {
+                                      this.#readTSV(reader.result);
+                                      this.requestUpdate();
+                                  };
+                                  reader.readAsText(file);
+                              };
+                          }}
+                          >Upload TSV File</nwb-button
+                      >
+                      <nwb-button
+                          size="small"
+                          @click=${() => {
+                              const tsv = this.#getTSV();
 
-                        const element = document.createElement("a");
-                        element.setAttribute(
-                            "href",
-                            "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
-                        );
-                        element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
-                        element.style.display = "none";
-                        document.body.appendChild(element);
-                        element.click();
-                        document.body.removeChild(element);
-                    }}
-                    >Download TSV File</nwb-button
-                >
-            </div>
+                              const element = document.createElement("a");
+                              element.setAttribute(
+                                  "href",
+                                  "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
+                              );
+                              element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
+                              element.style.display = "none";
+                              document.body.appendChild(element);
+                              element.click();
+                              document.body.removeChild(element);
+                          }}
+                          >Download TSV File</nwb-button
+                      >
+                  </div>`
+                : ""}
+            ${description
+                ? html`<p style="margin: 0; margin-top: 10px">
+                      <small style="color: gray;">${description}</small>
+                  </p>`
+                : ""}
         `;
     }
 }

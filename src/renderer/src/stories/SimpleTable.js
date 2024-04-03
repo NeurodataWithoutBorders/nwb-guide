@@ -11,7 +11,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 import "./Button";
 import tippy from "tippy.js";
-import { sortTable } from "./Table";
+import { sortTable, getEditable } from "./Table";
 import { NestedInputCell } from "./table/cells/input";
 import { getIgnore } from "./JSONSchemaForm";
 
@@ -66,6 +66,10 @@ export class SimpleTable extends LitElement {
                 transform: translate(-50%, calc(-50% + 10px));
                 text-align: center;
                 border: none;
+            }
+
+            td[editable="false"] {
+                background: whitesmoke;
             }
 
             :host([loading]:not([waiting])) table {
@@ -201,6 +205,7 @@ export class SimpleTable extends LitElement {
         maxHeight,
         contextOptions = {},
         ignore = {},
+        editable = {},
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -213,6 +218,7 @@ export class SimpleTable extends LitElement {
         this.maxHeight = maxHeight ?? "";
 
         this.ignore = ignore;
+        this.editable = editable;
 
         this.contextOptions = contextOptions;
 
@@ -488,10 +494,11 @@ export class SimpleTable extends LitElement {
                 id: "add-row",
                 label: "Add Row",
                 onclick: (path) => {
-                    const cell = this.#getCellFromPath(path);
-                    if (!cell) return this.addRow(); // No cell selected
-                    const { i } = cell.simpleTableInfo;
-                    this.addRow(i); //2) // TODO: Support adding more than one row
+                    // const cell = this.#getCellFromPath(path);
+                    // if (!cell) return this.addRow(); // No cell selected
+                    // const { i } = cell.simpleTableInfo;
+                    const lastRow = this.#cells.length - 1;
+                    this.addRow(lastRow); // Just insert row at the end
                 },
             },
             remove: {
@@ -558,6 +565,41 @@ export class SimpleTable extends LitElement {
             this.#context = new ContextMenu({
                 target: this.shadowRoot.querySelector("table"),
                 items,
+                onOpen: (path) => {
+                    const checks = {
+                        row_remove: {
+                            check: this.editable.__row_remove,
+                            element: this.#context.shadowRoot.querySelector("#remove-row"),
+                        },
+
+                        row_add: {
+                            check: this.editable.__row_add,
+                            element: this.#context.shadowRoot.querySelector("#add-row"),
+                        },
+                    };
+
+                    const hasChecks = Object.values(checks).some(({ check }) => check);
+
+                    if (hasChecks) {
+                        const cell = this.#getCellFromPath(path);
+                        const info = cell.simpleTableInfo;
+                        const rowNames = Object.keys(this.#data);
+                        const row = Array.isArray(this.#data) ? info.i : rowNames[info.i];
+
+                        const results = Object.values(checks).map(({ check, element }) => {
+                            if (check) {
+                                const canRemove = check(cell.value, this.#data[row]);
+                                if (canRemove) element.removeAttribute("disabled");
+                                else element.setAttribute("disabled", "");
+                                return canRemove;
+                            } else return true;
+                        });
+
+                        return !results.every((r) => r === false); // If all are hidden, don't show the context menu
+                    }
+
+                    return true;
+                },
             });
 
             this.#context.updated = () => this.#updateContextMenuRendering(); // Run when done rendering
@@ -780,6 +822,8 @@ export class SimpleTable extends LitElement {
         const schema = this.#itemProps[fullInfo.col];
 
         const ignore = getIgnore(this.ignore, [fullInfo.col]);
+        const rowData = this.#data[row];
+        const isEditable = getEditable(value, rowData, this.editable, fullInfo.col);
 
         // Track the cell renderer
         const cell = new TableCell({
@@ -791,6 +835,7 @@ export class SimpleTable extends LitElement {
                 ),
                 col: this.colHeaders[info.j],
             },
+            editable: isEditable,
             value,
             schema,
             ignore,
@@ -846,9 +891,13 @@ export class SimpleTable extends LitElement {
 
     #renderCell = (value, info) => {
         const td = document.createElement("td");
+
         const cell = value instanceof TableCell ? value : this.#createCell(value, info);
 
         cell.simpleTableInfo.td = td;
+
+        td.setAttribute("editable", cell.editable);
+
         td.onmouseover = () => {
             if (this.#selecting) this.#selectCells(cell);
         };
