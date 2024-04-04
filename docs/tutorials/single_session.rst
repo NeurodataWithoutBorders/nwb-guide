@@ -83,9 +83,9 @@ Data Entry
 
 Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
-On this page, specify the relevant **.bin** (Spikeglx) file and **phy** folder so that the GUIDE can find this source data to complete the conversion.
+On this page, specify the **.ap.bin** (SpikeGLX) file and **phy** folder so that the GUIDE can find this source data to complete the conversion.
 
-As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/data`` directory.
+As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/data`` directory, where **~** is the home directory of your system.
 
 You can either click the file selector to navigate to the file or drag-and-drop into the GUIDE from your file navigator.
 
@@ -93,6 +93,7 @@ You can either click the file selector to navigate to the file or drag-and-drop 
   :align: center
   :alt: Source Data page with source locations specified
 
+Advance to the next page to extract metadata from the source data.
 
 Session Metadata
 ^^^^^^^^^^^^^^^^
@@ -104,6 +105,7 @@ The Session Start Time in the **General Metadata** section is already specified 
   :align: center
   :alt: Metadata page with invalid Subject information
 
+While the **General Metadata** section is complete, take some time to fill out additional information such as the **Institutional Info** box and the **Experimenter** field.
 
 However, we still need to add the Subject information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
 
@@ -137,7 +139,7 @@ The Inspector Report page allows you to validate the preview file against the la
   :align: center
   :alt: NWB Inspector report
 
-
+Advance to the next page when you are satisfied with the Inspector Report.
 
 Conversion Preview
 ^^^^^^^^^^^^^^^^^^
