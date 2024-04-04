@@ -34,6 +34,24 @@ export const uploadToDandi = (subdirectory, forceSkip = false) => {
 
       await takeScreenshot(join(subdirectory, 'api-token-added'), 100)
 
+
+      // Open dandiset creation modal
+      await evaluate(() => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const form = dashboard.page.form
+        const dandisetInput = form.getFormElement(['dandiset'])
+        const createDandiset = dandisetInput.controls[0]
+        createDandiset.onClick()
+      })
+  
+      await takeScreenshot(join(subdirectory, 'create-dandiset'), 100)
+
+      // Close modal
+      await evaluate(() => {
+        const modal = document.querySelector('nwb-modal') as any
+        modal.toggle(false)
+      })
+
       await evaluate(async (dandisetId) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page

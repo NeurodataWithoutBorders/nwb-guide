@@ -60,7 +60,12 @@ Continue to the next page to trigger your upload to the DANDI Archive.
 
 Creating a Dandiset from the GUIDE
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you do not already own a Dandiset on staging, you will need to create one. Press the Create New Dandiset button to open a pop-up that guides you through the required fields for Dandiset creation—particularly Title, Archive (in this case, Development Server), Description, and License.
+If you do not already own a Dandiset on staging, you will need to create one. Press the Create New Dandiset button to open a pop-up that guides you through the required fields for Dandiset creation.
+
+.. figure:: ../assets/tutorials/dandi/create-dandiset.png
+  :align: center
+  :alt: Dandiset creation pop-up
+
 
 Once this pop-up form is submitted, the Dandiset input will now contain your new Dandiset.
 
