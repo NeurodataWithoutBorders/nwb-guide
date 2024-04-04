@@ -144,8 +144,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         ecephys.properties.Device.title = 'Devices'
         ecephys.properties.ElectrodeGroup.title = 'Electrode Groups'
 
-        if (ecephys.properties.ElectrodeColumns)  ecephys.properties.ElectrodeColumns.order = COLUMN_SCHEMA_ORDER
-        if (ecephys.properties.UnitProperties)  ecephys.properties.UnitProperties.order = COLUMN_SCHEMA_ORDER
+        if (ecephys.properties.ElectrodeColumns)  ecephys.properties.ElectrodeColumns.items.order = COLUMN_SCHEMA_ORDER
+        if (ecephys.properties.UnitColumns)  ecephys.properties.UnitColumns.items.order = COLUMN_SCHEMA_ORDER
 
 
         updateEcephysTable("Electrodes", copy, {
