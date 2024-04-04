@@ -13,7 +13,7 @@ For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial <
 
     **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`.
 
-    We’re going to use the Staging server for this tutorial so we don’t crowd the DANDI Archive with `synthetic` datasets! However, you’ll want to publish your `real` data on the main instance—which will require a separate approval process.
+    We’re going to use the Staging server for this tutorial so we don’t crowd the main DANDI Archive with `synthetic` datasets! However, you’ll want to publish your `real` data on the main server—which will require a separate approval process.
 
     Once you receive notice that your account was approved, you can move on to the next steps.
 
@@ -31,7 +31,7 @@ You'll now notice that the **Exit Pipeline** button has been replaced with **Nex
 
 DANDI Upload
 ------------
-You’ll need to specify your DANDI API keys if you haven’t uploaded from the GUIDE before. These keys are unique between the Main and Staging instance.
+You’ll need to specify your DANDI API keys if you haven’t uploaded from the GUIDE before. These keys are unique between the Main and Staging servers.
 
 .. figure:: ../assets/tutorials/dandi/api-tokens.png
   :align: center
