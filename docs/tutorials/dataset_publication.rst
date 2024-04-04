@@ -50,7 +50,7 @@ Submit this to the Staging API Key input on the GUIDE.
   :alt: DANDI staging API key added
 
 
-Once you have specified your Staging API Key, the **Dandiset** input will allow you to select any existing Dandiset associated with your account by ID (e.g. 207698) or name (e.g. NWB GUIDE Test).
+Once you have specified your Staging API Key, the **Dandiset** input will allow you to select any existing Dandiset associated with your account by ID (e.g., "207698") or name (e.g., "NWB GUIDE Test").
 
 Continue to the next page to trigger your upload to the DANDI Archive.
 
