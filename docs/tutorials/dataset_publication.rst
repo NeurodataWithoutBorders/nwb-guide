@@ -3,21 +3,25 @@ Dataset Publication
 
 For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
-Resume the conversion on the home page, then navigate back to the **Workflow** page.
-
-Change your original selection to specify that you’d like to publish your data to the :dandi-archive:`DANDI Archive <>`.
-
 .. note::
     Gaining access to DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server.
 
-    **This tutorial requires an account on the :dandi-staging:`DANDI staging server <>`.
+    **This tutorial requires an account on the :dandi-staging:`DANDI staging server <>`**.
 
     We’re going use the Staging server for this tutorial so we don’t crowd the DANDI Archive with `synthetic` datasets! However, you’ll want to publish your `real` data on the main instance—which will require a separate approval process.
 
     Once you receive notice that your account was approved, you can move on to the next steps.
 
 
-Navigate back to the **Conversion Review** page and ensure that you save the workflow change as you do.
+Workflow Setup
+--------------
+1. Resume the conversion via the **Convert** page
+
+2. Navigate to the **Workflow** page.
+
+   a. Specify that you’d like to publish your data to the :dandi-archive:`DANDI Archive <>`.
+
+3. Navigate back to the **Conversion Review** page
 
 You'll now notice that the **Exit Pipeline** button has been replaced with **Next**, allowing you to move forward with publication on the DANDI Archive.
 
@@ -29,7 +33,13 @@ You’ll need to specify your DANDI API keys if you haven’t uploaded from the 
   :align: center
   :alt: A pop-up asking for DANDI API keys
 
-To get your API key, visit the :dandi-staging:`staging website <>` and click on the profile icon in the top-right corner. This will show a dropdown with a copy button, which will assign your API key to the clipboard. Submit this to the Staging API Key input on the GUIDE.
+To get your API key, visit the :dandi-staging:`staging website <>` and click on the profile icon in the top-right corner. This will show a dropdown with a copy button, which will assign your API key to the clipboard. 
+
+.. figure:: ../assets/dandi/api-token-location.png
+  :align: center
+  :alt: DANDI staging API key added
+
+Submit this to the Staging API Key input on the GUIDE.
 
 .. figure:: ../assets/tutorials/dandi/api-token-added.png
   :align: center
