@@ -53,6 +53,10 @@ body {
     overflow: hidden; /* Dashboard without scroll behavior */
 }
 
+small {
+    font-size: 12px !important;
+}
+
 a {
     color: var(--color-link);
 }
