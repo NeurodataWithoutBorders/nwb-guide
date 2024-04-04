@@ -33,7 +33,7 @@ You’ll need to specify your DANDI API keys if you haven’t uploaded from the 
   :align: center
   :alt: A pop-up asking for DANDI API keys
 
-To get your API key, visit the :dandi-staging:`staging website <>` and click on the profile icon in the top-right corner. This will show a dropdown with a copy button, which will assign your API key to the clipboard. 
+To get your API key, visit the :dandi-staging:`staging website <>` and click on the profile icon in the top-right corner. This will show a dropdown with a copy button, which will assign your API key to the clipboard.
 
 .. figure:: ../assets/dandi/api-token-location.png
   :align: center
