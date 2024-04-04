@@ -5,12 +5,14 @@ For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial <
 
 Resume the conversion on the home page, then navigate back to the **Workflow** page.
 
-Change your original selection to specify that you’d like to publish your data to the DANDI Archive.
+Change your original selection to specify that you’d like to publish your data to the :dandi-archive:`DANDI Archive <>`.
 
 .. note::
-    Gaining access to the DANDI Archive can involve a long approval process. Make sure you’ve created an account on the :dandi-staging:`DANDI staging instance <>` before starting this section of the tutorial.
+    Gaining access to DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server. 
+    
+    **This tutorial requires an account on the :dandi-staging:`DANDI staging server <>`.
 
-    We’re going use the Staging instance for this tutorial so we don’t crowd the DANDI Archive with tutorial outputs! However, you’ll likely want to publish real data on the main instance—which will require a separate approval process.
+    We’re going use the Staging server for this tutorial so we don’t crowd the DANDI Archive with `synthetic` datasets! However, you’ll want to publish your `real` data on the main instance—which will require a separate approval process.
 
     Once you receive notice that your account was approved, you can move on to the next steps.
 
