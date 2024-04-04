@@ -43,7 +43,7 @@ export const uploadToDandi = (subdirectory, forceSkip = false) => {
         const createDandiset = dandisetInput.controls[0]
         createDandiset.onClick()
       })
-  
+
       await takeScreenshot(join(subdirectory, 'create-dandiset'), 100)
 
       // Close modal
