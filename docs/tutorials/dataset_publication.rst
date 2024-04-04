@@ -68,4 +68,8 @@ Final Review
 ------------
 Once your upload to the DANDI Archive is complete, you will be able to review a quick overview of the associated Dandiset and a list of the uploaded files from this pipeline.
 
+.. figure:: ../assets/tutorials/dandi/review-page.png
+  :align: center
+  :alt: DANDI upload review page
+
 Congratulations on your first upload to the DANDI Archive from the GUIDE!
