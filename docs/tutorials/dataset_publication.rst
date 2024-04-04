@@ -4,8 +4,8 @@ Dataset Publication
 For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
 .. note::
-    This tutorial focuses on uploading to the Staging server. 
-    
+    This tutorial focuses on uploading to the Staging server.
+
     **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Staging server with the Main Archive.
 
 .. note::
