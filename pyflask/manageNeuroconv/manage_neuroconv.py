@@ -53,12 +53,10 @@ SORTING_INTERFACE_PROPERTIES_TO_RECAST = {
 
 SORTING_INTERFACE_PROPERTY_OVERRIDES = {
     "unit_id": {"description": "The unique ID for this unit", "data_type": "str"},
-
     "brain_area": {
         "description": "The brain area where the unit is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
     },
-
     **SORTING_INTERFACE_PROPERTIES_TO_RECAST,
 }
 
@@ -744,7 +742,7 @@ def convert_to_nwb(info: dict) -> str:
             # ecephys_metadata["UnitProperties"] = [
             #     {"name": entry["name"], "description": entry["description"]} for entry in shared_units_columns
             # ]
-            
+
             del ecephys_metadata["Units"]
             del ecephys_metadata["UnitColumns"]
 
@@ -1248,7 +1246,7 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
 
             # elif property_name == "unit_name":
             #     sorting_property_value = str(unit_id) # By default, unit_name is unit_id (str)
-            
+
             elif property_name in SORTING_INTERFACE_PROPERTY_OVERRIDES:
                 try:
                     sorting_property_value = SORTING_INTERFACE_PROPERTY_OVERRIDES[property_name][

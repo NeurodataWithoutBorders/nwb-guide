@@ -61,10 +61,10 @@ const tableRenderConfig = {
     },
     UnitColumns: function (metadata) {
         metadata.editable = false;
-        console.log('Column metadata', metadata)
+        console.log("Column metadata", metadata);
         metadata.schema.description = "Update unit information directly on your source data.";
 
-        return true
+        return true;
 
         // const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Units"]);
         //
