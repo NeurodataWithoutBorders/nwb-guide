@@ -4,6 +4,11 @@ Dataset Publication
 For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
 .. note::
+    This tutorial focuses on uploading to the Staging server. 
+    
+    **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Staging server with the Main Archive.
+
+.. note::
     Gaining access to DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server.
 
     **This tutorial requires an account on the :dandi-staging:`DANDI staging server <>`**.
@@ -11,7 +16,6 @@ For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial <
     We’re going to use the Staging server for this tutorial so we don’t crowd the DANDI Archive with `synthetic` datasets! However, you’ll want to publish your `real` data on the main instance—which will require a separate approval process.
 
     Once you receive notice that your account was approved, you can move on to the next steps.
-
 
 Workflow Setup
 --------------
@@ -56,9 +60,7 @@ Continue to the next page to trigger your upload to the DANDI Archive.
 
 Creating a Dandiset from the GUIDE
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you do not already own a Dandiset on staging, you will need to create one. Press the Create New Dandiset button to open a pop-up that guides you through the required fields for Dandiset creation—particularly Title, Archive, Description, and License.
-
-For this tutorial, you'd select the Development Server. However, **when you publish your real data, you'll want to select the Main Archive.**
+If you do not already own a Dandiset on staging, you will need to create one. Press the Create New Dandiset button to open a pop-up that guides you through the required fields for Dandiset creation—particularly Title, Archive (in this case, Development Server), Description, and License.
 
 Once this pop-up form is submitted, the Dandiset input will now contain your new Dandiset.
 
