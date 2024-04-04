@@ -31,7 +31,7 @@ const parentTableRenderConfig = {
         return true;
     },
     Units: (metadata) => {
-        metadata.editable = false;
+        metadata.truncated = true;
         metadata.schema.description = "Update unit information directly on your source data.";
         return true;
     },

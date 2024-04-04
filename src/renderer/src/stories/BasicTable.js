@@ -131,6 +131,7 @@ export class BasicTable extends LitElement {
         onLoaded,
         onUpdate,
         editable = true,
+        truncated = false,
     } = {}) {
         super();
         this.name = name ?? "data_table";
@@ -147,7 +148,8 @@ export class BasicTable extends LitElement {
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
 
-        this.editable = editable;
+        this.truncated = truncated
+        this.editable = editable && !truncated;
     }
 
     #schema = {};
@@ -419,8 +421,6 @@ export class BasicTable extends LitElement {
             }); // Only include data from schema
         });
 
-        console.log(header, data, structuredData, this.data, this.#itemProps);
-
         if (this.onUpdate) this.onUpdate([], data); // Update the whole table
     }
 
@@ -430,6 +430,8 @@ export class BasicTable extends LitElement {
 
         this.schema = this.schema; // Always update the schema
         const entries = this.#itemProps;
+
+        if (this.truncated) this.data = this.data.slice(0, 5) // Limit to 5 rows when truncated
 
         // Add existing additional properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties) {
@@ -535,6 +537,9 @@ export class BasicTable extends LitElement {
                       >
                   </div>`
                 : ""}
+                ${this.truncated
+                    ? html`<p style="margin: 0; width: 100%; text-align: center; font-size: 150%;">... </p>`
+                    : ""}
             ${description
                 ? html`<p style="margin: 0; margin-top: 10px">
                       <small style="color: gray;">${description}</small>
