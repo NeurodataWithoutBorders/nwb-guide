@@ -783,6 +783,20 @@ def convert_to_nwb(info: dict) -> str:
         ]
         del ecephys_metadata["ElectrodeColumns"]
 
+
+    # from neuroconv.utils import NWBMetaDataEncoder
+    # from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
+
+    # def raise_property_list(name, sorting_interface):
+    #     properties = list(sorting_interface.sorting_extractor.get_property_keys())
+    #     raise Exception(f"{name}: {properties}")
+
+    # # Map sorting interfaces to metadata
+    # map_interfaces(BaseSortingExtractorInterface, raise_property_list, converter)
+
+    # metadata = converter.get_metadata()
+    # raise Exception(json.loads(json.dumps(resolved_metadata, cls=NWBMetaDataEncoder)))
+
     # Actually run the conversion
     converter.run_conversion(
         metadata=resolved_metadata,
