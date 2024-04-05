@@ -84,7 +84,6 @@ const pages = {
         label: "Convert",
         icon: guidedIcon,
         pages: {
-            
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",

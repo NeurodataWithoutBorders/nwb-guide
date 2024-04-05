@@ -1,7 +1,7 @@
 Tutorials
 =======================================
 The NWB Graphical User Interface for Data Entry (GUIDE) is a desktop tool for converting neurophysiological data
-to the Neurodata Without Borders (NWB) format and uploading to the DANDI Archive. 
+to the Neurodata Without Borders (NWB) format and uploading to the DANDI Archive.
 
 In these tutorials, you'll follow along on a :doc:`local installation of the GUIDE </installation>` as we detail the conversion process from initial setup to final upload.
 

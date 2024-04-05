@@ -258,7 +258,7 @@ export default async function runWorkflow(name, workflow, identifier) {
 
       // Fill out the path expansion information for non-autocompleted interfaces
       accordionKeys.slice(1).forEach(id => {
-        const name = Object.entries(common).find(([_, info]) => info.id === id)![0] 
+        const name = Object.entries(common).find(([_, info]) => info.id === id)![0]
         const { format } = multi[name]
         const formatInput = form.getFormElement([id, 'format_string_path'])
         formatInput.updateData(format)

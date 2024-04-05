@@ -435,7 +435,7 @@ export class GuidedPathExpansionPage extends Page {
         const controls = {};
 
         const baseDirectory = this.workflow.base_directory.value;
-        const globals = structureState.globals = {}
+        const globals = (structureState.globals = {});
 
         for (let key in this.info.globalState.interfaces) {
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
