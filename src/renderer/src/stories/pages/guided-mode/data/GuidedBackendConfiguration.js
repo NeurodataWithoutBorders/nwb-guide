@@ -42,7 +42,8 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     footer = {
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-            for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
+            await this.form.validate()
+            // for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
             return this.to(1);
         },
     };
@@ -77,13 +78,14 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             backend: "hdf5"
         })
             .then((backendOptions) => {
+                console.log(backendOptions)
                 return (this.form = new JSONSchemaForm({
                     schema: {},
                     results: {},
                     globals: backendOptions,
                     onUpdate: () => (this.unsavedUpdates = true),
                     onThrow,
-                    validateOnChange: validate,
+                    // validateOnChange: validate,
                 }));
             })
             .catch((error) => html`<p>${error}</p>`);

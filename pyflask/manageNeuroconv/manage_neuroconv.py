@@ -672,7 +672,7 @@ def get_backend_configuration(info):
     from pynwb import NWBHDF5IO
 
     with NWBHDF5IO(info["nwbfile_path"], "r") as io:
-        nwbfile= io.read()
+        nwbfile = io.read()
         configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=info["backend"])
         return json.loads(json.dumps(configuration.dataset_configurations))
 

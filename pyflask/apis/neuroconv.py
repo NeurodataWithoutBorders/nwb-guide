@@ -149,8 +149,6 @@ class SetBackendConfiguration(Resource):
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
 
-
-
 validate_parser = neuroconv_api.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
 validate_parser.add_argument("function_name", type=str, required=True)
