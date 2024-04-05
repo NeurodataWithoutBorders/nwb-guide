@@ -156,14 +156,18 @@ export class List extends LitElement {
       const oldObject = this.object
       this.#updateObject()
 
-      this.onChange({
-        items: this.#items,
-        object: this.object
-      },
-      {
-        items: oldList,
-        object: oldObject
-      })
+      if (this.#initialized) {
+
+        this.onChange({
+          items: this.#items,
+          object: this.object
+        },
+        {
+          items: oldList,
+          object: oldObject
+        })
+      }
+
       this.requestUpdate('items', oldList)
     }
 
@@ -176,6 +180,8 @@ export class List extends LitElement {
     declare unordered: boolean
 
     declare listStyles: any
+
+    #initialized = false
 
     allowDrop = (ev) => ev.preventDefault();
 
@@ -229,6 +235,8 @@ export class List extends LitElement {
       this.transform = props.transform
 
       if (props.onChange) this.onChange = props.onChange
+
+      this.#initialized = true
 
     }
 
