@@ -31,7 +31,7 @@ const parentTableRenderConfig = {
         return true;
     },
     Units: (metadata) => {
-        metadata.editable = false;
+        metadata.truncated = true;
         metadata.schema.description = "Update unit information directly on your source data.";
         return true;
     },
@@ -60,21 +60,27 @@ const tableRenderConfig = {
         });
     },
     UnitColumns: function (metadata) {
-        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Units"]);
+        metadata.editable = false;
+        console.log("Column metadata", metadata);
+        metadata.schema.description = "Update unit information directly on your source data.";
 
-        return new SimpleTable({
-            ...metadata,
-            contextOptions: {
-                row: {
-                    add: false,
-                    remove: false,
-                },
-            },
-            editable: {
-                name: (value) => !aggregateRequirements.has(value),
-                data_type: (_, row) => !aggregateRequirements.has(row.name),
-            },
-        });
+        return true;
+
+        // const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Units"]);
+        //
+        // return new SimpleTable({
+        //     ...metadata,
+        //     contextOptions: {
+        //         row: {
+        //             add: false,
+        //             remove: false,
+        //         },
+        //     },
+        //     editable: {
+        //         name: (value) => !aggregateRequirements.has(value),
+        //         data_type: (_, row) => !aggregateRequirements.has(row.name),
+        //     },
+        // });
     },
 };
 
@@ -245,7 +251,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const ophys = schema.properties.Ophys;
         if (ophys) {
-            // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
             drillSchemaProperties(
                 schema,
                 (path, schema, target, isPatternProperties, parentSchema) => {
@@ -258,11 +263,14 @@ export class GuidedMetadataPage extends ManagedPage {
 
                         if (schema.type === "array") {
                             if (name !== "Device" && target) {
-                                if (name in target)
-                                    schema.minItems = schema.maxItems = target[name].length; // Skip unresolved deep in pattern properties)
-                                // Remove Ophys requirements if left initially undefined
-                                else if (parentSchema.required.includes(name))
-                                    parentSchema.required = parentSchema.required.filter((n) => n !== name);
+                                // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
+                                if (name in target) schema.minItems = schema.maxItems = target[name].length;
+                                // Remove Ophys property requirement if left initially undefined
+                                else {
+                                    target[name] = []; // Initialize empty array
+                                    if (parentSchema.required.includes(name))
+                                        parentSchema.required = parentSchema.required.filter((n) => n !== name);
+                                }
                             }
                         }
                     }
@@ -272,6 +280,7 @@ export class GuidedMetadataPage extends ManagedPage {
         }
 
         console.log("schema", structuredClone(schema), structuredClone(results));
+
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,

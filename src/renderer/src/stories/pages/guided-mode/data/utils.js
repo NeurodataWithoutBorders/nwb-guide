@@ -88,12 +88,6 @@ export function resolveProperties(properties = {}, target, globals = {}) {
     for (let name in properties) {
         const info = properties[name];
 
-        // NEUROCONV PATCH: Correct for incorrect array schema
-        if (info.properties && info.type === "array") {
-            info.items = { type: "object", properties: info.properties, required: info.required };
-            delete info.properties;
-        }
-
         const props = info.properties;
 
         if (!(name in target)) {

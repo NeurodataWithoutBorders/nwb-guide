@@ -5,8 +5,19 @@ import { mkdirSync, existsSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
 import * as config from './config'
-import runWorkflow from './workflow'
-import { evaluate, takeScreenshot } from './utils'
+import runWorkflow, { uploadToDandi } from './workflow'
+import { evaluate, takeScreenshot, to, toNextPage } from './utils'
+
+const x = 250 // Sidebar size
+const width = config.windowDims.width - x
+
+const datasetScreenshotClip = {
+  x,
+  y: 0,
+  width,
+  height: 220
+}
+
 
 beforeAll(() => {
 
@@ -22,8 +33,6 @@ beforeAll(() => {
 
 describe('E2E Test', () => {
 
-  // NOTE: This is where you should be connecting...
-
   test('Ensure number of test pipelines starts at zero', async () => {
 
     await sleep(500) // Wait for full notification to render
@@ -34,58 +43,49 @@ describe('E2E Test', () => {
     expect(nPipelines).toBe(0)
   })
 
-  describe('Manually run through the pipeline', async () => {
 
-    const datasetTestFunction = config.regenerateTestData ? test : test.skip
+  const datasetTestFunction = config.regenerateTestData ? test : test.skip
 
-    datasetTestFunction('Create tutorial dataset', async () => {
-
-      const x = 250 // Sidebar size
-      const width = config.windowDims.width - x
-
-      const screenshotClip = {
-        x,
-        y: 0,
-        width,
-        height: 220
-      }
+  datasetTestFunction('Create tutorial dataset', async () => {
 
 
-      await evaluate(async () => {
+    await evaluate(async () => {
 
-        // Transition to settings page
-        const dashboard = document.querySelector('nwb-dashboard')
-        dashboard.sidebar.select('settings')
+      // Transition to settings page
+      const dashboard = document.querySelector('nwb-dashboard')
+      dashboard.sidebar.select('settings')
 
-        // Generate test data
-        const page = dashboard.page
-        page.deleteTestData()
-      })
-
-      await takeScreenshot('dataset-creation', 300, { clip: screenshotClip })
-
-      const outputLocation = await evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        const page = dashboard.page
-        const outputLocation = await page.generateTestData()
-        page.requestUpdate()
-        return outputLocation
-      })
-
-      // Take image after dataset generation
-      await takeScreenshot('dataset-created', 500, { clip: screenshotClip })
-
-      expect(existsSync(outputLocation)).toBe(true)
-
-      // Navigate back to the home page
-      let pageId = await evaluate(() => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        dashboard.sidebar.select('/')
-        return dashboard.page.info.id
-      })
-
-      expect(pageId).toBe('/')
+      // Generate test data
+      const page = dashboard.page
+      page.deleteTestData()
     })
+
+    await takeScreenshot('dataset-creation', 300, { clip: datasetScreenshotClip })
+
+    const outputLocation = await evaluate(async () => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      const page = dashboard.page
+      const outputLocation = await page.generateTestData()
+      page.requestUpdate()
+      return outputLocation
+    })
+
+    // Take image after dataset generation
+    await takeScreenshot('dataset-created', 500, { clip: datasetScreenshotClip })
+
+    expect(existsSync(outputLocation)).toBe(true)
+
+    // Navigate back to the home page
+    let pageId = await evaluate(() => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      dashboard.sidebar.select('/')
+      return dashboard.page.info.id
+    })
+
+    expect(pageId).toBe('/')
+  })
+
+  describe('Run through several pipeline workflows', async () => {
 
     describe('Complete a single-session workflow', async () => {
       const subdirectory = 'single'
@@ -109,6 +109,58 @@ describe('E2E Test', () => {
       })
     })
 
+    describe('Upload the multi-session output to DANDI', async () => {
+
+      const subdirectory = 'dandi'
+
+      test('Restart pipeline', async () => {
+
+        await evaluate(async () => {
+          const pipelines = document.getElementById('guided-div-resume-progress-cards').children
+          const found = Array.from(pipelines).find(card => card.info.project.name === 'Multi Session Workflow')
+          console.log(found, Array.from(pipelines))
+          found.querySelector('button').click()
+        })
+
+      })
+
+      test('Update the workflow to allow DANDI upload', async () => {
+
+        await sleep(1000)
+        await to('//workflow')
+
+        await evaluate(async ( workflow ) => {
+          const dashboard = document.querySelector('nwb-dashboard')
+          const page = dashboard.page
+
+          for (let key in workflow) {
+            const input = page.form.getFormElement([ key ])
+            input.updateData(workflow[key])
+          }
+
+          page.form.requestUpdate() // Ensure the form is updated visually
+
+          await page.save()
+
+        }, { upload_to_dandi: true })
+
+        await toNextPage('structure') // Save data without a popup
+        await to('//conversion')
+
+        // Do not prompt to save
+        await evaluate(() => {
+          const dashboard = document.querySelector('nwb-dashboard')
+          const page = dashboard.page
+          page.unsavedUpdates = false
+        })
+
+        await to('//upload') // NOTE: It would be nice to avoid having to re-run the conversion...
+
+      })
+
+      uploadToDandi(subdirectory) // Upload to DANDI if the API key is provided
+
+    })
 
   })
 
