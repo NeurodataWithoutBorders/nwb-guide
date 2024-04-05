@@ -88,11 +88,6 @@ export default async function runWorkflow(name, workflow, identifier) {
 
   test('Create new pipeline by specifying a name', async () => {
 
-    // Advance to instructions page
-    await toNextPage('start')
-
-    await takeScreenshot(join(identifier, 'intro-page'), 500)
-
     // Advance to general information page
     await toNextPage('details')
 
@@ -209,8 +204,6 @@ export default async function runWorkflow(name, workflow, identifier) {
         baseInput.updateData(basePath)
       })
 
-      dashboard.main.querySelector('main > section').scrollTop = 200 // Scroll down to see all interfaces
-
     },
       testInterfaceInfo,
       testDatasetPath
@@ -218,17 +211,20 @@ export default async function runWorkflow(name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'pathexpansion-basepath'), 300)
 
-    const name = Object.keys(testInterfaceInfo.common)[0]
-    const interfaceId = testInterfaceInfo.common[name].id
-    const autocompleteInfo = testInterfaceInfo.multi[name].autocomplete
 
-    await evaluate(id => {
+    const interfaceId = await evaluate(() => {
       const dashboard = document.querySelector('nwb-dashboard')
       const form = dashboard.page.form
+      const id = Object.keys(form.accordions)[0]
       const formatInput = form.getFormElement([id, 'format_string_path'])
       const autocompleteButton = formatInput.controls[0]
       autocompleteButton.onClick()
-    }, interfaceId)
+      return id
+    })
+
+    // Use autocomplete on first interface
+    const name = Object.entries(testInterfaceInfo.common).find(([name, info]) => info.id === interfaceId)![0]
+    const autocompleteInfo = testInterfaceInfo.multi[name].autocomplete
 
     await takeScreenshot(join(identifier, 'pathexpansion-autocomplete-open'), 300)
 
@@ -258,15 +254,15 @@ export default async function runWorkflow(name, workflow, identifier) {
       const dashboard = document.querySelector('nwb-dashboard')
       const form = dashboard.page.form
 
+      const accordionKeys = Object.keys(form.accordions)
+
       // Fill out the path expansion information for non-autocompleted interfaces
-      Object.entries(common).slice(1).forEach(([ name, info ]) => {
-        const id = info.id
+      accordionKeys.slice(1).forEach(id => {
+        const name = Object.entries(common).find(([_, info]) => info.id === id)![0] 
         const { format } = multi[name]
         const formatInput = form.getFormElement([id, 'format_string_path'])
         formatInput.updateData(format)
       })
-
-      dashboard.main.querySelector('main > section').scrollTop = 200
 
     }, testInterfaceInfo)
 
