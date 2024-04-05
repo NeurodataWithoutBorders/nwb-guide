@@ -43,6 +43,17 @@ const questions = {
         },
         default: false,
     },
+
+    base_directory: {
+        type: "string",
+        format: "directory",
+        title: "Where is your data located?",
+        description: "Provide the path here if contained in a single directory. Otherwise leave blank.",
+        dependencies: {
+            locate_data: { },
+        },
+    },
+
     upload_to_dandi: {
         type: "boolean",
         title: "Would you like to upload your data to DANDI?",
@@ -81,6 +92,7 @@ const projectWorkflowSchema = {
         return acc;
     }, {}),
     order: Object.keys(questions),
+    additionalProperties: false,
 };
 
 // ----------------------------------------------------------------------
