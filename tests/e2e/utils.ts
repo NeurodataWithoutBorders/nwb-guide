@@ -45,12 +45,13 @@ export const takeScreenshot = async (relativePath, delay = 0, options: Screensho
 
   }
 
-  export const toHome = async () => {
-    const pageId = await evaluate(async () => {
-      const dashboard = document.querySelector('nwb-dashboard')
-      await dashboard.page.to('/')
-      return dashboard.page.info.id
-    })
+  export const to = async (pageId = '/') => {
 
-    expect(pageId).toBe('/') // Ensure you are on the home page
+    const outputPageId = await evaluate(async (pageId) => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      await dashboard.page.to(pageId)
+      return dashboard.page.info.id
+    }, pageId)
+
+    expect(outputPageId).toBe(pageId) // Ensure you are on the home page
   }
