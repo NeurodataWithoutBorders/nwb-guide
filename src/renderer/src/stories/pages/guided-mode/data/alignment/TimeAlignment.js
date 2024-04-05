@@ -184,37 +184,36 @@ export class TimeAlignment extends LitElement {
 
             row.append(barCell);
 
-            if (hasData) {
-                const selectionCell = document.createElement("div");
-                const resultCell = document.createElement("div");
+            const selectionCell = document.createElement("div");
+            const resultCell = document.createElement("div");
 
-                const elements = options.map((option) => {
-                    const clickableElement = document.createElement("div");
-                    clickableElement.innerText = option.name;
-                    clickableElement.onclick = () => {
-                        const element = new JSONSchemaInput({
-                            schema: option.schema,
-                            path: [ ],
-                        })
+            const resolvedOptions = hasData ? options.slice(0, 2) : options;
 
-                        resultCell.innerHTML = '';
-                        resultCell.append(element)
-                    }
-                    return clickableElement;
-                })
-                
-                selectionCell.append(...elements)
+            const elements = resolvedOptions.map((option) => {
+                const clickableElement = document.createElement("div");
+                clickableElement.innerText = option.name;
+                clickableElement.onclick = () => {
+                    const element = new JSONSchemaInput({
+                        schema: option.schema,
+                        path: [ ],
+                    })
 
-                row.append(selectionCell, resultCell);
-                elements[0].click();
+                    resultCell.innerHTML = '';
+                    resultCell.append(element)
+                }
+                return clickableElement;
+            })
+            
+            selectionCell.append(...elements)
 
-            } else {
-                const empty = document.createElement("div");
-                const disclaimer = document.createElement("div");
-                disclaimer.classList.add("disclaimer");
-                disclaimer.innerText = "Edit in Source Data";
-                row.append(disclaimer, empty);
-            }
+            row.append(selectionCell, resultCell);
+            elements[0].click();
+
+            // const empty = document.createElement("div");
+            // const disclaimer = document.createElement("div");
+            // disclaimer.classList.add("disclaimer");
+            // disclaimer.innerText = "Edit in Source Data";
+            // row.append(disclaimer, empty);
 
             container.append(row);
 
