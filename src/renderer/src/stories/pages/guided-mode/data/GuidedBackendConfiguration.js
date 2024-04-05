@@ -25,7 +25,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
     form;
 
-
     header = {
         subtitle: "Configure your backend",
     };
@@ -35,14 +34,14 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             skip: {
                 condition: (v) => v === false,
                 skip: true,
-            }
-        }
-    }
+            },
+        },
+    };
 
     footer = {
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-            await this.form.validate()
+            await this.form.validate();
             // for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
             return this.to(1);
         },
@@ -66,19 +65,18 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     }
 
     render() {
-
         this.#updateRendered(true);
 
         const { stubs } = this.info.globalState.preview;
         const stubArray = getStubArray(stubs);
 
         const nwbfile_path = stubArray[0].file;
-        const promise = run('configuration', {
+        const promise = run("configuration", {
             nwbfile_path,
-            backend: "hdf5"
+            backend: "hdf5",
         })
             .then((backendOptions) => {
-                console.log(backendOptions)
+                console.log(backendOptions);
                 return (this.form = new JSONSchemaForm({
                     schema: {},
                     results: {},
@@ -96,8 +94,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             this.#toggleRendered();
         });
 
-        return untilResult
-        
+        return untilResult;
     }
 }
 

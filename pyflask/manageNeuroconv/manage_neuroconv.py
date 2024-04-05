@@ -667,6 +667,7 @@ def get_interface_alignment(info: dict) -> dict:
 
     return timestamps
 
+
 def get_backend_configuration(info):
     from neuroconv.tools.nwb_helpers import get_default_backend_configuration
     from pynwb import NWBHDF5IO
@@ -682,11 +683,8 @@ def set_backend_configuration(info):
     from pynwb import NWBHDF5IO
 
     with NWBHDF5IO(info["nwbfile_path"], "r") as io:
-        nwbfile= io.read()
-        configure_backend(
-            nwbfile=nwbfile, backend_configuration=info["configuration"]
-        )
-
+        nwbfile = io.read()
+        configure_backend(nwbfile=nwbfile, backend_configuration=info["configuration"])
 
 
 def convert_to_nwb(info: dict) -> str:
@@ -782,7 +780,6 @@ def convert_to_nwb(info: dict) -> str:
             {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
         ]
         del ecephys_metadata["ElectrodeColumns"]
-
 
     # from neuroconv.utils import NWBMetaDataEncoder
     # from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface

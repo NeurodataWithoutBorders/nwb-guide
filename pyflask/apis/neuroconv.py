@@ -127,6 +127,7 @@ class Alignment(Resource):
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
 
+
 @neuroconv_api.route("/configuration")
 class GetBackendConfiguration(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -138,6 +139,7 @@ class GetBackendConfiguration(Resource):
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
 
+
 @neuroconv_api.route("/configuration/set")
 class SetBackendConfiguration(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -148,6 +150,7 @@ class SetBackendConfiguration(Resource):
         except Exception as exception:
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
+
 
 validate_parser = neuroconv_api.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
