@@ -11,6 +11,8 @@ import { run } from "../options/utils.js";
 import { getStubArray } from "../options/GuidedStubPreview";
 import { until } from "lit/directives/until.js";
 
+import { resolve } from "../../../../promises";
+
 export class GuidedBackendConfigurationPage extends ManagedPage {
     constructor(...args) {
         super(...args);
@@ -29,8 +31,11 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     };
 
     workflow = {
-        locate_data: {
-            skip: true
+        backend_configuration: {
+            skip: {
+                condition: (v) => v === false,
+                skip: true,
+            }
         }
     }
 
