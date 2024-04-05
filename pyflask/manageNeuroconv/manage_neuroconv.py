@@ -667,6 +667,27 @@ def get_interface_alignment(info: dict) -> dict:
 
     return timestamps
 
+def get_backend_configuration(info):
+    from neuroconv.tools.nwb_helpers import get_default_backend_configuration
+    from pynwb import NWBHDF5IO
+
+    with NWBHDF5IO(info["nwbfile_path"], "r") as io:
+        nwbfile= io.read()
+        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=info["backend"])
+        return json.loads(json.dumps(configuration.dataset_configurations))
+
+
+def set_backend_configuration(info):
+    from neuroconv.tools.nwb_helpers import configure_backend
+    from pynwb import NWBHDF5IO
+
+    with NWBHDF5IO(info["nwbfile_path"], "r") as io:
+        nwbfile= io.read()
+        configure_backend(
+            nwbfile=nwbfile, backend_configuration=info["configuration"]
+        )
+
+
 
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""

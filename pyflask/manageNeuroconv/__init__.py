@@ -17,6 +17,8 @@ from .manage_neuroconv import (
     inspect_multiple_filesystem_objects,
     get_interface_alignment,
     generate_test_data,
+    set_backend_configuration,
+    get_backend_configuration,
 )
 
 

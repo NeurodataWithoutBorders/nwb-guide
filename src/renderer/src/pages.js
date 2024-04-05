@@ -29,6 +29,7 @@ import { InspectPage } from "./stories/pages/inspect/InspectPage";
 import { PreviewPage } from "./stories/pages/preview/PreviewPage";
 import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
 import { GuidedDandiResultsPage } from "./stories/pages/guided-mode/results/GuidedDandiResults";
+import { GuidedBackendConfigurationPage } from "./stories/pages/guided-mode/data/GuidedBackendConfiguration";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -128,6 +129,12 @@ const pages = {
             metadata: new GuidedMetadataPage({
                 title: "File Metadata",
                 label: "File metadata",
+                section: sections[1],
+            }),
+
+            backend: new GuidedBackendConfigurationPage({
+                title: "Backend Configuration",
+                label: "Backend configuration",
                 section: sections[1],
             }),
 
