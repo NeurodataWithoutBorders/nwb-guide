@@ -18,6 +18,7 @@ import { baseUrl } from "../../../../server/globals";
 import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils.js";
 import { Modal } from "../../../Modal";
+import { TimeAlignment } from "./alignment/TimeAlignment.js";
 
 const propsToIgnore = {
     "*": {
@@ -263,94 +264,18 @@ export class GuidedSourceDataPage extends ManagedPage {
                         });
 
                         const header = document.createElement("div");
-                        const h2 = document.createElement("h2");
-                        Object.assign(h2.style, {
-                            marginBottom: "10px",
-                        });
+                        const h2 = document.createElement("h3");
+                        Object.assign(h2.style, { margin: "0px", });
                         h2.innerText = `Alignment Preview: ${subject}/${session}`;
-                        const warning = document.createElement("small");
-                        warning.innerHTML =
-                            "<b>Warning:</b> This is just a preview. We do not currently have the features implemented to change the alignment of your interfaces.";
-                        header.append(h2, warning);
 
-                        const modal = new Modal({
-                            header,
-                        });
+                        header.append(h2);
+
+                        const modal = new Modal({ header });
 
                         document.body.append(modal);
 
-                        const content = document.createElement("div");
-                        Object.assign(content.style, {
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "20px",
-                            padding: "20px",
-                        });
-
-                        modal.append(content);
-
-                        const flatTimes = Object.values(results)
-                            .map((interfaceTimestamps) => {
-                                return [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]];
-                            })
-                            .flat()
-                            .filter((timestamp) => !isNaN(timestamp));
-
-                        const minTime = Math.min(...flatTimes);
-                        const maxTime = Math.max(...flatTimes);
-
-                        const normalizeTime = (time) => (time - minTime) / (maxTime - minTime);
-                        const normalizeTimePct = (time) => `${normalizeTime(time) * 100}%`;
-
-                        for (let name in results) {
-                            const container = document.createElement("div");
-                            const label = document.createElement("label");
-                            label.innerText = name;
-                            container.append(label);
-
-                            const data = results[name];
-
-                            const barContainer = document.createElement("div");
-                            Object.assign(barContainer.style, {
-                                height: "10px",
-                                width: "100%",
-                                marginTop: "5px",
-                                border: "1px solid lightgray",
-                                position: "relative",
-                            });
-
-                            if (data.length) {
-                                const firstTime = data[0];
-                                const lastTime = data[data.length - 1];
-
-                                label.innerText += ` (${firstTime.toFixed(2)} - ${lastTime.toFixed(2)} sec)`;
-
-                                const firstTimePct = normalizeTimePct(firstTime);
-                                const lastTimePct = normalizeTimePct(lastTime);
-
-                                const width = `calc(${lastTimePct} - ${firstTimePct})`;
-
-                                const bar = document.createElement("div");
-
-                                Object.assign(bar.style, {
-                                    position: "absolute",
-
-                                    left: firstTimePct,
-                                    width: width,
-                                    height: "100%",
-                                    background: "blue",
-                                });
-
-                                barContainer.append(bar);
-                            } else {
-                                barContainer.style.background =
-                                    "repeating-linear-gradient(45deg, lightgray, lightgray 10px, white 10px, white 20px)";
-                            }
-
-                            container.append(barContainer);
-
-                            content.append(container);
-                        }
+                        const alignment = new TimeAlignment({ results })
+                        modal.append(alignment)
 
                         modal.open = true;
                     },
