@@ -15,7 +15,7 @@ And finally, feel free to try out your own data and/or download relevant GIN dat
 - **Behavior Data:** https://gin.g-node.org/CatalystNeuro/behavior_testing_data
 
 Considerations for Real-World Use
----------------------------------------
+---------------------------------
 When using the GUIDE to convert data from your own experiments, there are a few things to keep in mind:
 
 Choosing an Output Location
