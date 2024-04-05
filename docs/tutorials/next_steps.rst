@@ -1,5 +1,5 @@
 What's Next?
-=======================================
+============
 Congratulations on finishing your first set of conversions using the NWB GUIDE!
 
 Make sure to check out the rest of the :doc:`User Guide </index>`. for more information on the GUIDE.
