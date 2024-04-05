@@ -43,6 +43,12 @@ const questions = {
         },
         default: false,
     },
+    backend_configuration: {
+        type: "boolean",
+        title: "Will you configure the backend for this pipeline?",
+        description: "This allows you to specify file type (e.g. HDF5, Zarr) and dataset chunking + compression.",
+        default: false,
+    },
     upload_to_dandi: {
         type: "boolean",
         title: "Would you like to upload your data to DANDI?",

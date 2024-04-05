@@ -28,14 +28,16 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         subtitle: "Configure your backend",
     };
 
+    workflow = {
+        locate_data: {
+            skip: true
+        }
+    }
+
     footer = {
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
-
-            await this.convert({ preview: true });
-
             return this.to(1);
         },
     };
@@ -60,8 +62,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     render() {
 
         this.#updateRendered(true);
-
-        console.log(this.info.globalState.s)
 
         const { stubs } = this.info.globalState.preview;
         const stubArray = getStubArray(stubs);
