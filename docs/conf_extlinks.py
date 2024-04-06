@@ -6,7 +6,7 @@ extlinks = {
     "matnwb-src": ("https://github.com/NeurodataWithoutBorders/matnwb/%s", "%s"),
     "nwb-overview": ("https://nwb-overview.readthedocs.io/en/latest/%s", "%s"),
     "guide-issues": ("https://github.com/NeurodataWithoutBorders/nwb-guide/issues/%s", "%s"),
-    "request-format-support": ("https://github.com/catalystneuro/neuroconv/issues/new?assignees=&labels=enhancement%2Cdata+interfaces&projects=&template=format_request.yml&title=%5BNew+Format%5D%3A+%s", "%s"),
+    "request-format-support": ("https://github.com/catalystneuro/neuroconv/issues/new?assignees=&labels=enhancement%%2Cdata+interfaces&projects=&template=format_request.yml&title=%%5BNew+Format%%5D%%3A+%s", "%s"),
     "path-expansion-guide": ("https://neuroconv.readthedocs.io/en/main/user_guide/expand_path.html%s", "%s"),
     "dandi-staging": ("https://gui-staging.dandiarchive.org/%s", "%s"),
     "dandi-archive": ("https://dandiarchive.org/%s", "%s"),
