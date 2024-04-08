@@ -1,6 +1,6 @@
 import { LitElement, css } from "lit";
 import { JSONSchemaInput } from "../../../../JSONSchemaInput";
-
+import { Button } from "../../../../Button";
 
 
 const options = [
@@ -25,6 +25,18 @@ const options = [
         schema: {
             type: 'string',
             description: 'The name of the linked recording.'
+        },
+        controls: function () {
+            return [
+                new Button({
+                    label: 'Add Dummy Recording',
+                    size: 'small',
+                    primary: true,
+                    onClick: () => {
+                        console.log('Adding dummy recording');
+                    }
+                })
+            ]
         }
     }
 ]
@@ -196,6 +208,7 @@ export class TimeAlignment extends LitElement {
                     const element = new JSONSchemaInput({
                         schema: option.schema,
                         path: [ ],
+                        controls: option.controls ? option.controls() : [],
                     })
 
                     resultCell.innerHTML = '';
