@@ -43,12 +43,25 @@ const questions = {
         },
         default: false,
     },
+
+    base_directory: {
+        type: "string",
+        format: "directory",
+        title: "Where is your data located?",
+        description:
+            "A single directory where all data is contained. Can override for specific data formats.<br><small>Leave blank if unknown</small>",
+        dependencies: {
+            locate_data: {},
+        },
+    },
+    
     backend_configuration: {
         type: "boolean",
         title: "Will you configure the backend for this pipeline?",
         description: "This allows you to specify file type (e.g. HDF5, Zarr) and dataset chunking + compression.",
         default: false,
     },
+
     upload_to_dandi: {
         type: "boolean",
         title: "Would you like to upload your data to DANDI?",
@@ -87,6 +100,7 @@ const projectWorkflowSchema = {
         return acc;
     }, {}),
     order: Object.keys(questions),
+    additionalProperties: false,
 };
 
 // ----------------------------------------------------------------------

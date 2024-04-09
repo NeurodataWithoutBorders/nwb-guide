@@ -9,7 +9,7 @@ To get you started as quickly as possible, we’ve created a way to generate thi
 
   The **Phy** data format stores spike sorting results.
 
-Navigate to the **Settings** page using the main sidebar. Then press the **Generate** button in the top-right corner to initiate the dataset creation.
+Navigate to the **Settings** page using the button at the bottom of the main sidebar. Then press the **Generate** button in the top-right corner to initiate the dataset creation.
 
 .. figure:: ../assets/tutorials/dataset-creation.png
   :align: center
@@ -17,7 +17,7 @@ Navigate to the **Settings** page using the main sidebar. Then press the **Gener
 
   Press the Generate button on the Settings page to create the dataset.
 
-The generated data will populate in the ``~/NWB_GUIDE/test_data`` directory and include a ``data`` folder with the original data as well as a ``dataset`` folder that duplicates this ``data`` across multiple subjects and sessions.
+The generated data will populate in the ``~/NWB_GUIDE/test_data`` directory, where ``~`` is the home directory of your system. This includes a ``data`` folder with the original data as well as a ``dataset`` folder that duplicates this ``data`` across multiple subjects and sessions.
 
 .. code-block:: bash
 
