@@ -1005,8 +1005,8 @@ export class JSONSchemaInput extends LitElement {
                         },
                     });
 
-                    return html`<div style="width: 100%;">
-                        <div style="display: flex; gap: 10px; align-items: center;">${input}${submitButton}</div>
+                    return html`<div style="width: 100%; margin-bottom: 5px;">
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">${input}${submitButton}</div>
                         ${list}
                     </div>`;
                 }

@@ -725,7 +725,16 @@ def get_backend_configuration(info: dict) -> dict:
 
         # neuroconv_api.logger.info(default_backend_configuration)
 
-        serialized = json.loads(json.dumps(configuration.dict(), default=custom_encoder))
+        # Provide metadata on configuration dictionary
+        configuration_dict = configuration.dict()
+        for dataset in configuration_dict["dataset_configurations"].values():
+
+            metadata = dataset["_metadata"] = {}
+            metadata["source_size_in_gb"] = math.prod(dataset["full_shape"]) * dataset["dtype"].itemsize / 1e9
+            metadata["maximum_ram_usage_per_iteration_in_gb"] = math.prod(dataset["buffer_shape"]) * dataset["dtype"].itemsize / 1e9
+            metadata["disk_space_usage_per_chunk_in_mb"] = math.prod(dataset["chunk_shape"]) * dataset["dtype"].itemsize / 1e6
+
+        serialized = json.loads(json.dumps(configuration_dict, default=custom_encoder))
 
         dataset_configurations = serialized["dataset_configurations"]  # Only provide dataset configurations
 
