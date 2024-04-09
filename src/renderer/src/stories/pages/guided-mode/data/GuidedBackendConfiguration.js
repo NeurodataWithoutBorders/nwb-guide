@@ -115,17 +115,21 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                     // Set directly on last iteration
                     if (i === lenSplit - 1) {
-                        const schema = props[key] = { ...itemSchema };
+                        const schema = (props[key] = { ...itemSchema });
 
                         if (item.compression_options == null) item.compression_options = {}; // Set blank compression options to an empty object
                         results[key] = item;
 
                         const { _metadata = {} } = item;
-                        const { source_size_in_gb = 0, maximum_ram_usage_per_iteration_in_gb = 0, disk_space_usage_per_chunk_in_mb = 0 } = _metadata;
-                        
-                        schema.description = `Source size: ${source_size_in_gb.toFixed(2)} GB`
-                        schema.properties.buffer_shape.description = `Expected RAM usage: ${maximum_ram_usage_per_iteration_in_gb.toFixed(2)} GB`
-                        schema.properties.chunk_shape.description = `Disk space usage per chunk: ${disk_space_usage_per_chunk_in_mb.toFixed(2)} MB`
+                        const {
+                            source_size_in_gb = 0,
+                            maximum_ram_usage_per_iteration_in_gb = 0,
+                            disk_space_usage_per_chunk_in_mb = 0,
+                        } = _metadata;
+
+                        schema.description = `Source size: ${source_size_in_gb.toFixed(2)} GB`;
+                        schema.properties.buffer_shape.description = `Expected RAM usage: ${maximum_ram_usage_per_iteration_in_gb.toFixed(2)} GB`;
+                        schema.properties.chunk_shape.description = `Disk space usage per chunk: ${disk_space_usage_per_chunk_in_mb.toFixed(2)} MB`;
 
                         delete item._metadata;
 

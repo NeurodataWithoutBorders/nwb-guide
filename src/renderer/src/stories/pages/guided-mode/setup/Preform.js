@@ -54,7 +54,7 @@ const questions = {
             locate_data: {},
         },
     },
-    
+
     backend_configuration: {
         type: "boolean",
         title: "Will you configure the backend for this pipeline?",
