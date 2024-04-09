@@ -115,6 +115,7 @@ export class GuidedInspectorPage extends Page {
         return html`
             ${until(
                 (async () => {
+
                     if (fileArr.length <= 1) {
                         this.report = inspector;
 
@@ -147,12 +148,17 @@ export class GuidedInspectorPage extends Page {
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
 
                     this.report = inspector;
+
                     if (!this.report) {
                         const result = await run("inspect_folder", { path, ...options }, { title: title + "s" });
+
                         this.report = globalState.preview.inspector = {
                             ...result,
                             messages: truncateFilePaths(result.messages, path),
                         };
+
+                        console.log(this.report, fileArr)
+
                     }
 
                     if (!inspector) await this.save();

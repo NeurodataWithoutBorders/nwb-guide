@@ -36,6 +36,10 @@ export class List extends LitElement {
         overflow: auto;
       }
 
+      ol {
+        margin: 0px;
+      }
+
 
       #empty {
         margin: 1rem;
@@ -327,10 +331,10 @@ export class List extends LitElement {
         this.object[i] = value;
       }
 
+      console.log(this)
 
-      if (isObjectContent) {} // Skip object contents
-
-      else if (content instanceof HTMLElement) li.append(editableElement = content)
+      if (content instanceof HTMLElement) li.append(editableElement = content)
+      else if (isObjectContent) {} // Skip other object contents
 
       // Always attempt render of other items
       else {

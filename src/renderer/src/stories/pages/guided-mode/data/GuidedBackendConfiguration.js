@@ -59,7 +59,8 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 if (instance instanceof JSONSchemaForm) await instance.validate(); // Will throw an error in the callback
             }
 
-            await this.getBackendConfiguration() // Validate by trying to set backend configuration with the latest values
+            // NOTE: Eventually you'll want to swap this to a full stub conversion with these options (which will fail the same...)
+            await this.getBackendConfiguration(true, { title: "Validating backend options..." }) // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },

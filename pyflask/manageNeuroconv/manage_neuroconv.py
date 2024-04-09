@@ -668,10 +668,36 @@ def get_interface_alignment(info: dict) -> dict:
     return timestamps
 
 
+def configure_dataset_backends(nwbfile, backend_configuration, configuration = None):
+    from neuroconv.tools.nwb_helpers import get_default_backend_configuration, configure_backend
+
+    PROPS_TO_AVOID = [
+        "full_shape"
+    ]
+
+    if (configuration is None):
+        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend="hdf5")
+
+    for name, item in backend_configuration.items():
+        for key, value in item.items():
+
+            # Avoid setting compression options if unspecified
+            if (key == 'compression_options' and len(value) == 0):
+                setattr(configuration.dataset_configurations[name], key, None)
+
+            # Avoid certain properties passed to the GUIDE
+            elif (key not in PROPS_TO_AVOID):
+                setattr(configuration.dataset_configurations[name], key, value)
+
+
+    configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
+
+
+
 def get_backend_configuration(info: dict) -> dict:
 
     import numpy as np
-    from neuroconv.tools.nwb_helpers import make_or_load_nwbfile, get_default_backend_configuration, HDF5BackendConfiguration, configure_backend
+    from neuroconv.tools.nwb_helpers import make_or_load_nwbfile, get_default_backend_configuration
 
     backend_configuration = info.get("configuration")
 
@@ -684,11 +710,6 @@ def get_backend_configuration(info: dict) -> dict:
         "location_in_file",
         "dtype"
     ]
-
-    PROPS_TO_AVOID = [
-        "full_shape"
-    ]
-        
 
     with make_or_load_nwbfile(
         nwbfile_path=path_info["file"],
@@ -703,28 +724,13 @@ def get_backend_configuration(info: dict) -> dict:
         configuration = get_default_backend_configuration(nwbfile=nwbfile, backend="hdf5")
 
         if backend_configuration:
-
-            for name, item in backend_configuration.items():
-                for key, value in item.items():
-
-                    # Avoid setting compression options if unspecified
-                    if (key == 'compression_options' and len(value) == 0):
-                        setattr(configuration.dataset_configurations[name], key, None)
-
-                    # Avoid certain properties passed to the GUIDE
-                    elif (key not in PROPS_TO_AVOID):
-                        setattr(configuration.dataset_configurations[name], key, value)
-
-
-            configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
-
-
+            configure_dataset_backends(nwbfile, backend_configuration, configuration)
+            
         def custom_encoder(obj):
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
             if isinstance(obj, np.dtype):
                 return str(obj)
-            # Add more types as needed
             raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
 
         # neuroconv_api.logger.info(default_backend_configuration)
@@ -850,8 +856,9 @@ def convert_to_nwb(info: dict) -> str:
         else None
     )
 
-    # if (backend_configuration):
-    #     configure_backend(nwbfile=nwbfile, backend_configuration=backend_configuration)
+    ## NOTE: figure out how to actually set this on the output NWB file...
+    # if backend_configuration:
+    #     configure_dataset_backends(nwbfile, backend_configuration)
 
     # Actually run the conversion
     converter.run_conversion(
