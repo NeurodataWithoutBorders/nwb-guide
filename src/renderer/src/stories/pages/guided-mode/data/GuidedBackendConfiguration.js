@@ -45,7 +45,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
     workflow = {
         backend_configuration: {
-            skip: () => this.convert({ preview: true, configuration: false }) // Ensure conversion is completed with skip
+            skip: () => this.convert({ preview: true, configuration: false }), // Ensure conversion is completed with skip
         },
     };
 
@@ -60,12 +60,12 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             const title = document.createElement("div");
             const header = document.createElement("h4");
             header.innerText = "Running preview conversion on all sessions";
-            Object.assign(header.style, { margin: 0 })
+            Object.assign(header.style, { margin: 0 });
 
             const small = document.createElement("small");
             small.innerText = "Includes the latest configuration options";
 
-            title.append(header, small)
+            title.append(header, small);
 
             await this.convert({ preview: true }, { title }); // Validate by trying to set backend configuration with the latest values
 
@@ -170,10 +170,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     #needsUpdate = {};
 
     render() {
-
-
-        if (this.workflow.backend_configuration.value === false) return // Skipping backend configuration
-
+        if (this.workflow.backend_configuration.value === false) return; // Skipping backend configuration
 
         this.#needsUpdate = {};
         this.#updateRendered(true);
