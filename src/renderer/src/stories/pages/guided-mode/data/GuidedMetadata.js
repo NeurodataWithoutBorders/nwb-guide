@@ -187,8 +187,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
 
-            await this.convert({ preview: true });
-
             return this.to(1);
         },
     };

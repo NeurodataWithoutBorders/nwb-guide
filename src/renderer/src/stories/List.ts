@@ -331,8 +331,6 @@ export class List extends LitElement {
         this.object[i] = value;
       }
 
-      console.log(this)
-
       if (content instanceof HTMLElement) li.append(editableElement = content)
       else if (isObjectContent) {} // Skip other object contents
 

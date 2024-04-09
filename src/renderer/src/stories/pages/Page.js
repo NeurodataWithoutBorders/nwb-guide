@@ -116,18 +116,24 @@ export class Page extends LitElement {
 
     mapSessions = (callback, data = this.info.globalState.results) => mapSessions(callback, data);
 
-    async convert({ preview } = {}) {
+    async convert({ preview, configuration } = {}, options = {}) {
         const key = preview ? "preview" : "conversion";
 
         delete this.info.globalState[key]; // Clear the preview results
 
         if (preview) {
-            const stubs = await this.runConversions({ stub_test: true }, undefined, {
-                title: "Running stub conversion on all sessions...",
-            });
+
+            if (!options.title) options.title = "Running preview conversion on all sessions...";
+
+            const stubs = await this.runConversions({ stub_test: true, configuration }, undefined, options);
             this.info.globalState[key] = { stubs };
+
         } else {
-            this.info.globalState[key] = await this.runConversions({}, true, { title: "Running all conversions" });
+
+            if (!options.title) options.title = "Running all conversions";
+
+            this.info.globalState[key] = await this.runConversions({ configuration }, true, options);
+
         }
 
         this.unsavedUpdates = true;
@@ -202,14 +208,20 @@ export class Page extends LitElement {
                 source_data: merge(SourceData, sourceDataCopy),
             };
 
+            const optsCopy = structuredClone(conversionOptions);
+
+            if (optsCopy.configuration === false) delete sessionInfo.configuration // Skip backend configuration options if specified as such
+            delete optsCopy.configuration;
+
+
             const result = await backendFunctionToRun(
                 {
-                    output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
+                    output_folder: optsCopy.stub_test ? undefined : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                     ...sessionInfo, // source_data and metadata are passed in here
-                    ...conversionOptions, // Any additional conversion options override the defaults
+                    ...optsCopy, // Any additional conversion options override the defaults
 
                     interfaces: globalState.interfaces,
                 },

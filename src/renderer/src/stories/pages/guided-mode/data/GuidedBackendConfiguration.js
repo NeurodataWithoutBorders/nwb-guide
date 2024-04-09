@@ -45,22 +45,29 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
     workflow = {
         backend_configuration: {
-            skip: {
-                condition: (v) => v === false,
-                skip: true,
-            },
+            skip: () => this.convert({ preview: true, configuration: false }) // Ensure conversion is completed with skip
         },
     };
 
     footer = {
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
+
             for (let { instance } of this.instances) {
                 if (instance instanceof JSONSchemaForm) await instance.validate(); // Will throw an error in the callback
             }
 
-            // NOTE: Eventually you'll want to swap this to a full stub conversion with these options (which will fail the same...)
-            await this.getBackendConfiguration(true, { title: "Validating current backend configuration" }); // Validate by trying to set backend configuration with the latest values
+            const title = document.createElement("div");
+            const header = document.createElement("h4");
+            header.innerText = "Running preview conversion on all sessions";
+            Object.assign(header.style, { margin: 0 })
+
+            const small = document.createElement("small");
+            small.innerText = "Includes the latest configuration options";
+
+            title.append(header, small)
+
+            await this.convert({ preview: true }, { title }); // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },
@@ -163,6 +170,11 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     #needsUpdate = {};
 
     render() {
+
+
+        if (this.workflow.backend_configuration.value === false) return // Skipping backend configuration
+
+
         this.#needsUpdate = {};
         this.#updateRendered(true);
 
@@ -229,6 +241,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         const hasAll = this.mapSessions(
             ({ session, subject }) => !!this.info.globalState.results[subject][session].configuration
         );
+
         if (hasAll.every((v) => v === true)) return renderInstances();
 
         const promise = this.getBackendConfiguration()
