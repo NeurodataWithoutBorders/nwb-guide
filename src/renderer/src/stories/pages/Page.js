@@ -122,18 +122,14 @@ export class Page extends LitElement {
         delete this.info.globalState[key]; // Clear the preview results
 
         if (preview) {
-
             if (!options.title) options.title = "Running preview conversion on all sessions...";
 
             const stubs = await this.runConversions({ stub_test: true, configuration }, undefined, options);
             this.info.globalState[key] = { stubs };
-
         } else {
-
             if (!options.title) options.title = "Running all conversions";
 
             this.info.globalState[key] = await this.runConversions({ configuration }, true, options);
-
         }
 
         this.unsavedUpdates = true;
@@ -210,9 +206,8 @@ export class Page extends LitElement {
 
             const optsCopy = structuredClone(conversionOptions);
 
-            if (optsCopy.configuration === false) delete sessionInfo.configuration // Skip backend configuration options if specified as such
+            if (optsCopy.configuration === false) delete sessionInfo.configuration; // Skip backend configuration options if specified as such
             delete optsCopy.configuration;
-
 
             const result = await backendFunctionToRun(
                 {
