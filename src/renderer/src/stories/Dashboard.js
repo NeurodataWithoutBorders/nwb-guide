@@ -247,24 +247,25 @@ export class Dashboard extends LitElement {
                 ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
                 : projectName;
 
-            this.updateSections({ sidebar: false, main: true });
-
-            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
 
             const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
+            // Skip rendering page if configured as such
             if (skipped) {
                 if (isStorybook) return; // Do not skip on storybook
-
-                // Run skip functions
-                Object.entries(page.workflow).forEach(([key, state]) => {
-                    if (typeof state.skip === "function") state.skip();
+    
+                return Promise.all(Object.entries(page.workflow).map(async ([_, state]) => {
+                    if (typeof state.skip === "function") return await state.skip(); // Run skip functions
+                })).then(() => {
+                    if (previous && previous.info.previous === this.page) this.main.onTransition(-1);
+                    else this.main.onTransition(1);
                 });
-
-                // Skip right over the page if configured as such
-                if (previous && previous.info.previous === this.page) this.page.onTransition(-1);
-                else this.page.onTransition(1);
             }
+    
+            // Update main to render page
+            this.updateSections({ sidebar: false, main: true });
+
+            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
         });
     }
 

@@ -222,7 +222,7 @@ export class Main extends LitElement {
                           <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
                               <div style="line-height: 1em; color: gray;">
                                   <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
-                                  <small>${unsafeHTML(subtitle)}</small>
+                                  <small>${subtitle instanceof HTMLElement ? subtitle : unsafeHTML(subtitle)}</small>
                               </div>
                               <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
                           </div>

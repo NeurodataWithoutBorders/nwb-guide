@@ -673,8 +673,13 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
 
     PROPS_TO_AVOID = ["full_shape"]
 
+    # Default to HDF5 backend configuration
     if configuration is None:
         configuration = get_default_backend_configuration(nwbfile=nwbfile, backend="hdf5")
+
+    # Ensure the configuration is a dictionary
+    elif isinstance(configuration, str):
+        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=configuration)
 
     for name, item in backend_configuration.items():
         for key, value in item.items():
@@ -696,22 +701,31 @@ def get_backend_configuration(info: dict) -> dict:
     from neuroconv.tools.nwb_helpers import make_or_load_nwbfile, get_default_backend_configuration
 
     backend_configuration = info.get("configuration")
+    backend = info.get("backend", "hdf5")
 
     converter, metadata, path_info = get_conversion_info(info)
 
     PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
 
+    nwbfile_path = path_info["file"]
+    if nwbfile_path.exists():
+        if nwbfile_path.is_dir():
+            rmtree(nwbfile_path)
+        else:
+            nwbfile_path.unlink()
+
+
     with make_or_load_nwbfile(
-        nwbfile_path=path_info["file"],
+        nwbfile_path=nwbfile_path,
         metadata=metadata,
         overwrite=True,
-        backend="hdf5",
+        backend=backend,
         verbose=True,
     ) as nwbfile:
 
         converter.add_to_nwbfile(nwbfile, metadata=metadata)
 
-        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend="hdf5")
+        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
 
         if backend_configuration:
             configure_dataset_backends(nwbfile, backend_configuration, configuration)
@@ -837,9 +851,12 @@ def get_conversion_info(info: dict) -> dict:
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
+    from neuroconv.tools.nwb_helpers import make_or_load_nwbfile
+
     run_stub_test = info.get("stub_test", False)
     source_data = info.get("source_data", False)
     backend_configuration = info.get("configuration")
+    backend = info.get("backend", "hdf5")
 
     converter, metadata, path_info = get_conversion_info(info)
 
@@ -862,17 +879,27 @@ def convert_to_nwb(info: dict) -> str:
         else None
     )
 
-    ## NOTE: figure out how to actually set this on the output NWB file...
-    # if backend_configuration:
-    #     configure_dataset_backends(nwbfile, backend_configuration)
+    # Create NWB file with appropriate backend configuration
+    with make_or_load_nwbfile(
+        nwbfile_path=output_path, 
+        metadata=metadata, 
+        overwrite=info.get("overwrite", False), 
+        backend=backend
+    ) as nwbfile:
+        converter.add_to_nwbfile(nwbfile, metadata=metadata, conversion_options=options)
+        # for interface_or_subconverter_name, interface_or_subconverter in converter.data_interface_objects.items():
+        #     interface_or_subconverter.add_to_nwbfile(nwbfile=nwbfile, **options.get(interface_or_subconverter_name, dict()))
 
-    # Actually run the conversion
-    converter.run_conversion(
-        metadata=metadata,
-        nwbfile_path=output_path,
-        overwrite=info.get("overwrite", False),
-        conversion_options=options,
-    )
+        if backend_configuration:
+            configure_dataset_backends(nwbfile, backend_configuration, backend)
+
+    # # Actually run the conversion
+    # converter.run_conversion(
+    #     metadata=metadata,
+    #     nwbfile_path=output_path,
+    #     overwrite=info.get("overwrite", False),
+    #     conversion_options=options,
+    # )
 
     # Create a symlink between the fake data and custom data
     if not resolved_output_directory == default_output_directory:

@@ -39,7 +39,7 @@ const questions = {
         type: "boolean",
         title: "Would you like to locate the source data programmatically?",
         dependencies: {
-            multiple_sessions: { default: false },
+            multiple_sessions: {  },
         },
         default: false,
     },
@@ -60,6 +60,20 @@ const questions = {
         title: "Will you configure the backend for this pipeline?",
         description: "This allows you to specify file type (e.g. HDF5, Zarr) and dataset chunking + compression.",
         default: false,
+    },
+
+    backend_type: {
+        type: "string",
+        enum: ['hdf5', 'zarr'],
+        enumLabels: {
+            hdf5: "HDF5",
+            zarr: "Zarr",
+        },
+        title: "What file backend would you like to use?",
+        default: "hdf5",
+        dependencies: {
+            backend_configuration: {},
+        },
     },
 
     upload_to_dandi: {
@@ -87,7 +101,9 @@ const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
         else
             Object.entries(deps).forEach(([dep, opts]) => {
                 if (!acc[dep]) acc[dep] = [];
+                console.log('Saving dep', name, { name, ...opts })
                 acc[dep].push({ name, ...opts });
+                acc[dep].push({ name, default: info.default, ...opts }); // Inherit default value
             });
     }
     return acc;
@@ -164,11 +180,15 @@ export class GuidedPreform extends Page {
                         condition = (v) => dependent.condition.some((condition) => v == condition);
                     else console.warn("Invalid condition", dependent.condition);
 
+                    // Is set to true
                     if (uniformDeps.every(({ name }) => condition(parent[name]))) {
                         dependentParent.removeAttribute(attr);
                         if ("required" in dependent) dependentEl.required = dependent.required;
-                        if ("__cached" in dependent) dependentEl.updateData(dependent.__cached);
-                    } else {
+                        if ('__cached' in dependent) dependentEl.updateData(dependent.__cached);
+                    } 
+                    
+                    // Is set to false
+                    else {
                         if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
                         dependentEl.updateData(dependent.default);
                         dependentParent.setAttribute(attr, true);
@@ -179,12 +199,11 @@ export class GuidedPreform extends Page {
 
             // Immediately re-render boolean values
             onUpdate: async (path, value) => {
-                if (typeof value === "boolean") {
-                    this.unsavedUpdates = true;
-                    this.info.globalState.project.workflow = this.state;
-                    this.updateSections(); // Trigger section changes with new workflow
-                    await this.save({}, false); // Save new workflow and section changes
-                }
+                const willUpdateFlow = typeof value === "boolean";
+                this.unsavedUpdates = true;
+                this.info.globalState.project.workflow = this.state;
+                if (willUpdateFlow) this.updateSections(); // Trigger section changes with new workflow
+                await this.save({}, false); // Save new workflow and section changes
             },
             onThrow,
             // groups: [

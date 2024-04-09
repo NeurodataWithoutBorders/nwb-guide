@@ -14,12 +14,18 @@ import { resolve } from "../../../../promises";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { getSchema } from "../../../../../../../schemas/backend-configuration.schema";
 import { getInfoFromId } from "./utils.js";
+import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 
 const getBackendConfigurations = (info, options = {}) => run(`configuration`, info, options);
 
 const itemIgnore = {
     full_shape: true,
     compression_options: true,
+};
+
+const backendMap = {
+    zarr: "Zarr",
+    hdf5: "HDF5",
 };
 
 export class GuidedBackendConfigurationPage extends ManagedPage {
@@ -39,14 +45,25 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         return found?.instance instanceof JSONSchemaForm ? found.instance : null;
     };
 
+    #subtitle = document.createElement("span")
+
     header = {
-        subtitle: "Configure your backend",
+        subtitle: this.#subtitle,
     };
 
     workflow = {
         backend_configuration: {
-            skip: () => this.convert({ preview: true, configuration: false }), // Ensure conversion is completed with skip
+
+            // Ensure conversion is completed with skip
+            skip: async () => {
+                await this.convert({ 
+                    preview: true, 
+                    configuration: false 
+                })
+            }
+
         },
+        backend_type: {}
     };
 
     footer = {
@@ -67,7 +84,10 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
             title.append(header, small);
 
-            await this.convert({ preview: true }, { title }); // Validate by trying to set backend configuration with the latest values
+            await this.convert({ 
+                preview: true,
+                backend: this.workflow.backend_type.value
+            }, { title }); // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },
@@ -175,7 +195,9 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         if (!opts.title && config === true) opts.title = "Getting backend options for all sessions";
 
         return this.runConversions(
-            {},
+            {
+                backend: this.workflow.backend_type.value
+            },
             config, // All or specific session
             opts,
             getBackendConfigurations
@@ -185,7 +207,9 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     #needsUpdate = {};
 
     render() {
-        if (this.workflow.backend_configuration.value === false) return; // Skipping backend configuration
+
+        const backend = this.workflow.backend_type.value;
+        this.#subtitle.innerText = `Configured for ${backendMap[backend]}`;
 
         this.#needsUpdate = {};
         this.#updateRendered(true);
@@ -254,11 +278,24 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             ({ session, subject }) => !!this.info.globalState.results[subject][session].configuration
         );
 
-        if (hasAll.every((v) => v === true)) return renderInstances();
+        const sameBackend = this.info.globalState.project.backend === backend;
+
+        if (hasAll.every((v) => v === true) && sameBackend) return renderInstances();
 
         const promise = this.getBackendConfiguration()
-            .then((backendOptions) => renderInstances(backendOptions))
-            .catch((error) => html`<p>${error}</p>`);
+            .then((backendOptions) => {
+                this.info.globalState.project.backend = backend; // Track current backend type
+                console.log(backendOptions)
+                return renderInstances(backendOptions)
+            })
+            .catch((error) => html`
+                <h4>Configuration failed for ${backendMap[backend]} file backend</h4>
+                ${new InspectorListItem({
+                    message: error.message.split(':')[1].slice(1),
+                    type: "error",
+                })}
+                <p>You may want to change to another filetype.</p>
+            `);
 
         const untilResult = until(promise, html`Loading form contents...`);
 

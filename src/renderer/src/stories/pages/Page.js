@@ -116,7 +116,7 @@ export class Page extends LitElement {
 
     mapSessions = (callback, data = this.info.globalState.results) => mapSessions(callback, data);
 
-    async convert({ preview, configuration } = {}, options = {}) {
+    async convert({ preview, ...conversionOptions } = {}, options = {}) {
         const key = preview ? "preview" : "conversion";
 
         delete this.info.globalState[key]; // Clear the preview results
@@ -124,12 +124,12 @@ export class Page extends LitElement {
         if (preview) {
             if (!options.title) options.title = "Running preview conversion on all sessions...";
 
-            const stubs = await this.runConversions({ stub_test: true, configuration }, undefined, options);
+            const stubs = await this.runConversions({ stub_test: true, ...conversionOptions }, undefined, options);
             this.info.globalState[key] = { stubs };
         } else {
             if (!options.title) options.title = "Running all conversions";
 
-            this.info.globalState[key] = await this.runConversions({ configuration }, true, options);
+            this.info.globalState[key] = await this.runConversions(conversionOptions, true, options);
         }
 
         this.unsavedUpdates = true;
@@ -206,7 +206,10 @@ export class Page extends LitElement {
 
             const optsCopy = structuredClone(conversionOptions);
 
-            if (optsCopy.configuration === false) delete sessionInfo.configuration; // Skip backend configuration options if specified as such
+            if (optsCopy.configuration === false) {
+                delete sessionInfo.configuration; // Skip backend configuration options if specified as such
+                delete optsCopy.backend
+            }
             delete optsCopy.configuration;
 
             const result = await backendFunctionToRun(
@@ -223,6 +226,7 @@ export class Page extends LitElement {
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((error) => {
                 let message = error.message;
+                console.log(error)
 
                 if (message.includes("The user aborted a request.")) {
                     this.notify("Conversion was cancelled.", "warning");
