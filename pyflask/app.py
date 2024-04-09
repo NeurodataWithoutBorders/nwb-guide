@@ -111,15 +111,15 @@ def get_cpu_count():
 @app.route("/compression/hdf5")
 def get_hdf5_compression_methods():
     from neuroconv.tools.nwb_helpers import AVAILABLE_HDF5_COMPRESSION_METHODS
+
     return list(AVAILABLE_HDF5_COMPRESSION_METHODS)
+
 
 @app.route("/compression/zarr")
 def get_zarr_compression_methods():
     from neuroconv.tools.nwb_helpers import AVAILABLE_ZARR_COMPRESSION_METHODS
+
     return list(AVAILABLE_ZARR_COMPRESSION_METHODS)
-
-
-
 
 
 @app.route("/get-recommended-species")

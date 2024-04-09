@@ -926,7 +926,7 @@ export class JSONSchemaInput extends LitElement {
             const allowPatternProperties = isPatternProperties(this.pattern);
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
 
-            const editableInline = [ 'string', 'number' ]
+            const editableInline = ["string", "number"];
 
             // Provide default item types
             if (isArray) {
@@ -946,15 +946,12 @@ export class JSONSchemaInput extends LitElement {
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-
             // Create tables if possible
             else if (editableInline.includes(itemSchema?.type) && !itemSchema.properties) {
-
-
                 const postprocess = (v) => {
-                    if (itemSchema?.type === 'number') return parseFloat(v)
-                    else return v
-                }
+                    if (itemSchema?.type === "number") return parseFloat(v);
+                    else return v;
+                };
 
                 const list = new List({
                     items: this.value,

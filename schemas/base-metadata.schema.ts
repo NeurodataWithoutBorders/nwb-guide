@@ -157,7 +157,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         })
 
         const units = ecephys.properties["Units"]
-        
+
         if (units) {
 
             units.title = "Summarized Units"

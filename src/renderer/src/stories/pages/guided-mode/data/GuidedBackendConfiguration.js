@@ -19,8 +19,8 @@ const getBackendConfigurations = (info, options = {}) => run(`configuration`, in
 
 const itemIgnore = {
     full_shape: true,
-    compression_options: true
-}
+    compression_options: true,
+};
 
 export class GuidedBackendConfigurationPage extends ManagedPage {
     constructor(...args) {
@@ -33,11 +33,11 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     };
 
     form;
-    instances = []
+    instances = [];
     #getForm = (sub, ses) => {
-        const found = this.instances.find(o => o.session === ses && o.subject === sub )
-        return found?.instance instanceof JSONSchemaForm ? found.instance : null
-    }
+        const found = this.instances.find((o) => o.session === ses && o.subject === sub);
+        return found?.instance instanceof JSONSchemaForm ? found.instance : null;
+    };
 
     header = {
         subtitle: "Configure your backend",
@@ -60,7 +60,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             }
 
             // NOTE: Eventually you'll want to swap this to a full stub conversion with these options (which will fail the same...)
-            await this.getBackendConfiguration(true, { title: "Validating backend options..." }) // Validate by trying to set backend configuration with the latest values
+            await this.getBackendConfiguration(true, { title: "Validating current backend configuration" }) // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },
@@ -84,113 +84,105 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     }
 
     renderInstance = ({ session, subject, info }) => {
-
-        this.localState.results[subject][session].configuration = info
+        this.localState.results[subject][session].configuration = info;
 
         let instance;
         if (Object.keys(info).length === 0) {
             instance = document.createElement("span");
             instance.innerText = "No configuration options available for this session";
-        }
+        } else {
+            const itemSchema = getSchema();
 
-        else {
-    
-            const itemSchema = getSchema()
+            const schema = { type: "object", properties: {} };
 
-            const schema = { type: 'object', properties: {} }
+            const reorganized = Object.entries(info).reduce((acc, [name, item]) => {
+                const splitName = name.split("/");
 
-            const reorganized = Object.entries(info).reduce((acc, [ name, item ]) => {
+                const resolved = { schema, results: acc };
 
-                const splitName = name.split('/')
-
-                const resolved = { schema, results: acc }
-
-                const lenSplit = splitName.length
+                const lenSplit = splitName.length;
                 splitName.reduce((acc, key, i) => {
+                    const { schema, results } = acc;
 
-                        const { schema, results } = acc
+                    const props = schema.properties ?? (schema.properties = {});
 
-                        const props = schema.properties ?? (schema.properties = {})
+                    // Set directly on last iteration
+                    if (i === lenSplit - 1) {
+                        props[key] = { ...itemSchema };
+                        if (item.compression_options == null) item.compression_options = {}; // Set blank compression options to an empty object
+                        results[key] = item;
+                        return;
+                    }
 
-                        // Set directly on last iteration
-                        if (i === (lenSplit - 1)) {
-                            props[key] = {...itemSchema}
-                            if (item.compression_options == null) item.compression_options = {} // Set blank compression options to an empty object
-                            results[key] = item
-                            return
-                        }
+                    // Otherwise drill into the results
+                    else {
+                        const thisSchema = props[key] ?? (props[key] = {});
+                        if (!results[key]) results[key] = {};
+                        return { schema: thisSchema, results: results[key] };
+                    }
+                }, resolved);
 
-                        // Otherwise drill into the results
-                        else {
-                            const thisSchema = props[key] ?? (props[key] = {})
-                            if (!results[key]) results[key] = {}
-                            return { schema: thisSchema, results: results[key] }
-                        }
+                return acc;
+            }, {});
 
-                }, resolved)
-
-                return acc
-
-            }, {})
-
-            const existingForm = this.#getForm(subject, session)
+            const existingForm = this.#getForm(subject, session);
             if (existingForm) {
-                existingForm.results = reorganized // Update resolved values
-                return { session, subject, instance: existingForm }
+                existingForm.results = reorganized; // Update resolved values
+                return { session, subject, instance: existingForm };
             }
-
 
             instance = new JSONSchemaForm({
                 schema,
                 results: reorganized,
                 ignore: {
-                    '*': itemIgnore
+                    "*": itemIgnore,
                 },
                 onUpdate: (updatedPath) => {
-                    console.log(updatedPath)
-                    this.unsavedUpdates = true
+                    console.log(updatedPath);
+                    this.unsavedUpdates = true;
                 },
                 onThrow,
                 // validateOnChange: validate,
-            })
+            });
         }
 
         return { session, subject, instance };
-
     };
 
     getBackendConfiguration = (config = true, opts = {}) => {
-
-        if (!opts.title && config === true) opts.title = "Getting backend options for all sessions" 
-
+        if (!opts.title && config === true) opts.title = "Getting backend options for all sessions";
 
         return this.runConversions(
-            {}, 
+            {},
             config, // All or specific session
-            opts, 
+            opts,
             getBackendConfigurations
-        )
-    }
+        );
+    };
 
-    #needsUpdate = {}
+    #needsUpdate = {};
 
     render() {
-
-        this.#needsUpdate = {}
+        this.#needsUpdate = {};
         this.#updateRendered(true);
 
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         const renderInstances = (toIterate) => {
-
             const instances = {};
-            this.instances = toIterate ? this.mapSessions(this.renderInstance, toIterate) :  this.mapSessions(({ subject, session, info }) => this.renderInstance({ subject, session, info: info.configuration }), toIterate);
-            
+            this.instances = toIterate
+                ? this.mapSessions(this.renderInstance, toIterate)
+                : this.mapSessions(
+                      ({ subject, session, info }) =>
+                          this.renderInstance({ subject, session, info: info.configuration }),
+                      toIterate
+                  );
+
             this.instances.forEach(({ subject, session, instance }) => {
                 if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
                 instances[`sub-${subject}`][`ses-${session}`] = instance;
             });
-    
+
             this.manager = new InstanceManager({
                 header: "Sessions",
                 instanceType: "Session",
@@ -200,48 +192,48 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                         name: "Update",
                         primary: true,
                         onClick: async (key) => {
-                            
                             const { subject, session } = getInfoFromId(key);
 
-                            const existingForm = this.#getForm(subject, session)
-                            await existingForm.validate()
+                            const existingForm = this.#getForm(subject, session);
+                            await existingForm.validate();
 
-                            const merged = merge(this.localState, structuredClone(this.info.globalState))
+                            const merged = merge(this.localState, structuredClone(this.info.globalState));
 
-                            const results = await this.getBackendConfiguration(                            [
+                            const results = await this.getBackendConfiguration(
+                                [
+                                    {
+                                        subject,
+                                        session,
+                                        globalState: merged,
+                                    },
+                                ],
                                 {
-                                    subject,
-                                    session,
-                                    globalState:merged,
-                                },
-                            ],
-                            { 
-                                title: `Configuring backend for ${key}`
-                            }).catch(() => {})
+                                    title: `Configuring backend for ${key}`,
+                                }
+                            ).catch(() => {});
 
-    
                             if (!results) return;
 
                             // Update existing instance
-                            this.renderInstance({ subject, session, info: results[subject][session] })
+                            this.renderInstance({ subject, session, info: results[subject][session] });
 
-                            await this.save() // Save if properly returned
-    
+                            await this.save(); // Save if properly returned
                         },
                     },
-                ]        
-            })
+                ],
+            });
 
-            return this.manager
+            return this.manager;
+        };
 
-        }
+        const hasAll = this.mapSessions(
+            ({ session, subject }) => !!this.info.globalState.results[subject][session].configuration
+        );
+        if (hasAll.every((v) => v === true)) return renderInstances();
 
-
-        const hasAll = this.mapSessions(({ session, subject}) => !!this.info.globalState.results[subject][session].configuration)
-        if (hasAll.every((v) => v === true)) return renderInstances()
-
-
-        const promise = this.getBackendConfiguration().then((backendOptions) =>  renderInstances(backendOptions)).catch((error) => html`<p>${error}</p>`);
+        const promise = this.getBackendConfiguration()
+            .then((backendOptions) => renderInstances(backendOptions))
+            .catch((error) => html`<p>${error}</p>`);
 
         const untilResult = until(promise, html`Loading form contents...`);
 
@@ -250,7 +242,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         });
 
         return untilResult;
-        
     }
 }
 
