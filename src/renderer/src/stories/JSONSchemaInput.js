@@ -926,6 +926,8 @@ export class JSONSchemaInput extends LitElement {
             const allowPatternProperties = isPatternProperties(this.pattern);
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
 
+            const editableInline = [ 'string', 'number' ]
+
             // Provide default item types
             if (isArray) {
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
@@ -944,13 +946,22 @@ export class JSONSchemaInput extends LitElement {
 
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
+
             // Create tables if possible
-            else if (itemSchema?.type === "string" && !itemSchema.properties) {
+            else if (editableInline.includes(itemSchema?.type) && !itemSchema.properties) {
+
+
+                const postprocess = (v) => {
+                    if (itemSchema?.type === 'number') return parseFloat(v)
+                    else return v
+                }
+
                 const list = new List({
                     items: this.value,
                     emptyMessage: "No items",
+                    unordered: false,
                     onChange: ({ items }) => {
-                        this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
+                        this.#updateData(fullPath, items.length ? items.map((o) => postprocess(o.value)) : undefined);
                         if (validateOnChange) this.#triggerValidation(name, path);
                     },
                 });

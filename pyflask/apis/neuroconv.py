@@ -22,8 +22,7 @@ from manageNeuroconv import (
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
     get_interface_alignment,
-    get_backend_configuration,
-    set_backend_configuration,
+    get_backend_configuration
 )
 
 from errorHandlers import notBadRequestException
@@ -132,20 +131,10 @@ class Alignment(Resource):
 class GetBackendConfiguration(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
+
         try:
+
             return get_backend_configuration(neuroconv_api.payload)
-
-        except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
-
-
-@neuroconv_api.route("/configuration/set")
-class SetBackendConfiguration(Resource):
-    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        try:
-            return set_backend_configuration(neuroconv_api.payload)
 
         except Exception as exception:
             if notBadRequestException(exception):

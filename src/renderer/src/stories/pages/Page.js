@@ -140,7 +140,12 @@ export class Page extends LitElement {
         }
     }
 
-    async runConversions(conversionOptions = {}, toRun, options = {}) {
+    async runConversions(
+        conversionOptions = {}, 
+        toRun, 
+        options = {},
+        backendFunctionToRun = runConversion
+    ) {
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
@@ -195,6 +200,7 @@ export class Page extends LitElement {
 
             const sourceDataCopy = structuredClone(sessionResults.source_data);
 
+
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
                 ...sessionResults,
@@ -202,7 +208,7 @@ export class Page extends LitElement {
                 source_data: merge(SourceData, sourceDataCopy),
             };
 
-            const result = await runConversion(
+            const result = await backendFunctionToRun(
                 {
                     output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
                     project_name: name,
