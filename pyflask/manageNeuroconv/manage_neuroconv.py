@@ -714,7 +714,6 @@ def get_backend_configuration(info: dict) -> dict:
         else:
             nwbfile_path.unlink()
 
-
     with make_or_load_nwbfile(
         nwbfile_path=nwbfile_path,
         metadata=metadata,
@@ -881,10 +880,7 @@ def convert_to_nwb(info: dict) -> str:
 
     # Create NWB file with appropriate backend configuration
     with make_or_load_nwbfile(
-        nwbfile_path=output_path, 
-        metadata=metadata, 
-        overwrite=info.get("overwrite", False), 
-        backend=backend
+        nwbfile_path=output_path, metadata=metadata, overwrite=info.get("overwrite", False), backend=backend
     ) as nwbfile:
         converter.add_to_nwbfile(nwbfile, metadata=metadata, conversion_options=options)
         # for interface_or_subconverter_name, interface_or_subconverter in converter.data_interface_objects.items():

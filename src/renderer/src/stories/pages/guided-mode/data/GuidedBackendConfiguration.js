@@ -45,7 +45,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         return found?.instance instanceof JSONSchemaForm ? found.instance : null;
     };
 
-    #subtitle = document.createElement("span")
+    #subtitle = document.createElement("span");
 
     header = {
         subtitle: this.#subtitle,
@@ -53,17 +53,15 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
     workflow = {
         backend_configuration: {
-
             // Ensure conversion is completed with skip
             skip: async () => {
-                await this.convert({ 
-                    preview: true, 
-                    configuration: false 
-                })
-            }
-
+                await this.convert({
+                    preview: true,
+                    configuration: false,
+                });
+            },
         },
-        backend_type: {}
+        backend_type: {},
     };
 
     footer = {
@@ -84,10 +82,13 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
             title.append(header, small);
 
-            await this.convert({ 
-                preview: true,
-                backend: this.workflow.backend_type.value
-            }, { title }); // Validate by trying to set backend configuration with the latest values
+            await this.convert(
+                {
+                    preview: true,
+                    backend: this.workflow.backend_type.value,
+                },
+                { title }
+            ); // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },
@@ -196,7 +197,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
         return this.runConversions(
             {
-                backend: this.workflow.backend_type.value
+                backend: this.workflow.backend_type.value,
             },
             config, // All or specific session
             opts,
@@ -207,7 +208,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     #needsUpdate = {};
 
     render() {
-
         const backend = this.workflow.backend_type.value;
         this.#subtitle.innerText = `Configured for ${backendMap[backend]}`;
 
@@ -285,17 +285,19 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         const promise = this.getBackendConfiguration()
             .then((backendOptions) => {
                 this.info.globalState.project.backend = backend; // Track current backend type
-                console.log(backendOptions)
-                return renderInstances(backendOptions)
+                console.log(backendOptions);
+                return renderInstances(backendOptions);
             })
-            .catch((error) => html`
-                <h4>Configuration failed for ${backendMap[backend]} file backend</h4>
-                ${new InspectorListItem({
-                    message: error.message.split(':')[1].slice(1),
-                    type: "error",
-                })}
-                <p>You may want to change to another filetype.</p>
-            `);
+            .catch(
+                (error) => html`
+                    <h4>Configuration failed for ${backendMap[backend]} file backend</h4>
+                    ${new InspectorListItem({
+                        message: error.message.split(":")[1].slice(1),
+                        type: "error",
+                    })}
+                    <p>You may want to change to another filetype.</p>
+                `
+            );
 
         const untilResult = until(promise, html`Loading form contents...`);
 

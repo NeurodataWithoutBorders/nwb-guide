@@ -39,7 +39,7 @@ const questions = {
         type: "boolean",
         title: "Would you like to locate the source data programmatically?",
         dependencies: {
-            multiple_sessions: {  },
+            multiple_sessions: {},
         },
         default: false,
     },
@@ -64,7 +64,7 @@ const questions = {
 
     backend_type: {
         type: "string",
-        enum: ['hdf5', 'zarr'],
+        enum: ["hdf5", "zarr"],
         enumLabels: {
             hdf5: "HDF5",
             zarr: "Zarr",
@@ -101,7 +101,7 @@ const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
         else
             Object.entries(deps).forEach(([dep, opts]) => {
                 if (!acc[dep]) acc[dep] = [];
-                console.log('Saving dep', name, { name, ...opts })
+                console.log("Saving dep", name, { name, ...opts });
                 acc[dep].push({ name, ...opts });
                 acc[dep].push({ name, default: info.default, ...opts }); // Inherit default value
             });
@@ -184,9 +184,9 @@ export class GuidedPreform extends Page {
                     if (uniformDeps.every(({ name }) => condition(parent[name]))) {
                         dependentParent.removeAttribute(attr);
                         if ("required" in dependent) dependentEl.required = dependent.required;
-                        if ('__cached' in dependent) dependentEl.updateData(dependent.__cached);
-                    } 
-                    
+                        if ("__cached" in dependent) dependentEl.updateData(dependent.__cached);
+                    }
+
                     // Is set to false
                     else {
                         if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
