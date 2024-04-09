@@ -2,7 +2,6 @@ import { GettingStartedPage } from "./stories/pages/getting-started/GettingStart
 import { DocumentationPage } from "./stories/pages/documentation/Documentation";
 import { ContactPage } from "./stories/pages/contact-us/Contact";
 import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome";
-import { GuidedStartPage } from "./stories/pages/guided-mode/GuidedStart";
 import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/setup/GuidedNewDatasetInfo";
 import { GuidedStructurePage } from "./stories/pages/guided-mode/data/GuidedStructure";
 import { sections } from "./stories/pages/globals";
@@ -85,10 +84,6 @@ const pages = {
         label: "Convert",
         icon: guidedIcon,
         pages: {
-            start: new GuidedStartPage({
-                label: "Start",
-            }),
-
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",

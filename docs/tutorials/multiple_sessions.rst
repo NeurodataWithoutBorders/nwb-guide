@@ -3,6 +3,8 @@ Managing Multiple Sessions
 
 Now, let’s say that you’ve already run some of your experiments and now you want to convert them all at the same time. This is where a multi-session workflow will come in handy.
 
+Begin a new conversion on the **Convert** page and provide a name for your pipeline.
+
 Workflow Configuration
 ----------------------
 
@@ -12,7 +14,9 @@ On the Workflow page, confirm that this pipeline will be run on multiple session
   :align: center
   :alt: Workflow page with multiple sessions and locate data selected
 
-Complete the first section of the GUIDE as normal until you reach a new **Locate Data** page after the Data Formats page.
+Data Formats
+------------
+As before, specify **SpikeGLX Recording** and **Phy Sorting** as the data formats for this conversion.
 
 Locate Data
 -----------
@@ -25,7 +29,7 @@ This page helps you automatically identify source data for multiple subjects / s
 File locations are specified as **format strings** that define source data paths of each selected data format.
 
 .. note::
-    Format strings are one component of NeuroConv's **path expansion language**, which has some nifty features for manually specifying complex paths. Complete documentation of the path expansion feature of NeuroConv can be found :path-expansion-guide:`here <>` .
+    Format strings are one component of NeuroConv's **path expansion language**, which has some nifty features for manually specifying complex paths. Complete documentation of the path expansion feature of NeuroConv can be found :path-expansion-guide:`here <>`.
 
 While you don’t have to specify format strings for all of the pipeline’s data formats, we’re going to find all of our data here for this tutorial. You'll always be able to confirm or manually select the final paths on the Source Data page later in the workflow.
 
@@ -91,6 +95,7 @@ We should also indicate the ``sex`` of each subject since this is a requirement 
 
     You’ll be able to specify Global Metadata on the Source Data and File Metadata pages as well.
 
+Advance to the next page when you have entered subject metadata for all subjects.
 
 Source Data Information
 -----------------------
