@@ -60,7 +60,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             }
 
             // NOTE: Eventually you'll want to swap this to a full stub conversion with these options (which will fail the same...)
-            await this.getBackendConfiguration(true, { title: "Validating current backend configuration" }) // Validate by trying to set backend configuration with the latest values
+            await this.getBackendConfiguration(true, { title: "Validating current backend configuration" }); // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },

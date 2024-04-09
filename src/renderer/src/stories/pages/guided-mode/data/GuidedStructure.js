@@ -34,9 +34,9 @@ export class GuidedStructurePage extends Page {
         };
 
         Object.assign(this.addButton.style, {
-            marginTop: '10px'
-        })
-        
+            marginTop: "10px",
+        });
+
         this.addButton.innerText = "Add Format";
         this.addButton.onClick = () => {
             this.search.shadowRoot.querySelector("input").focus();

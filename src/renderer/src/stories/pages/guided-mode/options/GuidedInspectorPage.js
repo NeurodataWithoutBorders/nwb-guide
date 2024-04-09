@@ -115,7 +115,6 @@ export class GuidedInspectorPage extends Page {
         return html`
             ${until(
                 (async () => {
-
                     if (fileArr.length <= 1) {
                         this.report = inspector;
 
@@ -157,8 +156,7 @@ export class GuidedInspectorPage extends Page {
                             messages: truncateFilePaths(result.messages, path),
                         };
 
-                        console.log(this.report, fileArr)
-
+                        console.log(this.report, fileArr);
                     }
 
                     if (!inspector) await this.save();
