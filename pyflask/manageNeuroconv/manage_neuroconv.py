@@ -671,24 +671,20 @@ def get_interface_alignment(info: dict) -> dict:
 def get_backend_configuration(info: dict) -> dict:
 
     import numpy as np
-    from neuroconv.tools.nwb_helpers import make_or_load_nwbfile, get_default_backend_configuration, HDF5BackendConfiguration, configure_backend
+    from neuroconv.tools.nwb_helpers import (
+        make_or_load_nwbfile,
+        get_default_backend_configuration,
+        HDF5BackendConfiguration,
+        configure_backend,
+    )
 
     backend_configuration = info.get("configuration")
 
     converter, metadata, path_info = get_conversion_info(info)
 
-            
-    PROPS_TO_REMOVE = [
-        "object_id",
-        "dataset_name",
-        "location_in_file",
-        "dtype"
-    ]
+    PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
 
-    PROPS_TO_AVOID = [
-        "full_shape"
-    ]
-        
+    PROPS_TO_AVOID = ["full_shape"]
 
     with make_or_load_nwbfile(
         nwbfile_path=path_info["file"],
@@ -708,16 +704,14 @@ def get_backend_configuration(info: dict) -> dict:
                 for key, value in item.items():
 
                     # Avoid setting compression options if unspecified
-                    if (key == 'compression_options' and len(value) == 0):
+                    if key == "compression_options" and len(value) == 0:
                         setattr(configuration.dataset_configurations[name], key, None)
 
                     # Avoid certain properties passed to the GUIDE
-                    elif (key not in PROPS_TO_AVOID):
+                    elif key not in PROPS_TO_AVOID:
                         setattr(configuration.dataset_configurations[name], key, value)
 
-
             configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
-
 
         def custom_encoder(obj):
             if isinstance(obj, np.ndarray):
@@ -731,12 +725,12 @@ def get_backend_configuration(info: dict) -> dict:
 
         serialized = json.loads(json.dumps(configuration.dict(), default=custom_encoder))
 
-        dataset_configurations = serialized["dataset_configurations"] # Only provide dataset configurations
+        dataset_configurations = serialized["dataset_configurations"]  # Only provide dataset configurations
 
         for dataset in dataset_configurations.values():
             for key in PROPS_TO_REMOVE:
                 del dataset[key]
-            
+
         return dataset_configurations
 
 
@@ -818,7 +812,11 @@ def get_conversion_info(info: dict) -> dict:
 
         del ecephys_metadata["ElectrodeColumns"]
 
-    return converter, resolved_metadata, dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory)
+    return (
+        converter,
+        resolved_metadata,
+        dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory),
+    )
 
 
 def convert_to_nwb(info: dict) -> str:
@@ -827,7 +825,6 @@ def convert_to_nwb(info: dict) -> str:
     run_stub_test = info.get("stub_test", False)
     source_data = info.get("source_data", False)
     backend_configuration = info.get("configuration")
-
 
     converter, metadata, path_info = get_conversion_info(info)
 
@@ -840,7 +837,7 @@ def convert_to_nwb(info: dict) -> str:
     options = (
         {
             interface: (
-                { "stub_test": run_stub_test }  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                {"stub_test": run_stub_test}  # , "iter_opts": {"report_hook": update_conversion_progress}}
                 if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
                 else {}
             )

@@ -22,7 +22,7 @@ from manageNeuroconv import (
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
     get_interface_alignment,
-    get_backend_configuration
+    get_backend_configuration,
 )
 
 from errorHandlers import notBadRequestException

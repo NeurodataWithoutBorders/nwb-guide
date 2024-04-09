@@ -47,7 +47,7 @@ export const getSchema = (method='hdf5') => {
     copy.properties["compression_method"].enum = resolved[method] ?? sharedCompressionMethods
     return copy
 }
-    
+
 
 const setReady: any = {}
 
