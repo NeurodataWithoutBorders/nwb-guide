@@ -661,7 +661,7 @@ export class JSONSchemaInput extends LitElement {
                         : ""
                 }
                 </label>
-                <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
+                <main>${input}${this.controls && this.controls.length ? html`<div id="controls">${this.controls}</div>` : ""}</main>
                 ${
                     description
                         ? html`<p class="guided--text-input-instructions">
@@ -976,6 +976,7 @@ export class JSONSchemaInput extends LitElement {
                             };
                         }),
                         value: this.value,
+                        placeholder: schema.placeholder,
                         listMode: schema.strict === false ? "click" : "append",
                         showAllWhenEmpty: false,
                         onSelect: async ({ label, value }) => {
@@ -1124,6 +1125,7 @@ export class JSONSchemaInput extends LitElement {
             const search = new Search({
                 options,
                 strict: schema.strict,
+                placeholder: schema.placeholder,
                 value: {
                     value: this.value,
                     key: this.value,

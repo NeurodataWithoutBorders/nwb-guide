@@ -695,82 +695,115 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
     configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
 
 
-def get_backend_configuration(info: dict) -> dict:
 
-    import numpy as np
+def create_file(info: dict) -> dict:
+
     from neuroconv.tools.nwb_helpers import make_or_load_nwbfile, get_default_backend_configuration
 
+    run_stub_test = info.get("stub_test", False)
+    source_data = info.get("source_data", False)
     backend_configuration = info.get("configuration")
     backend = info.get("backend", "hdf5")
 
+    will_configure_backend = backend_configuration is not None and run_stub_test is False
+
     converter, metadata, path_info = get_conversion_info(info)
 
-    PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
-
     nwbfile_path = path_info["file"]
-    if nwbfile_path.exists():
-        if nwbfile_path.is_dir():
-            rmtree(nwbfile_path)
-        else:
-            nwbfile_path.unlink()
+
+    # # Delete test files
+    # if nwbfile_path.exists():
+    #     if nwbfile_path.is_dir():
+    #         rmtree(nwbfile_path)
+    #     else:
+    #         nwbfile_path.unlink()
 
 
+    # Assume all interfaces have the same conversion options for now
+    available_options = converter.get_conversion_options_schema()
+    options = (
+        {
+            interface: (
+                {"stub_test": run_stub_test}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
+                else {}
+            )
+            for interface in source_data
+        }
+        if run_stub_test
+        else None
+    )
+
+
+    # Create NWB file with appropriate backend configuration
     with make_or_load_nwbfile(
-        nwbfile_path=nwbfile_path,
-        metadata=metadata,
-        overwrite=True,
-        backend=backend,
-        verbose=True,
+        nwbfile_path=nwbfile_path, 
+        metadata=metadata, 
+        overwrite=info.get("overwrite", False), 
+        backend=backend
     ) as nwbfile:
-
-        converter.add_to_nwbfile(nwbfile, metadata=metadata)
+        
+        converter.add_to_nwbfile(nwbfile, metadata=metadata, conversion_options=options)
 
         configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
 
-        if backend_configuration:
+        if will_configure_backend:
             configure_dataset_backends(nwbfile, backend_configuration, configuration)
-
-        def custom_encoder(obj):
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            if isinstance(obj, np.dtype):
-                return str(obj)
-            raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
-
-        # neuroconv_api.logger.info(default_backend_configuration)
-
-        # Provide metadata on configuration dictionary
-        configuration_dict = configuration.dict()
-        for dataset in configuration_dict["dataset_configurations"].values():
-
-            metadata = dataset["_metadata"] = {}
-            metadata["source_size_in_gb"] = math.prod(dataset["full_shape"]) * dataset["dtype"].itemsize / 1e9
-            metadata["maximum_ram_usage_per_iteration_in_gb"] = (
-                math.prod(dataset["buffer_shape"]) * dataset["dtype"].itemsize / 1e9
-            )
-            metadata["disk_space_usage_per_chunk_in_mb"] = (
-                math.prod(dataset["chunk_shape"]) * dataset["dtype"].itemsize / 1e6
-            )
-
-        serialized = json.loads(json.dumps(configuration_dict, default=custom_encoder))
-
-        dataset_configurations = serialized["dataset_configurations"]  # Only provide dataset configurations
-
-        for dataset in dataset_configurations.values():
-            for key in PROPS_TO_REMOVE:
-                del dataset[key]
-
-        return dataset_configurations
+            
+        return configuration
 
 
-def get_conversion_info(info: dict) -> dict:
-    """Function used to organize the required information for conversion."""
+def get_backend_configuration(info: dict) -> dict:
+
+    import numpy as np
+
+    PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
+
+    info["overwrite"] = True # Always overwrite the file
+
+    from neuroconv.tools.nwb_helpers import make_nwbfile_from_metadata, get_default_backend_configuration
+
+    converter, metadata, __ = get_conversion_info(info)
+
+    nwbfile = make_nwbfile_from_metadata(metadata=metadata)
+    converter.add_to_nwbfile(nwbfile, metadata=metadata)
+    configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=info.get("backend", "hdf5"))
+
+    def custom_encoder(obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.dtype):
+            return str(obj)
+        raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+    # Provide metadata on configuration dictionary
+    configuration_dict = configuration.dict()
+    for dataset in configuration_dict["dataset_configurations"].values():
+
+        dataset["_itemsize"] = dataset["dtype"].itemsize
+
+    serialized = json.loads(json.dumps(configuration_dict, default=custom_encoder))
+
+    dataset_configurations = serialized["dataset_configurations"]  # Only provide dataset configurations
+
+    for dataset in dataset_configurations.values():
+        for key in PROPS_TO_REMOVE:
+            del dataset[key]
+
+    return dict(
+        results=dataset_configurations,
+        schema={} # configuration.schema(),
+    )
+
+
+def get_conversion_path_info(info: dict) -> dict:
+    """Function used to resolve the path details for the conversion."""
 
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
     run_stub_test = info.get("stub_test", False)
-
+                             
     default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
     default_output_directory = default_output_base / project_name
 
@@ -778,6 +811,18 @@ def get_conversion_info(info: dict) -> dict:
     resolved_output_base = Path(custom_output_directory) if custom_output_directory else default_output_base
     resolved_output_directory = resolved_output_base / project_name
     resolved_output_path = resolved_output_directory / nwbfile_path
+
+    return dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory)
+
+def get_conversion_info(info: dict) -> dict:
+    """Function used to organize the required information for conversion."""
+
+    nwbfile_path = Path(info["nwbfile_path"])
+
+    path_info = get_conversion_path_info(info)
+    resolved_output_path = path_info["file"]
+    resolved_output_directory = path_info["directory"]
+    default_output_directory = path_info["default"]
 
     # Remove symlink placed at the default_output_directory if this will hold real data
     if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
@@ -844,54 +889,19 @@ def get_conversion_info(info: dict) -> dict:
     return (
         converter,
         resolved_metadata,
-        dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory),
+        path_info,
     )
 
 
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
-    from neuroconv.tools.nwb_helpers import make_or_load_nwbfile
-
-    run_stub_test = info.get("stub_test", False)
-    source_data = info.get("source_data", False)
-    backend_configuration = info.get("configuration")
-    backend = info.get("backend", "hdf5")
-
-    converter, metadata, path_info = get_conversion_info(info)
-
+    path_info = get_conversion_path_info(info)
     output_path = path_info["file"]
     resolved_output_directory = path_info["directory"]
     default_output_directory = path_info["default"]
 
-    # Assume all interfaces have the same conversion options for now
-    available_options = converter.get_conversion_options_schema()
-    options = (
-        {
-            interface: (
-                {"stub_test": run_stub_test}  # , "iter_opts": {"report_hook": update_conversion_progress}}
-                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
-                else {}
-            )
-            for interface in source_data
-        }
-        if run_stub_test
-        else None
-    )
-
-    # Create NWB file with appropriate backend configuration
-    with make_or_load_nwbfile(
-        nwbfile_path=output_path, 
-        metadata=metadata, 
-        overwrite=info.get("overwrite", False), 
-        backend=backend
-    ) as nwbfile:
-        converter.add_to_nwbfile(nwbfile, metadata=metadata, conversion_options=options)
-        # for interface_or_subconverter_name, interface_or_subconverter in converter.data_interface_objects.items():
-        #     interface_or_subconverter.add_to_nwbfile(nwbfile=nwbfile, **options.get(interface_or_subconverter_name, dict()))
-
-        if backend_configuration:
-            configure_dataset_backends(nwbfile, backend_configuration, backend)
+    create_file(info)
 
     # # Actually run the conversion
     # converter.run_conversion(

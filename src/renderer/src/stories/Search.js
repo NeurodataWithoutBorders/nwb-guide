@@ -17,11 +17,13 @@ export class Search extends LitElement {
         headerStyles = {},
         disabledLabel,
         onSelect,
+        placeholder = "Type here to search",
         strict = false,
     } = {}) {
         super();
         this.#value = value;
         this.options = options;
+        this.placeholder = placeholder
         this.showAllWhenEmpty = showAllWhenEmpty;
         this.disabledLabel = disabledLabel;
         this.listMode = listMode;
@@ -224,6 +226,7 @@ export class Search extends LitElement {
 
     static get properties() {
         return {
+            placeholder: { type: String },
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
             listMode: { type: String, reflect: true },
@@ -487,7 +490,7 @@ export class Search extends LitElement {
     <div class="header" style=${styleMap({
         ...this.headerStyles,
     })}>
-      <input placeholder="Type here to search" value=${valueToDisplay} @click=${(clickEvent) => {
+      <input placeholder=${this.placeholder} value=${valueToDisplay} @click=${(clickEvent) => {
           clickEvent.stopPropagation();
           if (ALTERNATIVE_MODES.includes(this.listMode)) {
               const input = clickEvent.target.value;

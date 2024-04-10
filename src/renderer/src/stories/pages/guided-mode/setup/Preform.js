@@ -70,6 +70,7 @@ const questions = {
             zarr: "Zarr",
         },
         title: "What file backend would you like to use?",
+        description: "Choose the default file format for your data. You can override this for specific sessions.",
         default: "hdf5",
         dependencies: {
             backend_configuration: {},
@@ -101,8 +102,6 @@ const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
         else
             Object.entries(deps).forEach(([dep, opts]) => {
                 if (!acc[dep]) acc[dep] = [];
-                console.log('Saving dep', name, { name, ...opts })
-                acc[dep].push({ name, ...opts });
                 acc[dep].push({ name, default: info.default, ...opts }); // Inherit default value
             });
     }

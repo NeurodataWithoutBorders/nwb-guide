@@ -116,6 +116,7 @@ export class InstanceManager extends LitElement {
             .controls > div {
                 display: flex;
                 gap: 10px;
+                align-items: center;
             }
 
             #new-info {
@@ -357,6 +358,11 @@ export class InstanceManager extends LitElement {
                         });
                     }
 
+                    const controls = this.#controls()
+                    const controlDiv = this.shadowRoot.querySelector(".controls > div");
+                    controlDiv.innerHTML = "";
+                    controlDiv.append(...controls);
+
                     this.#onSelected();
                 };
 
@@ -369,6 +375,36 @@ export class InstanceManager extends LitElement {
     }
 
     #hasMultiple = () => this.#items.length > 1;
+
+    #controls = () => {
+
+        return this.controls.map((item) => {
+
+
+            if (item instanceof HTMLElement) return item; // Custom element
+            else if (typeof item === "function") return item(this.#selected); // Function
+
+            // Button configuration
+            const { name, icon, primary, onClick } = item;
+            return html`<nwb-button
+                size="small"
+                icon=${icon}
+                .primary=${primary ?? false}
+                @click=${function () {
+                    const activeContentElement = this.shadowRoot.querySelector(
+                        "#instance-display > div:not([hidden])"
+                    );
+                    onClick.call(
+                        this,
+                        activeContentElement.getAttribute("data-instance"),
+                        activeContentElement
+                    );
+                }}
+                >${name}</nwb-button
+            >`;
+        })
+
+    }
 
     render() {
         this.#info = {};
@@ -445,26 +481,7 @@ export class InstanceManager extends LitElement {
                 <div id="content">
                     <div class="controls">
                         <span id="selectedName"></span>
-                        <div>
-                            ${this.controls.map(({ name, icon, primary, onClick }) => {
-                                return html`<nwb-button
-                                    size="small"
-                                    icon=${icon}
-                                    .primary=${primary ?? false}
-                                    @click=${function () {
-                                        const activeContentElement = this.shadowRoot.querySelector(
-                                            "#instance-display > div:not([hidden])"
-                                        );
-                                        onClick.call(
-                                            this,
-                                            activeContentElement.getAttribute("data-instance"),
-                                            activeContentElement
-                                        );
-                                    }}
-                                    >${name}</nwb-button
-                                >`;
-                            })}
-                        </div>
+                        <div>${this.#controls()}</div>
                     </div>
 
                     <div id="instance-display">

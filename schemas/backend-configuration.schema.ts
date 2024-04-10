@@ -30,17 +30,13 @@ const schema = {
             type: 'object',
             properties: {}
         }
-    }
+    },
+    // additionalProperties: false,
 }
 
 const resolved = {}
 
-const sharedCompressionMethods = [
-    "gzip",
-    "Zstd",
-    "LZ4",
-    "Blosc"
-]
+const sharedCompressionMethods = [ "gzip" ]
 
 export const getSchema = (method='hdf5') => {
     const copy = structuredClone(schema)
