@@ -95,8 +95,8 @@ export const run = async (url, payload, options = {}) => {
 export const runConversion = async (info, options = {}) =>
     run(`convert`, info, {
         title: "Running the conversion",
-        onError: (results) => {
-            if (results.message.includes("already exists")) {
+        onError: (e) => {
+            if (e.message.includes("already exists")) {
                 return "File already exists. Please specify another location to store the conversion results";
             } else {
                 return "Conversion failed with current metadata. Please try again.";

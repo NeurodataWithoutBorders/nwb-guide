@@ -955,7 +955,7 @@ export class JSONSchemaInput extends LitElement {
 
                 const list = new List({
                     items: this.value,
-                    emptyMessage: "No items",
+                    emptyMessage: schema.empty ?? 'No items selected.',
                     unordered: false,
                     onChange: ({ items }) => {
                         this.#updateData(fullPath, items.length ? items.map((o) => postprocess(o.value)) : undefined);
@@ -964,6 +964,7 @@ export class JSONSchemaInput extends LitElement {
                 });
 
                 if (itemSchema.enum) {
+
                     const search = new Search({
                         options: itemSchema.enum.map((v) => {
                             return {
@@ -991,7 +992,7 @@ export class JSONSchemaInput extends LitElement {
                 } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
-                    input.placeholder = "Provide an item for the list";
+                    input.placeholder = schema.placeholder ?? "Provide an item for the list";
 
                     const submitButton = new Button({
                         label: "Submit",

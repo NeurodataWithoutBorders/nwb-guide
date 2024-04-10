@@ -3,6 +3,7 @@ import { baseUrl, onServerOpen } from "../src/renderer/src/server/globals"
 
 const schema = {
     type: "object",
+    order: ["filter_methods", "compression_method", "compression_options", "chunk_shape", "buffer_shape"],
     properties: {
         full_shape: {
             type: 'array',
@@ -24,11 +25,27 @@ const schema = {
         },
         compression_method: {
             type: 'string',
-            enum: ['gzip']
+            enum: ['gzip'],
+            strict: true
+        },
+        filter_methods: {
+            type: 'array',
+            placeholder: 'Select a method',
+            empty: 'No methods selected',
+            items: {
+                type: 'string'
+            }
         },
         compression_options: {
             type: 'object',
             properties: {}
+        },
+        filter_options: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {}
+            }
         }
     },
     // additionalProperties: false,

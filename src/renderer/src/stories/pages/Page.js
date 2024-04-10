@@ -195,11 +195,16 @@ export class Page extends LitElement {
 
             const sessionResults = globalState.results[subject][session];
 
+            const configurationCopy = { ...sessionResults.configuration ?? {} };
+
             const sourceDataCopy = structuredClone(sessionResults.source_data);
+
+            if (!configurationCopy.backend) configurationCopy.backend = this.workflow.backend_type.value;
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
                 ...sessionResults,
+                configuration: configurationCopy,
                 metadata: resolveMetadata(subject, session, globalState),
                 source_data: merge(SourceData, sourceDataCopy),
             };
@@ -209,7 +214,10 @@ export class Page extends LitElement {
             if (optsCopy.configuration === false) {
                 delete sessionInfo.configuration; // Skip backend configuration options if specified as such
                 delete optsCopy.backend;
+            } else {
+                if (!configurationCopy.backend) configurationCopy.backend = this.workflow.backend_type.value; // Provide default
             }
+            
             delete optsCopy.configuration;
 
             const result = await backendFunctionToRun(
@@ -226,7 +234,6 @@ export class Page extends LitElement {
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((error) => {
                 let message = error.message;
-                console.log(error);
 
                 if (message.includes("The user aborted a request.")) {
                     this.notify("Conversion was cancelled.", "warning");

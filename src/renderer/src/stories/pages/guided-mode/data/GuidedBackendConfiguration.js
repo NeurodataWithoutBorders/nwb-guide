@@ -13,7 +13,6 @@ import { until } from "lit/directives/until.js";
 import { resolve } from "../../../../promises";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { getSchema } from "../../../../../../../schemas/backend-configuration.schema";
-import { getInfoFromId } from "./utils.js";
 import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
@@ -24,6 +23,7 @@ const getBackendConfigurations = (info, options = {}) => run(`configuration`, in
 const itemIgnore = {
     full_shape: true,
     compression_options: true,
+    filter_options: true,
 };
 
 const backendMap = {
@@ -38,7 +38,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     }
 
     beforeSave = () => {
-        merge(this.localState.results, this.info.globalState.results);
+        merge(this.localState, this.info.globalState);
     };
 
     form;
@@ -48,15 +48,12 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         return found?.instance instanceof JSONSchemaForm ? found.instance : null;
     };
 
-    #subtitle = document.createElement("span");
-
-    header = {
-        subtitle: this.#subtitle,
-    };
+    header = {};
 
     workflow = {
+
+        // Ensure conversion is completed when skipped
         backend_configuration: {
-            // Ensure conversion is completed with skip
             skip: async () => {
                 await this.convert({
                     preview: true,
@@ -64,11 +61,13 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 });
             },
         },
+        
         backend_type: {},
     };
 
     footer = {
         onNext: async () => {
+            
             await this.save(); // Save in case the conversion fails
 
             for (let { instance } of this.instances) {
@@ -76,10 +75,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             }
 
             await this.convert(
-                {
-                    preview: true,
-                    backend: this.workflow.backend_type.value,
-                },
+                { preview: true },
                 { title: "Running preview conversion on all sessions" }
             ); // Validate by trying to set backend configuration with the latest values
 
@@ -122,8 +118,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     renderInstance = ({ session, subject, info }) => {
         const { results, schema } = info;
 
-        this.localState.results[subject][session].configuration = info;
-
         let instance;
         if (Object.keys(results).length === 0) {
             instance = document.createElement("span");
@@ -143,13 +137,24 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     const { schema, results, itemsize } = acc;
 
                     const props = schema.properties ?? (schema.properties = {});
+                    if (!schema.required) schema.required = [];
+                    schema.required.push(key)
 
                     // Set directly on last iteration
                     if (i === lenSplit - 1) {
                         const schema = (props[key] = { ...itemSchema });
 
-                        if (item.compression_options == null) item.compression_options = {}; // Set blank compression options to an empty object
+
+                        if (!item.compression_options) item.compression_options = {}; // Set blank compression options to an empty object
+                        if (!item.filter_methods) item.filter_methods = []
+                        if (!item.filter_options) item.filter_options = []; // Set blank compression options to an empty object
+
                         results[key] = item;
+
+                        const { chunk_shape, buffer_shape, full_shape } = item;
+
+                        const chunkSchema = schema.properties.chunk_shape;
+                        const bufferSchema = schema.properties.buffer_shape;
 
                         const { _itemsize = 0 } = item;
                         itemsize[key] = _itemsize;
@@ -157,12 +162,18 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                         const source_size_in_gb = (prod(item["full_shape"]) * _itemsize) / 1e9;
 
                         schema.description = `Full Shape: ${item["full_shape"]} | Source size: ${source_size_in_gb.toFixed(2)} GB`; // This is static
-                        schema.properties.buffer_shape.description = this.#bufferShapeDescription(
-                            item["buffer_shape"],
+                        
+                        // bufferSchema.items.max = chunk_shape // Only in increments of the chunk_shape
+                        bufferSchema.maxItems = bufferSchema.minItems = buffer_shape.length;
+                        bufferSchema.description = this.#bufferShapeDescription(
+                            buffer_shape,
                             _itemsize
                         );
-                        schema.properties.chunk_shape.description = this.#chunkShapeDescription(
-                            item["chunk_shape"],
+
+                        chunkSchema.maxItems = chunkSchema.minItems = chunk_shape.length;
+                        // chunkSchema.items.max = full_shape // 1 - full_shape size
+                        chunkSchema.description = this.#chunkShapeDescription(
+                            chunk_shape,
                             _itemsize
                         );
 
@@ -213,100 +224,152 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         return { session, subject, instance };
     };
 
-    getBackendConfiguration = (config = true, opts = {}) => {
-        if (!opts.title && config === true) opts.title = "Getting backend options for all sessions";
+    getMissingBackendConfigurations = () => {
+
+        const toRun = this.mapSessions(
+            ({ session, subject }) => {
+                const sesResult = this.info.globalState.results[subject][session].configuration;
+                if (!sesResult) return { subject, session, skip: false };
+                
+                const backend = sesResult.backend ?? this.workflow.backend_type.value;
+
+                return {
+                    subject,
+                    session,
+                    skip: !!sesResult.results[backend],
+                }
+            }
+        ).filter(({ skip }) => !skip);
 
         return this.runConversions(
+            {},
+            toRun, // All or specific session
             {
-                backend: this.workflow.backend_type.value,
+                title: "Getting backend options"
             },
-            config, // All or specific session
-            opts,
             getBackendConfigurations
         );
     };
 
-    #needsUpdate = {};
+    #getManager = () => {
 
-    render() {
-        const backend = this.workflow.backend_type.value;
-        this.#subtitle.innerText = `Configured for ${backendMap[backend]}`;
+        const instances = {};
 
-        this.#needsUpdate = {};
-        this.#updateRendered(true);
-
-        this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
-
-        const renderInstances = (toIterate) => {
-            const instances = {};
-            this.instances = toIterate
-                ? this.mapSessions(this.renderInstance, toIterate)
-                : this.mapSessions(
-                      ({ subject, session, info }) => this.renderInstance({ subject, session, info: info }),
-                      toIterate
-                  );
-
-            this.instances.forEach(({ subject, session, instance }) => {
-                if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
-                instances[`sub-${subject}`][`ses-${session}`] = instance;
-            });
-
-            this.manager = new InstanceManager({
-                header: "Sessions",
-                instanceType: "Session",
-                instances,
-                controls: [
-                    (id) => {
-                        const instance = id.split("/").reduce((acc, key) => acc[key], instances);
-                        console.log(instance);
-                        return new JSONSchemaInput({
-                            path: [],
-                            schema: {
-                                type: "string",
-                                placeholder: "Select backend type",
-                                enum: Object.keys(backendMap),
-                                enumLabels: backendMap,
-                            },
-                            value: backend,
-                        });
-                    },
-                ],
-            });
-
-            console.log(this.manager);
-            return this.manager;
-        };
-
-        const hasAll = this.mapSessions(
-            ({ session, subject }) => !!this.info.globalState.results[subject][session].configuration
+        this.instances = this.mapSessions(
+            ({ subject, session, info }) => {
+                  const backend = info.configuration.backend ?? this.workflow.backend_type.value // Use the default backend if none is set
+                  return this.renderInstance({ subject, session, info: {
+                      backend,
+                      results: info.configuration.results[backend],
+                      schema: this.info.globalState.schema.configuration[subject][session][backend], // Get the schema for the current session
+                  }})
+              },
         );
 
-        const sameBackend = this.info.globalState.project.backend === backend;
-
-        if (hasAll.every((v) => v === true) && sameBackend) return renderInstances();
-
-        const promise = this.getBackendConfiguration()
-            .then((configurationInfo) => {
-                this.info.globalState.project.backend = backend; // Track current backend type
-                return renderInstances(configurationInfo);
-            })
-            .catch(
-                (error) => html`
-                    <h4>Configuration failed for ${backendMap[backend]} file backend</h4>
-                    ${new InspectorListItem({
-                        message: error.message.split(":")[1].slice(1),
-                        type: "error",
-                    })}
-                    <p>You may want to change to another filetype.</p>
-                `
-            );
-
-        const untilResult = until(promise, html`Loading form contents...`);
-
-        promise.then(() => {
-            this.#toggleRendered();
+        this.instances.forEach(({ subject, session, instance }) => {
+            if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
+            instances[`sub-${subject}`][`ses-${session}`] = instance;
         });
 
+        const ogManager = this.manager;
+
+        this.manager = new InstanceManager({
+            header: "Sessions",
+            instanceType: "Session",
+            instances,
+            controls: [
+                (id) => {
+
+                    const instanceInfo = id.split("/").reduce((acc, key) => acc[key.split('-').slice(1).join('-')], this.localState.results);
+                    const backend = instanceInfo.configuration.backend ?? this.workflow.backend_type.value;
+
+
+                    return new JSONSchemaInput({
+                        path: [],
+                        schema: {
+                            type: "string",
+                            placeholder: "Select backend type",
+                            enum: Object.keys(backendMap),
+                            enumLabels: backendMap
+                        },
+                        value: backend,
+                        onUpdate: async (value) => {
+                            if (instanceInfo.configuration.backend === value) return;
+                            instanceInfo.configuration.backend = value; // Ensure new backend choice is persistent
+                            await this.save();
+                            await this.#update()
+                        }
+                    });
+                },
+            ],
+        });
+
+        if (ogManager) ogManager.replaceWith(this.manager);
+
+        return this.manager;
+    };
+
+    #update = () => {
+
+        return this.getMissingBackendConfigurations()
+            .then((update) => {
+
+                if (Object.keys(update)) {
+                    this.mapSessions(({ subject, session, info }) => {
+
+                        const { results, schema, backend } = info;
+
+                        const sesResults = this.localState.results[subject][session]
+                        if (!sesResults.configuration) sesResults.configuration = { results: {} };
+
+                        sesResults.configuration.results[backend] = results // Set the configuration options for the current session
+
+                        // Set the schema for the current session
+                        const path = [ subject, session, backend ];
+                        path.reduce((acc, key, i) => {
+                            if (i === path.length - 1) acc[key] = schema
+                            if (!acc[key]) acc[key] = {};
+                            return acc[key];
+                        }, this.localState.schema.configuration);
+                        
+                    }, update)
+                
+
+                    this.save(); // Save data as soon as it arrives from the server
+
+                }
+
+                return this.#getManager();
+
+            })
+
+            .catch(
+                (error) => new InspectorListItem({
+                    message: error.message.split(":")[1].slice(1),
+                    type: "error",
+                })
+            );
+    }
+
+    render() {
+
+        delete this.manager // Delete any existing manager
+
+        this.#updateRendered(true);
+
+
+        const globalSchemas = this.info.globalState.schema
+        if (!globalSchemas.configuration) globalSchemas.configuration = {};
+
+        this.localState = { 
+            results: structuredClone(this.info.globalState.results), 
+            schema: { configuration: structuredClone(globalSchemas.configuration) }, 
+        };
+
+        const promise = this.#update();
+
+        const untilResult = until(promise, html`Loading form contents...`);
+        promise.then(() => this.#toggleRendered());
         return untilResult;
     }
 }
