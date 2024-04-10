@@ -23,7 +23,7 @@ export class Search extends LitElement {
         super();
         this.#value = value;
         this.options = options;
-        this.placeholder = placeholder
+        this.placeholder = placeholder;
         this.showAllWhenEmpty = showAllWhenEmpty;
         this.disabledLabel = disabledLabel;
         this.listMode = listMode;

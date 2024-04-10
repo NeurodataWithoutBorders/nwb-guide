@@ -358,7 +358,7 @@ export class InstanceManager extends LitElement {
                         });
                     }
 
-                    const controls = this.#controls()
+                    const controls = this.#controls();
                     const controlDiv = this.shadowRoot.querySelector(".controls > div");
                     controlDiv.innerHTML = "";
                     controlDiv.append(...controls);
@@ -377,11 +377,9 @@ export class InstanceManager extends LitElement {
     #hasMultiple = () => this.#items.length > 1;
 
     #controls = () => {
-
         return this.controls.map((item) => {
-
-
-            if (item instanceof HTMLElement) return item; // Custom element
+            if (item instanceof HTMLElement)
+                return item; // Custom element
             else if (typeof item === "function") return item(this.#selected); // Function
 
             // Button configuration
@@ -391,20 +389,13 @@ export class InstanceManager extends LitElement {
                 icon=${icon}
                 .primary=${primary ?? false}
                 @click=${function () {
-                    const activeContentElement = this.shadowRoot.querySelector(
-                        "#instance-display > div:not([hidden])"
-                    );
-                    onClick.call(
-                        this,
-                        activeContentElement.getAttribute("data-instance"),
-                        activeContentElement
-                    );
+                    const activeContentElement = this.shadowRoot.querySelector("#instance-display > div:not([hidden])");
+                    onClick.call(this, activeContentElement.getAttribute("data-instance"), activeContentElement);
                 }}
                 >${name}</nwb-button
             >`;
-        })
-
-    }
+        });
+    };
 
     render() {
         this.#info = {};

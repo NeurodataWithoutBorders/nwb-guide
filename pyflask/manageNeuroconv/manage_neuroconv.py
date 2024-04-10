@@ -695,7 +695,6 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
     configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
 
 
-
 def create_file(info: dict) -> dict:
 
     from neuroconv.tools.nwb_helpers import make_or_load_nwbfile, get_default_backend_configuration
@@ -718,7 +717,6 @@ def create_file(info: dict) -> dict:
     #     else:
     #         nwbfile_path.unlink()
 
-
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
@@ -734,22 +732,18 @@ def create_file(info: dict) -> dict:
         else None
     )
 
-
     # Create NWB file with appropriate backend configuration
     with make_or_load_nwbfile(
-        nwbfile_path=nwbfile_path, 
-        metadata=metadata, 
-        overwrite=info.get("overwrite", False), 
-        backend=backend
+        nwbfile_path=nwbfile_path, metadata=metadata, overwrite=info.get("overwrite", False), backend=backend
     ) as nwbfile:
-        
+
         converter.add_to_nwbfile(nwbfile, metadata=metadata, conversion_options=options)
 
         configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
 
         if will_configure_backend:
             configure_dataset_backends(nwbfile, backend_configuration, configuration)
-            
+
         return configuration
 
 
@@ -759,7 +753,7 @@ def get_backend_configuration(info: dict) -> dict:
 
     PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
 
-    info["overwrite"] = True # Always overwrite the file
+    info["overwrite"] = True  # Always overwrite the file
 
     from neuroconv.tools.nwb_helpers import make_nwbfile_from_metadata, get_default_backend_configuration
 
@@ -790,10 +784,7 @@ def get_backend_configuration(info: dict) -> dict:
         for key in PROPS_TO_REMOVE:
             del dataset[key]
 
-    return dict(
-        results=dataset_configurations,
-        schema={} # configuration.schema(),
-    )
+    return dict(results=dataset_configurations, schema={})  # configuration.schema(),
 
 
 def get_conversion_path_info(info: dict) -> dict:
@@ -803,7 +794,7 @@ def get_conversion_path_info(info: dict) -> dict:
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
     run_stub_test = info.get("stub_test", False)
-                             
+
     default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
     default_output_directory = default_output_base / project_name
 
@@ -813,6 +804,7 @@ def get_conversion_path_info(info: dict) -> dict:
     resolved_output_path = resolved_output_directory / nwbfile_path
 
     return dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory)
+
 
 def get_conversion_info(info: dict) -> dict:
     """Function used to organize the required information for conversion."""

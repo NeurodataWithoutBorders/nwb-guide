@@ -75,10 +75,13 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 if (instance instanceof JSONSchemaForm) await instance.validate(); // Will throw an error in the callback
             }
 
-            await this.convert({ 
-                preview: true,
-                backend: this.workflow.backend_type.value
-            }, { title: "Running preview conversion on all sessions" }); // Validate by trying to set backend configuration with the latest values
+            await this.convert(
+                {
+                    preview: true,
+                    backend: this.workflow.backend_type.value,
+                },
+                { title: "Running preview conversion on all sessions" }
+            ); // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },
@@ -101,23 +104,24 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         await this.rendered;
     }
 
-    #bufferShapeDescription = (value, itemsize) => `Expected RAM usage: ${(prod(value) * (itemsize / 1e9)).toFixed(2)} GB`
-    #chunkShapeDescription = (value, itemsize) => `Disk space usage per chunk: ${(prod(value) * (itemsize / 1e6)).toFixed(2)} MB`
+    #bufferShapeDescription = (value, itemsize) =>
+        `Expected RAM usage: ${(prod(value) * (itemsize / 1e9)).toFixed(2)} GB`;
+    #chunkShapeDescription = (value, itemsize) =>
+        `Disk space usage per chunk: ${(prod(value) * (itemsize / 1e6)).toFixed(2)} MB`;
 
-    #itemsize = {}
-    #getItemSize = (path) => get(path.slice(0, -1), this.#itemsize)
+    #itemsize = {};
+    #getItemSize = (path) => get(path.slice(0, -1), this.#itemsize);
 
     #getDescription = (path, value) => {
         const name = path.slice(-1)[0];
-        if (name === 'buffer_shape') return this.#bufferShapeDescription(value, this.#getItemSize(path))
-        if (name === 'chunk_shape') return this.#chunkShapeDescription(value, this.#getItemSize(path))
-        return
-    }
+        if (name === "buffer_shape") return this.#bufferShapeDescription(value, this.#getItemSize(path));
+        if (name === "chunk_shape") return this.#chunkShapeDescription(value, this.#getItemSize(path));
+        return;
+    };
 
     renderInstance = ({ session, subject, info }) => {
+        const { results, schema } = info;
 
-        const { results, schema } = info
-        
         this.localState.results[subject][session].configuration = info;
 
         let instance;
@@ -150,11 +154,17 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                         const { _itemsize = 0 } = item;
                         itemsize[key] = _itemsize;
 
-                        const source_size_in_gb = prod(item["full_shape"]) * _itemsize / 1e9;
+                        const source_size_in_gb = (prod(item["full_shape"]) * _itemsize) / 1e9;
 
                         schema.description = `Full Shape: ${item["full_shape"]} | Source size: ${source_size_in_gb.toFixed(2)} GB`; // This is static
-                        schema.properties.buffer_shape.description = this.#bufferShapeDescription(item["buffer_shape"], _itemsize)
-                        schema.properties.chunk_shape.description = this.#chunkShapeDescription(item["chunk_shape"], _itemsize)
+                        schema.properties.buffer_shape.description = this.#bufferShapeDescription(
+                            item["buffer_shape"],
+                            _itemsize
+                        );
+                        schema.properties.chunk_shape.description = this.#chunkShapeDescription(
+                            item["chunk_shape"],
+                            _itemsize
+                        );
 
                         delete item._itemsize; // Remove itemsize from the results
 
@@ -166,7 +176,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                         const thisSchema = props[key] ?? (props[key] = {});
                         if (!results[key]) results[key] = {};
                         if (!itemsize[key]) itemsize[key] = {};
-                        return { schema: thisSchema, results: results[key], itemsize: itemsize[key]};
+                        return { schema: thisSchema, results: results[key], itemsize: itemsize[key] };
                     }
                 }, resolved);
 
@@ -186,13 +196,13 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     "*": itemIgnore,
                 },
                 onUpdate: (updatedPath, value) => {
-                    const updatedDescription = this.#getDescription(updatedPath, value)
+                    const updatedDescription = this.#getDescription(updatedPath, value);
                     this.unsavedUpdates = true;
-                    console.log(updatedDescription)
+                    console.log(updatedDescription);
                     if (updatedDescription) {
                         const input = instance.getFormElement(updatedPath);
-                        input.description = 'AHH' // updatedDescription;
-                        console.warn('UPDATED')
+                        input.description = "AHH"; // updatedDescription;
+                        console.warn("UPDATED");
                     }
                 },
                 onThrow,
@@ -232,8 +242,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             this.instances = toIterate
                 ? this.mapSessions(this.renderInstance, toIterate)
                 : this.mapSessions(
-                      ({ subject, session, info }) =>
-                          this.renderInstance({ subject, session, info: info }),
+                      ({ subject, session, info }) => this.renderInstance({ subject, session, info: info }),
                       toIterate
                   );
 
@@ -247,9 +256,9 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 instanceType: "Session",
                 instances,
                 controls: [
-                    ( id ) => {
-                        const instance = id.split('/').reduce((acc, key) => acc[key], instances);
-                        console.log(instance)
+                    (id) => {
+                        const instance = id.split("/").reduce((acc, key) => acc[key], instances);
+                        console.log(instance);
                         return new JSONSchemaInput({
                             path: [],
                             schema: {
@@ -259,13 +268,12 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                                 enumLabels: backendMap,
                             },
                             value: backend,
-                        })
-                    }
+                        });
+                    },
                 ],
             });
 
-
-            console.log(this.manager )
+            console.log(this.manager);
             return this.manager;
         };
 
@@ -280,7 +288,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         const promise = this.getBackendConfiguration()
             .then((configurationInfo) => {
                 this.info.globalState.project.backend = backend; // Track current backend type
-                return renderInstances(configurationInfo)
+                return renderInstances(configurationInfo);
             })
             .catch(
                 (error) => html`
