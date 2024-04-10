@@ -77,7 +77,7 @@ export class InspectorListItem extends LitElement {
                 overflow: hidden;
                 text-wrap: wrap;
                 padding: 10px;
-                font-size: 12px;
+                font-size: 12.5px;
             }
 
             :host(:not(:last-child)) {
