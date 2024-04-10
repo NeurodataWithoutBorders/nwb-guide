@@ -160,7 +160,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
             ecephys.properties["Units"].title = "Summarized Units"
 
-            
+
             updateEcephysTable("Units", copy, {
                 properties: {
                     clu_id: {

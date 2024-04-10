@@ -331,7 +331,6 @@ export class GuidedPathExpansionPage extends Page {
 
         const globalBaseDirectory = this.workflow.base_directory.value;
 
-
         const finalStructure = {};
         for (let key in structure) {
             const entry = { ...structure[key] };
@@ -341,11 +340,10 @@ export class GuidedPathExpansionPage extends Page {
             else entry.folder_path = fstring;
             delete entry.format_string_path;
 
-            if (!entry.base_directory && globalBaseDirectory) entry.base_directory = globalBaseDirectory
+            if (!entry.base_directory && globalBaseDirectory) entry.base_directory = globalBaseDirectory;
 
             finalStructure[key] = entry;
         }
-
 
         if (Object.keys(finalStructure).length === 0) {
             const message =
