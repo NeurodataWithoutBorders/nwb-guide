@@ -208,7 +208,7 @@ export class Page extends LitElement {
 
             if (optsCopy.configuration === false) {
                 delete sessionInfo.configuration; // Skip backend configuration options if specified as such
-                delete optsCopy.backend
+                delete optsCopy.backend;
             }
             delete optsCopy.configuration;
 
@@ -226,7 +226,7 @@ export class Page extends LitElement {
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((error) => {
                 let message = error.message;
-                console.log(error)
+                console.log(error);
 
                 if (message.includes("The user aborted a request.")) {
                     this.notify("Conversion was cancelled.", "warning");

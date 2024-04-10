@@ -247,21 +247,22 @@ export class Dashboard extends LitElement {
                 ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
                 : projectName;
 
-
             const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
             // Skip rendering page if configured as such
             if (skipped) {
                 if (isStorybook) return; // Do not skip on storybook
-    
-                return Promise.all(Object.entries(page.workflow).map(async ([_, state]) => {
-                    if (typeof state.skip === "function") return await state.skip(); // Run skip functions
-                })).then(() => {
+
+                return Promise.all(
+                    Object.entries(page.workflow).map(async ([_, state]) => {
+                        if (typeof state.skip === "function") return await state.skip(); // Run skip functions
+                    })
+                ).then(() => {
                     if (previous && previous.info.previous === this.page) this.main.onTransition(-1);
                     else this.main.onTransition(1);
                 });
             }
-    
+
             // Update main to render page
             this.updateSections({ sidebar: false, main: true });
 
