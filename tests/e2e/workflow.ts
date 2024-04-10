@@ -4,20 +4,89 @@ import { sleep } from '../puppeteer'
 
 import { join } from 'node:path'
 import { evaluate, takeScreenshot, toNextPage } from "./utils"
-import { dandiInfo, subjectInfo, testDatasetPath, testInterfaceInfo } from "./config"
+import { dandiInfo, publish, subjectInfo, testDatasetPath, testInterfaceInfo } from "./config"
+
+export const uploadToDandi = (subdirectory, forceSkip = false) => {
 
 
-export default async function runWorkflow (name, workflow, identifier) {
+  const uploadDescribe = !publish || forceSkip ? describe.skip : describe
+
+  uploadDescribe('Upload to DANDI', () => {
+
+    test('Upload pipeline output to DANDI', async () => {
+
+      await evaluate(async () => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        await page.rendered
+        page.click() // Ensure page is clicked (otherwise, Electron crashes after DANDI upload after this...)
+      })
+
+      await takeScreenshot(join(subdirectory, 'api-tokens'), 100)
+
+      await evaluate(async (dandiAPIToken) => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        const modal = page.globalModal
+        const stagingKeyInput = modal.form.getFormElement(['staging_api_key'])
+        stagingKeyInput.updateData(dandiAPIToken)
+      }, dandiInfo.token)
+
+      await takeScreenshot(join(subdirectory, 'api-token-added'), 100)
+
+
+      // Open dandiset creation modal
+      await evaluate(() => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const form = dashboard.page.form
+        const dandisetInput = form.getFormElement(['dandiset'])
+        const createDandiset = dandisetInput.controls[0]
+        createDandiset.onClick()
+      })
+
+      await takeScreenshot(join(subdirectory, 'create-dandiset'), 100)
+
+      // Close modal
+      await evaluate(() => {
+        const modal = document.querySelector('nwb-modal') as any
+        modal.toggle(false)
+      })
+
+      await evaluate(async (dandisetId) => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        const modal = page.globalModal
+        await modal.footer.onClick() // Validate and submit value
+        const idInput = page.form.getFormElement(["dandiset"])
+        idInput.updateData(dandisetId)
+      }, dandiInfo.id)
+
+      await takeScreenshot(join(subdirectory, 'dandiset-id'), 1000)
+
+      await sleep(500) // Wait for input status to update
+
+      await toNextPage('review')
+
+    }, 5 * 60 * 1000) // Wait for upload to finish (~2min on M2). Ensure 5min of possible wait
+
+
+    test('Review upload results', async () => {
+
+      await takeScreenshot(join(subdirectory, 'review-page'), 1000)
+      await toNextPage()
+
+    })
+  })
+
+}
+
+
+export default async function runWorkflow(name, workflow, identifier) {
 
   const willLocateData = workflow.multiple_sessions && workflow.locate_data
   const willProvideSubjectInfo = workflow.multiple_sessions
 
   test('Create new pipeline by specifying a name', async () => {
-
-    // Advance to instructions page
-    await toNextPage('start')
-
-    await takeScreenshot(join(identifier, 'intro-page'), 500)
 
     // Advance to general information page
     await toNextPage('details')
@@ -48,12 +117,12 @@ export default async function runWorkflow (name, workflow, identifier) {
 
   test('View the pre-form workflow page', async () => {
 
-    await evaluate(( workflow ) => {
+    await evaluate((workflow) => {
       const dashboard = document.querySelector('nwb-dashboard')
       const page = dashboard.page
 
       for (let key in workflow) {
-        const input = page.form.getFormElement([ key ])
+        const input = page.form.getFormElement([key])
         input.updateData(workflow[key])
       }
 
@@ -135,8 +204,6 @@ export default async function runWorkflow (name, workflow, identifier) {
         baseInput.updateData(basePath)
       })
 
-      dashboard.main.querySelector('main > section').scrollTop = 200 // Scroll down to see all interfaces
-
     },
       testInterfaceInfo,
       testDatasetPath
@@ -144,17 +211,20 @@ export default async function runWorkflow (name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'pathexpansion-basepath'), 300)
 
-    const name = Object.keys(testInterfaceInfo.common)[0]
-    const interfaceId = testInterfaceInfo.common[name].id
-    const autocompleteInfo = testInterfaceInfo.multi[name].autocomplete
 
-    await evaluate(id => {
+    const interfaceId = await evaluate(() => {
       const dashboard = document.querySelector('nwb-dashboard')
       const form = dashboard.page.form
+      const id = Object.keys(form.accordions)[0]
       const formatInput = form.getFormElement([id, 'format_string_path'])
       const autocompleteButton = formatInput.controls[0]
       autocompleteButton.onClick()
-    }, interfaceId)
+      return id
+    })
+
+    // Use autocomplete on first interface
+    const name = Object.entries(testInterfaceInfo.common).find(([name, info]) => info.id === interfaceId)![0]
+    const autocompleteInfo = testInterfaceInfo.multi[name].autocomplete
 
     await takeScreenshot(join(identifier, 'pathexpansion-autocomplete-open'), 300)
 
@@ -184,15 +254,15 @@ export default async function runWorkflow (name, workflow, identifier) {
       const dashboard = document.querySelector('nwb-dashboard')
       const form = dashboard.page.form
 
+      const accordionKeys = Object.keys(form.accordions)
+
       // Fill out the path expansion information for non-autocompleted interfaces
-      Object.entries(common).slice(1).forEach(([ name, info ]) => {
-        const id = info.id
+      accordionKeys.slice(1).forEach(id => {
+        const name = Object.entries(common).find(([_, info]) => info.id === id)![0]
         const { format } = multi[name]
         const formatInput = form.getFormElement([id, 'format_string_path'])
         formatInput.updateData(format)
       })
-
-      dashboard.main.querySelector('main > section').scrollTop = 200
 
     }, testInterfaceInfo)
 
@@ -227,7 +297,7 @@ export default async function runWorkflow (name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'subject-error'), 500)
 
-    await evaluate(( { common, multiple } ) => {
+    await evaluate(({ common, multiple }) => {
       const dashboard = document.querySelector('nwb-dashboard')
 
       const page = dashboard.page
@@ -239,7 +309,7 @@ export default async function runWorkflow (name, workflow, identifier) {
 
 
       for (let name in data) {
-        const subjectInfo = { ...common, ...( multiple[name] ?? {} )}
+        const subjectInfo = { ...common, ...(multiple[name] ?? {}) }
         data[name] = { ...data[name], ...subjectInfo }
       }
 
@@ -377,56 +447,6 @@ export default async function runWorkflow (name, workflow, identifier) {
     else await toNextPage('')
   })
 
-  const uploadDescribe = workflow.upload_to_dandi ? describe : describe.skip
 
-  uploadDescribe('Upload to DANDI', () => {
-
-    test('Upload pipeline output to DANDI', async () => {
-
-      await takeScreenshot(join('dandi', 'upload-page'), 100)
-
-      await evaluate(async () => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        const page = dashboard.page
-        await page.rendered
-        page.click() // Ensure page is clicked (otherwise, Electron crashes after DANDI upload after this...)
-      })
-
-      await takeScreenshot(join('dandi', 'upload-page-api-tokens'), 100)
-
-      await evaluate(async (dandiAPIToken) => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        const page = dashboard.page
-        const modal = page.globalModal
-        const stagingKeyInput = modal.form.getFormElement(['staging_api_key'])
-        stagingKeyInput.updateData(dandiAPIToken)
-      }, dandiInfo.token)
-
-      await takeScreenshot(join('dandi', 'upload-page-api-token-added'), 100)
-
-      await evaluate(async (dandisetId) => {
-        const dashboard = document.querySelector('nwb-dashboard')
-        const page = dashboard.page
-        const modal = page.globalModal
-        await modal.footer.onClick() // Validate and submit value
-        const idInput = page.form.getFormElement(["dandiset"])
-        idInput.updateData(dandisetId)
-      }, dandiInfo.id)
-
-      await takeScreenshot(join('dandi', 'upload-page-with-id'), 100)
-
-      await sleep(500) // Wait for input status to update
-
-      await toNextPage('review')
-
-    }) // Wait for upload to finish (~2min on M2)
-
-
-    test('Review upload results', async () => {
-
-      await takeScreenshot(join('dandi', 'review-page'), 1000)
-      await toNextPage()
-
-    })
-  })
+  uploadToDandi(identifier, !workflow.upload_to_dandi)
 }

@@ -37,7 +37,7 @@ RECORDING_INTERFACE_PROPERTY_OVERRIDES = {
     }
 }
 
-EXTRA_SORTING_INTERFACE_PROPERTIES = ["unit_name", *EXTRA_INTERFACE_PROPERTIES.keys()]
+EXTRA_SORTING_INTERFACE_PROPERTIES = ["unit_id", *EXTRA_INTERFACE_PROPERTIES.keys()]
 
 SORTING_INTERFACE_PROPERTIES_TO_RECAST = {
     "quality": {
@@ -52,13 +52,19 @@ SORTING_INTERFACE_PROPERTIES_TO_RECAST = {
 }
 
 SORTING_INTERFACE_PROPERTY_OVERRIDES = {
-    "unit_name": {"description": "The unique name for the unit", "data_type": "str"},
+    "unit_id": {"description": "The unique ID for this unit", "data_type": "str"},
     "brain_area": {
         "description": "The brain area where the unit is located.",
         **EXTRA_INTERFACE_PROPERTIES["brain_area"],
     },
     **SORTING_INTERFACE_PROPERTIES_TO_RECAST,
 }
+
+# NOTE: No need to show this if it isn't editable
+del SORTING_INTERFACE_PROPERTY_OVERRIDES["brain_area"]
+brain_area_idx = EXTRA_SORTING_INTERFACE_PROPERTIES.index("brain_area")
+EXTRA_SORTING_INTERFACE_PROPERTIES.pop(brain_area_idx)
+
 
 EXCLUDED_SORTING_INTERFACE_PROPERTIES = ["location", "spike_times", "electrodes"]  # Not validated
 
@@ -721,19 +727,22 @@ def convert_to_nwb(info: dict) -> str:
         has_units = "Units" in ecephys_metadata
 
         if has_units:
-            shared_units_columns = ecephys_metadata["UnitColumns"]
-            for interface_name, interface_unit_results in ecephys_metadata["Units"].items():
-                interface = converter.data_interface_objects[interface_name]
 
-                update_sorting_properties_from_table_as_json(
-                    interface,
-                    unit_table_json=interface_unit_results,
-                    unit_column_info=shared_units_columns,
-                )
+            ## NOTE: Currently do not allow editing units properties
+            # shared_units_columns = ecephys_metadata["UnitColumns"]
+            # for interface_name, interface_unit_results in ecephys_metadata["Units"].items():
+            #     interface = converter.data_interface_objects[interface_name]
 
-            ecephys_metadata["UnitProperties"] = [
-                {"name": entry["name"], "description": entry["description"]} for entry in shared_units_columns
-            ]
+            #     update_sorting_properties_from_table_as_json(
+            #         interface,
+            #         unit_table_json=interface_unit_results,
+            #         unit_column_info=shared_units_columns,
+            #     )
+
+            # ecephys_metadata["UnitProperties"] = [
+            #     {"name": entry["name"], "description": entry["description"]} for entry in shared_units_columns
+            # ]
+
             del ecephys_metadata["Units"]
             del ecephys_metadata["UnitColumns"]
 
@@ -1232,9 +1241,12 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
 
         for property_name in properties:
 
-            # Separate this so that unit_id and unit_name exist (LOOK FURTHER)
-            if property_name == "unit_name":
-                sorting_property_value = str(unit_id)  # Insert unit_id as name (str)
+            if property_name == "unit_id":
+                sorting_property_value = str(unit_id)  # Insert unit_id to view
+
+            # elif property_name == "unit_name":
+            #     sorting_property_value = str(unit_id) # By default, unit_name is unit_id (str)
+
             elif property_name in SORTING_INTERFACE_PROPERTY_OVERRIDES:
                 try:
                     sorting_property_value = SORTING_INTERFACE_PROPERTY_OVERRIDES[property_name][
@@ -1417,11 +1429,11 @@ def update_sorting_properties_from_table_as_json(
     for entry_index, entry in enumerate(unit_table_json):
         unit_properties = dict(entry)  # copy
 
-        unit_id = unit_properties.pop("unit_name", None)  # NOTE: Is called unit_name in the actual units table
+        unit_id = unit_properties.pop("unit_id", None)  # NOTE: Is called unit_name in the actual units table
 
         for property_name, property_value in unit_properties.items():
 
-            if property_name == "unit_name":
+            if property_name == "unit_id":
                 continue  # Already controlling unit_id with the above variable
 
             dtype = unit_column_data_types[property_name]
@@ -1433,4 +1445,5 @@ def update_sorting_properties_from_table_as_json(
                 key=property_name,
                 values=np.array([property_value], dtype=dtype),
                 ids=[int(unit_id)],
+                # ids=[unit_id]
             )

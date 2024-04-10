@@ -265,6 +265,7 @@ export class GuidedPathExpansionPage extends Page {
     workflow = {
         subject_id: {},
         session_id: {},
+        base_directory: {},
         locate_data: {
             skip: () => {
                 this.#initialize();
@@ -432,8 +433,14 @@ export class GuidedPathExpansionPage extends Page {
         // Require properties for all sources
         const generatedSchema = { type: "object", properties: {}, additionalProperties: false };
         const controls = {};
+
+        const baseDirectory = this.workflow.base_directory.value;
+        const globals = (structureState.globals = {});
+
         for (let key in this.info.globalState.interfaces) {
             generatedSchema.properties[key] = { type: "object", ...pathExpansionSchema };
+
+            if (baseDirectory) globals[key] = { base_directory: baseDirectory };
 
             controls[key] = {
                 format_string_path: [
@@ -449,8 +456,6 @@ export class GuidedPathExpansionPage extends Page {
             };
         }
         structureState.schema = generatedSchema;
-
-        // this.optional.requestUpdate();
 
         const form = (this.form = new JSONSchemaForm({
             ...structureState,

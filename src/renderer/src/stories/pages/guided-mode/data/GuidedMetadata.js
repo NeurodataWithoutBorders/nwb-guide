@@ -31,7 +31,7 @@ const parentTableRenderConfig = {
         return true;
     },
     Units: (metadata) => {
-        metadata.editable = false;
+        metadata.truncated = true;
         metadata.schema.description = "Update unit information directly on your source data.";
         return true;
     },
@@ -60,21 +60,27 @@ const tableRenderConfig = {
         });
     },
     UnitColumns: function (metadata) {
-        const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Units"]);
+        metadata.editable = false;
+        console.log("Column metadata", metadata);
+        metadata.schema.description = "Update unit information directly on your source data.";
 
-        return new SimpleTable({
-            ...metadata,
-            contextOptions: {
-                row: {
-                    add: false,
-                    remove: false,
-                },
-            },
-            editable: {
-                name: (value) => !aggregateRequirements.has(value),
-                data_type: (_, row) => !aggregateRequirements.has(row.name),
-            },
-        });
+        return true;
+
+        // const aggregateRequirements = getAggregateRequirements.call(this, ["Ecephys", "Units"]);
+        //
+        // return new SimpleTable({
+        //     ...metadata,
+        //     contextOptions: {
+        //         row: {
+        //             add: false,
+        //             remove: false,
+        //         },
+        //     },
+        //     editable: {
+        //         name: (value) => !aggregateRequirements.has(value),
+        //         data_type: (_, row) => !aggregateRequirements.has(row.name),
+        //     },
+        // });
     },
 };
 
