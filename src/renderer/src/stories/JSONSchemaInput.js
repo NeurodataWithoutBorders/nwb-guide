@@ -491,6 +491,7 @@ export class JSONSchemaInput extends LitElement {
 
     static get properties() {
         return {
+            description: { type: String, reflect: false },
             schema: { type: Object, reflect: false },
             validateEmptyValue: { type: Boolean, reflect: true },
             required: { type: Boolean, reflect: true },

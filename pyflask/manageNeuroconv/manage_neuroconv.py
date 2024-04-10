@@ -787,9 +787,10 @@ def get_backend_configuration(info: dict) -> dict:
 
     # Provide metadata on configuration dictionary
     configuration_dict = configuration.dict()
-    for dataset in configuration_dict["dataset_configurations"].values():
 
-        dataset["_itemsize"] = dataset["dtype"].itemsize
+    itemsizes = {}
+    for key, dataset in configuration_dict["dataset_configurations"].items():
+        itemsizes[key] = dataset["dtype"].itemsize
 
     serialized = json.loads(json.dumps(configuration_dict, default=custom_encoder))
 
@@ -799,7 +800,7 @@ def get_backend_configuration(info: dict) -> dict:
         for key in PROPS_TO_REMOVE:
             del dataset[key]
 
-    return dict(results=dataset_configurations, schema={}, backend=backend)  # configuration.schema(),
+    return dict(results=dataset_configurations, schema={}, backend=backend, itemsizes=itemsizes)  # configuration.schema(),
 
 
 def get_conversion_path_info(info: dict) -> dict:

@@ -100,24 +100,27 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         await this.rendered;
     }
 
-    #bufferShapeDescription = (value, itemsize) =>
-        `Expected RAM usage: ${(prod(value) * (itemsize / 1e9)).toFixed(2)} GB`;
-    #chunkShapeDescription = (value, itemsize) =>
-        `Disk space usage per chunk: ${(prod(value) * (itemsize / 1e6)).toFixed(2)} MB`;
+    #bufferShapeDescription = (value, itemsize) => {
+        return `Expected RAM usage: ${(prod(value) * (itemsize / 1e9)).toFixed(2)} GB`;
+    }
+    #chunkShapeDescription = (value, itemsize) => {
+        return `Disk space usage per chunk: ${(prod(value) * (itemsize / 1e6)).toFixed(2)} MB`;
+    }
 
-    #itemsize = {};
-    #getItemSize = (path) => get(path.slice(0, -1), this.#itemsize);
+    #getItemSize = (path, itemsizes) => itemsizes[path.slice(0, -1).join("/")];
 
-    #getDescription = (path, value) => {
+    #getDescription = (path, itemsizes, value) => {
         const name = path.slice(-1)[0];
-        if (name === "buffer_shape") return this.#bufferShapeDescription(value, this.#getItemSize(path));
-        if (name === "chunk_shape") return this.#chunkShapeDescription(value, this.#getItemSize(path));
+        if (name === "buffer_shape") return this.#bufferShapeDescription(value, this.#getItemSize(path, itemsizes));
+        if (name === "chunk_shape") return this.#chunkShapeDescription(value, this.#getItemSize(path, itemsizes));
         return;
     };
 
-    renderInstance = ({ session, subject, info }) => {
-        const { results, schema } = info;
+    renderInstance = (info) => {
+        const { session, subject, info: configuration } = info;
+        const { results, schema, backend, itemsizes } = configuration;
 
+        console.log(configuration)
         let instance;
         if (Object.keys(results).length === 0) {
             instance = document.createElement("span");
@@ -130,11 +133,13 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             const reorganized = Object.entries(results).reduce((acc, [name, item]) => {
                 const splitName = name.split("/");
 
-                const resolved = { schema, results: acc, itemsize: this.#itemsize };
+                const itemsize = itemsizes[name];
+
+                const resolved = { schema, results: acc };
 
                 const lenSplit = splitName.length;
                 splitName.reduce((acc, key, i) => {
-                    const { schema, results, itemsize } = acc;
+                    const { schema, results } = acc;
 
                     const props = schema.properties ?? (schema.properties = {});
                     if (!schema.required) schema.required = [];
@@ -142,7 +147,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                     // Set directly on last iteration
                     if (i === lenSplit - 1) {
-                        const schema = (props[key] = { ...itemSchema });
+                        const schema = (props[key] = structuredClone(itemSchema));
 
 
                         if (!item.compression_options) item.compression_options = {}; // Set blank compression options to an empty object
@@ -156,28 +161,23 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                         const chunkSchema = schema.properties.chunk_shape;
                         const bufferSchema = schema.properties.buffer_shape;
 
-                        const { _itemsize = 0 } = item;
-                        itemsize[key] = _itemsize;
+                        const source_size_in_gb = (prod(full_shape) * itemsize) / 1e9;
 
-                        const source_size_in_gb = (prod(item["full_shape"]) * _itemsize) / 1e9;
-
-                        schema.description = `Full Shape: ${item["full_shape"]} | Source size: ${source_size_in_gb.toFixed(2)} GB`; // This is static
+                        schema.description = `Full Shape: ${full_shape} | Source size: ${source_size_in_gb.toFixed(2)} GB`; // This is static
                         
                         // bufferSchema.items.max = chunk_shape // Only in increments of the chunk_shape
                         bufferSchema.maxItems = bufferSchema.minItems = buffer_shape.length;
                         bufferSchema.description = this.#bufferShapeDescription(
                             buffer_shape,
-                            _itemsize
+                            itemsize
                         );
 
                         chunkSchema.maxItems = chunkSchema.minItems = chunk_shape.length;
                         // chunkSchema.items.max = full_shape // 1 - full_shape size
                         chunkSchema.description = this.#chunkShapeDescription(
                             chunk_shape,
-                            _itemsize
+                            itemsize
                         );
-
-                        delete item._itemsize; // Remove itemsize from the results
 
                         return;
                     }
@@ -186,8 +186,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     else {
                         const thisSchema = props[key] ?? (props[key] = {});
                         if (!results[key]) results[key] = {};
-                        if (!itemsize[key]) itemsize[key] = {};
-                        return { schema: thisSchema, results: results[key], itemsize: itemsize[key] };
+                        return { schema: thisSchema, results: results[key] };
                     }
                 }, resolved);
 
@@ -207,13 +206,11 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     "*": itemIgnore,
                 },
                 onUpdate: (updatedPath, value) => {
-                    const updatedDescription = this.#getDescription(updatedPath, value);
+                    const updatedDescription = this.#getDescription(updatedPath, itemsizes, value);
                     this.unsavedUpdates = true;
-                    console.log(updatedDescription);
                     if (updatedDescription) {
                         const input = instance.getFormElement(updatedPath);
-                        input.description = "AHH"; // updatedDescription;
-                        console.warn("UPDATED");
+                        input.description = updatedDescription;
                     }
                 },
                 onThrow,
@@ -239,7 +236,8 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     skip: !!sesResult.results[backend],
                 }
             }
-        ).filter(({ skip }) => !skip);
+        )
+        .filter(({ skip }) => !skip);
 
         return this.runConversions(
             {},
@@ -258,9 +256,11 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         this.instances = this.mapSessions(
             ({ subject, session, info }) => {
                   const backend = info.configuration.backend ?? this.workflow.backend_type.value // Use the default backend if none is set
+
                   return this.renderInstance({ subject, session, info: {
                       backend,
-                      results: info.configuration.results[backend],
+                      results: info.configuration.results[backend], // Get the configuration options for the current session
+                      itemsizes: info.configuration.itemsizes[backend], // Get the item sizes for the current session
                       schema: this.info.globalState.schema.configuration[subject][session][backend], // Get the schema for the current session
                   }})
               },
@@ -282,7 +282,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                     const instanceInfo = id.split("/").reduce((acc, key) => acc[key.split('-').slice(1).join('-')], this.localState.results);
                     const backend = instanceInfo.configuration.backend ?? this.workflow.backend_type.value;
-
 
                     return new JSONSchemaInput({
                         path: [],
@@ -317,11 +316,14 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 if (Object.keys(update)) {
                     this.mapSessions(({ subject, session, info }) => {
 
-                        const { results, schema, backend } = info;
+                        const { results, schema, backend, itemsizes } = info;
 
                         const sesResults = this.localState.results[subject][session]
-                        if (!sesResults.configuration) sesResults.configuration = { results: {} };
+                        if (!sesResults.configuration) sesResults.configuration = {};
+                        if (!sesResults.configuration.results) sesResults.configuration.results = {};
+                        if (!sesResults.configuration.itemsizes) sesResults.configuration.itemsizes = {};
 
+                        sesResults.configuration.itemsizes[backend] = itemsizes // Set the item sizes for the current session
                         sesResults.configuration.results[backend] = results // Set the configuration options for the current session
 
                         // Set the schema for the current session
@@ -344,10 +346,13 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             })
 
             .catch(
-                (error) => new InspectorListItem({
-                    message: error.message.split(":")[1].slice(1),
-                    type: "error",
-                })
+                (error) => {
+                    const split = error.message.split(":")
+                    return new InspectorListItem({
+                        message: split.length > 1 ? error.message.split(":")[1].slice(1) : error.message,
+                        type: "error",
+                    })
+                }
             );
     }
 
