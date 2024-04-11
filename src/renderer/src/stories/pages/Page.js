@@ -203,7 +203,6 @@ export class Page extends LitElement {
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
-                ...sessionResults,
                 configuration: configurationCopy,
                 metadata: resolveMetadata(subject, session, globalState),
                 source_data: merge(SourceData, sourceDataCopy),
@@ -215,10 +214,15 @@ export class Page extends LitElement {
                 delete sessionInfo.configuration; // Skip backend configuration options if specified as such
                 delete optsCopy.backend;
             } else {
+
+                if (typeof optsCopy.configuration === "object") merge(optsCopy.configuration, configurationCopy)
+
                 if (!configurationCopy.backend) configurationCopy.backend = this.workflow.file_format.value; // Provide default
             }
             
             delete optsCopy.configuration;
+
+            console.log("Running conversion for", subject, session, sessionInfo);
 
             const result = await backendFunctionToRun(
                 {

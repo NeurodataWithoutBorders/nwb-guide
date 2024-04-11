@@ -40,10 +40,10 @@ export const resolveBackendResults = (schema, results, itemsize) => {
 const propertiesToUpdate = [ 'chunk_shape', 'buffer_shape' ]
 
 const bufferShapeDescription = (value, itemsize) => {
-    return `Expected RAM usage: ${getResourceUsage(value, itemsize).toFixed(2)} GB`;
+    return `Expected RAM usage: ${getResourceUsage(value, itemsize).toFixed(2)} GB.`;
 }
 const chunkShapeDescription = (value, itemsize) => {
-    return `Disk space usage per chunk: ${getResourceUsage(value, itemsize, 1e6).toFixed(2)} MB`;
+    return `Disk space usage per chunk: ${getResourceUsage(value, itemsize, 1e6).toFixed(2)} MB.`;
 }
 
 

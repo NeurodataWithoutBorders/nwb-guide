@@ -18,6 +18,7 @@ import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 import { getResourceUsage } from '../../../../validation/backend-configuration'
 
 import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
+import { getInfoFromId } from "./utils.js";
 
 const getBackendConfigurations = (info, options = {}) => run(`configuration`, info, options);
 
@@ -40,6 +41,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
     beforeSave = () => {
         merge(this.localState, this.info.globalState);
+        console.log('SAVING', this.localState, this.info.globalState, this.manager?.instances)
     };
 
     form;
@@ -178,30 +180,39 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                     // Buffer shape depends on chunk shape
                     if (name === 'chunk_shape') form.inputs['buffer_shape'].schema = { ...form.inputs['buffer_shape'].schema } // Force schema update
+                
                 },
                 onThrow,
-                validateOnChange: (name, _, path, value) => {
+                validateOnChange: async (name, _, path, value) => {
+
+                    const errors = []
+
                     if (name === 'chunk_shape') {
 
                         const input = instance.getFormElement(path).inputs['chunk_shape']
 
                         const mbUsage = getResourceUsage(value, itemsizes[path.join("/")], 1e6)
 
-                        if (mbUsage > 20) return [
+                        if (mbUsage > 20) errors.push(
                             {
                                 message: "Recommended maximum chunk size is 20MB. You may want to reduce the size of the chunks.",
                                 type: "warning"
                             }
-                        ]
+                        )
 
                         // NOTE: Generalize for more axes
-                        else if (mbUsage < 10 && value[0] !== input.schema.items.max) return [
+                        else if (mbUsage < 10 && value[0] !== input.schema.items.max) errors.push(
                             {
                                 message: "Recommended minimum chunk size is 10MB. You may want to increase the size of the chunks.",
                                 type: "warning"
                             }
-                        ]
+                        )
                     }
+
+
+                    return errors.length ? errors : true;
+
+
                 },
             });
         }
@@ -237,6 +248,21 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         );
     };
 
+    validate = (toRun) => {
+        if (!toRun) return this.runConversions({}, true, { title: "Validating backend options" }, getBackendConfigurations);
+
+        const { subject, session } = toRun
+        return this.runConversions(
+            { configuration: this.info.globalState.results[subject][session].configuration },
+            [ { subject, session } ] , // All or specific session
+            {
+                title: "Validating backend options",
+                showCancelButton: false,
+            },
+            getBackendConfigurations
+        );
+    }
+
     #getManager = () => {
 
         const instances = {};
@@ -266,30 +292,42 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             instanceType: "Session",
             instances,
             controls: [
-                (id) => {
+            (id) => {
 
-                    const instanceInfo = id.split("/").reduce((acc, key) => acc[key.split('-').slice(1).join('-')], this.localState.results);
-                    const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
+                const instanceInfo = id.split("/").reduce((acc, key) => acc[key.split('-').slice(1).join('-')], this.localState.results);
+                const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
 
-                    return new JSONSchemaInput({
-                        path: [],
-                        schema: {
-                            type: "string",
-                            placeholder: "Select backend type",
-                            enum: Object.keys(backendMap),
-                            enumLabels: backendMap,
-                            strict: true
-                        },
-                        value: backend,
-                        onUpdate: async (value) => {
-                            if (instanceInfo.configuration.backend === value) return;
-                            instanceInfo.configuration.backend = value; // Ensure new backend choice is persistent
-                            await this.save();
-                            await this.#update()
-                        }
-                    });
-                },
-            ],
+                return new JSONSchemaInput({
+                    path: [],
+                    schema: {
+                        type: "string",
+                        placeholder: "Select backend type",
+                        enum: Object.keys(backendMap),
+                        enumLabels: backendMap,
+                        strict: true
+                    },
+                    value: backend,
+                    onUpdate: async (value) => {
+                        if (instanceInfo.configuration.backend === value) return;
+                        instanceInfo.configuration.backend = value; // Ensure new backend choice is persistent
+                        await this.save();
+                        await this.#update()
+                    }
+                });
+            },
+            {
+                name: "Validate",
+                primary: true,
+                onClick: async (id) => {
+
+                    const { subject, session } = getInfoFromId(id)
+
+                    console.log("Clicked on", subject, session)
+
+                    await this.validate({ session, subject })
+                }
+            }
+            ]
         });
 
         if (ogManager) ogManager.replaceWith(this.manager);

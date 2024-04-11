@@ -764,7 +764,8 @@ def get_backend_configuration(info: dict) -> dict:
 
     import numpy as np
 
-    PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
+    PROPS_TO_REMOVE = [ "object_id", "dataset_name", "location_in_file", "dtype" ]
+    PROPS_TO_IGNORE = [ 'full_shape' ]
 
     info["overwrite"] = True  # Always overwrite the file
 
@@ -772,12 +773,17 @@ def get_backend_configuration(info: dict) -> dict:
 
     backend_configuration = info.get("configuration", {})
     backend = backend_configuration.get("backend", "hdf5")
+    results = backend_configuration.get("results", {}).get(backend, {})
 
     converter, metadata, __ = get_conversion_info(info)
 
     nwbfile = make_nwbfile_from_metadata(metadata=metadata)
     converter.add_to_nwbfile(nwbfile, metadata=metadata)
     configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
+    for dataset_name, dataset_configuration in results.items():
+        for key, value in dataset_configuration.items():
+            if key not in PROPS_TO_IGNORE:
+                setattr(configuration.dataset_configurations[dataset_name], key, value)
 
     def custom_encoder(obj):
         if isinstance(obj, np.ndarray):
