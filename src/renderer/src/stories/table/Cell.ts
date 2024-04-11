@@ -219,7 +219,9 @@ export class TableCell extends LitElement {
         else if (this.schema.format === "date-time") {
             cls = DateTimeCell
             this.type = "date-time"
-        } else if (this.schema.type === "object") {
+        } 
+        
+        else if (this.schema.type === "object") {
             cls = NestedInputCell
             this.type = "table"
         }

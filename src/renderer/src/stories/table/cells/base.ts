@@ -201,17 +201,33 @@ export class TableCellBase extends LitElement {
 
     set(value: any, runOnChange = true) {
 
-        if (document.execCommand) {
+        // Ensure all operations are undoable
+        if (typeof InputEvent === 'function') {
             this.#editable.setAttribute('contenteditable', '')
             this.#editable.focus();
-            document.execCommand('selectAll');
-            document.execCommand('insertText', false, value);
+
+            const range = document.createRange();
+            range.selectNodeContents(this.#editable);
+            const sel = window.getSelection()!;
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            const inputEvent = new InputEvent('input', {
+                bubbles: true,
+                cancelable: false,
+                data: value,
+                inputType: 'insertText',
+            });
+            
+            this.#editable.dispatchEvent(inputEvent);
+            
             this.setText(value, undefined, runOnChange)
             this.#editable.blur();
             this.#editable.removeAttribute('contenteditable')
         }
 
-        else this.setText(value, undefined, runOnChange) // Ensure value is still set
+        
+        else this.setText(value, undefined, runOnChange) // Just set value
     }
 
     #render(property: 'renderer' | 'editor') {
