@@ -44,3 +44,7 @@ pipelines:
       folder_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed
     CellExplorerSortingInterface:
       file_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed/Peter_MS22_180629_110319_concat_stubbed.spikes.cellinfo.mat
+
+  IntanSingleFileRecording:
+    IntanRecordingInterface:
+      file_path: ephy_testing_data/intan/intan_rhd_test_1.rhd
