@@ -253,12 +253,14 @@ export class Dashboard extends LitElement {
             if (skipped) {
                 if (isStorybook) return; // Do not skip on storybook
 
+                const backwards = previous && previous.info.previous === this.page;
+
                 return Promise.all(
                     Object.entries(page.workflow).map(async ([_, state]) => {
-                        if (typeof state.skip === "function") return await state.skip(); // Run skip functions
+                        if (typeof state.skip === "function" && !backwards) return await state.skip(); // Run skip functions
                     })
                 ).then(() => {
-                    if (previous && previous.info.previous === this.page) this.main.onTransition(-1);
+                    if (backwards) this.main.onTransition(-1);
                     else this.main.onTransition(1);
                 });
             }

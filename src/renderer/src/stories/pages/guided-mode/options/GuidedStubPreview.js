@@ -19,6 +19,10 @@ export class GuidedStubPreviewPage extends Page {
         this.style.height = "100%"; // Fix main section
     }
 
+    workflow = {
+        backend_type: {}
+    }
+
     header = {
         subtitle: `Preview file contents on truncated files using the Neurosift application`,
         controls: () =>
