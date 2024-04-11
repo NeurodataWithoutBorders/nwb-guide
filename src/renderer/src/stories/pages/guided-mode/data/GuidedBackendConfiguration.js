@@ -151,8 +151,9 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
 
                         if (!item.compression_options) item.compression_options = {}; // Set blank compression options to an empty object
-                        if (!item.filter_methods) item.filter_methods = []
-                        if (!item.filter_options) item.filter_options = []; // Set blank compression options to an empty object
+                        
+                        if (props.filter_methods && !item.filter_methods) item.filter_methods = []
+                        if (props.filter_options && !item.filter_options) item.filter_options = []; // Set blank compression options to an empty object
 
                         results[key] = item;
 
@@ -289,7 +290,8 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                             type: "string",
                             placeholder: "Select backend type",
                             enum: Object.keys(backendMap),
-                            enumLabels: backendMap
+                            enumLabels: backendMap,
+                            strict: true
                         },
                         value: backend,
                         onUpdate: async (value) => {
@@ -348,6 +350,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             .catch(
                 (error) => {
                     const split = error.message.split(":")
+                    console.error(error)
                     return new InspectorListItem({
                         message: split.length > 1 ? error.message.split(":")[1].slice(1) : error.message,
                         type: "error",

@@ -486,6 +486,15 @@ export class JSONSchemaInput extends LitElement {
                 padding: 0;
                 margin-bottom: 1em;
             }
+
+            select { 
+                background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+                background-position: calc(100% - 0.75rem) center !important;
+                -moz-appearance:none !important;
+                -webkit-appearance: none !important; 
+                appearance: none !important;
+                padding-right: 2rem !important;
+            }
         `;
     }
 
@@ -1112,6 +1121,28 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (schema.enum && schema.enum.length) {
+
+            // Use generic selector
+            if (schema.strict && schema.search !== true) {
+                return html`
+                    <select
+                        class="guided--input schema-input"
+                        @input=${(ev) => this.#updateData(fullPath, schema.enum[ev.target.value])}
+                        @change=${() => validateOnChange && this.#triggerValidation(name, path)}
+                    >
+                        <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
+                        ${schema.enum.sort().map(
+                            (item, i) =>
+                                html`<option value=${i} ?selected=${this.value === item}>
+                                    ${schema.enumLabels?.[item] ?? item}
+                                </option>`
+                        )}
+                    </select>
+                `;
+            }
+
+
+
             const options = schema.enum.map((v) => {
                 return {
                     key: v,

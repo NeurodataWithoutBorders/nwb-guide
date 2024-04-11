@@ -69,6 +69,7 @@ const questions = {
             hdf5: "HDF5",
             zarr: "Zarr",
         },
+        strict: true,
         title: "What file backend would you like to use?",
         description: "Choose the default file format for your data. You can override this for specific sessions.",
         default: "hdf5",

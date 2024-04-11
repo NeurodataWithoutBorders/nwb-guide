@@ -709,12 +709,13 @@ def create_file(info: dict) -> dict:
 
     nwbfile_path = path_info["file"]
 
-    # # Delete test files
-    # if nwbfile_path.exists():
-    #     if nwbfile_path.is_dir():
-    #         rmtree(nwbfile_path)
-    #     else:
-    #         nwbfile_path.unlink()
+    # Delete files manually if using Zarr
+    if (overwrite):
+        if nwbfile_path.exists():
+            if nwbfile_path.is_dir():
+                rmtree(nwbfile_path)
+            else:
+                nwbfile_path.unlink()
 
     if will_configure_backend:
 

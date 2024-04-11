@@ -1,54 +1,69 @@
 import { isStorybook } from "../src/renderer/src/dependencies/simple"
 import { baseUrl, onServerOpen } from "../src/renderer/src/server/globals"
 
-const schema = {
-    type: "object",
-    order: ["filter_methods", "compression_method", "compression_options", "chunk_shape", "buffer_shape"],
-    properties: {
-        full_shape: {
-            type: 'array',
-            items: {
-                type: 'number'
-            }
-        },
-        chunk_shape: {
-            type: 'array',
-            items: {
-                type: 'number'
-            }
-        },
-        buffer_shape: {
-            type: 'array',
-            items: {
-                type: 'number'
-            }
-        },
-        compression_method: {
-            type: 'string',
-            enum: ['gzip'],
-            strict: true
-        },
-        filter_methods: {
-            type: 'array',
-            placeholder: 'Select a method',
-            empty: 'No methods selected',
-            items: {
-                type: 'string'
-            }
-        },
-        compression_options: {
-            type: 'object',
-            properties: {}
-        },
-        filter_options: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {}
-            }
+const schemaProps = {
+    full_shape: {
+        type: 'array',
+        items: {
+            type: 'number'
         }
     },
+    chunk_shape: {
+        type: 'array',
+        items: {
+            type: 'number'
+        }
+    },
+    buffer_shape: {
+        type: 'array',
+        items: {
+            type: 'number'
+        }
+    },
+    compression_method: {
+        type: 'string',
+        enum: ['gzip'],
+        strict: true,
+        // search: true
+    },
+    compression_options: {
+        type: 'object',
+        properties: {}
+    }
+}
+
+const schemaBase = {
+    type: "object",
+    order: ["filter_methods", "compression_method", "compression_options", "chunk_shape", "buffer_shape"],
     // additionalProperties: false,
+}
+
+const schemas = {
+    hdf5: {
+        ...schemaBase,
+        properties: { ...schemaProps }
+    },
+    zarr: {
+        ...schemaBase,
+        properties: { 
+            ...schemaProps,
+            filter_methods: {
+                type: 'array',
+                placeholder: 'Select a method',
+                empty: 'No methods selected',
+                items: {
+                    type: 'string'
+                }
+            },
+            filter_options: {
+                type: 'array',
+                items: {
+                    type: 'object',
+                    properties: {}
+                }
+            }
+        }
+    }
 }
 
 const resolved = {}
@@ -56,7 +71,7 @@ const resolved = {}
 const sharedCompressionMethods = [ "gzip" ]
 
 export const getSchema = (method='hdf5') => {
-    const copy = structuredClone(schema)
+    const copy = structuredClone(schemas[method])
     copy.properties["compression_method"].enum = resolved[method] ?? sharedCompressionMethods
     return copy
 }
