@@ -16,7 +16,7 @@ import { getSchema } from "../../../../../../../schemas/backend-configuration.sc
 import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
-const prod = (arr) => arr.reduce((accumulator, currentValue) => accumulator * currentValue, 1);
+import { getResourceUsage } from '../../../../validation/backend-configuration'
 
 const getBackendConfigurations = (info, options = {}) => run(`configuration`, info, options);
 
@@ -101,26 +101,51 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     }
 
     #bufferShapeDescription = (value, itemsize) => {
-        return `Expected RAM usage: ${(prod(value) * (itemsize / 1e9)).toFixed(2)} GB`;
+        return `Expected RAM usage: ${getResourceUsage(value, itemsize).toFixed(2)} GB`;
     }
     #chunkShapeDescription = (value, itemsize) => {
-        return `Disk space usage per chunk: ${(prod(value) * (itemsize / 1e6)).toFixed(2)} MB`;
+        return `Disk space usage per chunk: ${getResourceUsage(value, itemsize, 1e6).toFixed(2)} MB`;
     }
 
     #getItemSize = (path, itemsizes) => itemsizes[path.slice(0, -1).join("/")];
 
-    #getDescription = (path, itemsizes, value) => {
-        const name = path.slice(-1)[0];
-        if (name === "buffer_shape") return this.#bufferShapeDescription(value, this.#getItemSize(path, itemsizes));
-        if (name === "chunk_shape") return this.#chunkShapeDescription(value, this.#getItemSize(path, itemsizes));
-        return;
-    };
+    #updateSchema(schema, parent, itemsize, properties=[ 'chunk_shape', 'buffer_shape' ]) {
+        const { chunk_shape, buffer_shape, full_shape } = parent;
+
+        const chunkSchema = schema.properties.chunk_shape;
+        const bufferSchema = schema.properties.buffer_shape;
+
+        const shapeMax = full_shape[0]
+        
+        if (properties.includes('chunk_shape')) {
+            chunkSchema.items.min = bufferSchema.items.min = 1
+            chunkSchema.maxItems = chunkSchema.minItems = chunk_shape.length;
+            chunkSchema.items.max = shapeMax
+            chunkSchema.description = this.#chunkShapeDescription(
+                chunk_shape,
+                itemsize
+            );
+
+        }
+
+        if (properties.includes('buffer_shape')) {
+
+            bufferSchema.items.max = shapeMax
+            bufferSchema.items.step = chunk_shape[0] // Constrain to increments of chunk size
+            bufferSchema.strict = true
+
+            bufferSchema.maxItems = bufferSchema.minItems = buffer_shape.length;
+            bufferSchema.description = this.#bufferShapeDescription(
+                buffer_shape,
+                itemsize
+            );
+        }
+    }
 
     renderInstance = (info) => {
         const { session, subject, info: configuration } = info;
-        const { results, schema, backend, itemsizes } = configuration;
+        const { results, schema, itemsizes } = configuration;
 
-        console.log(configuration)
         let instance;
         if (Object.keys(results).length === 0) {
             instance = document.createElement("span");
@@ -157,28 +182,12 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                         results[key] = item;
 
-                        const { chunk_shape, buffer_shape, full_shape } = item;
+                        const { full_shape } = item;
 
-                        const chunkSchema = schema.properties.chunk_shape;
-                        const bufferSchema = schema.properties.buffer_shape;
-
-                        const source_size_in_gb = (prod(full_shape) * itemsize) / 1e9;
-
-                        schema.description = `Full Shape: ${full_shape} | Source size: ${source_size_in_gb.toFixed(2)} GB`; // This is static
+                        schema.description = `Full Shape: ${full_shape} | Source size: ${getResourceUsage(full_shape, itemsize).toFixed(2)} GB`; // This is static
                         
-                        // bufferSchema.items.max = chunk_shape // Only in increments of the chunk_shape
-                        bufferSchema.maxItems = bufferSchema.minItems = buffer_shape.length;
-                        bufferSchema.description = this.#bufferShapeDescription(
-                            buffer_shape,
-                            itemsize
-                        );
-
-                        chunkSchema.maxItems = chunkSchema.minItems = chunk_shape.length;
-                        // chunkSchema.items.max = full_shape // 1 - full_shape size
-                        chunkSchema.description = this.#chunkShapeDescription(
-                            chunk_shape,
-                            itemsize
-                        );
+                        this.#updateSchema(schema, item, itemsize)
+                       
 
                         return;
                     }
@@ -206,16 +215,36 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 ignore: {
                     "*": itemIgnore,
                 },
-                onUpdate: (updatedPath, value) => {
-                    const updatedDescription = this.#getDescription(updatedPath, itemsizes, value);
+                onUpdate: ( updatedPath ) => {
+
                     this.unsavedUpdates = true;
-                    if (updatedDescription) {
-                        const input = instance.getFormElement(updatedPath);
-                        input.description = updatedDescription;
-                    }
+
+                    const parentPath = updatedPath.slice(0, -1);
+                    const form = instance.getFormElement(parentPath);
+                    const name = updatedPath.slice(-1)[0];
+
+                    // Update used schema
+                    const schema = form.schema;
+                    this.#updateSchema(schema, form.results, itemsizes[parentPath.join("/")])
+
+                    // Update rendered description
+                    const input = form.inputs[name];
+                    input.description = schema.properties[name].description;
+
+                    // Buffer shape depends on chunk shape
+                    if (name === 'chunk_shape') form.inputs['buffer_shape'].schema = { ...form.inputs['buffer_shape'].schema } // Force schema update
                 },
                 onThrow,
-                // validateOnChange: validate,
+                validateOnChange: (name, parent, path, value) => {
+                    if (name === 'chunk_shape') {
+                        if (getResourceUsage(value, itemsizes[path.join("/")], 1e6) > 20) return [
+                            {
+                                message: "Recommended maximum chunk size is 20MB. Please reduce the size of the chunks.",
+                                type: "warning"
+                            }
+                        ]
+                    }
+                },
             });
         }
 

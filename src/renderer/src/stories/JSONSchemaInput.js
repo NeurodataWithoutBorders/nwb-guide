@@ -500,11 +500,23 @@ export class JSONSchemaInput extends LitElement {
 
     static get properties() {
         return {
-            description: { type: String, reflect: false },
             schema: { type: Object, reflect: false },
             validateEmptyValue: { type: Boolean, reflect: true },
             required: { type: Boolean, reflect: true },
         };
+    }
+
+    #description;
+    get description() {
+        return this.#description ?? this.schema.description
+    }
+
+    set description(value) {
+        this.#description = value;
+
+        const descriptionEl = this.shadowRoot.querySelector('.guided--text-input-instructions');
+        if (!descriptionEl) return
+        descriptionEl.innerHTML = value;
     }
 
     // Enforce dynamic required properties
@@ -655,7 +667,7 @@ export class JSONSchemaInput extends LitElement {
 
         if (input === null) return null; // Hide rendering
 
-        const description = this.description ?? schema.description;
+        const description = this.description;
 
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
@@ -672,15 +684,16 @@ export class JSONSchemaInput extends LitElement {
                 }
                 </label>
                 <main>${input}${this.controls && this.controls.length ? html`<div id="controls">${this.controls}</div>` : ""}</main>
+                <p class="guided--text-input-instructions">
                 ${
                     description
-                        ? html`<p class="guided--text-input-instructions">
+                        ? html`
                               ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
                                   ? ""
-                                  : "."}
-                          </p>`
+                                  : "."}`
                         : ""
                 }
+                </p>
             </div>
         `;
     }
@@ -915,6 +928,7 @@ export class JSONSchemaInput extends LitElement {
 
         // Transform to single item if maxItems is 1
         if (isArray && schema.maxItems === 1 && !isTable) {
+
             return new JSONSchemaInput({
                 value: this.value?.[0],
                 schema: {
@@ -1242,11 +1256,22 @@ export class JSONSchemaInput extends LitElement {
                             if (isInteger) value = newValue = parseInt(value);
                             else if (isNumber) value = newValue = parseFloat(value);
 
-                            if (isNumber) {
-                                if ("min" in schema && newValue < schema.min) newValue = schema.min;
-                                else if ("max" in schema && newValue > schema.max) newValue = schema.max;
+                            const isStrict = schema.strict ? true : false;
 
-                                if (isNaN(newValue)) newValue = undefined;
+                            if (isNumber) {
+                                if ("min" in schema && newValue < schema.min) {
+                                    if (isStrict) newValue = this.value // Set back to last value
+                                    else newValue = schema.min;
+                                }
+                                else if ("max" in schema && newValue > schema.max) {
+                                    if (isStrict) newValue = this.value // Set back to last value
+                                    else newValue = schema.max;
+                                }
+
+                                if (isNaN(newValue)) {
+                                    if (isStrict) newValue = this.value // Set back to last value
+                                    else newValue = undefined
+                                }
                             }
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
@@ -1256,6 +1281,7 @@ export class JSONSchemaInput extends LitElement {
                             //     const regex = new RegExp(schema.pattern)
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
                             // }
+                            
 
                             if (isNumber && newValue !== value) {
                                 ev.target.value = newValue;
