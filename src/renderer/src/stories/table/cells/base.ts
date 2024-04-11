@@ -218,15 +218,15 @@ export class TableCellBase extends LitElement {
                 data: value,
                 inputType: 'insertText',
             });
-            
+
             this.#editable.dispatchEvent(inputEvent);
-            
+
             this.setText(value, undefined, runOnChange)
             this.#editable.blur();
             this.#editable.removeAttribute('contenteditable')
         }
 
-        
+
         else this.setText(value, undefined, runOnChange) // Just set value
     }
 

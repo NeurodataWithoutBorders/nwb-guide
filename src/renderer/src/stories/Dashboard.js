@@ -202,8 +202,7 @@ export class Dashboard extends LitElement {
     }
 
     setMain(page) {
-
-        window.getSelection().empty() // Remove user selection before transitioning
+        window.getSelection().empty(); // Remove user selection before transitioning
 
         // Update Previous Page
         const info = page.info;
@@ -241,9 +240,7 @@ export class Dashboard extends LitElement {
             this.subSidebar.hide();
         }
 
-
         this.page.set(toPass, false);
-
 
         this.page.checkSyncState().then(() => {
             const projectName = info.globalState?.project?.name;
@@ -270,7 +267,6 @@ export class Dashboard extends LitElement {
                 if (previous && previous.info.previous === this.page) this.page.onTransition(-1);
                 else this.page.onTransition(1);
             }
-
         });
     }
 
