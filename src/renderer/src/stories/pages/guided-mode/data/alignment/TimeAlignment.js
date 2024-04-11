@@ -23,10 +23,11 @@ const options = [
         name: "Link to Recording",
         schema: {
             type: 'string',
-            description: 'The name of the linked recording.'
+            description: 'The name of the linked recording.',
+            placeholder: 'Select a recording interface',
+            enum: [],
+            strict: true
         },
-        enum: [],
-        strict: true
     }
 ]
 
@@ -86,6 +87,11 @@ export class TimeAlignment extends LitElement {
 
             label {
                 font-weight: bold;
+            }
+
+            [selected] {
+                font-weight: bold;
+                background: whitesmoke;
             }
         `
     }
@@ -197,6 +203,10 @@ export class TimeAlignment extends LitElement {
                 const clickableElement = document.createElement("div");
                 clickableElement.innerText = option.name;
                 clickableElement.onclick = () => {
+
+                    elements.forEach(el => el.removeAttribute("selected"));
+                    clickableElement.setAttribute("selected", "");
+
                     const element = new JSONSchemaInput({
                         schema: option.schema,
                         path: [ ],
