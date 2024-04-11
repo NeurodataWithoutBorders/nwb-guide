@@ -199,7 +199,7 @@ export class Page extends LitElement {
 
             const sourceDataCopy = structuredClone(sessionResults.source_data);
 
-            if (!configurationCopy.backend) configurationCopy.backend = this.workflow.backend_type.value;
+            if (!configurationCopy.backend) configurationCopy.backend = this.workflow.file_format.value;
 
             // Resolve the correct session info from all of the metadata for this conversion
             const sessionInfo = {
@@ -215,7 +215,7 @@ export class Page extends LitElement {
                 delete sessionInfo.configuration; // Skip backend configuration options if specified as such
                 delete optsCopy.backend;
             } else {
-                if (!configurationCopy.backend) configurationCopy.backend = this.workflow.backend_type.value; // Provide default
+                if (!configurationCopy.backend) configurationCopy.backend = this.workflow.file_format.value; // Provide default
             }
             
             delete optsCopy.configuration;

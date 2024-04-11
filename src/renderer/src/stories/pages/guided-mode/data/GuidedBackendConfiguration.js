@@ -62,7 +62,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             },
         },
         
-        backend_type: {},
+        file_format: {},
     };
 
     footer = {
@@ -235,11 +235,24 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     if (name === 'chunk_shape') form.inputs['buffer_shape'].schema = { ...form.inputs['buffer_shape'].schema } // Force schema update
                 },
                 onThrow,
-                validateOnChange: (name, parent, path, value) => {
+                validateOnChange: (name, _, path, value) => {
                     if (name === 'chunk_shape') {
-                        if (getResourceUsage(value, itemsizes[path.join("/")], 1e6) > 20) return [
+
+                        const input = instance.getFormElement(path).inputs['chunk_shape']
+
+                        const mbUsage = getResourceUsage(value, itemsizes[path.join("/")], 1e6)
+
+                        if (mbUsage > 20) return [
                             {
-                                message: "Recommended maximum chunk size is 20MB. Please reduce the size of the chunks.",
+                                message: "Recommended maximum chunk size is 20MB. You may want to reduce the size of the chunks.",
+                                type: "warning"
+                            }
+                        ]
+
+                        // NOTE: Generalize for more axes
+                        else if (mbUsage < 10 && value[0] !== input.schema.items.max) return [
+                            {
+                                message: "Recommended minimum chunk size is 10MB. You may want to increase the size of the chunks.",
                                 type: "warning"
                             }
                         ]
@@ -258,7 +271,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 const sesResult = this.info.globalState.results[subject][session].configuration;
                 if (!sesResult) return { subject, session, skip: false };
                 
-                const backend = sesResult.backend ?? this.workflow.backend_type.value;
+                const backend = sesResult.backend ?? this.workflow.file_format.value;
 
                 return {
                     subject,
@@ -285,7 +298,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
         this.instances = this.mapSessions(
             ({ subject, session, info }) => {
-                  const backend = info.configuration.backend ?? this.workflow.backend_type.value // Use the default backend if none is set
+                  const backend = info.configuration.backend ?? this.workflow.file_format.value // Use the default backend if none is set
 
                   return this.renderInstance({ subject, session, info: {
                       backend,
@@ -311,7 +324,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 (id) => {
 
                     const instanceInfo = id.split("/").reduce((acc, key) => acc[key.split('-').slice(1).join('-')], this.localState.results);
-                    const backend = instanceInfo.configuration.backend ?? this.workflow.backend_type.value;
+                    const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
 
                     return new JSONSchemaInput({
                         path: [],

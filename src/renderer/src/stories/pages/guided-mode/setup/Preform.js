@@ -55,14 +55,7 @@ const questions = {
         },
     },
 
-    backend_configuration: {
-        type: "boolean",
-        title: "Will you configure the backend for this pipeline?",
-        description: "This allows you to specify file type (e.g. HDF5, Zarr) and dataset chunking + compression.",
-        default: false,
-    },
-
-    backend_type: {
+    file_format: {
         type: "string",
         enum: ["hdf5", "zarr"],
         enumLabels: {
@@ -70,17 +63,22 @@ const questions = {
             zarr: "Zarr",
         },
         strict: true,
-        title: "What file backend would you like to use?",
-        description: "Choose the default file format for your data. You can override this for specific sessions.",
-        default: "hdf5",
-        dependencies: {
-            backend_configuration: {},
-        },
+        title: "What file format would you like to use?",
+        description: "Choose a default file format for your data.",
+        default: "hdf5"
     },
+
+    backend_configuration: {
+        type: "boolean",
+        title: "Will you customize low-level data storage options?",
+        description: "<span>Dataset chunking, compression, etc.</span><br><small>This also allows you to change file formats per-session</small>",
+        default: false,
+    },
+
 
     upload_to_dandi: {
         type: "boolean",
-        title: "Would you like to upload your data to DANDI?",
+        title: "Will you publish data on DANDI?",
         default: true,
     },
 };
@@ -142,6 +140,7 @@ export class GuidedPreform extends Page {
 
     footer = {
         onNext: async () => {
+            await this.form.validate();
             await this.save();
             return this.to(1);
         },
@@ -158,6 +157,7 @@ export class GuidedPreform extends Page {
             results: this.state,
             validateEmptyValues: false, // Only show errors after submission
             validateOnChange: function (name, parent, path, value) {
+                
                 dependents[name].forEach((dependent) => {
                     const dependencies = questions[dependent.name].dependencies;
                     const uniformDeps = Array.isArray(dependencies)
@@ -195,6 +195,20 @@ export class GuidedPreform extends Page {
                         if ("required" in dependent) dependentEl.required = !dependent.required;
                     }
                 });
+
+                // console.log(name, parent)
+                const { upload_to_dandi, file_format } = parent;
+
+                // Only check file format because of global re-render
+                if (name === "file_format") {
+                    if (upload_to_dandi === true && file_format === "zarr") return [
+                        {
+                            type: 'error',
+                            message: "<h4 style='margin:0;'>Zarr files are not supported by DANDI</h4><span>Please change the file format to HDF5 or disable DANDI upload.</span>",
+                        },
+                    ]
+                }
+
             },
 
             // Immediately re-render boolean values

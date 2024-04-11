@@ -20,7 +20,7 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     workflow = {
-        backend_type: {}
+        file_format: {}
     }
 
     header = {
