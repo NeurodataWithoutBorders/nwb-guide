@@ -1,11 +1,10 @@
 import { LitElement, css } from "lit";
 import { JSONSchemaInput } from "../../../../JSONSchemaInput";
-import { Button } from "../../../../Button";
 
 
 const options = [
     {
-        name: "Timestamps",
+        name: "Upload Timestamps",
         schema: {
             type: 'string',
             format: 'file',
@@ -13,7 +12,7 @@ const options = [
         }
     },
     {
-        name: "Start Time",
+        name: "Adjust Start Time",
         schema: {
             type: 'number',
             description: 'The start time of the recording in seconds.',
@@ -21,23 +20,13 @@ const options = [
         }
     },
     {
-        name: "Linked Recording",
+        name: "Link to Recording",
         schema: {
             type: 'string',
             description: 'The name of the linked recording.'
         },
-        controls: function () {
-            return [
-                new Button({
-                    label: 'Add Dummy Recording',
-                    size: 'small',
-                    primary: true,
-                    onClick: () => {
-                        console.log('Adding dummy recording');
-                    }
-                })
-            ]
-        }
+        enum: [],
+        strict: true
     }
 ]
 
@@ -77,7 +66,7 @@ export class TimeAlignment extends LitElement {
                 justify-content: center;
                 white-space: nowrap;
                 font-size: 90%;
-                min-width: 130px;
+                min-width: 150px;
             }
 
             :host > div > div > *:nth-child(2) > div {
@@ -193,13 +182,16 @@ export class TimeAlignment extends LitElement {
             }
 
 
-
             row.append(barCell);
 
             const selectionCell = document.createElement("div");
             const resultCell = document.createElement("div");
 
-            const resolvedOptions = hasData ? options.slice(0, 2) : options;
+            const optionsCopy = structuredClone(options);
+
+            options[2].schema.enum = Object.keys(results).filter(str => str.includes('Recording'))
+
+            const resolvedOptions = hasData ? optionsCopy.slice(0, 2) : optionsCopy;
 
             const elements = resolvedOptions.map((option) => {
                 const clickableElement = document.createElement("div");
