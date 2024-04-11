@@ -61,7 +61,7 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Create and activate environment
-        run: mamba env update --name nwb-guide --file ${{ matrix.label }} --no-cache-dir --no-default-packages 
+        run: mamba env update --name nwb-guide --file ${{ matrix.label }} --no-cache-dir --no-default-packages
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
