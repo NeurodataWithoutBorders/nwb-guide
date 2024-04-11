@@ -379,7 +379,6 @@ export default async function runWorkflow(name, workflow, identifier) {
       const page = dashboard.page
       const firstSessionForm = page.forms[0].form
       firstSessionForm.accordions["NWBFile"].toggle(true)
-      window.getSelection().empty() // Remove annoying user-select highlight
     })
 
     await takeScreenshot(join(identifier, 'metadata-nwbfile'), 100)

@@ -202,6 +202,8 @@ export class Dashboard extends LitElement {
     }
 
     setMain(page) {
+        window.getSelection().empty(); // Remove user selection before transitioning
+
         // Update Previous Page
         const info = page.info;
         const previous = this.page;
