@@ -176,7 +176,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     if (ophys) {
 
-        ophys.required = Object.keys(ophys.properties)
+        ophys.required = Object.keys(ophys.properties).filter(prop => prop !== 'definitions')
 
         const getProp = (name: string) => ophys.properties[name]
 
