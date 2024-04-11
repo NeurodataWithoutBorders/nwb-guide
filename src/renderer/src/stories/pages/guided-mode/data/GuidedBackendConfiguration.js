@@ -12,17 +12,18 @@ import { until } from "lit/directives/until.js";
 
 import { resolve } from "../../../../promises";
 import { InstanceManager } from "../../../InstanceManager.js";
-import { getSchema } from "../../../../../../../schemas/backend-configuration.schema";
 import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
 import { getResourceUsage } from '../../../../validation/backend-configuration'
 
+import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
+
 const getBackendConfigurations = (info, options = {}) => run(`configuration`, info, options);
 
 const itemIgnore = {
     full_shape: true,
-    compression_options: true,
+    compression_options: true, // NOTE: Must still request
     filter_options: true,
 };
 
@@ -100,60 +101,17 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         await this.rendered;
     }
 
-    #bufferShapeDescription = (value, itemsize) => {
-        return `Expected RAM usage: ${getResourceUsage(value, itemsize).toFixed(2)} GB`;
-    }
-    #chunkShapeDescription = (value, itemsize) => {
-        return `Disk space usage per chunk: ${getResourceUsage(value, itemsize, 1e6).toFixed(2)} MB`;
-    }
-
-    #getItemSize = (path, itemsizes) => itemsizes[path.slice(0, -1).join("/")];
-
-    #updateSchema(schema, parent, itemsize, properties=[ 'chunk_shape', 'buffer_shape' ]) {
-        const { chunk_shape, buffer_shape, full_shape } = parent;
-
-        const chunkSchema = schema.properties.chunk_shape;
-        const bufferSchema = schema.properties.buffer_shape;
-
-        const shapeMax = full_shape[0]
-        
-        if (properties.includes('chunk_shape')) {
-            chunkSchema.items.min = bufferSchema.items.min = 1
-            chunkSchema.maxItems = chunkSchema.minItems = chunk_shape.length;
-            chunkSchema.items.max = shapeMax
-            chunkSchema.description = this.#chunkShapeDescription(
-                chunk_shape,
-                itemsize
-            );
-
-        }
-
-        if (properties.includes('buffer_shape')) {
-
-            bufferSchema.items.max = shapeMax
-            bufferSchema.items.step = chunk_shape[0] // Constrain to increments of chunk size
-            bufferSchema.strict = true
-
-            bufferSchema.maxItems = bufferSchema.minItems = buffer_shape.length;
-            bufferSchema.description = this.#bufferShapeDescription(
-                buffer_shape,
-                itemsize
-            );
-        }
-    }
-
     renderInstance = (info) => {
         const { session, subject, info: configuration } = info;
-        const { results, schema, itemsizes } = configuration;
+        const { results, schema: itemSchema, itemsizes } = configuration;
 
         let instance;
         if (Object.keys(results).length === 0) {
             instance = document.createElement("span");
             instance.innerText = "No configuration options available for this session";
         } else {
-            const itemSchema = getSchema();
 
-            const schema = { type: "object", properties: {} };
+            const schema = { type: "object", properties: {} }
 
             const reorganized = Object.entries(results).reduce((acc, [name, item]) => {
                 const splitName = name.split("/");
@@ -166,35 +124,22 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 splitName.reduce((acc, key, i) => {
                     const { schema, results } = acc;
 
-                    const props = schema.properties ?? (schema.properties = {});
+                    const upperProps = schema.properties ?? (schema.properties = {});
                     if (!schema.required) schema.required = [];
                     schema.required.push(key)
 
                     // Set directly on last iteration
                     if (i === lenSplit - 1) {
-                        const schema = (props[key] = structuredClone(itemSchema));
-
-
-                        if (!item.compression_options) item.compression_options = {}; // Set blank compression options to an empty object
-                        
-                        if (props.filter_methods && !item.filter_methods) item.filter_methods = []
-                        if (props.filter_options && !item.filter_options) item.filter_options = []; // Set blank compression options to an empty object
-
-                        results[key] = item;
-
-                        const { full_shape } = item;
-
-                        schema.description = `Full Shape: ${full_shape} | Source size: ${getResourceUsage(full_shape, itemsize).toFixed(2)} GB`; // This is static
-                        
-                        this.#updateSchema(schema, item, itemsize)
-                       
-
+                        const { schema, resolved } = resolveBackendResults(itemSchema, item, itemsize)
+                        upperProps[key] = schema;
+                        results[key] = resolved;
+                        updateSchema(schema, item, itemsize)
                         return;
                     }
 
                     // Otherwise drill into the results
                     else {
-                        const thisSchema = props[key] ?? (props[key] = {});
+                        const thisSchema = upperProps[key] ?? (upperProps[key] = {});
                         if (!results[key]) results[key] = {};
                         return { schema: thisSchema, results: results[key] };
                     }
@@ -225,7 +170,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                     // Update used schema
                     const schema = form.schema;
-                    this.#updateSchema(schema, form.results, itemsizes[parentPath.join("/")])
+                    updateSchema(schema, form.results, itemsizes[parentPath.join("/")])
 
                     // Update rendered description
                     const input = form.inputs[name];
@@ -355,7 +300,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     #update = () => {
 
         return this.getMissingBackendConfigurations()
-            .then((update) => {
+            .then(async (update) => {
 
                 if (Object.keys(update)) {
                     this.mapSessions(({ subject, session, info }) => {
@@ -381,7 +326,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     }, update)
                 
 
-                    this.save(); // Save data as soon as it arrives from the server
+                    await this.save(); // Save data as soon as it arrives from the server
 
                 }
 

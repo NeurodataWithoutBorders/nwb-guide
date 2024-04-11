@@ -2,6 +2,7 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
+import { merge } from "../../utils.js";
 
 // ------------------------------------------------------------------------------
 // ------------------------ Preform Configuration -------------------------------
@@ -83,6 +84,11 @@ const questions = {
     },
 };
 
+const defaults = Object.entries(questions).reduce((acc, [name, info]) => {
+    acc[name] = info.default;
+    return acc;
+}, {});
+
 // -------------------------------------------------------------------------------------------
 // ------------------------ Derived from the above information -------------------------------
 // -------------------------------------------------------------------------------------------
@@ -133,9 +139,11 @@ export class GuidedPreform extends Page {
         subtitle: "Answer the following questions to simplify your workflow through the GUIDE",
     };
 
+    #setWorkflow = () => this.info.globalState.project.workflow = merge(this.state, structuredClone(defaults))
+
     beforeSave = async () => {
         await this.form.validate();
-        this.info.globalState.project.workflow = this.state;
+        this.#setWorkflow()
     };
 
     footer = {
@@ -196,7 +204,6 @@ export class GuidedPreform extends Page {
                     }
                 });
 
-                // console.log(name, parent)
                 const { upload_to_dandi, file_format } = parent;
 
                 // Only check file format because of global re-render
@@ -211,11 +218,11 @@ export class GuidedPreform extends Page {
 
             },
 
-            // Immediately re-render boolean values
+            // Save all changes
             onUpdate: async (path, value) => {
                 const willUpdateFlow = typeof value === "boolean";
                 this.unsavedUpdates = true;
-                this.info.globalState.project.workflow = this.state;
+                this.#setWorkflow()
                 if (willUpdateFlow) this.updateSections(); // Trigger section changes with new workflow
                 await this.save({}, false); // Save new workflow and section changes
             },

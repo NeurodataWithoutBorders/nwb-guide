@@ -801,7 +801,18 @@ def get_backend_configuration(info: dict) -> dict:
         for key in PROPS_TO_REMOVE:
             del dataset[key]
 
-    return dict(results=dataset_configurations, schema={}, backend=backend, itemsizes=itemsizes)  # configuration.schema(),
+    schema = list(configuration.schema()["$defs"].values())[0]
+    for key in PROPS_TO_REMOVE:
+        existed = schema["properties"].pop(key, None) # Why is dtype not included but the rest are?
+        if existed:
+            schema["required"].remove(key)
+    
+    return dict(
+        results=dataset_configurations, 
+        schema=schema, 
+        backend=backend, 
+        itemsizes=itemsizes
+    ) 
 
 
 def get_conversion_path_info(info: dict) -> dict:
