@@ -41,7 +41,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
     beforeSave = () => {
         merge(this.localState, this.info.globalState);
-        console.log('SAVING', this.localState, this.info.globalState, this.manager?.instances)
     };
 
     form;
@@ -76,6 +75,8 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             for (let { instance } of this.instances) {
                 if (instance instanceof JSONSchemaForm) await instance.validate(); // Will throw an error in the callback
             }
+
+            await this.validate(); // Validate all backend configurations
 
             await this.convert(
                 { preview: true },
@@ -267,6 +268,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
         const instances = {};
 
+        // Provide references to local state to each instance
         this.instances = this.mapSessions(
             ({ subject, session, info }) => {
                   const backend = info.configuration.backend ?? this.workflow.file_format.value // Use the default backend if none is set
@@ -278,6 +280,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                       schema: this.info.globalState.schema.configuration[subject][session][backend], // Get the schema for the current session
                   }})
               },
+              this.localState.results
         );
 
         this.instances.forEach(({ subject, session, instance }) => {
@@ -319,11 +322,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 name: "Validate",
                 primary: true,
                 onClick: async (id) => {
-
                     const { subject, session } = getInfoFromId(id)
-
-                    console.log("Clicked on", subject, session)
-
                     await this.validate({ session, subject })
                 }
             }
