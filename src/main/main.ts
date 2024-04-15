@@ -271,7 +271,11 @@ function initialize() {
     // Avoid CORS (for all requests) for Dandiset creation
     win.webContents.session.webRequest.onBeforeSendHeaders(
       (details, callback) => {
-        callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
+        callback({ requestHeaders: { 
+          Origin: '*',
+          Referer: "http://localhost:5174/", // Spoof the referrer
+          ...details.requestHeaders
+        } });
       },
     );
 
