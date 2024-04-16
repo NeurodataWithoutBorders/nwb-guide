@@ -24,7 +24,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
         display: "block",
     });
 
-    const bars = {}
+    const bars = {};
 
     const getBar = (id) => {
         if (!bars[id]) {
@@ -33,7 +33,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
             element.append(bar);
         }
         return bars[id];
-    }
+    };
 
     const globalSymbol = Symbol("global");
 
@@ -51,15 +51,15 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     const onProgressMessage = ({ data }) => {
         const parsed = JSON.parse(data);
         const { request_id, ...update } = parsed;
-        console.log("parsed", parsed)
+        console.log("parsed", parsed);
 
         if (request_id && request_id !== id) return;
         lastUpdate = Date.now();
-        
+
         const _barId = parsed.progress_bar_id;
         const barId = id === _barId ? globalSymbol : _barId;
         const bar = getBar(barId);
-        if (!tqdmCallback) bar.value = parsed.format_dict
+        if (!tqdmCallback) bar.value = parsed.format_dict;
         else tqdmCallback(update);
     };
 
@@ -68,7 +68,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     const close = () => {
         if (lastUpdate) {
             // const timeSinceLastUpdate = now - lastUpdate;
-            const animationLeft = 1000 // ProgressBar.animationDuration - timeSinceLastUpdate; // Add 100ms to ensure the animation has time to complete
+            const animationLeft = 1000; // ProgressBar.animationDuration - timeSinceLastUpdate; // Add 100ms to ensure the animation has time to complete
             if (animationLeft) setTimeout(() => popup.close(), animationLeft);
             else popup.close();
         } else popup.close();

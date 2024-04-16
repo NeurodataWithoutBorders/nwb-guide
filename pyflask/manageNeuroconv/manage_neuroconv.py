@@ -933,12 +933,13 @@ def inspect_nwb_file(payload):
 
     return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
+
 def _inspect_file_per_job(
-        nwbfile_path: str,
-        url,
-        ignore: Optional[List[str]] = None,
-        request_id: Optional[str] = None,
-    ):
+    nwbfile_path: str,
+    url,
+    ignore: Optional[List[str]] = None,
+    request_id: Optional[str] = None,
+):
 
     from nwbinspector import nwbinspector
     from pynwb import NWBHDF5IO
@@ -946,31 +947,38 @@ def _inspect_file_per_job(
     import requests
 
     checks = nwbinspector.configure_checks(
-        checks=nwbinspector.available_checks, 
+        checks=nwbinspector.available_checks,
         config=nwbinspector.load_config(filepath_or_keyword="dandi"),
         ignore=ignore,
     )
 
-    progress_bar_options=dict(
+    progress_bar_options = dict(
         mininterval=0,
-        on_progress_update=lambda message: requests.post(url=url, json=dict(request_id=request_id, **message))
+        on_progress_update=lambda message: requests.post(url=url, json=dict(request_id=request_id, **message)),
     )
 
     with NWBHDF5IO(path=nwbfile_path, mode="r", load_namespaces=True) as io:
         nwbfile = io.read()
-        messages = list(nwbinspector.run_checks(nwbfile=nwbfile, checks=checks, progress_bar_class=TQDMProgressSubscriber, progress_bar_options=progress_bar_options))
+        messages = list(
+            nwbinspector.run_checks(
+                nwbfile=nwbfile,
+                checks=checks,
+                progress_bar_class=TQDMProgressSubscriber,
+                progress_bar_options=progress_bar_options,
+            )
+        )
         for message in messages:
             if message.file_path is None:
-                message.file_path = nwbfile_path # Add file path to message if it is missing
-        
+                message.file_path = nwbfile_path  # Add file path to message if it is missing
+
         return messages
+
 
 def inspect_all(url, config):
 
     from concurrent.futures import ProcessPoolExecutor, as_completed
     from nwbinspector.utils import calculate_number_of_cpu
     from tqdm_publisher import TQDMProgressSubscriber
-
 
     path = config["path"]
     config.pop("path")
@@ -986,7 +994,7 @@ def inspect_all(url, config):
     n_jobs = None if n_jobs == -1 else n_jobs
 
     futures = list()
-    
+
     with ProcessPoolExecutor(max_workers=n_jobs) as executor:
         for nwbfile_path in nwbfile_paths:
             futures.append(
@@ -995,7 +1003,7 @@ def inspect_all(url, config):
                     nwbfile_path=str(nwbfile_path),
                     ignore=config.get("ignore"),
                     url=url,
-                    request_id=request_id
+                    request_id=request_id,
                 )
             )
 
@@ -1003,18 +1011,20 @@ def inspect_all(url, config):
 
         # Announce directly
         def on_progress_update(message):
-            message["progress_bar_id"] = request_id # Ensure request_id matches
-            announcer.announce(dict(
-                request_id=request_id, 
-                **message, 
-            ))
+            message["progress_bar_id"] = request_id  # Ensure request_id matches
+            announcer.announce(
+                dict(
+                    request_id=request_id,
+                    **message,
+                )
+            )
 
         inspection_iterable = TQDMProgressSubscriber(
             iterable=as_completed(futures),
             desc="Total files inspected",
             total=len(futures),
             mininterval=0,
-            on_progress_update=on_progress_update
+            on_progress_update=on_progress_update,
         )
 
         i = 0

@@ -250,6 +250,7 @@ class InspectNWBFolder(Resource):
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
 
+
 @neuroconv_api.route("/inspect")
 class InspectNWBFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
