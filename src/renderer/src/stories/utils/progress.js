@@ -24,15 +24,26 @@ export const createProgressPopup = async (options, tqdmCallback) => {
         display: "block",
     });
 
-    const progressBar = new ProgressBar();
-    elements.progress = progressBar;
-    element.append(progressBar);
+    const bars = {}
+
+    const getBar = (id) => {
+        if (!bars[id]) {
+            const bar = new ProgressBar();
+            bars[id] = bar;
+            element.append(bar);
+        }
+        return bars[id];
+    }
+
+    const globalSymbol = Symbol("global");
+
+    elements.progress = getBar(globalSymbol);
+
+    elements.bars = bars;
 
     const commonReturnValue = { swal: popup, fetch: { signal: cancelController.signal }, elements, ...options };
 
     // Provide a default callback
-    if (!tqdmCallback) tqdmCallback = ({ format_dict }) => (progressBar.value = format_dict);
-
     let lastUpdate;
 
     const id = createRandomString();
@@ -40,18 +51,24 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     const onProgressMessage = ({ data }) => {
         const parsed = JSON.parse(data);
         const { request_id, ...update } = parsed;
+        console.log("parsed", parsed)
+
         if (request_id && request_id !== id) return;
         lastUpdate = Date.now();
-        tqdmCallback(update);
+        
+        const _barId = parsed.progress_bar_id;
+        const barId = id === _barId ? globalSymbol : _barId;
+        const bar = getBar(barId);
+        if (!tqdmCallback) bar.value = parsed.format_dict
+        else tqdmCallback(update);
     };
 
     progressHandler.addEventListener("message", onProgressMessage);
 
     const close = () => {
         if (lastUpdate) {
-            const now = Date.now();
-            const timeSinceLastUpdate = now - lastUpdate;
-            const animationLeft = ProgressBar.animationDuration - timeSinceLastUpdate; // Add 100ms to ensure the animation has time to complete
+            // const timeSinceLastUpdate = now - lastUpdate;
+            const animationLeft = 1000 // ProgressBar.animationDuration - timeSinceLastUpdate; // Add 100ms to ensure the animation has time to complete
             if (animationLeft) setTimeout(() => popup.close(), animationLeft);
             else popup.close();
         } else popup.close();
