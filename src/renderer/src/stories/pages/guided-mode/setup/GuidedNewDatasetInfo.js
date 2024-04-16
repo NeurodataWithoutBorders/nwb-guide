@@ -43,7 +43,7 @@ export class GuidedNewDatasetPage extends Page {
             const name = this.state.name;
             if (!name) {
                 if (this.#nameNotification) this.dismiss(this.#nameNotification); // Dismiss previous custom notification
-                this.#nameNotification = this.notify("Please enter a project name.", "error");
+                this.#nameNotification = this.notify("Please enter a project name.", "error", 3000);
                 return;
             }
 
@@ -97,7 +97,12 @@ export class GuidedNewDatasetPage extends Page {
             onOverride: (name) => {
                 this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
-            validateOnChange,
+            validateOnChange: async (...args) => {
+                const results = await validateOnChange.call(this.form, ...args)
+                if (!results && args[0] === "name") this.#nameNotification && this.dismiss(this.#nameNotification);
+                return results
+            
+            },
             onUpdate: () => (this.unsavedUpdates = true),
             onThrow: function (message) {
                 if (skipError(message)) return;
