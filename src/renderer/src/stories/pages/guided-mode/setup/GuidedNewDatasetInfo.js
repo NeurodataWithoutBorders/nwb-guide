@@ -9,9 +9,10 @@ import projectGlobalSchema from "../../../../../../../schemas/json/project/globa
 import { merge } from "../../utils.js";
 import { onThrow } from "../../../../errors";
 import { header } from "../../../forms/utils";
-import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
+
+const skipError = (message) => (message.includes("requires") && message.includes("name"));
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -31,6 +32,13 @@ export class GuidedNewDatasetPage extends Page {
         onNext: async () => {
             const globalState = this.info.globalState.project;
 
+            this.dismiss(); // Dismiss all notifications
+
+            await this.form.validate().catch((error) => {
+                if (skipError(error.message)) return;
+                throw error;
+            })
+
             // Check validity of project name
             const name = this.state.name;
             if (!name) {
@@ -38,10 +46,6 @@ export class GuidedNewDatasetPage extends Page {
                 this.#nameNotification = this.notify("Please enter a project name.", "error");
                 return;
             }
-
-            this.dismiss(); // Dismiss all notifications
-
-            await this.form.validate();
 
             if (!name) return;
 
@@ -86,7 +90,7 @@ export class GuidedNewDatasetPage extends Page {
         this.form = new JSONSchemaForm({
             schema,
             results: this.state,
-            // validateEmptyValues: null,
+            validateEmptyValues: false,
             dialogOptions: {
                 properties: ["createDirectory"],
             },
@@ -95,7 +99,10 @@ export class GuidedNewDatasetPage extends Page {
             },
             validateOnChange,
             onUpdate: () => (this.unsavedUpdates = true),
-            onThrow,
+            onThrow: function (message) {
+                if (skipError(message)) return;
+                onThrow(message);
+            }
         });
 
         return this.form;
