@@ -98,10 +98,9 @@ export class GuidedNewDatasetPage extends Page {
                 this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
             validateOnChange: async (...args) => {
-                const results = await validateOnChange.call(this.form, ...args)
+                const results = await validateOnChange.call(this.form, ...args);
                 if (!results && args[0] === "name") this.#nameNotification && this.dismiss(this.#nameNotification);
-                return results
-            
+                return results;
             },
             onUpdate: () => (this.unsavedUpdates = true),
             onThrow: function (message) {
