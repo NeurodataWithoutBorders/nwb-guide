@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "./utils/useGlobalStyles.js";
 
-import { Main } from "./Main.js";
+import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
 import { NavigationSidebar } from "./NavigationSidebar.js";
 
@@ -180,7 +180,30 @@ export class Dashboard extends LitElement {
         else if (typeof page === "object") return this.getPage(Object.values(page)[0]);
     }
 
+    updateSections({ sidebar = true, main = false } = {}, globalState = this.page.info.globalState) {
+        const info = this.page.info;
+        let parent = info.parent;
+
+        if (sidebar) {
+            this.subSidebar.sections = this.#getSections(parent.info.pages, globalState); // Update sidebar items (if changed)
+        }
+
+        const { sections } = this.subSidebar;
+
+        if (main) {
+            if (this.page.header) delete this.page.header.sections; // Ensure sections are updated
+            this.main.set({
+                page: this.page,
+                sections,
+            });
+        }
+
+        return sections;
+    }
+
     setMain(page) {
+        window.getSelection().empty(); // Remove user selection before transitioning
+
         // Update Previous Page
         const info = page.info;
         const previous = this.page;
@@ -208,7 +231,7 @@ export class Dashboard extends LitElement {
         if (isNested) {
             let parent = info.parent;
             while (parent.info.parent) parent = parent.info.parent; // Lock sections to the top-level parent
-            this.subSidebar.sections = this.#getSections(parent.info.pages, toPass.globalState); // Update sidebar items (if changed)
+            this.updateSections({ sidebar: true }, toPass.globalState);
             this.subSidebar.active = info.id; // Update active item (if changed)
             this.sidebar.hide(true);
             this.subSidebar.show();
@@ -226,14 +249,12 @@ export class Dashboard extends LitElement {
                 ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
                 : projectName;
 
-            this.main.set({
-                page,
-                sections: this.subSidebar.sections ?? {},
-            });
+            this.updateSections({ sidebar: false, main: true });
 
             if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
 
             const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
+
             if (skipped) {
                 if (isStorybook) return; // Do not skip on storybook
 
@@ -279,15 +300,7 @@ export class Dashboard extends LitElement {
                 pageState.active = false;
 
                 // Check if page is skipped based on workflow state (if applicable)
-                if (page.workflow) {
-                    const workflow = page.workflow;
-                    const workflowValues = globalState.project?.workflow ?? {};
-                    const skipped = Object.entries(workflow).some(([key, state]) => {
-                        if (!workflowValues[key]) return state.skip;
-                    });
-
-                    pageState.skipped = skipped;
-                }
+                pageState.skipped = checkIfPageIsSkipped(page, globalState.project?.workflow);
 
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 
@@ -296,7 +309,7 @@ export class Dashboard extends LitElement {
             }
         });
 
-        return globalState.sections;
+        return (globalState.sections = { ...globalState.sections }); // Update global state with new reference (to ensure re-render)
     };
 
     #transitionPromise = {};

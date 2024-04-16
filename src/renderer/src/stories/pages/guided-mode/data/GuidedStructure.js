@@ -35,6 +35,7 @@ export class GuidedStructurePage extends Page {
 
         this.addButton.innerText = "Add Format";
         this.addButton.onClick = () => {
+            this.search.shadowRoot.querySelector("input").focus();
             this.searchModal.toggle(true);
         };
 
@@ -52,10 +53,7 @@ export class GuidedStructurePage extends Page {
         },
     });
 
-    list = new List({
-        emptyMessage: defaultEmptyMessage,
-        onChange: () => (this.unsavedUpdates = "conversions"),
-    });
+    list = new List({ emptyMessage: defaultEmptyMessage });
 
     addButton = new Button();
 
@@ -146,6 +144,8 @@ export class GuidedStructurePage extends Page {
 
         this.list.emptyMessage = defaultEmptyMessage;
 
+        const items = [];
+
         for (const [key, name] of Object.entries(interfaces)) {
             let found = this.search.options?.find((item) => item.value === name);
 
@@ -158,8 +158,20 @@ export class GuidedStructurePage extends Page {
                 };
             }
 
-            this.list.add({ ...found, key }); // Add previously selected items
+            items.push({ ...found, key });
         }
+
+        const ogList = this.list;
+
+        this.list = new List({
+            items,
+            emptyMessage: defaultEmptyMessage,
+            onChange: () => (this.unsavedUpdates = "conversions"),
+        });
+
+        this.list.style.display = "inline-block";
+
+        ogList.replaceWith(this.list);
 
         this.addButton.removeAttribute("hidden");
         super.updated(); // Call if updating data
@@ -167,8 +179,6 @@ export class GuidedStructurePage extends Page {
 
     render() {
         // Reset list
-        this.list.style.display = "inline-block";
-        this.list.clear();
         this.addButton.setAttribute("hidden", "");
 
         return html`

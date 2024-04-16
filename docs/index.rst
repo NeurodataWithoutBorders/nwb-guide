@@ -19,5 +19,6 @@ The resulting files are fully compliant with the best practices expected of the 
    :maxdepth: 2
 
    installation
+   tutorials/index
    format_support
    developer_guide

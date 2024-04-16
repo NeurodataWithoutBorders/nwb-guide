@@ -1,7 +1,7 @@
 {
   "name": "nwb-guide",
   "productName": "NWB GUIDE",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.",
   "main": "./build/main/main.js",
   "engine": {
@@ -39,7 +39,8 @@
     "deploy:electron:linux": "electron-builder build --linux --publish always",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "chromatic": "npx chromatic"
+    "chromatic": "npx chromatic",
+    "build:docs": "sphinx-build -b html docs/ _build/html/"
   },
   "lint-staged": {
     "./**/*.{html|css|js|md|yml}": [

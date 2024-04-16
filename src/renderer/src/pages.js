@@ -2,7 +2,6 @@ import { GettingStartedPage } from "./stories/pages/getting-started/GettingStart
 import { DocumentationPage } from "./stories/pages/documentation/Documentation";
 import { ContactPage } from "./stories/pages/contact-us/Contact";
 import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome";
-import { GuidedStartPage } from "./stories/pages/guided-mode/GuidedStart";
 import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/setup/GuidedNewDatasetInfo";
 import { GuidedStructurePage } from "./stories/pages/guided-mode/data/GuidedStructure";
 import { sections } from "./stories/pages/globals";
@@ -28,6 +27,7 @@ import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 import { InspectPage } from "./stories/pages/inspect/InspectPage";
 import { PreviewPage } from "./stories/pages/preview/PreviewPage";
 import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
+import { GuidedDandiResultsPage } from "./stories/pages/guided-mode/results/GuidedDandiResults";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -84,10 +84,6 @@ const pages = {
         label: "Convert",
         icon: guidedIcon,
         pages: {
-            start: new GuidedStartPage({
-                label: "Start",
-            }),
-
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
@@ -132,16 +128,22 @@ const pages = {
 
             inspect: new GuidedInspectorPage({
                 title: "Inspector Report",
-                label: "Inspect files",
+                label: "Validate metadata",
                 section: sections[2],
                 sync: ["preview"],
             }),
 
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
-                label: "Preview files",
+                label: "Preview NWB files",
                 section: sections[2],
                 sync: ["preview"],
+            }),
+
+            conversion: new GuidedResultsPage({
+                title: "Conversion Review",
+                label: "Review conversion",
+                section: sections[2],
             }),
 
             upload: new GuidedUploadPage({
@@ -151,9 +153,9 @@ const pages = {
                 sync: ["conversion"],
             }),
 
-            review: new GuidedResultsPage({
-                title: "Conversion Review",
-                label: "View conversion report",
+            review: new GuidedDandiResultsPage({
+                title: "Upload Review",
+                label: "Review published data",
                 section: sections[3],
             }),
         },
