@@ -12,7 +12,7 @@ import { header } from "../../../forms/utils";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 
-const skipError = (message) => (message.includes("requires") && message.includes("name"));
+const skipError = (message) => message.includes("requires") && message.includes("name");
 
 export class GuidedNewDatasetPage extends Page {
     constructor(...args) {
@@ -37,7 +37,7 @@ export class GuidedNewDatasetPage extends Page {
             await this.form.validate().catch((error) => {
                 if (skipError(error.message)) return;
                 throw error;
-            })
+            });
 
             // Check validity of project name
             const name = this.state.name;
@@ -102,7 +102,7 @@ export class GuidedNewDatasetPage extends Page {
             onThrow: function (message) {
                 if (skipError(message)) return;
                 onThrow(message);
-            }
+            },
         });
 
         return this.form;
