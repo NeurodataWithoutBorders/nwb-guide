@@ -648,27 +648,22 @@ export class JSONSchemaInput extends LitElement {
         const description = this.description ?? schema.description;
 
         const renderedDescription = description
-        ? html`<p class="guided--text-input-instructions">
-              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
-                  ? ""
-                  : "."}
-          </p>`
-        : ""
+            ? html`<p class="guided--text-input-instructions">
+                  ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0]) ? "" : "."}
+              </p>`
+            : "";
 
         return html`
-            <div class="${this.required || this.conditional ? "required" : ""} ${
-                this.conditional ? "conditional" : ""
-            }">
-
-                ${
-                    this.showLabel
-                        ? html`<label class="guided--form-label"
+            <div
+                class="${this.required || this.conditional ? "required" : ""} ${this.conditional ? "conditional" : ""}"
+            >
+                ${this.showLabel
+                    ? html`<label class="guided--form-label"
                               >${(schema.title ? unsafeHTML(schema.title) : null) ??
                               header(this.path.slice(-1)[0])}</label
                           >${renderedDescription}`
-                        : ""
-                }
-                
+                    : ""}
+
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
                 ${this.showLabel ? "" : renderedDescription}
             </div>

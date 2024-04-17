@@ -7,7 +7,7 @@ export default function preprocessSourceDataSchema (schema) {
     // Abstract across different interfaces
     Object.entries(schema.properties ?? {}).forEach(([key, schema]: [string, any]) => {
 
-            
+
             pathKeys.forEach(pathKey => {
                 if (schema.properties[pathKey])schema.properties[pathKey].title = false
             })
