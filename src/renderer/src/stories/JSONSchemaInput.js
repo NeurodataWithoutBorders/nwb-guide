@@ -1001,7 +1001,6 @@ export class JSONSchemaInput extends LitElement {
                         if (ev.key === "Enter") submitButton.onClick();
                     });
 
-
                     return html`<div style="width: 100%;">
                         <div style="display: flex; gap: 10px; align-items: center;">${input}${submitButton}</div>
                         ${list}
