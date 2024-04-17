@@ -14,7 +14,7 @@ export const capitalize = (str: string) => {
 }
 
 
-export const header = (headerStr: string) => headerStr.split(/[_\s]/).filter(str => !!str).map(capitalize).join(' ')
+export const header = (headerStr: string, capAll = true) => headerStr.split(/[_\s]/).filter(str => !!str).map((str, i) => capAll || i === 0 ? capitalize(str) : str).join(' ')
 
 export const textToArray = (value: string) => value.split("\n")
                                             .map((str) => str.trim())

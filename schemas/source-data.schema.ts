@@ -1,5 +1,7 @@
 // import { merge } from "../src/renderer/src/stories/pages/utils"
 
+import { header } from "../src/renderer/src/stories/forms/utils"
+
 const pathKeys = ["file_path", "folder_path", "file_paths", "folder_paths"]
 
 export default function preprocessSourceDataSchema (schema) {
@@ -9,7 +11,11 @@ export default function preprocessSourceDataSchema (schema) {
 
             
             pathKeys.forEach(pathKey => {
-                if (schema.properties[pathKey])schema.properties[pathKey].title = false
+                if (schema.properties[pathKey]) {
+                    const hasDescription = schema.properties[pathKey]?.description
+                    schema.properties[pathKey].title = false
+                    if (!hasDescription) schema.properties[pathKey].description = `${header(pathKey, false)} associated with this data format.`
+                }
             })
 
             if (schema.properties.file_paths) {
