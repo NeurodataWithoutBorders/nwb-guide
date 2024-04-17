@@ -1423,10 +1423,7 @@ export class JSONSchemaForm extends LitElement {
         if (this.#resolving) return this.#resolving;
         this.#resolving = resolve(this.#rendered, () => {
             const promise = Promise.all([...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered))
-            promise.then(() => {
-                this.#resolving = null;
-                console.error('DONE', this.base)
-            })
+            promise.then(() => this.#resolving = null)
             return promise
         }
         );
