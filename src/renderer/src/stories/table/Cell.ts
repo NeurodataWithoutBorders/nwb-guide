@@ -16,7 +16,7 @@ type ValidationResult = {
 
 type ValidationFunction = (value: any) => any | any[]
 
-type OnValidateFunction = (info: ValidationResult) => void
+type OnValidateFunction = (info: ValidationResult, changed?: boolean) => void
 
 type TableCellProps = {
     value: string,

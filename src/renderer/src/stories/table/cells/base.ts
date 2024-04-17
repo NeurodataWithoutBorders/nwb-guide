@@ -98,7 +98,7 @@ export class TableCellBase extends LitElement {
         this.editable = editable
 
         this.#editable.addEventListener('input', (ev: InputEvent) => {
-            this.interacted = true
+            if (ev.isTrusted) this.interacted = true
             if (ev.inputType.includes('history')) this.setText(this.#editable.innerText) // Catch undo / redo}
         })
 
@@ -160,7 +160,6 @@ export class TableCellBase extends LitElement {
                 document.removeEventListener('click', this.#editableClose)
             } else {
                 current = this.#editor.value
-                console.log('Editor value', current)
                 this.interacted = true
                 if (this.#editor && this.#editor.onEditEnd) this.#editor.onEditEnd()
             }
