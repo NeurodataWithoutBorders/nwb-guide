@@ -137,7 +137,7 @@ export class Page extends LitElement {
         if (desyncedData) {
             delete desyncedData[key];
             if (Object.keys(desyncedData).length === 0) delete this.info.globalState.desyncedData;
-            await this.save({}, false)
+            await this.save({}, false);
         }
     }
 

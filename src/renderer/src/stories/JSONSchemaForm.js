@@ -443,7 +443,7 @@ export class JSONSchemaForm extends LitElement {
                 isObject(value) && isObject(resolvedParent) ? merge(value, resolvedParent[name]) : value; // Merge with existing resolved values
         }
 
-        if ((hasUpdate || forceUpdate)) this.onUpdate(localPath, value); // Ensure the value has actually changed
+        if (hasUpdate || forceUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
     }
 
     #addMessage = (name, message, type) => {
@@ -1417,19 +1417,20 @@ export class JSONSchemaForm extends LitElement {
         this.inputs = {};
     }
 
-    #resolving
+    #resolving;
     // Check if everything is internally rendered
     get rendered() {
         if (this.#resolving) return this.#resolving;
         this.#resolving = resolve(this.#rendered, () => {
-            const promise = Promise.all([...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered))
+            const promise = Promise.all(
+                [...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered)
+            );
             promise.then(() => {
                 this.#resolving = null;
-                console.error('DONE', this.base)
-            })
-            return promise
-        }
-        );
+                console.error("DONE", this.base);
+            });
+            return promise;
+        });
         return this.#resolving;
     }
 
