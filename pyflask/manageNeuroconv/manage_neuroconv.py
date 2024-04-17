@@ -989,7 +989,7 @@ def inspect_all(url, config):
     if request_id:
         config.pop("request_id")
 
-    n_jobs = config.get("n_jobs", 1)
+    n_jobs = config.get("n_jobs", -2) # Default to all but one CPU
     n_jobs = calculate_number_of_cpu(requested_cpu=n_jobs)
     n_jobs = None if n_jobs == -1 else n_jobs
 
@@ -1044,7 +1044,6 @@ def inspect_nwb_folder(url, payload):
     from pickle import PicklingError
 
     kwargs = dict(
-        n_jobs=-2,  # uses number of CPU - 1
         ignore=[
             "check_description",
             "check_data_orientation",

@@ -11,6 +11,9 @@ import { InspectorList, InspectorLegend } from "../../preview/inspector/Inspecto
 import { download } from "./utils.js";
 import { createProgressPopup } from "../../utils/progress.js";
 
+import { ready } from "../../../../../../schemas/dandi-upload.schema";
+import { JSONSchemaForm } from "../../JSONSchemaForm.js";
+
 export class InspectPage extends Page {
     constructor(...args) {
         super(...args);
@@ -24,10 +27,10 @@ export class InspectPage extends Page {
     inspect = async (paths, kwargs = {}, options = {}) => {
         const swalOpts = await createProgressPopup(
             { title: "Inspecting selected filesystem entries.", ...options },
-            ({ format_dict }) => (elements.progress.value = format_dict)
         );
 
-        const { close: closeProgressPopup, elements } = swalOpts;
+        const { close: closeProgressPopup } = swalOpts;
+
 
         const result = await run("inspect", { request_id: swalOpts.id, paths, ...kwargs }, swalOpts).catch((error) => {
             this.notify(error.message, "error");
@@ -55,7 +58,11 @@ export class InspectPage extends Page {
 
         const legend = new InspectorLegend();
 
-        const result = await this.inspect(value);
+        const kwargs = {}
+        const nJobs = this.form.inputs['n_jobs'].value
+        if (nJobs) kwargs.n_jobs = nJobs
+
+        const result = await this.inspect(value, kwargs);
 
         const messages = result.messages;
 
@@ -107,35 +114,55 @@ export class InspectPage extends Page {
         modal.toggle(true);
     };
 
-    input = new JSONSchemaInput({
-        path: ["filesystem_paths"],
+    form = new JSONSchemaForm({
         schema: {
-            type: "array",
-            items: {
-                type: "string",
-                format: ["file", "directory"],
-                multiple: true,
-            },
+            properties: {
+                filesystem_paths: {
+                    title: false,
+                    type: "array",
+                    items: {
+                        type: "string",
+                        format: ["file", "directory"],
+                        multiple: true,
+                    },
+                },
+                n_jobs: {
+                    type: "number",
+                    title: "Job Count",
+                    description: "Number of parallel jobs to run. Leave blank to use all available cores.",
+                    min: 1,
+                    step: 1,
+                }
+            }
         },
+        showLabel: true,
         onThrow,
     });
 
-    render() {
-        const button = new Button({
-            label: "Start Inspection",
-            onClick: async () => this.showReport(this.input.value),
-        });
+    updated() {
 
         const urlFilePath = new URL(document.location).searchParams.get("file");
 
         if (urlFilePath) {
             this.showReport(urlFilePath);
-            this.input.value = urlFilePath;
+            this.form.inputs['filesystem_paths'].value = urlFilePath;
         }
 
+        ready.cpus.then(({ number_of_jobs }) => {
+            const nJobsInput = this.form.inputs["n_jobs"]
+            nJobsInput.schema.max = number_of_jobs.max
+        })
+    }
+
+    render() {
+        const button = new Button({
+            label: "Start Inspection",
+            onClick: async () => this.showReport(this.form.inputs['filesystem_paths'].value),
+        });
+
         return html`
-            ${this.input}
-            <br />
+            ${this.form}
+            <br/><br/>
             ${button}
         `;
     }
