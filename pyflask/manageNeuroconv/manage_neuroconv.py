@@ -411,7 +411,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["ElectrodeColumns"] = {
             "type": "array",
             "minItems": 0,
-            "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
+            "items": {"$ref": "#/properties/Ecephys/definitions/ElectrodeColumn"},
         }
 
         ecephys_schema["required"].append("ElectrodeColumns")
@@ -429,7 +429,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             ecephys_properties["UnitColumns"] = {
                 "type": "array",
                 "minItems": 0,
-                "items": {"$ref": "#/properties/Ecephys/properties/definitions/UnitColumn"},
+                "items": {"$ref": "#/properties/Ecephys/definitions/UnitColumn"},
             }
 
             schema["properties"]["Ecephys"]["required"].append("UnitColumns")
@@ -463,7 +463,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "maxItems": n_units,
             "items": {
                 "allOf": [
-                    {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
+                    {"$ref": "#/properties/Ecephys/definitions/Unit"},
                     {"required": list(map(lambda info: info["name"], unit_columns))},
                 ]
             },
@@ -499,7 +499,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "maxItems": n_electrodes,
             "items": {
                 "allOf": [
-                    {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
+                    {"$ref": "#/properties/Ecephys/definitions/Electrode"},
                     {"required": list(map(lambda info: info["name"], electrode_columns))},
                 ]
             },
@@ -521,7 +521,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
 
-        defs = ecephys_properties["definitions"]
+        defs = ecephys_schema["definitions"]
 
         electrode_def = defs["Electrodes"]
 
