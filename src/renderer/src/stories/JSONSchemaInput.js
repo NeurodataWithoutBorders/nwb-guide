@@ -365,6 +365,7 @@ export class JSONSchemaInput extends LitElement {
             }
 
             main {
+                margin-top: 10px;
                 display: flex;
             }
 
@@ -451,7 +452,6 @@ export class JSONSchemaInput extends LitElement {
                 display: block;
                 width: 100%;
                 margin: 0;
-                margin-bottom: 10px;
                 color: black;
                 font-weight: 600;
                 font-size: 1.2em !important;
@@ -647,6 +647,14 @@ export class JSONSchemaInput extends LitElement {
 
         const description = this.description ?? schema.description;
 
+        const renderedDescription = description
+        ? html`<p class="guided--text-input-instructions">
+              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
+                  ? ""
+                  : "."}
+          </p>`
+        : ""
+
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
                 this.conditional ? "conditional" : ""
@@ -657,20 +665,12 @@ export class JSONSchemaInput extends LitElement {
                         ? html`<label class="guided--form-label"
                               >${(schema.title ? unsafeHTML(schema.title) : null) ??
                               header(this.path.slice(-1)[0])}</label
-                          >`
+                          >${renderedDescription}`
                         : ""
                 }
-                </label>
+                
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
-                ${
-                    description
-                        ? html`<p class="guided--text-input-instructions">
-                              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
-                                  ? ""
-                                  : "."}
-                          </p>`
-                        : ""
-                }
+                ${this.showLabel ? "" : renderedDescription}
             </div>
         `;
     }

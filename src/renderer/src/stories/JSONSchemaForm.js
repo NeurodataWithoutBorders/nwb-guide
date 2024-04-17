@@ -691,7 +691,7 @@ export class JSONSchemaForm extends LitElement {
             pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
             renderTable: this.renderTable,
             renderCustomHTML: this.renderCustomHTML,
-            showLabel: true,
+            showLabel: !('title' in info && !info.title),
         });
 
         this.inputs[localPath.join("-")] = interactiveInput;
@@ -1165,6 +1165,7 @@ export class JSONSchemaForm extends LitElement {
             const base = [...this.base, ...localPath];
 
             const explicitlyRequired = schema.required?.includes(name) ?? false;
+
 
             const headerName = header(info.title ?? name);
 
