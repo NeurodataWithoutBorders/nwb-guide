@@ -710,7 +710,7 @@ def create_file(info: dict) -> dict:
     nwbfile_path = path_info["file"]
 
     # Delete files manually if using Zarr
-    if (overwrite):
+    if overwrite:
         if nwbfile_path.exists():
             if nwbfile_path.is_dir():
                 rmtree(nwbfile_path)
@@ -720,7 +720,7 @@ def create_file(info: dict) -> dict:
     if will_configure_backend:
 
         backend = backend_configuration.get("backend", "hdf5")
-        configuration_values = backend_configuration.get('results', {}).get(backend, {})
+        configuration_values = backend_configuration.get("results", {}).get(backend, {})
 
         # Create NWB file with appropriate backend configuration
         with make_or_load_nwbfile(
@@ -757,15 +757,14 @@ def create_file(info: dict) -> dict:
             overwrite=overwrite,
             conversion_options=options,
         )
-        
 
 
 def get_backend_configuration(info: dict) -> dict:
 
     import numpy as np
 
-    PROPS_TO_REMOVE = [ "object_id", "dataset_name", "location_in_file", "dtype" ]
-    PROPS_TO_IGNORE = [ 'full_shape' ]
+    PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
+    PROPS_TO_IGNORE = ["full_shape"]
 
     info["overwrite"] = True  # Always overwrite the file
 
@@ -809,16 +808,11 @@ def get_backend_configuration(info: dict) -> dict:
 
     schema = list(configuration.schema()["$defs"].values())[0]
     for key in PROPS_TO_REMOVE:
-        existed = schema["properties"].pop(key, None) # Why is dtype not included but the rest are?
+        existed = schema["properties"].pop(key, None)  # Why is dtype not included but the rest are?
         if existed:
             schema["required"].remove(key)
-    
-    return dict(
-        results=dataset_configurations, 
-        schema=schema, 
-        backend=backend, 
-        itemsizes=itemsizes
-    ) 
+
+    return dict(results=dataset_configurations, schema=schema, backend=backend, itemsizes=itemsizes)
 
 
 def get_conversion_path_info(info: dict) -> dict:

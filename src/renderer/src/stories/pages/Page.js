@@ -195,7 +195,7 @@ export class Page extends LitElement {
 
             const sessionResults = globalState.results[subject][session];
 
-            const configurationCopy = { ...sessionResults.configuration ?? {} };
+            const configurationCopy = { ...(sessionResults.configuration ?? {}) };
 
             const sourceDataCopy = structuredClone(sessionResults.source_data);
 
@@ -214,12 +214,11 @@ export class Page extends LitElement {
                 delete sessionInfo.configuration; // Skip backend configuration options if specified as such
                 delete optsCopy.backend;
             } else {
-
-                if (typeof optsCopy.configuration === "object") merge(optsCopy.configuration, configurationCopy)
+                if (typeof optsCopy.configuration === "object") merge(optsCopy.configuration, configurationCopy);
 
                 if (!configurationCopy.backend) configurationCopy.backend = this.workflow.file_format.value; // Provide default
             }
-            
+
             delete optsCopy.configuration;
 
             console.log("Running conversion for", subject, session, sessionInfo);

@@ -266,7 +266,7 @@ export class Search extends LitElement {
         if (inputMode) this.setAttribute("active", false);
 
         if (this.strict && !selectedOption) {
-            input.value = this.#value.label ?? this.#value.key ?? '';
+            input.value = this.#value.label ?? this.#value.key ?? "";
             return;
         }
 

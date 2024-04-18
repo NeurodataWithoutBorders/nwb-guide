@@ -20,8 +20,8 @@ export class GuidedStubPreviewPage extends Page {
     }
 
     workflow = {
-        file_format: {}
-    }
+        file_format: {},
+    };
 
     header = {
         subtitle: `Preview file contents on truncated files using the Neurosift application`,

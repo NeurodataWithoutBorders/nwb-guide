@@ -66,16 +66,16 @@ const questions = {
         strict: true,
         title: "What file format would you like to use?",
         description: "Choose a default file format for your data.",
-        default: "hdf5"
+        default: "hdf5",
     },
 
     backend_configuration: {
         type: "boolean",
         title: "Will you customize low-level data storage options?",
-        description: "<span>Dataset chunking, compression, etc.</span><br><small>This also allows you to change file formats per-session</small>",
+        description:
+            "<span>Dataset chunking, compression, etc.</span><br><small>This also allows you to change file formats per-session</small>",
         default: false,
     },
-
 
     upload_to_dandi: {
         type: "boolean",
@@ -139,11 +139,11 @@ export class GuidedPreform extends Page {
         subtitle: "Answer the following questions to simplify your workflow through the GUIDE",
     };
 
-    #setWorkflow = () => this.info.globalState.project.workflow = merge(this.state, structuredClone(defaults))
+    #setWorkflow = () => (this.info.globalState.project.workflow = merge(this.state, structuredClone(defaults)));
 
     beforeSave = async () => {
         await this.form.validate();
-        this.#setWorkflow()
+        this.#setWorkflow();
     };
 
     footer = {
@@ -165,7 +165,6 @@ export class GuidedPreform extends Page {
             results: this.state,
             validateEmptyValues: false, // Only show errors after submission
             validateOnChange: function (name, parent, path, value) {
-                
                 dependents[name].forEach((dependent) => {
                     const dependencies = questions[dependent.name].dependencies;
                     const uniformDeps = Array.isArray(dependencies)
@@ -208,21 +207,22 @@ export class GuidedPreform extends Page {
 
                 // Only check file format because of global re-render
                 if (name === "file_format") {
-                    if (upload_to_dandi === true && file_format === "zarr") return [
-                        {
-                            type: 'error',
-                            message: "<h4 style='margin:0;'>Zarr files are not supported by DANDI</h4><span>Please change the file format to HDF5 or disable DANDI upload.</span>",
-                        },
-                    ]
+                    if (upload_to_dandi === true && file_format === "zarr")
+                        return [
+                            {
+                                type: "error",
+                                message:
+                                    "<h4 style='margin:0;'>Zarr files are not supported by DANDI</h4><span>Please change the file format to HDF5 or disable DANDI upload.</span>",
+                            },
+                        ];
                 }
-
             },
 
             // Save all changes
             onUpdate: async (path, value) => {
                 const willUpdateFlow = typeof value === "boolean";
                 this.unsavedUpdates = true;
-                this.#setWorkflow()
+                this.#setWorkflow();
                 if (willUpdateFlow) this.updateSections(); // Trigger section changes with new workflow
                 await this.save({}, false); // Save new workflow and section changes
             },

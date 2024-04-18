@@ -15,7 +15,7 @@ import { InstanceManager } from "../../../InstanceManager.js";
 import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
-import { getResourceUsage } from '../../../../validation/backend-configuration'
+import { getResourceUsage } from "../../../../validation/backend-configuration";
 
 import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
 import { getInfoFromId } from "./utils.js";
@@ -53,7 +53,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     header = {};
 
     workflow = {
-
         // Ensure conversion is completed when skipped
         backend_configuration: {
             skip: async () => {
@@ -63,13 +62,12 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 });
             },
         },
-        
+
         file_format: {},
     };
 
     footer = {
         onNext: async () => {
-            
             await this.save(); // Save in case the conversion fails
 
             for (let { instance } of this.instances) {
@@ -78,10 +76,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
             await this.validate(); // Validate all backend configurations
 
-            await this.convert(
-                { preview: true },
-                { title: "Running preview conversion on all sessions" }
-            ); // Validate by trying to set backend configuration with the latest values
+            await this.convert({ preview: true }, { title: "Running preview conversion on all sessions" }); // Validate by trying to set backend configuration with the latest values
 
             return this.to(1);
         },
@@ -113,8 +108,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             instance = document.createElement("span");
             instance.innerText = "No configuration options available for this session";
         } else {
-
-            const schema = { type: "object", properties: {} }
+            const schema = { type: "object", properties: {} };
 
             const reorganized = Object.entries(results).reduce((acc, [name, item]) => {
                 const splitName = name.split("/");
@@ -129,14 +123,14 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                     const upperProps = schema.properties ?? (schema.properties = {});
                     if (!schema.required) schema.required = [];
-                    schema.required.push(key)
+                    schema.required.push(key);
 
                     // Set directly on last iteration
                     if (i === lenSplit - 1) {
-                        const { schema, resolved } = resolveBackendResults(itemSchema, item, itemsize)
+                        const { schema, resolved } = resolveBackendResults(itemSchema, item, itemsize);
                         upperProps[key] = schema;
                         results[key] = resolved;
-                        updateSchema(schema, item, itemsize)
+                        updateSchema(schema, item, itemsize);
                         return;
                     }
 
@@ -163,8 +157,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 ignore: {
                     "*": itemIgnore,
                 },
-                onUpdate: ( updatedPath ) => {
-
+                onUpdate: (updatedPath) => {
                     this.unsavedUpdates = true;
 
                     const parentPath = updatedPath.slice(0, -1);
@@ -173,47 +166,41 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
                     // Update used schema
                     const schema = form.schema;
-                    updateSchema(schema, form.results, itemsizes[parentPath.join("/")])
+                    updateSchema(schema, form.results, itemsizes[parentPath.join("/")]);
 
                     // Update rendered description
                     const input = form.inputs[name];
                     input.description = schema.properties[name].description;
 
                     // Buffer shape depends on chunk shape
-                    if (name === 'chunk_shape') form.inputs['buffer_shape'].schema = { ...form.inputs['buffer_shape'].schema } // Force schema update
-                
+                    if (name === "chunk_shape")
+                        form.inputs["buffer_shape"].schema = { ...form.inputs["buffer_shape"].schema }; // Force schema update
                 },
                 onThrow,
                 validateOnChange: async (name, _, path, value) => {
+                    const errors = [];
 
-                    const errors = []
+                    if (name === "chunk_shape") {
+                        const input = instance.getFormElement(path).inputs["chunk_shape"];
 
-                    if (name === 'chunk_shape') {
+                        const mbUsage = getResourceUsage(value, itemsizes[path.join("/")], 1e6);
 
-                        const input = instance.getFormElement(path).inputs['chunk_shape']
-
-                        const mbUsage = getResourceUsage(value, itemsizes[path.join("/")], 1e6)
-
-                        if (mbUsage > 20) errors.push(
-                            {
-                                message: "Recommended maximum chunk size is 20MB. You may want to reduce the size of the chunks.",
-                                type: "warning"
-                            }
-                        )
-
+                        if (mbUsage > 20)
+                            errors.push({
+                                message:
+                                    "Recommended maximum chunk size is 20MB. You may want to reduce the size of the chunks.",
+                                type: "warning",
+                            });
                         // NOTE: Generalize for more axes
-                        else if (mbUsage < 10 && value[0] !== input.schema.items.max) errors.push(
-                            {
-                                message: "Recommended minimum chunk size is 10MB. You may want to increase the size of the chunks.",
-                                type: "warning"
-                            }
-                        )
+                        else if (mbUsage < 10 && value[0] !== input.schema.items.max)
+                            errors.push({
+                                message:
+                                    "Recommended minimum chunk size is 10MB. You may want to increase the size of the chunks.",
+                                type: "warning",
+                            });
                     }
 
-
                     return errors.length ? errors : true;
-
-
                 },
             });
         }
@@ -222,66 +209,63 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     };
 
     getMissingBackendConfigurations = () => {
+        const toRun = this.mapSessions(({ session, subject }) => {
+            const sesResult = this.info.globalState.results[subject][session].configuration;
+            if (!sesResult) return { subject, session, skip: false };
 
-        const toRun = this.mapSessions(
-            ({ session, subject }) => {
-                const sesResult = this.info.globalState.results[subject][session].configuration;
-                if (!sesResult) return { subject, session, skip: false };
-                
-                const backend = sesResult.backend ?? this.workflow.file_format.value;
+            const backend = sesResult.backend ?? this.workflow.file_format.value;
 
-                return {
-                    subject,
-                    session,
-                    skip: !!sesResult.results[backend],
-                }
-            }
-        )
-        .filter(({ skip }) => !skip);
+            return {
+                subject,
+                session,
+                skip: !!sesResult.results[backend],
+            };
+        }).filter(({ skip }) => !skip);
 
         return this.runConversions(
             {},
             toRun, // All or specific session
             {
-                title: "Getting backend options"
+                title: "Getting backend options",
             },
             getBackendConfigurations
         );
     };
 
     validate = (toRun) => {
-        if (!toRun) return this.runConversions({}, true, { title: "Validating backend options" }, getBackendConfigurations);
+        if (!toRun)
+            return this.runConversions({}, true, { title: "Validating backend options" }, getBackendConfigurations);
 
-        const { subject, session } = toRun
+        const { subject, session } = toRun;
         return this.runConversions(
             { configuration: this.info.globalState.results[subject][session].configuration },
-            [ { subject, session } ] , // All or specific session
+            [{ subject, session }], // All or specific session
             {
                 title: "Validating backend options",
                 showCancelButton: false,
             },
             getBackendConfigurations
         );
-    }
+    };
 
     #getManager = () => {
-
         const instances = {};
 
         // Provide references to local state to each instance
-        this.instances = this.mapSessions(
-            ({ subject, session, info }) => {
-                  const backend = info.configuration.backend ?? this.workflow.file_format.value // Use the default backend if none is set
+        this.instances = this.mapSessions(({ subject, session, info }) => {
+            const backend = info.configuration.backend ?? this.workflow.file_format.value; // Use the default backend if none is set
 
-                  return this.renderInstance({ subject, session, info: {
-                      backend,
-                      results: info.configuration.results[backend], // Get the configuration options for the current session
-                      itemsizes: info.configuration.itemsizes[backend], // Get the item sizes for the current session
-                      schema: this.info.globalState.schema.configuration[subject][session][backend], // Get the schema for the current session
-                  }})
-              },
-              this.localState.results
-        );
+            return this.renderInstance({
+                subject,
+                session,
+                info: {
+                    backend,
+                    results: info.configuration.results[backend], // Get the configuration options for the current session
+                    itemsizes: info.configuration.itemsizes[backend], // Get the item sizes for the current session
+                    schema: this.info.globalState.schema.configuration[subject][session][backend], // Get the schema for the current session
+                },
+            });
+        }, this.localState.results);
 
         this.instances.forEach(({ subject, session, instance }) => {
             if (!instances[`sub-${subject}`]) instances[`sub-${subject}`] = {};
@@ -295,38 +279,39 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             instanceType: "Session",
             instances,
             controls: [
-            (id) => {
+                (id) => {
+                    const instanceInfo = id
+                        .split("/")
+                        .reduce((acc, key) => acc[key.split("-").slice(1).join("-")], this.localState.results);
+                    const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
 
-                const instanceInfo = id.split("/").reduce((acc, key) => acc[key.split('-').slice(1).join('-')], this.localState.results);
-                const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
-
-                return new JSONSchemaInput({
-                    path: [],
-                    schema: {
-                        type: "string",
-                        placeholder: "Select backend type",
-                        enum: Object.keys(backendMap),
-                        enumLabels: backendMap,
-                        strict: true
+                    return new JSONSchemaInput({
+                        path: [],
+                        schema: {
+                            type: "string",
+                            placeholder: "Select backend type",
+                            enum: Object.keys(backendMap),
+                            enumLabels: backendMap,
+                            strict: true,
+                        },
+                        value: backend,
+                        onUpdate: async (value) => {
+                            if (instanceInfo.configuration.backend === value) return;
+                            instanceInfo.configuration.backend = value; // Ensure new backend choice is persistent
+                            await this.save();
+                            await this.#update();
+                        },
+                    });
+                },
+                {
+                    name: "Validate",
+                    primary: true,
+                    onClick: async (id) => {
+                        const { subject, session } = getInfoFromId(id);
+                        await this.validate({ session, subject });
                     },
-                    value: backend,
-                    onUpdate: async (value) => {
-                        if (instanceInfo.configuration.backend === value) return;
-                        instanceInfo.configuration.backend = value; // Ensure new backend choice is persistent
-                        await this.save();
-                        await this.#update()
-                    }
-                });
-            },
-            {
-                name: "Validate",
-                primary: true,
-                onClick: async (id) => {
-                    const { subject, session } = getInfoFromId(id)
-                    await this.validate({ session, subject })
-                }
-            }
-            ]
+                },
+            ],
         });
 
         if (ogManager) ogManager.replaceWith(this.manager);
@@ -335,67 +320,56 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     };
 
     #update = () => {
-
         return this.getMissingBackendConfigurations()
             .then(async (update) => {
-
                 if (Object.keys(update)) {
                     this.mapSessions(({ subject, session, info }) => {
-
                         const { results, schema, backend, itemsizes } = info;
 
-                        const sesResults = this.localState.results[subject][session]
+                        const sesResults = this.localState.results[subject][session];
                         if (!sesResults.configuration) sesResults.configuration = {};
                         if (!sesResults.configuration.results) sesResults.configuration.results = {};
                         if (!sesResults.configuration.itemsizes) sesResults.configuration.itemsizes = {};
 
-                        sesResults.configuration.itemsizes[backend] = itemsizes // Set the item sizes for the current session
-                        sesResults.configuration.results[backend] = results // Set the configuration options for the current session
+                        sesResults.configuration.itemsizes[backend] = itemsizes; // Set the item sizes for the current session
+                        sesResults.configuration.results[backend] = results; // Set the configuration options for the current session
 
                         // Set the schema for the current session
-                        const path = [ subject, session, backend ];
+                        const path = [subject, session, backend];
                         path.reduce((acc, key, i) => {
-                            if (i === path.length - 1) acc[key] = schema
+                            if (i === path.length - 1) acc[key] = schema;
                             if (!acc[key]) acc[key] = {};
                             return acc[key];
                         }, this.localState.schema.configuration);
-                        
-                    }, update)
-                
+                    }, update);
 
                     await this.save(); // Save data as soon as it arrives from the server
-
                 }
 
                 return this.#getManager();
-
             })
 
-            .catch(
-                (error) => {
-                    const split = error.message.split(":")
-                    console.error(error)
-                    return new InspectorListItem({
-                        message: split.length > 1 ? error.message.split(":")[1].slice(1) : error.message,
-                        type: "error",
-                    })
-                }
-            );
-    }
+            .catch((error) => {
+                const split = error.message.split(":");
+                console.error(error);
+                return new InspectorListItem({
+                    message: split.length > 1 ? error.message.split(":")[1].slice(1) : error.message,
+                    type: "error",
+                });
+            });
+    };
 
     render() {
-
-        delete this.manager // Delete any existing manager
+        delete this.manager; // Delete any existing manager
 
         this.#updateRendered(true);
 
-
-        const globalSchemas = this.info.globalState.schema
+        const globalSchemas = this.info.globalState.schema;
         if (!globalSchemas.configuration) globalSchemas.configuration = {};
 
-        this.localState = { 
-            results: structuredClone(this.info.globalState.results), 
-            schema: { configuration: structuredClone(globalSchemas.configuration) }, 
+        this.localState = {
+            results: structuredClone(this.info.globalState.results),
+            schema: { configuration: structuredClone(globalSchemas.configuration) },
         };
 
         const promise = this.#update();

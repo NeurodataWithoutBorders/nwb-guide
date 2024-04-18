@@ -487,11 +487,12 @@ export class JSONSchemaInput extends LitElement {
                 margin-bottom: 1em;
             }
 
-            select { 
-                background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+            select {
+                background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>")
+                    no-repeat;
                 background-position: calc(100% - 0.75rem) center !important;
-                -moz-appearance:none !important;
-                -webkit-appearance: none !important; 
+                -moz-appearance: none !important;
+                -webkit-appearance: none !important;
                 appearance: none !important;
                 padding-right: 2rem !important;
             }
@@ -508,14 +509,14 @@ export class JSONSchemaInput extends LitElement {
 
     #description;
     get description() {
-        return this.#description ?? this.schema.description
+        return this.#description ?? this.schema.description;
     }
 
     set description(value) {
         this.#description = value;
 
-        const descriptionEl = this.shadowRoot.querySelector('.guided--text-input-instructions');
-        if (!descriptionEl) return
+        const descriptionEl = this.shadowRoot.querySelector(".guided--text-input-instructions");
+        if (!descriptionEl) return;
         descriptionEl.innerHTML = value;
     }
 
@@ -687,10 +688,11 @@ export class JSONSchemaInput extends LitElement {
                 <p class="guided--text-input-instructions">
                 ${
                     description
-                        ? html`
-                              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
-                                  ? ""
-                                  : "."}`
+                        ? html` ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(
+                              description.slice(-1)[0]
+                          )
+                              ? ""
+                              : "."}`
                         : ""
                 }
                 </p>
@@ -928,7 +930,6 @@ export class JSONSchemaInput extends LitElement {
 
         // Transform to single item if maxItems is 1
         if (isArray && schema.maxItems === 1 && !isTable) {
-
             return new JSONSchemaInput({
                 value: this.value?.[0],
                 schema: {
@@ -979,7 +980,7 @@ export class JSONSchemaInput extends LitElement {
 
                 const list = new List({
                     items: this.value,
-                    emptyMessage: schema.empty ?? 'No items selected.',
+                    emptyMessage: schema.empty ?? "No items selected.",
                     unordered: false,
                     onChange: ({ items }) => {
                         this.#updateData(fullPath, items.length ? items.map((o) => postprocess(o.value)) : undefined);
@@ -988,7 +989,6 @@ export class JSONSchemaInput extends LitElement {
                 });
 
                 if (itemSchema.enum) {
-
                     const search = new Search({
                         options: itemSchema.enum.map((v) => {
                             return {
@@ -1135,7 +1135,6 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (schema.enum && schema.enum.length) {
-
             // Use generic selector
             if (schema.strict && schema.search !== true) {
                 return html`
@@ -1145,17 +1144,17 @@ export class JSONSchemaInput extends LitElement {
                         @change=${() => validateOnChange && this.#triggerValidation(name, path)}
                     >
                         <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
-                        ${schema.enum.sort().map(
-                            (item, i) =>
-                                html`<option value=${i} ?selected=${this.value === item}>
-                                    ${schema.enumLabels?.[item] ?? item}
-                                </option>`
-                        )}
+                        ${schema.enum
+                            .sort()
+                            .map(
+                                (item, i) =>
+                                    html`<option value=${i} ?selected=${this.value === item}>
+                                        ${schema.enumLabels?.[item] ?? item}
+                                    </option>`
+                            )}
                     </select>
                 `;
             }
-
-
 
             const options = schema.enum.map((v) => {
                 return {
@@ -1260,17 +1259,19 @@ export class JSONSchemaInput extends LitElement {
 
                             if (isNumber) {
                                 if ("min" in schema && newValue < schema.min) {
-                                    if (isStrict) newValue = this.value // Set back to last value
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
                                     else newValue = schema.min;
-                                }
-                                else if ("max" in schema && newValue > schema.max) {
-                                    if (isStrict) newValue = this.value // Set back to last value
+                                } else if ("max" in schema && newValue > schema.max) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
                                     else newValue = schema.max;
                                 }
 
                                 if (isNaN(newValue)) {
-                                    if (isStrict) newValue = this.value // Set back to last value
-                                    else newValue = undefined
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = undefined;
                                 }
                             }
 
@@ -1281,7 +1282,6 @@ export class JSONSchemaInput extends LitElement {
                             //     const regex = new RegExp(schema.pattern)
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
                             // }
-                            
 
                             if (isNumber && newValue !== value) {
                                 ev.target.value = newValue;
