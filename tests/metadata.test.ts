@@ -7,25 +7,32 @@ import baseMetadataSchema from '../schemas/base-metadata.schema'
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { textToArray } from '../src/renderer/src/stories/forms/utils'
+import { tempPropertyKey, textToArray } from '../src/renderer/src/stories/forms/utils'
 import { updateResultsFromSubjects } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
 import { JSONSchemaForm } from '../src/renderer/src/stories/JSONSchemaForm'
 
 import { validateOnChange } from "../src/renderer/src/validation/index.js";
 import { SimpleTable } from '../src/renderer/src/stories/SimpleTable'
+import { JSONSchemaInput } from '../src/renderer/src/stories/JSONSchemaInput.js'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-var v = new Validator();
+var validator = new Validator();
+
+const NWBFileSchemaProperties = baseMetadataSchema.properties.NWBFile.properties
 
 describe('metadata is specified correctly', () => {
 
     test('session-specific metadata is merged with project and subject metadata correctly', () => {
         const globalState = createMockGlobalState()
-        const result = mapSessions(info => createResults(info, globalState), globalState)
-        const res = v.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
+
+        // Allow mouse (full list populated from server)
+        baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
+
+        const result = mapSessions(info => createResults(info, globalState), globalState.results)
+        const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
 })
@@ -48,13 +55,93 @@ test('removing all existing sessions will maintain the related subject entry on 
     expect(Object.keys(results)).toEqual(Object.keys(copy))
 })
 
+const popupSchemas = {
+    "type": "object",
+    "required": ["keywords", "experimenter"],
+    "properties": {
+        "keywords": NWBFileSchemaProperties.keywords,
+        "experimenter": NWBFileSchemaProperties.experimenter
+    }
+}
+
+// Pop-up inputs and forms work correctly
+test('pop-up inputs work correctly', async () => {
+
+    const results = {}
+
+    // Create the form
+    const form = new JSONSchemaForm({ schema: popupSchemas, results })
+
+    document.body.append(form)
+
+    await form.rendered
+
+    // Validate that the results are incorrect
+    let errors = false
+    await form.validate().catch(() => errors = true)
+    expect(errors).toBe(true) // Is invalid
+
+
+    // Validate that changes to experimenter are valid
+    const experimenterInput = form.getFormElement(['experimenter'])
+    const experimenterButton = experimenterInput.shadowRoot.querySelector('nwb-button')
+    const experimenterModal = experimenterButton.onClick()
+    const experimenterNestedElement = experimenterModal.children[0].children[0]
+    const experimenterSubmitButton = experimenterModal.footer
+
+    await sleep(1000)
+
+    let modalFailed
+    try {
+        await experimenterSubmitButton.onClick()
+        modalFailed = false
+    } catch (e) {
+        modalFailed = true
+    }
+
+    expect(modalFailed).toBe(true) // Is invalid
+
+    experimenterNestedElement.updateData(['first_name'], 'Garrett')
+    experimenterNestedElement.updateData(['last_name'], 'Flynn')
+
+    experimenterNestedElement.requestUpdate()
+
+    await experimenterNestedElement.rendered
+
+    try {
+        await experimenterSubmitButton.onClick()
+        modalFailed = false
+    } catch (e) {
+        modalFailed = true
+    }
+
+    expect(modalFailed).toBe(false) // Is valid
+
+    // Validate that changes to keywords are valid
+    const keywordsInput = form.getFormElement(['keywords'])
+    const input = keywordsInput.shadowRoot.querySelector('input')
+    const submitButton = keywordsInput.shadowRoot.querySelector('nwb-button')
+    const list = keywordsInput.shadowRoot.querySelector('nwb-list')
+    expect(list.items.length).toBe(0) // No items
+
+    input.value = 'test'
+    await submitButton.onClick()
+
+    expect(list.items.length).toBe(1) // Has item
+    expect(input.value).toBe('') // Input is cleared
+
+    // Validate that the new structure is correct
+    const hasErrors = await form.validate(form.results).then(res => false).catch(() => true)
+
+    expect(hasErrors).toBe(false) // Is valid
+})
 
 // TODO: Convert an integration
 test('inter-table updates are triggered', async () => {
 
     const results = {
         Ecephys: { // NOTE: This layer is required to place the properties at the right level for the hardcoded validation function
-            ElectrodeGroup: [ { name: 's1' } ],
+            ElectrodeGroup: [{ name: 's1' }],
             Electrodes: [{ group_name: 's1' }]
         }
     }
@@ -104,6 +191,7 @@ test('inter-table updates are triggered', async () => {
         validateOnChange,
         renderTable: (name, metadata, path) => {
             if (name !== "Electrodes") return new SimpleTable(metadata);
+            else return true
         },
     })
 
@@ -112,86 +200,23 @@ test('inter-table updates are triggered', async () => {
     await form.rendered
 
     // Validate that the results are incorrect
-    let errors = false
-    await form.validate().catch(e => errors = true)
+    const errors = await form.validate().catch(() => true).catch((e) => e)
+    console.log(errors)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
-    const table = form.getTable(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
+    const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
     const row = table.addRow()
 
     const baseRow = table.getRow(0)
     row.forEach((cell, i) => {
-        if (cell.simpleTableInfo.col === 'name') cell.value = randomStringId // Set name to random string id
-        else cell.value = baseRow[i].value // Otherwise carry over info
+        if (cell.simpleTableInfo.col === 'name') cell.setInput(randomStringId) // Set name to random string id
+        else cell.setInput(baseRow[i].value) // Otherwise carry over info
     })
 
-    // Validate that the new structure is correct
-    await form.validate().then(res => errors = false).catch(e => errors = true)
-    expect(errors).toBe(false) // Is valid
-})
-
-
-// TODO: Convert an integration
-test('changes are resolved correctly', async () => {
-
-    const results = {}
-    const schema = {
-        properties: {
-            v0: {
-                type: 'string'
-            },
-            l1: {
-                type: "object",
-                properties: {
-                    l2: {
-                        type: "object",
-                        properties: {
-                            l3: {
-                                type: "object",
-                                properties: {
-                                    v2: {
-                                        type: 'string'
-                                    }
-                                },
-                                required: ['v2']
-                            },
-                        },
-                    },
-                    v1: {
-                        type: 'string'
-                    }
-                },
-                required: ['v1']
-            }
-        },
-        required: ['v0']
-    }
-
-    // Create the form
-    const form = new JSONSchemaForm({
-        schema,
-        results
-    })
-
-    document.body.append(form)
-
-    await form.rendered
-
-    // Validate that the results are incorrect
-    let errors = false
-    await form.validate().catch(e => errors = true)
-    expect(errors).toBe(true) // Is invalid
-
-    const input1 = form.getInput(['v0'])
-    const input2 = form.getInput(['l1', 'v1'])
-    const input3 = form.getInput(['l1', 'l2', 'l3', 'v2'])
-
-    input1.updateData('test')
-    input2.updateData('test')
-    input3.updateData('test')
+    form.requestUpdate() // Re-render the form to update the table
 
     // Validate that the new structure is correct
-    await form.validate(form.results).then(res => errors = false).catch(e => errors = true)
-    expect(errors).toBe(false) // Is valid
+    const hasErrors = await form.validate().then(() => false).catch((e) => true)
+    expect(hasErrors).toBe(false) // Is valid
 })

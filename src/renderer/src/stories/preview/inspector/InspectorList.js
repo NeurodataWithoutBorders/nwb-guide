@@ -2,6 +2,8 @@ import { LitElement, css, html } from "lit";
 import { List } from "../../List";
 import { getMessageType, isErrorImportance } from "../../../validation";
 
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
 const sortList = (items) => {
     return items
         .sort((a, b) => {
@@ -12,19 +14,19 @@ const sortList = (items) => {
             else return 1;
         })
         .sort((a, b) => {
-            const aLow = a.severity == "LOW";
-            const bLow = b.severity === "LOW";
-            if (aLow && bLow) return 0;
-            else if (aLow) return 1;
+            const lowA = a.severity == "LOW";
+            const lowB = b.severity === "LOW";
+            if (lowA && lowB) return 0;
+            else if (lowA) return 1;
             else return -1;
         });
 };
 
 const aggregateMessages = (items) => {
     let messages = {};
-    items.forEach((o) => {
-        if (!messages[o.message]) messages[o.message] = [];
-        messages[o.message].push(o);
+    items.forEach((item) => {
+        if (!messages[item.message]) messages[item.message] = [];
+        messages[item.message].push(item);
     });
     return messages;
 };
@@ -41,11 +43,11 @@ export class InspectorList extends List {
         ];
     }
 
-    constructor(props) {
+    constructor(props = {}) {
         const { items } = props;
         const aggregatedItems = Object.values(aggregateMessages(items)).map((items) => {
             const aggregate = { ...items.pop() }; // Create a base object for the aggregation
-            aggregate.files = [aggregate.file_path, ...items.map((o) => o.file_path)];
+            aggregate.files = [aggregate.file_path, ...items.map(({ file_path }) => file_path)];
             return aggregate;
         });
 
@@ -53,8 +55,8 @@ export class InspectorList extends List {
             editable: false,
             unordered: true,
             ...props,
-            items: sortList(aggregatedItems).map((o) => {
-                const item = new InspectorListItem(o);
+            items: sortList(aggregatedItems).map((itemProps) => {
+                const item = new InspectorListItem(itemProps);
                 item.style.flexGrow = "1";
                 return { content: item };
             }),
@@ -74,7 +76,11 @@ export class InspectorListItem extends LitElement {
                 border-radius: 10px;
                 overflow: hidden;
                 text-wrap: wrap;
-                padding: 25px;
+                padding: 10px;
+                font-size: 12.5px;
+            }
+
+            :host(:not(:last-child)) {
                 margin: 0 0 1em;
             }
 
@@ -112,7 +118,7 @@ export class InspectorListItem extends LitElement {
         `;
     }
 
-    constructor(props) {
+    constructor(props = {}) {
         super();
         this.ORIGINAL_TYPE = props.type;
         Object.assign(this, props);
@@ -133,14 +139,17 @@ export class InspectorListItem extends LitElement {
             type: this.ORIGINAL_TYPE,
         });
 
-        this.setAttribute("title", this.message);
+        const isString = typeof this.message === "string";
+        if (isString) this.setAttribute("title", this.message);
 
         const hasObjectType = "object_type" in this;
         const hasMetadata = hasObjectType && "object_name" in this;
 
+        const message = isString ? unsafeHTML(this.message) : this.message;
+
         return html`
             ${hasMetadata ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>` : ""}
-            ${hasMetadata ? html`<span id="message">${this.message}</span>` : html`<p>${this.message}</p>`}
+            ${hasMetadata ? html`<span id="message">${message}</span>` : html`<p>${message}</p>`}
             ${this.file_path
                 ? html`<span id="filepath"
                       >${this.files && this.files.length > 1
@@ -153,3 +162,75 @@ export class InspectorListItem extends LitElement {
 }
 
 customElements.get("inspector-list-item") || customElements.define("inspector-list-item", InspectorListItem);
+
+const legendEntries = [
+    { type: "error", header: "Error", message: "Must be fixed" },
+    { type: "warning", header: "Warning", message: "Can be safely ignored" },
+];
+
+export class InspectorLegend extends LitElement {
+    static get styles() {
+        return css`
+            :host {
+                display: block;
+                font-size: 80%;
+            }
+
+            inspector-list-item {
+                margin: 0;
+            }
+
+            :host > div {
+                padding: 5px 10px;
+                display: flex;
+                gap: 25px;
+                align-items: center;
+                border: 1px solid gray;
+                border-radius: 0 0 10px 10px;
+            }
+
+            h4 {
+                margin: 0;
+                padding: 5px 10px;
+                width: 100%;
+                background: black;
+                color: white;
+                border-radius: 10px 10px 0 0;
+                box-sizing: border-box;
+            }
+        `;
+    }
+
+    constructor() {
+        super();
+    }
+
+    render() {
+        return html`
+            <h4>Legend</h4>
+            <div>
+                ${legendEntries.map(({ type, header, message }) => {
+                    const item = new InspectorListItem({
+                        type,
+                        message: html`<h3 style="margin: 0;">${header}</h3>
+                            <span>${message}</span>`,
+                    });
+                    item.style.width = "max-content";
+                    return item;
+                })}
+                <div>
+                    <p>
+                        To fix issues specific to a single file, you can edit the <b>file metadata</b> on the previous
+                        page.
+                    </p>
+                    <p>
+                        To fix issues across many files, you may want to edit the <b>global metadata</b> on the previous
+                        page.
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+customElements.get("nwbguide-inspector-legend") || customElements.define("nwbguide-inspector-legend", InspectorLegend);

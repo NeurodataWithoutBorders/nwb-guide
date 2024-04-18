@@ -1,6 +1,6 @@
 import { Table } from "./Table.js";
 
-import subjectSchema from "../../../../schemas/subject.schema";
+import getSubjectSchema from "../../../../schemas/subject.schema";
 import { SimpleTable } from "./SimpleTable.js";
 import { BasicTable } from "./BasicTable.js";
 
@@ -26,12 +26,19 @@ const data = subjectIds.reduce((acc, key) => {
 
 const BasicTableTemplate = (args) => new BasicTable(args);
 
+const subjectSchema = getSubjectSchema();
+
 subjectSchema.additionalProperties = true;
+
+const subjectTableSchema = {
+    type: "array",
+    items: subjectSchema,
+};
 
 export const Basic = BasicTableTemplate.bind({});
 Basic.args = {
     name: "basic_table_test",
-    schema: subjectSchema,
+    schema: subjectTableSchema,
     data,
     keyColumn: "subject_id",
     validateOnChange: (key, parent, value) => !!value, // Always validate as true
@@ -39,7 +46,7 @@ Basic.args = {
 
 export const Default = Template.bind({});
 Default.args = {
-    schema: subjectSchema,
+    schema: subjectTableSchema,
     data,
     keyColumn: "subject_id",
     validateOnChange: () => true, // Always validate as true
@@ -49,7 +56,7 @@ const SimpleTemplate = (args) => new SimpleTable(args);
 
 export const Simple = SimpleTemplate.bind({});
 Simple.args = {
-    schema: subjectSchema,
+    schema: subjectTableSchema,
     data,
     keyColumn: "subject_id",
     validateOnChange: (key, parent, value) => {

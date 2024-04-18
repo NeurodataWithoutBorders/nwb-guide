@@ -7,8 +7,9 @@ export const remove = (name) => {
     const progressFilePathToDelete = joinPath(guidedProgressFilePath, name + ".json");
 
     //delete the progress file
-    if (fs) fs.unlinkSync(progressFilePathToDelete);
-    else localStorage.removeItem(progressFilePathToDelete);
+    if (fs) {
+        if (fs.existsSync(progressFilePathToDelete)) fs.unlinkSync(progressFilePathToDelete);
+    } else localStorage.removeItem(progressFilePathToDelete);
 
     if (fs) {
         // delete default preview location

@@ -1,11 +1,40 @@
 import { html } from "lit";
-import { Page } from "../../Page.js";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
-import { DandiResults } from "../../../DandiResults.js";
+import { Page } from "../../Page.js";
+import { getStubArray } from "../options/GuidedStubPreview.js";
+import { getSharedPath } from "../../../preview/NWBFilePreview.js";
+
+import { electron, path } from "../../../../electron/index.js";
+const { ipcRenderer } = electron;
 
 export class GuidedResultsPage extends Page {
     constructor(...args) {
         super(...args);
+    }
+
+    header = {
+        controls: () =>
+            html`<nwb-button
+                size="small"
+                @click=${() => {
+                    if (ipcRenderer) ipcRenderer.send("showItemInFolder", this.#sharedPath());
+                }}
+                >${unsafeSVG(folderOpenSVG)}</nwb-button
+            >`,
+    };
+
+    footer = {};
+
+    #sharedPath = () => {
+        const { conversion } = this.info.globalState;
+        if (!conversion) return "";
+        return getSharedPath(getStubArray(conversion).map((item) => item.file));
+    };
+
+    updated() {
+        this.save(); // Save the current state
     }
 
     render() {
@@ -14,9 +43,15 @@ export class GuidedResultsPage extends Page {
         if (!conversion)
             return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
 
-        const { dandiset_id } = this.info.globalState.upload?.info ?? {};
-
-        return html`<div style="padding: 10px 20px;">${new DandiResults({ id: dandiset_id, files: conversion })}</div>`;
+        return html`
+            <p>Your data was successfully converted to NWB!</p>
+            <ol style="margin: 10px 0px; padding-top: 0;">
+                ${getStubArray(conversion)
+                    .map(({ file }) => file.split(path.sep).slice(-1)[0])
+                    .sort()
+                    .map((id) => html`<li>${id}</li>`)}
+            </ol>
+        `;
     }
 }
 

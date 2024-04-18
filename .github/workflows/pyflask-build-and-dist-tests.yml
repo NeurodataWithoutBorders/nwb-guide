@@ -1,4 +1,4 @@
-name: PyFlask build and distributable tests
+name: Build Tests
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -15,7 +15,7 @@ env:
 
 jobs:
   testing:
-    name: PyFlask build and distributable tests on ${{ matrix.os }}
+    name: PyInstaller on ${{ matrix.os }}  # Will read on the dashboard as 'Build Tests / PyInstaller on {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -24,12 +24,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
-          - python-version: "3.9"
-            os: ubuntu-latest
-            label: environments/environment-Linux.yml
-            prefix: /usr/share/miniconda3/envs/nwb-guide
+          # current linux installation instructions use dev mode instead of distributable
+          # - python-version: "3.9"
+          #   os: ubuntu-latest
+          #   label: environments/environment-Linux.yml
+          #   prefix: /usr/share/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
             os: macos-latest
@@ -42,12 +42,12 @@ jobs:
             prefix: C:\Miniconda3\envs\nwb-guide
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: git fetch --prune --unshallow --tags
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
@@ -60,7 +60,7 @@ jobs:
         shell: bash
 
       - name: Cache Mamba env
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ env.CONDA }}/envs
           key:
@@ -73,12 +73,12 @@ jobs:
         name: Update environment
         run: mamba env update -f ${{ matrix.label }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
 
-      - run: npm ci
+      - run: npm ci --verbose
 
       # fix for macos build
       - if: matrix.os == 'macos-latest'

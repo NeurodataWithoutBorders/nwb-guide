@@ -1,4 +1,5 @@
 """The primary Flask server for the Python backend."""
+
 import sys
 import json
 import multiprocessing
@@ -20,7 +21,7 @@ from flask import Flask, request, send_from_directory, send_file
 from flask_cors import CORS
 from flask_restx import Api, Resource
 
-from apis import startup_api, neuroconv_api
+from apis import startup_api, neuroconv_api, data_api
 from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
 
 app = Flask(__name__)
@@ -56,6 +57,7 @@ api = Api(
 )
 api.add_namespace(startup_api)
 api.add_namespace(neuroconv_api)
+api.add_namespace(data_api)
 api.init_app(app)
 
 registered = {}
@@ -93,6 +95,23 @@ def send_conversions(path):
 @app.route("/preview/<path:path>")
 def send_preview(path):
     return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
+
+
+@app.route("/cpus")
+def get_cpu_count():
+    from psutil import cpu_count
+
+    physical = cpu_count(logical=False)
+    logical = cpu_count()
+
+    return dict(physical=physical, logical=logical)
+
+
+@app.route("/get-recommended-species")
+def get_species():
+    from dandi.metadata.util import species_map
+
+    return species_map
 
 
 @api.route("/server_shutdown", endpoint="shutdown")

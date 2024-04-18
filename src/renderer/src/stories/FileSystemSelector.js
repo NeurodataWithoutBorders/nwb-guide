@@ -1,6 +1,7 @@
 import { LitElement, css, html } from "lit";
 
 import { fs, remote } from "../electron/index";
+import { List } from "./List";
 const { dialog } = remote;
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
@@ -15,8 +16,8 @@ function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
             ? "directories"
             : "files"
         : nested
-        ? type
-        : `a ${type}`;
+          ? type
+          : `a ${type}`;
 }
 
 const componentCSS = css`
@@ -31,6 +32,10 @@ const componentCSS = css`
 
     :host([manytypes="true"]) > button {
         cursor: default;
+    }
+
+    nwb-list {
+        width: 100px;
     }
 
     #button-div {
@@ -65,9 +70,9 @@ const componentCSS = css`
     }
 `;
 
-document.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+document.addEventListener("dragover", (dragOverEvent) => {
+    dragOverEvent.preventDefault();
+    dragOverEvent.stopPropagation();
 });
 
 export class FilesystemSelector extends LitElement {
@@ -126,7 +131,7 @@ export class FilesystemSelector extends LitElement {
     };
 
     #checkType = (value) => {
-        const isLikelyFile = fs ? fs.lstatSync(value).isFile() : value.split(".").length;
+        const isLikelyFile = fs ? fs.statSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
     };
@@ -162,12 +167,13 @@ export class FilesystemSelector extends LitElement {
             // const path = file.filePath ?? file.filePaths?.[0];
             this.#handleFiles(results.filePath ?? results.filePaths, type);
         } else {
-            let handles = await (type === "directory"
-                ? window.showDirectoryPicker()
-                : window.showOpenFilePicker({ multiple: this.multiple })
-            ).catch((e) => []); // Call using the same options
+            let handles = await (
+                type === "directory"
+                    ? window.showDirectoryPicker()
+                    : window.showOpenFilePicker({ multiple: this.multiple })
+            ).catch(() => []); // Call using the same options
 
-            const result = Array.isArray(handles) ? handles.map((o) => o.name) : handles.name;
+            const result = Array.isArray(handles) ? handles.map(({ name }) => name) : handles.name;
             this.#handleFiles(result, type);
         }
     }
@@ -178,17 +184,8 @@ export class FilesystemSelector extends LitElement {
         const isMultipleTypes = Array.isArray(this.type);
         this.setAttribute("manytypes", isMultipleTypes);
         const isArray = Array.isArray(this.value);
+
         const len = isArray ? this.value.length : 0;
-
-        if (isArray) {
-            resolved = this.value.map((str) => str.replaceAll("\\", "/"));
-            isUpdated = JSON.stringify(resolved) !== JSON.stringify(this.value);
-        } else {
-            resolved = typeof this.value === "string" ? this.value.replaceAll("\\", "/") : this.value;
-            isUpdated = resolved !== this.value;
-        }
-
-        if (isUpdated) this.#handleFiles(resolved); // Notify of the change to the separators
 
         const resolvedValueDisplay = isArray
             ? len > 1
@@ -198,50 +195,64 @@ export class FilesystemSelector extends LitElement {
 
         const objectTypeReference = getObjectTypeReferenceString(this.type, this.multiple);
 
-        return html`
-            <button
-                title=${isArray ? this.value.map((v, i) => `${i + 1}. ${v}`).join("\n") : this.value}
-                @click=${() => isMultipleTypes || this.selectFormat()}
-                @dragenter=${() => {
-                    this.classList.add("active");
-                }}
-                @dragleave=${() => {
-                    this.classList.remove("active");
-                }}
-                @drop=${async (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.classList.remove("active");
+        const instanceThis = this;
 
-                    let pathArr = [];
-                    for (const f of event.dataTransfer.files) pathArr.push(f.path ?? f.name);
-                    this.#handleFiles(pathArr);
-                }}
-            >
-                ${resolvedValueDisplay
-                    ? html`
-                          ${resolvedValueDisplay}
-                          ${dialog
-                              ? ""
-                              : html`<br /><small
-                                        >Cannot get full ${isMultipleTypes ? this.type.join(" / ") : this.type}
-                                        path${this.multiple ? "s" : ""} on web distribution</small
-                                    >`}
-                      `
-                    : html`<span
-                              >Drop ${objectTypeReference}
-                              here${isMultipleTypes
+        return html`
+            <div>
+                <button
+                    title=${isArray ? this.value.map((v, i) => `${i + 1}. ${v}`).join("\n") : this.value}
+                    @click=${() => isMultipleTypes || this.selectFormat()}
+                    @dragenter=${() => {
+                        this.classList.add("active");
+                    }}
+                    @dragleave=${() => {
+                        this.classList.remove("active");
+                    }}
+                    @drop=${async (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        this.classList.remove("active");
+
+                        let pathArr = [];
+                        for (const f of event.dataTransfer.files) pathArr.push(f.path ?? f.name);
+                        this.#handleFiles(pathArr);
+                    }}
+                >
+                    ${resolvedValueDisplay
+                        ? html`
+                              ${resolvedValueDisplay}
+                              ${dialog
                                   ? ""
-                                  : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
-                                        native: true,
-                                    })}`}</span
-                          >${this.multiple &&
-                          (this.type === "directory" || (isMultipleTypes && this.type.includes("directory") && !dialog))
-                              ? html`<br /><small
-                                        >Multiple directory support only available using drag-and-drop.</small
-                                    >`
-                              : ""}`}
-            </button>
+                                  : html`<br /><small
+                                            >Cannot get full ${isMultipleTypes ? this.type.join(" / ") : this.type}
+                                            path${this.multiple ? "s" : ""} on web distribution</small
+                                        >`}
+                          `
+                        : html`<span
+                                  >Drop ${objectTypeReference}
+                                  here${isMultipleTypes
+                                      ? ""
+                                      : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
+                                            native: true,
+                                        })}`}</span
+                              >${this.multiple &&
+                              (this.type === "directory" ||
+                                  (isMultipleTypes && this.type.includes("directory") && !dialog))
+                                  ? html`<br /><small
+                                            >Multiple directory support only available using drag-and-drop.</small
+                                        >`
+                                  : ""}`}
+                </button>
+                ${this.multiple && isArray && this.value.length > 1
+                    ? new List({
+                          items: this.value.map((v) => ({ value: v })),
+                          editable: false,
+                          onChange: function () {
+                              instanceThis.value = this.items.map((item) => item.value);
+                          },
+                      })
+                    : ""}
+            </div>
             ${isMultipleTypes
                 ? html`<div id="button-div">
                       ${this.type.map(

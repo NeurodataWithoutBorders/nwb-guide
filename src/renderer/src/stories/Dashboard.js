@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "./utils/useGlobalStyles.js";
 
-import { Main } from "./Main.js";
+import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
 import { NavigationSidebar } from "./NavigationSidebar.js";
 
@@ -85,7 +85,10 @@ export class Dashboard extends LitElement {
     }
 
     pagesById = {};
-    #active;
+    page;
+
+    next = () => this.main.next();
+    back = () => this.main.back();
 
     constructor(props = {}) {
         super();
@@ -96,12 +99,12 @@ export class Dashboard extends LitElement {
         this.sidebar = new Sidebar();
         this.sidebar.onClick = (_, value) => {
             const id = value.info.id;
-            if (this.#active) this.#active.to(id);
+            if (this.page) this.page.to(id);
             else this.setAttribute("activePage", id);
         };
 
         this.subSidebar = new NavigationSidebar();
-        this.subSidebar.onClick = async (id) => this.#active.to(id);
+        this.subSidebar.onClick = async (id) => this.page.to(id);
 
         this.pages = props.pages ?? {};
         this.name = props.name;
@@ -114,27 +117,31 @@ export class Dashboard extends LitElement {
 
         // Handle all pop and push state updates
         const pushState = window.history.pushState;
-        window.history.pushState = function (state) {
-            if (typeof window.onpushstate == "function") window.onpushstate({ state: state });
-            return pushState.apply(window.history, arguments);
-        };
 
-        window.onpushstate = window.onpopstate = (e) => {
-            if (e.state) {
-                const titleString = e.state.title ?? e.state.label;
+        const pushPopListener = (popEvent) => {
+            if (popEvent.state) {
+                const titleString = popEvent.state.title ?? popEvent.state.label;
                 document.title = `${titleString} - ${this.name}`;
-                const page = this.pagesById[e.state.page]; // ?? this.pagesById[this.#activatePage]
+                const page = this.pagesById[popEvent.state.page]; // ?? this.pagesById[this.#activatePage]
                 if (!page) return;
-                if (page === this.#active) return; // Do not rerender current page
+                if (page === this.page) return; // Do not rerender current page
                 this.setMain(page);
             }
         };
+
+        window.history.pushState = function (state) {
+            pushPopListener({ state: state });
+            return pushState.apply(window.history, arguments);
+        };
+
+        window.addEventListener("popstate", pushPopListener);
+        window.addEventListener("pushstate", pushPopListener);
 
         this.#updated();
     }
 
     requestPageUpdate() {
-        if (this.#active) this.#active.requestUpdate();
+        if (this.page) this.page.requestUpdate();
     }
 
     createRenderRoot() {
@@ -147,20 +154,22 @@ export class Dashboard extends LitElement {
         else if (key === "renderNameInSidebar") this.sidebar.renderName = latest === "true" || latest === true;
         else if (key === "pages") this.#updated(latest);
         else if (key.toLowerCase() === "activepage") {
-            if (this.#active && this.#active.info.parent && this.#active.info.section) {
+            if (this.page && this.page.info.parent && this.page.info.section) {
                 const currentProject = getCurrentProjectName();
                 if (currentProject) updateAppProgress(latest, currentProject);
             }
 
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page
 
+            // Update sidebar states
+
             this.sidebar.selectItem(latest); // Just highlight the item
             this.sidebar.initialize = false;
             this.#activatePage(latest);
             return;
-        } else if (key.toLowerCase() === "globalstate" && this.#active) {
-            this.#active.info.globalState = JSON.parse(latest);
-            this.#active.requestUpdate();
+        } else if (key.toLowerCase() === "globalstate" && this.page) {
+            this.page.info.globalState = JSON.parse(latest);
+            this.page.requestUpdate();
         }
     }
 
@@ -171,10 +180,33 @@ export class Dashboard extends LitElement {
         else if (typeof page === "object") return this.getPage(Object.values(page)[0]);
     }
 
+    updateSections({ sidebar = true, main = false } = {}, globalState = this.page.info.globalState) {
+        const info = this.page.info;
+        let parent = info.parent;
+
+        if (sidebar) {
+            this.subSidebar.sections = this.#getSections(parent.info.pages, globalState); // Update sidebar items (if changed)
+        }
+
+        const { sections } = this.subSidebar;
+
+        if (main) {
+            if (this.page.header) delete this.page.header.sections; // Ensure sections are updated
+            this.main.set({
+                page: this.page,
+                sections,
+            });
+        }
+
+        return sections;
+    }
+
     setMain(page) {
+        window.getSelection().empty(); // Remove user selection before transitioning
+
         // Update Previous Page
         const info = page.info;
-        const previous = this.#active;
+        const previous = this.page;
 
         // if (previous === page) return // Prevent rerendering the same page
 
@@ -191,12 +223,15 @@ export class Dashboard extends LitElement {
         if (isNested && !("globalState" in toPass)) toPass.globalState = this.globalState ?? page.load();
 
         // Update Active Page
-        this.#active = page;
+        this.page = page;
+
+        // Reset global state if page has no parent
+        if (!this.page.info.parent) toPass.globalState = {};
 
         if (isNested) {
             let parent = info.parent;
             while (parent.info.parent) parent = parent.info.parent; // Lock sections to the top-level parent
-            this.subSidebar.sections = this.#getSections(parent.info.pages, toPass.globalState); // Update sidebar items (if changed)
+            this.updateSections({ sidebar: true }, toPass.globalState);
             this.subSidebar.active = info.id; // Update active item (if changed)
             this.sidebar.hide(true);
             this.subSidebar.show();
@@ -205,12 +240,33 @@ export class Dashboard extends LitElement {
             this.subSidebar.hide();
         }
 
-        page.set(toPass);
+        this.page.set(toPass, false);
 
-        // const page = this.getPage(info)
-        this.main.set({
-            page,
-            sections: this.subSidebar.sections ?? {},
+        this.page.checkSyncState().then(() => {
+            const projectName = info.globalState?.project?.name;
+
+            this.subSidebar.header = projectName
+                ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
+                : projectName;
+
+            this.updateSections({ sidebar: false, main: true });
+
+            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
+
+            const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
+
+            if (skipped) {
+                if (isStorybook) return; // Do not skip on storybook
+
+                // Run skip functions
+                Object.entries(page.workflow).forEach(([key, state]) => {
+                    if (typeof state.skip === "function") state.skip();
+                });
+
+                // Skip right over the page if configured as such
+                if (previous && previous.info.previous === this.page) this.page.onTransition(-1);
+                else this.page.onTransition(1);
+            }
         });
     }
 
@@ -243,15 +299,20 @@ export class Dashboard extends LitElement {
                 state.active = false;
                 pageState.active = false;
 
+                // Check if page is skipped based on workflow state (if applicable)
+                pageState.skipped = checkIfPageIsSkipped(page, globalState.project?.workflow);
+
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 
                 if (!("visited" in pageState)) pageState.visited = false;
-                if (id === this.#active.info.id) state.active = pageState.visited = pageState.active = true; // Set active page as visited
+                if (id === this.page.info.id) state.active = pageState.visited = pageState.active = true; // Set active page as visited
             }
         });
 
-        return globalState.sections;
+        return (globalState.sections = { ...globalState.sections }); // Update global state with new reference (to ensure re-render)
     };
+
+    #transitionPromise = {};
 
     #updated(pages = this.pages) {
         const url = new URL(window.location.href);
@@ -259,20 +320,26 @@ export class Dashboard extends LitElement {
         if (isElectron || isStorybook) active = new URLSearchParams(url.search).get("page");
         if (!active) active = this.activePage; // default to active page
 
-        this.main.onTransition = (transition) => {
+        this.main.onTransition = async (transition) => {
+            const promise = (this.#transitionPromise.value = new Promise(
+                (resolve) => (this.#transitionPromise.trigger = resolve)
+            ));
+
             if (typeof transition === "number") {
-                const info = this.#active.info;
+                const info = this.page.info;
                 const sign = Math.sign(transition);
                 if (sign === 1) return this.setAttribute("activePage", info.next.info.id);
                 else if (sign === -1) return this.setAttribute("activePage", (info.previous ?? info.parent).info.id); // Default to back in time
             }
 
             this.setAttribute("activePage", transition);
+
+            return await promise;
         };
 
         this.main.updatePages = () => {
             this.#updated(); // Rerender with new pages
-            this.setAttribute("activePage", this.#active.info.id); // Re-render the current page
+            this.setAttribute("activePage", this.page.info.id); // Re-render the current page
         };
 
         this.pagesById = {};

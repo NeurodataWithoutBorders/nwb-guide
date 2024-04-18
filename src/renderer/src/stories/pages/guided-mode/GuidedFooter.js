@@ -27,7 +27,7 @@ export class GuidedFooter extends LitElement {
     constructor({
         back = "Back",
         next = "Next",
-        exit = "Return to Home Screen",
+        exit = "Exit Current Pipeline",
         onBack = () => this.to(-1),
         onNext = () => this.to(1),
         onExit = () => this.to("/"),
@@ -48,17 +48,18 @@ export class GuidedFooter extends LitElement {
     }
 
     updated() {
-        this.to = (transition) => this.parentElement.to(transition);
+        this.to = (transition) => this.parentElement.to(transition); // Run main page's transition function
     }
 
     render() {
         return html`
             <nwb-footer style="display: flex; align-items: center; justify-content: space-between;">
+                <div>${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ""}</div>
+
                 <div>
                     ${this.back ? html`<nwb-button @click=${this.onBack}>${this.back}</nwb-button>` : ""}
                     ${this.next ? html`<nwb-button @click=${this.onNext} primary>${this.next}</nwb-button>` : ""}
                 </div>
-                ${this.exit ? html`<nwb-button @click=${this.onExit}>${this.exit}</nwb-button>` : ""}
             </nwb-footer>
         `;
     }

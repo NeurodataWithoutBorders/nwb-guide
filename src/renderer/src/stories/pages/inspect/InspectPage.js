@@ -7,12 +7,37 @@ import { run } from "../guided-mode/options/utils.js";
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { Modal } from "../../Modal";
 import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.js";
-import { InspectorList } from "../../preview/inspector/InspectorList.js";
+import { InspectorList, InspectorLegend } from "../../preview/inspector/InspectorList.js";
+import { download } from "./utils.js";
 
 export class InspectPage extends Page {
     constructor(...args) {
         super(...args);
     }
+
+    header = {
+        title: "NWB File Validation",
+        subtitle: "Inspect NWB files using the NWB Inspector.",
+    };
+
+    inspect = async (paths, kwargs = {}, options = {}) => {
+        const result = await run(
+            "inspect",
+            { paths, ...kwargs },
+            { title: "Inspecting selected filesystem entries.", ...options }
+        ).catch((error) => {
+            this.notify(error.message, "error");
+            throw error;
+        });
+
+        if (typeof result === "string") return result;
+
+        const { messages } = result;
+
+        if (!messages.length) return this.notify("No messages received from the NWB Inspector");
+
+        return result;
+    };
 
     showReport = async (value) => {
         if (!value) {
@@ -21,26 +46,55 @@ export class InspectPage extends Page {
             throw new Error(message);
         }
 
-        const result = await run(
-            "inspect",
-            { paths: value },
-            { title: "Inspecting selected filesystem entries." }
-        ).catch((e) => {
-            this.notify(e.message, "error");
-            throw e;
-        });
+        const legend = new InspectorLegend();
 
-        if (!result.length) return this.notify("No messages received from the NWB Inspector");
+        const result = await this.inspect(value);
 
-        const items = truncateFilePaths(result, getSharedPath(result.map((o) => o.file_path)));
+        const messages = result.messages;
+
+        const items = truncateFilePaths(messages, getSharedPath(messages.map((item) => item.file_path)));
 
         const list = new InspectorList({ items });
-        list.style.padding = "25px";
+
+        // const buttons = document.createElement('div')
+        // buttons.style.display = 'flex'
+        // buttons.style.gap = '10px'
+
+        const downloadJSONButton = new Button({
+            label: "JSON",
+            primary: true,
+            onClick: () =>
+                download("nwb-inspector-report.json", {
+                    header: result.header,
+                    messages: result.messages,
+                }),
+        });
+
+        const downloadTextButton = new Button({
+            label: "Text",
+            primary: true,
+            onClick: async () => {
+                download("nwb-inspector-report.txt", result.text);
+            },
+        });
 
         const modal = new Modal({
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
+            controls: [downloadJSONButton, downloadTextButton],
+            footer: legend,
         });
-        modal.append(list);
+
+        const container = document.createElement("div");
+        Object.assign(container.style, {
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            padding: "20px",
+        });
+
+        container.append(list);
+
+        modal.append(container);
         document.body.append(modal);
 
         modal.toggle(true);
@@ -48,9 +102,10 @@ export class InspectPage extends Page {
 
     input = new JSONSchemaInput({
         path: ["filesystem_paths"],
-        info: {
+        schema: {
             type: "array",
             items: {
+                type: "string",
                 format: ["file", "directory"],
                 multiple: true,
             },
@@ -72,17 +127,9 @@ export class InspectPage extends Page {
         }
 
         return html`
-            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 5px;">
-                <h1 style="margin: 0;">NWB Inspector Report</h1>
-            </div>
-            <p>This page allows you to inspect NWB files using the NWB Inspector.</p>
-            <hr />
-
-            <div>
-                ${this.input}
-                <br />
-                ${button}
-            </div>
+            ${this.input}
+            <br />
+            ${button}
         `;
     }
 }

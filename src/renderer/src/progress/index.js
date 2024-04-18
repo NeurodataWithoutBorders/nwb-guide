@@ -5,7 +5,8 @@ import {
     reloadPageToHome,
     isStorybook,
     appDirectory,
-    homeDirectory,
+    ENCRYPTION_KEY,
+    ENCRYPTION_IV,
 } from "../dependencies/simple.js";
 import { fs, crypto } from "../electron/index.js";
 
@@ -18,42 +19,57 @@ import * as operations from "./operations";
 
 export * from "./update";
 
-var re = /[0-9A-Fa-f]{6}/g;
+const CRYPTO_VERSION = "0.0.1"; // NOTE: Update to wipe values created using an outdated encryption algorithm
+const CRYPTO_ALGORITHM = "aes-256-cbc";
 
-function encode(message) {
-    if (!crypto) return message;
-    const mykey = crypto.createCipher("aes-128-cbc", homeDirectory);
-    const mystr = mykey.update(message, "utf8", "hex");
-    return mystr + mykey.final("hex");
+function encode(text) {
+    if (!crypto) return text;
+    const cipher = crypto.createCipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, ENCRYPTION_IV);
+
+    const encrypted = cipher.update(text);
+    return `${CRYPTO_VERSION}:${ENCRYPTION_IV.toString("hex")}:${Buffer.concat([encrypted, cipher.final()]).toString(
+        "hex"
+    )}`;
 }
 
 // Try to decode the value
-function decode(message) {
-    if (!crypto || !/[0-9A-Fa-f]{6}/g.test(message)) return message;
+function decode(text) {
+    const [TEXT_CRYPTO_VERSION, ENCRYPTION_IV_HEX, encrypted] = text.split(":");
+
+    if (text.slice(0, TEXT_CRYPTO_VERSION.length) !== CRYPTO_VERSION) return undefined;
+
+    if (!crypto || !/[0-9A-Fa-f]{6}/g.test(encrypted)) return encrypted;
 
     try {
-        const mykey = crypto.createDecipher("aes-128-cbc", homeDirectory);
-        const mystr = mykey.update(message, "hex", "utf8");
-        return mystr + mykey.final("utf8");
+        let textParts = encrypted.split(":");
+        let encryptedText = Buffer.from(textParts.join(":"), "hex");
+        let decipher = crypto.createDecipheriv(CRYPTO_ALGORITHM, ENCRYPTION_KEY, Buffer.from(ENCRYPTION_IV_HEX, "hex"));
+        let decrypted = decipher.update(encryptedText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
     } catch {
-        return message;
+        return encrypted;
     }
 }
 
-function drill(o, callback) {
-    if (o && typeof o === "object") {
-        const copy = Array.isArray(o) ? [...o] : { ...o };
-        for (let k in copy) copy[k] = drill(copy[k], callback);
+export function drill(object, callback) {
+    if (object && typeof object === "object") {
+        const copy = Array.isArray(object) ? [...object] : { ...object };
+        for (let k in copy) {
+            const res = drill(copy[k], callback);
+            if (res) copy[k] = res;
+            else delete copy[k];
+        }
         return copy;
-    } else return callback(o);
+    } else return callback(object);
 }
 
-function encodeObject(o) {
-    return drill(o, (v) => (typeof v === "string" ? encode(v) : v));
+function encodeObject(object) {
+    return drill(object, (value) => (typeof value === "string" ? encode(value) : value));
 }
 
-function decodeObject(o) {
-    return drill(o, (v) => (typeof v === "string" ? decode(v) : v));
+function decodeObject(object) {
+    return drill(object, (value) => (typeof value === "string" ? decode(value) : value));
 }
 
 class GlobalAppConfig {
@@ -104,10 +120,31 @@ export const getEntries = () => {
     return progressFiles.filter((path) => path.slice(-5) === ".json");
 };
 
+const oldConversionsPath = "conversion";
+const convertOldPath = (path) => {
+    if (path && path.slice(0, oldConversionsPath.length) === oldConversionsPath)
+        return `/${path.slice(oldConversionsPath.length)}`;
+    else return path;
+};
+
+const transformProgressFile = (progressFile) => {
+    progressFile["page-before-exit"] = convertOldPath(progressFile["page-before-exit"]);
+    Object.values(progressFile.sections ?? {}).forEach((section) => {
+        const pages = {};
+        Object.entries(section.pages).forEach(([page, value]) => {
+            pages[convertOldPath(page)] = value;
+        });
+        section.pages = pages;
+    });
+
+    return progressFile;
+};
 export const getAll = (progressFiles) => {
     return progressFiles.map((progressFile) => {
         let progressFilePath = joinPath(guidedProgressFilePath, progressFile);
-        return JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath));
+        return transformProgressFile(
+            JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath))
+        );
     });
 };
 
@@ -118,6 +155,7 @@ export const getCurrentProjectName = () => {
 
 export const get = (name) => {
     if (!name) {
+        console.error("No name provided to get()");
         const params = new URLSearchParams(location.search);
         const projectName = params.get("project");
         if (!projectName) {
@@ -139,13 +177,15 @@ export const get = (name) => {
     let progressFilePath = joinPath(guidedProgressFilePath, name + ".json");
 
     const exists = fs ? fs.existsSync(progressFilePath) : localStorage.getItem(progressFilePath) !== null;
-    return exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {};
+    return transformProgressFile(
+        exists ? JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath)) : {}
+    );
 };
 
 export function resume(name) {
     const global = this ? this.load(name) : get(name);
 
-    const commandToResume = global["page-before-exit"] || "conversion/start";
+    let commandToResume = global["page-before-exit"] || "//details";
     updateURLParams({ project: name });
 
     if (this) this.onTransition(commandToResume);
@@ -153,19 +193,21 @@ export function resume(name) {
     return commandToResume;
 }
 
-export const remove = async (name) => {
-    const result = await Swal.fire({
-        title: `Are you sure you would like to delete this conversion pipeline?`,
-        html: `All related files will be deleted permanently, and existing progress will be lost.`,
-        icon: "warning",
-        heightAuto: false,
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: `Delete ${name}`,
-        cancelButtonText: "Cancel",
-        focusCancel: true,
-    });
+export const remove = async (name, force = false) => {
+    const result = force
+        ? { isConfirmed: true }
+        : await Swal.fire({
+              title: `Are you sure you would like to delete this conversion pipeline?`,
+              html: `All related files will be deleted permanently, and existing progress will be lost.`,
+              icon: "warning",
+              heightAuto: false,
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: `Delete ${name}`,
+              cancelButtonText: "Cancel",
+              focusCancel: true,
+          });
 
     if (result.isConfirmed) return operations.remove(name);
 

@@ -2,7 +2,6 @@ import { GettingStartedPage } from "./stories/pages/getting-started/GettingStart
 import { DocumentationPage } from "./stories/pages/documentation/Documentation";
 import { ContactPage } from "./stories/pages/contact-us/Contact";
 import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome";
-import { GuidedStartPage } from "./stories/pages/guided-mode/GuidedStart";
 import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/setup/GuidedNewDatasetInfo";
 import { GuidedStructurePage } from "./stories/pages/guided-mode/data/GuidedStructure";
 import { sections } from "./stories/pages/globals";
@@ -10,7 +9,6 @@ import { GuidedSubjectsPage } from "./stories/pages/guided-mode/setup/GuidedSubj
 import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSourceData";
 import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata";
 import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload";
-// import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions";
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./stories/Dashboard";
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
@@ -18,8 +16,6 @@ import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedI
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
-import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
-import tutorialIcon from "./stories/assets/exploration.svg?raw";
 import uploadIcon from "./stories/assets/dandi.svg?raw";
 import inspectIcon from "./stories/assets/inspect.svg?raw";
 import neurosiftIcon from "./stories/assets/neurosift-logo.svg?raw";
@@ -30,6 +26,8 @@ import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 import { InspectPage } from "./stories/pages/inspect/InspectPage";
 import { PreviewPage } from "./stories/pages/preview/PreviewPage";
+import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
+import { GuidedDandiResultsPage } from "./stories/pages/guided-mode/results/GuidedDandiResults";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -37,22 +35,7 @@ dashboard.logo = logo;
 dashboard.name = "NWB GUIDE";
 dashboard.renderNameInSidebar = false;
 
-const overviewIcon = `
-<svg
-    style="margin-right: 30px; margin-bottom: -5px"
-    width="20px"
-    height="20px"
-    viewBox="0 0 16 16"
-    class="bi bi-caret-right-square-fill"
-    fill="white"
-    xmlns="http://www.w3.org/2000/svg"
->
-<path
-    fill-rule="evenodd"
-    d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.5 10a.5.5 0 0 0 .832.374l4.5-4a.5.5 0 0 0 0-.748l-4.5-4A.5.5 0 0 0 5.5 4v8z"
-></path>
-</svg>
-`;
+const resourcesGroup = "Resources";
 
 const guidedIcon = `
 <svg
@@ -97,24 +80,24 @@ style="margin-right: 30px; margin-bottom: -5px"
 `;
 
 const pages = {
-    "/": new GettingStartedPage({
-        label: "Home",
-        icon: overviewIcon,
-    }),
-    conversion: new GuidedHomePage({
-        label: "Conversions",
+    "/": new GuidedHomePage({
+        label: "Convert",
         icon: guidedIcon,
         pages: {
-            start: new GuidedStartPage({
-                label: "Start",
-            }),
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
                 section: sections[0],
             }),
+
+            workflow: new GuidedPreform({
+                title: "Pipeline Workflow",
+                label: "Pipeline workflow",
+                section: sections[0],
+            }),
+
             structure: new GuidedStructurePage({
-                title: "Data Formats",
+                title: "Provide Data Formats",
                 label: "Data formats",
                 section: sections[0],
             }),
@@ -132,7 +115,7 @@ const pages = {
             }),
 
             sourcedata: new GuidedSourceDataPage({
-                title: "Source Data",
+                title: "Source Data Information",
                 label: "Source data",
                 section: sections[1],
             }),
@@ -145,13 +128,21 @@ const pages = {
 
             inspect: new GuidedInspectorPage({
                 title: "Inspector Report",
-                label: "Inspect files",
+                label: "Validate metadata",
                 section: sections[2],
+                sync: ["preview"],
             }),
 
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
-                label: "Preview files",
+                label: "Preview NWB files",
+                section: sections[2],
+                sync: ["preview"],
+            }),
+
+            conversion: new GuidedResultsPage({
+                title: "Conversion Review",
+                label: "Review conversion",
                 section: sections[2],
             }),
 
@@ -159,38 +150,37 @@ const pages = {
                 title: "DANDI Upload Options",
                 label: "Upload to DANDI",
                 section: sections[3],
+                sync: ["conversion"],
             }),
 
-            review: new GuidedResultsPage({
-                title: "Conversion Review",
-                label: "View conversion report",
+            review: new GuidedDandiResultsPage({
+                title: "Upload Review",
+                label: "Review published data",
                 section: sections[3],
             }),
         },
     }),
-    inspect: new InspectPage({
-        label: "Inspect",
+    validate: new InspectPage({
+        label: "Validate",
         icon: inspectIcon,
     }),
-    preview: new PreviewPage({
-        label: "Neurosift",
+    explore: new PreviewPage({
+        label: "Explore",
         icon: neurosiftIcon,
     }),
     uploads: new UploadsPage({
-        label: "Uploads",
+        label: "Upload",
         icon: uploadIcon,
-    }),
-    tutorial: new TutorialPage({
-        label: "Tutorial",
-        icon: tutorialIcon,
     }),
     docs: new DocumentationPage({
         label: "Documentation",
         icon: documentationIcon,
+        group: resourcesGroup,
     }),
     contact: new ContactPage({
         label: "Contact Us",
         icon: contactIcon,
+        group: resourcesGroup,
     }),
     settings: new SettingsPage({
         label: "Settings",

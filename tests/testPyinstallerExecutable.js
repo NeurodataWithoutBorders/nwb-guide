@@ -41,18 +41,18 @@ function handleProcess(proc, id = "process") {
             }
         });
 
-        const error = () => () => {
+        const errorFn = () => () => {
             throw new Error("The distributable pyflask failed to run!");
         };
 
         proc.on("error", (error) => {
             console.error(`[${id}] Error: ${error.message}`);
-            error();
+            errorFn();
         });
 
         proc.on("close", (code) => {
             console.error(`[${id}] Exit: ${code}`);
-            error();
+            errorFn();
         });
     } else console.error("child process failed to start on port" + port);
 }

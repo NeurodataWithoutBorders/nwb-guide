@@ -21,6 +21,14 @@ import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
 import preloadUrl from './../preload/preload.js?asset'
 
+const runByTestSuite = !!process.env.VITEST
+
+// Enable remote debugging port for Vitest
+if (runByTestSuite) {
+  app.commandLine.appendSwitch('remote-debugging-port', `${8315}`) // Mirrors the global electronDebugPort variable
+  app.commandLine.appendSwitch('remote-allow-origins', '*') // Allow all remote origins
+}
+
 // autoUpdater.channel = "latest";
 
 /*************************************************************
@@ -34,13 +42,17 @@ const PY_FLASK_DIST_FOLDER = path.join('..', '..', PYFLASK_DIST_FOLDER_BASE);
 const PY_FLASK_FOLDER = path.join('..', '..', "pyflask");
 const PYINSTALLER_NAME = "nwb-guide"
 
+const isWindows = process.platform === 'win32'
+
+
+
+
 let pyflaskProcess: any = null;
 
 let PORT: number | string | null = 4242;
 let selectedPort: number | string | null = null;
+let serverFilePath = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
 const portRange = 100;
-
-const isWindows = process.platform === 'win32'
 
 let readyQueue: Function[] = []
 
@@ -110,7 +122,7 @@ const pythonIsClosed = (err = globals.python.latestError) => {
  * The resources path is used for Linux and Mac builds and the app.getAppPath() is used for Windows builds.
  * @returns {boolean} True if the app is packaged, false if it is running from a dev version.
  */
-const getPackagedPath = () => {
+function getPackagedPath () {
   const scriptPath = isWindows ? path.join(__dirname, PY_FLASK_DIST_FOLDER, PYINSTALLER_NAME, `${PYINSTALLER_NAME}.exe`) : path.join(process.resourcesPath, PYFLASK_BUILD_SUBFOLDER_NAME, PYINSTALLER_NAME)
   if (fs.existsSync(scriptPath)) return scriptPath;
 };
@@ -119,7 +131,6 @@ const createPyProc = async () => {
 
   return new Promise(async (resolve, reject) => {
 
-    let script = getPackagedPath() || path.join(__dirname, PY_FLASK_FOLDER, "app.py");
     await killAllPreviousProcesses();
 
     const defaultPort = PORT as number
@@ -129,7 +140,7 @@ const createPyProc = async () => {
       .then(([freePort]: string[]) => {
         selectedPort = freePort;
 
-        pyflaskProcess = (script.slice(-3) === '.py') ? child_process.spawn("python", [script, freePort], {}) : child_process.spawn(`${script}`, [freePort], {});
+        pyflaskProcess = (serverFilePath.slice(-3) === '.py') ? child_process.spawn("python", [serverFilePath, freePort], {}) : child_process.spawn(`${serverFilePath}`, [freePort], {});
 
         if (pyflaskProcess != null) {
 
@@ -219,6 +230,11 @@ function initialize() {
       return { action: 'deny' };
     });
 
+    globals.mainWindow.webContents.on('will-prevent-unload', () => {
+        return true // Avoid page refresh on Appzi feedback form submission
+    });
+
+
     // globals.mainWindow.webContents.once("dom-ready", () => {
     //   if (updatechecked == false) {
     //     autoUpdater.checkForUpdatesAndNotify();
@@ -230,11 +246,14 @@ function initialize() {
 
     if (globals.mainWindow) return // Do not re-initialize if the main window is already declared
 
+    const minHeight = 800;
+    const minWidth = 1280;
+
     const windowOptions = {
-      minWidth: 1121,
-      minHeight: 735,
-      width: 1121,
-      height: 735,
+      minWidth,
+      minHeight,
+      width: minWidth,
+      height: minHeight,
       center: true,
       show: false,
       icon,
@@ -247,7 +266,35 @@ function initialize() {
       },
     };
 
-    globals.mainWindow = new BrowserWindow(windowOptions);
+    const win = globals.mainWindow = new BrowserWindow(windowOptions);
+
+    // Avoid CORS (for all requests) for Dandiset creation
+    win.webContents.session.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        callback({ requestHeaders: {
+          Origin: '*',
+          Referer: "http://localhost:5174/", // Spoof the referrer
+          ...details.requestHeaders
+        } });
+      },
+    );
+
+    const accessControlHeader = 'Access-Control-Allow-Origin'
+
+    win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+
+      const accessHeader = [accessControlHeader, accessControlHeader.toLowerCase()].find(key => details.responseHeaders?.[key]) ?? accessControlHeader
+      const origins = details.responseHeaders?.[accessHeader] ?? []
+      if (origins.includes("*")) return callback(details)
+
+      return callback({
+        responseHeaders: {
+          [accessHeader]: ['*'],
+          ...details.responseHeaders,
+        },
+      });
+
+    });
 
 
     // Only create one python process
@@ -272,14 +319,14 @@ function initialize() {
       })
     }
 
-    main.enable(globals.mainWindow.webContents);
+    main.enable(win.webContents);
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) globals.mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  else globals.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) win.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  else win.loadFile(path.join(__dirname, '../renderer/index.html'))
 
-    globals.mainWindow.once("closed", () => {
+    win.once("closed", () => {
       delete globals.mainWindow
     })
 
@@ -295,14 +342,14 @@ function initialize() {
     splash.loadFile(splashHTML)
 
     //  if main window is ready to show, then destroy the splash window and show up the main window
-    globals.mainWindow.once("ready-to-show", () => {
+    win.once("ready-to-show", () => {
 
       setTimeout(function () {
 
         hasBeenOpened = true
 
         splash.close();
-        globals.mainWindow.show();
+        win.show();
         createWindow();
 
         // autoUpdater.checkForUpdatesAndNotify();
@@ -363,13 +410,19 @@ app.on('activate', () => {
 })
 
 
+const root = runByTestSuite ? path.join(paths.root, '.test') : paths.root
+
+if (runByTestSuite) onWindowReady(() => console.log('WINDOW READY FOR TESTING'))
+
+
 const homeDirectory = app.getPath("home");
-const appDirectory = path.join(homeDirectory, paths.root)
+const appDirectory = path.join(homeDirectory, root)
 const guidedProgressFilePath = path.join(appDirectory, ...paths.subfolders.progress);
 const guidedConversionFolderPath = path.join(appDirectory, ...paths.subfolders.conversions);
 const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.preview);
 
 function getEntries(path, type = 'isDirectory') {
+  if (!fs.existsSync(path)) return []
   return fs.readdirSync(path, { withFileTypes: true })
   .filter(dirent => dirent[type]())
   .map(dirent => dirent.name)
@@ -396,16 +449,17 @@ app.on("window-all-closed", () => {
 app.on("before-quit", async (ev: Event) => {
 
   ev.preventDefault()
+    if (!runByTestSuite) {
+    const { response } = await dialog
+    .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
+      type: "question",
+      buttons: ["Yes", "No"],
+      title: "Confirm",
+      message: "Any running process will be stopped. Are you sure you want to quit?",
+    })
 
-  const { response } = await dialog
-  .showMessageBox(BrowserWindow.getFocusedWindow() as BrowserWindow, {
-    type: "question",
-    buttons: ["Yes", "No"],
-    title: "Confirm",
-    message: "Any running process will be stopped. Are you sure you want to quit?",
-  })
-
-  if (response !== 0) return // Skip quitting
+    if (response !== 0) return // Skip quitting
+  }
 
   try {
     globalShortcut.unregisterAll();
@@ -433,6 +487,10 @@ ipcMain.on("resize-window", (event, dir) => {
   globals.mainWindow.setSize(x, y);
 });
 
+ipcMain.on('showItemInFolder', function(event, fullPath) {
+  shell.showItemInFolder(fullPath);
+});
+
 // autoUpdater.on("update-available", () => {
 //   onWindowReady(win => send.call(win, "update_available"));
 // });
@@ -447,6 +505,10 @@ ipcMain.on("resize-window", (event, dir) => {
 
 ipcMain.on("get-port", (event) => {
   event.returnValue = selectedPort;
+});
+
+ipcMain.on("get-server-file-path", (event) => {
+  event.returnValue = serverFilePath;
 });
 
 // Allow the browser to request status if already sent once

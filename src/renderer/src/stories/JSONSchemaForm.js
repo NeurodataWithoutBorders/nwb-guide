@@ -4,13 +4,94 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { header } from "./forms/utils";
+import { header, replaceRefsWithValue } from "./forms/utils";
 import { resolve } from "../promises";
 import { merge } from "./pages/utils";
 import { resolveProperties } from "./pages/guided-mode/data/utils";
 
-import { JSONSchemaInput } from "./JSONSchemaInput";
+import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
+
+const encode = (str) => {
+    try {
+        document.querySelector(`#${str}`);
+        return str;
+    } catch {
+        return btoa(str).replace(/\+|\/|\=/g, "_");
+    }
+};
+
+export const get = (path, object, omitted = [], skipped = []) => {
+    // path = path.slice(this.base.length); // Correct for base path
+    if (!path) throw new Error("Path not specified");
+    return path.reduce((acc, curr, i) => {
+        const tempAcc = acc?.[curr] ?? acc?.[omitted.find((str) => acc[str] && acc[str][curr])]?.[curr];
+        if (tempAcc) return tempAcc;
+        else {
+            const level1 = acc?.[skipped.find((str) => acc[str])];
+            if (level1) {
+                // Handle items-like objects
+                const result = get(path.slice(i), level1, omitted, skipped);
+                if (result) return result;
+
+                // Handle pattern properties objects
+                const got = Object.keys(level1).find((key) => {
+                    const result = get(path.slice(i + 1), level1[key], omitted, skipped);
+                    if (result && typeof result === "object") return result; // Schema are objects...
+                });
+
+                if (got) return level1[got];
+            }
+        }
+    }, object);
+};
+
+export const getSchema = (path, schema, base = []) => {
+    if (typeof path === "string") path = path.split(".");
+
+    // NOTE: Still must correct for the base here
+    if (base.length) {
+        const indexOf = path.indexOf(base.slice(-1)[0]);
+        if (indexOf !== -1) path = path.slice(indexOf + 1);
+    }
+
+    // NOTE: Refs are now pre-resolved
+    const resolved = get(path, schema, ["properties", "patternProperties"], ["patternProperties", "items"]);
+
+    return resolved;
+};
+
+const additionalPropPattern = "additional";
+
+const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
+
+import { Validator } from "jsonschema";
+import { successHue, warningHue, errorHue } from "./globals";
+import { Button } from "./Button";
+
+var validator = new Validator();
+
+const isObject = (item) => {
+    return item && typeof item === "object" && !Array.isArray(item);
+};
+
+export const getIgnore = (o, path) => {
+    if (typeof path === "string") path = path.split(".");
+    return path.reduce((acc, key) => {
+        const info = acc[key] ?? {};
+
+        const accWildcard = acc["*"] ?? {};
+        const infoWildcard = info["*"] ?? {};
+        const mergedWildcards = { ...accWildcard, ...infoWildcard };
+
+        if (key in mergedWildcards) return { ...info, ...mergedWildcards[key] };
+
+        return {
+            ...info,
+            "*": mergedWildcards, // Accumulate ignore values
+        };
+    }, o);
+};
 
 const selfRequiredSymbol = Symbol();
 
@@ -22,47 +103,49 @@ const componentCSS = `
 
     :host {
       display: inline-block;
-      width:100%;
+      width: 100%;
     }
+
+
+
+    .form-section:not(:last-child), .link:not(:last-child){
+        margin-bottom: 15px;
+    }
+
+    .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-section[hidden] {
+        display: none;
+    }
+
+    #empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        color: gray;
+    }
+
 
     p {
       margin: 0 0 1em;
       line-height: 1.4285em;
     }
 
-    .invalid {
-      background: rgb(255, 229, 228) !important;
-    }
-
-    .guided--form-label {
-      display: block;
-      width: 100%;
-      margin: 1.45rem 0 0.45rem 0;
-      color: black;
-      font-weight: 600;
-    }
-
-    .form-section:first-child .guided--form-label {
-      margin-top: 0;
-    }
-
-    .guided--form-label {
-      font-size: 1.2em !important;
-    }
-
-    .guided--form-label.centered {
-      text-align: center;
-    }
-
-    .guided--form-label.header {
-      font-size: 1.5em !important;
+    *:first-child jsonschema-input {
+      margin: 0;
     }
 
     .link {
-      margin-top: 20px;
       border: 1px solid black;
       border-radius: 4px;
       position: relative;
+
     }
 
     .link > div {
@@ -80,23 +163,31 @@ const componentCSS = `
       font-weight: bold;
     }
 
-    .link.required::after {
-      box-sizing: border-box;
-      display: block;
-      width: 10px;
-      height: 10px;
-      background: #ff3d64;
-      border-radius: 50%;
-      position: absolute;
-      top: 0;
-      right: 0;
-      content: '';
-      margin: 15px;
+    .link::after {
+        box-sizing: border-box;
+        display: block;
+        width: 10px;
+        height: 10px;
+        background: hsl(${successHue}, 100%, 70%) !important;
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        content: '';
+        margin: 15px;
+      }
+
+    .link.error::after {
+        background: hsl(${errorHue}, 100%, 70%) !important;
     }
 
-hr {
-  margin: 1em 0 1.5em 0;
-}
+    .link.warning::after {
+        background: hsl(${warningHue}, 100%, 70%) !important;
+    }
+
+    hr {
+    margin: 1em 0 1.5em 0;
+    }
 
     pre {
         white-space: pre-wrap;       /* Since CSS 2.1 */
@@ -108,35 +199,39 @@ hr {
         color: DimGray;
     }
 
-  .required label:after {
-    content: " *";
-    color: #ff0033;
-  }
+    h4 {
+        margin: 0;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid gainsboro;
+    }
 
-  .required.conditional label:after {
-    color: transparent;
-  }
+    .guided--text-input-instructions {
+        font-size: 13px;
+        width: 100%;
+        padding-top: 4px;
+        color: dimgray !important;
+        margin: 0 0 1em;
+        line-height: 1.4285em;
+    }
 
-  h4 {
-    margin: 0;
-    margin-bottom: 5px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid gainsboro;
-  }
+    nwb-accordion {
+        margin-bottom: 0.5em;
+    }
 
-  .guided--text-input-instructions {
-    font-size: 13px;
-    width: 100%;
-    padding-top: 4px;
-    color: dimgray !important;
-    margin: 0 0 1em;
-    line-height: 1.4285em;
-}
+    [disabled]{
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    small {
+        font-size: 0.8em;
+    }
 `;
 
-document.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+document.addEventListener("dragover", (dragEvent) => {
+    dragEvent.preventDefault();
+    dragEvent.stopPropagation();
 });
 
 export class JSONSchemaForm extends LitElement {
@@ -146,17 +241,20 @@ export class JSONSchemaForm extends LitElement {
 
     static get properties() {
         return {
-            mode: { type: String, reflect: true },
             schema: { type: Object, reflect: false },
             results: { type: Object, reflect: false },
             required: { type: Object, reflect: false },
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
+            globals: { type: Object, reflect: false },
+            validateEmptyValues: { type: Boolean, reflect: true },
         };
     }
 
     base = [];
-    #nestedForms = {};
+    forms = {};
+    inputs = [];
+
     tables = {};
     #nErrors = 0;
     #nWarnings = 0;
@@ -178,23 +276,29 @@ export class JSONSchemaForm extends LitElement {
         this.#rendered = this.#updateRendered(true);
 
         this.identifier = props.identifier;
-        this.mode = props.mode ?? "default";
         this.schema = props.schema ?? {};
         this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
 
-        this.ignore = props.ignore ?? [];
+        this.ignore = props.ignore ?? {};
         this.required = props.required ?? {};
         this.dialogOptions = props.dialogOptions;
         this.dialogType = props.dialogType;
         this.deferLoading = props.deferLoading ?? false;
 
+        this.controls = props.controls ?? {};
+
+        this.transformErrors = props.transformErrors;
+
+        this.emptyMessage = props.emptyMessage ?? "No properties to render";
+
         this.onlyRequired = props.onlyRequired ?? false;
         this.showLevelOverride = props.showLevelOverride ?? false;
 
-        this.conditionalRequirements = props.conditionalRequirements ?? []; // NOTE: We assume properties only belong to one conditional requirement group
+        this.groups = props.groups ?? []; // NOTE: We assume properties only belong to one conditional requirement group
 
-        this.validateEmptyValues = props.validateEmptyValues ?? true;
+        // NOTE: Documentation for validateEmptyValues
+        this.validateEmptyValues = props.validateEmptyValues === undefined ? true : props.validateEmptyValues; // false = validate when not empty, true = always validate, null = never validate
 
         if (props.onInvalid) this.onInvalid = props.onInvalid;
         if (props.sort) this.sort = props.sort;
@@ -204,36 +308,91 @@ export class JSONSchemaForm extends LitElement {
         if (props.onLoaded) this.onLoaded = props.onLoaded;
         if (props.onUpdate) this.onUpdate = props.onUpdate;
         if (props.renderTable) this.renderTable = props.renderTable;
+        if (props.renderCustomHTML) this.renderCustomHTML = props.renderCustomHTML;
+        if (props.onOverride) this.onOverride = props.onOverride;
 
         if (props.onStatusChange) this.onStatusChange = props.onStatusChange;
 
         if (props.base) this.base = props.base;
     }
 
-    getTable = (path) => {
-        if (typeof path === "string") path = path.split(".");
-        if (path.length === 1) return this.tables[path[0]]; // return table if accessible
+    // Handle wildcards to grab multiple form elements
+    getAllFormElements = (path, config = { forms: true, tables: true, inputs: true }) => {
+        const name = path[0];
+        const upcomingPath = path.slice(1);
 
-        const copy = [...path];
-        const tableName = copy.pop();
+        const isWildcard = name === "*";
+        const last = !upcomingPath.length;
 
-        if (this.mode === "accordion") return this.getForm(copy).getTable(tableName);
-        else return this.shadowRoot.getElementById(path.join("-")).children[1].shadowRoot.children[0]; // Get table from UI container, then JSONSchemaInput
+        if (isWildcard) {
+            if (last) {
+                const allElements = [];
+                if (config.forms) allElements.push(...this.forms.values());
+                if (config.tables) allElements.push(...this.tables.values());
+                if (config.inputs) allElements.push(...this.inputs.values());
+                return allElements;
+            } else
+                return Object.values(this.forms)
+                    .map((form) => form.getAllFormElements(upcomingPath, config))
+                    .flat();
+        }
+
+        // Get Single element
+        else {
+            const result = this.#getElementOnForm(path);
+            if (!result) return [];
+
+            if (last) {
+                if (result instanceof JSONSchemaForm && config.forms) return [result];
+                else if (result instanceof JSONSchemaInput && config.inputs) return [result];
+                else if (config.tables) return [result];
+
+                return [];
+            } else {
+                if (result instanceof JSONSchemaForm) return result.getAllFormElements(upcomingPath, config);
+                else return [result];
+            }
+        }
     };
 
-    getForm = (path) => {
+    // Single later only
+    #getElementOnForm = (path, { forms = true, tables = true, inputs = true } = {}) => {
         if (typeof path === "string") path = path.split(".");
-        const form = this.#nestedForms[path[0]];
-        if (!path.length || !form) return this; // No nested form with this name. Returning self.
+        if (!path.length) return this;
 
-        return form.getForm(path.slice(1));
+        const name = path[0];
+
+        const form = this.forms[name];
+        if (form && forms) return form;
+
+        const table = this.tables[name];
+        if (table && tables) return table;
+
+        const foundInput = this.inputs[path.join(".")]; // Check Inputs
+        if (foundInput && inputs) return foundInput;
     };
 
-    getInput = (path) => {
+    // Get the form element defined by the path (stops before table cells)
+    getFormElement = (
+        path,
+        { forms, tables, inputs } = {
+            forms: true,
+            tables: true,
+            inputs: true,
+        }
+    ) => {
         if (typeof path === "string") path = path.split(".");
-        const container = this.shadowRoot.querySelector(`#${path.join("-")}`);
-        if (!container) return;
-        return container.querySelector("jsonschema-input");
+        if (!path.length) return this;
+
+        const updatedPath = path.slice(1);
+
+        const result = this.#getElementOnForm(path, { forms, tables, inputs });
+        if (result instanceof JSONSchemaForm) {
+            if (!updatedPath.length) return result;
+            else return result.getFormElement(updatedPath, { forms, tables, inputs });
+        }
+
+        return result;
     };
 
     #requirements = {};
@@ -243,152 +402,267 @@ export class JSONSchemaForm extends LitElement {
         if (changedProperties === "options") this.requestUpdate();
     }
 
+    getGlobalValue(path) {
+        if (typeof path === "string") path = path.split(".");
+        const resolved = this.#get(path, this.globals);
+        return resolved;
+    }
+
     // Track resolved values for the form (data only)
-    updateData(localPath, value) {
+    updateData(localPath, value, forceUpdate = false) {
         const path = [...localPath];
         const name = path.pop();
 
-        const reducer = (acc, key) => (key in acc ? acc[key] : (acc[key] = {})); // NOTE: Create nested objects if required to set a new path
+        const reducer = (acc, key) => {
+            const value = acc[key];
+            return value && typeof value === "object" ? value : (acc[key] = {});
+        }; // NOTE: Create nested objects if required to set a new path
 
         const resultParent = path.reduce(reducer, this.results);
         const resolvedParent = path.reduce(reducer, this.resolved);
         const hasUpdate = resolvedParent[name] !== value;
 
+        const globalValue = this.getGlobalValue(localPath);
+
         // NOTE: Forms with nested forms will handle their own state updates
-        if (!value) {
-            delete resultParent[name];
-            delete resolvedParent[name];
+        if (this.isUndefined(value)) {
+            // Continue to resolve and re-render...
+            if (globalValue) {
+                value = resolvedParent[name] = globalValue;
+                const input = this.getFormElement(localPath);
+                if (input) {
+                    input.updateData(globalValue);
+                    this.onOverride(name, globalValue, path);
+                }
+            } else resolvedParent[name] = undefined;
+
+            resultParent[name] = undefined; // NOTE: Will be removed when stringified
         } else {
-            resultParent[name] = value;
-            resolvedParent[name] = value;
+            resultParent[name] = value === globalValue ? undefined : value; // Retain association with global value
+            resolvedParent[name] =
+                isObject(value) && isObject(resolvedParent) ? merge(value, resolvedParent[name]) : value; // Merge with existing resolved values
         }
 
-        if (hasUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
+        if (hasUpdate || forceUpdate) this.onUpdate(localPath, value); // Ensure the value has actually changed
     }
 
     #addMessage = (name, message, type) => {
         if (Array.isArray(name)) name = name.join("-"); // Convert array to string
-        const container = this.shadowRoot.querySelector(`#${name} .${type}`);
+        const parent = this.shadowRoot.querySelector(`#${encode(name)}`);
+        if (!parent) return;
+
+        let container = parent.querySelector(`.${type}`);
+
+        if (!container) {
+            container = document.createElement("div");
+            container.classList.add(type);
+            parent.append(container);
+        }
+
         const item = new InspectorListItem(message);
         container.appendChild(item);
     };
 
     #clearMessages = (localPath, type) => {
         if (Array.isArray(localPath)) localPath = localPath.join("-"); // Convert array to string
-        const container = this.shadowRoot.querySelector(`#${localPath} .${type}`);
 
-        if (container) {
-            const nChildren = container.children.length;
-            container.innerHTML = "";
+        if (!localPath.length) return;
 
-            // Track errors and warnings
-            if (type === "errors") this.#nErrors -= nChildren;
-            if (type === "warnings") this.#nWarnings -= nChildren;
-        }
+        const parent = this.shadowRoot.querySelector(`#${encode(localPath)}`);
+        if (!parent) return;
+
+        const container = parent.querySelector(`.${type}`);
+        if (!container) return;
+
+        const nChildren = container.children.length;
+        container.remove();
+
+        // Track errors and warnings
+        if (type === "errors") this.#nErrors -= nChildren;
+        if (type === "warnings") this.#nWarnings -= nChildren;
     };
 
     status;
-    checkStatus = () =>
+    checkStatus = () => {
         checkStatus.call(this, this.#nWarnings, this.#nErrors, [
-            ...Object.values(this.#nestedForms),
+            ...Object.entries(this.forms)
+                .filter(([k, v]) => {
+                    const accordion = this.accordions[k];
+                    return !accordion || !accordion.disabled;
+                })
+                .map(([_, v]) => v),
             ...Object.values(this.tables),
         ]);
+    };
 
     throw = (message) => {
         this.onThrow(message, this.identifier);
         throw new Error(message);
     };
 
-    validate = async (resolved) => {
-        // Check if any required inputs are missing
-        const invalidInputs = await this.#validateRequirements(resolved); // get missing required paths
-        const isValid = !invalidInputs.length;
+    validateSchema = (resolved, schema, name) => {
+        return validator
+            .validate(resolved, schema)
+            .errors.map((e) => {
+                const propName = e.path.slice(-1)[0] ?? name ?? (e.property === "instance" ? "Form" : e.property);
+                const rowName = e.path.slice(-2)[0];
 
-        // Print out a detailed error message if any inputs are missing
-        let message = isValid ? "" : `${invalidInputs.length} required inputs are not specified properly.`;
+                const isRow = typeof rowName === "number";
+
+                const resolvedValue = e.instance; // Get offending value
+                const resolvedSchema = e.schema; // Get offending schema
+
+                // ------------ Exclude Certain Errors ------------
+                // Allow referring to floats as null (i.e. JSON NaN representation)
+                if (e.message.includes("is not of a type(s)")) {
+                    if (resolvedSchema.type === "number") {
+                        if (resolvedValue === "NaN") return;
+                        else if (resolvedValue === null) {
+                            if (schema.type !== "array") return; // Allow null in non-tables
+                        } else if (isRow) e.message = `${e.message}. ${templateNaNMessage}`;
+                    } else if (resolvedSchema.type === "string") {
+                        if ("properties" in resolvedSchema) return; // Allow for constructing types from object types
+                    }
+                }
+
+                // Ignore required errors if value is empty
+                if (e.name === "required" && this.validateEmptyValues === null && !(e.property in e.instance)) return;
+
+                // Non-Strict Rule
+                if (resolvedSchema.strict === false && e.message.includes("is not one of enum values")) return;
+
+                const prevHeader = name ? header(name) : "Row";
+
+                return {
+                    type: "error",
+                    message: `${
+                        typeof propName === "string"
+                            ? `${header(propName)}${isRow ? ` on ${prevHeader} ${rowName}` : ""}`
+                            : `${prevHeader} ${propName}`
+                    } ${e.message}.`,
+                };
+            })
+            .filter((v) => !!v);
+    };
+
+    validate = async (resolved = this.resolved) => {
+        if (this.validateEmptyValues === false) this.validateEmptyValues = true;
+
+        // Validate against the entire JSON Schema
+        const copy = structuredClone(resolved);
+        delete copy.__disabled;
+
+        const result = this.validateSchema(copy, this.schema);
+
+        const resolvedErrors = this.#resolveErrors(result, this.base, resolved);
+
+        // Check if any required inputs are missing
+        const requiredButNotSpecified = await this.#validateRequirements(resolved); // get missing required paths
+        const isValid = !requiredButNotSpecified.length;
 
         // Check if all inputs are valid
         const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
 
+        if (resolvedErrors.length) {
+            const len = resolvedErrors.length;
+            if (len === 1) this.throw(resolvedErrors[0].message);
+            else this.throw(`${len} JSON Schema errors detected.`);
+        }
+
+        const allErrors = Array.from(flaggedInputs)
+            .map((inputElement) => {
+                if (!inputElement.nextElementSibling) return; // Skip tables
+                return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
+            })
+            .flat();
+
+        const nMissingRequired = allErrors.reduce((acc, curr) => {
+            return (acc += curr.includes(this.#isARequiredPropertyString) ? 1 : 0);
+        }, 0);
+
+        // Print out a detailed error message if any inputs are missing
+        let message = isValid
+            ? ""
+            : requiredButNotSpecified.length === 1
+              ? `<b>${header(requiredButNotSpecified[0])}</b> is not defined`
+              : `${requiredButNotSpecified.length} required inputs are not specified properly`;
+        if (requiredButNotSpecified.length !== nMissingRequired)
+            console.warn("Disagreement about the correct error to throw...");
+
+        // if (!isValid && allErrors.length && nMissingRequired === allErrors.length) message = `${nMissingRequired} required inputs are not defined.`;
+
+        // Check if all inputs are valid
         if (flaggedInputs.length) {
             flaggedInputs[0].focus();
-            if (!message) message = `${flaggedInputs.length} invalid form values.`;
-            message += ` Please check the highlighted fields.`;
+            if (!message) {
+                if (flaggedInputs.length === 1) {
+                    const path = flaggedInputs[0].path;
+                    const schema = this.getSchema(path);
+                    message = `<b>${header(schema.title ?? path.join("."))}</b> is not valid`;
+                } else message = `${flaggedInputs.length} invalid form values`;
+            }
+            message += `${
+                this.base.length ? ` in the <b>${this.base.join(".")}</b> section` : ""
+            }. Please check the highlighted fields.`;
         }
 
         if (message) this.throw(message);
 
-        for (let key in this.#nestedForms) await this.#nestedForms[key].validate(resolved ? resolved[key] : undefined); // Validate nested forms too
-        try {
-            for (let key in this.tables) await this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
-        } catch (e) {
-            this.throw(e.message);
+        // Validate nested forms (skip disabled)
+        for (let name in this.forms) {
+            const accordion = this.accordions[name];
+            if (!accordion || !accordion.disabled)
+                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
         }
 
-        // NOTE: Ensure user is aware of any warnings before moving on
-        // const activeWarnings = Array.from(this.shadowRoot.querySelectorAll('.warnings')).map(input => Array.from(input.children)).filter(input => input.length)
-
-        // if (this.#nWarnings) {
-        //   const warningText = activeWarnings.reduce((acc, children) => [...acc, ...children.map(el => el.innerText)], [])
-        //   const result = await Swal.fire({
-        //     title: `Are you sure you would like to submit your metadata with ${this.#nWarnings} warnings?`,
-        //     html: `<small><ol style="text-align: left;">${warningText.map(v => `<li>${v}</li>`).join('')}</ol></small>`,
-        //     icon: "warning",
-        //     heightAuto: false,
-        //     showCancelButton: true,
-        //     confirmButtonColor: "#3085d6",
-        //     cancelButtonColor: "#d33",
-        //     confirmButtonText: "Complete Metadata Entry",
-        //     cancelButtonText: "Cancel",
-        //     focusCancel: true,
-        //   });
-
-        //   if (!result.isConfirmed) throw new Error('User cancelled metadata submission')
-        // }
+        for (let key in this.tables) {
+            try {
+                this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
+            } catch (error) {
+                const title = this.tables[key].schema.title;
+                const message = error.message.replace(
+                    "this table",
+                    `the <b>${header(title ?? [...this.base, key].join("."))}</b> table`
+                );
+                this.throw(message);
+                break;
+            }
+        }
 
         return true;
     };
 
-    #get = (path, object = this.resolved, omitted = []) => {
-        // path = path.slice(this.base.length); // Correct for base path
-        return path.reduce((acc, curr) => (acc = acc[curr] ?? acc?.[omitted.find((str) => acc[str])]?.[curr]), object);
-    };
+    #get = (path, object = this.resolved, omitted = [], skipped = []) => get(path, object, omitted, skipped);
 
     #checkRequiredAfterChange = async (localPath) => {
         const path = [...localPath];
         const name = path.pop();
-        const element = this.shadowRoot
-            .querySelector(`#${localPath.join("-")}`)
-            .querySelector("jsonschema-input")
-            .getElement();
-        const isValid = await this.triggerValidation(name, element, path, false);
+        const isValid = await this.triggerValidation(name, path, false);
         if (!isValid) return true;
     };
 
-    getSchema(path, schema = this.schema) {
-        if (typeof path === "string") path = path.split(".");
+    // Resolve all references on the schema when set (INTERNAL USE ONLY)
+    #schema;
 
-        // NOTE: Still must correct for the base here
-        if (this.base.length) {
-            const base = this.base.slice(-1)[0];
-            const indexOf = path.indexOf(base);
-            if (indexOf !== -1) path = path.slice(indexOf + 1);
-        }
-
-        const resolved = this.#get(path, schema, ["properties"]);
-        if (resolved["$ref"]) return this.getSchema(resolved["$ref"].split("/").slice(1)); // NOTE: This assumes reference to the root of the schema
-
-        return resolved;
+    set schema(schema) {
+        this.#schema = schema;
+        this.#schema = replaceRefsWithValue(schema);
     }
 
-    #renderInteractiveElement = (name, info, required, path = []) => {
-        let isRequired = required[name];
+    get schema() {
+        return this.#schema;
+    }
+
+    getSchema = (path, schema = this.schema) => getSchema(path, schema, this.base);
+
+    #renderInteractiveElement = (name, info, required, path = [], value, propertyType) => {
+        let isRequired = this.#isRequired([...path, name]);
 
         const localPath = [...path, name];
         const externalPath = [...this.base, ...localPath];
 
         const resolved = this.#get(path, this.resolved);
-        const value = resolved[name];
+        if (value === undefined) value = resolved[name];
 
         const isConditional = this.#getLink(externalPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
 
@@ -406,39 +680,23 @@ export class JSONSchemaForm extends LitElement {
             };
 
         const interactiveInput = new JSONSchemaInput({
-            info,
+            schema: info,
             path: localPath,
             value,
             form: this,
+            controls: this.controls[name],
             required: isRequired,
+            conditional: isConditional,
             validateEmptyValue: this.validateEmptyValues,
+            pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
+            renderTable: this.renderTable,
+            renderCustomHTML: this.renderCustomHTML,
+            showLabel: true,
         });
 
-        // this.validateEmptyValues ? undefined : (el) => (el.value ?? el.checked) !== ""
+        this.inputs[localPath.join("-")] = interactiveInput;
 
-        // const possibleInputs = Array.from(this.shadowRoot.querySelectorAll("jsonschema-input")).map(input => input.children)
-        // const inputs = possibleInputs.filter(el => el instanceof HTMLElement);
-        // const fileInputs = Array.from(this.shadowRoot.querySelectorAll("filesystem-selector") ?? []);
-        // const allInputs = [...inputs, ...fileInputs];
-        // const filtered = filter ? allInputs.filter(filter) : allInputs;
-        // filtered.forEach((input) => input.dispatchEvent(new Event("change")));
-
-        // console.log(interactiveInput)
-
-        return html`
-            <div
-                id=${localPath.join("-")}
-                class="form-section ${isRequired || isConditional ? "required" : ""} ${isConditional
-                    ? "conditional"
-                    : ""}"
-            >
-                <label class="guided--form-label">${info.title ?? header(name)}</label>
-                ${interactiveInput}
-                <div class="errors"></div>
-                <div class="warnings"></div>
-                <div class="info"></div>
-            </div>
-        `;
+        return html` <div id=${encode(localPath.join("-"))} class="form-section">${interactiveInput}</div> `;
     };
 
     load = () => {
@@ -449,18 +707,22 @@ export class JSONSchemaForm extends LitElement {
     nLoaded = 0;
 
     checkAllLoaded = () => {
-        const expected = [...Object.keys(this.#nestedForms), ...Object.keys(this.tables)].length;
+        const expected = [...Object.keys(this.forms), ...Object.keys(this.tables)].length;
         if (this.nLoaded === expected) {
             this.#loaded = true;
             this.onLoaded();
         }
     };
 
+    // willValidateWhenEmpty = (k) =>  (Array.isArray(this.validateEmptyValues) && this.validateEmptyValues.includes(k)) || this.validateEmptyValues;
+
     #validateRequirements = async (resolved = this.resolved, requirements = this.#requirements, parentPath) => {
         let invalid = [];
 
         for (let name in requirements) {
-            let isRequired = requirements[name];
+            let isRequired = this.#isRequired(name, requirements);
+
+            if (this.accordions[name]?.disabled) continue; // Skip disabled accordions
 
             // // NOTE: Uncomment to block checking requirements inside optional properties
             // if (!requirements[name][selfRequiredSymbol] && !resolved[name]) continue; // Do not continue checking requirements if absent and not required
@@ -469,9 +731,10 @@ export class JSONSchemaForm extends LitElement {
             if (isRequired) {
                 let path = parentPath ? `${parentPath}-${name}` : name;
 
-                if (typeof isRequired === "object" && !Array.isArray(isRequired))
-                    invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
-                else if (!resolved[name]) invalid.push(path);
+                // if (typeof isRequired === "object" && !Array.isArray(isRequired))
+                //     invalid.push(...(await this.#validateRequirements(resolved[name], isRequired, path)));
+                // else
+                if (this.isUndefined(resolved[name]) && this.validateEmptyValues !== null) invalid.push(path);
             }
         }
 
@@ -482,46 +745,59 @@ export class JSONSchemaForm extends LitElement {
     onInvalid = () => {};
     onLoaded = () => {};
     onUpdate = () => {};
+    onOverride = () => {};
 
-    #deleteExtraneousResults = (results, schema) => {
-        for (let name in results) {
-            if (!schema.properties || !(name in schema.properties)) delete results[name];
-            else if (results[name] && typeof results[name] === "object" && !Array.isArray(results[name]))
-                this.#deleteExtraneousResults(results[name], schema.properties[name]);
-        }
-    };
+    // #deleteExtraneousResults = (results, schema) => {
+    //     for (let name in results) {
+    //         if (!schema.properties || !(name in schema.properties)) delete results[name];
+    //         else if (results[name] && typeof results[name] === "object" && !Array.isArray(results[name]))
+    //             this.#deleteExtraneousResults(results[name], schema.properties[name]);
+    //     }
+    // };
 
-    #getRenderable = (schema = {}, required, path, recursive = false) => {
+    #getRenderable = (schema = {}, required, ignore = {}, path, recursive = false) => {
         const entries = Object.entries(schema.properties ?? {});
 
         const isArrayOfArrays = (arr) => !!arr.find((v) => Array.isArray(v));
 
         const flattenRecursedValues = (arr) => {
             const newArr = [];
-            arr.forEach((o) => {
-                if (isArrayOfArrays(o)) newArr.push(...o);
-                else newArr.push(o);
+            arr.forEach((item) => {
+                if (isArrayOfArrays(item)) newArr.push(...item);
+                else newArr.push(item);
             });
 
             return newArr;
         };
 
         const isRenderable = (key, value) => {
-            if (recursive && value.properties) return this.#getRenderable(value, required[key], [...path, key], true);
+            if (recursive && value.properties)
+                return this.#getRenderable(
+                    value,
+                    this.#isRequired([...path, key]),
+                    getIgnore(ignore, key),
+                    [...path, key],
+                    true
+                );
             else return [key, value];
         };
 
         const res = entries
             .map(([key, value]) => {
                 if (!value.properties && key === "definitions") return false; // Skip definitions
-                if (this.ignore.includes(key)) return false;
+
+                // If conclusively ignored
+                if (this.ignore["*"]?.[key] === true)
+                    return false; // Skip all properties with this name
+                else if (this.ignore[key] === true) return false; // Skip this property
+
                 if (this.showLevelOverride >= path.length) return isRenderable(key, value);
                 if (required[key]) return isRenderable(key, value);
                 if (this.#getLink([...this.base, ...path, key])) return isRenderable(key, value);
                 if (!this.onlyRequired) return isRenderable(key, value);
                 return false;
             })
-            .filter((o) => !!o);
+            .filter((result) => !!result);
 
         return flattenRecursedValues(res); // Flatten on the last pass
     };
@@ -530,12 +806,19 @@ export class JSONSchemaForm extends LitElement {
     onStatusChange = () => {};
     onThrow = () => {};
     renderTable = () => {};
+    renderCustomHTML = () => {};
 
     #getLink = (args) => {
         if (typeof args === "string") args = args.split("-");
-        return this.conditionalRequirements.find((linked) =>
-            linked.properties.find((link) => link.join("-") === args.join("-"))
-        );
+        const group = this.#getGroup(args);
+        if (!group) return;
+        return group.validate ? group : undefined;
+    };
+
+    #getGroup = (args) => {
+        if (typeof args === "string") args = args.split("-");
+        const group = this.groups.find((linked) => linked.properties.find((link) => link.join("-") === args.join("-")));
+        return group;
     };
 
     #applyToLinkedProperties = (fn, externalPath) => {
@@ -562,44 +845,84 @@ export class JSONSchemaForm extends LitElement {
         ).reduce((a, b) => a && b, true);
     };
 
-    #isRequired = (path) => {
+    #isRequired = (path, requirements = this.#requirements) => {
         if (typeof path === "string") path = path.split("-");
         // path = path.slice(this.base.length); // Remove base path
-        let res = path.reduce((obj, key) => obj && obj[key], this.#requirements);
-
+        let res = path.reduce((obj, key) => obj?.[key], requirements);
         if (typeof res === "object") res = res[selfRequiredSymbol];
         return res;
     };
 
-    #getLinkElement = (externalPath) => {
-        const link = this.#getLink(externalPath);
+    #getGroupElement = (externalPath) => {
+        const link = this.#getGroup(externalPath);
         if (!link) return;
         return this.shadowRoot.querySelector(`[data-name="${link.name}"]`);
     };
 
+    isUndefined(value) {
+        return value === undefined || value === "";
+    }
+
+    #isARequiredPropertyString = `is a required property`;
+
+    #resolveErrors = (errors, externalPath, parent) => {
+        return errors
+            .map((e) => {
+                // Custom Error Transformations
+                if (this.transformErrors) {
+                    const name = externalPath.slice(-1)[0];
+                    const res = this.transformErrors(e, externalPath, parent[name]);
+                    if (res === false) return;
+                }
+
+                return e;
+            })
+            .filter((v) => !!v);
+    };
+
     // Assume this is going to return as a Promise—even if the change function isn't returning one
-    triggerValidation = async (name, element, path = [], checkLinks = true) => {
-        const parent = this.#get(path, this.resolved);
+    triggerValidation = async (name, path = [], checkLinks = true, input, schema, parent, hooks = {}) => {
+        const { onError, onWarning, onInfo } = hooks;
 
-        const pathToValidate = [...(this.base ?? []), ...path];
+        const localPath = [...path, name].filter((str) => typeof str === "string"); // Ignore row information
+        const externalPath = [...this.base, ...localPath];
+        const pathToValidate = [...this.base, ...path];
 
-        const valid =
-            !this.validateEmptyValues && !(name in parent)
-                ? true
-                : await this.validateOnChange(name, parent, pathToValidate);
+        const undefinedPathToken = localPath.findIndex((str) => !str && typeof str !== "number") !== -1;
+        if (undefinedPathToken) return true; // Will be unable to get schema anyways (additionalProperties)
 
-        const localPath = [...path, name]; // Use basePath to augment the validation
-        const externalPath = [...this.base, name];
+        if (!input) input = this.getFormElement(localPath, { inputs: true });
+        if (!parent) parent = this.#get(path, this.resolved);
+        if (!schema) schema = this.getSchema(localPath);
 
-        const isRequired = this.#isRequired(localPath);
+        const value = parent[name];
+
+        const skipValidation = this.validateEmptyValues === null && value === undefined;
+
+        const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
+
+        // Run validation functions
+        const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
+        const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
+
+        if (valid === null) return null; // Skip validation / data change if the value is null
+
+        const isRequired = this.#isRequired(localPath) || (!input.table && input.required); // Do not trust required status of table validations
+
         let warnings = Array.isArray(valid)
             ? valid.filter((info) => info.type === "warning" && (!isRequired || !info.missing))
             : [];
-        const errors = Array.isArray(valid)
-            ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
-            : [];
+
+        const errors = [
+            ...(Array.isArray(valid)
+                ? valid?.filter((info) => info.type === "error" || (isRequired && info.missing))
+                : []), // Derived Errors
+            ...jsonSchemaErrors, // JSON Schema Errors
+        ];
 
         const info = Array.isArray(valid) ? valid?.filter((info) => info.type === "info") : [];
+
+        const isUndefined = this.isUndefined(parent[name]);
 
         const hasLinks = this.#getLink(externalPath);
         if (hasLinks) {
@@ -616,16 +939,46 @@ export class JSONSchemaForm extends LitElement {
                     }, externalPath);
                 }
             }
-        } else {
-            // For non-links, throw a basic requirement error if the property is required
-            if (!errors.length && isRequired && !parent[name]) {
-                const schema = this.getSchema(localPath);
-                console.log(schema);
-                errors.push({
-                    message: `${schema.title ?? header(name)} is a required property.`,
-                    type: "error",
-                    missing: true,
-                }); // Throw at least a basic error if the property is required
+        }
+
+        if (!errors.length) {
+            if (isUndefined) {
+                // Throw at least a basic warning if a non-linked property is required and missing
+                if (!hasLinks && isRequired) {
+                    if (this.validateEmptyValues === null) {
+                        warnings.push({
+                            message: `${schema.title ?? header(name)} is a suggested property.`,
+                            type: "warning",
+                            missing: true,
+                        });
+                    } else {
+                        const rowName = pathToValidate.slice(-1)[0];
+                        const isRow = typeof rowName === "number";
+
+                        errors.push({
+                            message: `${schema.title ?? header(name)} ${this.#isARequiredPropertyString}. ${
+                                schema.type === "number"
+                                    ? isRow
+                                        ? templateNaNMessage
+                                        : "<br><small>Use the 'I Don't Know' checkbox if unsure.</small>"
+                                    : ""
+                            }`,
+                            type: "error",
+                            missing: true,
+                        });
+                    }
+                }
+            }
+
+            // Validate Regex Pattern automatically
+            else if (schema.pattern) {
+                const regex = new RegExp(schema.pattern, schema.flags);
+                if (!regex.test(parent[name])) {
+                    errors.push({
+                        message: `${schema.title ?? header(name)} does not match the required pattern (${regex}).`,
+                        type: "error",
+                    });
+                }
             }
         }
 
@@ -639,24 +992,33 @@ export class JSONSchemaForm extends LitElement {
             valid === true ||
             valid == undefined ||
             isFunction ||
-            (Array.isArray(valid) && !valid.find((o) => o.type === "error"));
+            (Array.isArray(valid) && !valid.find((error) => error.type === "error"));
 
         if (!isValid && errors.length === 0) errors.push({ type: "error", message: "Invalid value detected" });
 
+        const resolvedErrors = this.#resolveErrors(errors, externalPath, parent);
+
         // Track errors and warnings
-        this.#nErrors += errors.length;
-        this.#nWarnings += warnings.length;
+        const updatedWarnings = warnings.map((info) => (onWarning ? onWarning(info) : info)).filter((v) => !!v);
+        const updatedErrors = resolvedErrors.map((info) => (onError ? onError(info) : info)).filter((v) => !!v);
+
+        this.#nErrors += updatedErrors.length;
+        this.#nWarnings += updatedWarnings.length;
         this.checkStatus();
 
-        // Show aggregated errors and warnings (if any)
-        warnings.forEach((info) => this.#addMessage(localPath, info, "warnings"));
-        info.forEach((info) => this.#addMessage(localPath, info, "info"));
+        // Show aggregated errors and warnings (if allowed)
+        updatedWarnings.forEach((info) => (onWarning ? "" : this.#addMessage(localPath, info, "warnings")));
+        info.forEach((info) => (onInfo ? onInfo(info) : this.#addMessage(localPath, info, "info")));
 
-        if (isValid && errors.length === 0) {
-            element.classList.remove("invalid");
+        const groupEl = this.#getGroupElement(externalPath);
 
-            const linkEl = this.#getLinkElement(externalPath);
-            if (linkEl) linkEl.classList.remove("required", "conditional");
+        if (groupEl) {
+            groupEl.classList[resolvedErrors.length ? "add" : "remove"]("error");
+            groupEl.classList[warnings.length ? "add" : "remove"]("warning");
+        }
+
+        if (isValid && updatedErrors.length === 0) {
+            input.classList.remove("invalid");
 
             await this.#applyToLinkedProperties((path, element) => {
                 element.classList.remove("required", "conditional"); // Links manage their own error and validity states, but only one needs to be valid
@@ -666,39 +1028,43 @@ export class JSONSchemaForm extends LitElement {
 
             return true;
         } else {
-            // Add new invalid classes and errors
-            element.classList.add("invalid");
+            if (this.validateEmptyValues) {
+                // Add new invalid classes and errors
+                input.classList.add("invalid");
 
-            const linkEl = this.#getLinkElement(externalPath);
-            if (linkEl) linkEl.classList.add("required", "conditional");
+                // Only add the conditional class for linked elements
+                await this.#applyToLinkedProperties(
+                    (name, element) => element.classList.add("required", "conditional"),
+                    [...path, name]
+                );
 
-            // Only add the conditional class for linked elements
-            await this.#applyToLinkedProperties(
-                (name, element) => element.classList.add("required", "conditional"),
-                [...path, name]
-            );
-
-            errors.forEach((info) => this.#addMessage(localPath, info, "errors"));
+                updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
+            }
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
 
             return false;
         }
     };
 
-    #render = (schema, results, required = {}, path = []) => {
-        let isLink = Symbol("isLink");
-        // Filter non-required properties (if specified) and render the sub-schema
-        const renderable = this.#getRenderable(schema, required, path);
+    accordions = {};
 
+    #render = (schema, results, required = {}, ignore = {}, path = []) => {
+        let isLink = Symbol("isLink");
+
+        const hasPatternProperties = !!schema.patternProperties;
+        const allowAdditionalProperties = schema.additionalProperties !== false;
+
+        // Filter non-required properties (if specified) and render the sub-schema
+        const renderable = this.#getRenderable(schema, required, ignore, path);
         // // Filter non-required properties (if specified) and render the sub-schema
         // const renderable = path.length ? this.#getRenderable(schema, required) : Object.entries(schema.properties ?? {})
 
-        if (renderable.length === 0) return html`<p>No properties to render</p>`;
+        const hasProperties = renderable.length > 0 || hasPatternProperties || allowAdditionalProperties;
 
+        if (!hasProperties) return html`<div id="empty">${this.emptyMessage}</div>`;
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
-            const link = this.#getLink(externalPath); // Use the base path to find a link
-
+            const link = this.#getGroup(externalPath); // Use the base path to find a link
             if (link) {
                 if (!acc.find(([_, info]) => info === link)) {
                     const entry = [link.name, link];
@@ -710,14 +1076,21 @@ export class JSONSchemaForm extends LitElement {
             return acc;
         }, []);
 
+        const getRequiredValue = (name) => {
+            const value = required[name];
+            return value && typeof value === "object" ? value[selfRequiredSymbol] : value;
+        };
+
         const sorted = renderableWithLinks
 
             // Sort alphabetically
             .sort(([name], [name2]) => {
-                if (name.toLowerCase() < name2.toLowerCase()) {
+                const header1 = header(name);
+                const header2 = header(name2);
+                if (header1.toLowerCase() < header2.toLowerCase()) {
                     return -1;
                 }
-                if (name.toLowerCase() > name2.toLowerCase()) {
+                if (header1.toLowerCase() > header2.toLowerCase()) {
                     return 1;
                 }
                 return 0;
@@ -728,8 +1101,8 @@ export class JSONSchemaForm extends LitElement {
                 const [name] = e1;
                 const [name2] = e2;
 
-                if (required[name] && !required[name2]) return -1; // first required
-                if (!required[name] && required[name2]) return 1; // second required
+                if (getRequiredValue(name) && !getRequiredValue(name2)) return -1; // first required
+                if (!getRequiredValue(name) && getRequiredValue(name2)) return 1; // second required
 
                 if (e1[isLink] && !e2[isLink]) return -1; // first link
                 if (!e1[isLink] && e2[isLink]) return 1; // second link
@@ -744,15 +1117,28 @@ export class JSONSchemaForm extends LitElement {
 
                 if (e1[isLink] || e2[isLink]) return 0;
 
-                if (info2.properties) return -1;
+                if (info2.properties && info.properties) return 0;
+                else if (info2.properties) return -1;
                 else if (info.properties) return 1;
                 else return 0;
             });
+
+        if (schema.order) {
+            sorted.sort(([name], [name2]) => {
+                const index = schema.order.indexOf(name);
+                const index2 = schema.order.indexOf(name2);
+                if (index === -1) return 1;
+                if (index2 === -1) return -1;
+                return index - index2;
+            });
+        }
 
         const finalSort = this.sort ? sorted.sort(this.sort) : sorted;
 
         let rendered = finalSort.map((entry) => {
             const [name, info] = entry;
+
+            const hasPatternProperties = !!info.patternProperties;
 
             // Render linked properties
             if (entry[isLink]) {
@@ -775,35 +1161,64 @@ export class JSONSchemaForm extends LitElement {
 
             const localPath = [...path, name];
 
-            if (this.mode === "accordion" && hasMany) {
-                const headerName = header(name);
+            // Check properties that will be rendered before creating the accordion
+            const base = [...this.base, ...localPath];
 
-                this.#nestedForms[name] = new JSONSchemaForm({
+            const explicitlyRequired = schema.required?.includes(name) ?? false;
+
+            const headerName = header(info.title ?? name);
+
+            const renderableInside = this.#getRenderable(info, required[name], ignore, localPath, true);
+
+            const __disabled = this.results.__disabled ?? (this.results.__disabled = {});
+            const __interacted = __disabled.__interacted ?? (__disabled.__interacted = {});
+
+            const hasInteraction = __interacted[name]; // NOTE: This locks the specific value to what the user has chosen...
+
+            const { __disabled: __tempDisabledGlobal = {} } = this.getGlobalValue(localPath.slice(0, -1));
+
+            const __disabledGlobal = structuredClone(__tempDisabledGlobal); // NOTE: Cloning ensures no property transfer
+
+            let isGlobalEffect = !hasInteraction || (!hasInteraction && __disabledGlobal.__interacted?.[name]); // Indicate whether global effect is used
+
+            const __disabledResolved = isGlobalEffect ? __disabledGlobal : __disabled;
+
+            const isDisabled = !!__disabledResolved[name];
+
+            const nestedResults = __disabled[name] ?? results[name] ?? this.results[name]; // One or the other will exist—depending on global or local disabling
+
+            if (renderableInside.length) {
+                const ignore = getIgnore(this.ignore, name);
+
+                const ogContext = this;
+                const nested = (this.forms[name] = new JSONSchemaForm({
                     identifier: this.identifier,
                     schema: info,
-                    results: { ...results[name] },
+                    results: { ...nestedResults },
                     globals: this.globals?.[name],
 
-                    mode: this.mode,
+                    controls: this.controls[name],
 
-                    onUpdate: (internalPath, value) => {
+                    onUpdate: (internalPath, value, forceUpdate) => {
                         const path = [...localPath, ...internalPath];
-                        this.updateData(path, value);
+                        this.updateData(path, value, forceUpdate);
                     },
 
+                    transformErrors: this.transformErrors,
+
                     required: required[name], // Scoped to the sub-schema
-                    ignore: this.ignore,
+                    ignore,
                     dialogOptions: this.dialogOptions,
                     dialogType: this.dialogType,
                     onlyRequired: this.onlyRequired,
                     showLevelOverride: this.showLevelOverride,
                     deferLoading: this.deferLoading,
-                    conditionalRequirements: this.conditionalRequirements,
+                    groups: this.groups,
                     validateOnChange: (...args) => this.validateOnChange(...args),
                     onThrow: (...args) => this.onThrow(...args),
                     validateEmptyValues: this.validateEmptyValues,
                     onStatusChange: (status) => {
-                        accordion.setSectionStatus(headerName, status);
+                        accordion.setStatus(status);
                         this.checkStatus();
                     }, // Forward status changes to the parent form
                     onInvalid: (...args) => this.onInvalid(...args),
@@ -811,52 +1226,181 @@ export class JSONSchemaForm extends LitElement {
                         this.nLoaded++;
                         this.checkAllLoaded();
                     },
-                    renderTable: (...args) => this.renderTable(...args),
-                    base: [...this.base, ...localPath],
-                });
-
-                const accordion = new Accordion({
-                    sections: {
-                        [headerName]: {
-                            subtitle: `${this.#getRenderable(info, required[name], localPath, true).length} fields`,
-                            content: this.#nestedForms[name],
-                        },
+                    renderCustomHTML: function (...args) {
+                        return ogContext.renderCustomHTML.call(this, ...args);
                     },
-                });
-
-                accordion.id = name; // assign name to accordion id
-
-                return accordion;
+                    renderTable: function (...args) {
+                        return ogContext.renderTable.call(this, ...args);
+                    },
+                    onOverride: (...args) => this.onOverride(...args),
+                    base,
+                }));
             }
 
-            // Render properties in the sub-schema
-            const rendered = this.#render(info, results?.[name], required[name], localPath);
-            return hasMany || path.length > 1
-                ? html`
-                      <div style="margin-top: 40px;">
-                          <label class="guided--form-label header">${header(name)}</label>
-                          <hr />
-                          ${rendered}
-                      </div>
-                  `
-                : rendered;
+            const oldStates = this.accordions[name];
+
+            const disableText = "Skip";
+            const enableText = "Enable";
+
+            const disabledPath = [...path, "__disabled"];
+            const interactedPath = [...disabledPath, "__interacted"];
+
+            const enableToggle = new Button({
+                label: isDisabled ? enableText : disableText,
+                size: "extra-small",
+                onClick: (ev) => {
+                    ev.stopPropagation();
+
+                    const willEnable = enableToggle.label === enableText;
+
+                    // Reset parameters on interaction
+                    isGlobalEffect = false;
+
+                    enableToggle.label = willEnable ? disableText : enableText;
+
+                    willEnable ? enable() : disable();
+                    this.updateData([...interactedPath, name], true, true);
+
+                    this.onUpdate(localPath, this.results[name]);
+                },
+            });
+
+            // const enableToggle = document.createElement("input");
+            const enableToggleContainer = document.createElement("div");
+            Object.assign(enableToggleContainer.style, { position: "relative" });
+            enableToggleContainer.append(enableToggle);
+            Object.assign(enableToggle.style, { marginRight: "10px", pointerEvents: "all" });
+
+            // Skip if accordion will be empty
+            if (!renderableInside.length) return;
+
+            const accordion = (this.accordions[name] = new Accordion({
+                name: headerName,
+                toggleable: hasMany, // Only show toggle if there are multiple siblings
+                subtitle: html`<div style="display:flex; align-items: center;">
+                    ${explicitlyRequired ? "" : enableToggleContainer}
+                </div>`,
+                content: this.forms[name],
+
+                // States
+                open: oldStates?.open ?? !hasMany,
+                disabled: isDisabled,
+                status: oldStates?.status ?? "valid", // Always show a status
+            }));
+
+            accordion.id = name; // assign name to accordion id
+
+            const disable = () => {
+                accordion.disabled = true;
+
+                const target = this.results;
+                const value = target[name] ?? {};
+
+                let update = true;
+                if (target.__disabled?.[name] && isGlobalEffect) update = false;
+
+                // Disabled path is set to actual value
+                if (update) this.updateData([...disabledPath, name], value);
+
+                // Actual data is set to undefined
+                this.updateData(localPath, undefined);
+
+                this.checkStatus();
+            };
+
+            const enable = () => {
+                accordion.disabled = false;
+
+                const { __disabled = {} } = this.results;
+
+                // Actual value is restored to the cached value
+                if (__disabled[name]) this.updateData(localPath, __disabled[name]);
+
+                // Cached value is cleared
+                this.updateData([...disabledPath, name], undefined);
+
+                this.checkStatus();
+            };
+
+            if (isGlobalEffect) {
+                isDisabled ? disable() : enable();
+                Object.assign(enableToggle.style, { accentColor: "gray" });
+            }
+
+            return accordion;
         });
+
+        if (hasPatternProperties) {
+            const patternProps = Object.entries(schema.patternProperties).map(([key, schema]) => {
+                return this.#renderInteractiveElement(
+                    key,
+                    {
+                        ...schema,
+                        title: `Pattern Properties <small><small style="font-weight: normal">${key}</small></small>`,
+                    },
+                    required,
+                    path,
+                    results,
+                    "pattern"
+                );
+            });
+
+            rendered = [...rendered, ...patternProps];
+        }
+
+        const additionalProps = getEditableItems(results, additionalPropPattern, { schema });
+
+        // Render additional properties
+        if (allowAdditionalProperties) {
+            // NOTE: If no pre-existing additional properties exist, exclude the entire rendering group
+            if (!additionalProps.length) return rendered;
+
+            const additionalElement = this.#renderInteractiveElement(
+                "",
+                {
+                    title: `Additional Properties`,
+                    ...schema,
+                },
+                required,
+                path,
+                results,
+                additionalPropPattern
+            );
+
+            return [...rendered, additionalElement];
+        }
+
+        // Delete additional properties off the final results
+        else {
+            additionalProps.forEach(({ key }) => {
+                delete results[key];
+            });
+        }
 
         return rendered;
     };
 
-    #registerRequirements = (schema, requirements = {}, acc = this.#requirements) => {
+    #registerRequirements = (schema, requirements = {}, acc = this.#requirements, path = []) => {
         if (!schema) return;
+
+        const isItem = (schema) => schema.items && schema.items.properties;
+        if (isItem(schema)) schema = schema.items;
+
         if (schema.required) schema.required.forEach((key) => (acc[key] = true));
+
         for (let key in requirements) acc[key] = requirements[key]; // Overwrite standard requirements with custom requirements
+
         if (schema.properties) {
             Object.entries(schema.properties).forEach(([key, value]) => {
-                if (value.properties) {
+                const isPropItem = isItem(value);
+
+                if (value.properties || isPropItem) {
+                    const fullPath = [...path, key];
                     let nextAccumulator = acc[key];
                     const isNotObject = typeof nextAccumulator !== "object";
                     if (!nextAccumulator || isNotObject)
-                        nextAccumulator = acc[key] = { [selfRequiredSymbol]: !!nextAccumulator };
-                    this.#registerRequirements(value, requirements[key], nextAccumulator);
+                        nextAccumulator = acc[key] = { [selfRequiredSymbol]: !!(nextAccumulator && !isPropItem) };
+                    this.#registerRequirements(value, requirements[key], nextAccumulator, fullPath);
                 }
             });
         }
@@ -870,12 +1414,13 @@ export class JSONSchemaForm extends LitElement {
     #resetLoadState() {
         this.#loaded = false;
         this.nLoaded = 0;
+        this.inputs = {};
     }
 
     // Check if everything is internally rendered
     get rendered() {
         const isRendered = resolve(this.#rendered, () =>
-            Promise.all([...Object.values(this.#nestedForms), ...Object.values(this.tables)].map((o) => o.rendered))
+            Promise.all([...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered))
         );
         return isRendered;
     }
@@ -887,24 +1432,22 @@ export class JSONSchemaForm extends LitElement {
 
         const schema = this.schema ?? {};
 
-        this.resolved = merge(this.results, {}); // Track resolved values as a copy of the user-specified results
+        this.resolved = structuredClone(this.results); // Track resolved values as a copy of the user-specified results
 
         // Register default properties
         resolveProperties(schema.properties, this.resolved, this.globals);
 
         // // Delete extraneous results
         // this.#deleteExtraneousResults(this.results, this.schema);
-
+        this.#requirements = {};
         this.#registerRequirements(this.schema, this.required);
 
         return html`
-            <div>
-                ${schema.description
-                    ? html`<h4>Description</h4>
-                          <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
-                    : ""}
-                ${this.#render(schema, this.resolved, this.#requirements)}
-            </div>
+            ${schema.description
+                ? html`<h4>Description</h4>
+                      <p class="guided--text-input-instructions">${unsafeHTML(schema.description)}</p>`
+                : ""}
+            ${this.#render(schema, this.resolved, this.#requirements, this.ignore)}
         `;
     }
 }

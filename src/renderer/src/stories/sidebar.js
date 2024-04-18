@@ -1,5 +1,6 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "./utils/useGlobalStyles.js";
+import { header } from "./forms/utils";
 
 const componentCSS = ``; // These are not active until the component is using shadow DOM
 
@@ -71,7 +72,7 @@ export class Sidebar extends LitElement {
         // Actually click the item
         let selectedItem = this.#selected
             ? (this.shadowRoot ?? this).querySelector(`ul[data-id='${this.#selected}']`)
-            : (this.shadowRoot ?? this).querySelector("ul").children[0];
+            : (this.shadowRoot ?? this).querySelector("ul").querySelector("a");
         if (this.initialize && selectedItem) selectedItem.click();
         else if (this.#selected) this.selectItem(this.#selected); // Visually select the item
 
@@ -138,7 +139,14 @@ export class Sidebar extends LitElement {
           <div class="sidebar-header">
               ${
                   logoNoName
-                      ? html` <img id="button-soda-big-icon" class="nav-center-logo-image" src="${this.logo}" /> `
+                      ? html`
+                            <img
+                                id="button-soda-big-icon"
+                                class="nav-center-logo-image"
+                                src="${this.logo}"
+                                @click=${() => this.select("/")}
+                            />
+                        `
                       : ""
               }
                 ${hasName ? html`<h1 style="margin-bottom: 0;">${this.name}</h1>` : ""}
@@ -162,26 +170,54 @@ export class Sidebar extends LitElement {
                     ul.classList.add("components");
 
                     const groups = {};
+
                     Object.entries(this.pages).forEach(([id, page]) => {
                         const info = page.info ?? {};
                         const label = info.label ?? id;
                         const icon = info.icon ?? "";
+
+                        if (info.hidden) return;
+
                         const a = document.createElement("a");
                         a.setAttribute("data-id", id);
                         a.href = "#";
-                        a.innerHTML = `${icon} ${label} `;
+                        a.innerHTML = `${icon} ${label}`;
                         a.onclick = () => this.#onClick(id);
 
                         const li = document.createElement("li");
                         li.append(a);
 
+                        if (info.hidden) {
+                            li.style.display = "none";
+                        }
+
                         const parent = info.group
                             ? groups[info.group] ?? (groups[info.group] = document.createElement("div"))
                             : ul;
-                        parent.append(a);
+                        parent.append(li);
                     });
 
-                    return [ul, ...Object.values(groups)];
+                    const bottomGroup = groups["bottom"];
+                    delete groups["bottom"];
+
+                    for (let key in groups) {
+                        const group = groups[key];
+                        const title = document.createElement("h4");
+                        Object.assign(title.style, {
+                            color: "gray",
+                            fontSize: "14px",
+                            padding: "15px 0px 7px 10px",
+                            borderBottom: "1px solid #ccc",
+                            margin: 0,
+                            marginBottom: "10px",
+                        });
+                        title.innerHTML = header(key);
+                        group.prepend(title);
+                    }
+
+                    ul.append(...Object.values(groups));
+
+                    return [ul, bottomGroup];
                 })()}
             </div>
             <div>

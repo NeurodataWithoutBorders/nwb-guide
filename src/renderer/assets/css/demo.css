@@ -713,13 +713,6 @@ table.table-save-metadata {
     font-size: 14px;
     font-style: italic;
 }
-
-.info {
-    width: 18px;
-    height: 18px;
-    float: right;
-}
-
 .tooltipnew .tooltiptext {
     visibility: hidden;
     width: 400px;

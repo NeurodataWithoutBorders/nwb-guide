@@ -12,6 +12,7 @@ import BlackrockRecordingInterfaceSchema from "../../../../../../schemas/json/ge
 import BlackrockSortingInterfaceSchema from "../../../../../../schemas/json/generated/BlackrockSortingInterface.json";
 import CellExplorerSortingInterfaceSchema from "../../../../../../schemas/json/generated/CellExplorerSortingInterface.json";
 import KiloSortSortingInterfaceSchema from "../../../../../../schemas/json/generated/KiloSortSortingInterface.json";
+import TdtRecordingInterfaceSchema from "../../../../../../schemas/json/generated/TdtRecordingInterface.json";
 import Spike2RecordingInterfaceSchema from "../../../../../../schemas/json/generated/Spike2RecordingInterface.json";
 import BrukerTiffSinglePlaneImagingInterfaceSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneImagingInterface.json";
 import ExtractSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/ExtractSegmentationInterface.json";
@@ -28,8 +29,21 @@ import MEArecRecordingInterfaceSchema from "../../../../../../schemas/json/gener
 import PlexonRecordingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonRecordingInterface.json";
 import PlexonSortingInterfaceSchema from "../../../../../../schemas/json/generated/PlexonSortingInterface.json";
 import AxonaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AxonaRecordingInterface.json";
+import VideoInterfaceSchema from "../../../../../../schemas/json/generated/VideoInterface.json";
 import NeuralynxRecordingInterfaceSchema from "../../../../../../schemas/json/generated/NeuralynxRecordingInterface.json";
+import Suite2pSegmentationInterfaceSchema from "../../../../../../schemas/json/generated/Suite2pSegmentationInterface.json";
 import AlphaOmegaRecordingInterfaceSchema from "../../../../../../schemas/json/generated/AlphaOmegaRecordingInterface.json";
+import DeepLabCutInterfaceSchema from "../../../../../../schemas/json/generated/DeepLabCutInterface.json";
+import SLEAPInterfaceSchema from "../../../../../../schemas/json/generated/SLEAPInterface.json";
+import FicTracDataInterfaceSchema from "../../../../../../schemas/json/generated/FicTracDataInterface.json";
+import AudioInterfaceSchema from "../../../../../../schemas/json/generated/AudioInterface.json";
+import MiniscopeBehaviorInterfaceSchema from "../../../../../../schemas/json/generated/MiniscopeBehaviorInterface.json";
+import EDFRecordingInterfaceSchema from "../../../../../../schemas/json/generated/EDFRecordingInterface.json";
+import SpikeGLXConverterPipeSchema from "../../../../../../schemas/json/generated/SpikeGLXConverterPipe.json";
+import BrukerTiffSinglePlaneConverterSchema from "../../../../../../schemas/json/generated/BrukerTiffSinglePlaneConverter.json";
+import BrukerTiffMultiPlaneConverterSchema from "../../../../../../schemas/json/generated/BrukerTiffMultiPlaneConverter.json";
+import MiniscopeConverterSchema from "../../../../../../schemas/json/generated/MiniscopeConverter.json";
+import CellExplorerRecordingInterfaceSchema from "../../../../../../schemas/json/generated/CellExplorerRecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -38,7 +52,7 @@ export default {
     },
 };
 
-const activePage = "conversion/sourcedata";
+const activePage = "//sourcedata";
 
 const globalStateCopy = JSON.parse(JSON.stringify(globalState));
 globalStateCopy.schema.source_data.properties.SpikeGLXRecordingInterface =
@@ -67,11 +81,12 @@ globalStateCopy.schema.source_data.properties.CellExplorerSortingInterface =
     CellExplorerSortingInterfaceSchema.properties.CellExplorerSortingInterface;
 globalStateCopy.schema.source_data.properties.KiloSortSortingInterface =
     KiloSortSortingInterfaceSchema.properties.KiloSortSortingInterface;
+globalStateCopy.schema.source_data.properties.TdtRecordingInterface =
+    TdtRecordingInterfaceSchema.properties.TdtRecordingInterface;
 globalStateCopy.schema.source_data.properties.Spike2RecordingInterface =
     Spike2RecordingInterfaceSchema.properties.Spike2RecordingInterface;
 globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneImagingInterface =
     BrukerTiffSinglePlaneImagingInterfaceSchema.properties.BrukerTiffSinglePlaneImagingInterface;
-sd;
 globalStateCopy.schema.source_data.properties.ExtractSegmentationInterface =
     ExtractSegmentationInterfaceSchema.properties.ExtractSegmentationInterface;
 globalStateCopy.schema.source_data.properties.CnmfeSegmentationInterface =
@@ -100,10 +115,33 @@ globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
     PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
 globalStateCopy.schema.source_data.properties.AxonaRecordingInterface =
     AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface;
+globalStateCopy.schema.source_data.properties.VideoInterface = VideoInterfaceSchema.properties.VideoInterface;
 globalStateCopy.schema.source_data.properties.NeuralynxRecordingInterface =
     NeuralynxRecordingInterfaceSchema.properties.NeuralynxRecordingInterface;
+globalStateCopy.schema.source_data.properties.Suite2pSegmentationInterface =
+    Suite2pSegmentationInterfaceSchema.properties.Suite2pSegmentationInterface;
 globalStateCopy.schema.source_data.properties.AlphaOmegaRecordingInterface =
     AlphaOmegaRecordingInterfaceSchema.properties.AlphaOmegaRecordingInterface;
+globalStateCopy.schema.source_data.properties.DeepLabCutInterface =
+    DeepLabCutInterfaceSchema.properties.DeepLabCutInterface;
+globalStateCopy.schema.source_data.properties.SLEAPInterface = SLEAPInterfaceSchema.properties.SLEAPInterface;
+globalStateCopy.schema.source_data.properties.FicTracDataInterface =
+    FicTracDataInterfaceSchema.properties.FicTracDataInterface;
+globalStateCopy.schema.source_data.properties.AudioInterface = AudioInterfaceSchema.properties.AudioInterface;
+globalStateCopy.schema.source_data.properties.MiniscopeBehaviorInterface =
+    MiniscopeBehaviorInterfaceSchema.properties.MiniscopeBehaviorInterface;
+globalStateCopy.schema.source_data.properties.EDFRecordingInterface =
+    EDFRecordingInterfaceSchema.properties.EDFRecordingInterface;
+globalStateCopy.schema.source_data.properties.SpikeGLXConverterPipe =
+    SpikeGLXConverterPipeSchema.properties.SpikeGLXConverterPipe;
+globalStateCopy.schema.source_data.properties.BrukerTiffSinglePlaneConverter =
+    BrukerTiffSinglePlaneConverterSchema.properties.BrukerTiffSinglePlaneConverter;
+globalStateCopy.schema.source_data.properties.BrukerTiffMultiPlaneConverter =
+    BrukerTiffMultiPlaneConverterSchema.properties.BrukerTiffMultiPlaneConverter;
+globalStateCopy.schema.source_data.properties.MiniscopeConverter =
+    MiniscopeConverterSchema.properties.MiniscopeConverter;
+globalStateCopy.schema.source_data.properties.CellExplorerRecordingInterface =
+    CellExplorerRecordingInterfaceSchema.properties.CellExplorerRecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -191,6 +229,12 @@ const KiloSortSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState
 KiloSortSortingInterfaceGlobalCopy.interfaces.interface = KiloSortSortingInterface;
 KiloSortSortingInterfaceGlobalCopy.schema.source_data = KiloSortSortingInterfaceSchema;
 KiloSortSortingInterface.args = { activePage, globalState: KiloSortSortingInterfaceGlobalCopy };
+
+export const TdtRecordingInterface = PageTemplate.bind({});
+const TdtRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+TdtRecordingInterfaceGlobalCopy.interfaces.interface = TdtRecordingInterface;
+TdtRecordingInterfaceGlobalCopy.schema.source_data = TdtRecordingInterfaceSchema;
+TdtRecordingInterface.args = { activePage, globalState: TdtRecordingInterfaceGlobalCopy };
 
 export const Spike2RecordingInterface = PageTemplate.bind({});
 const Spike2RecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
@@ -291,14 +335,92 @@ AxonaRecordingInterfaceGlobalCopy.interfaces.interface = AxonaRecordingInterface
 AxonaRecordingInterfaceGlobalCopy.schema.source_data = AxonaRecordingInterfaceSchema;
 AxonaRecordingInterface.args = { activePage, globalState: AxonaRecordingInterfaceGlobalCopy };
 
+export const VideoInterface = PageTemplate.bind({});
+const VideoInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+VideoInterfaceGlobalCopy.interfaces.interface = VideoInterface;
+VideoInterfaceGlobalCopy.schema.source_data = VideoInterfaceSchema;
+VideoInterface.args = { activePage, globalState: VideoInterfaceGlobalCopy };
+
 export const NeuralynxRecordingInterface = PageTemplate.bind({});
 const NeuralynxRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 NeuralynxRecordingInterfaceGlobalCopy.interfaces.interface = NeuralynxRecordingInterface;
 NeuralynxRecordingInterfaceGlobalCopy.schema.source_data = NeuralynxRecordingInterfaceSchema;
 NeuralynxRecordingInterface.args = { activePage, globalState: NeuralynxRecordingInterfaceGlobalCopy };
 
+export const Suite2pSegmentationInterface = PageTemplate.bind({});
+const Suite2pSegmentationInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+Suite2pSegmentationInterfaceGlobalCopy.interfaces.interface = Suite2pSegmentationInterface;
+Suite2pSegmentationInterfaceGlobalCopy.schema.source_data = Suite2pSegmentationInterfaceSchema;
+Suite2pSegmentationInterface.args = { activePage, globalState: Suite2pSegmentationInterfaceGlobalCopy };
+
 export const AlphaOmegaRecordingInterface = PageTemplate.bind({});
 const AlphaOmegaRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
 AlphaOmegaRecordingInterfaceGlobalCopy.interfaces.interface = AlphaOmegaRecordingInterface;
 AlphaOmegaRecordingInterfaceGlobalCopy.schema.source_data = AlphaOmegaRecordingInterfaceSchema;
 AlphaOmegaRecordingInterface.args = { activePage, globalState: AlphaOmegaRecordingInterfaceGlobalCopy };
+
+export const DeepLabCutInterface = PageTemplate.bind({});
+const DeepLabCutInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+DeepLabCutInterfaceGlobalCopy.interfaces.interface = DeepLabCutInterface;
+DeepLabCutInterfaceGlobalCopy.schema.source_data = DeepLabCutInterfaceSchema;
+DeepLabCutInterface.args = { activePage, globalState: DeepLabCutInterfaceGlobalCopy };
+
+export const SLEAPInterface = PageTemplate.bind({});
+const SLEAPInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+SLEAPInterfaceGlobalCopy.interfaces.interface = SLEAPInterface;
+SLEAPInterfaceGlobalCopy.schema.source_data = SLEAPInterfaceSchema;
+SLEAPInterface.args = { activePage, globalState: SLEAPInterfaceGlobalCopy };
+
+export const FicTracDataInterface = PageTemplate.bind({});
+const FicTracDataInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+FicTracDataInterfaceGlobalCopy.interfaces.interface = FicTracDataInterface;
+FicTracDataInterfaceGlobalCopy.schema.source_data = FicTracDataInterfaceSchema;
+FicTracDataInterface.args = { activePage, globalState: FicTracDataInterfaceGlobalCopy };
+
+export const AudioInterface = PageTemplate.bind({});
+const AudioInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+AudioInterfaceGlobalCopy.interfaces.interface = AudioInterface;
+AudioInterfaceGlobalCopy.schema.source_data = AudioInterfaceSchema;
+AudioInterface.args = { activePage, globalState: AudioInterfaceGlobalCopy };
+
+export const MiniscopeBehaviorInterface = PageTemplate.bind({});
+const MiniscopeBehaviorInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeBehaviorInterfaceGlobalCopy.interfaces.interface = MiniscopeBehaviorInterface;
+MiniscopeBehaviorInterfaceGlobalCopy.schema.source_data = MiniscopeBehaviorInterfaceSchema;
+MiniscopeBehaviorInterface.args = { activePage, globalState: MiniscopeBehaviorInterfaceGlobalCopy };
+
+export const EDFRecordingInterface = PageTemplate.bind({});
+const EDFRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+EDFRecordingInterfaceGlobalCopy.interfaces.interface = EDFRecordingInterface;
+EDFRecordingInterfaceGlobalCopy.schema.source_data = EDFRecordingInterfaceSchema;
+EDFRecordingInterface.args = { activePage, globalState: EDFRecordingInterfaceGlobalCopy };
+
+export const SpikeGLXConverterPipe = PageTemplate.bind({});
+const SpikeGLXConverterPipeGlobalCopy = JSON.parse(JSON.stringify(globalState));
+SpikeGLXConverterPipeGlobalCopy.interfaces.interface = SpikeGLXConverterPipe;
+SpikeGLXConverterPipeGlobalCopy.schema.source_data = SpikeGLXConverterPipeSchema;
+SpikeGLXConverterPipe.args = { activePage, globalState: SpikeGLXConverterPipeGlobalCopy };
+
+export const BrukerTiffSinglePlaneConverter = PageTemplate.bind({});
+const BrukerTiffSinglePlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffSinglePlaneConverterGlobalCopy.interfaces.interface = BrukerTiffSinglePlaneConverter;
+BrukerTiffSinglePlaneConverterGlobalCopy.schema.source_data = BrukerTiffSinglePlaneConverterSchema;
+BrukerTiffSinglePlaneConverter.args = { activePage, globalState: BrukerTiffSinglePlaneConverterGlobalCopy };
+
+export const BrukerTiffMultiPlaneConverter = PageTemplate.bind({});
+const BrukerTiffMultiPlaneConverterGlobalCopy = JSON.parse(JSON.stringify(globalState));
+BrukerTiffMultiPlaneConverterGlobalCopy.interfaces.interface = BrukerTiffMultiPlaneConverter;
+BrukerTiffMultiPlaneConverterGlobalCopy.schema.source_data = BrukerTiffMultiPlaneConverterSchema;
+BrukerTiffMultiPlaneConverter.args = { activePage, globalState: BrukerTiffMultiPlaneConverterGlobalCopy };
+
+export const MiniscopeConverter = PageTemplate.bind({});
+const MiniscopeConverterGlobalCopy = JSON.parse(JSON.stringify(globalState));
+MiniscopeConverterGlobalCopy.interfaces.interface = MiniscopeConverter;
+MiniscopeConverterGlobalCopy.schema.source_data = MiniscopeConverterSchema;
+MiniscopeConverter.args = { activePage, globalState: MiniscopeConverterGlobalCopy };
+
+export const CellExplorerRecordingInterface = PageTemplate.bind({});
+const CellExplorerRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+CellExplorerRecordingInterfaceGlobalCopy.interfaces.interface = CellExplorerRecordingInterface;
+CellExplorerRecordingInterfaceGlobalCopy.schema.source_data = CellExplorerRecordingInterfaceSchema;
+CellExplorerRecordingInterface.args = { activePage, globalState: CellExplorerRecordingInterfaceGlobalCopy };

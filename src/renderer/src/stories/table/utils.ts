@@ -1,17 +1,17 @@
 
 
-export function placeCaretAtEnd(el) {
-    el.focus();
+export function placeCaretAtEnd(inputElement) {
+    inputElement.focus();
     if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
         var range = document.createRange();
-        range.selectNodeContents(el);
+        range.selectNodeContents(inputElement);
         range.collapse(false);
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
     } else if (typeof document.body.createTextRange != "undefined") {
         var textRange = document.body.createTextRange();
-        textRange.moveToElementText(el);
+        textRange.moveToElementText(inputElement);
         textRange.collapse(false);
         textRange.select();
     }

@@ -9,7 +9,7 @@ export default {
 
 export const Invalid = PageTemplate.bind({});
 Invalid.args = {
-    activePage: "conversion/locate",
+    activePage: "//locate",
     globalState,
 };
 
@@ -24,6 +24,6 @@ validGlobalState.structure.results = {
 };
 
 Valid.args = {
-    activePage: "conversion/locate",
+    activePage: "//locate",
     globalState: validGlobalState,
 };

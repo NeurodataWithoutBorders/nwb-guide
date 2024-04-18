@@ -1,11 +1,11 @@
 {
-    "*": "check_{*}",
 
     "name": false,
     "conversion_output_folder": false,
-    "preview_output_folder": false,
 
     "NWBFile": {
+        "description": "check_description",
+        "experiment_description": "check_experiment_description",
         "identifier": false,
         "session_description": false,
         "lab": false,
@@ -43,15 +43,16 @@
     "Behavior": false,
 
     "Subject": {
+        "sessions": false,
         "description": false,
         "genotype": false,
         "strain": false,
         "weight": false,
+        "sex": ["check_subject_sex"],
         "age__reference": false,
         "subject_id": "check_subject_id_exists",
         "species": ["check_subject_species_form", "check_subject_species_exists"],
         "date_of_birth": false,
-        "age": ["check_subject_age", "check_subject_proper_age_range"],
-        "*": "check_subject_{*}"
+        "age": ["check_subject_age", "check_subject_proper_age_range"]
     }
 }

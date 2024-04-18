@@ -1,14 +1,38 @@
 {
     "properties": {
-        "dandiset_id": {
+        "dandiset": {
             "type": "string",
-            "description": "The unique identifier for your dandiset. Will automatically determine whether to upload to the main DANDI archive or the development staging server."
+            "description": "The unique identifier for your Dandiset. Can also be created or searched by name."
         },
-        "cleanup": {
-            "type": "boolean",
-            "title": "Delete Local Files After Upload",
-            "default": false
+        "additional_settings": {
+            "properties": {
+                "number_of_jobs": {
+                    "type": "integer",
+                    "title": "Job Count",
+                    "description": "The number of files to upload in parallel.",
+                    "min": 1,
+                    "default": 1
+                },
+                "number_of_threads": {
+                    "type": "integer",
+                    "title": "Threads per Job",
+                    "description": "The number of threads to handle each file.",
+                    "min": 1,
+                    "default": 1
+                },
+                "ignore_cache": {
+                    "type": "boolean",
+                    "description": "Ignore the cache used by DANDI to speed up repeated operations.",
+                    "default": false
+                },
+                "cleanup": {
+                    "type": "boolean",
+                    "title": "Cleanup Local Filesystem",
+                    "description": "Delete local files after upload",
+                    "default": false
+                }
+            }
         }
     },
-    "required": ["dandiset_id"]
+    "required": ["dandiset", "additional_settings"]
 }

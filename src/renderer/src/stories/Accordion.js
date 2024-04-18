@@ -11,8 +11,6 @@ import {
 
 import { Chevron } from "./Chevron";
 
-// import 'fa-icons';
-
 const faSize = "1em";
 const faColor = "#000000";
 
@@ -23,10 +21,13 @@ export class Accordion extends LitElement {
                 box-sizing: border-box;
             }
 
+            :host {
+                display: block;
+            }
+
             .header {
                 display: flex;
-                align-items: end;
-                padding: 20px 0px;
+                align-items: center;
                 white-space: nowrap;
             }
 
@@ -42,14 +43,6 @@ export class Accordion extends LitElement {
                 margin-right: 10px;
             }
 
-            .header > *:nth-child(2) {
-                padding-bottom: 2px;
-            }
-
-            nwb-chevron {
-                margin: 10px;
-            }
-
             .guided--nav-bar-section {
                 display: flex;
                 flex-direction: column;
@@ -59,45 +52,39 @@ export class Accordion extends LitElement {
                 height: 100%;
             }
 
-            .guided--nav-bar-section > * {
-                padding: 0px 10px;
-            }
-
             .content {
                 width: 100%;
             }
 
             .guided--nav-bar-dropdown {
                 position: relative;
-                min-height: 40px;
                 width: 100%;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 flex-wrap: nowrap;
                 user-select: none;
-                background-color: rgb(240, 240, 240);
-                border-bottom: 1px solid gray;
+                background-color: rgb(235, 235, 235);
+            }
+
+            .guided--nav-bar-section > * {
+                padding: 3px 15px 3px 10px;
             }
 
             .guided--nav-bar-dropdown.active {
                 border-bottom: none;
             }
 
-            .guided--nav-bar-section:last-child > .guided--nav-bar-dropdown {
-                border-bottom: none;
-            }
-
             .guided--nav-bar-dropdown.error {
-                border-bottom: 5px solid hsl(${errorHue}, 100%, 70%) !important;
+                border-bottom: 3px solid hsl(${errorHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown.warning {
-                border-bottom: 5px solid hsl(${warningHue}, 100%, 70%) !important;
+                border-bottom: 3px solid hsl(${warningHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown.valid {
-                border-bottom: 5px solid hsl(${successHue}, 100%, 70%) !important;
+                border-bottom: 3px solid hsl(${successHue}, 100%, 70%) !important;
             }
 
             .guided--nav-bar-dropdown {
@@ -107,25 +94,17 @@ export class Accordion extends LitElement {
             .guided--nav-bar-dropdown::after {
                 font-size: 0.8em;
                 position: absolute;
-                right: 50px;
+                right: 25px;
                 font-family: ${unsafeCSS(emojiFontFamily)};
             }
 
-            .guided--nav-bar-dropdown.error::after {
-                content: "${errorSymbol}";
+            .guided--nav-bar-dropdown.toggleable::after {
+                right: 50px;
             }
 
-            .guided--nav-bar-dropdown.warning::after {
-                content: "${warningSymbol}";
-            }
-
-            .guided--nav-bar-dropdown.valid::after {
-                content: "${successSymbol}";
-            }
-
-            .guided--nav-bar-dropdown:hover {
+            .guided--nav-bar-dropdown.toggleable:hover {
                 cursor: pointer;
-                background-color: lightgray;
+                background-color: gainsboro;
             }
 
             .guided--nav-bar-section-page {
@@ -143,100 +122,128 @@ export class Accordion extends LitElement {
                 padding-left: 0px;
                 overflow-y: auto;
             }
+
+            .disabled {
+                opacity: 0.5;
+                pointer-events: none;
+            }
         `;
     }
 
     static get properties() {
         return {
-            sections: { type: Object, reflect: false },
+            name: { type: String, reflect: true },
+            open: { type: Boolean, reflect: true },
+            disabled: { type: Boolean, reflect: true },
+            status: { type: String, reflect: true },
         };
     }
 
-    constructor({ sections = {}, contentPadding } = {}) {
+    constructor({
+        name,
+        subtitle,
+        toggleable = true,
+        content,
+        open = false,
+        status,
+        disabled = false,
+        contentPadding,
+    } = {}) {
         super();
-        this.sections = sections;
+        this.name = name;
+        this.subtitle = subtitle;
+        this.content = content;
+        this.open = open;
+        this.status = status;
+        this.disabled = disabled;
+        this.toggleable = toggleable;
         this.contentPadding = contentPadding;
     }
 
     updated() {
-        Object.entries(this.sections).map(([sectionName, info]) => {
-            const isActive = info.open;
-            if (isActive) this.#toggleDropdown(sectionName, true);
-            else this.#toggleDropdown(sectionName, false);
-        });
+        if (!this.content) return;
+        this.toggle(!!this.open);
     }
 
-    setSectionStatus = (sectionName, status) => {
-        const el = this.shadowRoot.querySelector("[data-section-name='" + sectionName + "']");
-        el.classList.remove("error", "warning", "valid");
-        el.classList.add(status);
-        this.sections[sectionName].status = status;
+    setStatus = (status) => {
+        const dropdownElement = this.shadowRoot.getElementById("dropdown");
+        dropdownElement.classList.remove("error", "warning", "valid");
+        dropdownElement.classList.add(status);
+        this.status = status;
     };
 
     onClick = () => {}; // Set by the user
 
-    #updateClass = (name, el, force) => {
-        if (force === undefined) el.classList.toggle(name);
+    #updateClass = (name, element, force) => {
+        if (force === undefined) element.classList.toggle(name);
         else {
-            if (force) el.classList.remove(name);
-            else el.classList.add(name);
+            if (force) element.classList.remove(name);
+            else element.classList.add(name);
         }
     };
 
-    #toggleDropdown = (sectionName, forcedState) => {
+    toggle = (forcedState) => {
         const hasForce = forcedState !== undefined;
-        const toggledState = !this.sections[sectionName].open;
+        const toggledState = !this.open;
 
-        let state = hasForce ? forcedState : toggledState;
+        const desiredState = hasForce ? forcedState : toggledState;
+        const state = this.toOpen(desiredState);
 
         //remove hidden from child elements with guided--nav-bar-section-page class
-        const section = this.shadowRoot.querySelector("[data-section='" + sectionName + "']");
+        const section = this.shadowRoot.getElementById("section");
         section.toggleAttribute("hidden", hasForce ? !state : undefined);
 
-        const dropdown = this.shadowRoot.querySelector("[data-section-name='" + sectionName + "']");
+        const dropdown = this.shadowRoot.getElementById("dropdown");
         this.#updateClass("active", dropdown, !state);
 
         //toggle the chevron
         const chevron = dropdown.querySelector("nwb-chevron");
-        chevron.direction = state ? "bottom" : "right";
+        if (chevron) chevron.direction = state ? "bottom" : "right";
 
-        this.sections[sectionName].open = state;
+        if (desiredState === state) this.open = state; // Update state if not overridden
+    };
+
+    toOpen = (state = this.open) => {
+        if (!this.toggleable)
+            return true; // Force open if not toggleable
+        else if (this.disabled) return false; // Force closed if disabled
+        return state;
     };
 
     render() {
+        const isToggleable = this.content && this.toggleable;
+
         return html`
-            <ul id="guided-nav-items" class="guided--container-nav-items">
-                ${Object.entries(this.sections)
-                    .map(([sectionName, info]) => {
-                        return html`
-                            <div class="guided--nav-bar-section">
-                                <div
-                                    class="guided--nav-bar-dropdown ${info.status}"
-                                    data-section-name=${sectionName}
-                                    @click=${() => this.#toggleDropdown(sectionName, undefined)}
-                                >
-                                    <div class="header">
-                                        <span>${sectionName}</span>
-                                        <small>${info.subtitle}</small>
-                                    </div>
-                                    ${new Chevron({
-                                        direction: "right",
-                                        color: faColor,
-                                        size: faSize,
-                                    })}
-                                </div>
-                                <div
-                                    data-section="${sectionName}"
-                                    class="content hidden"
-                                    style="padding: ${this.contentPadding ?? "25px"}"
-                                >
-                                    ${info.content}
-                                </div>
-                            </div>
-                        `;
-                    })
-                    .flat()}
-            </ul>
+            <div class="guided--nav-bar-section">
+                <div
+                    id="dropdown"
+                    class="guided--nav-bar-dropdown ${isToggleable && "toggleable"} ${this.disabled
+                        ? "disabled"
+                        : ""} ${this.status}"
+                    @click=${() => isToggleable && this.toggle()}
+                >
+                    <div class="header">
+                        <span>${this.name}</span>
+                        <small>${this.subtitle}</small>
+                    </div>
+                    ${isToggleable
+                        ? new Chevron({
+                              direction: "right",
+                              color: faColor,
+                              size: faSize,
+                          })
+                        : ""}
+                </div>
+                ${this.content
+                    ? html`<div
+                          id="section"
+                          class="content hidden ${this.disabled ? "disabled" : ""}"
+                          style="padding: ${this.contentPadding ?? "15px"}"
+                      >
+                          ${this.content}
+                      </div>`
+                    : ""}
+            </div>
         `;
     }
 }
