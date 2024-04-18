@@ -10,15 +10,15 @@ Download and run `NWB-GUIDE-x64.exe <https://github.com/NeurodataWithoutBorders/
 MacOS - Intel
 -------------
 
-Download `NWB-GUIDE-x64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-x64.dmg>`_, which should prompt you to move it into your 'Applications' folder in order to run.
+Download and run `NWB-GUIDE-x64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-x64.dmg>`_. This will prompt you to move the app into your 'Applications' folder. Then open the 'NWB GUIDE' app from your 'Applications' folder.
 
 MacOS - Apple Silicon
 ---------------------
 
-Download `NWB-GUIDE-arm64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-arm64.dmg>`_, which should prompt you to move it into your 'Applications' folder in order to run.
+Download and run `NWB-GUIDE-arm64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-arm64.dmg>`_. This will prompt you to move the app into your 'Applications' folder. Then open the 'NWB GUIDE' app from your 'Applications' folder.
 
 .. note::
-   Some data formats can have issues using this build of the application. If you encounter errors when using a particular interface, try following the advanced :ref:`Developer Installation instructions<developer_installation>` instructions.
+   Some data formats can have issues using this build of the application. If you encounter errors when using a particular interface, try following the advanced :ref:`Developer Installation instructions<developer_installation>`.
 
 Linux
 -----

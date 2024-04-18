@@ -329,6 +329,8 @@ export class GuidedPathExpansionPage extends Page {
 
         await this.form.validate();
 
+        const globalBaseDirectory = this.workflow.base_directory.value;
+
         const finalStructure = {};
         for (let key in structure) {
             const entry = { ...structure[key] };
@@ -337,6 +339,9 @@ export class GuidedPathExpansionPage extends Page {
             if (fstring.split(".").length > 1) entry.file_path = fstring;
             else entry.folder_path = fstring;
             delete entry.format_string_path;
+
+            if (!entry.base_directory && globalBaseDirectory) entry.base_directory = globalBaseDirectory;
+
             finalStructure[key] = entry;
         }
 

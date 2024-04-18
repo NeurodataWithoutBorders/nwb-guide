@@ -157,7 +157,6 @@ export class List extends LitElement {
       const oldList = this.#previousItems
       const uniform = value.map(item => item && typeof item === 'object' ? item : { value: item })
       this.#items = uniform.map(item => this.transform ? this.transform(item) ?? item : item)
-
       this.#previousItems = this.#items.map(item => ({...item})) // Clone items
       const oldObject = this.object
       this.#updateObject()
