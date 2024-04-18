@@ -928,20 +928,29 @@ export class JSONSchemaInput extends LitElement {
             return filesystemSelectorElement;
         };
 
-        // Transform to single item if maxItems is 1
-        if (isArray && schema.maxItems === 1 && !isTable) {
+        // Transform to single item if maxItems is 1 OR the array has a fixed lenth
+        if (isArray && ( schema.maxItems === 1 || schema.maxItems === schema.minItems) && !isTable) {
+
+            const len = schema.maxItems ?? 1;
+            const array = this.value ?? [];
+            return Array.from({ length: len }).map((_, i) => {
+
             return new JSONSchemaInput({
-                value: this.value?.[0],
-                schema: {
-                    ...schema.items,
-                    strict: schema.strict,
-                },
-                path: fullPath,
-                validateEmptyValue: this.validateEmptyValue,
-                required: this.required,
-                validateOnChange: () => (validateOnChange ? this.#triggerValidation(name, path) : ""),
-                form: this.form,
-                onUpdate: (value) => this.#updateData(fullPath, [value]),
+                    value: array[i],
+                    schema: {
+                        ...schema.items,
+                        strict: schema.strict,
+                    },
+                    path: fullPath,
+                    validateEmptyValue: this.validateEmptyValue,
+                    required: this.required,
+                    validateOnChange: () => (validateOnChange ? this.#triggerValidation(name, path) : ""),
+                    form: this.form,
+                    onUpdate: (value) => {
+                        array[i] = value;
+                        this.#updateData(fullPath, [...array])
+                    }
+                });
             });
         }
 
@@ -1258,15 +1267,32 @@ export class JSONSchemaInput extends LitElement {
                             const isStrict = schema.strict ? true : false;
 
                             if (isNumber) {
-                                if ("min" in schema && newValue < schema.min) {
-                                    if (isStrict)
-                                        newValue = this.value; // Set back to last value
-                                    else newValue = schema.min;
-                                } else if ("max" in schema && newValue > schema.max) {
-                                    if (isStrict)
-                                        newValue = this.value; // Set back to last value
-                                    else newValue = schema.max;
+
+          
+                                // exclusiveMinimum
+                                if ("exclusiveMinimum" in schema && newValue <= schema.exclusiveMinimum) {
+                                    if (isStrict) newValue = this.value // Set back to last value
+                                    else newValue = schema.exclusiveMinimum + 1 // (schema.step ?? 1);
                                 }
+
+                                // exclusiveMaximum
+                                else if ("exclusiveMaximum" in schema && newValue >= schema.exclusiveMaximum) {
+                                    if (isStrict) newValue = this.value // Set back to last value
+                                    else newValue = schema.exclusiveMaximum - 1 // (schema.step ?? 1);
+                                }
+
+                                // minimum
+                                else if ("minimum" in schema && newValue < schema.minimum) {
+                                    if (isStrict) newValue = this.value // Set back to last value
+                                    else newValue = schema.minimum;
+                                }
+
+                                // maximum
+                                else if ("maximum" in schema && newValue > schema.maximum) {
+                                    if (isStrict) newValue = this.value // Set back to last value
+                                    else newValue = schema.maximum;
+                                }
+                    
 
                                 if (isNaN(newValue)) {
                                     if (isStrict)

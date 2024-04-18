@@ -57,9 +57,9 @@ export const updateSchema = (schema, results, itemsize) => {
     const shapeMax = full_shape[0]
 
     if (propertiesToUpdate.includes('chunk_shape')) {
-        chunkSchema.items.min = bufferSchema.items.min = 1
+        chunkSchema.items.minimum = bufferSchema.items.minimum = 1
         chunkSchema.maxItems = chunkSchema.minItems = chunk_shape.length;
-        chunkSchema.items.max = shapeMax
+        chunkSchema.items.maximum = shapeMax
         chunkSchema.description = chunkShapeDescription(
             chunk_shape,
             itemsize
@@ -69,7 +69,7 @@ export const updateSchema = (schema, results, itemsize) => {
 
     if (propertiesToUpdate.includes('buffer_shape')) {
 
-        bufferSchema.items.max = shapeMax
+        bufferSchema.items.maximum = shapeMax
         bufferSchema.items.step = chunk_shape[0] // Constrain to increments of chunk size
         bufferSchema.strict = true
 
