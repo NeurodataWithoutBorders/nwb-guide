@@ -38,9 +38,21 @@ pipelines:
     CellExplorerRecordingInterface:
       folder_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed
 
-
   CellExplorerUnits:
     CellExplorerRecordingInterface:
       folder_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed
     CellExplorerSortingInterface:
       file_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed/Peter_MS22_180629_110319_concat_stubbed.spikes.cellinfo.mat
+
+  IntanSingleFileRecording:
+    IntanRecordingInterface:
+      file_path: ephy_testing_data/intan/intan_rhd_test_1.rhd
+
+  BrukerTiffMultiChannelSinglePlane:
+    BrukerTiffSinglePlaneConverter:
+      folder_path: ophys_testing_data/imaging_datasets/BrukerTif/NCCR32_2023_02_20_Into_the_void_t_series_baseline-000
+
+  DeepLabCut:
+    DeepLabCutInterface:
+      file_path: behavior_testing_data/DLC/m3v1mp4DLC_resnet50_openfieldAug20shuffle1_30000.h5
+      config_file_path: behavior_testing_data/DLC/config.yaml

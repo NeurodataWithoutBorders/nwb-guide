@@ -411,7 +411,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties["ElectrodeColumns"] = {
             "type": "array",
             "minItems": 0,
-            "items": {"$ref": "#/properties/Ecephys/properties/definitions/ElectrodeColumn"},
+            "items": {"$ref": "#/properties/Ecephys/definitions/ElectrodeColumn"},
         }
 
         ecephys_schema["required"].append("ElectrodeColumns")
@@ -429,7 +429,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             ecephys_properties["UnitColumns"] = {
                 "type": "array",
                 "minItems": 0,
-                "items": {"$ref": "#/properties/Ecephys/properties/definitions/UnitColumn"},
+                "items": {"$ref": "#/properties/Ecephys/definitions/UnitColumn"},
             }
 
             schema["properties"]["Ecephys"]["required"].append("UnitColumns")
@@ -463,7 +463,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "maxItems": n_units,
             "items": {
                 "allOf": [
-                    {"$ref": "#/properties/Ecephys/properties/definitions/Unit"},
+                    {"$ref": "#/properties/Ecephys/definitions/Unit"},
                     {"required": list(map(lambda info: info["name"], unit_columns))},
                 ]
             },
@@ -499,7 +499,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "maxItems": n_electrodes,
             "items": {
                 "allOf": [
-                    {"$ref": "#/properties/Ecephys/properties/definitions/Electrode"},
+                    {"$ref": "#/properties/Ecephys/definitions/Electrode"},
                     {"required": list(map(lambda info: info["name"], electrode_columns))},
                 ]
             },
@@ -521,7 +521,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
 
-        defs = ecephys_properties["definitions"]
+        defs = ecephys_schema["definitions"]
 
         electrode_def = defs["Electrodes"]
 
@@ -1384,7 +1384,6 @@ def update_recording_properties_from_table_as_json(
 
     recording_extractor = recording_interface.recording_extractor
     channel_ids = recording_extractor.get_channel_ids()
-    stream_prefix = channel_ids[0].split("#")[0]  # TODO: see if this generalized across formats
 
     # TODO: uncomment when neuroconv supports contact vectors (probe interface)
     # property_names = recording_extractor.get_property_keys()
@@ -1394,7 +1393,7 @@ def update_recording_properties_from_table_as_json(
 
     for entry_index, entry in enumerate(electrode_table_json):
         electrode_properties = dict(entry)  # copy
-        channel_name = electrode_properties.pop("channel_name", None)
+        # channel_name = electrode_properties.pop("channel_name", None)
         for property_name, property_value in electrode_properties.items():
             if property_name not in electrode_column_data_types:  # Skip data with missing column information
                 continue
@@ -1403,13 +1402,10 @@ def update_recording_properties_from_table_as_json(
             #     property_index = contact_vector_property_names.index(property_name)
             #     modified_contact_vector[entry_index][property_index] = property_value
             else:
-                ids = (
-                    [stream_prefix + "#" + channel_name] if channel_name else []
-                )  # Correct for minimal metadata (e.g. CellExplorer)
                 recording_extractor.set_property(
                     key=property_name,
                     values=np.array([property_value], dtype=electrode_column_data_types[property_name]),
-                    ids=ids,
+                    ids=[channel_ids[entry_index]],  # Assume rows match indices of channel list
                 )
 
     # TODO: uncomment when neuroconv supports contact vectors (probe interface)
