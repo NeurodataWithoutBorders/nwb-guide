@@ -40,10 +40,7 @@ export class GuidedStubPreviewPage extends Page {
         next: "Run Conversion",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-
-            await this.convert();
-
-            return this.to(1);
+            return this.to(1); // Will trigger conversion if necessary
         },
     };
 
