@@ -877,7 +877,8 @@ export class SimpleTable extends LitElement {
                     }
                 }
 
-                this.#onCellChange(cell);
+                this.#onCellChange(cell); // Only update data if the value has changed
+
                 this.#checkStatus(); // Check status after every validation update
             },
         });
