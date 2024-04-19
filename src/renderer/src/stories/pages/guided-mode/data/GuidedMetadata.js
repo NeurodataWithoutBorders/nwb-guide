@@ -61,7 +61,6 @@ const tableRenderConfig = {
     },
     UnitColumns: function (metadata) {
         metadata.editable = false;
-        console.log("Column metadata", metadata);
         metadata.schema.description = "Update unit information directly on your source data.";
 
         return true;
@@ -184,12 +183,8 @@ export class GuidedMetadataPage extends ManagedPage {
     footer = {
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
-
             for (let { form } of this.forms) await form.validate(); // Will throw an error in the callback
-
-            await this.convert({ preview: true });
-
-            return this.to(1);
+            return this.to(1); // Will trigger preview conversion if necessary
         },
     };
 
@@ -323,9 +318,7 @@ export class GuidedMetadataPage extends ManagedPage {
                 this.#checkAllLoaded();
             },
 
-            onUpdate: () => {
-                this.unsavedUpdates = "conversions";
-            },
+            onUpdate: () => (this.unsavedUpdates = "conversions"),
 
             validateOnChange,
             onlyRequired: false,
