@@ -11,7 +11,7 @@ const total = 50;
 
 export const Default = Template.bind({});
 Default.args = {
-    value: {
+    format: {
         n,
         total,
     },
@@ -25,6 +25,6 @@ Default.play = async ({ canvasElement }) => {
     const progressBar = canvasElement.querySelector("nwb-progress");
     for (let i = 1; i <= total; i++) {
         await sleep(1000);
-        progressBar.value = { n: i, total };
+        progressBar.format = { n: i, total };
     }
 };

@@ -163,7 +163,7 @@ export class Page extends LitElement {
         );
 
         let completed = 0;
-        elements.progress.value = { n: completed, total: toRun.length };
+        elements.progress.format = { n: completed, total: toRun.length };
 
         for (let info of toRun) {
             const { subject, session, globalState = this.info.globalState } = info;
@@ -210,7 +210,7 @@ export class Page extends LitElement {
             completed++;
             if (isMultiple) {
                 const progressInfo = { n: completed, total: toRun.length };
-                elements.progress.value = progressInfo;
+                elements.progress.format = progressInfo;
             }
 
             const subRef = results[subject] ?? (results[subject] = {});

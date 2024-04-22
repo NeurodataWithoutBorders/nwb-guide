@@ -19,25 +19,34 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     popup.hideLoading();
     const element = (elements.container = popup.getHtmlContainer());
     element.innerText = "";
+
     Object.assign(element.style, {
+        marginTop: "5px",
+    })
+
+    const container = document.createElement("div");
+    Object.assign(container.style, {
         textAlign: "left",
-        display: "block",
+        display: "flex",
+        flexDirection: "column",
+        gap: "5px"
     });
+    element.append(container);
 
     const bars = {};
 
-    const getBar = (id) => {
+    const getBar = (id, large = false) => {
         if (!bars[id]) {
-            const bar = new ProgressBar();
+            const bar = new ProgressBar({ size: large ? undefined : 'small' });
             bars[id] = bar;
-            element.append(bar);
+            container.append(bar);
         }
         return bars[id];
     };
 
     const globalSymbol = Symbol("global");
 
-    elements.progress = getBar(globalSymbol);
+    elements.progress = getBar(globalSymbol, true);
 
     elements.bars = bars;
 
@@ -51,7 +60,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     const onProgressMessage = ({ data }) => {
         const parsed = JSON.parse(data);
         const { request_id, ...update } = parsed;
-        console.log("parsed", parsed);
+        console.warn("parsed", parsed);
 
         if (request_id && request_id !== id) return;
         lastUpdate = Date.now();
@@ -59,7 +68,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
         const _barId = parsed.progress_bar_id;
         const barId = id === _barId ? globalSymbol : _barId;
         const bar = getBar(barId);
-        if (!tqdmCallback) bar.value = parsed.format_dict;
+        if (!tqdmCallback) bar.format = parsed.format_dict;
         else tqdmCallback(update);
     };
 
