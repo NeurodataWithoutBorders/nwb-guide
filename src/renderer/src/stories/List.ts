@@ -36,7 +36,6 @@ export class List extends LitElement {
         overflow: auto;
       }
 
-
       #empty {
         margin: 1rem;
         margin-left: -40px;
@@ -148,10 +147,11 @@ export class List extends LitElement {
     #previousItems = []
     #items: ListItemType[] = []
 
-    set items(value: ListItemType[]) {
+    set items(value: ListItemType[] | any[]) {
 
       const oldList = this.#previousItems
-      this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
+      const uniform = value.map(item => item && typeof item === 'object' ? item : { value: item })
+      this.#items = uniform.map(item => this.transform ? this.transform(item) ?? item : item)
       this.#previousItems = this.#items.map(item => ({...item})) // Clone items
       const oldObject = this.object
       this.#updateObject()
@@ -325,15 +325,16 @@ export class List extends LitElement {
         this.object[i] = value;
       }
 
-      if (typeof content === 'string')  {
+      if (content instanceof HTMLElement) li.append(editableElement = content)
+      else if (isObjectContent) {} // Skip other object contents
+
+      // Always attempt render of other items
+      else {
           const valueEl = document.createElement("span");
           if (!key) editableElement = valueEl
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
-
-      // Skip object contents
-      else if (content instanceof HTMLElement) li.append(editableElement = content)
 
 
 

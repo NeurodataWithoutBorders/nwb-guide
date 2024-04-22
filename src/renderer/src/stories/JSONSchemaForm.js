@@ -1417,12 +1417,18 @@ export class JSONSchemaForm extends LitElement {
         this.inputs = {};
     }
 
+    #resolving;
     // Check if everything is internally rendered
     get rendered() {
-        const isRendered = resolve(this.#rendered, () =>
-            Promise.all([...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered))
-        );
-        return isRendered;
+        if (this.#resolving) return this.#resolving;
+        this.#resolving = resolve(this.#rendered, () => {
+            const promise = Promise.all(
+                [...Object.values(this.forms), ...Object.values(this.tables)].map(({ rendered }) => rendered)
+            );
+            promise.then(() => (this.#resolving = null));
+            return promise;
+        });
+        return this.#resolving;
     }
 
     render() {
