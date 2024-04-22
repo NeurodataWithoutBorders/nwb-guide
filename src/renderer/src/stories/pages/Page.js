@@ -189,7 +189,7 @@ export class Page extends LitElement {
             const { subject, session, globalState = this.info.globalState } = info;
             const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, name, SourceData } = globalState.project;
+            const { conversion_output_folder, name, SourceData, alignment } = globalState.project;
 
             const sessionResults = globalState.results[subject][session];
 
@@ -212,6 +212,7 @@ export class Page extends LitElement {
                     ...conversionOptions, // Any additional conversion options override the defaults
 
                     interfaces: globalState.interfaces,
+                    alignment
                 },
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((error) => {

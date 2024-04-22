@@ -2,8 +2,8 @@ import { LitElement, css } from "lit";
 import { JSONSchemaInput } from "../../../../JSONSchemaInput";
 
 
-const options = [
-    {
+const options = {
+    timestamps: {
         name: "Upload Timestamps",
         schema: {
             type: 'string',
@@ -11,7 +11,7 @@ const options = [
             description: 'A CSV file containing the timestamps of the recording.'
         }
     },
-    {
+    start: {
         name: "Adjust Start Time",
         schema: {
             type: 'number',
@@ -19,7 +19,7 @@ const options = [
             min: 0
         }
     },
-    {
+    linked: {
         name: "Link to Recording",
         schema: {
             type: 'string',
@@ -29,7 +29,7 @@ const options = [
             strict: true
         },
     }
-]
+}
 
 export class TimeAlignment extends LitElement {
 
@@ -98,21 +98,23 @@ export class TimeAlignment extends LitElement {
     
     static get properties() {
         return {
-            results: { type: Object },
+            data: { type: Object },
         };
     }
 
-    constructor({ results = {} }) {
+    constructor({ data = {}, results = {}, interfaces = {} }) {
         super();
+        this.data = data;
         this.results = results;
+        this.interfaces = interfaces;
     }
 
     render() {
         
         const container = document.createElement("div");
 
-        const results = this.results;
-        const flatTimes = Object.values(results)
+        const data = this.data;
+        const flatTimes = Object.values(data)
             .map((interfaceTimestamps) => {
                 return [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]];
             })
@@ -125,7 +127,13 @@ export class TimeAlignment extends LitElement {
         const normalizeTime = (time) => (time - minTime) / (maxTime - minTime);
         const normalizeTimePct = (time) => `${normalizeTime(time) * 100}%`;
 
-        for (let name in results) {
+        console.log('Got', data)
+        for (let name in data) {
+            
+            if (!(name in this.results)) this.results[name] = { 
+                selected: undefined,
+                values: {}
+            }
 
             const row = document.createElement("div");
             // Object.assign(row.style, {
@@ -141,7 +149,7 @@ export class TimeAlignment extends LitElement {
             label.innerText = name;
             barCell.append(label);
 
-            const data = results[name];
+            const info = data[name];
 
             const barContainer = document.createElement("div");
             Object.assign(barContainer.style, {
@@ -154,12 +162,15 @@ export class TimeAlignment extends LitElement {
 
             barCell.append(barContainer);
 
+            const interfaceName = this.interfaces[name];
 
-            const hasData = data.length > 0;
+            const isSortingInterface = interfaceName && interfaceName.includes('Sorting');
+            
+            // Render this way if the interface has data
+            if (info.length > 0) {
 
-            if (hasData) {
-                const firstTime = data[0];
-                const lastTime = data[data.length - 1];
+                const firstTime = info[0];
+                const lastTime = info[info.length - 1];
 
                 const smallLabel = document.createElement("small");
                 smallLabel.innerText = `${firstTime.toFixed(2)} - ${lastTime.toFixed(2)} sec`;
@@ -176,7 +187,7 @@ export class TimeAlignment extends LitElement {
                     left: firstTimePct,
                     width: width,
                     height: "100%",
-                    background: "blue",
+                    background: "#029CFD",
                 });
 
                 barContainer.append(bar);
@@ -193,36 +204,51 @@ export class TimeAlignment extends LitElement {
             const selectionCell = document.createElement("div");
             const resultCell = document.createElement("div");
 
-            const optionsCopy = structuredClone(options);
+            const optionsCopy = Object.entries(structuredClone(options));
+            
 
-            options[2].schema.enum = Object.keys(results).filter(str => str.includes('Recording'))
+            optionsCopy[2][1].schema.enum = Object.keys(data).filter(str => this.interfaces[str].includes('Recording'))
 
-            const resolvedOptions = hasData ? optionsCopy.slice(0, 2) : optionsCopy;
+            const resolvedOptionEntries = isSortingInterface ? optionsCopy : optionsCopy.slice(0, 2);
 
-            const elements = resolvedOptions.map((option) => {
+            const elements = resolvedOptionEntries.reduce((acc, [ key, option ]) => {
+
+                const optionResults = this.results[name];
+
                 const clickableElement = document.createElement("div");
                 clickableElement.innerText = option.name;
                 clickableElement.onclick = () => {
 
-                    elements.forEach(el => el.removeAttribute("selected"));
+                    optionResults.selected = key;
+
+                    Object.values(elements).forEach(el => el.removeAttribute("selected"));
                     clickableElement.setAttribute("selected", "");
 
                     const element = new JSONSchemaInput({
+                        value: optionResults.values[key],
                         schema: option.schema,
                         path: [ ],
                         controls: option.controls ? option.controls() : [],
+                        onUpdate: (value) => optionResults.values[key] = value
                     })
 
                     resultCell.innerHTML = '';
                     resultCell.append(element)
                 }
-                return clickableElement;
-            })
-            
-            selectionCell.append(...elements)
 
+                acc[key] = clickableElement;
+                return acc
+            }, {})
+
+            console.log(elements)
+            
+            const elArray = Object.values(elements);
+            selectionCell.append(...elArray)
+
+            const selected = this.results[name].selected;
             row.append(selectionCell, resultCell);
-            elements[0].click();
+            if (selected) elements[selected].click();
+            else elArray[0].click();
 
             // const empty = document.createElement("div");
             // const disclaimer = document.createElement("div");

@@ -251,31 +251,56 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         const { subject, session } = getInfoFromId(id);
 
-                        const souceCopy = structuredClone(globalState.results[subject][session].source_data);
-
-                        const sessionInfo = {
-                            interfaces: globalState.interfaces,
-                            source_data: merge(globalState.project.SourceData, souceCopy),
-                        };
-
-                        const results = await run("alignment", sessionInfo, {
-                            title: "Checking Alignment",
-                            message: "Please wait...",
-                        });
-
                         const header = document.createElement("div");
+                        Object.assign(header.style, { paddingTop: '10px' })
                         const h2 = document.createElement("h3");
-                        Object.assign(h2.style, { margin: "0px", });
-                        h2.innerText = `Alignment Preview: ${subject}/${session}`;
+                        Object.assign(h2.style, { margin: "0px" });
+                        const small = document.createElement("small");
+                        small.innerText = `${subject}/${session}`;
+                        h2.innerText = `Alignment Preview`;
 
-                        header.append(h2);
+                        header.append(h2, small);
 
                         const modal = new Modal({ header });
 
                         document.body.append(modal);
 
-                        const alignment = new TimeAlignment({ results })
-                        modal.append(alignment)
+                        let alignment;
+
+                        modal.footer = new Button({
+                            label: "Update",
+                            primary: true,
+                            onClick: async () => {
+                                console.log('Submit to backend')
+
+                                if (alignment) {
+                                    globalState.project.alignment = alignment.results
+                                    await this.save()
+                                }
+
+                                const sourceCopy = structuredClone(globalState.results[subject][session].source_data);
+
+                                const alignmentInfo = globalState.project.alignment ?? ( globalState.project.alignment = {} );
+
+                                const sessionInfo = {
+                                    interfaces: globalState.interfaces,
+                                    source_data: merge(globalState.project.SourceData, sourceCopy),
+                                    alignment: alignmentInfo
+                                };
+
+                                const data = await run("alignment", sessionInfo, {
+                                    title: "Checking Alignment",
+                                    message: "Please wait...",
+                                });
+
+        
+                                alignment = new TimeAlignment({ data, interfaces: globalState.interfaces, results: alignmentInfo })
+                                modal.innerHTML = ''
+                                modal.append(alignment)
+                            }
+                        })
+
+                        modal.footer.onClick()
 
                         modal.open = true;
                     },
