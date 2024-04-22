@@ -212,7 +212,7 @@ export class Page extends LitElement {
                     ...conversionOptions, // Any additional conversion options override the defaults
 
                     interfaces: globalState.interfaces,
-                    alignment
+                    alignment,
                 },
                 { swal: popup, fetch: { signal: cancelController.signal }, ...options }
             ).catch((error) => {

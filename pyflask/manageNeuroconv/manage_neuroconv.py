@@ -357,11 +357,7 @@ def get_custom_converter(interface_class_dict: dict, alignment_info: dict = dict
     return CustomNWBConverter
 
 
-def instantiate_custom_converter(
-        source_data, 
-        interface_class_dict,
-        alignment_info: dict = dict()
-    ):  # -> NWBConverter:
+def instantiate_custom_converter(source_data, interface_class_dict, alignment_info: dict = dict()):  # -> NWBConverter:
 
     CustomNWBConverter = get_custom_converter(interface_class_dict, alignment_info)
 
@@ -657,42 +653,42 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
 
-def set_interface_alignment(
-        converter,
-        alignment_info
-    ):
-        
-        import numpy as np
-        import csv
+def set_interface_alignment(converter, alignment_info):
 
-        for name, interface in converter.data_interface_objects.items():
+    import numpy as np
+    import csv
 
-            interface = converter.data_interface_objects[name]
-            info = alignment_info.get(name, {})
-            
-            # Set alignment
-            method = info.get("selected", None)
-            if method:
-                value = info["values"].get(method, None)
-                if (value != None):
-                    if method == "timestamps":
+    for name, interface in converter.data_interface_objects.items():
 
-                        # Open the input CSV file for reading
-                        with open(value, mode='r', newline='') as csvfile:
-                            reader = csv.reader(csvfile)
-                            rows = list(reader)
-                            timestamps_array = [ float(row[0]) for row in rows ]
-                            interface.set_aligned_timestamps(np.array(timestamps_array))
+        interface = converter.data_interface_objects[name]
+        info = alignment_info.get(name, {})
 
-                    elif method == 'linked':
-                        interface.register_recording(converter.data_interface_objects[value]) # Register the linked interface
-                    
-                    elif method == 'start':
-                        interface.set_aligned_starting_time(value)
+        # Set alignment
+        method = info.get("selected", None)
+        if method:
+            value = info["values"].get(method, None)
+            if value != None:
+                if method == "timestamps":
+
+                    # Open the input CSV file for reading
+                    with open(value, mode="r", newline="") as csvfile:
+                        reader = csv.reader(csvfile)
+                        rows = list(reader)
+                        timestamps_array = [float(row[0]) for row in rows]
+                        interface.set_aligned_timestamps(np.array(timestamps_array))
+
+                elif method == "linked":
+                    interface.register_recording(
+                        converter.data_interface_objects[value]
+                    )  # Register the linked interface
+
+                elif method == "start":
+                    interface.set_aligned_starting_time(value)
+
 
 def get_interface_alignment(info: dict) -> dict:
 
-    alignment_info = info.get('alignment', {})
+    alignment_info = info.get("alignment", {})
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
     set_interface_alignment(converter, alignment_info)
@@ -744,11 +740,7 @@ def convert_to_nwb(info: dict) -> str:
         info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
     )
 
-    converter = instantiate_custom_converter(
-        resolved_source_data, 
-        info["interfaces"], 
-        info.get('alignment', {})
-    )
+    converter = instantiate_custom_converter(resolved_source_data, info["interfaces"], info.get("alignment", {}))
 
     def update_conversion_progress(**kwargs):
         announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")

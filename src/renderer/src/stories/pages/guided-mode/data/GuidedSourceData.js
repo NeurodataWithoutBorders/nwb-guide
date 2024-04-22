@@ -252,7 +252,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                         const { subject, session } = getInfoFromId(id);
 
                         const header = document.createElement("div");
-                        Object.assign(header.style, { paddingTop: '10px' })
+                        Object.assign(header.style, { paddingTop: "10px" });
                         const h2 = document.createElement("h3");
                         Object.assign(h2.style, { margin: "0px" });
                         const small = document.createElement("small");
@@ -271,21 +271,22 @@ export class GuidedSourceDataPage extends ManagedPage {
                             label: "Update",
                             primary: true,
                             onClick: async () => {
-                                console.log('Submit to backend')
+                                console.log("Submit to backend");
 
                                 if (alignment) {
-                                    globalState.project.alignment = alignment.results
-                                    await this.save()
+                                    globalState.project.alignment = alignment.results;
+                                    await this.save();
                                 }
 
                                 const sourceCopy = structuredClone(globalState.results[subject][session].source_data);
 
-                                const alignmentInfo = globalState.project.alignment ?? ( globalState.project.alignment = {} );
+                                const alignmentInfo =
+                                    globalState.project.alignment ?? (globalState.project.alignment = {});
 
                                 const sessionInfo = {
                                     interfaces: globalState.interfaces,
                                     source_data: merge(globalState.project.SourceData, sourceCopy),
-                                    alignment: alignmentInfo
+                                    alignment: alignmentInfo,
                                 };
 
                                 const data = await run("alignment", sessionInfo, {
@@ -293,14 +294,17 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     message: "Please wait...",
                                 });
 
-        
-                                alignment = new TimeAlignment({ data, interfaces: globalState.interfaces, results: alignmentInfo })
-                                modal.innerHTML = ''
-                                modal.append(alignment)
-                            }
-                        })
+                                alignment = new TimeAlignment({
+                                    data,
+                                    interfaces: globalState.interfaces,
+                                    results: alignmentInfo,
+                                });
+                                modal.innerHTML = "";
+                                modal.append(alignment);
+                            },
+                        });
 
-                        modal.footer.onClick()
+                        modal.footer.onClick();
 
                         modal.open = true;
                     },

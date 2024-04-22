@@ -1,41 +1,38 @@
 import { LitElement, css } from "lit";
 import { JSONSchemaInput } from "../../../../JSONSchemaInput";
 
-
 const options = {
     timestamps: {
         name: "Upload Timestamps",
         schema: {
-            type: 'string',
-            format: 'file',
-            description: 'A CSV file containing the timestamps of the recording.'
-        }
+            type: "string",
+            format: "file",
+            description: "A CSV file containing the timestamps of the recording.",
+        },
     },
     start: {
         name: "Adjust Start Time",
         schema: {
-            type: 'number',
-            description: 'The start time of the recording in seconds.',
-            min: 0
-        }
+            type: "number",
+            description: "The start time of the recording in seconds.",
+            min: 0,
+        },
     },
     linked: {
         name: "Link to Recording",
         schema: {
-            type: 'string',
-            description: 'The name of the linked recording.',
-            placeholder: 'Select a recording interface',
+            type: "string",
+            description: "The name of the linked recording.",
+            placeholder: "Select a recording interface",
             enum: [],
-            strict: true
+            strict: true,
         },
-    }
-}
+    },
+};
 
 export class TimeAlignment extends LitElement {
-
     static get styles() {
         return css`
-
             * {
                 box-sizing: border-box;
             }
@@ -75,7 +72,7 @@ export class TimeAlignment extends LitElement {
                 padding: 5px 10px;
                 border: 1px solid lightgray;
             }
-            
+
             :host > div > div > *:nth-child(3) {
                 width: 700px;
             }
@@ -93,9 +90,9 @@ export class TimeAlignment extends LitElement {
                 font-weight: bold;
                 background: whitesmoke;
             }
-        `
+        `;
     }
-    
+
     static get properties() {
         return {
             data: { type: Object },
@@ -110,7 +107,6 @@ export class TimeAlignment extends LitElement {
     }
 
     render() {
-        
         const container = document.createElement("div");
 
         const data = this.data;
@@ -127,13 +123,13 @@ export class TimeAlignment extends LitElement {
         const normalizeTime = (time) => (time - minTime) / (maxTime - minTime);
         const normalizeTimePct = (time) => `${normalizeTime(time) * 100}%`;
 
-        console.log('Got', data)
+        console.log("Got", data);
         for (let name in data) {
-            
-            if (!(name in this.results)) this.results[name] = { 
-                selected: undefined,
-                values: {}
-            }
+            if (!(name in this.results))
+                this.results[name] = {
+                    selected: undefined,
+                    values: {},
+                };
 
             const row = document.createElement("div");
             // Object.assign(row.style, {
@@ -164,11 +160,10 @@ export class TimeAlignment extends LitElement {
 
             const interfaceName = this.interfaces[name];
 
-            const isSortingInterface = interfaceName && interfaceName.includes('Sorting');
-            
+            const isSortingInterface = interfaceName && interfaceName.includes("Sorting");
+
             // Render this way if the interface has data
             if (info.length > 0) {
-
                 const firstTime = info[0];
                 const lastTime = info[info.length - 1];
 
@@ -192,12 +187,10 @@ export class TimeAlignment extends LitElement {
 
                 barContainer.append(bar);
                 barCell.append(smallLabel);
-
             } else {
                 barContainer.style.background =
                     "repeating-linear-gradient(45deg, lightgray, lightgray 10px, white 10px, white 20px)";
             }
-
 
             row.append(barCell);
 
@@ -205,45 +198,44 @@ export class TimeAlignment extends LitElement {
             const resultCell = document.createElement("div");
 
             const optionsCopy = Object.entries(structuredClone(options));
-            
 
-            optionsCopy[2][1].schema.enum = Object.keys(data).filter(str => this.interfaces[str].includes('Recording'))
+            optionsCopy[2][1].schema.enum = Object.keys(data).filter((str) =>
+                this.interfaces[str].includes("Recording")
+            );
 
             const resolvedOptionEntries = isSortingInterface ? optionsCopy : optionsCopy.slice(0, 2);
 
-            const elements = resolvedOptionEntries.reduce((acc, [ key, option ]) => {
-
+            const elements = resolvedOptionEntries.reduce((acc, [key, option]) => {
                 const optionResults = this.results[name];
 
                 const clickableElement = document.createElement("div");
                 clickableElement.innerText = option.name;
                 clickableElement.onclick = () => {
-
                     optionResults.selected = key;
 
-                    Object.values(elements).forEach(el => el.removeAttribute("selected"));
+                    Object.values(elements).forEach((el) => el.removeAttribute("selected"));
                     clickableElement.setAttribute("selected", "");
 
                     const element = new JSONSchemaInput({
                         value: optionResults.values[key],
                         schema: option.schema,
-                        path: [ ],
+                        path: [],
                         controls: option.controls ? option.controls() : [],
-                        onUpdate: (value) => optionResults.values[key] = value
-                    })
+                        onUpdate: (value) => (optionResults.values[key] = value),
+                    });
 
-                    resultCell.innerHTML = '';
-                    resultCell.append(element)
-                }
+                    resultCell.innerHTML = "";
+                    resultCell.append(element);
+                };
 
                 acc[key] = clickableElement;
-                return acc
-            }, {})
+                return acc;
+            }, {});
 
-            console.log(elements)
-            
+            console.log(elements);
+
             const elArray = Object.values(elements);
-            selectionCell.append(...elArray)
+            selectionCell.append(...elArray);
 
             const selected = this.results[name].selected;
             row.append(selectionCell, resultCell);
@@ -257,14 +249,10 @@ export class TimeAlignment extends LitElement {
             // row.append(disclaimer, empty);
 
             container.append(row);
-
         }
 
-        return container
-
+        return container;
     }
 }
 
-
-customElements.get("nwbguide-time-alignment") ||
-    customElements.define("nwbguide-time-alignment", TimeAlignment);
+customElements.get("nwbguide-time-alignment") || customElements.define("nwbguide-time-alignment", TimeAlignment);
