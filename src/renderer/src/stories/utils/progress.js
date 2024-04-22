@@ -22,14 +22,14 @@ export const createProgressPopup = async (options, tqdmCallback) => {
 
     Object.assign(element.style, {
         marginTop: "5px",
-    })
+    });
 
     const container = document.createElement("div");
     Object.assign(container.style, {
         textAlign: "left",
         display: "flex",
         flexDirection: "column",
-        gap: "5px"
+        gap: "5px",
     });
     element.append(container);
 
@@ -37,7 +37,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
 
     const getBar = (id, large = false) => {
         if (!bars[id]) {
-            const bar = new ProgressBar({ size: large ? undefined : 'small' });
+            const bar = new ProgressBar({ size: large ? undefined : "small" });
             bars[id] = bar;
             container.append(bar);
         }

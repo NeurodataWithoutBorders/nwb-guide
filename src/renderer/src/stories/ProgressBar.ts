@@ -23,41 +23,41 @@ export class ProgressBar extends LitElement {
         return css`
 
             /* Small Bar */
-            
+
             .bar > div {
               display: flex;
               justify-content: space-between;
               align-items: center;
               gap: 10px;
             }
-            
+
             .bar label {
               font-size: 0.85rem;
               font-weight: bold;
               margin-bottom: 5px;
             }
-            
+
             .progress {
               height: 10px;
               width: 100%;
               border: 1px solid lightgray;
             }
-            
+
             .progress div {
               height: 100%;
               background-color: #029CFD;
               width: 0%;
               transition: width ${unsafeCSS((animationDuration / 1000).toFixed(2))}s;
             }
-            
-            
+
+
             small {
               font-size: 0.8rem;
               color: gray;
               width: min-content;
               white-space: nowrap;
-            }   
-            
+            }
+
             :host([size="small"]) > .progress {
                 height: 5px;
             }
