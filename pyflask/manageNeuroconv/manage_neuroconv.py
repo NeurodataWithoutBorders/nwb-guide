@@ -657,6 +657,10 @@ def set_interface_alignment(converter, alignment_info):
 
     import numpy as np
     import csv
+    from neuroconv.tools.testing.mock_interfaces import MockRecordingInterface
+
+
+    errors = {}
 
     for name, interface in converter.data_interface_objects.items():
 
@@ -668,22 +672,61 @@ def set_interface_alignment(converter, alignment_info):
         if method:
             value = info["values"].get(method, None)
             if value != None:
-                if method == "timestamps":
 
-                    # Open the input CSV file for reading
-                    with open(value, mode="r", newline="") as csvfile:
-                        reader = csv.reader(csvfile)
-                        rows = list(reader)
-                        timestamps_array = [float(row[0]) for row in rows]
-                        interface.set_aligned_timestamps(np.array(timestamps_array))
+                try:
+                    if method == "timestamps":
 
-                elif method == "linked":
-                    interface.register_recording(
-                        converter.data_interface_objects[value]
-                    )  # Register the linked interface
+                        # Open the input CSV file for reading
+                        with open(value, mode="r", newline="") as csvfile:
+                            reader = csv.reader(csvfile)
+                            rows = list(reader)
+                            timestamps_array = [float(row[0]) for row in rows]
 
-                elif method == "start":
-                    interface.set_aligned_starting_time(value)
+                            # NOTE: Not sure if it's acceptable to provide timestamps of an arbitrary size
+                            # Use the provided timestamps to align the interface
+                            if hasattr(interface, "sorting_extractor"):
+                                if (not interface.sorting_extractor.has_recording()):
+                                    extractor = interface.sorting_extractor
+                                    fs = extractor.get_sampling_frequency()
+                                    end_frame = len(timestamps_array)
+                                    mock_recording_interface = MockRecordingInterface( 
+                                        sampling_frequency=fs, 
+                                        durations=[ end_frame / fs ],
+                                        num_channels=1
+                                    )
+                                    interface.register_recording(mock_recording_interface)
+
+                            interface.set_aligned_timestamps(np.array(timestamps_array))
+
+
+
+                    # Register the linked interface
+                    elif method == "linked":
+                        interface.register_recording(
+                            converter.data_interface_objects[value]
+                        )
+
+                    elif method == "start":
+
+                        # NOTE: Should not need this after a fix in neuroconv for sorting_segment._t_start
+                        # Use information internal to align the interface
+                        if hasattr(interface, "sorting_extractor"):
+                            if (not interface.sorting_extractor.has_recording()):
+                                extractor = interface.sorting_extractor
+                                fs = extractor.get_sampling_frequency()
+                                mock_recording_interface = MockRecordingInterface( 
+                                    sampling_frequency=fs,
+                                    num_channels=1
+                                )
+                                interface.register_recording(mock_recording_interface)
+
+
+                        interface.set_aligned_starting_time(value)
+
+                except Exception as e:
+                    errors[name] = str(e)
+
+    return errors
 
 
 def get_interface_alignment(info: dict) -> dict:
@@ -691,7 +734,7 @@ def get_interface_alignment(info: dict) -> dict:
     alignment_info = info.get("alignment", {})
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
 
-    set_interface_alignment(converter, alignment_info)
+    errors = set_interface_alignment(converter, alignment_info)
 
     timestamps = {}
     for name, interface in converter.data_interface_objects.items():
@@ -701,7 +744,7 @@ def get_interface_alignment(info: dict) -> dict:
             try:
                 interface_timestamps = interface.get_timestamps()
                 if len(interface_timestamps) == 1:
-                    interface_timestamps = interface_timestamps[0]  # Correct for video interface nesting
+                    interface_timestamps = interface_timestamps[0]  # TODO: Correct for video interface nesting
                 timestamps[name] = interface_timestamps.tolist()
 
             except Exception:
@@ -709,8 +752,11 @@ def get_interface_alignment(info: dict) -> dict:
         else:
             timestamps[name] = []
 
-    return timestamps
 
+    return dict(
+        timestamps=timestamps,
+        errors=errors,
+    )
 
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""

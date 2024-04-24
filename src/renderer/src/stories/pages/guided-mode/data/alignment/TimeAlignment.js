@@ -1,5 +1,7 @@
 import { LitElement, css } from "lit";
 import { JSONSchemaInput } from "../../../../JSONSchemaInput";
+import { errorHue } from "../../../../globals";
+import { InspectorListItem } from "../../../../preview/inspector/InspectorList";
 
 const options = {
     timestamps: {
@@ -109,8 +111,9 @@ export class TimeAlignment extends LitElement {
     render() {
         const container = document.createElement("div");
 
-        const data = this.data;
-        const flatTimes = Object.values(data)
+        const { timestamps, errors } = this.data;
+
+        const flatTimes = Object.values(timestamps)
             .map((interfaceTimestamps) => {
                 return [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]];
             })
@@ -123,8 +126,13 @@ export class TimeAlignment extends LitElement {
         const normalizeTime = (time) => (time - minTime) / (maxTime - minTime);
         const normalizeTimePct = (time) => `${normalizeTime(time) * 100}%`;
 
-        console.log("Got", data);
-        for (let name in data) {
+        const cachedErrors = {}
+
+        console.log(timestamps)
+        for (let name in timestamps) {
+
+            cachedErrors[name] = {}
+
             if (!(name in this.results))
                 this.results[name] = {
                     selected: undefined,
@@ -145,7 +153,7 @@ export class TimeAlignment extends LitElement {
             label.innerText = name;
             barCell.append(label);
 
-            const info = data[name];
+            const info = timestamps[name];
 
             const barContainer = document.createElement("div");
             Object.assign(barContainer.style, {
@@ -199,45 +207,60 @@ export class TimeAlignment extends LitElement {
 
             const optionsCopy = Object.entries(structuredClone(options));
 
-            optionsCopy[2][1].schema.enum = Object.keys(data).filter((str) =>
+            optionsCopy[2][1].schema.enum = Object.keys(timestamps).filter((str) =>
                 this.interfaces[str].includes("Recording")
             );
 
             const resolvedOptionEntries = isSortingInterface ? optionsCopy : optionsCopy.slice(0, 2);
 
-            const elements = resolvedOptionEntries.reduce((acc, [key, option]) => {
+
+            const elements = resolvedOptionEntries.reduce((acc, [selected, option]) => {
                 const optionResults = this.results[name];
 
                 const clickableElement = document.createElement("div");
                 clickableElement.innerText = option.name;
                 clickableElement.onclick = () => {
-                    optionResults.selected = key;
+                    optionResults.selected = selected;
 
                     Object.values(elements).forEach((el) => el.removeAttribute("selected"));
                     clickableElement.setAttribute("selected", "");
 
                     const element = new JSONSchemaInput({
-                        value: optionResults.values[key],
+                        value: optionResults.values[selected],
                         schema: option.schema,
                         path: [],
                         controls: option.controls ? option.controls() : [],
-                        onUpdate: (value) => (optionResults.values[key] = value),
+                        onUpdate: (value) => (optionResults.values[selected] = value),
                     });
 
                     resultCell.innerHTML = "";
                     resultCell.append(element);
+
+                    const errorMessage = cachedErrors[name][selected]
+                    if (errorMessage) {
+
+                        const error = new InspectorListItem({
+                            type: "error",
+                            message: `<h4 style="margin:0;">Alignment Failed</h4><span>${errorMessage}</span>`,
+                        })
+                        
+                        error.style.marginTop = "5px";
+                        resultCell.append(error);
+                    }
+
                 };
 
-                acc[key] = clickableElement;
+                acc[selected] = clickableElement;
                 return acc;
             }, {});
-
-            console.log(elements);
 
             const elArray = Object.values(elements);
             selectionCell.append(...elArray);
 
             const selected = this.results[name].selected;
+            if (errors[name]) cachedErrors[name][selected] = errors[name];
+
+
             row.append(selectionCell, resultCell);
             if (selected) elements[selected].click();
             else elArray[0].click();
