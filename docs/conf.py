@@ -1,10 +1,14 @@
 import sys
 import inspect
 from pathlib import Path
+import json
+import os
 
-from conf_extlinks import extlinks, intersphinx_mapping
-
+sys.path.insert(0, str(Path(__file__).resolve().parents[0]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from conf_extlinks import extlinks, intersphinx_mapping  # noqa: E402, F401
+
 
 project = "NWB GUIDE"
 copyright = "2022, CatalystNeuro"  # TODO: how to include NWB?
@@ -74,6 +78,29 @@ autodoc_default_options = {
 }
 add_module_names = False
 
+# Define the json_url for our version switcher.
+json_url = "https://nwb-guide.readthedocs.io/en/latest/_static/switcher.json"
+
+# Define the version we use for matching in the version switcher.
+# Adapted from https://github.com/pydata/pydata-sphinx-theme/blob/a4eaf774f97400d12d9cfc53b410122f1a8d88c6/docs/conf.py
+version_match = os.environ.get("READTHEDOCS_VERSION")
+with open("../package.json") as f:
+    release = json.load(f)["version"]
+# If READTHEDOCS_VERSION doesn't exist, we're not on RTD
+# If it is an integer, we're in a PR build and the version isn't correct.
+# If it's "latest" → change to "dev" (that's what we want the switcher to call it)
+if not version_match or version_match.isdigit() or version_match == "latest":
+    # For local development, infer the version to match from the package.
+    if "dev" in release or "rc" in release:
+        version_match = "dev"
+        # We want to keep the relative reference if we are in dev mode
+        # but we want the whole url if we are effectively in a released version
+        json_url = "_static/switcher.json"
+    else:
+        version_match = f"v{release}"
+elif version_match == "stable":
+    version_match = f"v{release}"
+
 html_theme_options = {
     "use_edit_page_button": True,
     "icon_links": [
@@ -84,6 +111,15 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "switcher": {
+        "json_url": json_url,
+        "version_match": version_match,
+    },
+    "logo": {
+        "text": "NWB GUIDE",
+        "alt_text": "NWB GUIDE - Home",
+    },
+    "navbar_start": ["navbar-logo", "version-switcher"]
 }
 
 html_context = {
