@@ -163,8 +163,8 @@ export class TimeAlignment extends LitElement {
 
             barCell.append(barContainer);
 
-            const isSortingInterface = metadata[name].sorting === true
-            const hasCompatibleInterfaces = isSortingInterface && metadata[name].compatible.length > 0
+            const isSortingInterface = metadata[name].sorting === true;
+            const hasCompatibleInterfaces = isSortingInterface && metadata[name].compatible.length > 0;
 
             // Render this way if the interface has data
             if (info.length > 0) {
