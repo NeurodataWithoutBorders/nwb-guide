@@ -16,27 +16,35 @@ extensions = [
     "sphinx.ext.intersphinx",  # Allows links to other sphinx project documentation sites
     "sphinx_search.extension",  # Allows for auto search function the documentation
     "sphinx.ext.viewcode",  # Shows source code in the documentation
-"sphinx.ext.extlinks",  # Allows to use shorter external links defined in the extlinks variable.
+    "sphinx.ext.extlinks",  # Allows to use shorter external links defined in the extlinks variable.
+    "sphinx_favicon",  # Allows to set a favicon for the documentation
 ]
 
 templates_path = ["_templates"]
 master_doc = "index"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "pydata_sphinx_theme"
+html_title = "NWB GUIDE"
+html_static_path = ["_static"]
 
-# The name of an image file (within the static path) to use as favicon of the
-# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
-#html_favicon = 'img/favicon.ico'  # TODO
+html_show_sourcelink = False
 
-# These paths are either relative to html_static_path or fully qualified paths (eg. https://...)
-html_css_files = [
-    "css/custom.css",
+html_logo = "assets/logo-guide-draft-transparent-tight.png"
+
+# configure the favicon via the sphinx_favicon extension
+favicons = [
+    "favicon.ico",
+    "favicon-16x16.png",
+    "favicon-32x32.png",
+    "android-chrome-192x192.png",
+    "android-chrome-512x512.png",
+    "apple-touch-icon.png",
 ]
 
-html_theme_options = {
-    "collapse_navigation": False,
-}
+# These paths are either relative to html_static_path or fully qualified paths (eg. https://...)
+# html_css_files = [
+#     "css/custom.css",
+# ]
 
 linkcheck_anchors = False
 
