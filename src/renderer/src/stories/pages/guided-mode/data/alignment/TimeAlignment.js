@@ -126,11 +126,10 @@ export class TimeAlignment extends LitElement {
         const normalizeTime = (time) => (time - minTime) / (maxTime - minTime);
         const normalizeTimePct = (time) => `${normalizeTime(time) * 100}%`;
 
-        const cachedErrors = {}
+        const cachedErrors = {};
 
         for (let name in timestamps) {
-
-            cachedErrors[name] = {}
+            cachedErrors[name] = {};
 
             if (!(name in this.results))
                 this.results[name] = {
@@ -212,7 +211,6 @@ export class TimeAlignment extends LitElement {
 
             const resolvedOptionEntries = isSortingInterface ? optionsCopy : optionsCopy.slice(0, 2);
 
-
             const elements = resolvedOptionEntries.reduce((acc, [selected, option]) => {
                 const optionResults = this.results[name];
 
@@ -235,18 +233,16 @@ export class TimeAlignment extends LitElement {
                     resultCell.innerHTML = "";
                     resultCell.append(element);
 
-                    const errorMessage = cachedErrors[name][selected]
+                    const errorMessage = cachedErrors[name][selected];
                     if (errorMessage) {
-
                         const error = new InspectorListItem({
                             type: "error",
                             message: `<h4 style="margin:0;">Alignment Failed</h4><span>${errorMessage}</span>`,
-                        })
-                        
+                        });
+
                         error.style.marginTop = "5px";
                         resultCell.append(error);
                     }
-
                 };
 
                 acc[selected] = clickableElement;
@@ -258,7 +254,6 @@ export class TimeAlignment extends LitElement {
 
             const selected = this.results[name].selected;
             if (errors[name]) cachedErrors[name][selected] = errors[name];
-
 
             row.append(selectionCell, resultCell);
             if (selected) elements[selected].click();

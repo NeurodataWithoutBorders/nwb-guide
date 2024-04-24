@@ -299,7 +299,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     interfaces: globalState.interfaces,
                                     results: alignmentInfo,
                                 });
-                                
+
                                 modal.innerHTML = "";
                                 modal.append(alignment);
                             },
