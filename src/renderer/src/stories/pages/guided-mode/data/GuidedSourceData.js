@@ -244,7 +244,7 @@ export class GuidedSourceDataPage extends ManagedPage {
             instances,
             controls: [
                 {
-                    name: "Check Alignment",
+                    name: "View Temporal Alignment",
                     primary: true,
                     onClick: async (id) => {
                         const { globalState } = this.info;
@@ -257,7 +257,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                         Object.assign(h2.style, { margin: "0px" });
                         const small = document.createElement("small");
                         small.innerText = `${subject}/${session}`;
-                        h2.innerText = `Alignment Preview`;
+                        h2.innerText = `Temporal Alignment`;
 
                         header.append(h2, small);
 

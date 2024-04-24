@@ -128,7 +128,6 @@ export class TimeAlignment extends LitElement {
 
         const cachedErrors = {}
 
-        console.log(timestamps)
         for (let name in timestamps) {
 
             cachedErrors[name] = {}
