@@ -91,13 +91,18 @@ with open("../package.json") as f:
 # If it's "latest" → change to "dev" (that's what we want the switcher to call it)
 if not version_match or version_match.isdigit() or version_match == "latest":
     # For local development, infer the version to match from the package.
-    if "dev" in release or "rc" in release:
-        version_match = "dev"
-        # We want to keep the relative reference if we are in dev mode
-        # but we want the whole url if we are effectively in a released version
-        json_url = "_static/switcher.json"
-    else:
-        version_match = f"v{release}"
+    # NOTE: In local development, you can't just open the built HTML file and have the version switcher work
+    # Use `python -m http.server -d docs/build/html/` and open the page at http://localhost:8000
+    # In local development, the version switcher will always show "dev" and use the local switcher.json
+    version_match = "dev"
+    json_url = "_static/switcher.json"
+    # if "dev" in release or "rc" in release:
+    #     version_match = "dev"
+    #     # We want to keep the relative reference if we are in dev mode
+    #     # but we want the whole url if we are effectively in a released version
+    #     json_url = "_static/switcher.json"
+    # else:
+    #     version_match = f"v{release}"
 elif version_match == "stable":
     version_match = f"v{release}"
 
