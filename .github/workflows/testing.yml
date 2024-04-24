@@ -28,7 +28,7 @@ jobs:
             label: environments/environment-Linux.yml
 
           - os: macos-latest
-            label: environments/environment-Mac.yml
+            label: environments/environment-MAC-arm64.yml
 
           - os: windows-latest
             label: environments/environment-Windows.yml
