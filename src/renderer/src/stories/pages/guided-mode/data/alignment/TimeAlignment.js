@@ -1,23 +1,22 @@
 import { LitElement, css } from "lit";
 import { JSONSchemaInput } from "../../../../JSONSchemaInput";
-import { errorHue } from "../../../../globals";
 import { InspectorListItem } from "../../../../preview/inspector/InspectorList";
 
 const options = {
-    timestamps: {
-        name: "Upload Timestamps",
-        schema: {
-            type: "string",
-            format: "file",
-            description: "A CSV file containing the timestamps of the recording.",
-        },
-    },
     start: {
         name: "Adjust Start Time",
         schema: {
             type: "number",
             description: "The start time of the recording in seconds.",
             min: 0,
+        },
+    },
+    timestamps: {
+        name: "Upload Timestamps",
+        schema: {
+            type: "string",
+            format: "file",
+            description: "A CSV file containing the timestamps of the recording.",
         },
     },
     linked: {
@@ -111,7 +110,7 @@ export class TimeAlignment extends LitElement {
     render() {
         const container = document.createElement("div");
 
-        const { timestamps, errors } = this.data;
+        const { timestamps, errors, metadata } = this.data;
 
         const flatTimes = Object.values(timestamps)
             .map((interfaceTimestamps) => {
@@ -164,9 +163,8 @@ export class TimeAlignment extends LitElement {
 
             barCell.append(barContainer);
 
-            const interfaceName = this.interfaces[name];
-
-            const isSortingInterface = interfaceName && interfaceName.includes("Sorting");
+            const isSortingInterface = metadata[name].sorting === true
+            const hasCompatibleInterfaces = isSortingInterface && metadata[name].compatible.length > 0
 
             // Render this way if the interface has data
             if (info.length > 0) {
@@ -209,7 +207,7 @@ export class TimeAlignment extends LitElement {
                 this.interfaces[str].includes("Recording")
             );
 
-            const resolvedOptionEntries = isSortingInterface ? optionsCopy : optionsCopy.slice(0, 2);
+            const resolvedOptionEntries = hasCompatibleInterfaces ? optionsCopy : optionsCopy.slice(0, 2);
 
             const elements = resolvedOptionEntries.reduce((acc, [selected, option]) => {
                 const optionResults = this.results[name];

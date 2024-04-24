@@ -700,17 +700,7 @@ def set_interface_alignment(converter, alignment_info):
                         interface.register_recording(converter.data_interface_objects[value])
 
                     elif method == "start":
-
-                        # NOTE: Should not need this after a fix in neuroconv for sorting_segment._t_start
-                        # Use information internal to align the interface
-                        if hasattr(interface, "sorting_extractor"):
-                            if not interface.sorting_extractor.has_recording():
-                                extractor = interface.sorting_extractor
-                                fs = extractor.get_sampling_frequency()
-                                mock_recording_interface = MockRecordingInterface(sampling_frequency=fs, num_channels=1)
-                                interface.register_recording(mock_recording_interface)
-
-                        interface.set_aligned_starting_time(value)
+                        interface.set_aligned_starting_time(value) # For sorting interfaces, an empty array will still be returned
 
                 except Exception as e:
                     errors[name] = str(e)
@@ -725,8 +715,24 @@ def get_interface_alignment(info: dict) -> dict:
 
     errors = set_interface_alignment(converter, alignment_info)
 
+    metadata = {}
     timestamps = {}
     for name, interface in converter.data_interface_objects.items():
+
+        metadata[name] = dict()
+        is_sorting = metadata[name]["sorting"] = hasattr(interface, "sorting_extractor")
+
+        if is_sorting:
+            metadata[name]["compatible"] = []
+            for sub_name in alignment_info.keys():
+                sub_interface = converter.data_interface_objects[sub_name]
+                if hasattr(sub_interface, "recording_extractor"):
+                    try:
+                        interface.register_recording(sub_interface)
+                        metadata[name]["compatible"].append(name)
+                    except Exception:
+                        pass
+
 
         # Run interface.get_timestamps if it has the method
         if hasattr(interface, "get_timestamps"):
@@ -735,13 +741,13 @@ def get_interface_alignment(info: dict) -> dict:
                 if len(interface_timestamps) == 1:
                     interface_timestamps = interface_timestamps[0]  # TODO: Correct for video interface nesting
                 timestamps[name] = interface_timestamps.tolist()
-
             except Exception:
                 timestamps[name] = []
         else:
             timestamps[name] = []
 
     return dict(
+        metadata=metadata,
         timestamps=timestamps,
         errors=errors,
     )
