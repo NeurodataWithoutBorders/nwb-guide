@@ -33,7 +33,7 @@ jobs:
 
           - python-version: "3.9"
             os: macos-latest
-            label: environments/environment-Mac.yml
+            label: environments/environment-MAC-arm64.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
