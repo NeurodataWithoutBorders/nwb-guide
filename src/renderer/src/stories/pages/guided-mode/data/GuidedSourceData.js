@@ -275,6 +275,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                                 if (alignment) {
                                     globalState.project.alignment = alignment.results;
+                                    this.unsavedUpdates = "conversions"
                                     await this.save();
                                 }
 
