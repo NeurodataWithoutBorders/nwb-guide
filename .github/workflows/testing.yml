@@ -30,6 +30,9 @@ jobs:
           - os: macos-latest
             label: environments/environment-MAC-arm64.yml
 
+          - os: macos-13
+            label: environments/environment-MAC.yml
+
           - os: windows-latest
             label: environments/environment-Windows.yml
 

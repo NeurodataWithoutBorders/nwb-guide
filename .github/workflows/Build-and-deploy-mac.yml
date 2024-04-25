@@ -1,5 +1,6 @@
 name: Mac Release
 run-name: ${{ github.actor }} is building a MAC release for NWB GUIDE
+# NOTE: even though the runner is an arm64 mac, both x64 and arm64 releases will be made
 
 on:
   workflow_dispatch:
