@@ -32,13 +32,13 @@ jobs:
           #   prefix: /usr/share/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
-            os: macos-latest-xlarge  # Mac arm64 runner
+            os: macos-latest  # Mac arm64 runner
             label: environments/environment-MAC-arm64.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
-            os: macos-latest-large  # Mac x64 runner
-            label: environments/environment-MAC.yml
+            os: macos-13  # Mac x64 runner
+            label: environments/environment-MAC-arm64.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
@@ -49,6 +49,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch --prune --unshallow --tags
+
+      - name: Printout architecture
+        run: echo uname -m
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Setup Mambaforge
