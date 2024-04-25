@@ -45,7 +45,11 @@ extlinks = {
     "ontobee": ("https://ontobee.org/%s", None),
 
     "web-components": ("https://www.webcomponents.org/%s", None),
-    "npm": ("https://www.npmjs.com/%s", None)
+    "npm": ("https://www.npmjs.com/%s", None),
+
+    "sphinx": ("https://www.sphinx-doc.org/en/master/%s", None),
+    "pydata-sphinx-theme": ("https://pydata-sphinx-theme.readthedocs.io/en/stable/%s", None),
+    "readthedocs": ("https://docs.readthedocs.io/en/stable/%s", None),
 }
 
 # Use this for mapping for links to commonly used documentation
