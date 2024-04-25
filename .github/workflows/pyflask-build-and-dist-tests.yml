@@ -37,7 +37,7 @@ jobs:
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
-            os: macos-13  # Mac x64 runner
+            os: macos-12  # Mac x64 runner
             label: environments/environment-MAC.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
