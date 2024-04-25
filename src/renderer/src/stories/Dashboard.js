@@ -180,7 +180,7 @@ export class Dashboard extends LitElement {
         else if (typeof page === "object") return this.getPage(Object.values(page)[0]);
     }
 
-    updateSections({ sidebar = true, main = false } = {}, globalState = this.page.info.globalState) {
+    updateSections({ sidebar = true, main = false, header = false } = {}, globalState = this.page.info.globalState) {
         const info = this.page.info;
         let parent = info.parent;
 
@@ -196,7 +196,9 @@ export class Dashboard extends LitElement {
                 page: this.page,
                 sections,
             });
-        }
+        } 
+        
+        else if (header) this.main.header.sections = sections // Update header sections
 
         return sections;
     }
@@ -286,7 +288,7 @@ export class Dashboard extends LitElement {
                 const section = info.section;
 
                 let state = globalState.sections[section];
-                if (!state) state = globalState.sections[section] = { open: false, active: false, pages: {} };
+                if (!state) state = globalState.sections[section] = { open: undefined, active: false, pages: {} };
 
                 let pageState = state.pages[id];
                 if (!pageState)

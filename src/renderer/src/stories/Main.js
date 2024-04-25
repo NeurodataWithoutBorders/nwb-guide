@@ -130,7 +130,6 @@ export class Main extends LitElement {
         let { page = "", sections = {} } = this.toRender ?? {};
 
         let footer = page?.footer; // Page-specific footer
-        let header = page?.header; // Page-specific header
         let capsules = page?.capsules; // Page-specific capsules
 
         if (page) {
@@ -159,8 +158,61 @@ export class Main extends LitElement {
 
             if (footer === true) footer = {};
             if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Next";
+        }
 
-            // Default Capsules Behavior
+        const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
+        if (!footer) delete this.footer; // Reset footer
+
+
+        this.header = new MainHeader(sections, page);
+
+        return html`
+            ${this.header}
+
+            <main id="content" class="js-content" style="overflow: hidden;">
+                <section class="section">${page}</section>
+            </main>
+            ${footerEl}
+        `;
+    }
+}
+
+customElements.get("nwb-main") || customElements.define("nwb-main", Main);
+
+
+class MainHeader extends LitElement {
+
+    static get properties() {
+        return {
+            sections: { type: Object },
+        }
+    }
+
+    constructor(sections, page){
+        super();
+        this.sections = sections;
+        this.page = page;
+    }
+
+    createRenderRoot() {
+        return this;
+    }
+
+    render() {
+
+        let { page = "", sections = {} } = this
+
+        delete this.capsules; // Reset capsules
+        delete this.title     // Reset title
+        
+
+        let config = page?.header; // Page-specific header
+        const capsules = page?.capsules; // Page-specific capsules
+
+        if (page) {
+
+            const info = page.info ?? {};
+
             const section = sections[info.section];
             if (section) {
                 if (capsules === true || !("capsules" in page)) {
@@ -173,72 +225,66 @@ export class Main extends LitElement {
                             selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
                         };
 
-                        capsules = new GuidedCapsules(capsulesProps);
-                        capsules.onClick = (i) => this.toRender.page.to(pageIds[i]);
+                        this.capsules = new GuidedCapsules(capsulesProps);
+                        this.capsules.onClick = (i) => this.page.to(pageIds[i]);
                     }
                 }
 
-                if (header === true || !("header" in page) || !("sections" in page.header)) {
+                if (config === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.entries(sections)
                         .filter(([name, info]) => !Object.values(info.pages).every((state) => state.skipped))
                         .map(([name]) => name);
-                    header = page.header && typeof page.header === "object" ? page.header : {};
-                    header.sections = sectionNames;
-                    header.selected = sectionNames.indexOf(info.section);
+
+                    config = page.header && typeof page.header === "object" ? page.header : {};
+                    config.sections = sectionNames;
+                    config.selected = sectionNames.indexOf(info.section);
                 }
             }
         }
 
-        const headerEl = header ? (this.header = new GuidedHeader(header)) : html`<div></div>`; // Render for grid
-        if (!header) delete this.header; // Reset header
+        const headerEl = config ? (this.header = new GuidedHeader(config)) : html`<div></div>`; // Render for grid
+        if (!config) delete this.header; // Reset header
 
-        if (!header) delete this.header; // Reset header
+        const title = config?.title ?? page.info?.title;
+        if (title) this.title = title; // Set title if not undefined
 
-        const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
-        if (!footer) delete this.footer; // Reset footer
-
-        const title = header?.title ?? page.info?.title;
-
-        let subtitle = header?.subtitle;
+        let subtitle = config?.subtitle;
         if (typeof subtitle === "function") subtitle = subtitle(); // Generate custom header content if required
 
-        let controls = header?.controls;
+        let controls = config?.controls;
         if (typeof controls === "function") controls = controls(); // Generate custom header content if required
 
         return html`
-            ${headerEl}
-            ${
-                capsules
-                    ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
-                    : html``
-            }
-            ${
-                title
-                    ? html`<div
-                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${capsules
-                              ? ""
-                              : "padding-top: 35px;"}"
-                      >
-                          <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
-                              <div style="line-height: 1em; color: gray;">
-                                  <h1 class="title" style="margin: 0; padding: 0; color:black;">${title}</h1>
-                                  <small>${subtitle instanceof HTMLElement ? subtitle : unsafeHTML(subtitle)}</small>
-                              </div>
-                              <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
-                          </div>
-                          <hr style="margin-bottom: 0;" />
-                      </div>`
-                    : ""
-            }
-
-            <main id="content" class="js-content" style="overflow: hidden; ${
-                capsules || title ? "" : "padding-top: 35px;"
-            }"">
-                <section class="section">${page}</section>
-            </main>
-            ${footerEl}
+            <div style="overflow: hidden; ${
+                this.capsules || this.title ? "" : "padding-top: 35px;"
+            }">
+                ${headerEl}
+                ${
+                    this.capsules
+                        ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${this.capsules}</div>`
+                        : html``
+                }
+                ${
+                    this.title
+                        ? html`<div
+                            style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${this.capsules
+                                ? ""
+                                : "padding-top: 35px;"}"
+                        >
+                            <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
+                                <div style="line-height: 1em; color: gray;">
+                                    <h1 class="title" style="margin: 0; padding: 0; color:black;">${this.title}</h1>
+                                    <small>${subtitle instanceof HTMLElement ? subtitle : unsafeHTML(subtitle)}</small>
+                                </div>
+                                <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
+                            </div>
+                            <hr style="margin-bottom: 0;" />
+                        </div>`
+                        : ""
+                }
+            </div>
         `;
     }
 }
 
-customElements.get("nwb-main") || customElements.define("nwb-main", Main);
+customElements.get("nwb-main-header") || customElements.define("nwb-main-header", MainHeader);

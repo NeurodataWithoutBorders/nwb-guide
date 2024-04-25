@@ -11,6 +11,8 @@ function isHTML(str) {
     return Array.from(doc.body.childNodes).some((node) => node.nodeType === 1);
 }
 
+const autoOpenValue = Symbol('SECTION_AUTO_OPEN')
+
 export class NavigationSidebar extends LitElement {
     static get styles() {
         return useGlobalStyles(
@@ -61,8 +63,9 @@ export class NavigationSidebar extends LitElement {
                 !isAllSkipped
             );
 
-            if (isActive) this.#toggleDropdown(sectionName, true);
-            else this.#toggleDropdown(sectionName, false);
+            if (isActive) this.#toggleDropdown(sectionName, autoOpenValue);
+            else if (info.open === autoOpenValue) this.#toggleDropdown(sectionName, false);
+            else this.#toggleDropdown(sectionName, info.open);
         });
 
         if (this.#queue.length) {
@@ -93,6 +96,8 @@ export class NavigationSidebar extends LitElement {
 
     #toggleDropdown = (sectionName, forcedState) => {
         const hasForce = forcedState !== undefined;
+
+
         //remove hidden from child elements with guided--nav-bar-section-page class
         const children = this.querySelectorAll("[data-section='" + sectionName + "']");
         for (const child of children) child.toggleAttribute("hidden", hasForce ? !forcedState : undefined);

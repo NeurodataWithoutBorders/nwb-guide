@@ -1248,9 +1248,6 @@ export class JSONSchemaInput extends LitElement {
             const isNumber = schema.type === "number";
 
             const isRequiredNumber = isNumber && this.required && this.allowNaN;
-            if (this.value === undefined) {
-                console.warn('Got reequired number', this.value)
-            }
 
             const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
