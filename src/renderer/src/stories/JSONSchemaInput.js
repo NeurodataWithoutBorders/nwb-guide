@@ -556,6 +556,7 @@ export class JSONSchemaInput extends LitElement {
     controls = [];
     // required;
     validateOnChange = true;
+    allowNaN = true
 
     constructor(props = {}) {
         super();
@@ -887,6 +888,17 @@ export class JSONSchemaInput extends LitElement {
     #render() {
         const { validateOnChange, schema, path: fullPath } = this;
 
+        // Resolve anyof inside the schema
+        const anyOf = schema.anyOf
+        if (anyOf) {
+            delete schema.anyOf
+            for (let key in anyOf[0]) {
+                schema[key] = anyOf[0][key]
+            }
+                
+            // schema = {...schema, ...anyOf[0]}
+        }
+
         // Do your best to fill in missing schema values
         if (!("type" in schema)) schema.type = this.#getType();
 
@@ -929,12 +941,20 @@ export class JSONSchemaInput extends LitElement {
         };
 
         // Transform to single item if maxItems is 1 OR the array has a fixed lenth
-        if (isArray && (schema.maxItems === 1 || schema.maxItems === schema.minItems) && !isTable) {
+        if (isArray && (schema.maxItems === 1 || (schema.maxItems && schema.minItems && schema.maxItems === schema.minItems)) && !isTable) {
             const len = schema.maxItems ?? 1;
             const array = this.value ?? [];
-            return Array.from({ length: len }).map((_, i) => {
-                return new JSONSchemaInput({
-                    value: array[i],
+
+            // JSONified arrays will convert undefined to null
+           const jsonify = (value) => value === undefined ? null : value
+           const jsonschemify = (value) => value === null ? undefined : value
+
+           this.required = false
+
+            const inputs = Array.from({ length: len }).map((_, i) => {
+
+                const input =  new JSONSchemaInput({
+                    value: jsonify(array[i]),
                     schema: {
                         ...schema.items,
                         strict: schema.strict,
@@ -942,14 +962,21 @@ export class JSONSchemaInput extends LitElement {
                     path: fullPath,
                     validateEmptyValue: this.validateEmptyValue,
                     required: this.required,
+                    allowNaN: false,
                     validateOnChange: () => (validateOnChange ? this.#triggerValidation(name, path) : ""),
                     form: this.form,
                     onUpdate: (value) => {
-                        array[i] = value;
+                        array[i] = jsonschemify(value);
                         this.#updateData(fullPath, [...array]);
                     },
                 });
+
+                array[i] = jsonschemify(array[i]);
+
+                return input
             });
+            
+            return inputs
         }
 
         if (isArray || canAddProperties) {
@@ -995,6 +1022,8 @@ export class JSONSchemaInput extends LitElement {
                     },
                 });
 
+
+
                 if (itemSchema.enum) {
                     const search = new Search({
                         options: itemSchema.enum.map((v) => {
@@ -1018,8 +1047,9 @@ export class JSONSchemaInput extends LitElement {
                         },
                     });
 
-                    search.style.height = "auto";
-                    return html`<div style="width: 100%;">${search}${list}</div>`;
+                    Object.assign(search.style, { width: "100%"});
+                    
+                    return html`<div style="width: 100%;"><div style="margin-bottom: 10px;">${search}</div>${list}</div>`;
                 } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
@@ -1217,7 +1247,10 @@ export class JSONSchemaInput extends LitElement {
             if (isInteger) schema.type = "number";
             const isNumber = schema.type === "number";
 
-            const isRequiredNumber = isNumber && this.required;
+            const isRequiredNumber = isNumber && this.required && this.allowNaN;
+            if (this.value === undefined) {
+                console.warn('Got reequired number', this.value)
+            }
 
             const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -1309,7 +1342,7 @@ export class JSONSchemaInput extends LitElement {
                             // }
 
                             if (isNumber && newValue !== value) {
-                                ev.target.value = newValue;
+                                if (newValue !== undefined) ev.target.value = newValue; // Avoids unnecessary error message
                                 value = newValue;
                             }
 

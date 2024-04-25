@@ -24,8 +24,9 @@ const getBackendConfigurations = (info, options = {}) => run(`configuration`, in
 
 const itemIgnore = {
     full_shape: true,
-    compression_options: true, // NOTE: Must still request
-    filter_options: true,
+    buffer_shape: true,
+    compression_options: true,
+    filter_options: true
 };
 
 const backendMap = {
@@ -147,6 +148,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
             const existingForm = this.#getForm(subject, session);
             if (existingForm) {
+                existingForm.schema = schema; // Update schema
                 existingForm.results = reorganized; // Update resolved values
                 return { session, subject, instance: existingForm };
             }
@@ -172,9 +174,8 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     const input = form.inputs[name];
                     input.description = schema.properties[name].description;
 
-                    // Buffer shape depends on chunk shape
-                    if (name === "chunk_shape")
-                        form.inputs["buffer_shape"].schema = { ...form.inputs["buffer_shape"].schema }; // Force schema update
+                    // // Buffer shape depends on chunk shape
+                    // if (name === "chunk_shape") form.inputs["buffer_shape"].schema = { ...form.inputs["buffer_shape"].schema }; // Force schema update
                 },
                 onThrow,
                 validateOnChange: async (name, _, path, value) => {
@@ -191,8 +192,9 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                                     "Recommended maximum chunk size is 20MB. You may want to reduce the size of the chunks.",
                                 type: "warning",
                             });
+
                         // NOTE: Generalize for more axes
-                        else if (mbUsage < 10 && value[0] !== input.schema.items.max)
+                        else if (mbUsage < 10 && value[0] !== input.schema.items.maximum)
                             errors.push({
                                 message:
                                     "Recommended minimum chunk size is 10MB. You may want to increase the size of the chunks.",
@@ -304,10 +306,11 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     });
                 },
                 {
-                    name: "Validate",
+                    name: "Save & Validate",
                     primary: true,
                     onClick: async (id) => {
                         const { subject, session } = getInfoFromId(id);
+                        await this.save();
                         await this.validate({ session, subject });
                     },
                 },

@@ -32,12 +32,12 @@ onServerOpen(async () => {
     .then((res) => res.json())
     .then(({ physical, logical }) => {
         const { number_of_jobs, number_of_threads } = additionalSettings as any;
-        number_of_jobs.max = physical;
-        number_of_threads.max = logical / physical;
+        number_of_jobs.maximum = physical;
+        number_of_threads.maximum = logical / physical;
         setReady.cpus({ number_of_jobs, number_of_threads })
     })
     .catch(() => {
-        if (isStorybook) setReady.cpus({ number_of_jobs: { max: 1, default: 1 }, number_of_threads: { max: 1, default: 1 } })
+        if (isStorybook) setReady.cpus({ number_of_jobs: { maximum: 1, default: 1 }, number_of_threads: { maximum: 1, default: 1 } })
     });
 });
 

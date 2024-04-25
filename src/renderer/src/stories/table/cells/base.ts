@@ -160,7 +160,6 @@ export class TableCellBase extends LitElement {
                 document.removeEventListener('click', this.#editableClose)
             } else {
                 current = this.#editor.value
-                console.log('Editor value', current)
                 this.interacted = true
                 if (this.#editor && this.#editor.onEditEnd) this.#editor.onEditEnd()
             }

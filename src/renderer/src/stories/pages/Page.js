@@ -221,8 +221,6 @@ export class Page extends LitElement {
 
             delete optsCopy.configuration;
 
-            console.log("Running conversion for", subject, session, sessionInfo);
-
             const result = await backendFunctionToRun(
                 {
                     output_folder: optsCopy.stub_test ? undefined : conversion_output_folder,

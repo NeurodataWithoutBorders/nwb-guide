@@ -521,6 +521,10 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
 
+        if 'definitions' not in ecephys_schema:
+            ecephys_schema['definitions'] = ecephys_properties["definitions"]
+
+        
         defs = ecephys_schema["definitions"]
 
         electrode_def = defs["Electrodes"]
@@ -763,8 +767,17 @@ def get_backend_configuration(info: dict) -> dict:
 
     import numpy as np
 
-    PROPS_TO_REMOVE = ["object_id", "dataset_name", "location_in_file", "dtype"]
-    PROPS_TO_IGNORE = ["full_shape"]
+    PROPS_TO_REMOVE = [
+        # Immutable
+        "object_id", 
+        "dataset_name", 
+        "location_in_file", 
+        "dtype",
+    ]
+    
+    PROPS_TO_IGNORE = [
+        "full_shape"
+    ]
 
     info["overwrite"] = True  # Always overwrite the file
 
@@ -773,6 +786,8 @@ def get_backend_configuration(info: dict) -> dict:
     backend_configuration = info.get("configuration", {})
     backend = backend_configuration.get("backend", "hdf5")
     results = backend_configuration.get("results", {}).get(backend, {})
+
+    # raise ValueError(f"This function is not currently supported. {results}")
 
     converter, metadata, __ = get_conversion_info(info)
 
