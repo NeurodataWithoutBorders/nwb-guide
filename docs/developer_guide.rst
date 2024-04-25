@@ -301,7 +301,7 @@ You can also run ``make clean`` from the ``docs`` directory to remove all files 
 
 The documentation is hosted online using :readthedocs:`ReadTheDocs <>`. An automation rule was set up so that
 new tags will automatically be activated; however, these versions are not automatically listed in the version
-switcher. ``docs/_static/switcher.json`` must be manually updated to specify new versions, remove versions 
+switcher. ``docs/_static/switcher.json`` must be manually updated to specify new versions, remove versions
 that are too old, label a particular version as stable in the name, and identify which version is
-"preferred" for use in version warning banners. See 
+"preferred" for use in version warning banners. See
 :pydata-sphinx-theme:`PyData Sphinx theme user guide <user_guide>` for instructions and more information.
