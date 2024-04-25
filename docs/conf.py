@@ -123,7 +123,8 @@ html_theme_options = {
         "text": "NWB GUIDE",
         "alt_text": "NWB GUIDE - Home",
     },
-    "navbar_start": ["navbar-logo", "version-switcher"]
+    "navbar_start": ["navbar-logo", "version-switcher"],
+    "show_version_warning_banner": True,
 }
 
 html_context = {
