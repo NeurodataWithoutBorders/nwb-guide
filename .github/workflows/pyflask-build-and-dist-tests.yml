@@ -51,7 +51,7 @@ jobs:
       - run: git fetch --prune --unshallow --tags
 
       - name: Printout architecture
-        run: echo uname -m
+        run: uname -m
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Setup Mambaforge
