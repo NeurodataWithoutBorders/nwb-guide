@@ -32,12 +32,12 @@ jobs:
           #   prefix: /usr/share/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
-            os: macos-latest
+            os: macos-latest  # Mac arm64 runner
             label: environments/environment-MAC-arm64.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
-            os: macos-13
+            os: macos-13  # Mac x64 runner 
             label: environments/environment-MAC.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
