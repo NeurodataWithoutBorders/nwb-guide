@@ -1049,7 +1049,7 @@ export class JSONSchemaInput extends LitElement {
 
                     Object.assign(search.style, { width: "100%"});
                     
-                    return html`<div style="width: 100%;"><div style="margin-bottom: 10px;">${search}</div>${list}</div>`;
+                    return html`<div style="width: 100%; margin-bottom: 5px;"><div style="margin-bottom: 10px;">${search}</div>${list}</div>`;
                 } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
@@ -1067,6 +1067,11 @@ export class JSONSchemaInput extends LitElement {
                             input.value = "";
                         },
                     });
+
+                    input.addEventListener("keydown", (ev) => {
+                        if (ev.key === "Enter") submitButton.onClick();
+                    });
+
 
                     return html`<div style="width: 100%; margin-bottom: 5px;">
                         <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">

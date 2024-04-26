@@ -98,7 +98,7 @@ export class TableCellBase extends LitElement {
         this.editable = editable
 
         this.#editable.addEventListener('input', (ev: InputEvent) => {
-            this.interacted = true
+            if (ev.isTrusted) this.interacted = true
             if (ev.inputType.includes('history')) this.setText(this.#editable.innerText) // Catch undo / redo}
         })
 
