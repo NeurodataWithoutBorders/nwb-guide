@@ -163,7 +163,6 @@ export class Main extends LitElement {
         const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
         if (!footer) delete this.footer; // Reset footer
 
-
         this.header = new MainHeader(sections, page);
 
         return html`
@@ -179,16 +178,14 @@ export class Main extends LitElement {
 
 customElements.get("nwb-main") || customElements.define("nwb-main", Main);
 
-
 class MainHeader extends LitElement {
-
     static get properties() {
         return {
             sections: { type: Object },
-        }
+        };
     }
 
-    constructor(sections, page){
+    constructor(sections, page) {
         super();
         this.sections = sections;
         this.page = page;
@@ -199,18 +196,15 @@ class MainHeader extends LitElement {
     }
 
     render() {
-
-        let { page = "", sections = {} } = this
+        let { page = "", sections = {} } = this;
 
         delete this.capsules; // Reset capsules
-        delete this.title     // Reset title
-        
+        delete this.title; // Reset title
 
         let config = page?.header; // Page-specific header
         const capsules = page?.capsules; // Page-specific capsules
 
         if (page) {
-
             const info = page.info ?? {};
 
             const section = sections[info.section];
@@ -255,33 +249,28 @@ class MainHeader extends LitElement {
         if (typeof controls === "function") controls = controls(); // Generate custom header content if required
 
         return html`
-            <div style="overflow: hidden; ${
-                this.capsules || this.title ? "" : "padding-top: 35px;"
-            }">
+            <div style="overflow: hidden; ${this.capsules || this.title ? "" : "padding-top: 35px;"}">
                 ${headerEl}
-                ${
-                    this.capsules
-                        ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${this.capsules}</div>`
-                        : html``
-                }
-                ${
-                    this.title
-                        ? html`<div
-                            style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${this.capsules
-                                ? ""
-                                : "padding-top: 35px;"}"
-                        >
-                            <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
-                                <div style="line-height: 1em; color: gray;">
-                                    <h1 class="title" style="margin: 0; padding: 0; color:black;">${this.title}</h1>
-                                    <small>${subtitle instanceof HTMLElement ? subtitle : unsafeHTML(subtitle)}</small>
-                                </div>
-                                <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
-                            </div>
-                            <hr style="margin-bottom: 0;" />
-                        </div>`
-                        : ""
-                }
+                ${this.capsules
+                    ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${this.capsules}</div>`
+                    : html``}
+                ${this.title
+                    ? html`<div
+                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${this
+                              .capsules
+                              ? ""
+                              : "padding-top: 35px;"}"
+                      >
+                          <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
+                              <div style="line-height: 1em; color: gray;">
+                                  <h1 class="title" style="margin: 0; padding: 0; color:black;">${this.title}</h1>
+                                  <small>${subtitle instanceof HTMLElement ? subtitle : unsafeHTML(subtitle)}</small>
+                              </div>
+                              <div style="padding-left: 25px; display: flex; gap: 10px;">${controls}</div>
+                          </div>
+                          <hr style="margin-bottom: 0;" />
+                      </div>`
+                    : ""}
             </div>
         `;
     }

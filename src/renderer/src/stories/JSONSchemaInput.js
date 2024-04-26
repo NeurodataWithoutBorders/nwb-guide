@@ -556,7 +556,7 @@ export class JSONSchemaInput extends LitElement {
     controls = [];
     // required;
     validateOnChange = true;
-    allowNaN = true
+    allowNaN = true;
 
     constructor(props = {}) {
         super();
@@ -889,13 +889,13 @@ export class JSONSchemaInput extends LitElement {
         const { validateOnChange, schema, path: fullPath } = this;
 
         // Resolve anyof inside the schema
-        const anyOf = schema.anyOf
+        const anyOf = schema.anyOf;
         if (anyOf) {
-            delete schema.anyOf
+            delete schema.anyOf;
             for (let key in anyOf[0]) {
-                schema[key] = anyOf[0][key]
+                schema[key] = anyOf[0][key];
             }
-                
+
             // schema = {...schema, ...anyOf[0]}
         }
 
@@ -941,19 +941,22 @@ export class JSONSchemaInput extends LitElement {
         };
 
         // Transform to single item if maxItems is 1 OR the array has a fixed lenth
-        if (isArray && (schema.maxItems === 1 || (schema.maxItems && schema.minItems && schema.maxItems === schema.minItems)) && !isTable) {
+        if (
+            isArray &&
+            (schema.maxItems === 1 || (schema.maxItems && schema.minItems && schema.maxItems === schema.minItems)) &&
+            !isTable
+        ) {
             const len = schema.maxItems ?? 1;
             const array = this.value ?? [];
 
             // JSONified arrays will convert undefined to null
-           const jsonify = (value) => value === undefined ? null : value
-           const jsonschemify = (value) => value === null ? undefined : value
+            const jsonify = (value) => (value === undefined ? null : value);
+            const jsonschemify = (value) => (value === null ? undefined : value);
 
-           this.required = false
+            this.required = false;
 
             const inputs = Array.from({ length: len }).map((_, i) => {
-
-                const input =  new JSONSchemaInput({
+                const input = new JSONSchemaInput({
                     value: jsonify(array[i]),
                     schema: {
                         ...schema.items,
@@ -973,10 +976,10 @@ export class JSONSchemaInput extends LitElement {
 
                 array[i] = jsonschemify(array[i]);
 
-                return input
+                return input;
             });
-            
-            return inputs
+
+            return inputs;
         }
 
         if (isArray || canAddProperties) {
@@ -1022,8 +1025,6 @@ export class JSONSchemaInput extends LitElement {
                     },
                 });
 
-
-
                 if (itemSchema.enum) {
                     const search = new Search({
                         options: itemSchema.enum.map((v) => {
@@ -1047,9 +1048,12 @@ export class JSONSchemaInput extends LitElement {
                         },
                     });
 
-                    Object.assign(search.style, { width: "100%"});
-                    
-                    return html`<div style="width: 100%; margin-bottom: 5px;"><div style="margin-bottom: 10px;">${search}</div>${list}</div>`;
+                    Object.assign(search.style, { width: "100%" });
+
+                    return html`<div style="width: 100%; margin-bottom: 5px;">
+                        <div style="margin-bottom: 10px;">${search}</div>
+                        ${list}
+                    </div>`;
                 } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
@@ -1071,7 +1075,6 @@ export class JSONSchemaInput extends LitElement {
                     input.addEventListener("keydown", (ev) => {
                         if (ev.key === "Enter") submitButton.onClick();
                     });
-
 
                     return html`<div style="width: 100%; margin-bottom: 5px;">
                         <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">

@@ -521,10 +521,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
 
-        if 'definitions' not in ecephys_schema:
-            ecephys_schema['definitions'] = ecephys_properties["definitions"]
+        if "definitions" not in ecephys_schema:
+            ecephys_schema["definitions"] = ecephys_properties["definitions"]
 
-        
         defs = ecephys_schema["definitions"]
 
         electrode_def = defs["Electrodes"]
@@ -769,15 +768,13 @@ def get_backend_configuration(info: dict) -> dict:
 
     PROPS_TO_REMOVE = [
         # Immutable
-        "object_id", 
-        "dataset_name", 
-        "location_in_file", 
+        "object_id",
+        "dataset_name",
+        "location_in_file",
         "dtype",
     ]
-    
-    PROPS_TO_IGNORE = [
-        "full_shape"
-    ]
+
+    PROPS_TO_IGNORE = ["full_shape"]
 
     info["overwrite"] = True  # Always overwrite the file
 

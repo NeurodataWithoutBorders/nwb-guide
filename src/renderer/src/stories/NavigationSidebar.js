@@ -11,7 +11,7 @@ function isHTML(str) {
     return Array.from(doc.body.childNodes).some((node) => node.nodeType === 1);
 }
 
-const autoOpenValue = Symbol('SECTION_AUTO_OPEN')
+const autoOpenValue = Symbol("SECTION_AUTO_OPEN");
 
 export class NavigationSidebar extends LitElement {
     static get styles() {
@@ -96,7 +96,6 @@ export class NavigationSidebar extends LitElement {
 
     #toggleDropdown = (sectionName, forcedState) => {
         const hasForce = forcedState !== undefined;
-
 
         //remove hidden from child elements with guided--nav-bar-section-page class
         const children = this.querySelectorAll("[data-section='" + sectionName + "']");

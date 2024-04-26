@@ -14,7 +14,7 @@ export const resolveBackendResults = (schema, results, itemsize) => {
 
 
     // results.buffer_shape = results.chunk_shape.map(() => null); // Provide an unspecified buffer shape for now
-    
+
     // Do not handle compression options or any filter options for now
     if (copy.properties.compression_options) results.compression_options = null;
     if (copy.properties.filter_methods) results.filter_methods = []
@@ -32,9 +32,9 @@ export const resolveBackendResults = (schema, results, itemsize) => {
 }
 
 
-const propertiesToUpdate = [ 
-    'chunk_shape', 
-    // 'buffer_shape' 
+const propertiesToUpdate = [
+    'chunk_shape',
+    // 'buffer_shape'
 ]
 
 // const bufferShapeDescription = (value, itemsize) => {
@@ -50,12 +50,12 @@ const chunkShapeDescription = (value, itemsize) => {
 
 export const updateSchema = (schema, results, itemsize) => {
 
-    const { 
-        chunk_shape, 
-        // buffer_shape, 
-        full_shape 
+    const {
+        chunk_shape,
+        // buffer_shape,
+        full_shape
     } = results;
-    
+
 
     const chunkSchema = schema.properties.chunk_shape;
     const chunkArraySchema = chunkSchema.anyOf?.[0] || chunkSchema;

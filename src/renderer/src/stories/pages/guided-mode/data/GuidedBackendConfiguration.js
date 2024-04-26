@@ -26,7 +26,7 @@ const itemIgnore = {
     full_shape: true,
     buffer_shape: true,
     compression_options: true,
-    filter_options: true
+    filter_options: true,
 };
 
 const backendMap = {
@@ -192,7 +192,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                                     "Recommended maximum chunk size is 20MB. You may want to reduce the size of the chunks.",
                                 type: "warning",
                             });
-
                         // NOTE: Generalize for more axes
                         else if (mbUsage < 10 && value[0] !== input.schema.items.maximum)
                             errors.push({

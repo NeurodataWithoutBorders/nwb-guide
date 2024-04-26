@@ -196,9 +196,7 @@ export class Dashboard extends LitElement {
                 page: this.page,
                 sections,
             });
-        } 
-        
-        else if (header) this.main.header.sections = sections // Update header sections
+        } else if (header) this.main.header.sections = sections; // Update header sections
 
         return sections;
     }
