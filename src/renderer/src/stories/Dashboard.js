@@ -256,7 +256,6 @@ export class Dashboard extends LitElement {
             const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
             if (skipped) {
-                
                 if (isStorybook) return; // Do not skip on storybook
 
                 // Run skip functions
@@ -268,7 +267,6 @@ export class Dashboard extends LitElement {
                 if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
                 else await this.page.onTransition(1);
             }
-
         });
     }
 
@@ -330,10 +328,10 @@ export class Dashboard extends LitElement {
             if (typeof transition === "number") {
                 const info = this.page.info;
                 const sign = Math.sign(transition);
-                if (sign === 1) transition = info.next.info.id 
+                if (sign === 1) transition = info.next.info.id;
                 else if (sign === -1) transition = (info.previous ?? info.parent).info.id; // Default to back in time
             }
-            
+
             this.setAttribute("activePage", transition);
 
             return promise;
