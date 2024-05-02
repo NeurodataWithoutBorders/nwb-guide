@@ -302,7 +302,7 @@ export class GuidedMetadataPage extends ManagedPage {
                         ["Subject", "date_of_birth"],
                     ],
                     link: true,
-                    conditional: true
+                    conditional: true,
                 },
                 {
                     name: "Institutional Info",
@@ -319,7 +319,7 @@ export class GuidedMetadataPage extends ManagedPage {
                         ["Subject", "species"],
                     ],
                     link: true,
-                }
+                },
             ],
 
             // deferLoading: true,

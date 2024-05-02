@@ -1002,7 +1002,7 @@ export class JSONSchemaForm extends LitElement {
             groupEl.classList[warnings.length ? "add" : "remove"]("warning");
         }
 
-        const clearAllErrors = isValid && updatedErrors.length === 0
+        const clearAllErrors = isValid && updatedErrors.length === 0;
         if (clearAllErrors) {
             input.classList.remove("invalid");
 
@@ -1011,7 +1011,6 @@ export class JSONSchemaForm extends LitElement {
             }, localPath);
 
             if (isFunction) valid(); // Run if returned value is a function
-
         } else {
             if (this.validateEmptyValues) {
                 // Add new invalid classes and errors
@@ -1028,28 +1027,24 @@ export class JSONSchemaForm extends LitElement {
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
         }
 
-
-
         // Update link
         if (link) {
             if (checkLinks) {
                 if (!(await this.#isLinkResolved(externalPath))) {
                     errors.push(...warnings); // Move warnings to errors if the element is linked
                     warnings = [];
-                    
+
                     this.#applyToLinkedProperties((path) => {
                         const internalPath = path.slice((this.base ?? []).length);
                         if (internalPath.join("-") === externalPath.join("-")) return;
                         const name = internalPath.slice(-1)[0];
-                        this.triggerValidation(name, internalPath.slice(0, -1), false)
+                        this.triggerValidation(name, internalPath.slice(0, -1), false);
                     }, externalPath);
                 }
             }
         }
 
-        return clearAllErrors
-
-
+        return clearAllErrors;
     };
 
     accordions = {};
