@@ -258,7 +258,7 @@ export class Page extends LitElement {
 
         const { desyncedData } = info.globalState;
 
-        f
+        f;
         return Promise.all(
             sync.map((k) => {
                 if (desyncedData?.[k] !== false) {
