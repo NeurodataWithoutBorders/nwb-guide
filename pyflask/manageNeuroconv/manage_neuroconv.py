@@ -402,7 +402,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         ecephys_properties = ecephys_schema["properties"]
 
         original_electrodes_schema = ecephys_properties["Electrodes"]
-        has_electrodes = 'ElectrodeColumns' in ecephys_properties
+        has_electrodes = "ElectrodeColumns" in ecephys_properties
 
         original_units_schema = ecephys_properties.pop("UnitProperties", None)
         metadata["Ecephys"].pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
@@ -767,7 +767,7 @@ def convert_to_nwb(info: dict) -> str:
             ecephys_metadata["Electrodes"] = [
                 {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
             ]
-            
+
             del ecephys_metadata["ElectrodeColumns"]
 
     # Actually run the conversion

@@ -694,7 +694,7 @@ export class JSONSchemaForm extends LitElement {
             showLabel: true,
         });
 
-        console.log(interactiveInput, info, value)
+        console.log(interactiveInput, info, value);
 
         this.inputs[localPath.join("-")] = interactiveInput;
 

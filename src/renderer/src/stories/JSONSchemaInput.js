@@ -882,7 +882,7 @@ export class JSONSchemaInput extends LitElement {
                 onThrow: this.#onThrow,
             });
 
-            const renderEmpty = custom === null
+            const renderEmpty = custom === null;
             if (renderEmpty) this.classList.add("empty");
             else this.classList.remove("empty");
 
