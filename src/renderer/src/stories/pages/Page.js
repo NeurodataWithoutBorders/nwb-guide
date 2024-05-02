@@ -134,9 +134,10 @@ export class Page extends LitElement {
 
         // Indicate conversion has run successfully
         const { desyncedData } = this.info.globalState;
+        if (!desyncedData) this.info.globalState.desyncedData = { };
+
         if (desyncedData) {
-            delete desyncedData[key];
-            if (Object.keys(desyncedData).length === 0) delete this.info.globalState.desyncedData;
+            desyncedData[key] = false;
             await this.save({}, false);
         }
     }
@@ -255,16 +256,15 @@ export class Page extends LitElement {
         if (!sync) return;
 
         const { desyncedData } = info.globalState;
-        if (desyncedData) {
-            return Promise.all(
-                sync.map((k) => {
-                    if (desyncedData[k]) {
-                        if (k === "conversion") return this.convert();
-                        else if (k === "preview") return this.convert({ preview: true });
-                    }
-                })
-            );
-        }
+
+        return Promise.all(
+            sync.map((k) => {
+                if (desyncedData?.[k] !== false) {
+                    if (k === "conversion") return this.convert();
+                    else if (k === "preview") return this.convert({ preview: true });
+                }
+            })
+        );
     };
 
     updateSections = () => {
