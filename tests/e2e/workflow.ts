@@ -1,4 +1,4 @@
-import { describe, test } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import { sleep } from '../puppeteer'
 
@@ -441,8 +441,18 @@ export default async function runWorkflow(name, workflow, identifier) {
 
   test('View the conversion results', async () => {
     await takeScreenshot(join(identifier, 'conversion-results-page'), 1000)
+
+    const conversionCompleted = await evaluate(() => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      const page = dashboard.page
+      return !!page.info.globalState.conversion
+    })
+
     if (workflow.upload_to_dandi) await toNextPage('upload')
     else await toNextPage('')
+
+    expect(conversionCompleted).toBe(true)
+
   })
 
 
