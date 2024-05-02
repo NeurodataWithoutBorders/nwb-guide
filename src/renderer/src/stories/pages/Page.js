@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import { openProgressSwal, runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
-import { dismissNotification, notify } from "../../dependencies/globals.js";
+import { dismissNotification, isStorybook, notify } from "../../dependencies/globals.js";
 import { randomizeElements, mapSessions, merge } from "./utils.js";
 
 import { ProgressBar } from "../ProgressBar";
@@ -254,9 +254,11 @@ export class Page extends LitElement {
 
     checkSyncState = async (info = this.info, sync = info.sync) => {
         if (!sync) return;
+        if (isStorybook) return;
 
         const { desyncedData } = info.globalState;
 
+        f
         return Promise.all(
             sync.map((k) => {
                 if (desyncedData?.[k] !== false) {
