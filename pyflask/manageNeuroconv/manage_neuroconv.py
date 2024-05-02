@@ -364,13 +364,19 @@ def get_source_schema(interface_class_dict: dict) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def map_interfaces(BaseRecordingExtractorInterface, callback, converter):
+def map_interfaces(callback, converter, to_match=None, parent_name=None):
+    from neuroconv import NWBConverter
 
     output = []
 
     for name, interface in converter.data_interface_objects.items():
-        if isinstance(interface, BaseRecordingExtractorInterface):
-            result = callback(name, interface)
+
+        associated_name = f"{parent_name} — {name}" if parent_name else name
+        if isinstance(interface, NWBConverter):
+            result = map_interfaces(callback, interface, to_match, associated_name)
+            output.extend(result)
+        elif to_match == None or isinstance(interface, to_match):
+            result = callback(associated_name, interface)
             output.append(result)
 
     return output
@@ -513,10 +519,10 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
 
     # Map recording interfaces to metadata
-    map_interfaces(BaseRecordingExtractorInterface, on_recording_interface, converter)
+    map_interfaces(on_recording_interface, converter, BaseRecordingExtractorInterface)
 
     # Map sorting interfaces to metadata
-    map_interfaces(BaseSortingExtractorInterface, on_sorting_interface, converter)
+    map_interfaces(on_sorting_interface, converter, BaseSortingExtractorInterface)
 
     # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
@@ -749,7 +755,10 @@ def convert_to_nwb(info: dict) -> str:
         shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
         for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
-            interface = converter.data_interface_objects[interface_name]
+
+            interface = converter
+            for sub_interface in interface_name.split(" — "):
+                interface = interface.data_interface_objects[sub_interface]
 
             update_recording_properties_from_table_as_json(
                 interface,
