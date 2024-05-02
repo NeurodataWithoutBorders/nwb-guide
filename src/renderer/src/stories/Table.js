@@ -362,7 +362,7 @@ export class Table extends LitElement {
                 if (value && k === instanceThis.keyColumn) {
                     if (value in instanceThis.data && instanceThis.data[value]?.[rowSymbol] !== row) {
                         // Convert previously valid value to unresolved
-                        const previousKey = instanceThis.getRowName(rrow);
+                        const previousKey = instanceThis.getRowName(row);
                         if (previousKey) {
                             unresolved[row] = instanceThis.data[previousKey];
                             delete instanceThis.data[previousKey];

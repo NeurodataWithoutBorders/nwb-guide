@@ -301,7 +301,8 @@ export class GuidedMetadataPage extends ManagedPage {
                         ["Subject", "age"],
                         ["Subject", "date_of_birth"],
                     ],
-                    validate: true,
+                    link: true,
+                    conditional: true
                 },
                 {
                     name: "Institutional Info",
@@ -310,6 +311,15 @@ export class GuidedMetadataPage extends ManagedPage {
                         ["NWBFile", "lab"],
                     ],
                 },
+
+                // For C. Elegans
+                {
+                    properties: [
+                        ["Subject", "sex"],
+                        ["Subject", "species"],
+                    ],
+                    link: true,
+                }
             ],
 
             // deferLoading: true,
