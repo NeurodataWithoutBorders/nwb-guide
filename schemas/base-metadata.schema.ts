@@ -98,7 +98,6 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     // subjectProps.order = ['weight', 'age', 'age__reference', 'date_of_birth', 'genotype', 'strain']
 
-    subjectProps.sex.enum = [ 'M', 'F', 'U', 'O', 'XX', 'XO' ]
     subjectProps.sex.enumLabels = {
         M: 'Male',
         F: 'Female',
