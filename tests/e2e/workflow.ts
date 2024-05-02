@@ -193,23 +193,23 @@ export default async function runWorkflow(name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'pathexpansion-page'))
 
-    // Provide base path for all interfaces
-    await evaluate(({ common }, basePath) => {
-      const dashboard = document.querySelector('nwb-dashboard')
-      const form = dashboard.page.form
+    // // Provide base path for all interfaces
+    // await evaluate(({ common }, basePath) => {
+    //   const dashboard = document.querySelector('nwb-dashboard')
+    //   const form = dashboard.page.form
 
-      Object.entries(common).forEach(([ name, info ]) => {
-        const id = info.id
-        const baseInput = form.getFormElement([id, 'base_directory'])
-        baseInput.updateData(basePath)
-      })
+    //   Object.entries(common).forEach(([ name, info ]) => {
+    //     const id = info.id
+    //     const baseInput = form.getFormElement([id, 'base_directory'])
+    //     baseInput.updateData(basePath)
+    //   })
 
-    },
-      testInterfaceInfo,
-      testDatasetPath
-    )
+    // },
+    //   testInterfaceInfo,
+    //   testDatasetPath
+    // )
 
-    await takeScreenshot(join(identifier, 'pathexpansion-basepath'), 300)
+    // await takeScreenshot(join(identifier, 'pathexpansion-basepath'), 300)
 
 
     const interfaceId = await evaluate(() => {

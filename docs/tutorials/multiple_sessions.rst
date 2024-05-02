@@ -8,7 +8,11 @@ Begin a new conversion on the **Convert** page and provide a name for your pipel
 Workflow Configuration
 ----------------------
 
-On the Workflow page, confirm that this pipeline will be run on multiple sessions. After this, also select that you’d like to locate the source data programmatically and skip dataset publication.
+On the Workflow page for this pipeline, specify that you'd like to:
+1. Run on multiple sessions
+2. Locate the source data programmatically
+   - Also specify that your dataset is located at ``~/NWB_GUIDE/test-data/dataset``, where **~** is the home directory of your system.
+3. Skip dataset publication.
 
 .. figure:: ../assets/tutorials/multiple/workflow-page.png
   :align: center
@@ -35,9 +39,9 @@ While you don’t have to specify format strings for all of the pipeline’s dat
 
 Format strings are specified using two components: the **base directory**, which is the directory to search in, and the **format string path**, where the source data is within that directory.
 
-Given the structure of the tutorial dataset, we’ll select ``~/NWB_GUIDE/test-data/dataset`` as the **base directory**, where **~** is the home directory of your system.
+The base directory has been pre-populated based on your selection on the Workflow page. 
 
-We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the **Autocomplete** button to open a pop-up form that will derive the format string from a single example path.
+To avoid specifying the format string path by hand, we can take advantage of **Autocomplete**. Click the **Autocomplete** button to open a pop-up form that will derive the format string from a single example path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-open.png
   :align: center

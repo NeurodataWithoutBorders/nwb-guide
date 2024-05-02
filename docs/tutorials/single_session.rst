@@ -107,7 +107,7 @@ The Session Start Time in the **General Metadata** section is already specified 
 
 While the **General Metadata** section is complete, take some time to fill out additional information such as the **Institutional Info** box and the **Experimenter** field.
 
-However, we still need to add the Subject information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
+W also need to add the **Subject** information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
 
 .. figure:: ../assets/tutorials/single/metadata-subject-complete.png
   :align: center
@@ -123,9 +123,7 @@ This dataset will also have **Ecephys** metadata extracted from the SpikeGLX sou
   :alt: Ecephys metadata extracted from the SpikeGLX source data
 
 
-Let's leave this as-is and advance to the next page.
-
-The next step generates a preview file and displays real-time progress throughout the conversion process.
+Let's leave this as-is and advance to the next page. This will trigger the conversion of your source data into a preview NWB file.
 
 File Conversion
 ---------------
