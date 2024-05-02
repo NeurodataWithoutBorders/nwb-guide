@@ -134,7 +134,7 @@ export class Page extends LitElement {
 
         // Indicate conversion has run successfully
         const { desyncedData } = this.info.globalState;
-        if (!desyncedData) this.info.globalState.desyncedData = { };
+        if (!desyncedData) this.info.globalState.desyncedData = {};
 
         if (desyncedData) {
             desyncedData[key] = false;
