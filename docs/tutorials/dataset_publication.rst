@@ -14,7 +14,7 @@ Workflow Setup
 --------------
 1. Resume the conversion via the **Convert** page
 
-2. Navigate to the **Workflow** page.
+2. Navigate to the **Workflow** page using the navigation sidebar on the left.
 
    a. Specify that you’d like to publish your data to the :dandi-archive:`DANDI Archive <>`.
 

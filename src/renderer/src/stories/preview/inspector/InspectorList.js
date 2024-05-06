@@ -203,13 +203,10 @@ export class InspectorLegend extends LitElement {
 
     constructor(props) {
         super();
-        console.log(props)
         Object.assign(this, props);
     }
 
     render() {
-
-        console.log(this.multiple)
 
         return html`
             <h4>Legend</h4>
