@@ -4,6 +4,10 @@ import { fs, remote } from "../electron/index";
 import { List } from "./List";
 const { dialog } = remote;
 
+import restartSVG from "../stories/assets/restart.svg?raw";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+
+
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
     if (Array.isArray(type))
         return `${multiple ? "" : "a "}${type
@@ -27,6 +31,7 @@ const componentCSS = css`
 
     :host {
         display: inline-block;
+        position: relative;
         width: 100%;
     }
 
@@ -67,6 +72,14 @@ const componentCSS = css`
 
     :host(.active) button {
         background: rgb(240, 240, 240);
+    }
+
+    .controls {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        cursor: pointer;
+        padding: 0px 5px;
     }
 `;
 
@@ -139,8 +152,10 @@ export class FilesystemSelector extends LitElement {
     #handleFiles = async (pathOrPaths, type) => {
         const resolvedType = type ?? this.type;
 
-        if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
-        else if (!type) this.#checkType(pathOrPaths);
+        if (pathOrPaths) {
+            if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
+            else if (!type) this.#checkType(pathOrPaths);
+        }
 
         let resolvedValue = pathOrPaths;
 
@@ -165,6 +180,8 @@ export class FilesystemSelector extends LitElement {
         if (dialog) {
             const results = await this.#useElectronDialog(type);
             // const path = file.filePath ?? file.filePaths?.[0];
+            const resolved = results.filePath ?? results.filePaths
+            if (!resolved) return; // Cancelled
             this.#handleFiles(results.filePath ?? results.filePaths, type);
         } else {
             let handles = await (
@@ -174,13 +191,13 @@ export class FilesystemSelector extends LitElement {
             ).catch(() => []); // Call using the same options
 
             const result = Array.isArray(handles) ? handles.map(({ name }) => name) : handles.name;
+            if (!result) return; // Cancelled
+
             this.#handleFiles(result, type);
         }
     }
 
     render() {
-        let resolved, isUpdated;
-
         const isMultipleTypes = Array.isArray(this.type);
         this.setAttribute("manytypes", isMultipleTypes);
         const isArray = Array.isArray(this.value);
@@ -252,6 +269,11 @@ export class FilesystemSelector extends LitElement {
                           },
                       })
                     : ""}
+
+                <div class="controls">
+                    ${this.value ? html`<div @click=${() => this.#handleFiles()}>${unsafeSVG(restartSVG)}</div>` : ""}
+                </div>
+
             </div>
             ${isMultipleTypes
                 ? html`<div id="button-div">
