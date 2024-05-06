@@ -144,6 +144,7 @@ const pages = {
                 title: "Conversion Review",
                 label: "Review conversion",
                 section: sections[2],
+                sync: ["conversion"],
             }),
 
             upload: new GuidedUploadPage({
