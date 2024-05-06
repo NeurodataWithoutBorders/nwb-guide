@@ -14,7 +14,7 @@ from urllib.parse import unquote
 
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
-# multiprocessing.freeze_support()
+multiprocessing.freeze_support()
 
 
 from flask import Flask, request, send_from_directory, send_file
