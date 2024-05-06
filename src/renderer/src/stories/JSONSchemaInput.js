@@ -575,14 +575,11 @@ export class JSONSchemaInput extends LitElement {
             const inputElement = this.getElement();
             if (!inputElement) return false;
 
+            const hasList = inputElement.querySelector('nwb-list')
+
             if (inputElement.type === "checkbox") inputElement.checked = value;
-            else if (inputElement.classList.contains("list")) {
-                const list = inputElement.children[0];
-                inputElement.children[0].items = this.#mapToList({
-                    value,
-                    list,
-                }); // NOTE: Make sure this is correct
-            } else if (inputElement instanceof Search) inputElement.shadowRoot.querySelector("input").value = value;
+            else if (hasList) hasList.items = this.#mapToList({ value, hasList }); // NOTE: Make sure this is correct
+            else if (inputElement instanceof Search) inputElement.shadowRoot.querySelector("input").value = value;
             else inputElement.value = value;
         }
 
@@ -1033,9 +1030,6 @@ export class JSONSchemaInput extends LitElement {
 
                 if (table) {
                     this.setAttribute('data-table', '')
-                    setTimeout(() => {
-                        console.log(this)
-                    })
                     return table;
                 }
             }
