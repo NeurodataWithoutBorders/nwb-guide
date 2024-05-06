@@ -501,6 +501,7 @@ export class GuidedPathExpansionPage extends Page {
                             (acc, key) => acc[key],
                             this.form.resolved
                         );
+
                         if (!base_directory) return true; // Do not calculate if base is not found
 
                         const entry = { base_directory };
@@ -527,16 +528,22 @@ export class GuidedPathExpansionPage extends Page {
                             }
                         }
 
+                        if (resolved.length === 0) return [
+                           {
+                                message: html`No source files found using the provided information.`,
+                                type: "warning",
+                            },
+                        ]
+
                         return [
                             {
-                                message: html` <h4 style="margin: 0;">Source Files Found</h4>
+                                message: html`<h4 style="margin: 0;">Source Files Found</h4>
                                     <small>${base_directory}</small>
                                     <small
                                         >${new List({
                                             items: resolved.map((path) => {
                                                 return { value: path };
                                             }),
-                                            emptyMessage: "N/A",
                                             editable: false,
                                         })}</small
                                     >`,
