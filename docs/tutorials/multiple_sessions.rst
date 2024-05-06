@@ -85,20 +85,6 @@ We should also indicate the ``sex`` of each subject since this is a requirement 
   :align: center
   :alt: Complete subject table
 
-.. note::
-    If you're trying to specify metadata that is shared across sessions, you can use the **Global Metadata** feature.
-
-    Pressing the Edit Global Metadata button at the top of the page will show a pop-up form which allows you to provide a
-    single default value for each property, as long as it’s expected not to be unique.
-
-    These values will take effect as soon as the pop-up form has been submitted.
-
-    While Global Metadata is less relevant when we’re working with two subjeccts, this feature can be very powerful when you’re working with tens or even hundreds of subjects in one conversion.
-
-    We recommend using Global Metadata to correct issues caught by the **NWB Inspector** that are seen across several sessions.
-
-    You’ll be able to specify Global Metadata on the Source Data and File Metadata pages as well.
-
 Advance to the next page when you have entered subject metadata for all subjects.
 
 Source Data Information
@@ -121,13 +107,15 @@ Aside from the session manager and global metadata features noted above, the fil
 
   A complete General Metadata form
 
-Acting as global metadata, the information supplied on the subject metadata page has pre-filled the Subject metadata for each session.
+Acting as default metadata, the information supplied on the subject metadata page has pre-filled the Subject metadata for each session.
 
 .. figure:: ../assets/tutorials/multiple/metadata-subject-complete.png
   :align: center
   :alt: Complete Subject metadata form
 
   A complete Subject metadata form
+
+You'll notice that there's an **Edit Default Metadata** button at the top of the page. This feature allows you to specify a single default value for each property that is expected to be the same across all sessions. **Use this button to fill in general metadata for your sessions**, which will save you time and effort while ensuring your files still follow Best Practices.
 
 Finish the rest of the workflow as you would for a single session by completing a full conversion after you review the preview files with the NWB Inspector and Neurosift.
 

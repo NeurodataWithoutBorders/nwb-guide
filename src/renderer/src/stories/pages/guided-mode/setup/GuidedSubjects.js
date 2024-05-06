@@ -24,7 +24,7 @@ export class GuidedSubjectsPage extends Page {
 
     #globalButton = new Button({
         icon: globalIcon,
-        label: "Edit Global Metadata",
+        label: "Edit Default Metadata",
         onClick: () => {
             this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
             this.#globalModal.open = true;

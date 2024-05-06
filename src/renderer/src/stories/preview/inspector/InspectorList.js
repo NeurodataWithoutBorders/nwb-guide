@@ -201,11 +201,16 @@ export class InspectorLegend extends LitElement {
         `;
     }
 
-    constructor() {
+    constructor(props) {
         super();
+        console.log(props)
+        Object.assign(this, props);
     }
 
     render() {
+
+        console.log(this.multiple)
+
         return html`
             <h4>Legend</h4>
             <div>
@@ -223,10 +228,7 @@ export class InspectorLegend extends LitElement {
                         To fix issues specific to a single file, you can edit the <b>file metadata</b> on the previous
                         page.
                     </p>
-                    <p>
-                        To fix issues across many files, you may want to edit the <b>global metadata</b> on the previous
-                        page.
-                    </p>
+                    ${this.multiple === false ? '': html`<p>To fix issues across many files, you may want to edit the <b>default metadata</b> on the previous page.</p>` }
                 </div>
             </div>
         `;
