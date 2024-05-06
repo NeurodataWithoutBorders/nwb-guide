@@ -1,4 +1,4 @@
-import { describe, test } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import { sleep } from '../puppeteer'
 
@@ -410,21 +410,30 @@ export default async function runWorkflow(name, workflow, identifier) {
 
   test('Review NWB Inspector output', async () => {
 
-    await takeScreenshot(join(identifier, 'inspect-page'), 5000) // Finish file inspection and allow full load of Neurosift page
+    await takeScreenshot(join(identifier, 'inspect-page'), 5000) // Allow for the completion of file validation
     await toNextPage('preview')
 
   })
 
   test('Review Neurosift visualization', async () => {
-    await takeScreenshot(join(identifier, 'preview-page'), 1000) // Finish loading Neurosift
+    await takeScreenshot(join(identifier, 'preview-page'), 1000) // Allow full load of Neurosift page
     await toNextPage('conversion')
   })
 
   test('View the conversion results', async () => {
+    await takeScreenshot(join(identifier, 'conversion-results-page'), 1000)
 
-    await takeScreenshot(join(identifier, 'conversion-results-page'), 300)
+    const conversionCompleted = await evaluate(() => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      const page = dashboard.page
+      return !!page.info.globalState.conversion
+    })
+
     if (workflow.upload_to_dandi) await toNextPage('upload')
     else await toNextPage('')
+
+    expect(conversionCompleted).toBe(true)
+
   })
 
 
