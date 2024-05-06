@@ -100,10 +100,10 @@ describe('E2E Test', () => {
 
     describe('Complete a multi-session workflow', async () => {
       const subdirectory = 'multiple'
-      await runWorkflow('Multi Session Workflow', { 
-        upload_to_dandi: false, 
-        multiple_sessions: true, 
-        locate_data: true,  
+      await runWorkflow('Multi Session Workflow', {
+        upload_to_dandi: false,
+        multiple_sessions: true,
+        locate_data: true,
         base_directory: config.testDatasetPath,
       }, subdirectory)
 

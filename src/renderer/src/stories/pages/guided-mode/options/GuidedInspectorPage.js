@@ -106,8 +106,7 @@ export class GuidedInspectorPage extends Page {
         const { globalState } = this.info;
         const { stubs, inspector } = globalState.preview;
 
-        const legendProps = { multiple: this.workflow.multiple_sessions.value }
-
+        const legendProps = { multiple: this.workflow.multiple_sessions.value };
 
         const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";

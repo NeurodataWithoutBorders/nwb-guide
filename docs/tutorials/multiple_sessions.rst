@@ -39,7 +39,7 @@ While you don’t have to specify format strings for all of the pipeline’s dat
 
 Format strings are specified using two components: the **base directory**, which is the directory to search in, and the **format string path**, where the source data is within that directory.
 
-The base directory has been pre-populated based on your selection on the Workflow page. 
+The base directory has been pre-populated based on your selection on the Workflow page.
 
 To avoid specifying the format string path by hand, we can take advantage of **Autocomplete**. Click the **Autocomplete** button to open a pop-up form that will derive the format string from a single example path.
 

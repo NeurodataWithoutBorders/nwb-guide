@@ -315,7 +315,6 @@ export class GuidedPathExpansionPage extends Page {
 
             await this.form.validate();
 
-
             return this.to(1);
         },
     };

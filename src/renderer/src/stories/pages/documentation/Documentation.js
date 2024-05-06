@@ -51,7 +51,7 @@ export class DocumentationPage extends Page {
 
                 <h3 style="padding: 0; margin-top: 25px;">Getting Started</h3>
                 <p>Follow along with our <a target="_blank" href="https://nwb-guide.readthedocs.io/en/latest/tutorials/index.html">tutorials</a> and learn how to create pipelines that convert neurophysiology data to NWB and publish results to the DANDI Archive.</p>
-            
+
                 <p>The NWB GUIDE also provides standalone utilities to <a @click=${(ev) => {
                     ev.preventDefault();
                     this.to("validate");

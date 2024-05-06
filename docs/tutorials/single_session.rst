@@ -143,7 +143,7 @@ Conversion Preview
 ^^^^^^^^^^^^^^^^^^
 On the Conversion Preview, Neurosift allows you to explore the structure of the NWB file and ensure the packaged data matches your expectations.
 
-In particular, take a look at the lefthand metadata table and check that the information provided on the previous pages is present in the NWB file. 
+In particular, take a look at the lefthand metadata table and check that the information provided on the previous pages is present in the NWB file.
 
 .. figure:: ../assets/tutorials/single/preview-page.png
   :align: center
