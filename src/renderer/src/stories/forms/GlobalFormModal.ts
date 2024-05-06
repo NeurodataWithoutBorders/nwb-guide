@@ -62,12 +62,11 @@ export function createFormModal ({
         Object.entries(props).forEach(([key, value]) => {
             if (key === '*') return
             if (value === true) delete obj[key]
-            else removeProperties(obj[key], value, globals)
+            else if (key in obj) removeProperties(obj[key], value, globals)
         })
     }
 
-    if (hasInstances) Object.keys(schemaCopy.properties).forEach(key => removeProperties(schemaCopy.properties[key].properties, propsToRemove[key], propsToRemove["*"]))
-    else removeProperties(schemaCopy.properties, propsToRemove)
+    removeProperties(schemaCopy.properties, propsToRemove)
 
     const globalForm = new JSONSchemaForm({
         validateEmptyValues: null,
