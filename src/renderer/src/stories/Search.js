@@ -182,7 +182,7 @@ export class Search extends LitElement {
                 top: 0;
                 z-index: 1;
             }
-            
+
             .structured-keywords {
                 font-size: 90%;
                 color: dimgrey;

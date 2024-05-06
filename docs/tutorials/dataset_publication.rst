@@ -49,13 +49,13 @@ Provide this for the Staging API Key value on the GUIDE.
   :align: center
   :alt: DANDI staging API key added
 
-Press the **Submit** button to save your API key. This will populate the **Dandiset** input with a list of Dandisets associated with your account, which you can search by title or ID.  
+Press the **Submit** button to save your API key. This will populate the **Dandiset** input with a list of Dandisets associated with your account, which you can search by title or ID.
 
 But what if you don't have any Dandisets to upload to? No problem!
 
 Creating a Dandiset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you don't already have a Dandiset on the Staging server, you can create one directly from the GUIDE. 
+If you don't already have a Dandiset on the Staging server, you can create one directly from the GUIDE.
 
 Press the **Create New Dandiset** button to open a pop-up that guides you through the required fields for Dandiset creation.
 
