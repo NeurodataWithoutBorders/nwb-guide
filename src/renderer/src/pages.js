@@ -147,7 +147,7 @@ const pages = {
             }),
 
             upload: new GuidedUploadPage({
-                title: "DANDI Upload Options",
+                title: "DANDI Upload",
                 label: "Upload to DANDI",
                 section: sections[3],
                 sync: ["conversion"],

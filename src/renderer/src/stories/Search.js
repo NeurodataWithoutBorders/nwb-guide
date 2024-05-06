@@ -172,7 +172,7 @@ export class Search extends LitElement {
             }
 
             .category {
-                padding: 10px 25px;
+                padding: 10px 18px;
                 background: gainsboro;
                 border-top: 1px solid gray;
                 border-bottom: 1px solid gray;
@@ -182,7 +182,7 @@ export class Search extends LitElement {
                 top: 0;
                 z-index: 1;
             }
-
+            
             .structured-keywords {
                 font-size: 90%;
                 color: dimgrey;
