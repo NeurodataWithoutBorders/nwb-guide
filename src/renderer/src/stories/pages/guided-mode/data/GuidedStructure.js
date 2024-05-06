@@ -8,6 +8,7 @@ import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 import { baseUrl } from "../../../../server/globals";
+import { ready } from "../../../../../../../schemas/interfaces.info";
 
 const defaultEmptyMessage = "No formats selected";
 
@@ -116,31 +117,28 @@ export class GuidedStructurePage extends Page {
 
         this.list.emptyMessage = "Loading valid formats...";
 
-        this.search.options = await fetch(`${baseUrl}/neuroconv`)
-            .then((res) => res.json())
-            .then((json) =>
-                Object.entries(json).map(([key, value]) => {
-                    const displayName = key.trim();
+        const interfaceInfo = await ready.interfaces
 
-                    const interfaceName = value.name;
+        this.search.options = Object.entries(interfaceInfo).map(([key, value]) => {
+            const displayName = key.trim();
 
-                    const category = categories.find(({ test }) => test.test(interfaceName))?.value;
+            const interfaceName = value.name;
 
-                    const structuredKeywords = {
-                        suffixes: value.suffixes ?? [],
-                    };
+            const category = categories.find(({ test }) => test.test(interfaceName))?.value;
 
-                    return {
-                        ...value, // Contains label and name already (extra metadata)
-                        key: displayName,
-                        value: interfaceName,
-                        structuredKeywords,
-                        category,
-                        disabled: !supportedInterfaces.includes(interfaceName),
-                    };
-                })
-            )
-            .catch((error) => console.error(error));
+            const structuredKeywords = {
+                suffixes: value.suffixes ?? [],
+            };
+
+            return {
+                ...value, // Contains label and name already (extra metadata)
+                key: displayName,
+                value: interfaceName,
+                structuredKeywords,
+                category,
+                disabled: !supportedInterfaces.includes(interfaceName),
+            };
+        })
 
         this.list.emptyMessage = defaultEmptyMessage;
 
