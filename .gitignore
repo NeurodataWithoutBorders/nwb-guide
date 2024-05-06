@@ -40,3 +40,6 @@ src/build
 
 # Spyder
 .spyproject/
+
+# PyCharm
+.idea/
