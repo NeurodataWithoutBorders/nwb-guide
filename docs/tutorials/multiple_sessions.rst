@@ -8,11 +8,12 @@ Begin a new conversion on the **Convert** page and provide a name for your pipel
 Workflow Configuration
 ----------------------
 
-On the Workflow page for this pipeline, specify that you'd like to:
+Update the Workflow page to indicate that you'll:
+
 1. Run on multiple sessions
 2. Locate the source data programmatically
-   - Also specify that your dataset is located at ``~/NWB_GUIDE/test-data/dataset``, where **~** is the home directory of your system.
-3. Skip dataset publication.
+3. Find source files inside ``~/NWB_GUIDE/test-data/dataset``, where **~** is the home directory of your system.
+4. Skip dataset publication.
 
 .. figure:: ../assets/tutorials/multiple/workflow-page.png
   :align: center
