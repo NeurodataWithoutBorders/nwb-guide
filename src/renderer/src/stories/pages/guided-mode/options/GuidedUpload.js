@@ -35,7 +35,7 @@ export class GuidedUploadPage extends Page {
     };
 
     header = {
-        subtitle: "Settings to upload your conversion to the DANDI Archive",
+        subtitle: "Configure your upload to the DANDI Archive",
         controls: [
             new Button({
                 icon: keyIcon,
