@@ -971,6 +971,9 @@ export class SimpleTable extends LitElement {
 
         return html`
             ${this.#context}
+            <p style="margin: 0; margin-bottom: 10px">
+                <small style="color: gray;">Right click to add or remove rows.</small>
+            </p>
             <div class="table-container">
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                     <thead>
@@ -998,9 +1001,6 @@ export class SimpleTable extends LitElement {
                     </tfoot>
                 </table>
             </div>
-            <p style="margin: 0; margin-top: 10px">
-                <small style="color: gray;">Right click to add or remove rows.</small>
-            </p>
         `;
     }
 }

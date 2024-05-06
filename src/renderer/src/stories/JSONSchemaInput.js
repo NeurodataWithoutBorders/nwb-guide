@@ -366,6 +366,7 @@ export class JSONSchemaInput extends LitElement {
 
             main {
                 display: flex;
+                align-items: center;
             }
 
             #controls {
@@ -455,6 +456,10 @@ export class JSONSchemaInput extends LitElement {
                 color: black;
                 font-weight: 600;
                 font-size: 1.2em !important;
+            }
+
+            :host([data-table]) .guided--form-label {
+                margin-bottom: 0px;
             }
 
             .guided--form-label.centered {
@@ -647,6 +652,15 @@ export class JSONSchemaInput extends LitElement {
 
         const description = this.description ?? schema.description;
 
+
+        const descriptionHTML = description ? html`<p class="guided--text-input-instructions">
+              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
+                  ? ""
+                  : "."}
+          </p>`
+        : ""
+
+
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
                 this.conditional ? "conditional" : ""
@@ -660,17 +674,8 @@ export class JSONSchemaInput extends LitElement {
                           >`
                         : ""
                 }
-                </label>
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
-                ${
-                    description
-                        ? html`<p class="guided--text-input-instructions">
-                              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
-                                  ? ""
-                                  : "."}
-                          </p>`
-                        : ""
-                }
+                ${descriptionHTML}
             </div>
         `;
     }
@@ -862,6 +867,8 @@ export class JSONSchemaInput extends LitElement {
     #render() {
         const { validateOnChange, schema, path: fullPath } = this;
 
+        this.removeAttribute('data-table')
+
         // Do your best to fill in missing schema values
         if (!("type" in schema)) schema.type = this.#getType();
 
@@ -1024,7 +1031,13 @@ export class JSONSchemaInput extends LitElement {
                     onThrow: this.#onThrow,
                 }); // Ensure change propagates
 
-                if (table) return table;
+                if (table) {
+                    this.setAttribute('data-table', '')
+                    setTimeout(() => {
+                        console.log(this)
+                    })
+                    return table;
+                }
             }
 
             const addButton = new Button({
@@ -1231,6 +1244,7 @@ export class JSONSchemaInput extends LitElement {
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                         @keydown=${this.#moveToNextInput}
                     />
+                    <span style="margin-left:10px;">${schema.unit ?? ''}</span>
                     ${isRequiredNumber
                         ? html`<div class="nan-handler"><input
                         type="checkbox"
