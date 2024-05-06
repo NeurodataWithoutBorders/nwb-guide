@@ -1,5 +1,5 @@
 Dataset Publication
-=======================================
+===================
 
 For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
@@ -54,7 +54,7 @@ Press the **Submit** button to save your API key. This will populate the **Dandi
 But what if you don't have any Dandisets to upload to? No problem!
 
 Creating a Dandiset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 If you don't already have a Dandiset on the Staging server, you can create one directly from the GUIDE.
 
 Press the **Create New Dandiset** button to open a pop-up that guides you through the required fields for Dandiset creation.
