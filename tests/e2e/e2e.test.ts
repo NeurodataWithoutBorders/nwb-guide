@@ -144,17 +144,8 @@ describe('E2E Test', () => {
 
         }, { upload_to_dandi: true })
 
-        await toNextPage('structure') // Save data without a popup
         await to('//conversion')
-
-        // Do not prompt to save
-        await evaluate(() => {
-          const dashboard = document.querySelector('nwb-dashboard')
-          const page = dashboard.page
-          page.unsavedUpdates = false
-        })
-
-        await to('//upload') // NOTE: It would be nice to avoid having to re-run the conversion...
+        await to('//upload')
 
       })
 

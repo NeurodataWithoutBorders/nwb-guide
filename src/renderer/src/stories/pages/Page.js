@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import { runConversion } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
-import { dismissNotification, notify } from "../../dependencies/globals.js";
+import { dismissNotification, isStorybook, notify } from "../../dependencies/globals.js";
 import { randomizeElements, mapSessions, merge } from "./utils.js";
 
 import { resolveMetadata } from "./guided-mode/data/utils.js";
@@ -134,9 +134,10 @@ export class Page extends LitElement {
 
         // Indicate conversion has run successfully
         const { desyncedData } = this.info.globalState;
+        if (!desyncedData) this.info.globalState.desyncedData = {};
+
         if (desyncedData) {
-            delete desyncedData[key];
-            if (Object.keys(desyncedData).length === 0) delete this.info.globalState.desyncedData;
+            desyncedData[key] = false;
             await this.save({}, false);
         }
     }
@@ -233,18 +234,18 @@ export class Page extends LitElement {
 
     checkSyncState = async (info = this.info, sync = info.sync) => {
         if (!sync) return;
+        if (isStorybook) return;
 
         const { desyncedData } = info.globalState;
-        if (desyncedData) {
-            return Promise.all(
-                sync.map((k) => {
-                    if (desyncedData[k]) {
-                        if (k === "conversion") return this.convert();
-                        else if (k === "preview") return this.convert({ preview: true });
-                    }
-                })
-            );
-        }
+
+        return Promise.all(
+            sync.map((k) => {
+                if (desyncedData?.[k] !== false) {
+                    if (k === "conversion") return this.convert();
+                    else if (k === "preview") return this.convert({ preview: true });
+                }
+            })
+        );
     };
 
     updateSections = () => {
