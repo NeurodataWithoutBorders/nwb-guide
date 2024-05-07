@@ -28,10 +28,10 @@ jobs:
             label: environments/environment-Linux.yml
 
           - os: macos-latest  # Mac arm64 runner
-            label: environments/environment-MAC-arm64.yml
+            label: environments/environment-MAC-apple.yml
 
           - os: macos-13  # Mac x64 runner
-            label: environments/environment-MAC.yml
+            label: environments/environment-MAC-intel.yml
 
           - os: windows-latest
             label: environments/environment-Windows.yml

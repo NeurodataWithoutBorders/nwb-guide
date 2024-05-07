@@ -36,13 +36,13 @@ Install the appropriate Python dependencies for your operating system.
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC.yml
+    conda env create -f ./environments/environment-MAC-intel.yml
 
 **Mac with arm64 architecture**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-arm64.yml
+    conda env create -f ./environments/environment-MAC-apple.yml
 
 **Linux**
 
