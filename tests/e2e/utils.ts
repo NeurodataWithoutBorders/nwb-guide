@@ -13,9 +13,9 @@ export const initTests = ({ screenshots, data }: { [key: string]: undefined | bo
     if (data !== false && regenerateTestData) {
       if (existsSync(testDataRootPath)) rmSync(testDataRootPath, { recursive: true })
     }
-  
+
     alwaysDelete.forEach(path => existsSync(path) ? rmSync(path, { recursive: true }) : '')
-  
+
     if (screenshots !== false) {
       if (existsSync(screenshotPath)) rmSync(screenshotPath, { recursive: true })
       mkdirSync(screenshotPath, { recursive: true })

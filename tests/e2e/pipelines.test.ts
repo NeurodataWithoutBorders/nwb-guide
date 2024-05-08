@@ -29,7 +29,7 @@ describe('Run tests pipelines', () => {
 
     test('Ensure number of test pipelines starts at zero', async () => {
       const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
-      expect(nPipelines).toBe(0) 
+      expect(nPipelines).toBe(0)
     })
 
     // NOTE: The following code is dependent on the presence of test data on the user's computer
