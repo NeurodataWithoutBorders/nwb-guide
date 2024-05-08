@@ -2,7 +2,6 @@ import { GettingStartedPage } from "./stories/pages/getting-started/GettingStart
 import { DocumentationPage } from "./stories/pages/documentation/Documentation";
 import { ContactPage } from "./stories/pages/contact-us/Contact";
 import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome";
-import { GuidedStartPage } from "./stories/pages/guided-mode/GuidedStart";
 import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/setup/GuidedNewDatasetInfo";
 import { GuidedStructurePage } from "./stories/pages/guided-mode/data/GuidedStructure";
 import { sections } from "./stories/pages/globals";
@@ -10,7 +9,6 @@ import { GuidedSubjectsPage } from "./stories/pages/guided-mode/setup/GuidedSubj
 import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSourceData";
 import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata";
 import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload";
-// import { GuidedConversionOptionsPage } from "./stories/pages/guided-mode/options/GuidedConversionOptions";
 import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./stories/Dashboard";
 import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
@@ -18,8 +16,6 @@ import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedI
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
-import { TutorialPage } from "./stories/pages/tutorial/Tutorial";
-import tutorialIcon from "./stories/assets/exploration.svg?raw";
 import uploadIcon from "./stories/assets/dandi.svg?raw";
 import inspectIcon from "./stories/assets/inspect.svg?raw";
 import neurosiftIcon from "./stories/assets/neurosift-logo.svg?raw";
@@ -30,6 +26,8 @@ import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 import { SettingsPage } from "./stories/pages/settings/SettingsPage";
 import { InspectPage } from "./stories/pages/inspect/InspectPage";
 import { PreviewPage } from "./stories/pages/preview/PreviewPage";
+import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
+import { GuidedDandiResultsPage } from "./stories/pages/guided-mode/results/GuidedDandiResults";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -86,13 +84,15 @@ const pages = {
         label: "Convert",
         icon: guidedIcon,
         pages: {
-            start: new GuidedStartPage({
-                label: "Start",
-            }),
-
             details: new GuidedNewDatasetPage({
                 title: "Project Setup",
                 label: "Project details",
+                section: sections[0],
+            }),
+
+            workflow: new GuidedPreform({
+                title: "Pipeline Workflow",
+                label: "Pipeline workflow",
                 section: sections[0],
             }),
 
@@ -128,28 +128,35 @@ const pages = {
 
             inspect: new GuidedInspectorPage({
                 title: "Inspector Report",
-                label: "Inspect files",
+                label: "Validate metadata",
                 section: sections[2],
                 sync: ["preview"],
             }),
 
             preview: new GuidedStubPreviewPage({
                 title: "Conversion Preview",
-                label: "Preview files",
+                label: "Preview NWB files",
                 section: sections[2],
                 sync: ["preview"],
             }),
 
+            conversion: new GuidedResultsPage({
+                title: "Conversion Review",
+                label: "Review conversion",
+                section: sections[2],
+                sync: ["conversion"],
+            }),
+
             upload: new GuidedUploadPage({
-                title: "DANDI Upload Options",
+                title: "DANDI Upload",
                 label: "Upload to DANDI",
                 section: sections[3],
                 sync: ["conversion"],
             }),
 
-            review: new GuidedResultsPage({
-                title: "Conversion Review",
-                label: "View conversion report",
+            review: new GuidedDandiResultsPage({
+                title: "Upload Review",
+                label: "Review published data",
                 section: sections[3],
             }),
         },
@@ -165,11 +172,6 @@ const pages = {
     uploads: new UploadsPage({
         label: "Upload",
         icon: uploadIcon,
-    }),
-    tutorial: new TutorialPage({
-        label: "Tutorial",
-        icon: tutorialIcon,
-        group: resourcesGroup,
     }),
     docs: new DocumentationPage({
         label: "Documentation",

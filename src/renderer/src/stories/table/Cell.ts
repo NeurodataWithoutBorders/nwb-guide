@@ -4,7 +4,7 @@ import { NestedInputCell } from "./cells/input"
 
 import { TableCellBase } from "./cells/base"
 import { DateTimeCell } from "./cells/date-time"
-
+import { DropdownCell } from "./cells/dropdown"
 
 import { getValue, renderValue } from './convert'
 
@@ -16,10 +16,11 @@ type ValidationResult = {
 
 type ValidationFunction = (value: any) => any | any[]
 
-type OnValidateFunction = (info: ValidationResult) => void
+type OnValidateFunction = (info: ValidationResult, changed?: boolean) => void
 
 type TableCellProps = {
     value: string,
+    editable: boolean,
     info: { col: string }
     ignore: { [key: string]: boolean },
     schema: {[key: string]: any},
@@ -33,6 +34,7 @@ export class TableCell extends LitElement {
 
     declare schema: TableCellProps['schema']
     declare info: TableCellProps['info']
+    declare editable: TableCellProps['editable']
 
     static get styles() {
         return css`
@@ -69,20 +71,21 @@ export class TableCell extends LitElement {
         `
     }
 
-    // static get properties() {
-    //     return {
-    //         value: { reflect: true }
-    //     }
-    // }
+    static get properties() {
+        return {
+            editable: { reflect: true }
+        }
+    }
 
     type = 'text'
 
-    constructor({ info, value, schema, validateOnChange, ignore, onValidate }: TableCellProps) {
+    constructor({ info, value, editable = true, schema, validateOnChange, ignore, onValidate }: TableCellProps) {
         super()
         this.#value = value
 
         this.schema = schema
         this.info = info
+        this.editable = editable
 
         if (validateOnChange) this.validateOnChange = validateOnChange
         if (ignore) this.ignore = ignore
@@ -102,7 +105,9 @@ export class TableCell extends LitElement {
 
     }
 
-    toggle = (v: boolean) => this.input.toggle(v)
+    toggle = (v: boolean) => {
+        if (this.editable) this.input.toggle(v)
+    }
 
     get value() {
         let v = this.input ? this.input.getValue() : this.#value
@@ -110,7 +115,9 @@ export class TableCell extends LitElement {
     }
 
     set value(value) {
-        if (!value) value = []
+
+
+        if (!this.editable && this.interacted === true) return // Don't set value if not editable
 
         if (this.input) this.input.set(renderValue(value, this.schema)) // Allow null to be set directly
         this.#value = this.input
@@ -170,6 +177,8 @@ export class TableCell extends LitElement {
         this.interacted = persistentInteraction
         // this.value = value
 
+        if (!this.editable) return // Don't set value if not editable
+
         if (this.input) this.input.set(value)  // Ensure all operations are undoable
         else this.#value = value // Silently set value if not rendered yet
     }
@@ -210,14 +219,22 @@ export class TableCell extends LitElement {
         else if (this.schema.format === "date-time") {
             cls = DateTimeCell
             this.type = "date-time"
-        } else if (this.schema.type === "object") {
+        }
+
+        else if (this.schema.type === "object") {
             cls = NestedInputCell
             this.type = "table"
+        }
+
+        else if (this.schema.enum) {
+            cls = DropdownCell
+            this.type = "dropdown"
         }
 
         // Only actually rerender if new class type
         if (cls !== this.#cls) {
             this.input = new cls({
+                editable: this.editable,
                 onChange: async (v) => {
                     if (this.input.interacted) this.interacted = true
                     const result = await this.validate()

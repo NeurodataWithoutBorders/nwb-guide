@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "./utils/useGlobalStyles.js";
 
-import { Main } from "./Main.js";
+import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
 import { NavigationSidebar } from "./NavigationSidebar.js";
 
@@ -87,6 +87,9 @@ export class Dashboard extends LitElement {
     pagesById = {};
     page;
 
+    next = () => this.main.next();
+    back = () => this.main.back();
+
     constructor(props = {}) {
         super();
 
@@ -114,12 +117,8 @@ export class Dashboard extends LitElement {
 
         // Handle all pop and push state updates
         const pushState = window.history.pushState;
-        window.history.pushState = function (state) {
-            if (typeof window.onpushstate == "function") window.onpushstate({ state: state });
-            return pushState.apply(window.history, arguments);
-        };
 
-        window.onpushstate = window.onpopstate = (popEvent) => {
+        const pushPopListener = (popEvent) => {
             if (popEvent.state) {
                 const titleString = popEvent.state.title ?? popEvent.state.label;
                 document.title = `${titleString} - ${this.name}`;
@@ -129,6 +128,14 @@ export class Dashboard extends LitElement {
                 this.setMain(page);
             }
         };
+
+        window.history.pushState = function (state) {
+            pushPopListener({ state: state });
+            return pushState.apply(window.history, arguments);
+        };
+
+        window.addEventListener("popstate", pushPopListener);
+        window.addEventListener("pushstate", pushPopListener);
 
         this.#updated();
     }
@@ -154,6 +161,8 @@ export class Dashboard extends LitElement {
 
             while (latest && !this.pagesById[latest]) latest = latest.split("/").slice(0, -1).join("/"); // Trim off last character until you find a page
 
+            // Update sidebar states
+
             this.sidebar.selectItem(latest); // Just highlight the item
             this.sidebar.initialize = false;
             this.#activatePage(latest);
@@ -171,7 +180,30 @@ export class Dashboard extends LitElement {
         else if (typeof page === "object") return this.getPage(Object.values(page)[0]);
     }
 
+    updateSections({ sidebar = true, main = false } = {}, globalState = this.page.info.globalState) {
+        const info = this.page.info;
+        let parent = info.parent;
+
+        if (sidebar) {
+            this.subSidebar.sections = this.#getSections(parent.info.pages, globalState); // Update sidebar items (if changed)
+        }
+
+        const { sections } = this.subSidebar;
+
+        if (main) {
+            if (this.page.header) delete this.page.header.sections; // Ensure sections are updated
+            this.main.set({
+                page: this.page,
+                sections,
+            });
+        }
+
+        return sections;
+    }
+
     setMain(page) {
+        window.getSelection().empty(); // Remove user selection before transitioning
+
         // Update Previous Page
         const info = page.info;
         const previous = this.page;
@@ -199,7 +231,7 @@ export class Dashboard extends LitElement {
         if (isNested) {
             let parent = info.parent;
             while (parent.info.parent) parent = parent.info.parent; // Lock sections to the top-level parent
-            this.subSidebar.sections = this.#getSections(parent.info.pages, toPass.globalState); // Update sidebar items (if changed)
+            this.updateSections({ sidebar: true }, toPass.globalState);
             this.subSidebar.active = info.id; // Update active item (if changed)
             this.sidebar.hide(true);
             this.subSidebar.show();
@@ -210,19 +242,31 @@ export class Dashboard extends LitElement {
 
         this.page.set(toPass, false);
 
-        this.page.checkSyncState().then(() => {
-            this.page.requestUpdate(); // Re-render page
-
+        this.page.checkSyncState().then(async () => {
             const projectName = info.globalState?.project?.name;
 
             this.subSidebar.header = projectName
                 ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
                 : projectName;
 
-            this.main.set({
-                page,
-                sections: this.subSidebar.sections ?? {},
-            });
+            this.updateSections({ sidebar: false, main: true });
+
+            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
+
+            const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
+
+            if (skipped) {
+                if (isStorybook) return; // Do not skip on storybook
+
+                // Run skip functions
+                Object.entries(page.workflow).forEach(([key, state]) => {
+                    if (typeof state.skip === "function") state.skip();
+                });
+
+                // Skip right over the page if configured as such
+                if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
+                else await this.page.onTransition(1);
+            }
         });
     }
 
@@ -255,6 +299,9 @@ export class Dashboard extends LitElement {
                 state.active = false;
                 pageState.active = false;
 
+                // Check if page is skipped based on workflow state (if applicable)
+                pageState.skipped = checkIfPageIsSkipped(page, globalState.project?.workflow);
+
                 if (page.info.pages) this.#getSections(page.info.pages, globalState); // Show all states
 
                 if (!("visited" in pageState)) pageState.visited = false;
@@ -262,8 +309,10 @@ export class Dashboard extends LitElement {
             }
         });
 
-        return globalState.sections;
+        return (globalState.sections = { ...globalState.sections }); // Update global state with new reference (to ensure re-render)
     };
+
+    #transitionPromise = {};
 
     #updated(pages = this.pages) {
         const url = new URL(window.location.href);
@@ -271,15 +320,21 @@ export class Dashboard extends LitElement {
         if (isElectron || isStorybook) active = new URLSearchParams(url.search).get("page");
         if (!active) active = this.activePage; // default to active page
 
-        this.main.onTransition = (transition) => {
+        this.main.onTransition = async (transition) => {
+            const promise = (this.#transitionPromise.value = new Promise(
+                (resolve) => (this.#transitionPromise.trigger = resolve)
+            ));
+
             if (typeof transition === "number") {
                 const info = this.page.info;
                 const sign = Math.sign(transition);
-                if (sign === 1) return this.setAttribute("activePage", info.next.info.id);
-                else if (sign === -1) return this.setAttribute("activePage", (info.previous ?? info.parent).info.id); // Default to back in time
+                if (sign === 1) transition = info.next.info.id;
+                else if (sign === -1) transition = (info.previous ?? info.parent).info.id; // Default to back in time
             }
 
             this.setAttribute("activePage", transition);
+
+            return promise;
         };
 
         this.main.updatePages = () => {

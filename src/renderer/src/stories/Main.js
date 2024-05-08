@@ -3,8 +3,22 @@ import useGlobalStyles from "./utils/useGlobalStyles.js";
 import { GuidedFooter } from "./pages/guided-mode/GuidedFooter";
 import { GuidedCapsules } from "./pages/guided-mode/GuidedCapsules.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
-
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
+export const checkIfPageIsSkipped = (page, workflowValues = {}) => {
+    if (page.workflow) {
+        const workflow = page.workflow;
+        const skipped = Object.entries(workflow).some(([key, state]) => {
+            const value = workflowValues[key];
+            if (state.condition) return state.condition(value) ? state.skip : false;
+            if (!value) return state.skip;
+        });
+
+        return skipped;
+    }
+
+    return false;
+};
 
 const componentCSS = `
     :host {
@@ -48,6 +62,9 @@ export class Main extends LitElement {
     onTransition = () => {}; // user-defined function
     updatePages = () => {}; // user-defined function
 
+    next = () => (this.footer ? this.footer.onNext() : this.toRender.page.to(1));
+    back = () => (this.footer ? this.footer.onBack() : this.toRender.page.to(-1));
+
     #queue = [];
 
     set(toRender) {
@@ -57,7 +74,26 @@ export class Main extends LitElement {
         page.onTransition = this.onTransition;
         page.updatePages = this.updatePages;
 
-        if (this.content) this.toRender = toRender.page ? toRender : { page };
+        // Constrain based on workflow configuration
+        const workflowConfig = page.workflow ?? (page.workflow = {});
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+
+        Object.entries(workflowConfig).forEach(([key, state]) => {
+            workflowConfig[key].value = workflowValues[key];
+
+            const value = workflowValues[key];
+
+            if (state.elements) {
+                const elements = state.elements;
+                if (value) elements.forEach((el) => el.removeAttribute("hidden"));
+                else elements.forEach((el) => el.setAttribute("hidden", true));
+            }
+        });
+
+        page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
+
+        if (this.content)
+            this.toRender = toRender.page ? toRender : { page }; // Ensure re-render in either case
         else this.#queue.push(page);
     }
 
@@ -76,6 +112,20 @@ export class Main extends LitElement {
         section.scrollTop = 0;
     }
 
+    #hasAvailableNextPages = (page) => {
+        const allNext = [];
+        let currentPage = page;
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+        while (currentPage.info.next) {
+            const nextPage = currentPage.info.next;
+            const skipped = checkIfPageIsSkipped(nextPage, workflowValues);
+            if (!skipped) allNext.push(nextPage);
+            currentPage = nextPage;
+        }
+
+        return allNext.length > 0;
+    };
+
     render() {
         let { page = "", sections = {} } = this.toRender ?? {};
 
@@ -92,12 +142,14 @@ export class Main extends LitElement {
             if (info.parent) {
                 if (!("footer" in page)) footer = true; // Allow navigating laterally if there is a next page
 
+                const hasAvailableNextPages = this.#hasAvailableNextPages(page);
+
                 // Go to home screen if there is no next page
-                if (!info.next) {
-                    console.log("setting", info);
+                if (!info.next || !hasAvailableNextPages) {
                     footer = Object.assign(
                         {
                             exit: false,
+                            next: "Exit Pipeline",
                             onNext: () => this.toRender.page.to("/"),
                         },
                         footer && typeof footer === "object" ? footer : {}
@@ -106,7 +158,7 @@ export class Main extends LitElement {
             }
 
             if (footer === true) footer = {};
-            if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Save and Continue";
+            if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Next";
 
             // Default Capsules Behavior
             const section = sections[info.section];
@@ -117,6 +169,7 @@ export class Main extends LitElement {
                     if (pages.length > 1) {
                         const capsulesProps = {
                             n: pages.length,
+                            skipped: pages.map((page) => page.skipped),
                             selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
                         };
 
@@ -126,8 +179,9 @@ export class Main extends LitElement {
                 }
 
                 if (header === true || !("header" in page) || !("sections" in page.header)) {
-                    const sectionNames = Object.keys(sections);
-
+                    const sectionNames = Object.entries(sections)
+                        .filter(([name, info]) => !Object.values(info.pages).every((state) => state.skipped))
+                        .map(([name]) => name);
                     header = page.header && typeof page.header === "object" ? page.header : {};
                     header.sections = sectionNames;
                     header.selected = sectionNames.indexOf(info.section);
@@ -135,9 +189,13 @@ export class Main extends LitElement {
             }
         }
 
-        const headerEl = header ? new GuidedHeader(header) : html`<div></div>`; // Render for grid
+        const headerEl = header ? (this.header = new GuidedHeader(header)) : html`<div></div>`; // Render for grid
+        if (!header) delete this.header; // Reset header
 
-        const footerEl = footer ? new GuidedFooter(footer) : html`<div></div>`; // Render for grid
+        if (!header) delete this.header; // Reset header
+
+        const footerEl = footer ? (this.footer = new GuidedFooter(footer)) : html`<div></div>`; // Render for grid
+        if (!footer) delete this.footer; // Reset footer
 
         const title = header?.title ?? page.info?.title;
 

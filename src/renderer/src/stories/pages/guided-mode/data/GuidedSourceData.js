@@ -42,23 +42,28 @@ export class GuidedSourceDataPage extends ManagedPage {
         merge(this.localState, this.info.globalState);
     };
 
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Source Data",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
+            this.#globalModal.open = true;
+        },
+    });
+
     header = {
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Source Data",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [this.#globalButton],
         subtitle:
             "Specify the file and folder locations on your local system for each interface, as well as any additional details that might be required.",
     };
 
+    workflow = {
+        multiple_sessions: {
+            elements: [this.#globalButton],
+        },
+    };
+
     footer = {
-        next: "Request Metadata Schema",
         onNext: async () => {
             await this.save(); // Save in case the conversion fails
 
@@ -115,7 +120,9 @@ export class GuidedSourceDataPage extends ManagedPage {
                         const [type, ...splitText] = result.message.split(":");
                         const text = splitText.length
                             ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
-                            : `<small><pre>${result.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`;
+                            : result.traceback
+                              ? `<small><pre>${result.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`
+                              : "";
 
                         const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
                         this.notify(message, "error");
@@ -147,11 +154,13 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             await this.save(undefined, false); // Just save new raw values
 
-            this.to(1);
+            return this.to(1);
         },
     };
 
     createForm = ({ subject, session, info }) => {
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
+
         const instanceId = `sub-${subject}/ses-${session}`;
 
         const schema = this.info.globalState.schema.source_data;
@@ -163,9 +172,9 @@ export class GuidedSourceDataPage extends ManagedPage {
             results: info.source_data,
             emptyMessage: "No source data required for this session.",
             ignore: propsToIgnore,
-            globals: this.info.globalState.project.SourceData,
+            globals: hasMultipleSessions ? this.info.globalState.project.SourceData : undefined,
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+                this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
             // onlyRequired: true,
             onUpdate: () => (this.unsavedUpdates = "conversions"),
@@ -212,10 +221,15 @@ export class GuidedSourceDataPage extends ManagedPage {
         if (this.#globalModal) this.#globalModal.remove();
     }
 
+    updated() {
+        const dashboard = document.querySelector("nwb-dashboard");
+        const page = dashboard.page;
+    }
+
     render() {
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
-        this.forms = this.mapSessions(this.createForm, this.localState);
+        this.forms = this.mapSessions(this.createForm, this.localState.results);
 
         let instances = {};
         this.forms.forEach(({ subject, session, form }) => {

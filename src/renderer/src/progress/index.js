@@ -182,13 +182,13 @@ export const get = (name) => {
     );
 };
 
-export function resume(name) {
+export async function resume(name) {
     const global = this ? this.load(name) : get(name);
 
-    let commandToResume = global["page-before-exit"] || "//start";
+    let commandToResume = global["page-before-exit"] || "//details";
     updateURLParams({ project: name });
 
-    if (this) this.onTransition(commandToResume);
+    if (this) await this.onTransition(commandToResume);
 
     return commandToResume;
 }

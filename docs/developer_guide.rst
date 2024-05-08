@@ -24,7 +24,6 @@ Start by cloning the repository
 Install Python Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 Install the appropriate Python dependencies for your operating system.
 
 **Windows**
@@ -37,19 +36,23 @@ Install the appropriate Python dependencies for your operating system.
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC.yml
+    conda env create -f ./environments/environment-MAC-intel.yml
 
 **Mac with arm64 architecture**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-arm64.yml
+    conda env create -f ./environments/environment-MAC-apple-silicon.yml
 
 **Linux**
 
 .. code-block:: bash
 
     conda env create -f ./environments/environment-Linux.yml
+
+
+Activate the Python Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before starting NWB GUIDE, you'll need to ensure that the Python environment is activated.
 
@@ -58,8 +61,8 @@ Before starting NWB GUIDE, you'll need to ensure that the Python environment is 
     conda activate nwb-guide
 
 
-Installing JavaScript Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Install JavaScript Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Next, install all JavaScript dependencies based on the `package-lock.json` file.
 
@@ -76,7 +79,6 @@ You can now run the following command to start the application using Electron.
 .. code-block:: bash
 
     npm start
-
 
 
 Repo Structure

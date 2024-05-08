@@ -52,14 +52,29 @@ export async function createDandiset(results = {}) {
     const content = document.createElement("div");
     Object.assign(content.style, {
         padding: "25px",
-        paddingBottom: "0px",
     });
+
+    const updateNIHInput = (state) => {
+        const nihInput = form.getFormElement(["nih_award_number"]);
+
+        const isEmbargoed = !!state;
+
+        // Show the NIH input if embargo is set
+        if (isEmbargoed) nihInput.removeAttribute("hidden");
+        else nihInput.setAttribute("hidden", "");
+
+        // Make the NIH input required if embargo is set
+        nihInput.required = isEmbargoed;
+    };
 
     const form = new JSONSchemaForm({
         schema: dandiCreateSchema,
         results,
+        validateEmptyValues: false, // Only show errors after submission
         validateOnChange: async (name, parent) => {
             const value = parent[name];
+
+            if (name === "embargo_status") return updateNIHInput(value);
 
             if (name === "nih_award_number") {
                 if (value)
@@ -271,7 +286,7 @@ export class UploadsPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
-                    this.#globalModal.form.results = structuredClone(global.data.DANDI.api_keys);
+                    this.#globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
                     this.#globalModal.open = true;
                 },
             }),
@@ -300,10 +315,13 @@ export class UploadsPage extends Page {
                     return null;
                 }
 
-                merge(apiKeys, global.data.DANDI.api_keys);
+                const globalDandiData = global.data.DANDI ?? (global.data.DANDI = {});
+                if (!globalDandiData.api_keys) globalDandiData.api_keys = {};
+                merge(apiKeys, globalDandiData.api_keys);
+
                 global.save();
                 await regenerateDandisets();
-                const input = this.form.getFormElement(["dandiset "]);
+                const input = this.form.getFormElement(["dandisets"]);
                 input.requestUpdate();
             },
             formProps: {
@@ -330,8 +348,7 @@ export class UploadsPage extends Page {
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
 
-                const files = this.form.resolved.filesystem_paths;
-                await uploadToDandi.call(this, { ...global.data.uploads });
+                const results = await uploadToDandi.call(this, { ...global.data.uploads });
                 global.data.uploads = {};
                 global.save();
 
@@ -340,7 +357,7 @@ export class UploadsPage extends Page {
                 const summary = new DandiResults({
                     id: globalState.dandiset,
                     files: {
-                        subject: files.map((file) => {
+                        subject: results.map((file) => {
                             return { file };
                         }),
                     },
@@ -361,6 +378,7 @@ export class UploadsPage extends Page {
                 return (this.form = new JSONSchemaForm({
                     results: globalState,
                     schema: dandiSchema,
+                    validateEmptyValues: false,
                     controls: {
                         dandiset: [
                             new Button({
@@ -404,7 +422,7 @@ export class UploadsPage extends Page {
 
         // Confirm that one api key exists
         promise.then(() => {
-            const api_keys = global.data.DANDI.api_keys;
+            const api_keys = global.data.DANDI?.api_keys;
             if (!api_keys || !Object.keys(api_keys).length) this.#globalModal.open = true;
         });
 

@@ -187,16 +187,6 @@ export class FilesystemSelector extends LitElement {
 
         const len = isArray ? this.value.length : 0;
 
-        if (isArray) {
-            resolved = this.value.map((str) => str.replaceAll("\\", "/"));
-            isUpdated = JSON.stringify(resolved) !== JSON.stringify(this.value);
-        } else {
-            resolved = typeof this.value === "string" ? this.value.replaceAll("\\", "/") : this.value;
-            isUpdated = resolved !== this.value;
-        }
-
-        if (isUpdated) this.#handleFiles(resolved); // Notify of the change to the separators
-
         const resolvedValueDisplay = isArray
             ? len > 1
                 ? `${this.value[0]} and ${len - 1} other${len > 2 ? "s" : ""}`

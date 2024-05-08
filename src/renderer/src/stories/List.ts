@@ -6,7 +6,8 @@ type ListItemType = {
   key: string,
   content: string,
   value: any,
-  controls: HTMLElement[]
+  controls: HTMLElement[],
+  originalKey?: string
 }
 
 export interface ListProps {
@@ -35,14 +36,14 @@ export class List extends LitElement {
         overflow: auto;
       }
 
-
       #empty {
+        margin: 1rem;
         margin-left: -40px;
         color: gray;
       }
 
       :host([unordered]) #empty {
-        margin: 0;
+        margin-left: calc(1rem - 40px) !important;
       }
 
       li {
@@ -73,12 +74,15 @@ export class List extends LitElement {
         margin: 0px;
       }
 
+      :host([unordered]) ol:has(li) {
+        padding: 0px;
+      }
+
 
       :host([unordered]) ol {
         list-style-type: none;
         display: flex;
         flex-wrap: wrap;
-        padding: 0;
       }
 
       :host([unordered]) ol > li {
@@ -123,7 +127,7 @@ export class List extends LitElement {
 
         unordered: {
           type: Boolean,
-          // reflect: true
+          reflect: true
         },
         emptyMessage: {
           type: String,
@@ -140,22 +144,30 @@ export class List extends LitElement {
       return this.items.map(item => item.value)
     }
 
+    #previousItems = []
     #items: ListItemType[] = []
 
-    set items(value) {
-      const oldList = this.#items
-      this.#items = value.map(item => this.transform ? this.transform(item) ?? item : item)
+    set items(value: ListItemType[] | any[]) {
+
+      const oldList = this.#previousItems
+      const uniform = value.map(item => item && typeof item === 'object' ? item : { value: item })
+      this.#items = uniform.map(item => this.transform ? this.transform(item) ?? item : item)
+      this.#previousItems = this.#items.map(item => ({...item})) // Clone items
       const oldObject = this.object
       this.#updateObject()
 
-      this.onChange({
-        items: this.#items,
-        object: this.object
-      },
-      {
-        items: oldList,
-        object: oldObject
-      })
+      if (this.#initialized) {
+
+        this.onChange({
+          items: this.#items,
+          object: this.object
+        },
+        {
+          items: oldList,
+          object: oldObject
+        })
+      }
+
       this.requestUpdate('items', oldList)
     }
 
@@ -168,6 +180,8 @@ export class List extends LitElement {
     declare unordered: boolean
 
     declare listStyles: any
+
+    #initialized = false
 
     allowDrop = (ev) => ev.preventDefault();
 
@@ -205,7 +219,7 @@ export class List extends LitElement {
       this.items.splice(draggedIdx, 1)
       this.items.splice(i, 0, movedItem)
 
-      this.items = [...this.items]
+      this.items = this.items
     }
 
 
@@ -222,10 +236,13 @@ export class List extends LitElement {
 
       if (props.onChange) this.onChange = props.onChange
 
+      this.#initialized = true
+
     }
 
     add = (item: ListItemType) => {
-      this.items = [...this.items, item]
+      this.items.push({ ...item }) // Update original
+      this.items = this.items
     }
 
     #removePlaceholder = () => {
@@ -235,6 +252,9 @@ export class List extends LitElement {
 
     #renderListItem = (item: ListItemType, i: number) => {
       const { key, value, content = value } = item;
+
+      if (!item.originalKey) item.originalKey = key
+
       const li = document.createElement("li");
       li.id = `item-${i}`;
 
@@ -283,7 +303,7 @@ export class List extends LitElement {
         let i = 0;
         while (resolvedKey in this.object) {
             i++;
-            resolvedKey = `${originalValue}_${i}`;
+            resolvedKey = `${originalValue} (${i})`;
         }
 
         const keyEl = editableElement
@@ -305,15 +325,16 @@ export class List extends LitElement {
         this.object[i] = value;
       }
 
-      if (typeof content === 'string')  {
+      if (content instanceof HTMLElement) li.append(editableElement = content)
+      else if (isObjectContent) {} // Skip other object contents
+
+      // Always attempt render of other items
+      else {
           const valueEl = document.createElement("span");
           if (!key) editableElement = valueEl
           valueEl.innerText = content;
           div.appendChild(valueEl);
       }
-
-      // Skip object contents
-      else if (content instanceof HTMLElement) li.append(editableElement = content)
 
 
 
@@ -352,10 +373,13 @@ export class List extends LitElement {
                   delete this.object[oKey];
                   this.object[newKey] = value;
 
-                  if (!isUnordered) {
+                  if (isUnordered) {
+                    this.items[i].key = newKey
+                  } else {
                     this.items[i].value = newKey
-                    this.items = [...this.items]
                   }
+                  this.items = this.items
+
             }
         };
 
@@ -367,11 +391,13 @@ export class List extends LitElement {
 
     delete = (i: number) => {
       this.items.splice(i, 1)
-      this.items = [...this.items]
+      this.items = this.items
     }
 
     clear = () => {
-      this.items = []
+      // Remove items in original list
+      for (let i = this.items.length - 1; i >= 0; i--) this.items.splice(i, 1)
+      this.items = this.items
     }
 
     #updateObject = () => {
@@ -388,8 +414,8 @@ export class List extends LitElement {
           // Ensure no duplicate keys
           let kI = 0;
           while (resolvedKey in this.object) {
-              i++;
-              resolvedKey = `${key}_${kI}`;
+              kI++;
+              resolvedKey = `${key} (${kI})`;
           }
 
           this.object[resolvedKey] = value
@@ -403,16 +429,13 @@ export class List extends LitElement {
 
     render() {
 
-      this.removeAttribute('unordered')
-      if (this.unordered) this.setAttribute('unordered', '')
-
       this.object = {}
 
       const { items, emptyMessage} = this
 
       return html`
       <ol style=${styleMap(this.listStyles)}>
-        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<li id="empty">${emptyMessage}</li>`}
+        ${(items.length || !emptyMessage) ? items.map(this.#renderListItem) : html`<div id="empty">${emptyMessage}</div>`}
       </ol>`
     }
   }

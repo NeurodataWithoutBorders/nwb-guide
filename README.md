@@ -1,17 +1,28 @@
 <p align="center">
   <img src="src/renderer/assets/img/logo-guide-draft-transparent-tight.png" width="250" alt="NeuroConv logo"/>
   <h3 align="center">NWB Graphical User Interface for Data Entry</h3>
+  <p align="center">
+    <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing.yml/badge.svg" alt="Full Tests"></a>
+    <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing-external.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing-external.yml/badge.svg" alt="Full Tests with External Dependencies"></a>
+      <a href="https://github.com/neurodatawithoutborders/nwb-guide/actions/workflows/pyflask-build-and-dist-tests.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/pyflask-build-and-dist-tests.yml/badge.svg" alt="Build and Distributable Tests"></a>
+    <a href="https://codecov.io/github/NeurodataWithoutBorders/nwb-guide?branch=main"><img src="https://codecov.io/github/NeurodataWithoutBorders/nwb-guide/coverage.svg?branch=main" alt="codecov"></a>
+    <a href="https://nwb-guide.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/nwb-guide/badge/?version=latest" alt="Documentation"></a>
+      <a href="https://github.com/catalystneuro/nwb-guide/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License: MIT"></a>
+  </p>
+  <p align="center">
+     <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-mac.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-mac.yml/badge.svg" alt="Mac Build"></a>
+    <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-win.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/Build-and-deploy-win.yml/badge.svg" alt="Windows Build"></a>
+  </p>
+  <p align="center">
+    <a href="https://github.com/psf/black"><img alt="Python code style: black" src="https://img.shields.io/badge/python_code_style-black-000000.svg"></a>
+    <a href="https://github.com/prettier/prettier"><img alt="JavaScript code style: prettier" src="https://img.shields.io/badge/javascript_code_style-prettier-ff69b4.svg?style=flat"></a>
+  </p>
+  <p align="center">
+      <a href="https://join.slack.com/t/nwb-users/shared_invite/enQtNzMwOTcwNzQ2MDM5LWMyZDUwODJjYjM3MzMzYzZiNDk4ZTU3ZjQ3MmMxMmY5MDUyNzc0ZDI5ZjViYmJjYTQ5NjljOGFjZmMwOGIwZmQ"><img src="https://img.shields.io/badge/chat-Slack-lightblue?style=flat&logo=slack" alt="NWB Slack"></a>
+  </p>
 </p>
-
 
 NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.
-
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=z-rk2wi5BDc" target="_blank">
-  <img src="docs/assets/guide-video-image.png" alt="Watch the video" width="500" />
-  </a>
-</p>
-
 
 ## Installation
 See the installation instructions in our [documentation](https://nwb-guide.readthedocs.io/en/latest/installation.html).

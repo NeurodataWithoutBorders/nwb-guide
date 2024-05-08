@@ -14,6 +14,7 @@
         },
 
         "embargo_status": {
+            "title": "Would you like to embargo this Dandiset?",
             "type": "boolean",
             "description": "Embargoed Dandisets are hidden from public access until a specific time period has elapsed. Uploading data to the DANDI archive under embargo requires a relevant NIH award number, and the data will be automatically published when the embargo period expires.",
             "default": false
@@ -36,15 +37,29 @@
 
         "license": {
             "type": "array",
+            "description": "Provide a set of licenses for this Dandiset. Review the individual licenses and select the one that best fits your needs.",
             "items": {
                 "type": "string",
+                "enumLinks": {
+                    "spdx:CC0-1.0": "https://creativecommons.org/public-domain/cc0/",
+                    "spdx:CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/deed.en"
+                },
+                "enumKeywords": {
+                    "spdx:CC0-1.0": ["No Rights Reserved"],
+                    "spdx:CC-BY-4.0": ["Attribution 4.0 International"]
+                },
+                "enumLabels": {
+                    "spdx:CC0-1.0": "CC0 1.0",
+                    "spdx:CC-BY-4.0": "CC BY 4.0"
+                },
                 "enum": [
                     "spdx:CC0-1.0",
                     "spdx:CC-BY-4.0"
                 ]
             },
+            "maxItems": 1,
             "uniqueItems": true,
-            "description": "Licenses associated with the item. <br><small><b>Note:</b> DANDI only supports a subset of <a href='https://creativecommons.org' target='_blank'>Creative Commons Licenses</a> applicable to datasets</small>"
+            "strict": true
         },
 
         "nih_award_number": {

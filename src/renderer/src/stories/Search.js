@@ -6,6 +6,8 @@ import searchSVG from "./assets/search.svg?raw";
 import tippy from "tippy.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+const ALTERNATIVE_MODES = ["input", "append"];
+
 export class Search extends LitElement {
     constructor({
         value,
@@ -15,6 +17,7 @@ export class Search extends LitElement {
         headerStyles = {},
         disabledLabel,
         onSelect,
+        strict = false,
     } = {}) {
         super();
         this.#value = value;
@@ -23,15 +26,18 @@ export class Search extends LitElement {
         this.disabledLabel = disabledLabel;
         this.listMode = listMode;
         this.headerStyles = headerStyles;
+        this.strict = strict;
         if (onSelect) this.onSelect = onSelect;
 
-        document.addEventListener("click", () => this.submit());
+        // document.addEventListener("click", () => this.#close());
     }
 
-    submit = () => {
-        if (this.listMode === "click" && this.getAttribute("interacted") === "true") {
+    #close = () => {
+        if (this.listMode === "input" && this.getAttribute("interacted") === "true") {
             this.setAttribute("interacted", false);
             this.#onSelect(this.getSelectedOption());
+        } else if (this.listMode !== "list") {
+            this.setAttribute("active", false);
         }
     };
 
@@ -41,10 +47,17 @@ export class Search extends LitElement {
         return value && typeof value === "object";
     }
 
+    #getOption = ({ label, value } = {}) => {
+        return this.options.find((item) => {
+            if (label && item.label === label) return true;
+            if (value && value === item.value) return true;
+        });
+    };
+
     getSelectedOption = () => {
-        const value = (this.shadowRoot.querySelector("input") ?? this).value;
-        const matched = this.options.find((item) => item.label === value);
-        return matched ?? { value };
+        const inputValue = (this.shadowRoot.querySelector("input") ?? this).value;
+        const matched = this.#getOption({ label: inputValue });
+        return matched ?? { value: inputValue };
     };
 
     get value() {
@@ -104,7 +117,8 @@ export class Search extends LitElement {
                 overflow: auto;
             }
 
-            :host([listmode="click"]) ul {
+            :host([listmode="input"]) ul,
+            :host([listmode="append"]) ul {
                 position: absolute;
                 top: 38px;
                 left: 0;
@@ -125,7 +139,18 @@ export class Search extends LitElement {
                 height: 20px;
             }
 
-            :host([listmode="click"]) svg {
+            a {
+                text-decoration: none;
+            }
+
+            a:after {
+                content: "🔗";
+                padding-left: 2px;
+                font-size: 60%;
+            }
+
+            :host([listmode="input"]) svg,
+            :host([listmode="append"]) svg {
                 position: absolute;
                 top: 50%;
                 padding: 0px;
@@ -147,7 +172,7 @@ export class Search extends LitElement {
             }
 
             .category {
-                padding: 10px 25px;
+                padding: 10px 18px;
                 background: gainsboro;
                 border-top: 1px solid gray;
                 border-bottom: 1px solid gray;
@@ -156,6 +181,11 @@ export class Search extends LitElement {
                 position: sticky;
                 top: 0;
                 z-index: 1;
+            }
+
+            .structured-keywords {
+                font-size: 90%;
+                color: dimgrey;
             }
 
             .option:hover {
@@ -197,6 +227,7 @@ export class Search extends LitElement {
             options: { type: Object },
             showAllWhenEmpty: { type: Boolean },
             listMode: { type: String, reflect: true },
+            strict: { type: Boolean, reflect: true },
         };
     }
 
@@ -204,11 +235,17 @@ export class Search extends LitElement {
         const options = this.shadowRoot.querySelectorAll(".option");
         this.#options = Array.from(options).map((option) => {
             const keywordString = option.getAttribute("data-keywords");
-            const keywords = keywordString ? JSON.parse(keywordString) : [];
-            return { option, keywords, label: option.querySelector(".label").innerText };
+            const structuredKeywordString = option.getAttribute("data-structured-keywords");
+
+            const keywords = keywordString ? JSON.parse(option.getAttribute("data-keywords")) : [];
+            const structuredKeywords = structuredKeywordString ? JSON.parse(structuredKeywordString) : {};
+
+            return { option, keywords, structuredKeywords, label: option.querySelector(".label").innerText };
         });
 
         this.#initialize();
+
+        if (!ALTERNATIVE_MODES.includes(this.listMode)) this.#populate();
     }
 
     onSelect = (id, value) => {};
@@ -218,11 +255,21 @@ export class Search extends LitElement {
     };
 
     #onSelect = (option) => {
+        const inputMode = this.listMode === "input";
         const input = this.shadowRoot.querySelector("input");
 
-        if (this.listMode === "click") {
+        const selectedOption = this.#getOption({ value: option.value });
+
+        if (inputMode) this.setAttribute("active", false);
+
+        if (this.strict && !selectedOption) {
+            input.value = this.#value.label;
+            return;
+        }
+
+        if (inputMode) {
+            this.value = selectedOption ?? option;
             input.value = this.#displayValue(option);
-            this.setAttribute("active", false);
             return this.onSelect(option);
         }
 
@@ -246,23 +293,37 @@ export class Search extends LitElement {
 
     #sortedCategories = [];
 
-    #populate = (input) => {
+    getTokens = (input) =>
+        input
+            .replaceAll(/[^\w\s]/g, "")
+            .split(" ")
+            .map((token) => token.trim().toLowerCase())
+            .filter((token) => token);
+
+    #populate = (input = this.value ?? "") => {
         const toShow = [];
 
-        // Check if the input value matches the label
-        this.#options.forEach(({ option, label }, i) => {
-            if (label.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-        });
+        const inputTokens = this.getTokens(input);
 
-        // Check if the input value matches any of the keywords
-        this.#options.forEach(({ option, keywords = [] }, i) => {
-            keywords.forEach((keyword) => {
-                if (keyword.toLowerCase().includes(input.toLowerCase()) && !toShow.includes(i)) toShow.push(i);
-            });
+        // Check if the input value matches the label or any of the keywords
+        this.#options.forEach(({ label, keywords, structuredKeywords }, i) => {
+            const labelTokens = this.getTokens(label);
+            const allKeywords = [...keywords, ...Object.values(structuredKeywords).flat()];
+            const allKeywordTokens = allKeywords.map((keyword) => this.getTokens(keyword)).flat();
+            const allTokens = [...labelTokens, ...allKeywordTokens];
+
+            const result = inputTokens.reduce((acc, token) => {
+                for (let subtoken of allTokens) {
+                    if (subtoken.startsWith(token) && !toShow.includes(i)) return (acc += 1);
+                }
+                return acc;
+            }, 0);
+
+            if (result === inputTokens.length) toShow.push(i);
         });
 
         this.#options.forEach(({ option }, i) => {
-            if (toShow.includes(i)) {
+            if (toShow.includes(i) || !inputTokens.length) {
                 option.removeAttribute("hidden");
             } else {
                 option.setAttribute("hidden", "");
@@ -275,9 +336,11 @@ export class Search extends LitElement {
             else element.removeAttribute("hidden");
         });
 
-        this.setAttribute("active", !!toShow.length);
+        this.setAttribute("active", !!toShow.length || !inputTokens.length);
         this.setAttribute("interacted", true);
     };
+
+    #ignore = false;
 
     render() {
         this.categories = {};
@@ -316,13 +379,23 @@ export class Search extends LitElement {
                     listItemElement.classList.add("option");
                     listItemElement.setAttribute("hidden", "");
                     listItemElement.setAttribute("tabindex", -1);
-                    if (option.keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
+
+                    const { disabled, structuredKeywords, keywords } = option;
+
+                    if (structuredKeywords)
+                        listItemElement.setAttribute(
+                            "data-structured-keywords",
+                            JSON.stringify(option.structuredKeywords)
+                        );
+                    if (keywords) listItemElement.setAttribute("data-keywords", JSON.stringify(option.keywords));
+
                     listItemElement.addEventListener("click", (clickEvent) => {
                         clickEvent.stopPropagation();
+                        if (this.#ignore) return (this.#ignore = false);
                         this.#onSelect(option);
                     });
 
-                    if (option.disabled) listItemElement.setAttribute("disabled", "");
+                    if (disabled) listItemElement.setAttribute("disabled", "");
 
                     const container = document.createElement("div");
 
@@ -330,26 +403,46 @@ export class Search extends LitElement {
                     label.classList.add("label");
                     label.innerText = option.label;
 
-                    const info = document.createElement("span");
+                    if (option.description || option.link) {
+                        const info = option.link ? document.createElement("a") : document.createElement("span");
+                        if (option.link) {
+                            info.setAttribute("data-link", true);
+                            info.href = option.link;
+                            info.target = "_blank";
+                        }
 
-                    if (option.description) {
                         info.innerText = "ℹ️";
                         label.append(info);
 
-                        tippy(info, {
-                            content: `<p>${option.description}</p>`,
-                            allowHTML: true,
-                            placement: "right",
-                        });
+                        if (option.description)
+                            tippy(info, {
+                                content: `<p>${option.description}</p>`,
+                                allowHTML: true,
+                                placement: "right",
+                            });
                     }
 
                     container.appendChild(label);
 
-                    if (option.keywords) {
-                        const keywords = document.createElement("small");
-                        keywords.classList.add("keywords");
-                        keywords.innerText = option.keywords.join(", ");
-                        container.appendChild(keywords);
+                    if (keywords) {
+                        const keywordsElement = document.createElement("small");
+                        keywordsElement.classList.add("keywords");
+                        keywordsElement.innerText = option.keywords.join(", ");
+                        container.appendChild(keywordsElement);
+                    }
+
+                    if (structuredKeywords) {
+                        const div = document.createElement("div");
+                        div.classList.add("structured-keywords");
+
+                        Object.entries(structuredKeywords).forEach(([key, value]) => {
+                            const keywordsElement = document.createElement("small");
+                            const capitalizedKey = key[0].toUpperCase() + key.slice(1);
+                            keywordsElement.innerHTML = `<b>${capitalizedKey}:</b> ${value.join(", ")}`;
+                            div.appendChild(keywordsElement);
+                        });
+
+                        container.appendChild(div);
                     }
 
                     listItemElement.append(container);
@@ -396,7 +489,7 @@ export class Search extends LitElement {
     })}>
       <input placeholder="Type here to search" value=${valueToDisplay} @click=${(clickEvent) => {
           clickEvent.stopPropagation();
-          if (this.listMode === "click") {
+          if (ALTERNATIVE_MODES.includes(this.listMode)) {
               const input = clickEvent.target.value;
               this.#populate(input);
           }
@@ -408,8 +501,16 @@ export class Search extends LitElement {
       }}
 
       @blur=${(blurEvent) => {
-          if (blurEvent.relatedTarget.classList.contains("option")) return;
-          this.submit();
+          const relatedTarget = blurEvent.relatedTarget;
+          if (relatedTarget) {
+              if (relatedTarget.classList.contains("option")) return;
+              if (relatedTarget.hasAttribute("data-link")) {
+                  this.#ignore = true;
+                  return;
+              }
+          }
+
+          this.#close();
       }}
 
       ></input>

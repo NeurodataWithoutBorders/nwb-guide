@@ -6,5 +6,7 @@ export default defineConfig({
     plugins: [ViteYaml()],
     test: {
         environment: "jsdom",
+        setupFiles: ["dotenv/config"],
+        testTimeout: 3 * 60 * 1000,
     },
 });

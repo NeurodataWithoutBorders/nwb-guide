@@ -12,7 +12,7 @@ export class DandiResults extends LitElement {
         `;
     }
 
-    constructor(props) {
+    constructor(props = {}) {
         super();
         Object.assign(this, props);
     }
@@ -91,12 +91,15 @@ export class DandiResults extends LitElement {
                     <ol class="publication"></ol>
 
                     ${this.files
-                        ? html` <h3 style="padding: 0;">Files Uploaded</h3>
+                        ? html` <h3 style="padding: 0;">Updated DANDI Assets</h3>
                               <ol>
                                   ${Object.values(this.files)
                                       .map((item) => Object.values(item))
                                       .flat()
-                                      .map(({ file }) => html`<li>${file}</li>`)}
+                                      .map(({ file }) => {
+                                          const truncated = file.split(this.id)[1].slice(1);
+                                          return html`<li>${truncated}</li>`;
+                                      })}
                               </ol>`
                         : ""}
                     <hr />

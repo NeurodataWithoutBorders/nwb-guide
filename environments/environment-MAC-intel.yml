@@ -9,15 +9,16 @@ dependencies:
   - numcodecs = 0.11.0
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0  # installs jsonschema-specifications
-  - pydantic[email] = 1.10.12  # installs email-validator
   - pip
   - pip:
+      - scipy<1.12.0 # Fix needed for scipy._lib._testutils
       - chardet == 5.1.0
       - configparser == 6.0.0
       - flask == 2.3.2
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
-      - dandi >= 0.58.1
+      - dandi >= 0.60.0
       - pytest == 7.4.0
       - pytest-cov == 4.1.0
+      - scikit-learn == 1.4.0

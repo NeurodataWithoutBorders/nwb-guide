@@ -15,19 +15,23 @@ def resource_path(relative_path):
     return Path(base_path) / relative_path
 
 
+is_test_environment = os.environ.get("VITEST")
+
 path_config = resource_path(
     "paths.config.json"
 )  # NOTE: Must have pyflask for running the GUIDE as a whole, but errors for just the server
 f = path_config.open()
 data = json.load(f)
 GUIDE_ROOT_FOLDER = Path(Path.home(), data["root"])
-STUB_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["preview"])
-CONVERSION_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["conversions"])
-TUTORIAL_SAVE_FOLDER_PATH = Path(Path.home(), data["root"], *data["subfolders"]["tutorial"])
+
+if is_test_environment:
+    GUIDE_ROOT_FOLDER = GUIDE_ROOT_FOLDER / ".test"
+
+STUB_SAVE_FOLDER_PATH = Path(GUIDE_ROOT_FOLDER, *data["subfolders"]["preview"])
+CONVERSION_SAVE_FOLDER_PATH = Path(GUIDE_ROOT_FOLDER, *data["subfolders"]["conversions"])
 
 f.close()
 
 # Create all nested home folders
 STUB_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)
 CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)
-TUTORIAL_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)

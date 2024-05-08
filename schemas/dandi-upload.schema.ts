@@ -42,10 +42,7 @@ onServerOpen(async () => {
 });
 
 // Resolve Dandiset Information Asynchronously
-export const regenerateDandisets = async ({
-    newPromise = true
-} = {}) => {
-    if (newPromise) ready.dandisets = createPromise("dandiset")
+export const regenerateDandisets = async () => {
     delete idSchema.enum
     delete idSchema.enumLabels
     delete idSchema.enumKeywords
@@ -68,11 +65,9 @@ export const updateDandisets = async (main = true) => {
 
     return await getMine({ token, type: staging ? 'staging' : undefined })
         .then((results) => results ? Promise.all(results.map(addDandiset)) : [])
-        .catch(error => {
-            console.error(error)
+        .catch(() => {
             return []
         })
-
 }
 
 export const addDandiset = async (info) => {
@@ -105,7 +100,7 @@ export const addDandiset = async (info) => {
     const enumLabels = `${id} — ${latestVersionInfo.name}`
 
     const isDraft = latestVersionInfo.version === 'draft'
-    const enumCategories = (isDraft ? 'Drafts — ' : '') + (staging ? 'Staging' : 'Main')
+    const enumCategories = (isDraft ? 'Unpublished' : '') + (staging ? `${isDraft ? ` - ` : ''}Staging` : '')
 
     const fullInfo = await info.getInfo({ version: latestVersionInfo.version });
 
@@ -125,6 +120,6 @@ export const addDandiset = async (info) => {
     return idInfo
 }
 
-regenerateDandisets({ newPromise: false })
+regenerateDandisets()
 
 export default schema

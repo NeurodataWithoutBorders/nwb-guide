@@ -35,6 +35,7 @@ export class GuidedStructurePage extends Page {
 
         this.addButton.innerText = "Add Format";
         this.addButton.onClick = () => {
+            this.search.shadowRoot.querySelector("input").focus();
             this.searchModal.toggle(true);
         };
 
@@ -52,10 +53,7 @@ export class GuidedStructurePage extends Page {
         },
     });
 
-    list = new List({
-        emptyMessage: defaultEmptyMessage,
-        onChange: () => (this.unsavedUpdates = "conversions"),
-    });
+    list = new List({ emptyMessage: defaultEmptyMessage });
 
     addButton = new Button();
 
@@ -84,25 +82,32 @@ export class GuidedStructurePage extends Page {
     };
 
     beforeSave = async () => {
-        this.info.globalState.interfaces = { ...this.list.object };
+        const interfaces = (this.info.globalState.interfaces = { ...this.list.object });
 
-        // Remove extra interfaces from results
+        // Remove or reassign extra interfaces in results
         if (this.info.globalState.results) {
             this.mapSessions(({ info }) => {
-                Object.keys(info.source_data).forEach((key) => {
-                    if (!this.info.globalState.interfaces[key]) delete info.source_data[key];
+                const metadata = [info.source_data];
+                metadata.forEach((results) => {
+                    Object.keys(results).forEach((key) => {
+                        if (!interfaces[key]) {
+                            const renamed = this.list.items.find((item) => item.originalKey === key);
+                            if (renamed) results[renamed.key] = results[key];
+                            delete results[key];
+                        }
+                    });
                 });
             });
         }
 
-        await this.save(undefined, false); // Interrim save, in case the schema request fails
+        await this.save(undefined, false); // Interim save, in case the schema request fails
         await this.getSchema();
     };
 
     footer = {
         onNext: async () => {
             if (!this.info.globalState.schema) await this.getSchema(); // Initialize schema
-            this.to(1);
+            return this.to(1);
         },
     };
 
@@ -115,20 +120,31 @@ export class GuidedStructurePage extends Page {
             .then((res) => res.json())
             .then((json) =>
                 Object.entries(json).map(([key, value]) => {
-                    const category = categories.find(({ test }) => test.test(key))?.value;
+                    const displayName = key.trim();
+
+                    const interfaceName = value.name;
+
+                    const category = categories.find(({ test }) => test.test(interfaceName))?.value;
+
+                    const structuredKeywords = {
+                        suffixes: value.suffixes ?? [],
+                    };
 
                     return {
-                        ...value,
-                        key,
-                        value: key,
+                        ...value, // Contains label and name already (extra metadata)
+                        key: displayName,
+                        value: interfaceName,
+                        structuredKeywords,
                         category,
-                        disabled: !supportedInterfaces.includes(key),
-                    }; // Has label and keywords property already
+                        disabled: !supportedInterfaces.includes(interfaceName),
+                    };
                 })
             )
             .catch((error) => console.error(error));
 
         this.list.emptyMessage = defaultEmptyMessage;
+
+        const items = [];
 
         for (const [key, name] of Object.entries(interfaces)) {
             let found = this.search.options?.find((item) => item.value === name);
@@ -142,8 +158,20 @@ export class GuidedStructurePage extends Page {
                 };
             }
 
-            this.list.add({ ...found, key }); // Add previously selected items
+            items.push({ ...found, key });
         }
+
+        const ogList = this.list;
+
+        this.list = new List({
+            items,
+            emptyMessage: defaultEmptyMessage,
+            onChange: () => (this.unsavedUpdates = "conversions"),
+        });
+
+        this.list.style.display = "inline-block";
+
+        ogList.replaceWith(this.list);
 
         this.addButton.removeAttribute("hidden");
         super.updated(); // Call if updating data
@@ -151,8 +179,6 @@ export class GuidedStructurePage extends Page {
 
     render() {
         // Reset list
-        this.list.style.display = "inline-block";
-        this.list.clear();
         this.addButton.setAttribute("hidden", "");
 
         return html`

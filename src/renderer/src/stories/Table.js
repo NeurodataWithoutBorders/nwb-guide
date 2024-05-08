@@ -8,10 +8,18 @@ import { emojiFontFamily } from "./globals";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
+const rowSymbol = Symbol("row");
+
 const maxRows = 20;
 
 const isRequired = (col, schema) => {
     return schema.required?.includes(col);
+};
+
+export const getEditable = (value, rowData = {}, config, colName) => {
+    if (typeof config === "boolean") return config;
+    if (typeof config === "function") return config(value, rowData);
+    return getEditable(value, rowData, config?.[colName] ?? true);
 };
 
 export function sortTable(schema, keyColumn, order) {
@@ -117,6 +125,7 @@ export class Table extends LitElement {
         onThrow,
         contextMenu,
         ignore,
+        groups, // NOTE: All groups must be non-overlapping
     } = {}) {
         super();
         this.schema = schema ?? {};
@@ -126,6 +135,7 @@ export class Table extends LitElement {
         this.validateEmptyCells = validateEmptyCells ?? true;
         this.contextMenu = contextMenu ?? {};
         this.ignore = ignore ?? {};
+        this.groups = groups ?? [];
 
         if (onThrow) this.onThrow = onThrow;
         if (onUpdate) this.onUpdate = onUpdate;
@@ -166,7 +176,7 @@ export class Table extends LitElement {
         });
     }
 
-    #getData(rows = this.rowHeaders, cols = this.colHeaders) {
+    #getData(rows = Object.keys(this.data), cols = this.colHeaders) {
         return rows.map((row, i) => this.#getRowData(row, cols));
     }
 
@@ -211,9 +221,23 @@ export class Table extends LitElement {
 
     set schema(schema) {
         this.#schema = schema;
-        this.#itemSchema = schema.items;
-        this.#itemProps = { ...this.#itemSchema.properties };
+        this.#itemSchema = schema.items ?? {};
+        this.#itemProps = { ...(this.#itemSchema.properties ?? {}) };
     }
+
+    getRowName = (row) =>
+        this.keyColumn ? Object.entries(this.data).find(([k, v]) => v[rowSymbol] === row)?.[0] : row;
+
+    revalidate = (skipped = []) => {
+        this.table.getData().forEach((rowData, i) => {
+            rowData.forEach((value, j) => {
+                const isSkipped = skipped.find(({ row, prop }) => row === i && j === prop);
+                if (!isSkipped) this.table.setDataAtCell(i, j, value);
+            });
+        });
+    };
+
+    #info = {};
 
     updated() {
         const div = (this.shadowRoot ?? this).querySelector("div");
@@ -256,12 +280,14 @@ export class Table extends LitElement {
             if (foundKey) this.keyColumn = foundKey;
         }
 
-        const rowHeaders = (this.rowHeaders = Object.keys(this.data));
+        Object.keys(this.data).forEach((row, i) =>
+            Object.defineProperty(this.data[row], rowSymbol, { value: i, configurable: true })
+        ); // Set initial row trackers
 
         const displayHeaders = [...colHeaders].map(header);
 
         const columns = colHeaders.map((k, i) => {
-            const info = { type: "text" };
+            const info = (this.#info[k] = { type: "text", stopGroupUpdates: {} });
 
             const colInfo = entries[k];
             if (colInfo.unit) displayHeaders[i] = `${displayHeaders[i]} (${colInfo.unit})`;
@@ -293,10 +319,11 @@ export class Table extends LitElement {
 
             const runThisValidator = async (value, row, prop) => {
                 try {
+                    const path = [row, k];
                     const valid = this.validateOnChange
                         ? await this.validateOnChange(
-                              k,
-                              { ...this.data[rowHeaders[row]] }, // Validate on a copy of the parent
+                              path,
+                              { ...this.data[this.getRowName(row)] }, // Validate on a copy of the parent
                               value,
                               info
                           )
@@ -312,6 +339,8 @@ export class Table extends LitElement {
             const required = isRequired(k, this.#itemSchema);
 
             const validator = async function (value, callback) {
+                const row = this.row;
+
                 const validateEmptyCells = instanceThis.validateEmptyCells;
                 const willValidate =
                     validateEmptyCells === true ||
@@ -323,18 +352,26 @@ export class Table extends LitElement {
                 if (!value && !willValidate) {
                     instanceThis.#handleValidationResult(
                         [], // Clear errors
-                        this.row,
+                        row,
                         this.col
                     );
                     callback(true); // Allow empty value
                     return;
                 }
 
-                if (value && k === instanceThis.keyColumn && unresolved[this.row]) {
-                    if (value in instanceThis.data) {
+                if (value && k === instanceThis.keyColumn) {
+                    if (value in instanceThis.data && instanceThis.data[value]?.[rowSymbol] !== row) {
+                        // Convert previously valid value to unresolved
+                        const previousKey = instanceThis.getRowName(rrow);
+                        if (previousKey) {
+                            unresolved[row] = instanceThis.data[previousKey];
+                            delete instanceThis.data[previousKey];
+                        }
+
+                        // Throw error
                         instanceThis.#handleValidationResult(
                             [{ message: `${header(k)} already exists`, type: "error" }],
-                            this.row,
+                            row,
                             this.col
                         );
                         callback(false);
@@ -342,15 +379,17 @@ export class Table extends LitElement {
                     }
                 }
 
-                if (!(await runThisValidator(value, this.row, this.col))) {
+                if (!(await runThisValidator(value, row, this.col))) {
                     callback(false);
                     return;
                 }
 
-                if (!value && required) {
+                const isUndefined = value == "";
+
+                if (isUndefined && required) {
                     instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
-                        this.row,
+                        row,
                         this.col
                     );
                     callback(false);
@@ -421,7 +460,7 @@ export class Table extends LitElement {
 
         const data = this.#getData();
 
-        let nRows = rowHeaders.length;
+        let nRows = Object.keys(data).length;
 
         let contextMenu = ["row_below", "remove_row"];
         if (this.#itemSchema.additionalProperties) contextMenu.push("col_right", "remove_col");
@@ -471,68 +510,100 @@ export class Table extends LitElement {
         if (menu) this.#root.appendChild(menu); // Move to style root
 
         let validated = 0;
-        const initialCellsToUpdate = data.reduce((acc, v) => acc + v.length, 0);
+
+        const initialCellsToUpdate = data.reduce((acc, arr) => acc + arr.length, 0);
 
         table.addHook("afterValidate", (isValid, value, row, prop) => {
-            const isUserUpdate = initialCellsToUpdate <= validated;
+            const header = typeof prop === "number" ? colHeaders[prop] : prop;
+            const info = this.#info[header];
 
-            if (isUserUpdate) {
-                const header = typeof prop === "number" ? colHeaders[prop] : prop;
-                let rowName = this.keyColumn ? rowHeaders[row] : row;
+            // Update other columns in the group
 
-                // NOTE: We would like to allow invalid values to mutate the results
-                // if (isValid) {
-                const isResolved = rowName in this.data;
-                let target = this.data;
+            const skipUpdate = info.stopGroupUpdates[row];
 
-                if (!isResolved) {
-                    if (!this.keyColumn)
-                        this.data[rowName] = {}; // Add new row to array
+            // Decrement counters
+            if (skipUpdate) info.stopGroupUpdates[row]--;
+
+            if (!skipUpdate) {
+                const isUserUpdate = initialCellsToUpdate <= validated;
+
+                let rowName = this.getRowName(row);
+
+                if (isUserUpdate) {
+                    // NOTE: We would like to allow invalid values to mutate the results
+                    // if (isValid) {
+                    const isResolved = rowName in this.data;
+                    let target = this.data;
+
+                    if (!isResolved) {
+                        if (!this.keyColumn)
+                            this.data[rowName] = {}; // Add new row to array
+                        else {
+                            rowName = row;
+                            if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
+                            target = unresolved;
+                        }
+                    }
+
+                    value = this.#getValue(value, entries[header]);
+
+                    // Transfer data to object (if valid)
+                    if (header === this.keyColumn) {
+                        if (isValid && value && value !== rowName) {
+                            const old = target[rowName] ?? {};
+                            this.data[value] = old;
+                            delete target[rowName];
+                            delete unresolved[row];
+                            Object.defineProperty(this.data[value], rowSymbol, { value: row, configurable: true }); // Setting row tracker
+                            this.revalidate([{ row, prop }]);
+                        }
+                    }
+
+                    // Update data on passed object
                     else {
-                        rowName = row;
-                        if (!unresolved[rowName]) unresolved[rowName] = {}; // Ensure row exists
-                        target = unresolved;
-                    }
-                }
+                        const globalValue = this.globals[header];
 
-                value = this.#getValue(value, entries[header]);
+                        if (value == undefined || value === "") {
+                            if (globalValue) {
+                                value = target[rowName][header] = globalValue;
+                                table.setDataAtCell(row, prop, value);
+                                this.onOverride(header, value, rowName);
+                            }
+                            target[rowName][header] = undefined;
+                        } else {
+                            // Correct for expected arrays (copy-paste issue)
+                            if (entries[header]?.type === "array") {
+                                if (value && !Array.isArray(value)) value = value.split(",").map((v) => v.trim());
+                            }
 
-                // Transfer data to object (if valid)
-                if (header === this.keyColumn) {
-                    if (isValid && value && value !== rowName) {
-                        const old = target[rowName] ?? {};
-                        this.data[value] = old;
-                        delete target[rowName];
-                        delete unresolved[row];
-                        rowHeaders[row] = value;
-                    }
-                }
-
-                // Update data on passed object
-                else {
-                    const globalValue = this.globals[header];
-
-                    if (value == undefined || value === "") {
-                        if (globalValue) {
-                            value = target[rowName][header] = globalValue;
-                            table.setDataAtCell(row, prop, value);
-                            this.onOverride(header, value, rowName);
+                            target[rowName][header] = value === globalValue ? undefined : value;
                         }
-                        target[rowName][header] = undefined;
-                    } else {
-                        // Correct for expected arrays (copy-paste issue)
-                        if (entries[header]?.type === "array") {
-                            if (value && !Array.isArray(value)) value = value.split(",").map((v) => v.trim());
-                        }
-
-                        target[rowName][header] = value === globalValue ? undefined : value;
                     }
+
+                    this.onUpdate(rowName, header, value);
                 }
 
-                this.onUpdate(rowName, header, value);
+                validated++;
+
+                // Check associated groups for validity
+                for (let group of this.groups) {
+                    const table = this.table;
+                    if (group.includes(header)) {
+                        const otherGroup = group.filter((col) => col !== header);
+
+                        otherGroup.forEach((col) => {
+                            const j = colHeaders.indexOf(col);
+                            const value = table.getDataAtCell(row, j);
+                            const depInfo = this.#info[col];
+                            const otherGroups = group.filter((c) => c !== col);
+                            depInfo.stopGroupUpdates[row] = otherGroups.length; // Expecting this many updates from other members of the group
+                            table.setDataAtCell(row, j, value);
+                        });
+
+                        return;
+                    }
+                }
             }
-
-            validated++;
 
             if (typeof isValid === "function") isValid();
         });
@@ -548,11 +619,11 @@ export class Table extends LitElement {
         table.addHook("afterRemoveRow", (_, amount, physicalRows) => {
             nRows -= amount;
             physicalRows.map(async (row) => {
-                const rowName = rowHeaders[row];
+                const rowName = this.getRowName(row);
                 // const cols = this.data[rowHeaders[row]]
                 // Object.keys(cols).map(k => cols[k] = '')
-                // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange(k, { ...cols },  cols[k])) // Validate with empty values before removing
-                delete this.data[rowHeaders[row]];
+                // if (this.validateOnChange) Object.keys(cols).map(k => this.validateOnChange([ k ], { ...cols },  cols[k])) // Validate with empty values before removing
+                delete this.data[rowName];
                 delete unresolved[row];
                 this.onUpdate(rowName, null, undefined); // NOTE: Global metadata PR might simply set all data values to undefined
             });
@@ -659,7 +730,7 @@ export class Table extends LitElement {
     render() {
         return html`
             <div></div>
-            <p style="width: 100%; margin: 10px 0px">
+            <p style="width: 100%; margin: 0; margin-top: 10px;">
                 <small id="description" style="color: gray;"></small>
             </p>
         `;

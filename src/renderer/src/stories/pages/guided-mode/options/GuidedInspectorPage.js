@@ -6,16 +6,14 @@ import folderOpenSVG from "../../../assets/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
 import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../preview/NWBFilePreview.js";
-const { shell } = electron;
+const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
 import { run } from "./utils.js";
-import { InspectorList } from "../../../preview/inspector/InspectorList.js";
+import { InspectorList, InspectorLegend } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
-import { path as nodePath } from "../../../../electron";
 import { getMessageType } from "../../../../validation/index.js";
 
-import { InfoBox } from "../../../InfoBox";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
@@ -39,9 +37,11 @@ export class GuidedInspectorPage extends Page {
     constructor(...args) {
         super(...args);
         this.style.height = "100%"; // Fix main section
+
         Object.assign(this.style, {
-            display: "flex",
-            flexDirection: "column",
+            display: "grid",
+            gridTemplateRows: "calc(100% - 120px) 1fr",
+            rowGap: "10px",
         });
     }
 
@@ -63,21 +63,20 @@ export class GuidedInspectorPage extends Page {
             ...this.headerButtons,
             html`<nwb-button
                 size="small"
-                @click=${() =>
-                    shell
-                        ? shell.showItemInFolder(
-                              getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file))
-                          )
-                        : ""}
+                @click=${() => {
+                    if (ipcRenderer)
+                        ipcRenderer.send(
+                            "showItemInFolder",
+                            getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file))
+                        );
+                }}
                 >${unsafeSVG(folderOpenSVG)}</nwb-button
             >`,
         ],
     };
 
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
-    footer = {
-        next: "Preview Files",
-    };
+    footer = {};
 
     getStatus = (list) => {
         return list.reduce((acc, messageInfo) => {
@@ -113,14 +112,7 @@ export class GuidedInspectorPage extends Page {
                 })
             )
             .flat();
-        return html` ${new InfoBox({
-                header: "How do I fix these suggestions?",
-                content: html`We suggest editing the Global Metadata on the <b>previous page</b> to fix any issues
-                    shared across files.`,
-            })}
-
-            <br />
-
+        return html`
             ${until(
                 (async () => {
                     if (fileArr.length <= 1) {
@@ -143,7 +135,13 @@ export class GuidedInspectorPage extends Page {
 
                         const items = this.report.messages;
 
-                        return new InspectorList({ items, emptyMessage });
+                        const list = new InspectorList({ items, emptyMessage });
+
+                        Object.assign(list.style, {
+                            height: "100%",
+                        });
+
+                        return html`${list}${new InspectorLegend()}`;
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
@@ -184,7 +182,8 @@ export class GuidedInspectorPage extends Page {
                     }, {});
 
                     Object.keys(instances).forEach((subLabel) => {
-                        const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                        // const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+                        const subItems = filter(items, { file_path: `${subLabel}_ses-` }); // NOTE: This will not run on web-only now
                         const path = getSharedPath(subItems.map((item) => item.file_path));
                         const filtered = truncateFilePaths(subItems, path);
 
@@ -209,10 +208,11 @@ export class GuidedInspectorPage extends Page {
                         instances: allInstances,
                     });
 
-                    return manager;
+                    return html`${manager}${new InspectorLegend()}`;
                 })(),
                 "Loading inspector report..."
-            )}`;
+            )}
+        `;
     }
 }
 

@@ -5,7 +5,6 @@ import { validateOnChange } from "../../../../validation/index.js";
 import { Table } from "../../../Table.js";
 
 import { updateResultsFromSubjects } from "./utils";
-import { merge } from "../../utils.js";
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 import { Button } from "../../../Button.js";
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
@@ -18,18 +17,35 @@ export class GuidedSubjectsPage extends Page {
         super(...args);
     }
 
+    #addButton = new Button({
+        label: "Add Subject",
+        onClick: () => this.table.table.alter("insert_row_below"),
+    });
+
+    #globalButton = new Button({
+        icon: globalIcon,
+        label: "Edit Global Metadata",
+        onClick: () => {
+            this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
+            this.#globalModal.open = true;
+        },
+    });
+
+    workflow = {
+        multiple_sessions: {
+            elements: [this.#globalButton, this.#addButton],
+        },
+    };
+
     header = {
         subtitle: "Enter all metadata known about each experiment subject",
-        controls: [
-            new Button({
-                icon: globalIcon,
-                label: "Edit Global Metadata",
-                onClick: () => {
-                    this.#globalModal.form.results = structuredClone(this.info.globalState.project.Subject ?? {});
-                    this.#globalModal.open = true;
-                },
-            }),
-        ],
+        controls: [this.#globalButton],
+    };
+
+    workflow = {
+        multiple_sessions: {
+            skip: () => {},
+        },
     };
 
     // Abort save if subject structure is invalid
@@ -41,22 +57,24 @@ export class GuidedSubjectsPage extends Page {
             throw error;
         }
 
-        // Delete old subjects before merging
-        const { subjects: globalSubjects } = this.info.globalState;
+        const localState = this.table.data;
 
-        for (let key in globalSubjects) {
-            if (!this.localState[key]) delete globalSubjects[key];
+        // Create map of original names to new names
+        const nameMap = {};
+        for (let key in this.#originalState) {
+            const renamed = Object.keys(localState).find(
+                (k) => localState[k].identifier === this.#originalState[key].identifier
+            );
+            nameMap[key] = renamed;
         }
 
-        this.info.globalState.subjects = merge(this.localState, globalSubjects); // Merge the local and global states
+        // Remove identifiers
+        for (let key in localState) delete localState[key].identifier;
+
+        // Local state is the source of truth
+        this.info.globalState.subjects = localState;
 
         const { results, subjects } = this.info.globalState;
-
-        // Object.keys(subjects).forEach((sub) => {
-        //     if (!subjects[sub].sessions?.length) {
-        //         delete subjects[sub]
-        //     }
-        // });
 
         const sourceDataObject = Object.keys(this.info.globalState.interfaces).reduce((acc, key) => {
             acc[key] = {};
@@ -64,16 +82,12 @@ export class GuidedSubjectsPage extends Page {
         }, {});
 
         // Modify the results object to track new subjects / sessions
-        updateResultsFromSubjects(results, subjects, sourceDataObject); // NOTE: This directly mutates the results object
+        updateResultsFromSubjects(results, subjects, sourceDataObject, nameMap); // NOTE: This directly mutates the results object
     };
 
-    footer = {
-        next: "Generate Data Structure",
-    };
+    footer = {};
 
     updated() {
-        const add = this.query("#addButton");
-        add.onclick = () => this.table.table.alter("insert_row_below");
         super.updated(); // Call if updating data
     }
 
@@ -87,7 +101,7 @@ export class GuidedSubjectsPage extends Page {
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Global Subject Metadata",
             key: "Subject",
-            validateEmptyValues: false,
+            validateEmptyValues: null,
             schema,
             formProps: {
                 validateOnChange: (localPath, parent, path) => {
@@ -103,7 +117,11 @@ export class GuidedSubjectsPage extends Page {
         if (this.#globalModal) this.#globalModal.remove();
     }
 
+    #originalState = {};
+
     render() {
+        const hasMultipleSessions = this.workflow.multiple_sessions.value;
+
         const subjects = (this.localState = structuredClone(this.info.globalState.subjects ?? {}));
 
         // Ensure all the proper subjects are in the global state
@@ -112,10 +130,17 @@ export class GuidedSubjectsPage extends Page {
         toRemove.forEach((sub) => delete subjects[sub]);
         toHave.forEach((sub) => (subjects[sub] = subjects[sub] ?? {}));
 
+        this.#originalState = structuredClone(subjects);
+
         for (let subject in subjects) {
             const sessions = Object.keys(this.info.globalState.results[subject]);
             subjects[subject].sessions = sessions;
+            subjects[subject].identifier = this.#originalState[subject].identifier = Symbol("subject"); // Add identifier to subject
         }
+
+        const contextMenuConfig = { ignore: ["row_below"] };
+
+        if (!hasMultipleSessions) contextMenuConfig.ignore.push("remove_row");
 
         this.table = new Table({
             schema: {
@@ -123,21 +148,28 @@ export class GuidedSubjectsPage extends Page {
                 items: getSubjectSchema(),
             },
             data: subjects,
-            globals: this.info.globalState.project.Subject,
+            globals: hasMultipleSessions ? this.info.globalState.project.Subject : undefined,
             keyColumn: "subject_id",
             validateEmptyCells: ["subject_id", "sessions"],
-            contextMenu: {
-                ignore: ["row_below"],
-            },
+            contextMenu: contextMenuConfig,
+            groups: [
+                [
+                    "sex",
+                    "species",
+                    // 'age'
+                ], // Validate both when one is changed
+            ],
             onThrow: (message, type) => this.notify(message, type),
             onOverride: (name) => {
-                this.notify(`<b>${header(name)}</b> has been overriden with a global value.`, "warning", 3000);
+                this.notify(`<b>${header(name)}</b> has been overridden with a global value.`, "warning", 3000);
             },
             onUpdate: () => {
                 this.unsavedUpdates = "conversions";
             },
-            validateOnChange: (localPath, parent, v) => {
-                if (localPath.slice(-1)[0] === "sessions") {
+            validateOnChange: function (localPath, parent, v) {
+                const name = localPath[localPath.length - 1];
+
+                if (name === "sessions") {
                     if (v?.length) return true;
                     else {
                         return [
@@ -149,7 +181,7 @@ export class GuidedSubjectsPage extends Page {
                     }
                 } else {
                     delete parent.sessions; // Delete sessions from parent copy
-                    return validateOnChange(localPath, parent, ["Subject"], v);
+                    return validateOnChange.call(this, name, parent, ["Subject", ...localPath.slice(0, -1)], v);
                 }
             },
         });
@@ -157,7 +189,7 @@ export class GuidedSubjectsPage extends Page {
         return html`
             <div style="display: flex; justify-content: center; flex-wrap: wrap;">
                 <div style="width: 100%;">${this.table}</div>
-                <nwb-button id="addButton">Add Subject</nwb-button>
+                ${this.#addButton}
             </div>
         `;
     }

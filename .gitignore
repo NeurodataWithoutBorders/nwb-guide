@@ -1,6 +1,7 @@
 *.[oa]
 *~
 
+_build
 dist
 out
 tests/screenshots
@@ -36,3 +37,6 @@ src/build
 .env
 .env.local
 .env.production
+
+# Spyder
+.spyproject/

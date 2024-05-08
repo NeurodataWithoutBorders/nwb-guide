@@ -230,6 +230,11 @@ function initialize() {
       return { action: 'deny' };
     });
 
+    globals.mainWindow.webContents.on('will-prevent-unload', () => {
+        return true // Avoid page refresh on Appzi feedback form submission
+    });
+
+
     // globals.mainWindow.webContents.once("dom-ready", () => {
     //   if (updatechecked == false) {
     //     autoUpdater.checkForUpdatesAndNotify();
@@ -263,20 +268,32 @@ function initialize() {
 
     const win = globals.mainWindow = new BrowserWindow(windowOptions);
 
-    // Avoid CORS for Dandiset creation
+    // Avoid CORS (for all requests) for Dandiset creation
     win.webContents.session.webRequest.onBeforeSendHeaders(
       (details, callback) => {
-        callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
+        callback({ requestHeaders: {
+          Origin: '*',
+          Referer: "http://localhost:5174/", // Spoof the referrer
+          ...details.requestHeaders
+        } });
       },
     );
 
+    const accessControlHeader = 'Access-Control-Allow-Origin'
+
     win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-      callback({
+
+      const accessHeader = [accessControlHeader, accessControlHeader.toLowerCase()].find(key => details.responseHeaders?.[key]) ?? accessControlHeader
+      const origins = details.responseHeaders?.[accessHeader] ?? []
+      if (origins.includes("*")) return callback(details)
+
+      return callback({
         responseHeaders: {
-          'Access-Control-Allow-Origin': ['*'],
+          [accessHeader]: ['*'],
           ...details.responseHeaders,
         },
       });
+
     });
 
 
@@ -404,8 +421,6 @@ const guidedProgressFilePath = path.join(appDirectory, ...paths.subfolders.progr
 const guidedConversionFolderPath = path.join(appDirectory, ...paths.subfolders.conversions);
 const guidedStubFolderPath = path.join(appDirectory, ...paths.subfolders.preview);
 
-if (runByTestSuite && fs.existsSync(appDirectory)) fs.rmSync(appDirectory, { recursive: true }) // Clear the test directory if it exists
-
 function getEntries(path, type = 'isDirectory') {
   if (!fs.existsSync(path)) return []
   return fs.readdirSync(path, { withFileTypes: true })
@@ -470,6 +485,10 @@ ipcMain.on("resize-window", (event, dir) => {
     y = y - 1;
   }
   globals.mainWindow.setSize(x, y);
+});
+
+ipcMain.on('showItemInFolder', function(event, fullPath) {
+  shell.showItemInFolder(fullPath);
 });
 
 // autoUpdater.on("update-available", () => {

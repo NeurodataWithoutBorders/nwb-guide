@@ -70,7 +70,7 @@ export function createFormModal ({
     else removeProperties(schemaCopy.properties, propsToRemove)
 
     const globalForm = new JSONSchemaForm({
-        validateEmptyValues: false,
+        validateEmptyValues: null,
         schema: schemaCopy,
         emptyMessage: "No properties to edit globally.",
         onThrow,
@@ -82,7 +82,7 @@ export function createFormModal ({
     content.style.padding = "25px"
 
     const saveButton = new Button({
-        label: "Update",
+        label: "Submit",
         primary: true,
         onClick: async () => {
             await globalForm.validate()

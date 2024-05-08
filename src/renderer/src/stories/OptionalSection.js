@@ -15,8 +15,7 @@ export class OptionalSection extends LitElement {
             }
 
             .optional-section__toggle {
-                margin: 10px 0px;
-                margin-bottom: 20px;
+                margin-bottom: 5px;
             }
 
             .optional-section__content {
@@ -31,35 +30,38 @@ export class OptionalSection extends LitElement {
 
     attributeChangedCallback(...args) {
         super.attributeChangedCallback(...args);
-        if (args[0] === "state") this.requestUpdate();
+        if (args[0] === "value") this.requestUpdate();
     }
 
     changed;
 
-    constructor(props) {
+    constructor(props = {}) {
         super();
         this.header = props.header ?? "";
         this.description = props.description ?? "";
         this.content = props.content ?? "";
         this.altContent = props.altContent ?? "";
-        this.state = props.state;
+        this.value = props.value;
+        this.size = props.size;
+        this.color = props.color;
 
         if (props.onChange) this.onChange = props.onChange;
+        if (props.onSelect) this.onSelect = props.onSelect;
+
+        this.addEventListener("change", () => this.onChange(this.value));
     }
 
     onChange = () => {}; // User-defined function
+    onSelect = () => {}; // User-defined function
 
-    show(state) {
-        this.toggled = true;
+    #show = (state) => {
         const content = this.shadowRoot.querySelector(".optional-section__content");
         const altContent = this.shadowRoot.querySelector("#altContent");
 
-        if (this.changed === undefined) this.changed = false;
-        else this.changed = true;
+        this.yes.primary = !!state;
+        this.no.primary = !state;
 
         if (state === undefined) state = !content.classList.contains("hidden");
-        else if (this.changed && this.hidden === state) this.onChange();
-
         if (state) {
             content.removeAttribute("hidden");
             altContent.setAttribute("hidden", true);
@@ -67,35 +69,43 @@ export class OptionalSection extends LitElement {
             content.setAttribute("hidden", true);
             altContent.removeAttribute("hidden");
         }
+    };
+
+    show(state) {
+        this.toggled = true;
+        this.#show(state);
+        this.value = state;
+        this.onSelect(state);
+        const event = new Event("change"); // Create a new change event
+        this.dispatchEvent(event);
     }
 
     yes = new Button({
         label: "Yes",
         color: "green",
-        onClick: () => {
-            this.show(true);
-            this.yes.primary = true;
-            this.no.primary = false;
-        },
+        onClick: () => this.show(true),
     });
 
     no = new Button({
         label: "No",
         color: "red",
-        onClick: () => {
-            this.show(false);
-            this.yes.primary = false;
-            this.no.primary = true;
-        },
+        onClick: () => this.show(false),
     });
 
     updated() {
-        if (this.state === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
-        else if (this.state) this.yes.onClick();
-        else this.no.onClick();
+        if (this.value === undefined) this.shadowRoot.querySelector(".optional-section__content").hidden = true;
+        else this.#show(this.value);
     }
 
     render() {
+        this.yes.size = this.size;
+        this.no.size = this.size;
+
+        if (this.color) {
+            this.yes.color = this.color;
+            this.no.color = this.color;
+        }
+
         return html`
             <div class="optional-section__header">
                 ${this.header ? html`<h2>${this.header}</h2>` : ""}

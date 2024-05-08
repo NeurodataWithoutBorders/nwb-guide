@@ -63,7 +63,7 @@ export class GuidedFormPage extends Page {
         onNext: async () => {
             await this.save(); // Save in case validation fails
             await this.form.validate(); // Validate the results of the form
-            this.to(1);
+            return this.to(1);
         },
     };
 

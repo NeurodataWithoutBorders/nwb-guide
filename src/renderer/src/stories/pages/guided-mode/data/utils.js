@@ -24,15 +24,19 @@ export const getInfoFromId = (key) => {
     return { subject, session };
 };
 
-export function resolveGlobalOverrides(subject, globalState) {
-    const subjectMetadataCopy = { ...globalState.subjects[subject] };
+export function resolveGlobalOverrides(subject, globalState, resolveMultiSessionOverrides = true) {
+    const subjectMetadataCopy = { ...(globalState.subjects?.[subject] ?? {}) };
     delete subjectMetadataCopy.sessions; // Remove extra key from metadata
 
-    const overrides = structuredClone(globalState.project ?? {}); // Copy project-wide metadata
+    if (resolveMultiSessionOverrides) {
+        const overrides = structuredClone(globalState.project ?? {}); // Copy project-wide metadata
 
-    merge(subjectMetadataCopy, overrides.Subject ?? (overrides.Subject = {})); // Ensure Subject exists
+        merge(subjectMetadataCopy, overrides.Subject ?? (overrides.Subject = {})); // Ensure Subject exists
 
-    return overrides;
+        return overrides;
+    }
+
+    return { Subject: subjectMetadataCopy };
 }
 
 const isPatternResult = Symbol("ispatternresult");
@@ -60,7 +64,7 @@ export function drillSchemaProperties(schema = {}, callback, target, path = [], 
         const info = patternProperties[regexp];
         const updatedPath = [...path, regexp];
         callback(updatedPath, info, undefined, true);
-        drillSchemaProperties(info, callback, undefined, updatedPath, true);
+        drillSchemaProperties(info, callback, undefined, updatedPath, true, schema);
     }
 
     for (let name in properties) {
@@ -70,7 +74,7 @@ export function drillSchemaProperties(schema = {}, callback, target, path = [], 
 
         const updatedPath = [...path, name];
 
-        callback(updatedPath, info, target);
+        callback(updatedPath, info, target, undefined, schema);
 
         drillSchemaProperties(info, callback, target?.[name], updatedPath, inPatternProperties);
     }
@@ -83,12 +87,6 @@ export function resolveProperties(properties = {}, target, globals = {}) {
 
     for (let name in properties) {
         const info = properties[name];
-
-        // NEUROCONV PATCH: Correct for incorrect array schema
-        if (info.properties && info.type === "array") {
-            info.items = { type: "object", properties: info.properties, required: info.required };
-            delete info.properties;
-        }
 
         const props = info.properties;
 

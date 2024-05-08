@@ -12,7 +12,7 @@
     margin-top: 0px !important;
 }
 
-/*  Notfy */
+/*  Notyf */
 .notyf__toast {
     max-width: 40vw !important;
 }
@@ -51,6 +51,10 @@ body {
     height: 100%;
     display: flex;
     overflow: hidden; /* Dashboard without scroll behavior */
+}
+
+small {
+    font-size: 12.5px !important;
 }
 
 a {

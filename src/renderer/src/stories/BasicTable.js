@@ -1,8 +1,8 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, unsafeCSS } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { header } from "./forms/utils";
 import { checkStatus } from "../validation";
-import { errorHue, warningHue } from "./globals";
+import { emojiFontFamily, errorHue, warningHue } from "./globals";
 
 import * as promises from "../promises";
 
@@ -38,6 +38,11 @@ export class BasicTable extends LitElement {
                 position: relative;
                 overflow: auto;
                 max-height: 400px;
+                border: 1px solid gray;
+            }
+
+            table tr:first-child td {
+                border-top: 0px;
             }
 
             table {
@@ -52,7 +57,8 @@ export class BasicTable extends LitElement {
             }
 
             th {
-                border: 1px solid silver;
+                border-right: 1px solid gray;
+                border-bottom: 1px solid gray;
                 color: #222;
                 font-weight: 400;
                 text-align: center;
@@ -65,6 +71,12 @@ export class BasicTable extends LitElement {
                 user-select: none;
             }
 
+            .relative .info {
+                margin: 0px 5px;
+                font-size: 80%;
+                font-family: ${unsafeCSS(emojiFontFamily)};
+            }
+
             th span {
                 display: inline-block;
             }
@@ -74,7 +86,9 @@ export class BasicTable extends LitElement {
             }
 
             td {
-                border: 1px solid gainsboro;
+                border: 1px solid gray;
+                border-left: none;
+                border-bottom: none;
                 background: white;
                 user-select: none;
             }
@@ -115,20 +129,27 @@ export class BasicTable extends LitElement {
         validateOnChange,
         onStatusChange,
         onLoaded,
+        onUpdate,
+        editable = true,
+        truncated = false,
     } = {}) {
         super();
         this.name = name ?? "data_table";
         this.schema = schema ?? {};
         this.data = data ?? [];
         this.keyColumn = keyColumn;
-        this.maxHeight = maxHeight ?? "";
+        this.maxHeight = maxHeight ?? "unset";
         this.validateEmptyCells = validateEmptyCells ?? true;
 
         this.ignore = ignore ?? {};
 
         if (validateOnChange) this.validateOnChange = validateOnChange;
+        if (onUpdate) this.onUpdate = onUpdate;
         if (onStatusChange) this.onStatusChange = onStatusChange;
         if (onLoaded) this.onLoaded = onLoaded;
+
+        this.truncated = truncated;
+        this.editable = editable && !truncated;
     }
 
     #schema = {};
@@ -139,10 +160,10 @@ export class BasicTable extends LitElement {
         return this.#schema;
     }
 
-    set schema(schema) {
+    set schema(schema = {}) {
         this.#schema = schema;
-        this.#itemSchema = schema.items;
-        this.#itemProps = { ...this.#itemSchema.properties };
+        this.#itemSchema = schema.items ?? {};
+        this.#itemProps = { ...(this.#itemSchema.properties ?? {}) };
     }
 
     #rendered;
@@ -158,9 +179,29 @@ export class BasicTable extends LitElement {
         return html`<div class="relative"><span>${header(str)}</span></div>`;
     };
 
-    #renderHeader = (str, { description }) => {
-        if (description) return html`<th title="${description}">${this.#renderHeaderContent(str)}</th>`;
-        return html`<th>${this.#renderHeaderContent(str)}</th>`;
+    #renderHeader = (prop, { description, title = prop } = {}) => {
+        const th = document.createElement("th");
+
+        const required = this.#itemSchema.required ? this.#itemSchema.required.includes(prop) : false;
+        const container = document.createElement("div");
+        container.classList.add("relative");
+        const span = document.createElement("span");
+        span.innerHTML = header(title);
+        if (required) span.setAttribute("required", "");
+        container.appendChild(span);
+
+        // Add Description Tooltip
+        if (description) {
+            const span = document.createElement("span");
+            span.classList.add("info");
+            span.innerText = "ℹ️";
+            container.append(span);
+            tippy(span, { content: `${description[0].toUpperCase() + description.slice(1)}`, allowHTML: true });
+        }
+
+        th.appendChild(container);
+
+        return th;
     };
 
     #getRowData(row, cols = this.colHeaders) {
@@ -169,13 +210,12 @@ export class BasicTable extends LitElement {
             let value;
             if (col === this.keyColumn) {
                 if (hasRow) value = row;
-                else return "";
+                else return;
             } else
                 value =
                     (hasRow ? this.data[row][col] : undefined) ??
                     // this.globals[col] ??
-                    this.#itemSchema.properties[col].default ??
-                    "";
+                    this.#itemSchema.properties[col]?.default;
             return value;
         });
     }
@@ -210,43 +250,54 @@ export class BasicTable extends LitElement {
     onStatusChange = () => {};
     onLoaded = () => {};
 
-    #validateCell = (value, col, parent) => {
+    #getType = (value, { type, data_type } = {}) => {
+        let inferred = typeof value;
+        if (Array.isArray(value)) inferred = "array";
+        if (value == undefined) inferred = "null";
+
+        const original = type || data_type;
+        let resolved = original;
+
+        // Handle based on JSON Schema types
+        if (type) {
+            if (resolved === "integer") resolved = "number"; // Map to javascript type
+        } else if (data_type) {
+            if (resolved.includes("array")) resolved = "array";
+            if (resolved.includes("int") || resolved.includes("float")) resolved = "number";
+            if (resolved.startsWith("bool")) resolved = "boolean";
+            if (resolved.startsWith("str")) resolved = "string";
+        }
+
+        return {
+            type: resolved,
+            original,
+            inferred,
+        };
+    };
+
+    #validateCell = (value, col, row, parent) => {
         if (!value && !this.validateEmptyCells) return true; // Empty cells are valid
         if (!this.validateOnChange) return true;
 
         let result;
 
         const propInfo = this.#itemProps[col] ?? {};
-        let thisTypeOf = typeof value;
-        let ogType;
-        let type = (ogType = propInfo.type || propInfo.data_type);
 
-        // Handle based on JSON Schema types
-        if ("type" in propInfo) {
-            // Map to javascript type
-            if (type === "integer") type = "number";
+        let { type, original, inferred } = this.#getType(value, propInfo);
 
-            // Convert to json schema type
-            if (Array.isArray(value)) thisTypeOf = "array";
-            if (value == undefined) thisTypeOf = "null";
-        } else if ("data_type" in propInfo) {
-            if (type.includes("array")) type = "array";
-            if (type.includes("int") || type.includes("float")) type = "number";
-            if (type.startsWith("bool")) type = "boolean";
-            if (type.startsWith("str")) type = "string";
-        }
+        const isUndefined = value === undefined || value === "";
 
         // Check if required
-        if (!value && "required" in this.#itemSchema.required.includes(col))
+        if (isUndefined && "required" in this.#itemSchema && this.#itemSchema.required.includes(col))
             result = [{ message: `${col} is a required property`, type: "error" }];
-        // If not required, check matching types for values that are defined
-        else if (value !== "" && thisTypeOf !== type)
-            result = [{ message: `${col} is expected to be of type ${ogType}, not ${thisTypeOf}`, type: "error" }];
+        // If not required, check matching types (if provided) for values that are defined
+        else if (!isUndefined && type && inferred !== type)
+            result = [{ message: `${col} is expected to be of type ${original}, not ${inferred}`, type: "error" }];
         // Otherwise validate using the specified onChange function
-        else result = this.validateOnChange(col, parent, value, this.#itemProps[col]);
+        else result = this.validateOnChange([row, col], parent, value, this.#itemProps[col]);
 
         // Will run synchronously if not a promise result
-        return promises.resolve(result, () => {
+        return promises.resolve(result, (result) => {
             let info = {
                 title: undefined,
                 warning: undefined,
@@ -277,7 +328,7 @@ export class BasicTable extends LitElement {
 
         const results = this.#data.map((v, i) => {
             return v.map((vv, j) => {
-                const info = this.#validateCell(vv, this.colHeaders[j], { ...this.data[rows[i]] }); // Could be a promise or a basic response
+                const info = this.#validateCell(vv, this.colHeaders[j], i, { ...this.data[rows[i]] }); // Could be a promise or a basic response
                 return promises.resolve(info, (info) => {
                     if (info === true) return;
                     const td = this.shadowRoot.getElementById(`i${i}_j${j}`);
@@ -333,10 +384,11 @@ export class BasicTable extends LitElement {
     };
 
     #readTSV(text) {
+        console.log(text, text.split("\n"));
         let data = text.split("\n").map((row) =>
             row.split("\t").map((v) => {
                 try {
-                    return JSON.parse(v);
+                    return eval(v);
                 } catch {
                     return v.trim();
                 }
@@ -353,22 +405,33 @@ export class BasicTable extends LitElement {
         );
 
         Object.keys(this.data).forEach((row) => delete this.data[row]); // Delete all previous rows
+
         Object.keys(data).forEach((row) => {
             const cols = structuredData[row];
             const latest = (this.data[this.keyColumn ? cols[this.keyColumn] : row] = {});
-            Object.entries(cols).forEach(([key, value]) => (key in this.#itemProps ? (latest[key] = value) : "")); // Only include data from schema
+            Object.entries(cols).forEach(([key, value]) => {
+                // if (key in this.#itemProps) {
+                const { type } = this.#getType(value, this.#itemProps[key]);
+                if (type === "string") {
+                    if (value === undefined) value = "";
+                    else value = `${value}`; // Convert to string if necessary
+                }
+                latest[key] = value;
+                // }
+            }); // Only include data from schema
         });
 
-        this.onUpdate(null, null, value); // Update the whole table
+        if (this.onUpdate) this.onUpdate([], data); // Update the whole table
     }
 
     // Render Code
     render() {
         this.#updateRendered();
 
+        this.schema = this.schema; // Always update the schema
         const entries = this.#itemProps;
-        for (let key in this.ignore) delete entries[key];
-        for (let key in this.ignore["*"] ?? {}) delete entries[key];
+
+        if (this.truncated) this.data = this.data.slice(0, 5); // Limit to 5 rows when truncated
 
         // Add existing additional properties to the entries variable if necessary
         if (this.#itemSchema.additionalProperties) {
@@ -383,6 +446,10 @@ export class BasicTable extends LitElement {
                 return acc;
             }, entries);
         }
+
+        // Ignore any additions in the ignore configuration
+        for (let key in this.ignore) delete entries[key];
+        for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
         // Sort Columns by Key Column and Requirement
         const keys =
@@ -406,6 +473,8 @@ export class BasicTable extends LitElement {
 
         const data = (this.#data = this.#getData());
 
+        const description = this.#schema.description;
+
         return html`
             <div class="table-container">
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
@@ -418,52 +487,64 @@ export class BasicTable extends LitElement {
                         ${data.map(
                             (row, i) =>
                                 html`<tr>
-                                    ${row.map((col, j) => html`<td id="i${i}_j${j}"><div>${col}</div></td>`)}
+                                    ${row.map(
+                                        (col, j) => html`<td id="i${i}_j${j}"><div>${JSON.stringify(col)}</div></td>`
+                                    )}
                                 </tr>`
                         )}
                     </tbody>
                 </table>
             </div>
-            <div id="buttons">
-                <nwb-button
-                    primary
-                    size="small"
-                    @click=${() => {
-                        const input = document.createElement("input");
-                        input.type = "file";
-                        input.accept = "text/tab-separated-values";
-                        input.click();
-                        input.onchange = () => {
-                            const file = input.files[0];
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                                this.#readTSV(reader.result);
-                                this.requestUpdate();
-                            };
-                            reader.readAsText(file);
-                        };
-                    }}
-                    >Upload TSV File</nwb-button
-                >
-                <nwb-button
-                    size="small"
-                    @click=${() => {
-                        const tsv = this.#getTSV();
+            ${this.editable
+                ? html`<div id="buttons">
+                      <nwb-button
+                          primary
+                          size="small"
+                          @click=${() => {
+                              const input = document.createElement("input");
+                              input.type = "file";
+                              input.accept = "text/tab-separated-values";
+                              input.click();
+                              input.onchange = () => {
+                                  const file = input.files[0];
+                                  const reader = new FileReader();
+                                  reader.onload = () => {
+                                      this.#readTSV(reader.result);
+                                      this.requestUpdate();
+                                  };
+                                  reader.readAsText(file);
+                              };
+                          }}
+                          >Upload TSV File</nwb-button
+                      >
+                      <nwb-button
+                          size="small"
+                          @click=${() => {
+                              const tsv = this.#getTSV();
 
-                        const element = document.createElement("a");
-                        element.setAttribute(
-                            "href",
-                            "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
-                        );
-                        element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
-                        element.style.display = "none";
-                        document.body.appendChild(element);
-                        element.click();
-                        document.body.removeChild(element);
-                    }}
-                    >Download TSV File</nwb-button
-                >
-            </div>
+                              const element = document.createElement("a");
+                              element.setAttribute(
+                                  "href",
+                                  "data:text/tab-separated-values;charset=utf-8," + encodeURIComponent(tsv)
+                              );
+                              element.setAttribute("download", `${this.name.split(" ").join("_")}.tsv`);
+                              element.style.display = "none";
+                              document.body.appendChild(element);
+                              element.click();
+                              document.body.removeChild(element);
+                          }}
+                          >Download TSV File</nwb-button
+                      >
+                  </div>`
+                : ""}
+            ${this.truncated
+                ? html`<p style="margin: 0; width: 100%; text-align: center; font-size: 150%;">...</p>`
+                : ""}
+            ${description
+                ? html`<p style="margin: 0; margin-top: 10px">
+                      <small style="color: gray;">${description}</small>
+                  </p>`
+                : ""}
         `;
     }
 }

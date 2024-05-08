@@ -14,6 +14,10 @@ import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
 import { merge } from "./pages/utils";
+import { OptionalSection } from "./OptionalSection";
+import { InspectorListItem } from "./preview/inspector/InspectorList";
+
+const isDevelopment = !!import.meta.env;
 
 const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
 
@@ -30,6 +34,7 @@ function resolveDateTime(value) {
 export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const name = fullPath.slice(-1)[0];
     const path = fullPath.slice(0, -1);
+    const relativePath = this.form?.base ? fullPath.slice(this.form.base.length) : fullPath;
 
     const schema = this.schema;
     const validateOnChange = this.validateOnChange;
@@ -227,6 +232,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         };
 
         const table = this.renderTable(id, tableMetadata, fullPath);
+
         return table; // Try rendering as a nested table with a fake property key (otherwise use nested forms)
     };
 
@@ -248,7 +254,6 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     }
 
     const nestedIgnore = getIgnore(ignore, fullPath);
-
     Object.assign(nestedIgnore, overrides.ignore ?? {});
 
     merge(overrides.ignore, nestedIgnore);
@@ -263,10 +268,10 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
         ignore: nestedIgnore, // According to schema
 
         onUpdate: function () {
-            return onUpdate.call(this, fullPath, this.data); // Update all table data
+            return onUpdate.call(this, relativePath, this.data); // Update all table data
         },
 
-        validateOnChange: (...args) => commonValidationFunction(fullPath, ...args),
+        validateOnChange: (...args) => commonValidationFunction(relativePath, ...args),
 
         ...commonTableMetadata,
     };
@@ -288,7 +293,7 @@ export const isEditableObject = (schema, value) =>
 export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);
 
-export const getEditableItems = (value, pattern, { name, schema } = {}) => {
+export const getEditableItems = (value = {}, pattern, { name, schema } = {}) => {
     let items = Object.entries(value);
 
     const allowAdditionalProperties = isAdditionalProperties(pattern);
@@ -351,18 +356,16 @@ export class JSONSchemaInput extends LitElement {
                 box-sizing: border-box;
             }
 
-            :host {
-                margin-top: 1.45rem;
-                display: block;
-            }
-
             :host(.invalid) .guided--input {
                 background: rgb(255, 229, 228) !important;
             }
 
+            jsonschema-input {
+                width: 100%;
+            }
+
             main {
                 display: flex;
-                margin-top: 0.5rem;
             }
 
             #controls {
@@ -424,7 +427,7 @@ export class JSONSchemaInput extends LitElement {
                 width: 100%;
                 padding-top: 4px;
                 color: dimgray !important;
-                margin: 0 0 1em;
+                margin: 0 0;
                 line-height: 1.4285em;
             }
 
@@ -448,6 +451,7 @@ export class JSONSchemaInput extends LitElement {
                 display: block;
                 width: 100%;
                 margin: 0;
+                margin-bottom: 10px;
                 color: black;
                 font-weight: 600;
                 font-size: 1.2em !important;
@@ -489,7 +493,34 @@ export class JSONSchemaInput extends LitElement {
         return {
             schema: { type: Object, reflect: false },
             validateEmptyValue: { type: Boolean, reflect: true },
+            required: { type: Boolean, reflect: true },
         };
+    }
+
+    // Enforce dynamic required properties
+    attributeChangedCallback(key, _, latest) {
+        super.attributeChangedCallback(...arguments);
+
+        const formSchema = this.form?.schema;
+        if (!formSchema) return;
+
+        if (key === "required") {
+            const name = this.path.slice(-1)[0];
+
+            if (latest !== null && !this.conditional) {
+                const requirements = formSchema.required ?? (formSchema.required = []);
+                if (!requirements.includes(name)) requirements.push(name);
+            }
+
+            // Remove requirement from form schema (and force if conditional requirement)
+            else {
+                const requirements = formSchema.required;
+                if (requirements && requirements.includes(name)) {
+                    const idx = requirements.indexOf(name);
+                    if (idx > -1) requirements.splice(idx, 1);
+                }
+            }
+        }
     }
 
     // schema,
@@ -498,14 +529,37 @@ export class JSONSchemaInput extends LitElement {
     // form,
     // pattern
     // showLabel
+    // description
     controls = [];
-    required = false;
+    // required;
     validateOnChange = true;
 
-    constructor(props) {
+    constructor(props = {}) {
         super();
         Object.assign(this, props);
+        if (props.validateEmptyValue === false) this.validateEmptyValue = true; // False is treated as required but not triggered if empty
     }
+
+    // Print the default value of the schema if not caught
+    onUncaughtSchema = (schema) => {
+        // In development, show uncaught schemas
+        if (!isDevelopment) {
+            if (this.form) {
+                const inputContainer = this.form.shadowRoot.querySelector(`#${this.path.slice(-1)[0]}`);
+                inputContainer.style.display = "none";
+            }
+        }
+
+        if (schema.default) return `<pre>${JSON.stringify(schema.default, null, 2)}</pre>`;
+
+        const error = new InspectorListItem({
+            message:
+                "<h3 style='margin: 0'>Internal GUIDE Error</h3><span>Cannot render this property because of a misformatted schema.</span>",
+        });
+        error.style.width = "100%";
+
+        return error;
+    };
 
     // onUpdate = () => {}
     // onValidate = () => {}
@@ -514,6 +568,8 @@ export class JSONSchemaInput extends LitElement {
         if (!forceValidate) {
             // Update the actual input element
             const inputElement = this.getElement();
+            if (!inputElement) return false;
+
             if (inputElement.type === "checkbox") inputElement.checked = value;
             else if (inputElement.classList.contains("list")) {
                 const list = inputElement.children[0];
@@ -573,7 +629,7 @@ export class JSONSchemaInput extends LitElement {
         return this.onValidate
             ? this.onValidate()
             : this.form?.triggerValidation
-              ? this.form.triggerValidation(name, path, this)
+              ? this.form.triggerValidation(name, path, undefined, this)
               : "";
     };
 
@@ -588,6 +644,8 @@ export class JSONSchemaInput extends LitElement {
         const input = this.#render();
 
         if (input === null) return null; // Hide rendering
+
+        const description = this.description ?? schema.description;
 
         return html`
             <div class="${this.required || this.conditional ? "required" : ""} ${
@@ -604,16 +662,15 @@ export class JSONSchemaInput extends LitElement {
                 }
                 </label>
                 <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
-                <p class="guided--text-input-instructions">
-                    ${
-                        schema.description
-                            ? html`${unsafeHTML(capitalize(schema.description))}${schema.description.slice(-1)[0] ===
-                              "."
+                ${
+                    description
+                        ? html`<p class="guided--text-input-instructions">
+                              ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0])
                                   ? ""
-                                  : "."}`
-                            : ""
-                    }
-                </p>
+                                  : "."}
+                          </p>`
+                        : ""
+                }
             </div>
         `;
     }
@@ -639,14 +696,13 @@ export class JSONSchemaInput extends LitElement {
                         new Button({
                             label: "Edit",
                             size: "small",
-                            onClick: () => {
+                            onClick: () =>
                                 this.#createModal({
                                     key,
                                     schema: isAdditionalProperties(this.pattern) ? undefined : schema,
                                     results: value,
                                     list: list ?? this.#list,
-                                });
-                            },
+                                }),
                         }),
                     ],
                 };
@@ -659,15 +715,14 @@ export class JSONSchemaInput extends LitElement {
                   })
                 : [];
         }
-
-        return items;
     }
 
-    #schemaElement;
     #modal;
 
-    async #createModal({ key, schema = {}, results, list } = {}) {
-        const createNewObject = !results;
+    #createModal({ key, schema = {}, results, list, label } = {}) {
+        const schemaCopy = structuredClone(schema);
+
+        const createNewObject = !results && (schemaCopy.type === "object" || schemaCopy.properties);
 
         // const schemaProperties = Object.keys(schema.properties ?? {});
         // const additionalProperties = Object.keys(results).filter((key) => !schemaProperties.includes(key));
@@ -675,12 +730,10 @@ export class JSONSchemaInput extends LitElement {
 
         const allowPatternProperties = isPatternProperties(this.pattern);
         const allowAdditionalProperties = isAdditionalProperties(this.pattern);
-        const creatNewPatternProperty = allowPatternProperties && createNewObject;
-
-        const schemaCopy = structuredClone(schema);
+        const createNewPatternProperty = allowPatternProperties && createNewObject;
 
         // Add a property name entry to the schema
-        if (creatNewPatternProperty) {
+        if (createNewPatternProperty) {
             schemaCopy.properties = {
                 __: { title: "Property Name", type: "string", pattern: this.pattern },
                 ...schemaCopy.properties,
@@ -695,10 +748,13 @@ export class JSONSchemaInput extends LitElement {
             primary: true,
         });
 
-        const updateTarget = results ?? {};
+        const isObject = schemaCopy.type === "object" || schemaCopy.properties; // NOTE: For formatted strings, this is not an object
 
-        submitButton.addEventListener("click", async () => {
-            if (this.#schemaElement instanceof JSONSchemaForm) await this.#schemaElement.validate();
+        // NOTE: Will be replaced by single instances
+        let updateTarget = results ?? (isObject ? {} : undefined);
+
+        submitButton.onClick = async () => {
+            await nestedModalElement.validate();
 
             let value = updateTarget;
 
@@ -713,19 +769,17 @@ export class JSONSchemaInput extends LitElement {
                 return this.#modal.toggle(false);
 
             // Add to the list
-            if (createNewObject) {
-                if (creatNewPatternProperty) {
-                    const key = value.__;
-                    delete value.__;
-                    list.add({ key, value });
-                } else list.add({ key, value });
-            } else list.requestUpdate();
+            if (createNewPatternProperty) {
+                const key = value.__;
+                delete value.__;
+                list.add({ key, value });
+            } else list.add({ key, value });
 
             this.#modal.toggle(false);
-        });
+        };
 
         this.#modal = new Modal({
-            header: key ? header(key) : "Property Definition",
+            header: label ? `${header(label)} Editor` : key ? header(key) : `Property Editor`,
             footer: submitButton,
             showCloseButton: createNewObject,
         });
@@ -733,12 +787,13 @@ export class JSONSchemaInput extends LitElement {
         const div = document.createElement("div");
         div.style.padding = "25px";
 
-        const isObject = schemaCopy.type === "object" || schemaCopy.properties; // NOTE: For formatted strings, this is not an object
+        const inputTitle = header(schemaCopy.title ?? label ?? "Value");
 
-        this.#schemaElement = isObject
+        const nestedModalElement = isObject
             ? new JSONSchemaForm({
                   schema: schemaCopy,
                   results: updateTarget,
+                  validateEmptyValues: false,
                   onUpdate: (internalPath, value) => {
                       if (!createNewObject) {
                           const path = [key, ...internalPath];
@@ -748,26 +803,35 @@ export class JSONSchemaInput extends LitElement {
                   renderTable: this.renderTable,
                   onThrow: this.#onThrow,
               })
-            : new JSONSchemaInput({
-                  schema: schemaCopy,
-                  validateOnChange: allowAdditionalProperties,
-                  path: this.path,
-                  form: this.form,
-                  value: updateTarget,
-                  renderTable: this.renderTable,
-                  onUpdate: (value) => {
-                      if (createNewObject) updateTarget[key] = value;
-                      else this.#updateData(key, value); // NOTE: Untested
+            : new JSONSchemaForm({
+                  schema: {
+                      properties: {
+                          [tempPropertyKey]: {
+                              ...schemaCopy,
+                              title: inputTitle,
+                          },
+                      },
+                      required: [tempPropertyKey],
                   },
+                  validateEmptyValues: false,
+                  results: updateTarget,
+                  onUpdate: (_, value) => {
+                      if (createNewObject) updateTarget[key] = value;
+                      else updateTarget = value;
+                  },
+                  // renderTable: this.renderTable,
+                  // onThrow: this.#onThrow,
               });
 
-        div.append(this.#schemaElement);
+        div.append(nestedModalElement);
 
         this.#modal.append(div);
 
         document.body.append(this.#modal);
 
         setTimeout(() => this.#modal.toggle(true));
+
+        return this.#modal;
     }
 
     #getType = (value = this.value) => (Array.isArray(value) ? "array" : typeof value);
@@ -807,6 +871,9 @@ export class JSONSchemaInput extends LitElement {
 
         const isArray = schema.type === "array"; // Handle string (and related) formats / types
 
+        const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
+        const isTable = itemSchema?.type === "object" && this.renderTable;
+
         const canAddProperties = isEditableObject(this.schema, this.value);
 
         if (this.renderCustomHTML) {
@@ -836,11 +903,129 @@ export class JSONSchemaInput extends LitElement {
             return filesystemSelectorElement;
         };
 
+        // Transform to single item if maxItems is 1
+        if (isArray && schema.maxItems === 1 && !isTable) {
+            return new JSONSchemaInput({
+                value: this.value?.[0],
+                schema: {
+                    ...schema.items,
+                    strict: schema.strict,
+                },
+                path: fullPath,
+                validateEmptyValue: this.validateEmptyValue,
+                required: this.required,
+                validateOnChange: () => (validateOnChange ? this.#triggerValidation(name, path) : ""),
+                form: this.form,
+                onUpdate: (value) => this.#updateData(fullPath, [value]),
+            });
+        }
+
         if (isArray || canAddProperties) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
 
             const allowPatternProperties = isPatternProperties(this.pattern);
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
+
+            // Provide default item types
+            if (isArray) {
+                const hasItemsRef = "items" in schema && "$ref" in schema.items;
+                if (!("items" in schema)) schema.items = {};
+                if (!("type" in schema.items) && !hasItemsRef) {
+                    // Guess the type of the first item
+                    if (this.value) {
+                        const itemToCheck = this.value[0];
+                        schema.items.type = itemToCheck ? this.#getType(itemToCheck) : "string";
+                    }
+
+                    // If no value, handle uncaught schema
+                    else return this.onUncaughtSchema(schema);
+                }
+            }
+
+            const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
+            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
+            // Create tables if possible
+            else if (itemSchema?.type === "string" && !itemSchema.properties) {
+                const list = new List({
+                    items: this.value,
+                    emptyMessage: "No items",
+                    onChange: ({ items }) => {
+                        this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
+                        if (validateOnChange) this.#triggerValidation(name, path);
+                    },
+                });
+
+                if (itemSchema.enum) {
+                    const search = new Search({
+                        options: itemSchema.enum.map((v) => {
+                            return {
+                                key: v,
+                                value: v,
+                                label: itemSchema.enumLabels?.[v] ?? v,
+                                keywords: itemSchema.enumKeywords?.[v],
+                                description: itemSchema.enumDescriptions?.[v],
+                                link: itemSchema.enumLinks?.[v],
+                            };
+                        }),
+                        value: this.value,
+                        listMode: schema.strict === false ? "click" : "append",
+                        showAllWhenEmpty: false,
+                        onSelect: async ({ label, value }) => {
+                            if (!value) return;
+                            if (schema.uniqueItems && this.value && this.value.includes(value)) return;
+                            list.add({ content: label, value });
+                        },
+                    });
+
+                    search.style.height = "auto";
+                    return html`<div style="width: 100%;">${search}${list}</div>`;
+                } else {
+                    const input = document.createElement("input");
+                    input.classList.add("guided--input");
+                    input.placeholder = "Provide an item for the list";
+
+                    const submitButton = new Button({
+                        label: "Submit",
+                        primary: true,
+                        size: "small",
+                        onClick: () => {
+                            const value = input.value;
+                            if (!value) return;
+                            if (schema.uniqueItems && this.value && this.value.includes(value)) return;
+                            list.add({ value });
+                            input.value = "";
+                        },
+                    });
+
+                    input.addEventListener("keydown", (ev) => {
+                        if (ev.key === "Enter") submitButton.onClick();
+                    });
+
+                    return html`<div style="width: 100%;">
+                        <div style="display: flex; gap: 10px; align-items: center;">${input}${submitButton}</div>
+                        ${list}
+                    </div>`;
+                }
+            } else if (isTable) {
+                const instanceThis = this;
+
+                function updateFunction(path, value = this.data) {
+                    return instanceThis.#updateData(path, value, true, {
+                        willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
+                        onError: (e) => e,
+                        onWarning: (e) => e,
+                    });
+                }
+
+                const externalPath = this.form?.base ? [...this.form.base, ...resolvedFullPath] : resolvedFullPath;
+
+                const table = createTable.call(this, externalPath, {
+                    onUpdate: updateFunction,
+                    onThrow: this.#onThrow,
+                }); // Ensure change propagates
+
+                if (table) return table;
+            }
 
             const addButton = new Button({
                 size: "small",
@@ -859,37 +1044,6 @@ export class JSONSchemaInput extends LitElement {
                     allowHTML: true,
                 });
             };
-
-            // Provide default item types
-            if (isArray) {
-                const hasItemsRef = "items" in schema && "$ref" in schema.items;
-                if (!("items" in schema)) schema.items = {};
-                if (!("type" in schema.items) && !hasItemsRef) schema.items.type = this.#getType(this.value?.[0]);
-            }
-
-            const itemSchema = this.form?.getSchema ? this.form.getSchema("items", schema) : schema["items"];
-
-            const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
-            if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
-            // Create tables if possible
-            else if (itemSchema?.type === "object" && this.renderTable) {
-                const instanceThis = this;
-
-                function updateFunction(path, value = this.data) {
-                    return instanceThis.#updateData(path, value, true, {
-                        willTimeout: false, // Since there is a special validation function, do not trigger a timeout validation call
-                        onError: (e) => e,
-                        onWarning: (e) => e,
-                    });
-                }
-
-                const table = createTable.call(this, resolvedFullPath, {
-                    onUpdate: updateFunction,
-                    onThrow: this.#onThrow,
-                }); // Ensure change propagates
-
-                if (table) return table;
-            }
 
             const list = (this.#list = new List({
                 items: this.#mapToList(),
@@ -937,9 +1091,8 @@ export class JSONSchemaInput extends LitElement {
                     submessage: "They don't have a predictable structure.",
                 });
 
-            addButton.addEventListener("click", () => {
-                this.#createModal({ list, schema: allowPatternProperties ? schema : itemSchema });
-            });
+            addButton.onClick = () =>
+                this.#createModal({ label: name, list, schema: allowPatternProperties ? schema : itemSchema });
 
             return html`
                 <div class="schema-input list" @change=${() => validateOnChange && this.#triggerValidation(name, path)}>
@@ -950,83 +1103,54 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (schema.enum && schema.enum.length) {
-            if (schema.strict === false) {
-                // const category = categories.find(({ test }) => test.test(key))?.value;
+            const options = schema.enum.map((v) => {
+                return {
+                    key: v,
+                    value: v,
+                    category: schema.enumCategories?.[v],
+                    label: schema.enumLabels?.[v] ?? v,
+                    keywords: schema.enumKeywords?.[v],
+                    description: schema.enumDescriptions?.[v],
+                    link: schema.enumLinks?.[v],
+                };
+            });
 
-                const options = schema.enum.map((v) => {
-                    return {
-                        key: v,
-                        value: v,
-                        category: schema.enumCategories?.[v],
-                        label: schema.enumLabels?.[v] ?? v,
-                        keywords: schema.enumKeywords?.[v],
-                    };
-                });
+            const search = new Search({
+                options,
+                strict: schema.strict,
+                value: {
+                    value: this.value,
+                    key: this.value,
+                    category: schema.enumCategories?.[this.value],
+                    label: schema.enumLabels?.[this.value],
+                    keywords: schema.enumKeywords?.[this.value],
+                },
+                showAllWhenEmpty: false,
+                listMode: "input",
+                onSelect: async ({ value, key }) => {
+                    const result = value ?? key;
+                    this.#updateData(fullPath, result);
+                    if (validateOnChange) await this.#triggerValidation(name, path);
+                },
+            });
 
-                const search = new Search({
-                    options,
-                    value: {
-                        value: this.value,
-                        key: this.value,
-                        category: schema.enumCategories?.[this.value],
-                        label: schema.enumLabels?.[this.value],
-                        keywords: schema.enumKeywords?.[this.value],
-                    },
-                    showAllWhenEmpty: false,
-                    listMode: "click",
-                    onSelect: async ({ value, key }) => {
-                        const result = value ?? key;
-                        this.#updateData(fullPath, result);
-                        if (validateOnChange) await this.#triggerValidation(name, path);
-                    },
-                });
+            search.classList.add("schema-input");
+            search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
 
-                search.classList.add("schema-input");
-                search.onchange = () => validateOnChange && this.#triggerValidation(name, path); // Ensure validation on forced change
-
-                search.addEventListener("keydown", this.#moveToNextInput);
-
-                return search;
-            }
-
-            const enumItems = [...schema.enum];
-
-            const noSelection = "No Selection";
-            if (!this.required) enumItems.unshift(noSelection);
-
-            const selectedItem = enumItems.find((item) => this.value === item);
-
-            return html`
-                <select
-                    class="guided--input schema-input"
-                    @input=${(ev) => {
-                        const index = ev.target.value;
-                        const value = enumItems[index];
-                        this.#updateData(fullPath, value === noSelection ? undefined : value);
-                    }}
-                    @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
-                    @keydown=${this.#moveToNextInput}
-                >
-                    <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
-                    ${enumItems.map(
-                        (item, i) =>
-                            html`<option
-                                value=${i}
-                                ?selected=${selectedItem === item || (selectedItem === -1 && item === noSelection)}
-                            >
-                                ${schema.enumLabels?.[item] ?? item}
-                            </option>`
-                    )}
-                </select>
-            `;
+            search.addEventListener("keydown", this.#moveToNextInput);
+            this.style.width = "100%";
+            return search;
         } else if (schema.type === "boolean") {
-            return html`<input
-                type="checkbox"
-                class="schema-input"
-                @input=${(ev) => this.#updateData(fullPath, ev.target.checked)}
-                ?checked=${this.value ?? false}
-                @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
-            />`;
+            const optional = new OptionalSection({
+                value: this.value ?? false,
+                color: "rgb(32,32,32)",
+                size: "small",
+                onSelect: (value) => this.#updateData(fullPath, value),
+                onChange: () => validateOnChange && this.#triggerValidation(name, path),
+            });
+
+            optional.classList.add("schema-input");
+            return optional;
         } else if (schema.type === "string" || schema.type === "number" || schema.type === "integer") {
             const isInteger = schema.type === "integer";
             if (isInteger) schema.type = "number";
@@ -1086,7 +1210,7 @@ export class JSONSchemaInput extends LitElement {
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
 
-                            // // Do not check patter if value is empty
+                            // // Do not check pattern if value is empty
                             // if (schema.pattern && !isBlank) {
                             //     const regex = new RegExp(schema.pattern)
                             //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
@@ -1129,8 +1253,7 @@ export class JSONSchemaInput extends LitElement {
             }
         }
 
-        // Print out the immutable default value
-        return html`<pre>${schema.default ? JSON.stringify(schema.default, null, 2) : "No default value"}</pre>`;
+        return this.onUncaughtSchema(schema);
     }
 }
 
