@@ -88,6 +88,7 @@ jobs:
         with:
           name: test-screenshots-${{ matrix.os }}
           path: docs/assets/tutorials
+          retention-days: 1
 
 
 
