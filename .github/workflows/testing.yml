@@ -86,8 +86,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-screenshots
+          name: test-screenshots-${{ matrix.os }}
           path: docs/assets/tutorials
+
 
 
       - name: Upload coverage reports to Codecov
