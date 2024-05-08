@@ -42,7 +42,7 @@ Install the appropriate Python dependencies for your operating system.
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-apple.yml
+    conda env create -f ./environments/environment-MAC-apple-silicon.yml
 
 **Linux**
 
