@@ -107,7 +107,7 @@ The Session Start Time in the **General Metadata** section is already specified 
 
 While the **General Metadata** section is complete, take some time to fill out additional information such as the **Institutional Info** box and the **Experimenter** field.
 
-W also need to add the **Subject** information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
+We also need to add the **Subject** information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
 
 .. figure:: ../assets/tutorials/single/metadata-subject-complete.png
   :align: center
