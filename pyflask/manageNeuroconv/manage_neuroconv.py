@@ -392,7 +392,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     has_ecephys = "Ecephys" in metadata
     has_units = False
     ecephys_metadata = metadata.get("Ecephys")
-    ecephys_schema = schema["properties"].get("Ecephys", { "properties": { } })
+    ecephys_schema = schema["properties"].get("Ecephys", {"properties": {}})
 
     if not ecephys_schema.get("required"):
         ecephys_schema["required"] = []
@@ -402,8 +402,8 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     resolved_electrodes = {}
     resolved_units = {}
-    resolved_electrodes_schema = { "type": "object", "properties": {}, "required": [] }
-    resolved_units_schema = { "type": "object", "properties": {}, "required": [] }
+    resolved_electrodes_schema = {"type": "object", "properties": {}, "required": []}
+    resolved_units_schema = {"type": "object", "properties": {}, "required": []}
 
     def on_sorting_interface(name, sorting_interface):
 
@@ -485,10 +485,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Map sorting interfaces to metadata
     map_interfaces(BaseSortingExtractorInterface, on_sorting_interface, converter)
 
-
     if has_ecephys:
 
-        has_electrodes = 'ElectrodeColumns' in ecephys_metadata
+        has_electrodes = "ElectrodeColumns" in ecephys_metadata
 
         original_units_schema = ecephys_properties.pop("UnitProperties", None)
         ecephys_metadata.pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
@@ -528,7 +527,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             ecephys_properties["Units"] = resolved_units_schema
             ecephys_metadata["Units"] = resolved_units
             schema["properties"]["Ecephys"]["required"].append("Units")
-
 
         # Delete Ecephys metadata if no interfaces processed
         defs = ecephys_schema["definitions"]
