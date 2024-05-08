@@ -126,10 +126,10 @@ export class GuidedInspectorPage extends Page {
                                 { title }
                             ).catch((error) => {
                                 this.notify(error.message, "error");
-                                return null
+                                return null;
                             });
 
-                            if (!result) return 'Failed to generate inspector report.'
+                            if (!result) return "Failed to generate inspector report.";
 
                             this.report = globalState.preview.inspector = {
                                 ...result,
@@ -165,11 +165,10 @@ export class GuidedInspectorPage extends Page {
                         ).catch((error) => {
                             this.notify(error.message, "error");
                             closeProgressPopup();
-                            return null
+                            return null;
                         });
 
-                        if (!result) return 'Failed to generate inspector report.'
-
+                        if (!result) return "Failed to generate inspector report.";
 
                         closeProgressPopup();
 
