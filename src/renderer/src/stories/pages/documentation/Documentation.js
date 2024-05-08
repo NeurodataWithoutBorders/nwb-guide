@@ -50,37 +50,18 @@ export class DocumentationPage extends Page {
             </div>
 
                 <h3 style="padding: 0; margin-top: 25px;">Getting Started</h3>
-                <h4 style="margin-top: 0;">Converting your data</h4>
-                <p>Most users will want to start by generating a <a @click=${(ev) => {
-                    ev.preventDefault();
-                    this.to("settings");
-                }}>test dataset</a> to learn how to use the NWB GUIDE.</p>
-                <p>If you'd like to jump right in, head to the <a @click=${(ev) => {
-                    ev.preventDefault();
-                    this.to("/");
-                }}>Convert</a> page and click "Create a new conversion pipeline" to begin your own custom conversion.</p>
+                <p>Follow along with our <a target="_blank" href="https://nwb-guide.readthedocs.io/en/latest/tutorials/index.html">tutorials</a> and learn how to create pipelines that convert neurophysiology data to NWB and publish results to the DANDI Archive.</p>
 
-                <h4>Standalone Utilities</h4>
-                <p>For users who are already familiar with the NWB format, the NWB GUIDE also provides standalone utilities for validating, exploring, and uploading existing NWB files.</p>
-
-                <h5>Validating your data</h5>
-                <p>Visit the <a @click=${(ev) => {
+                <p>The NWB GUIDE also provides standalone utilities to <a @click=${(ev) => {
                     ev.preventDefault();
                     this.to("validate");
-                }}>Validate</a> page to validate your NWB files against Best Practices.</p>
-
-                <h5>Exploring your data</h5>
-                <p>Visit the <a @click=${(ev) => {
+                }}>validate</a>, <a @click=${(ev) => {
                     ev.preventDefault();
                     this.to("explore");
-                }}>Explore</a> page to explore your NWB files and view their contents using Neurosift.</p>
-
-                <h5>Uploading your data</h5>
-                <p>Visit the <a @click=${(ev) => {
+                }}>explore</a>, and <a @click=${(ev) => {
                     ev.preventDefault();
                     this.to("dandiset");
-                }}>Upload</a> page to create dandisets and share your files on the DANDI Archive</p>
-
+                }}>upload</a> existing NWB files.</p>
 
                 <h3 style="padding: 0; margin-top: 25px;">Additional Resources</h3>
                 <p>

@@ -162,7 +162,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
     #globalButton = new Button({
         icon: globalIcon,
-        label: "Edit Global Metadata",
+        label: "Edit Default Metadata",
         onClick: () => {
             this.#globalModal.form.results = structuredClone(this.info.globalState.project);
             this.#globalModal.open = true;
@@ -197,7 +197,7 @@ export class GuidedMetadataPage extends ManagedPage {
         const schema = preprocessMetadataSchema(undefined, true);
 
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
-            header: "Global Metadata",
+            header: "Default Metadata",
             propsToRemove: propsToIgnore,
             schema,
             hasInstances: true,
