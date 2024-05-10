@@ -429,7 +429,12 @@ export default async function runWorkflow(name, workflow, identifier) {
 
   test('Review NWB Inspector output', async () => {
 
-    await takeScreenshot(join(identifier, 'inspect-page'), 5000) // Allow for the completion of file validation
+    await evaluate(async () => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        await dashboard.page.rendered
+    })
+
+    await takeScreenshot(join(identifier, 'inspect-page'), 100) // Allow for the completion of file validation
     await toNextPage('preview')
 
   })

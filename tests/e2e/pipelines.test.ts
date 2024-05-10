@@ -94,8 +94,8 @@ describe('Run tests pipelines', () => {
                     await sleep(100)
                     try {
                      await dashboard.next()
+                     await dashboard.page.rendered
                      const id = dashboard.page.info.id
-                     if (id.includes('inspect')) await sleep(5000) // Resolution not managed
                      if (id === '//conversion') break // Conversion page is the last page
                     } catch (e) {
                       await toHome()
