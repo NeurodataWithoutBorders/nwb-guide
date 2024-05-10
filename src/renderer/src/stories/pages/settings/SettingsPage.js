@@ -33,14 +33,18 @@ const propertiesToTransform = ["folder_path", "file_path"];
 
 const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
-function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
-    const subjectId = "mouse1";
+function saveNewPipelineFromYaml(name, info, rootFolder) {
+    const subject_id = "mouse1";
     const sessions = ["session1"];
+    const session_id = sessions[0]
+
+    info = structuredClone(info) // Copy info
 
     const hasMultipleSessions = sessions.length > 1;
 
-    const resolvedSourceData = structuredClone(sourceData);
-    Object.values(resolvedSourceData).forEach((info) => {
+    const resolvedInterfaces = info.interfaces ?? info
+
+    Object.values(resolvedInterfaces).forEach((info) => {
         propertiesToTransform.forEach((property) => {
             if (info[property]) {
                 const fullPath = path.join(rootFolder, info[property]);
@@ -49,18 +53,32 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
             }
         });
     });
+    
+
+    const resolvedMetadata = {
+        NWBFile: { session_id },
+        Subject: { subject_id }
+    };
+
+    resolvedMetadata.__generated = structuredClone(info.interfaces ? info.metadata ?? {} : {})
+
+    const resolvedInfo = {
+        source_data: resolvedInterfaces,
+        metadata: resolvedMetadata
+    }
+
 
     const updatedName = header(name);
 
     remove(updatedName, true);
 
     const workflowInfo = {
-        multiple_sessions: hasMultipleSessions,
+        multiple_sessions: hasMultipleSessions
     };
 
     if (!workflowInfo.multiple_sessions) {
-        workflowInfo.subject_id = subjectId;
-        workflowInfo.session_id = sessions[0];
+        workflowInfo.subject_id = subject_id;
+        workflowInfo.session_id = session_id
     }
 
     save({
@@ -73,7 +91,7 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
                 },
 
                 // provide data for all supported interfaces
-                interfaces: Object.keys(resolvedSourceData).reduce((acc, key) => {
+                interfaces: Object.keys(resolvedInterfaces).reduce((acc, key) => {
                     acc[key] = `${key}`;
                     return acc;
                 }, {}),
@@ -81,24 +99,14 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
                 structure: {},
 
                 results: {
-                    [subjectId]: sessions.reduce((acc, sessionId) => {
-                        acc[sessionId] = {
-                            metadata: {
-                                Subject: {
-                                    subject_id: subjectId,
-                                },
-                                NWBFile: {
-                                    session_id: sessionId,
-                                },
-                            },
-                            source_data: resolvedSourceData,
-                        };
+                    [subject_id]: sessions.reduce((acc, sessionId) => {
+                        acc[session_id] = resolvedInfo;
                         return acc;
                     }, {}),
                 },
 
                 subjects: {
-                    [subjectId]: {
+                    [subject_id]: {
                         sessions: sessions,
                         sex: "M",
                         species: "Mus musculus",
@@ -126,7 +134,7 @@ const schema = merge(
         required: ["DANDI", "developer"],
     },
     {
-        arrays: true,
+        arrays: 'append',
     }
 );
 

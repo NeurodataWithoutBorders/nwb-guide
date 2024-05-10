@@ -35,7 +35,7 @@ describe('Run tests pipelines', () => {
     // NOTE: The following code is dependent on the presence of test data on the user's computer
     pipelineDescribeFn('Generate and run pipeline from YAML file', () => {
 
-      test('Can create test pipelines', async ( ) => {
+      test('All test pipelines are created', async ( ) => {
 
         await evaluate(async (testGINPath) => {
 
@@ -73,10 +73,12 @@ describe('Run tests pipelines', () => {
       for (let pipeline in testingSuiteYaml.pipelines) {
 
         const pipelineParsed = header(pipeline)
+        const info = testingSuiteYaml.pipelines[pipeline]
+        const describeFn = info.test === false ? describe.skip : describe
 
-        describe(`Can run the ${pipelineParsed} pipeline`, async ( ) => {
+        describeFn(`${pipelineParsed}`, async ( ) => {
 
-            test(`Can advance through entire pipeline`, async () => {
+            test(`Full conversion completed`, async () => {
               const wasFound = await evaluate(async (toMatch) => {
                 const dashboard = document.querySelector('nwb-dashboard')
                 const pipelines = document.getElementById('guided-div-resume-progress-cards').children
@@ -84,9 +86,25 @@ describe('Run tests pipelines', () => {
                 if (found) {
                   found.querySelector('button')!.click()
 
+                  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+                  const toHome = () => dashboard.page.to('/')
+
                   // Update this with a while loop to advance through the pipeline until back at the home page
-                  await new Promise(resolve => setTimeout(resolve, 10))
-                  dashboard.page.to('/')
+                  while (document.querySelector('nwb-dashboard').page.info.id !== '//'){
+                    await sleep(100)
+                    try {
+                     await dashboard.next()
+                     const id = dashboard.page.info.id
+                     if (id.includes('inspect')) await sleep(5000) // Resolution not managed
+                     if (id === '//conversion') break // Conversion page is the last page
+                    } catch (e) {
+                      await toHome()
+                      return e.message // Return error
+                    }
+                  }
+
+                  await toHome()
+
                   return true
                 }
               }, pipelineParsed)

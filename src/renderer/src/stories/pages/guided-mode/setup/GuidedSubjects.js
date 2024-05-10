@@ -83,6 +83,7 @@ export class GuidedSubjectsPage extends Page {
 
         // Modify the results object to track new subjects / sessions
         updateResultsFromSubjects(results, subjects, sourceDataObject, nameMap); // NOTE: This directly mutates the results object
+
     };
 
     footer = {};

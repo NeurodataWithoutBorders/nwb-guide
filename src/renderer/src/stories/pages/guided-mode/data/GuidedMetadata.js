@@ -236,8 +236,6 @@ export class GuidedMetadataPage extends ManagedPage {
         const schema = preprocessMetadataSchema(globalState.schema.metadata[subject][session]);
         delete schema.description;
 
-        const ephys = schema.properties.Ecephys;
-
         resolveMetadata(subject, session, globalState);
 
         const additionalPropertiesToRetitle = ["Ophys.ImageSegmentation"];
@@ -275,6 +273,8 @@ export class GuidedMetadataPage extends ManagedPage {
         }
 
         console.log("schema", structuredClone(schema), structuredClone(results));
+
+        delete results.__generated // Ignore generated results. NOTE: See if this fails
 
         // Create the form
         const form = new JSONSchemaForm({

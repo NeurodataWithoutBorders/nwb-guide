@@ -178,6 +178,7 @@ export class GuidedStructurePage extends Page {
     }
 
     render() {
+
         // Reset list
         this.addButton.setAttribute("hidden", "");
 

@@ -95,6 +95,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                 Object.values(this.forms).map(async ({ subject, session, form }) => {
                     const info = this.info.globalState.results[subject][session];
 
+
                     // NOTE: This clears all user-defined results
                     const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
                         method: "POST",
@@ -141,8 +142,17 @@ export class GuidedSourceDataPage extends ManagedPage {
                         if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
                     }
 
-                    // Merge metadata results with the generated info
-                    merge(metadata, info.metadata);
+                    console.log('MERGING', structuredClone(info.metadata), structuredClone(metadata))
+
+                    // Merge arrays from generated pipeline data
+                    if (info.metadata.__generated) {
+                        const generated = info.metadata.__generated
+                        info.metadata = merge(info.metadata, merge(generated, metadata, { arrays: true }))
+                    }
+
+                    // Merge new results with old metadata
+                    else merge(metadata, info.metadata);
+
 
                     // Mirror structure with metadata schema
                     const schemaGlobal = this.info.globalState.schema;
@@ -227,6 +237,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     }
 
     render() {
+
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState.results);

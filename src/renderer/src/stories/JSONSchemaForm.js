@@ -694,8 +694,6 @@ export class JSONSchemaForm extends LitElement {
             showLabel: true,
         });
 
-        console.log(interactiveInput, info, value);
-
         this.inputs[localPath.join("-")] = interactiveInput;
 
         return html` <div id=${encode(localPath.join("-"))} class="form-section">${interactiveInput}</div> `;

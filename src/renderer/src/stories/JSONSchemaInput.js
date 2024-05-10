@@ -172,7 +172,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         merge(overrides.ignore, nestedIgnore);
 
-        merge(overrides.schema, schemaCopy, { arrays: true });
+        merge(overrides.schema, schemaCopy, { arrays: 'append' });
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
@@ -258,7 +258,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
     merge(overrides.ignore, nestedIgnore);
 
-    merge(overrides.schema, schemaCopy, { arrays: true });
+    merge(overrides.schema, schemaCopy, { arrays: 'append' });
 
     // Normal table parsing
     const tableMetadata = {
