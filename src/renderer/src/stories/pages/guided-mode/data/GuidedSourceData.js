@@ -44,7 +44,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
     #globalButton = new Button({
         icon: globalIcon,
-        label: "Edit Global Source Data",
+        label: "Edit Default Values",
         onClick: () => {
             this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
             this.#globalModal.open = true;

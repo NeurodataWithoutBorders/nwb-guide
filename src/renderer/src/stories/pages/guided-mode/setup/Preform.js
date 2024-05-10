@@ -15,7 +15,7 @@ const questions = {
     },
     subject_id: {
         type: "string",
-        description: "Provide an identifier for your subject",
+        description: "Provide an identifier for your subject (e.g. mouse01)",
         dependencies: {
             multiple_sessions: {
                 condition: [false, undefined],
@@ -26,7 +26,7 @@ const questions = {
     },
     session_id: {
         type: "string",
-        description: "Provide an identifier for your session",
+        description: "Provide an identifier for your session (e.g. task1)",
         dependencies: {
             multiple_sessions: {
                 condition: [false, undefined],
