@@ -29,7 +29,11 @@ import { joinPath } from "../../../globals.js";
 const dataOutputPath = joinPath(testDataFolderPath, "data");
 const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
 
-const propertiesToTransform = ["folder_path", "file_path"];
+const propertiesToTransform = [
+    "folder_path", 
+    "file_path",
+    "config_file_path"
+];
 
 const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
