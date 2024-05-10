@@ -108,7 +108,7 @@ const componentCSS = `
 
 
 
-    .form-section:not(:last-child) jsonschema-input:not(.empty), .link:not(:last-child){
+    .form-section:not(:last-child):not(:empty), .link:not(:last-child){
         margin-bottom: 15px;
     }
 
