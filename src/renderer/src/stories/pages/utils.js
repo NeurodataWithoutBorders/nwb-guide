@@ -41,19 +41,18 @@ export const sanitize = (item, condition = isPrivate) => {
 };
 
 export function merge(toMerge = {}, target = {}, mergeOptions = {}) {
-    
     // Deep merge objects
     for (const [k, value] of Object.entries(toMerge)) {
         const targetValue = target[k];
         // if (isPrivate(k)) continue;
-        const arrayMergeMethod = mergeOptions.arrays
+        const arrayMergeMethod = mergeOptions.arrays;
         if (arrayMergeMethod && Array.isArray(value) && Array.isArray(targetValue)) {
-            if (arrayMergeMethod === 'append') target[k] = [...targetValue, ...value]; // Append array entries together
+            if (arrayMergeMethod === "append")
+                target[k] = [...targetValue, ...value]; // Append array entries together
             else {
-                target[k] = targetValue.map((targetItem, i) => merge(value[i], targetItem, mergeOptions)) // Merge array entries
+                target[k] = targetValue.map((targetItem, i) => merge(value[i], targetItem, mergeOptions)); // Merge array entries
             }
-        }
-        else if (value === undefined) {
+        } else if (value === undefined) {
             delete target[k]; // Remove matched values
             // if (mergeOptions.remove !== false) delete target[k]; // Remove matched values
         } else if (isObject(value)) {

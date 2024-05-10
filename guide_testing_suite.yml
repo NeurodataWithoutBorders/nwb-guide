@@ -3,7 +3,7 @@
 #   pipeline_name:
 #     test: Optional[bool]
 #     metadata:
-#       key: 
+#       key:
 #         name: value
 #         array:
 #           - First value
@@ -35,7 +35,7 @@ pipelines:
         session_start_time: 2024-05-09T00:00
       Ophys:
         ImagingPlane:
-          - 
+          -
             excitation_lambda: NaN
             optical_channel:
               -
@@ -52,7 +52,7 @@ pipelines:
         session_start_time: 2024-05-09T00:00
       Ophys:
         ImagingPlane:
-          - 
+          -
             excitation_lambda: NaN
             optical_channel:
               -
@@ -123,11 +123,11 @@ pipelines:
         session_start_time: 2024-05-09T00:00
       Ecephys:
         ElectrodeGroup:
-          - 
+          -
             location: Test location
-          - 
+          -
             location: Test location
-          - 
+          -
             location: Test location
 
 
@@ -140,7 +140,7 @@ pipelines:
     metadata:
       Ophys:
         ImagingPlane:
-          - 
+          -
             excitation_lambda: NaN
             optical_channel:
               -
@@ -154,7 +154,7 @@ pipelines:
     metadata:
       NWBFile:
         session_start_time: 2024-05-09T00:00
-        
+
     interfaces:
       DeepLabCutInterface:
         file_path: behavior_testing_data/DLC/m3v1mp4DLC_resnet50_openfieldAug20shuffle1_30000.h5
