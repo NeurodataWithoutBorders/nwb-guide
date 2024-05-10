@@ -63,10 +63,19 @@ pipelines:
         file_path: ophys_testing_data/segmentation_datasets/caiman/caiman_analysis.hdf5
 
   ScanImage_SinglePlane_SingleChannel:
-    test: false
 
-    ScanImageImagingInterface:
-      file_path: ophys_testing_data/imaging_datasets/ScanImage/scanimage_20220801_single.tif
+    metadata:
+      Ophys:
+        ImagingPlane:
+          - 
+            excitation_lambda: NaN
+            optical_channel:
+              -
+                emission_lambda: NaN
+
+    interfaces:
+      ScanImageImagingInterface:
+        file_path: ophys_testing_data/imaging_datasets/ScanImage/sample_scanimage_version_3_8.tiff
 
   TDT:
     metadata:
