@@ -295,18 +295,17 @@ export class GuidedPathExpansionPage extends Page {
 
                 // Skip if results already exist without manual IDs
                 if ((!subject_id || !session_id) && globalState.results) return;
-
                 // Otherwise reset the results to the new subject/session
                 else {
                     globalState.results = {};
 
                     globalState.results[sub_id] = {};
 
-                    const metadata = structuredClone(existingMetadata)
-                    if (!metadata.NWBFile) metadata.NWBFile = {}
-                    if (!metadata.Subject) metadata.Subject = {}
-                    metadata.NWBFile.session_id = ses_id
-                    metadata.Subject.subject_id = sub_id
+                    const metadata = structuredClone(existingMetadata);
+                    if (!metadata.NWBFile) metadata.NWBFile = {};
+                    if (!metadata.Subject) metadata.Subject = {};
+                    metadata.NWBFile.session_id = ses_id;
+                    metadata.Subject.subject_id = sub_id;
 
                     globalState.results[sub_id][ses_id] = { source_data, metadata };
                 }

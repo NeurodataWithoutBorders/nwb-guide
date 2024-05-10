@@ -29,24 +29,20 @@ import { joinPath } from "../../../globals.js";
 const dataOutputPath = joinPath(testDataFolderPath, "data");
 const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
 
-const propertiesToTransform = [
-    "folder_path", 
-    "file_path",
-    "config_file_path"
-];
+const propertiesToTransform = ["folder_path", "file_path", "config_file_path"];
 
 const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
 function saveNewPipelineFromYaml(name, info, rootFolder) {
     const subject_id = "mouse1";
     const sessions = ["session1"];
-    const session_id = sessions[0]
+    const session_id = sessions[0];
 
-    info = structuredClone(info) // Copy info
+    info = structuredClone(info); // Copy info
 
     const hasMultipleSessions = sessions.length > 1;
 
-    const resolvedInterfaces = info.interfaces ?? info
+    const resolvedInterfaces = info.interfaces ?? info;
 
     Object.values(resolvedInterfaces).forEach((info) => {
         propertiesToTransform.forEach((property) => {
@@ -57,32 +53,30 @@ function saveNewPipelineFromYaml(name, info, rootFolder) {
             }
         });
     });
-    
 
     const resolvedMetadata = {
         NWBFile: { session_id },
-        Subject: { subject_id }
+        Subject: { subject_id },
     };
 
-    resolvedMetadata.__generated = structuredClone(info.interfaces ? info.metadata ?? {} : {})
+    resolvedMetadata.__generated = structuredClone(info.interfaces ? info.metadata ?? {} : {});
 
     const resolvedInfo = {
         source_data: resolvedInterfaces,
-        metadata: resolvedMetadata
-    }
-
+        metadata: resolvedMetadata,
+    };
 
     const updatedName = header(name);
 
     remove(updatedName, true);
 
     const workflowInfo = {
-        multiple_sessions: hasMultipleSessions
+        multiple_sessions: hasMultipleSessions,
     };
 
     if (!workflowInfo.multiple_sessions) {
         workflowInfo.subject_id = subject_id;
-        workflowInfo.session_id = session_id
+        workflowInfo.session_id = session_id;
     }
 
     save({
@@ -138,7 +132,7 @@ const schema = merge(
         required: ["DANDI", "developer"],
     },
     {
-        arrays: 'append',
+        arrays: "append",
     }
 );
 
