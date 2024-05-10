@@ -883,12 +883,8 @@ export class JSONSchemaInput extends LitElement {
             });
 
             const renderEmpty = custom === null;
-            if (renderEmpty) this.classList.add("empty");
-            else this.classList.remove("empty");
-
-            if (custom || renderEmpty) {
-                return custom;
-            }
+            if (custom) return custom;
+            else if (renderEmpty) this.remove() // Remove from DOM so that parent can be empty
         }
 
         // Handle file and directory formats
