@@ -881,7 +881,14 @@ export class JSONSchemaInput extends LitElement {
                 onUpdate: this.#updateData,
                 onThrow: this.#onThrow,
             });
-            if (custom || custom === null) return custom;
+
+            const renderEmpty = custom === null;
+            if (renderEmpty) this.classList.add("empty");
+            else this.classList.remove("empty");
+
+            if (custom || renderEmpty) {
+                return custom;
+            }
         }
 
         // Handle file and directory formats
