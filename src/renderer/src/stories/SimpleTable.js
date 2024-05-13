@@ -429,9 +429,10 @@ export class SimpleTable extends LitElement {
         let message;
 
         if (!message) {
-            const errors = this.shadowRoot.querySelectorAll("[error]");
+            const errors = Array.from(this.shadowRoot.querySelectorAll("[error]"));
             const len = errors.length;
-            if (len === 1) message = errors[0].title || "Error found";
+            console.log(errors)
+            if (len === 1) message = errors[0].title || "An error exists on this table.";
             else if (len) {
                 message = `${len} errors exist on this table.`;
             }
@@ -469,7 +470,7 @@ export class SimpleTable extends LitElement {
         }
     };
 
-    addRow = (anchorRow = this.#cells.length - 1, n) => this.#updateRows(anchorRow, 1)[0];
+    addRow = async (anchorRow = this.#cells.length - 1, n) => (await this.#updateRows(anchorRow, 1))[0];
     getRow = (i) => Object.values(this.#cells[i]);
 
     #updateContextMenuRendering = () => {
@@ -726,32 +727,30 @@ export class SimpleTable extends LitElement {
             Array.from(element.children).forEach((element) => (element.children[0].simpleTableInfo.i = pos)); // Increment position
         });
 
+
+        if (isPositive) {
+            const current = children[row];
+
+            // Replace deleted base row(s) with new one
+            let latest = current;
+            range.forEach((idx) => {
+                const i = idx + 1;
+                delete this.#cells[i];
+                const data = this.#getRowData(); // Get information for an undefined row
+                const newRow = document.createElement("tr");
+                newRow.setAttribute("data-row", i);
+                newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
+
+                if (latest) latest.insertAdjacentElement("afterend", newRow);
+                else bodyEl.append(newRow);
+            });
+        }
+
         return new Promise((resolve) => {
-            if (isPositive) {
-                const current = children[row];
-
-                // Replace deleted base row(s) with new one
-                let latest = current;
-                range.map((idx) => {
-                    const i = idx + 1;
-                    delete this.#cells[i];
-                    const data = this.#getRowData(); // Get information for an undefined row
-                    const newRow = document.createElement("tr");
-                    newRow.setAttribute("data-row", i);
-                    newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
-
-                    if (latest) latest.insertAdjacentElement("afterend", newRow);
-                    else bodyEl.append(newRow);
-                });
-
-                setTimeout(() => {
-                    this.#onUpdate([], this.data);
-                    resolve();
-                }, 50); // Wait for table to update asynchronously
-            } else {
+            setTimeout(() => {
                 this.#onUpdate([], this.data);
-                resolve();
-            }
+                resolve(range.map(i => i + 1));
+            }, 50); // Wait for table to update asynchronously
         });
     }
 
