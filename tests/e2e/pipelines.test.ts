@@ -25,9 +25,9 @@ const pipelineDescribeFn = hasGINPath ? describe : describe.skip
 
 beforeAll(() => initTests({ screenshots: false, data: false }))
 
-describe('Run tests pipelines', () => {
+describe('Run example pipelines', () => {
 
-    test('Ensure number of test pipelines starts at zero', async () => {
+    test('Ensure number of example pipelines starts at zero', async () => {
       const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
       expect(nPipelines).toBe(0)
     })
@@ -35,7 +35,7 @@ describe('Run tests pipelines', () => {
     // NOTE: The following code is dependent on the presence of test data on the user's computer
     pipelineDescribeFn('Generate and run pipeline from YAML file', () => {
 
-      test('All test pipelines are created', async ( ) => {
+      test('All example pipelines are created', async ( ) => {
 
         await evaluate(async (testGINPath) => {
 
@@ -44,7 +44,7 @@ describe('Run tests pipelines', () => {
             dashboard.sidebar.select('settings')
             await new Promise(resolve => setTimeout(resolve, 200))
 
-            // Genereate test pipelines
+            // Generate example pipelines
             const page = dashboard.page
             const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
             folderInput.updateData(testGINPath)
