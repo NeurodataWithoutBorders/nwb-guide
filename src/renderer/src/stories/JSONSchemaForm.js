@@ -108,7 +108,7 @@ const componentCSS = `
 
 
 
-    .form-section:not(:last-child), .link:not(:last-child){
+    .form-section:not(:last-child):not(:empty), .link:not(:last-child){
         margin-bottom: 15px;
     }
 
@@ -693,6 +693,8 @@ export class JSONSchemaForm extends LitElement {
             renderCustomHTML: this.renderCustomHTML,
             showLabel: true,
         });
+
+        console.log(interactiveInput, info, value);
 
         this.inputs[localPath.join("-")] = interactiveInput;
 
