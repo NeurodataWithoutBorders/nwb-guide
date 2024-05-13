@@ -114,7 +114,6 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     Swal.close();
 
-
                     if (isStorybook) return;
 
                     if (result.message) {

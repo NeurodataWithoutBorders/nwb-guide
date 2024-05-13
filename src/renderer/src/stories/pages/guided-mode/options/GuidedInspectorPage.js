@@ -14,7 +14,6 @@ import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { getMessageType } from "../../../../validation/index.js";
 
-
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
@@ -106,7 +105,6 @@ export class GuidedInspectorPage extends Page {
     };
 
     updated() {
-
         const [downloadJSONButton, downloadTextButton] = this.headerButtons;
 
         downloadJSONButton.onClick = () =>
@@ -116,11 +114,9 @@ export class GuidedInspectorPage extends Page {
             });
 
         downloadTextButton.onClick = () => download("nwb-inspector-report.txt", this.report.text);
-
     }
 
     render() {
-
         this.#updateRendered(true);
 
         const { globalState } = this.info;
@@ -235,9 +231,8 @@ export class GuidedInspectorPage extends Page {
                     });
 
                     return html`${manager}${new InspectorLegend(legendProps)}`;
-                })()
-                .finally(() => {
-                    this.#toggleRendered()
+                })().finally(() => {
+                    this.#toggleRendered();
                 }),
                 "Loading inspector report..."
             )}

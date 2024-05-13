@@ -252,8 +252,8 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (path[0] === "Ophys") {
                         const name = path.slice(-1)[0];
 
-                        if (isPatternProperties) schema.minItems = schema.maxItems = null // Do not allow more than on the reuslts
-    
+                        if (isPatternProperties) schema.minItems = schema.maxItems = null; // Do not allow more than on the reuslts
+
                         if (schema.type === "array") {
                             if (name !== "Device" && target) {
                                 // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
@@ -366,11 +366,12 @@ export class GuidedMetadataPage extends ManagedPage {
                             };
 
                             const table = createTable.call(mockInput, [...localPath], {
-                                onUpdate: (localPath, value) => onUpdate([name, ...localPath], value, true, {
-                                    willTimeout: false,
-                                    onError: (e) => e,
-                                    onWarning: (e) => e,
-                                }),
+                                onUpdate: (localPath, value) =>
+                                    onUpdate([name, ...localPath], value, true, {
+                                        willTimeout: false,
+                                        onError: (e) => e,
+                                        onWarning: (e) => e,
+                                    }),
                                 onThrow: onThrow,
                             });
 
@@ -386,79 +387,77 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (patternPropsToRetitle.includes(this.form.base.join("."))) {
                         inputSchema.title = "Plane Metadata<hr>";
 
-
                         return html`<div style="width: 100%;">
-                        ${Object.entries(data)
-                            .map(([name, value]) => {
+                            ${Object.entries(data)
+                                .map(([name, value]) => {
+                                    const createNestedTable = (value, pattern, schema) => {
+                                        const mockInput = {
+                                            schema: {
+                                                type: "object",
+                                                items: schema,
 
-                                const createNestedTable = (value, pattern, schema) => {
-                                    const mockInput = {
-                                        schema: {
-                                            type: "object",
-                                            items: schema,
+                                                // Transfer a subset of item schema values
+                                                minItems: schema.minItems,
+                                                maxItems: schema.maxItems,
+                                            },
 
-                                            // Transfer a subset of item schema values
-                                            minItems: schema.minItems,
-                                            maxItems: schema.maxItems,
-                                        },
+                                            renderTable: this.renderTable,
+                                            value,
+                                            pattern: pattern,
+                                            form: {
+                                                ignore: this.form.ignore,
+                                            },
+                                        };
 
-                                        renderTable: this.renderTable,
-                                        value,
-                                        pattern: pattern,
-                                        form: {
-                                            ignore: this.form.ignore,
-                                        },
-                                    };
-
-                                    return html`
-                                        <div style="width: 100%;">
-                                            ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ""}
-                                            ${createTable.call(mockInput, [...localPath], {
-                                                overrides: {
-                                                    schema: {
-                                                        items: {
-                                                            order: ["name", "description"],
-                                                            additionalProperties: false,
+                                        return html`
+                                            <div style="width: 100%;">
+                                                ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ""}
+                                                ${createTable.call(mockInput, [...localPath], {
+                                                    overrides: {
+                                                        schema: {
+                                                            items: {
+                                                                order: ["name", "description"],
+                                                                additionalProperties: false,
+                                                            },
+                                                        },
+                                                        ignore: {
+                                                            [tempPropertyKey]: true,
                                                         },
                                                     },
-                                                    ignore: {
-                                                        [tempPropertyKey]: true,
-                                                    },
-                                                },
-                                                onUpdate: (localPath, value) =>
-                                                    onUpdate([name, ...localPath], value, true, {
-                                                        willTimeout: false,
-                                                        onError: (e) => e,
-                                                        onWarning: (e) => e,
-                                                    }),
-                                                onThrow: onThrow,
-                                            })}
-                                        </div>
-                                    `;
-                                };
+                                                    onUpdate: (localPath, value) =>
+                                                        onUpdate([name, ...localPath], value, true, {
+                                                            willTimeout: false,
+                                                            onError: (e) => e,
+                                                            onWarning: (e) => e,
+                                                        }),
+                                                    onThrow: onThrow,
+                                                })}
+                                            </div>
+                                        `;
+                                    };
 
-                                if (isAdditional) {
-                                    const data = value.reduce((acc, item) => {
-                                        const name = item.name;
-                                        acc[name] = item;
-                                        return acc;
-                                    }, {});
+                                    if (isAdditional) {
+                                        const data = value.reduce((acc, item) => {
+                                            const name = item.name;
+                                            acc[name] = item;
+                                            return acc;
+                                        }, {});
 
-                                    return createNestedTable(data, undefined, {
-                                        type: "object",
-                                        items: {
+                                        return createNestedTable(data, undefined, {
                                             type: "object",
-                                            additionalProperties: true,
-                                        },
-                                    });
-                                }
+                                            items: {
+                                                type: "object",
+                                                additionalProperties: true,
+                                            },
+                                        });
+                                    }
 
-                                return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
-                                    return createNestedTable(value, pattern, schema);
-                                });
-                            })
-                            .flat()
-                        }`;
+                                    return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
+                                        return createNestedTable(value, pattern, schema);
+                                    });
+                                })
+                                .flat()}
+                        </div>`;
                     }
                 }
             },
