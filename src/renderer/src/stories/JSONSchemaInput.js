@@ -1192,6 +1192,10 @@ export class JSONSchemaInput extends LitElement {
 
                 const value = isDateTime ? resolveDateTime(this.value) : this.value;
 
+                const { minimum, maximum, exclusiveMax, exclusiveMin } = schema;
+                const min = exclusiveMin ?? minimum;
+                const max = exclusiveMax ?? maximum;
+
                 return html`
                     <input
                         class="guided--input schema-input ${schema.step === null ? "hideStep" : ""}"
@@ -1199,6 +1203,8 @@ export class JSONSchemaInput extends LitElement {
                         step=${isNumber && schema.step ? schema.step : ""}
                         placeholder="${schema.placeholder ?? ""}"
                         .value="${value ?? ""}"
+                        .min="${min}"
+                        .max="${max}"
                         @input=${(ev) => {
                             let value = ev.target.value;
                             let newValue = value;
