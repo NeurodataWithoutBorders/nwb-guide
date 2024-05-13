@@ -87,10 +87,10 @@ export class GuidedSubjectsPage extends Page {
 
     footer = {
         onNext: () => {
-            const extraElements = document.querySelectorAll('.HandsontableCopyPaste')
+            const extraElements = document.querySelectorAll(".HandsontableCopyPaste");
             extraElements.forEach((element) => element.remove());
             return this.to(1);
-        }
+        },
     };
 
     updated() {

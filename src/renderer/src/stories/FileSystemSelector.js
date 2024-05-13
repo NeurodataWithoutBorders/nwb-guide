@@ -7,7 +7,6 @@ const { dialog } = remote;
 import restartSVG from "../stories/assets/restart.svg?raw";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 
-
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
     if (Array.isArray(type))
         return `${multiple ? "" : "a "}${type
@@ -180,7 +179,7 @@ export class FilesystemSelector extends LitElement {
         if (dialog) {
             const results = await this.#useElectronDialog(type);
             // const path = file.filePath ?? file.filePaths?.[0];
-            const resolved = results.filePath ?? results.filePaths
+            const resolved = results.filePath ?? results.filePaths;
             if (!resolved) return; // Cancelled
             this.#handleFiles(results.filePath ?? results.filePaths, type);
         } else {
@@ -273,7 +272,6 @@ export class FilesystemSelector extends LitElement {
                 <div class="controls">
                     ${this.value ? html`<div @click=${() => this.#handleFiles()}>${unsafeSVG(restartSVG)}</div>` : ""}
                 </div>
-
             </div>
             ${isMultipleTypes
                 ? html`<div id="button-div">

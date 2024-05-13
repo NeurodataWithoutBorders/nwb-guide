@@ -478,8 +478,8 @@ export class BasicTable extends LitElement {
         return html`
             ${description
                 ? html`<p style="margin: 0; margin-bottom: 10px">
-                    <small style="color: gray;">${description}</small>
-                </p>`
+                      <small style="color: gray;">${description}</small>
+                  </p>`
                 : ""}
             <div class="table-container">
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>

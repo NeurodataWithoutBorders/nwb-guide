@@ -117,7 +117,7 @@ export class GuidedStructurePage extends Page {
 
         this.list.emptyMessage = "Loading valid formats...";
 
-        const interfaceInfo = await ready.interfaces
+        const interfaceInfo = await ready.interfaces;
 
         this.search.options = Object.entries(interfaceInfo).map(([key, value]) => {
             const displayName = key.trim();
@@ -138,7 +138,7 @@ export class GuidedStructurePage extends Page {
                 category,
                 disabled: !supportedInterfaces.includes(interfaceName),
             };
-        })
+        });
 
         this.list.emptyMessage = defaultEmptyMessage;
 
