@@ -743,12 +743,11 @@ export class SimpleTable extends LitElement {
                     if (latest) latest.insertAdjacentElement("afterend", newRow);
                     else bodyEl.append(newRow);
                 });
-                
-                setTimeout(() => {
-                    this.#onUpdate([], this.data)
-                    resolve();
-                }, 50) // Wait for table to update asynchronously
 
+                setTimeout(() => {
+                    this.#onUpdate([], this.data);
+                    resolve();
+                }, 50); // Wait for table to update asynchronously
             } else {
                 this.#onUpdate([], this.data);
                 resolve();
