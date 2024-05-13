@@ -417,12 +417,13 @@ export class GuidedPathExpansionPage extends Page {
                             }
                         }
 
-                        if (resolved.length === 0) return [
-                           {
-                                message: html`No source files found using the provided information.`,
-                                type: "warning",
-                            },
-                        ]
+                        if (resolved.length === 0)
+                            return [
+                                {
+                                    message: html`No source files found using the provided information.`,
+                                    type: "warning",
+                                },
+                            ];
 
                         return [
                             {

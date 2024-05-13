@@ -197,8 +197,8 @@ export class GuidedMetadataPage extends ManagedPage {
         const schema = preprocessMetadataSchema(undefined, true);
 
         const toRemove = structuredClone(propsToIgnore);
-        toRemove.Subject = true // Do not edit subject defaults
-        
+        toRemove.Subject = true; // Do not edit subject defaults
+
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
             header: "Default Metadata",
             propsToRemove: toRemove,
