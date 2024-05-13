@@ -26,8 +26,8 @@ import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
 import { run } from "../guided-mode/options/utils.js";
 import { joinPath } from "../../../globals.js";
 
-const dataOutputPath = joinPath(testDataFolderPath, "data");
-const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
+const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
+const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");
 
 const propertiesToTransform = ["folder_path", "file_path"];
 
@@ -158,16 +158,16 @@ export class SettingsPage extends Page {
     };
 
     deleteTestData = () => {
-        deleteIfExists(dataOutputPath);
-        deleteIfExists(datasetOutputPath);
+        deleteIfExists(DATA_OUTPUT_PATH);
+        deleteIfExists(DATASET_OUTPUT_PATH);
     };
 
     generateTestData = async () => {
-        if (!fs.existsSync(dataOutputPath)) {
+        if (!fs.existsSync(DATA_OUTPUT_PATH)) {
             await run(
                 "generate",
                 {
-                    output_path: dataOutputPath,
+                    output_path: DATA_OUTPUT_PATH,
                 },
                 {
                     title: "Generating test data",
@@ -183,8 +183,8 @@ export class SettingsPage extends Page {
         await run(
             "generate/dataset",
             {
-                input_path: dataOutputPath,
-                output_path: datasetOutputPath,
+                input_path: DATA_OUTPUT_PATH,
+                output_path: DATASET_OUTPUT_PATH,
             },
             {
                 title: "Generating test dataset",
@@ -195,11 +195,11 @@ export class SettingsPage extends Page {
             throw error;
         });
 
-        const sanitizedOutputPath = datasetOutputPath.replace(homeDirectory, "~");
+        const sanitizedOutputPath = DATASET_OUTPUT_PATH.replace(homeDirectory, "~");
 
         this.notify(`Test dataset successfully generated at ${sanitizedOutputPath}!`);
 
-        return datasetOutputPath;
+        return DATASET_OUTPUT_PATH;
     };
 
     beforeSave = async () => {
@@ -288,7 +288,7 @@ export class SettingsPage extends Page {
                 <div>
                     <p style="font-weight: bold;">Test Dataset</p>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        ${fs.existsSync(datasetOutputPath) && fs.existsSync(dataOutputPath)
+                        ${fs.existsSync(DATASET_OUTPUT_PATH) && fs.existsSync(DATA_OUTPUT_PATH)
                             ? [
                                   new Button({
                                       icon: deleteSVG,
@@ -307,8 +307,8 @@ export class SettingsPage extends Page {
                                       size: "small",
                                       onClick: async () => {
                                           if (electron.ipcRenderer) {
-                                              if (fs.existsSync(datasetOutputPath))
-                                                  electron.ipcRenderer.send("showItemInFolder", datasetOutputPath);
+                                              if (fs.existsSync(DATASET_OUTPUT_PATH))
+                                                  electron.ipcRenderer.send("showItemInFolder", DATASET_OUTPUT_PATH);
                                               else {
                                                   this.notify("The test dataset no longer exists!", "warning");
                                                   this.requestUpdate();

@@ -4,24 +4,17 @@ Dataset Publication
 For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
 .. note::
-    This tutorial focuses on uploading to the Staging server.
+    Creating an account on DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server.
 
-    **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Staging server with the Main Archive.
+    **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`. You’ll want to publish your `real` data on the main archive, which will require a separate approval but otherwise follows the same workflow defined in this tutorial.
 
-.. note::
-    Gaining access to DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server.
-
-    **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`.
-
-    We’re going to use the Staging server for this tutorial so we don’t crowd the main DANDI Archive with `synthetic` datasets! However, you’ll want to publish your `real` data on the main server—which will require a separate approval process.
-
-    Once you receive notice that your account was approved, you can move on to the next steps.
+    Once your account is approved, you can move on to the next steps.
 
 Workflow Setup
 --------------
 1. Resume the conversion via the **Convert** page
 
-2. Navigate to the **Workflow** page.
+2. Navigate to the **Workflow** page using the navigation sidebar on the left.
 
    a. Specify that you’d like to publish your data to the :dandi-archive:`DANDI Archive <>`.
 
