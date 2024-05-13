@@ -60,7 +60,6 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     const onProgressMessage = ({ data }) => {
         const parsed = JSON.parse(data);
         const { request_id, ...update } = parsed;
-        console.warn("parsed", parsed);
 
         if (request_id && request_id !== id) return;
         lastUpdate = Date.now();
@@ -74,13 +73,16 @@ export const createProgressPopup = async (options, tqdmCallback) => {
 
     progressHandler.addEventListener("message", onProgressMessage);
 
-    const close = () => {
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const close = async () => {
         if (lastUpdate) {
             // const timeSinceLastUpdate = now - lastUpdate;
             const animationLeft = 1000; // ProgressBar.animationDuration - timeSinceLastUpdate; // Add 100ms to ensure the animation has time to complete
-            if (animationLeft) setTimeout(() => popup.close(), animationLeft);
-            else popup.close();
-        } else popup.close();
+            if (animationLeft) await sleep(animationLeft);
+        } 
+        
+        popup.close();
 
         progressHandler.removeEventListener("message", onProgressMessage);
     };

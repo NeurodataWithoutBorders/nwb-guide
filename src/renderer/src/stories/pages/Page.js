@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { run, runConversion } from "./guided-mode/options/utils.js";
+import { run } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 import { dismissNotification, isStorybook, notify } from "../../dependencies/globals.js";
 import { randomizeElements, mapSessions, merge } from "./utils.js";
@@ -154,18 +154,8 @@ export class Page extends LitElement {
 
         const results = {};
 
-        const isMultiple = toRun.length > 1;
-
         const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
-        const { close: closeProgressPopup, elements } = swalOpts;
-
-        elements.container.insertAdjacentHTML(
-            "beforeend",
-            `<small><small><b>Note:</b> This may take a while to complete...</small></small><hr style="margin-bottom: 0;">`
-        );
-
-        let completed = 0;
-        elements.progress.format = { n: completed, total: toRun.length };
+        const { close: closeProgressPopup } = swalOpts;
 
         const fileConfiguration = []
 
@@ -198,59 +188,19 @@ export class Page extends LitElement {
             }
 
             fileConfiguration.push(payload)
-
-            // const result = await runConversion(
-            //     {
-            //         output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
-            //         project_name: name,
-            //         nwbfile_path: file,
-            //         overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-            //         ...sessionInfo, // source_data and metadata are passed in here
-            //         ...conversionOptions, // Any additional conversion options override the defaults
-
-            //         interfaces: globalState.interfaces,
-            //     },
-            //     swalOpts
-            // ).catch((error) => {
-            //     let message = error.message;
-
-            //     if (message.includes("The user aborted a request.")) {
-            //         this.notify("Conversion was cancelled.", "warning");
-            //         throw error;
-            //     }
-
-            //     this.notify(message, "error");
-            //     closeProgressPopup();
-            //     throw error;
-            // });
-
-            // completed++;
-            // if (isMultiple) {
-            //     const progressInfo = { n: completed, total: toRun.length };
-            //     elements.progress.format = progressInfo;
-            // }
         }
 
-
-        const request_id = Math.random().toString(36).substring(7);
-
-        const conversionResults = run(`convert`, {
+        const conversionResults = await run(`convert`, {
             files: fileConfiguration,
-            max_workers: 4,
-            request_id
+            max_workers: 2, // TODO: Make this configurable and confirm default value
+            request_id: swalOpts.id
         }, {
             title: "Running the conversion",
-            onError: (results) => {
-                if (results.message.includes("already exists")) {
-                    return "File already exists. Please specify another location to store the conversion results";
-                } else {
-                    return "Conversion failed with current metadata. Please try again.";
-                }
-            },
+            onError: () => "Conversion failed with current metadata. Please try again.",
             ...swalOpts,
         })
         
-        .catch((error) => {
+        .catch(async (error) => {
             let message = error.message;
 
             if (message.includes("The user aborted a request.")) {
@@ -259,20 +209,21 @@ export class Page extends LitElement {
             }
 
             this.notify(message, "error");
-            closeProgressPopup();
+            await closeProgressPopup();
             throw error;
         });
 
 
-        for (let file in conversionResults) {
-            const [ subject, session ] = file.match(/sub-(\d+)\/sub-\d+_ses-(\d+)\.nwb/).slice(1);
+        conversionResults.forEach((info) => {
+            const { file } = info
+            const fileName = file.split("/").pop();
+            const [ subject, session ] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
             const subRef = results[subject] ?? (results[subject] = {});
-            subRef[session] = conversionResults[file];
-        }
+            subRef[session] = info;
+        })
 
 
-        closeProgressPopup();
-        elements.container.style.textAlign = ""; // Clear style update
+        await closeProgressPopup();
 
         return results;
     }

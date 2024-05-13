@@ -35,7 +35,8 @@ export const sanitize = (item, condition = isPrivate) => {
             if (condition(k, value)) delete item[k];
             else sanitize(value, condition);
         }
-    }
+    } else if (Array.isArray(item)) item.forEach((value) => sanitize(value, condition));
+    
 
     return item;
 };

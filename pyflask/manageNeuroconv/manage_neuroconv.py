@@ -807,9 +807,6 @@ def convert_to_nwb(info: dict) -> str:
     return dict(file=str(resolved_output_path))
 
 
-def _convert_to_nwb(label, info: dict) -> dict:
-    return label, convert_to_nwb(info)
-
 def convert_all_to_nwb(
     url: str,
     files: List[dict],
@@ -829,15 +826,17 @@ def convert_all_to_nwb(
             )
         )
 
-    results = {}
+
     futures = []
+    file_paths = []
+
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
+
         for file_info in files:
 
             futures.append(
                 executor.submit(
-                    _convert_to_nwb,
-                    file_info.get('nwbfile_path'),
+                    convert_to_nwb,
                     dict(
                         url=url,
                         request_id=request_id,
@@ -855,11 +854,11 @@ def convert_all_to_nwb(
         )
 
 
-        for _ in inspection_iterable:
-            label, result = _.result()
-            results[label] = result
+        for future in inspection_iterable:
+            output_filepath = future.result()
+            file_paths.append(output_filepath)
 
-    return result
+        return file_paths
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs):

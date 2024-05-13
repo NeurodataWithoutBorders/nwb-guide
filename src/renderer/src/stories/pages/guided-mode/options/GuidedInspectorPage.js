@@ -162,15 +162,15 @@ export class GuidedInspectorPage extends Page {
                             "inspect_folder",
                             { path, ...options, request_id: swalOpts.id },
                             swalOpts
-                        ).catch((error) => {
+                        ).catch(async (error) => {
                             this.notify(error.message, "error");
-                            closeProgressPopup();
+                            await closeProgressPopup();
                             return null;
                         });
 
                         if (!result) return "Failed to generate inspector report.";
 
-                        closeProgressPopup();
+                        await closeProgressPopup();
 
                         this.report = globalState.preview.inspector = {
                             ...result,
