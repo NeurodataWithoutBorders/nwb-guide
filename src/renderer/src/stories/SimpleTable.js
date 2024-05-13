@@ -484,7 +484,6 @@ export class SimpleTable extends LitElement {
 
         const lockRemoveRow = nRows <= minItems
         const lockAddRow = nRows >= maxItems
-        console.warn(this.data, nRows, minItems, maxItems, lockAddRow, lockRemoveRow)
 
         if (minItems !== undefined) {
             if (minItems === null) removeRowButton.setAttribute("disabled", "");
