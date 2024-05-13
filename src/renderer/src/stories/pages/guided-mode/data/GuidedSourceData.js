@@ -131,7 +131,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     const { results: metadata, schema } = result;
 
-                    console.log('GOt', structuredClone(metadata))
+                    console.log("GOt", structuredClone(metadata));
 
                     // Merge arrays from generated pipeline data
                     if (info.metadata.__generated) {
