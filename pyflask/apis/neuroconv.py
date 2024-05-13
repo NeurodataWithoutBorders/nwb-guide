@@ -15,6 +15,7 @@ from manageNeuroconv import (
     get_source_schema,
     get_metadata_schema,
     convert_to_nwb,
+    convert_all_to_nwb,
     validate_metadata,
     listen_to_neuroconv_events,
     inspect_nwb_file,
@@ -110,7 +111,12 @@ class Convert(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return convert_to_nwb(neuroconv_api.payload)
+            has_files = "files" in neuroconv_api.payload
+            if has_files:
+                url = f"{request.url_root}neuroconv/announce"
+                return convert_all_to_nwb(url, **neuroconv_api.payload)
+            else:
+                return convert_to_nwb(neuroconv_api.payload)
 
         except Exception as exception:
             if notBadRequestException(exception):

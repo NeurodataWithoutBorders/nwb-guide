@@ -6,6 +6,7 @@ from .manage_neuroconv import (
     get_source_schema,
     get_metadata_schema,
     convert_to_nwb,
+    convert_all_to_nwb,
     validate_metadata,
     upload_project_to_dandi,
     upload_folder_to_dandi,

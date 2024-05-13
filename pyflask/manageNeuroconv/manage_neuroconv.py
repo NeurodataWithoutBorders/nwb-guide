@@ -124,6 +124,7 @@ def resolve_references(schema, root_schema=None):
         dict: The resolved JSON schema.
     """
     from jsonschema import RefResolver
+    
 
     if root_schema is None:
         root_schema = schema
@@ -663,9 +664,14 @@ def get_interface_alignment(info: dict) -> dict:
 
     return timestamps
 
-
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
+
+    from tqdm_publisher import TQDMProgressSubscriber
+    import requests
+
+    url = info.get("url", None)
+    request_id = info.get("request_id", None)
 
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
@@ -695,14 +701,27 @@ def convert_to_nwb(info: dict) -> str:
     converter = instantiate_custom_converter(resolved_source_data, info["interfaces"])
 
     def update_conversion_progress(**kwargs):
-        announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
+        update_dict = dict(request_id=request_id, **kwargs)
+        if (url) or not run_stub_test:
+             requests.post(url=url, json=update_dict)
+        else:
+            announcer.announce(update_dict)
+
+    progress_bar_options = dict(
+        mininterval=0,
+        on_progress_update=update_conversion_progress,
+    )
+
 
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
         {
             interface: (
-                {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                {
+                    "stub_test": info["stub_test"], 
+                    # "iterator_opts": dict( display_progress=True, progress_bar_class=TQDMProgressSubscriber, progress_bar_options=progress_bar_options )
+                }
                 if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
                 else {}
             )
@@ -786,6 +805,61 @@ def convert_to_nwb(info: dict) -> str:
             os.symlink(resolved_output_directory, default_output_directory)
 
     return dict(file=str(resolved_output_path))
+
+
+def _convert_to_nwb(label, info: dict) -> dict:
+    return label, convert_to_nwb(info)
+
+def convert_all_to_nwb(
+    url: str,
+    files: List[dict],
+    request_id: Optional[str],
+    max_workers: int = 1,
+) -> List[str]:
+    
+    from tqdm_publisher import TQDMProgressSubscriber
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+
+    def on_progress_update(message):
+        message["progress_bar_id"] = request_id  # Ensure request_id matches
+        announcer.announce(
+            dict(
+                request_id=request_id,
+                **message,
+            )
+        )
+
+    results = {}
+    futures = []
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        for file_info in files:
+
+            futures.append(
+                executor.submit(
+                    _convert_to_nwb,
+                    file_info.get('nwbfile_path'),
+                    dict(
+                        url=url,
+                        request_id=request_id,
+                        **file_info,
+                    ),
+                )
+            )
+
+        inspection_iterable = TQDMProgressSubscriber(
+            iterable=as_completed(futures),
+            desc="Total files converted",
+            total=len(futures),
+            mininterval=0,
+            on_progress_update=on_progress_update,
+        )
+
+
+        for _ in inspection_iterable:
+            label, result = _.result()
+            results[label] = result
+
+    return result
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs):
