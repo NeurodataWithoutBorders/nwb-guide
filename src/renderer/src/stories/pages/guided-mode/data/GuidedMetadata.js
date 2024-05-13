@@ -366,13 +366,11 @@ export class GuidedMetadataPage extends ManagedPage {
                             };
 
                             const table = createTable.call(mockInput, [...localPath], {
-                                onUpdate: (localPath, value) => {
-                                    onUpdate([name, ...localPath], value, true, {
-                                        willTimeout: false,
-                                        onError: (e) => e,
-                                        onWarning: (e) => e,
-                                    });
-                                },
+                                onUpdate: (localPath, value) => onUpdate([name, ...localPath], value, true, {
+                                    willTimeout: false,
+                                    onError: (e) => e,
+                                    onWarning: (e) => e,
+                                }),
                                 onThrow: onThrow,
                             });
 

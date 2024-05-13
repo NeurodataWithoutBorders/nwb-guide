@@ -188,7 +188,7 @@ export class SimpleTable extends LitElement {
 
     #onUpdate = (...args) => {
         this.onUpdate(...args);
-        if (this.#context) this.#updateContextMenuRendering();
+        if (this.#context) this.#updateContextMenuRendering()
     };
 
     constructor({
@@ -475,17 +475,23 @@ export class SimpleTable extends LitElement {
     #updateContextMenuRendering = () => {
         const { minItems, maxItems } = this.schema;
 
-        if (minItems !== undefined || maxItems !== undefined) {
-            const nRows = this.data.length;
-            const addRowButton = this.#context.shadowRoot.querySelector("#add-row");
-            const removeRowButton = this.#context.shadowRoot.querySelector("#remove-row");
+        const nRows = this.data.length;
+        const addRowButton = this.#context.shadowRoot.querySelector("#add-row");
+        const removeRowButton = this.#context.shadowRoot.querySelector("#remove-row");
 
-            removeRowButton.removeAttribute("disabled");
-            addRowButton.removeAttribute("disabled");
+        removeRowButton.removeAttribute("disabled");
+        addRowButton.removeAttribute("disabled");
 
+        const lockRemoveRow = nRows <= minItems
+        const lockAddRow = nRows >= maxItems
+        console.warn(this.data, nRows, minItems, maxItems, lockAddRow, lockRemoveRow)
+
+        if (minItems !== undefined) {
             if (minItems === null) removeRowButton.setAttribute("disabled", "");
             else if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
+        }
 
+        if (maxItems !== undefined) {
             if (maxItems === null) addRowButton.setAttribute("disabled", "");
             else if (nRows >= maxItems) addRowButton.setAttribute("disabled", "");
         }
@@ -703,11 +709,16 @@ export class SimpleTable extends LitElement {
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
             const rowHeaders = Object.keys(this.#data);
-            range.map((i) => {
-                children[i].remove();
-                delete this.#data[rowHeaders[row]];
+            range.map((idx) => {
+                if (Array.isArray(this.#data)) this.#data.splice(idx, 1);
+                else delete this.#data[rowHeaders[idx]];
+                
+                Array.from(children).forEach(el => {
+                    if (el.getAttribute("data-row") === idx.toString()) el.remove();
+                })
+
                 delete this.#unresolved[row];
-                delete this.#cells[i];
+                delete this.#cells[idx];
             });
         }
 
@@ -722,29 +733,35 @@ export class SimpleTable extends LitElement {
             Array.from(element.children).forEach((element) => (element.children[0].simpleTableInfo.i = pos)); // Increment position
         });
 
-        if (isPositive) {
-            const current = children[row];
+        return new Promise((resolve) => {
 
-            // Replace deleted base row(s) with new one
-            let latest = current;
-            const mapped = range.map((idx) => {
-                const i = idx + 1;
-                delete this.#cells[i];
-                const data = this.#getRowData(); // Get information for an undefined row
-                const newRow = document.createElement("tr");
-                newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
+            if (isPositive) {
+                const current = children[row];
 
-                if (latest) latest.insertAdjacentElement("afterend", newRow);
-                else bodyEl.append(newRow);
+                // Replace deleted base row(s) with new one
+                let latest = current;
+                range.map((idx) => {
+                    const i = idx + 1;
+                    delete this.#cells[i];
+                    const data = this.#getRowData(); // Get information for an undefined row
+                    const newRow = document.createElement("tr");
+                    newRow.setAttribute('data-row', i);
+                    newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
 
-                return this.getRow(i);
-            });
+                    if (latest) latest.insertAdjacentElement("afterend", newRow);
+                    else bodyEl.append(newRow);
+                });
+                
+                setTimeout(() => {
+                    this.#onUpdate([], this.data)
+                    resolve();
+                }, 100) // Wait for table to update asynchronously
 
-            this.#onUpdate([], this.data);
-            return mapped;
-        }
-
-        this.#onUpdate([], this.data);
+            } else {
+                this.#onUpdate([], this.data)
+                resolve()
+            }
+        })
     }
 
     #renderHeader = (str, { title, description }) => {
