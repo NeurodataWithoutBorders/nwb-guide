@@ -188,7 +188,7 @@ export class SimpleTable extends LitElement {
 
     #onUpdate = (...args) => {
         this.onUpdate(...args);
-        if (this.#context) this.#updateContextMenuRendering()
+        if (this.#context) this.#updateContextMenuRendering();
     };
 
     constructor({
@@ -482,9 +482,6 @@ export class SimpleTable extends LitElement {
         removeRowButton.removeAttribute("disabled");
         addRowButton.removeAttribute("disabled");
 
-        const lockRemoveRow = nRows <= minItems
-        const lockAddRow = nRows >= maxItems
-
         if (minItems !== undefined) {
             if (minItems === null) removeRowButton.setAttribute("disabled", "");
             else if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
@@ -553,9 +550,8 @@ export class SimpleTable extends LitElement {
         },
     };
 
-    getEditOptions(){
-
-        const options = merge(this.contextOptions, { row: { add: true, remove: true }}, { clone: true })
+    getEditOptions() {
+        const options = merge(this.contextOptions, { row: { add: true, remove: true } }, { clone: true });
 
         const { minItems, maxItems } = this.schema;
         const nRows = this.data.length;
@@ -572,15 +568,13 @@ export class SimpleTable extends LitElement {
     }
 
     generateContextMenu() {
-
-        const items = []
+        const items = [];
         const editOptions = this.getEditOptions();
 
         if (editOptions.row?.add) items.push(this.#menuOptions.row.add);
         if (editOptions.row?.remove) items.push(this.#menuOptions.row.remove);
         if (editOptions.column?.add) items.push(this.#menuOptions.column.add);
         if (editOptions.column?.remove) items.push(this.#menuOptions.column.remove);
-        
 
         if (items.length) {
             this.#context = new ContextMenu({
@@ -711,10 +705,10 @@ export class SimpleTable extends LitElement {
             range.map((idx) => {
                 if (Array.isArray(this.#data)) this.#data.splice(idx, 1);
                 else delete this.#data[rowHeaders[idx]];
-                
-                Array.from(children).forEach(el => {
+
+                Array.from(children).forEach((el) => {
                     if (el.getAttribute("data-row") === idx.toString()) el.remove();
-                })
+                });
 
                 delete this.#unresolved[row];
                 delete this.#cells[idx];
@@ -733,7 +727,6 @@ export class SimpleTable extends LitElement {
         });
 
         return new Promise((resolve) => {
-
             if (isPositive) {
                 const current = children[row];
 
@@ -744,7 +737,7 @@ export class SimpleTable extends LitElement {
                     delete this.#cells[i];
                     const data = this.#getRowData(); // Get information for an undefined row
                     const newRow = document.createElement("tr");
-                    newRow.setAttribute('data-row', i);
+                    newRow.setAttribute("data-row", i);
                     newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
 
                     if (latest) latest.insertAdjacentElement("afterend", newRow);
@@ -757,10 +750,10 @@ export class SimpleTable extends LitElement {
                 }, 50) // Wait for table to update asynchronously
 
             } else {
-                this.#onUpdate([], this.data)
-                resolve()
+                this.#onUpdate([], this.data);
+                resolve();
             }
-        })
+        });
     }
 
     #renderHeader = (str, { title, description }) => {
@@ -997,11 +990,11 @@ export class SimpleTable extends LitElement {
 
         const editOptions = this.getEditOptions();
 
-        const rowEditOptions = []
+        const rowEditOptions = [];
         if (editOptions.row?.add) rowEditOptions.push("add");
         if (editOptions.row?.remove) rowEditOptions.push("remove");
 
-        const description = rowEditOptions.length ? `Right click to ${rowEditOptions.join(' or ')} rows.` : "";
+        const description = rowEditOptions.length ? `Right click to ${rowEditOptions.join(" or ")} rows.` : "";
 
         return html`
             ${this.#context}
@@ -1033,9 +1026,11 @@ export class SimpleTable extends LitElement {
                 </table>
             </div>
 
-            ${description ? html`<p style="margin: 0; margin-top: 10px">
-                <small style="color: gray;">${description}</small>
-            </p>` : ''}
+            ${description
+                ? html`<p style="margin: 0; margin-top: 10px">
+                      <small style="color: gray;">${description}</small>
+                  </p>`
+                : ""}
         `;
     }
 }
