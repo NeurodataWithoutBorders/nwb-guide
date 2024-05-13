@@ -21,8 +21,8 @@ pipelines:
 
 
   SpikeGLXConverter-Phy:
-    SpikeGLXConverter:
-      file_path: ephy_testing_data/spikeglx/Noise4Sam_g0
+    SpikeGLXConverterPipe:
+      folder_path: ephy_testing_data/spikeglx/Noise4Sam_g0
     PhySortingInterface:
       folder_path: ephy_testing_data/phy/phy_example_0
 
