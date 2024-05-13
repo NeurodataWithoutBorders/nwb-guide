@@ -157,7 +157,7 @@ export class Page extends LitElement {
         const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
         const { close: closeProgressPopup } = swalOpts;
 
-        const fileConfiguration = []
+        const fileConfiguration = [];
 
         for (let info of toRun) {
             const { subject, session, globalState = this.info.globalState } = info;
@@ -185,22 +185,24 @@ export class Page extends LitElement {
                 ...conversionOptions, // Any additional conversion options override the defaults
 
                 interfaces: globalState.interfaces,
-            }
+            };
 
-            fileConfiguration.push(payload)
+            fileConfiguration.push(payload);
         }
 
-        const conversionResults = await run(`convert`, {
-            files: fileConfiguration,
-            max_workers: 2, // TODO: Make this configurable and confirm default value
-            request_id: swalOpts.id
-        }, {
-            title: "Running the conversion",
-            onError: () => "Conversion failed with current metadata. Please try again.",
-            ...swalOpts,
-        })
-        
-        .catch(async (error) => {
+        const conversionResults = await run(
+            `convert`,
+            {
+                files: fileConfiguration,
+                max_workers: 2, // TODO: Make this configurable and confirm default value
+                request_id: swalOpts.id,
+            },
+            {
+                title: "Running the conversion",
+                onError: () => "Conversion failed with current metadata. Please try again.",
+                ...swalOpts,
+            }
+        ).catch(async (error) => {
             let message = error.message;
 
             if (message.includes("The user aborted a request.")) {
@@ -213,15 +215,13 @@ export class Page extends LitElement {
             throw error;
         });
 
-
         conversionResults.forEach((info) => {
-            const { file } = info
+            const { file } = info;
             const fileName = file.split("/").pop();
-            const [ subject, session ] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
+            const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
             const subRef = results[subject] ?? (results[subject] = {});
             subRef[session] = info;
-        })
-
+        });
 
         await closeProgressPopup();
 

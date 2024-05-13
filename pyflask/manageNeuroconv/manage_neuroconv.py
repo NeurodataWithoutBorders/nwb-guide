@@ -124,7 +124,6 @@ def resolve_references(schema, root_schema=None):
         dict: The resolved JSON schema.
     """
     from jsonschema import RefResolver
-    
 
     if root_schema is None:
         root_schema = schema
@@ -664,6 +663,7 @@ def get_interface_alignment(info: dict) -> dict:
 
     return timestamps
 
+
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
@@ -703,7 +703,7 @@ def convert_to_nwb(info: dict) -> str:
     def update_conversion_progress(**kwargs):
         update_dict = dict(request_id=request_id, **kwargs)
         if (url) or not run_stub_test:
-             requests.post(url=url, json=update_dict)
+            requests.post(url=url, json=update_dict)
         else:
             announcer.announce(update_dict)
 
@@ -712,14 +712,13 @@ def convert_to_nwb(info: dict) -> str:
         on_progress_update=update_conversion_progress,
     )
 
-
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
         {
             interface: (
                 {
-                    "stub_test": info["stub_test"], 
+                    "stub_test": info["stub_test"],
                     # "iterator_opts": dict( display_progress=True, progress_bar_class=TQDMProgressSubscriber, progress_bar_options=progress_bar_options )
                 }
                 if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
@@ -813,7 +812,7 @@ def convert_all_to_nwb(
     request_id: Optional[str],
     max_workers: int = 1,
 ) -> List[str]:
-    
+
     from tqdm_publisher import TQDMProgressSubscriber
     from concurrent.futures import ProcessPoolExecutor, as_completed
 
@@ -825,7 +824,6 @@ def convert_all_to_nwb(
                 **message,
             )
         )
-
 
     futures = []
     file_paths = []
@@ -852,7 +850,6 @@ def convert_all_to_nwb(
             mininterval=0,
             on_progress_update=on_progress_update,
         )
-
 
         for future in inspection_iterable:
             output_filepath = future.result()

@@ -80,8 +80,8 @@ export const createProgressPopup = async (options, tqdmCallback) => {
             // const timeSinceLastUpdate = now - lastUpdate;
             const animationLeft = 1000; // ProgressBar.animationDuration - timeSinceLastUpdate; // Add 100ms to ensure the animation has time to complete
             if (animationLeft) await sleep(animationLeft);
-        } 
-        
+        }
+
         popup.close();
 
         progressHandler.removeEventListener("message", onProgressMessage);

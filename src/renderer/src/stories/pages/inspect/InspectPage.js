@@ -29,11 +29,13 @@ export class InspectPage extends Page {
 
         const { close: closeProgressPopup } = swalOpts;
 
-        const result = await run("inspect", { request_id: swalOpts.id, paths, ...kwargs }, swalOpts).catch(async (error) => {
-            this.notify(error.message, "error");
-            await closeProgressPopup();
-            throw error;
-        });
+        const result = await run("inspect", { request_id: swalOpts.id, paths, ...kwargs }, swalOpts).catch(
+            async (error) => {
+                this.notify(error.message, "error");
+                await closeProgressPopup();
+                throw error;
+            }
+        );
 
         await closeProgressPopup();
 
