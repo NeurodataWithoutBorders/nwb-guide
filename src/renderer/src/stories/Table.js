@@ -196,7 +196,7 @@ export class Table extends LitElement {
             }entry`;
 
         if (!message) {
-            const errors =  Array.from(this.querySelectorAll("[error]"));
+            const errors = Array.from(this.querySelectorAll("[error]"));
             const len = errors.length;
             if (len === 1) message = errors[0].getAttribute("data-message") || "Error found";
             else if (len) message = `${len} errors exist on this table.`;

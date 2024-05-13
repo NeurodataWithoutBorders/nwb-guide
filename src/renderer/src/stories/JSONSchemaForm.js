@@ -569,8 +569,9 @@ export class JSONSchemaForm extends LitElement {
         const isValid = !requiredButNotSpecified.length;
 
         // Check if all inputs are valid
-        const flaggedInputs = (this.shadowRoot ? Array.from(this.shadowRoot.querySelectorAll(".invalid")) : []).filter(el => el.nextElementSibling); // Skip tables
-
+        const flaggedInputs = (this.shadowRoot ? Array.from(this.shadowRoot.querySelectorAll(".invalid")) : []).filter(
+            (el) => el.nextElementSibling
+        ); // Skip tables
 
         if (resolvedErrors.length) {
             const len = resolvedErrors.length;
@@ -578,10 +579,9 @@ export class JSONSchemaForm extends LitElement {
             else this.throw(`${len} JSON Schema errors detected.`);
         }
 
-        const allErrors =
-            flaggedInputs
+        const allErrors = flaggedInputs
             .map((inputElement) => Array.from(inputElement.nextElementSibling.children).map((li) => li.message))
-            .flat()
+            .flat();
 
         const nMissingRequired = allErrors.reduce((acc, curr) => {
             return (acc += curr.includes(this.#isARequiredPropertyString) ? 1 : 0);

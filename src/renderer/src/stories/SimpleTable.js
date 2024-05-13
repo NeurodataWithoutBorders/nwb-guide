@@ -431,7 +431,7 @@ export class SimpleTable extends LitElement {
         if (!message) {
             const errors = Array.from(this.shadowRoot.querySelectorAll("[error]"));
             const len = errors.length;
-            console.log(errors)
+            console.log(errors);
             if (len === 1) message = errors[0].title || "An error exists on this table.";
             else if (len) {
                 message = `${len} errors exist on this table.`;
@@ -727,7 +727,6 @@ export class SimpleTable extends LitElement {
             Array.from(element.children).forEach((element) => (element.children[0].simpleTableInfo.i = pos)); // Increment position
         });
 
-
         if (isPositive) {
             const current = children[row];
 
@@ -749,7 +748,7 @@ export class SimpleTable extends LitElement {
         return new Promise((resolve) => {
             setTimeout(() => {
                 this.#onUpdate([], this.data);
-                resolve(range.map(i => i + 1));
+                resolve(range.map((i) => i + 1));
             }, 50); // Wait for table to update asynchronously
         });
     }
