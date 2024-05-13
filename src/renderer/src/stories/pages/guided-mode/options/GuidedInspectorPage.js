@@ -45,6 +45,10 @@ export class GuidedInspectorPage extends Page {
         });
     }
 
+    workflow = {
+        multiple_sessions: {},
+    };
+
     headerButtons = [
         new Button({
             label: "JSON",
@@ -102,6 +106,8 @@ export class GuidedInspectorPage extends Page {
         const { globalState } = this.info;
         const { stubs, inspector } = globalState.preview;
 
+        const legendProps = { multiple: this.workflow.multiple_sessions.value };
+
         const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
 
@@ -141,7 +147,7 @@ export class GuidedInspectorPage extends Page {
                             height: "100%",
                         });
 
-                        return html`${list}${new InspectorLegend()}`;
+                        return html`${list}${new InspectorLegend(legendProps)}`;
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
@@ -208,7 +214,7 @@ export class GuidedInspectorPage extends Page {
                         instances: allInstances,
                     });
 
-                    return html`${manager}${new InspectorLegend()}`;
+                    return html`${manager}${new InspectorLegend(legendProps)}`;
                 })(),
                 "Loading inspector report..."
             )}
