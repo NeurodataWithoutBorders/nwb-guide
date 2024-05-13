@@ -24,7 +24,7 @@
     "build:electron:mac": "electron-builder build --mac --publish never",
     "build:electron:linux": "electron-builder build --linux --publish never",
     "test": "npm run test:app && npm run test:server",
-    "test:app": "vitest run --exclude '**/pipelines.test.ts'",
+    "test:app": "vitest run --exclude \"**/pipelines.test.ts\"",
     "test:tutorial": "vitest tutorial",
     "test:pipelines": "vitest pipelines",
     "test:server": "pytest pyflask/tests/ -s -vv",
