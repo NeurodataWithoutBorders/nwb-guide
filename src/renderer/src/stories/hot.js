@@ -22,23 +22,6 @@ function arrayRenderer(instance, td, row, col, prop, value, cellProperties) {
     return td;
 }
 
-// Borrowed from https://stackoverflow.com/a/29774197/7290573
-function getDate(days) {
-    let date;
-
-    if (days !== undefined) {
-        date = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-    } else {
-        date = new Date();
-    }
-
-    const offset = date.getTimezoneOffset();
-
-    date = new Date(date.getTime() - offset * 60 * 1000);
-
-    return date.toISOString();
-}
-
 class DateTimeEditor extends Handsontable.editors.BaseEditor {
     constructor(hotInstance) {
         super(hotInstance);
@@ -52,9 +35,6 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
 
         this.DATETIME.style.display = "none";
         this.DATETIME.input.style.width = "0px"; // Don't actually show the input, just the picker
-
-        this.DATETIME.input.min = "1900-01-01T00:00";
-        this.DATETIME.input.max = getDate(0).slice(0, -2);
 
         // Attach node to DOM, by appending it to the container holding the table
         this.hot.rootElement.appendChild(this.DATETIME);
@@ -79,6 +59,10 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
         style[this.hot.isRtl() ? "right" : "left"] = `${start}px`;
         style.margin = "0px";
         style.display = "";
+
+        this.DATETIME.input.min = this.cellProperties.min
+        this.DATETIME.input.max = this.cellProperties.max
+
     }
 
     focus() {
