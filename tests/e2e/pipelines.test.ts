@@ -91,7 +91,7 @@ describe('Run example pipelines', () => {
 
                   // Update this with a while loop to advance through the pipeline until back at the home page
                   while (document.querySelector('nwb-dashboard').page.info.id !== '//'){
-                    await sleep(100)
+                    await sleep(200)
                     try {
                      await dashboard.next()
                      await dashboard.page.rendered

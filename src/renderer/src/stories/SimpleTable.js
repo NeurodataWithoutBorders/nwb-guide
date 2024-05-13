@@ -755,7 +755,7 @@ export class SimpleTable extends LitElement {
                 setTimeout(() => {
                     this.#onUpdate([], this.data)
                     resolve();
-                }, 100) // Wait for table to update asynchronously
+                }, 50) // Wait for table to update asynchronously
 
             } else {
                 this.#onUpdate([], this.data)
