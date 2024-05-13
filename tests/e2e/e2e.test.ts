@@ -6,7 +6,7 @@ import { join } from 'node:path'
 
 import * as config from './config'
 import runWorkflow, { uploadToDandi } from './workflow'
-import { evaluate, takeScreenshot, to, toNextPage } from './utils'
+import { evaluate, takeScreenshot, to } from './utils'
 
 const x = 250 // Sidebar size
 const width = config.windowDims.width - x
@@ -152,7 +152,7 @@ describe('E2E Test', () => {
         await to('//conversion')
         await to('//upload')
 
-      })
+      }, 2000)
 
       uploadToDandi(subdirectory) // Upload to DANDI if the API key is provided
 

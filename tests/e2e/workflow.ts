@@ -4,7 +4,7 @@ import { sleep } from '../puppeteer'
 
 import { join } from 'node:path'
 import { evaluate, takeScreenshot, toNextPage } from "./utils"
-import { dandiInfo, publish, subjectInfo, testDatasetPath, testInterfaceInfo } from "./config"
+import { dandiInfo, publish, subjectInfo, testInterfaceInfo } from "./config"
 
 export const uploadToDandi = (subdirectory, forceSkip = false) => {
 
