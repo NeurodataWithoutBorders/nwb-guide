@@ -242,6 +242,8 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
+        console.log("schema", structuredClone(schema), structuredClone(results));
+
         const ophys = schema.properties.Ophys;
         if (ophys) {
             drillSchemaProperties(
@@ -250,14 +252,12 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (path[0] === "Ophys") {
                         const name = path.slice(-1)[0];
 
-                        if (isPatternProperties)
-                            return (schema.minItems = schema.maxItems =
-                                Object.values(resolveFromPath(path, results)).length);
-
+                        if (isPatternProperties) schema.minItems = schema.maxItems = null // Do not allow more than on the reuslts
+    
                         if (schema.type === "array") {
                             if (name !== "Device" && target) {
                                 // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
-                                if (name in target) schema.minItems = schema.maxItems = target[name].length;
+                                if (name in target) schema.minItems = schema.maxItems = null;
                                 // Remove Ophys property requirement if left initially undefined
                                 else {
                                     target[name] = []; // Initialize empty array
@@ -388,8 +388,11 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (patternPropsToRetitle.includes(this.form.base.join("."))) {
                         inputSchema.title = "Plane Metadata<hr>";
 
-                        return Object.entries(data)
+
+                        return html`<div style="width: 100%;">
+                        ${Object.entries(data)
                             .map(([name, value]) => {
+
                                 const createNestedTable = (value, pattern, schema) => {
                                     const mockInput = {
                                         schema: {
@@ -456,7 +459,8 @@ export class GuidedMetadataPage extends ManagedPage {
                                     return createNestedTable(value, pattern, schema);
                                 });
                             })
-                            .flat();
+                            .flat()
+                        }`;
                     }
                 }
             },

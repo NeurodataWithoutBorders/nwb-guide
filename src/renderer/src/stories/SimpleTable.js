@@ -14,6 +14,7 @@ import tippy from "tippy.js";
 import { sortTable, getEditable } from "./Table";
 import { NestedInputCell } from "./table/cells/input";
 import { getIgnore } from "./JSONSchemaForm";
+import { merge } from "./pages/utils";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -474,7 +475,7 @@ export class SimpleTable extends LitElement {
     #updateContextMenuRendering = () => {
         const { minItems, maxItems } = this.schema;
 
-        if (minItems || maxItems) {
+        if (minItems !== undefined || maxItems !== undefined) {
             const nRows = this.data.length;
             const addRowButton = this.#context.shadowRoot.querySelector("#add-row");
             const removeRowButton = this.#context.shadowRoot.querySelector("#remove-row");
@@ -482,9 +483,11 @@ export class SimpleTable extends LitElement {
             removeRowButton.removeAttribute("disabled");
             addRowButton.removeAttribute("disabled");
 
-            if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
+            if (minItems === null) removeRowButton.setAttribute("disabled", "");
+            else if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
 
-            if (nRows >= maxItems) addRowButton.setAttribute("disabled", "");
+            if (maxItems === null) addRowButton.setAttribute("disabled", "");
+            else if (nRows >= maxItems) addRowButton.setAttribute("disabled", "");
         }
     };
 
@@ -545,21 +548,34 @@ export class SimpleTable extends LitElement {
         },
     };
 
-    generateContextMenu(options) {
-        const items = [];
+    getEditOptions(){
+
+        const options = merge(this.contextOptions, { row: { add: true, remove: true }}, { clone: true })
 
         const { minItems, maxItems } = this.schema;
         const nRows = this.data.length;
 
         const noRowEdits = minItems && maxItems && minItems === maxItems && nRows === minItems && nRows === maxItems;
 
-        if (!noRowEdits) {
-            if (options.row?.add) items.push(this.#menuOptions.row.add);
-            if (options.row?.remove) items.push(this.#menuOptions.row.remove);
+        if (noRowEdits) options.row.add = options.row.remove = false;
+        else {
+            if (maxItems === null) options.row.add = false;
+            if (minItems === null) options.row.remove = false;
         }
 
-        if (options.column?.add) items.push(this.#menuOptions.column.add);
-        if (options.column?.remove) items.push(this.#menuOptions.column.remove);
+        return options;
+    }
+
+    generateContextMenu() {
+
+        const items = []
+        const editOptions = this.getEditOptions();
+
+        if (editOptions.row?.add) items.push(this.#menuOptions.row.add);
+        if (editOptions.row?.remove) items.push(this.#menuOptions.row.remove);
+        if (editOptions.column?.add) items.push(this.#menuOptions.column.add);
+        if (editOptions.column?.remove) items.push(this.#menuOptions.column.remove);
+        
 
         if (items.length) {
             this.#context = new ContextMenu({
@@ -649,13 +665,7 @@ export class SimpleTable extends LitElement {
             this.#loaded = true;
             this.onLoaded();
 
-            this.generateContextMenu({
-                row: {
-                    add: true,
-                    remove: true,
-                },
-                ...this.contextOptions,
-            });
+            this.generateContextMenu();
         }
     };
 
@@ -969,6 +979,14 @@ export class SimpleTable extends LitElement {
             if (foundKey) this.keyColumn = foundKey;
         }
 
+        const editOptions = this.getEditOptions();
+
+        const rowEditOptions = []
+        if (editOptions.row?.add) rowEditOptions.push("add");
+        if (editOptions.row?.remove) rowEditOptions.push("remove");
+
+        const description = rowEditOptions.length ? `Right click to ${rowEditOptions.join(' or ')} rows.` : "";
+
         return html`
             ${this.#context}
             <div class="table-container">
@@ -998,9 +1016,10 @@ export class SimpleTable extends LitElement {
                     </tfoot>
                 </table>
             </div>
-            <p style="margin: 0; margin-top: 10px">
-                <small style="color: gray;">Right click to add or remove rows.</small>
-            </p>
+
+            ${description ? html`<p style="margin: 0; margin-top: 10px">
+                <small style="color: gray;">${description}</small>
+            </p>` : ''}
         `;
     }
 }

@@ -114,6 +114,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     Swal.close();
 
+
                     if (isStorybook) return;
 
                     if (result.message) {
@@ -140,8 +141,6 @@ export class GuidedSourceDataPage extends ManagedPage {
                     for (let key in info.metadata) {
                         if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
                     }
-
-                    console.log("MERGING", structuredClone(info.metadata), structuredClone(metadata));
 
                     // Merge arrays from generated pipeline data
                     if (info.metadata.__generated) {

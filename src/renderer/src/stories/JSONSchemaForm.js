@@ -513,6 +513,12 @@ export class JSONSchemaForm extends LitElement {
                 const resolvedSchema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
+                // Allow using null to specify an immutable table
+                if (e.message.includes('does not meet maximum length') || e.message.includes('oes not meet minimum length')) {
+                    if (e.argument === null) return;
+                }
+
+
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message.includes("is not of a type(s)")) {
                     if (resolvedSchema.type === "number") {
