@@ -194,7 +194,7 @@ export class GuidedPathExpansionPage extends Page {
                 // Map existing results to new subject information (if available)
                 const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
 
-                const existingMetadata = existingResults.metadata;
+                const existingMetadata = existingResults.metadata ?? {};
                 const existingSourceData = existingResults.source_data;
 
                 const source_data = {};
@@ -214,19 +214,13 @@ export class GuidedPathExpansionPage extends Page {
 
                     globalState.results[sub_id] = {};
 
-                    globalState.results[sub_id][ses_id] = {
-                        source_data,
-                        metadata: {
-                            NWBFile: {
-                                session_id: ses_id,
-                                ...(existingMetadata?.NWBFile ?? {}),
-                            },
-                            Subject: {
-                                subject_id: sub_id,
-                                ...(existingMetadata?.Subject ?? {}),
-                            },
-                        },
-                    };
+                    const metadata = structuredClone(existingMetadata);
+                    if (!metadata.NWBFile) metadata.NWBFile = {};
+                    if (!metadata.Subject) metadata.Subject = {};
+                    metadata.NWBFile.session_id = ses_id;
+                    metadata.Subject.subject_id = sub_id;
+
+                    globalState.results[sub_id][ses_id] = { source_data, metadata };
                 }
 
                 this.save({}, false); // Ensure this structure is saved

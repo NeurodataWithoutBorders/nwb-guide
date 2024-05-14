@@ -235,9 +235,9 @@ export class BasicTable extends LitElement {
     validate = () => {
         let message;
 
-        const errors = this.shadowRoot.querySelectorAll("[error]");
+        const errors = Array.from(this.shadowRoot.querySelectorAll("[error]"));
         const len = errors.length;
-        if (len === 1) message = errors[0].title || "Error found";
+        if (len === 1) message = errors[0].title || "An error exists on this table.";
         else if (len) {
             message = `${len} errors exist on this table.`;
             console.error(Array.from(errors).map((error) => error.title));
