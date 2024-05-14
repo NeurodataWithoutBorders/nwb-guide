@@ -172,7 +172,7 @@ export class Search extends LitElement {
             }
 
             .category {
-                padding: 10px 25px;
+                padding: 10px 18px;
                 background: gainsboro;
                 border-top: 1px solid gray;
                 border-bottom: 1px solid gray;

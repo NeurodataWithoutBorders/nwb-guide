@@ -1,9 +1,9 @@
 Converting a Single Session
 ===========================
 
-As a researcher, you’ve just completed an experimental session and you’d like to convert your data to NWB right away.
+Let's imagine you've just completed an experimental session and you’d like to convert your data to NWB right away.
 
-Upon launching the GUIDE, you'll begin on the Convert page. If you’re opening the application for the first time, there should be no pipelines listed on this page.
+Upon launching the GUIDE, you'll begin on the **Convert** page. If you’re opening the application for the first time, there should be no pipelines listed on this page.
 
 .. figure:: ../assets/tutorials/home-page.png
   :align: center
@@ -107,7 +107,7 @@ The Session Start Time in the **General Metadata** section is already specified 
 
 While the **General Metadata** section is complete, take some time to fill out additional information such as the **Institutional Info** box and the **Experimenter** field.
 
-However, we still need to add the Subject information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
+We also need to add the **Subject** information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
 
 .. figure:: ../assets/tutorials/single/metadata-subject-complete.png
   :align: center
@@ -116,16 +116,14 @@ However, we still need to add the Subject information—as noted by the red acce
   The status of the Subject information will update in real-time as you fill out the form.
 
 
-This dataset will also have **Ecephys** metadata extracted from the SpikeGLX source data.
+This dataset will also have **Ecephys** metadata extracted from the SpikeGLX source data, though we aren't interested in modifying this information at the moment.
 
 .. figure:: ../assets/tutorials/single/metadata-ecephys.png
   :align: center
   :alt: Ecephys metadata extracted from the SpikeGLX source data
 
 
-Let's leave this as-is and advance to the next page.
-
-The next step generates a preview file and displays real-time progress throughout the conversion process.
+Let's leave this as-is and advance to the next page. This will trigger the conversion of your source data into a preview NWB file.
 
 File Conversion
 ---------------
@@ -145,10 +143,13 @@ Conversion Preview
 ^^^^^^^^^^^^^^^^^^
 On the Conversion Preview, Neurosift allows you to explore the structure of the NWB file and ensure the packaged data matches your expectations.
 
+In particular, take a look at the lefthand metadata table and check that the information provided on the previous pages is present in the NWB file.
 
 .. figure:: ../assets/tutorials/single/preview-page.png
   :align: center
   :alt: Neurosift preview visualization
+
+Neurosift can be useful for many other exploration tasks—but this will not be covered in this tutorial.
 
 Advancing from this page will trigger the full conversion of your data to the NWB format, a process that may take some time depending on the dataset size.
 

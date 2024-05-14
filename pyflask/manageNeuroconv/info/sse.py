@@ -25,3 +25,6 @@ class MessageAnnouncer:
                 self.listeners[i].put_nowait(msg)
             except queue.Full:
                 del self.listeners[i]
+
+
+announcer = MessageAnnouncer()

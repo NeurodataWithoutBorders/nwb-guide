@@ -82,7 +82,7 @@ export function createFormModal ({
     content.style.padding = "25px"
 
     const saveButton = new Button({
-        label: "Update",
+        label: "Submit",
         primary: true,
         onClick: async () => {
             await globalForm.validate()
