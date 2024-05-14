@@ -172,7 +172,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
         merge(overrides.ignore, nestedIgnore);
 
-        merge(overrides.schema, schemaCopy, { arrays: true });
+        merge(overrides.schema, schemaCopy, { arrays: "append" });
 
         const tableMetadata = {
             keyColumn: tempPropertyKey,
@@ -258,7 +258,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 
     merge(overrides.ignore, nestedIgnore);
 
-    merge(overrides.schema, schemaCopy, { arrays: true });
+    merge(overrides.schema, schemaCopy, { arrays: "append" });
 
     // Normal table parsing
     const tableMetadata = {
@@ -884,7 +884,10 @@ export class JSONSchemaInput extends LitElement {
 
             const renderEmpty = custom === null;
             if (custom) return custom;
-            else if (renderEmpty) this.remove(); // Remove from DOM so that parent can be empty
+            else if (renderEmpty) {
+                this.remove(); // Remove from DOM so that parent can be empty
+                return;
+            }
         }
 
         // Handle file and directory formats
