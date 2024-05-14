@@ -881,7 +881,10 @@ export class JSONSchemaInput extends LitElement {
                 onUpdate: this.#updateData,
                 onThrow: this.#onThrow,
             });
-            if (custom || custom === null) return custom;
+
+            const renderEmpty = custom === null;
+            if (custom) return custom;
+            else if (renderEmpty) this.remove(); // Remove from DOM so that parent can be empty
         }
 
         // Handle file and directory formats
