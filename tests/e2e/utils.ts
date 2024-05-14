@@ -3,10 +3,24 @@ import { ScreenshotOptions } from 'puppeteer'
 
 import { sleep } from '../puppeteer'
 
-import { mkdirSync, existsSync } from 'node:fs'
+import { mkdirSync, existsSync, rmSync } from 'node:fs'
 import { join, sep } from 'node:path'
 
-import { references, screenshotPath } from "./config"
+import { references, screenshotPath, regenerateTestData, testDataRootPath, alwaysDelete } from "./config"
+
+export const initTests = ({ screenshots, data }: { [key: string]: undefined | boolean } = {}) => {
+
+    if (data !== false && regenerateTestData) {
+      if (existsSync(testDataRootPath)) rmSync(testDataRootPath, { recursive: true })
+    }
+
+    alwaysDelete.forEach(path => existsSync(path) ? rmSync(path, { recursive: true }) : '')
+
+    if (screenshots !== false) {
+      if (existsSync(screenshotPath)) rmSync(screenshotPath, { recursive: true })
+      mkdirSync(screenshotPath, { recursive: true })
+    }
+}
 
 export const takeScreenshot = async (relativePath, delay = 0, options: ScreenshotOptions = { fullPage: true }) => {
     if (delay) await sleep(delay)

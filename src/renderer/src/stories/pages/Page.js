@@ -123,7 +123,7 @@ export class Page extends LitElement {
 
         if (preview) {
             const stubs = await this.runConversions({ stub_test: true }, undefined, {
-                title: "Running stub conversion on all sessions...",
+                title: "Creating conversion preview for all sessions...",
             });
             this.info.globalState[key] = { stubs };
         } else {

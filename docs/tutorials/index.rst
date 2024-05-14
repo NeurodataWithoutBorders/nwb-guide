@@ -5,6 +5,19 @@ to the Neurodata Without Borders (NWB) format and uploading to the DANDI Archive
 
 In these tutorials, you'll follow along on a :doc:`local installation of the GUIDE </installation>` as we detail the conversion process from initial setup to final upload.
 
+.. note::
+    This tutorial focuses on uploading to the Staging server.
+
+    **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Staging server with the Main Archive.
+
+.. note::
+
+   If you intend to complete the Dataset Publication section of this tutorial, you'll need to create an account on the DANDI Archive. This will need to be approved by the archive administrators and will require separate approval for both the main archive and the staging server.
+
+    **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`.
+
+    We recommend that you create an account on the staging server before you begin the tutorials.
+
 Before you begin these tutorials, **you'll need to generate the tutorial dataset** using the instructions on the Dataset page.
 
 

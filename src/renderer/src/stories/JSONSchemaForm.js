@@ -108,7 +108,7 @@ const componentCSS = `
 
 
 
-    .form-section:not(:last-child), .link:not(:last-child){
+    .form-section:not(:last-child):not(:empty), .link:not(:last-child){
         margin-bottom: 15px;
     }
 
@@ -513,6 +513,14 @@ export class JSONSchemaForm extends LitElement {
                 const resolvedSchema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
+                // Allow using null to specify an immutable table
+                if (
+                    e.message.includes("does not meet maximum length") ||
+                    e.message.includes("does not meet minimum length")
+                ) {
+                    if (e.argument === null) return;
+                }
+
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message.includes("is not of a type(s)")) {
                     if (resolvedSchema.type === "number") {
@@ -561,7 +569,9 @@ export class JSONSchemaForm extends LitElement {
         const isValid = !requiredButNotSpecified.length;
 
         // Check if all inputs are valid
-        const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
+        const flaggedInputs = (this.shadowRoot ? Array.from(this.shadowRoot.querySelectorAll(".invalid")) : []).filter(
+            (el) => el.nextElementSibling
+        ); // Skip tables
 
         if (resolvedErrors.length) {
             const len = resolvedErrors.length;
@@ -569,11 +579,8 @@ export class JSONSchemaForm extends LitElement {
             else this.throw(`${len} JSON Schema errors detected.`);
         }
 
-        const allErrors = Array.from(flaggedInputs)
-            .map((inputElement) => {
-                if (!inputElement.nextElementSibling) return; // Skip tables
-                return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
-            })
+        const allErrors = flaggedInputs
+            .map((inputElement) => Array.from(inputElement.nextElementSibling.children).map((li) => li.message))
             .flat();
 
         const nMissingRequired = allErrors.reduce((acc, curr) => {
