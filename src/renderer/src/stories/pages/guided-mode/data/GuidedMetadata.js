@@ -252,7 +252,7 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (path[0] === "Ophys") {
                         const name = path.slice(-1)[0];
 
-                        if (isPatternProperties) schema.minItems = schema.maxItems = null; // Do not allow more than on the reuslts
+                        if (isPatternProperties) schema.minItems = schema.maxItems = null; // Do not allow more than on the results
 
                         if (schema.type === "array") {
                             if (name !== "Device" && target) {
