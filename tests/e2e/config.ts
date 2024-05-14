@@ -102,7 +102,7 @@ export const subjectInfo = {
   }
 }
 
-export const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
+export const regenerateTestData = !existsSync(testDataPath) || !existsSync(testDatasetPath) || false // Generate only if doesn't exist
 // export const regenerateTestData = true // Force regeneration
 
 export const dandiInfo = {
