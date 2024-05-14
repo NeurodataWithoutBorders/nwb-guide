@@ -242,7 +242,7 @@ export class Dashboard extends LitElement {
 
         this.page.set(toPass, false);
 
-        this.page.checkSyncState().then(() => {
+        this.page.checkSyncState().then(async () => {
             const projectName = info.globalState?.project?.name;
 
             this.subSidebar.header = projectName
@@ -264,8 +264,8 @@ export class Dashboard extends LitElement {
                 });
 
                 // Skip right over the page if configured as such
-                if (previous && previous.info.previous === this.page) this.page.onTransition(-1);
-                else this.page.onTransition(1);
+                if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
+                else await this.page.onTransition(1);
             }
         });
     }
@@ -328,13 +328,13 @@ export class Dashboard extends LitElement {
             if (typeof transition === "number") {
                 const info = this.page.info;
                 const sign = Math.sign(transition);
-                if (sign === 1) return this.setAttribute("activePage", info.next.info.id);
-                else if (sign === -1) return this.setAttribute("activePage", (info.previous ?? info.parent).info.id); // Default to back in time
+                if (sign === 1) transition = info.next.info.id;
+                else if (sign === -1) transition = (info.previous ?? info.parent).info.id; // Default to back in time
             }
 
             this.setAttribute("activePage", transition);
 
-            return await promise;
+            return promise;
         };
 
         this.main.updatePages = () => {

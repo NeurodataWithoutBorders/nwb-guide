@@ -26,21 +26,25 @@ import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
 import { run } from "../guided-mode/options/utils.js";
 import { joinPath } from "../../../globals.js";
 
-const dataOutputPath = joinPath(testDataFolderPath, "data");
-const datasetOutputPath = joinPath(testDataFolderPath, "dataset");
+const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
+const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");
 
-const propertiesToTransform = ["folder_path", "file_path"];
+const propertiesToTransform = ["folder_path", "file_path", "config_file_path"];
 
 const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
-function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
-    const subjectId = "mouse1";
+function saveNewPipelineFromYaml(name, info, rootFolder) {
+    const subject_id = "mouse1";
     const sessions = ["session1"];
+    const session_id = sessions[0];
+
+    info = structuredClone(info); // Copy info
 
     const hasMultipleSessions = sessions.length > 1;
 
-    const resolvedSourceData = structuredClone(sourceData);
-    Object.values(resolvedSourceData).forEach((info) => {
+    const resolvedInterfaces = info.interfaces ?? info;
+
+    Object.values(resolvedInterfaces).forEach((info) => {
         propertiesToTransform.forEach((property) => {
             if (info[property]) {
                 const fullPath = path.join(rootFolder, info[property]);
@@ -49,6 +53,18 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
             }
         });
     });
+
+    const resolvedMetadata = {
+        NWBFile: { session_id },
+        Subject: { subject_id },
+    };
+
+    resolvedMetadata.__generated = structuredClone(info.interfaces ? info.metadata ?? {} : {});
+
+    const resolvedInfo = {
+        source_data: resolvedInterfaces,
+        metadata: resolvedMetadata,
+    };
 
     const updatedName = header(name);
 
@@ -59,8 +75,8 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
     };
 
     if (!workflowInfo.multiple_sessions) {
-        workflowInfo.subject_id = subjectId;
-        workflowInfo.session_id = sessions[0];
+        workflowInfo.subject_id = subject_id;
+        workflowInfo.session_id = session_id;
     }
 
     save({
@@ -73,7 +89,7 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
                 },
 
                 // provide data for all supported interfaces
-                interfaces: Object.keys(resolvedSourceData).reduce((acc, key) => {
+                interfaces: Object.keys(resolvedInterfaces).reduce((acc, key) => {
                     acc[key] = `${key}`;
                     return acc;
                 }, {}),
@@ -81,24 +97,14 @@ function saveNewPipelineFromYaml(name, sourceData, rootFolder) {
                 structure: {},
 
                 results: {
-                    [subjectId]: sessions.reduce((acc, sessionId) => {
-                        acc[sessionId] = {
-                            metadata: {
-                                Subject: {
-                                    subject_id: subjectId,
-                                },
-                                NWBFile: {
-                                    session_id: sessionId,
-                                },
-                            },
-                            source_data: resolvedSourceData,
-                        };
+                    [subject_id]: sessions.reduce((acc, sessionId) => {
+                        acc[session_id] = resolvedInfo;
                         return acc;
                     }, {}),
                 },
 
                 subjects: {
-                    [subjectId]: {
+                    [subject_id]: {
                         sessions: sessions,
                         sex: "M",
                         species: "Mus musculus",
@@ -126,7 +132,7 @@ const schema = merge(
         required: ["DANDI", "developer"],
     },
     {
-        arrays: true,
+        arrays: "append",
     }
 );
 
@@ -158,16 +164,16 @@ export class SettingsPage extends Page {
     };
 
     deleteTestData = () => {
-        deleteIfExists(dataOutputPath);
-        deleteIfExists(datasetOutputPath);
+        deleteIfExists(DATA_OUTPUT_PATH);
+        deleteIfExists(DATASET_OUTPUT_PATH);
     };
 
     generateTestData = async () => {
-        if (!fs.existsSync(dataOutputPath)) {
+        if (!fs.existsSync(DATA_OUTPUT_PATH)) {
             await run(
                 "generate",
                 {
-                    output_path: dataOutputPath,
+                    output_path: DATA_OUTPUT_PATH,
                 },
                 {
                     title: "Generating test data",
@@ -183,8 +189,8 @@ export class SettingsPage extends Page {
         await run(
             "generate/dataset",
             {
-                input_path: dataOutputPath,
-                output_path: datasetOutputPath,
+                input_path: DATA_OUTPUT_PATH,
+                output_path: DATASET_OUTPUT_PATH,
             },
             {
                 title: "Generating test dataset",
@@ -195,11 +201,11 @@ export class SettingsPage extends Page {
             throw error;
         });
 
-        const sanitizedOutputPath = datasetOutputPath.replace(homeDirectory, "~");
+        const sanitizedOutputPath = DATASET_OUTPUT_PATH.replace(homeDirectory, "~");
 
         this.notify(`Test dataset successfully generated at ${sanitizedOutputPath}!`);
 
-        return datasetOutputPath;
+        return DATASET_OUTPUT_PATH;
     };
 
     beforeSave = async () => {
@@ -288,7 +294,7 @@ export class SettingsPage extends Page {
                 <div>
                     <p style="font-weight: bold;">Test Dataset</p>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        ${fs.existsSync(datasetOutputPath) && fs.existsSync(dataOutputPath)
+                        ${fs.existsSync(DATASET_OUTPUT_PATH) && fs.existsSync(DATA_OUTPUT_PATH)
                             ? [
                                   new Button({
                                       icon: deleteSVG,
@@ -307,8 +313,8 @@ export class SettingsPage extends Page {
                                       size: "small",
                                       onClick: async () => {
                                           if (electron.ipcRenderer) {
-                                              if (fs.existsSync(datasetOutputPath))
-                                                  electron.ipcRenderer.send("showItemInFolder", datasetOutputPath);
+                                              if (fs.existsSync(DATASET_OUTPUT_PATH))
+                                                  electron.ipcRenderer.send("showItemInFolder", DATASET_OUTPUT_PATH);
                                               else {
                                                   this.notify("The test dataset no longer exists!", "warning");
                                                   this.requestUpdate();

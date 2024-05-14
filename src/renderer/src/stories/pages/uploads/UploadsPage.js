@@ -12,7 +12,7 @@ import dandiUploadSchema, {
     regenerateDandisets,
 } from "../../../../../../schemas/dandi-upload.schema";
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
-const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: true });
+const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: "append" });
 
 import dandiCreateSchema from "../../../../../../schemas/dandi-create.schema";
 

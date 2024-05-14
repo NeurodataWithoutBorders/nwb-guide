@@ -1,12 +1,12 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import { sleep } from '../puppeteer'
 
-import { mkdirSync, existsSync, rmSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 import * as config from './config'
 import runWorkflow, { uploadToDandi } from './workflow'
-import { evaluate, takeScreenshot, to, toNextPage } from './utils'
+import { initTests, evaluate, takeScreenshot, to } from './utils'
 
 const x = 250 // Sidebar size
 const width = config.windowDims.width - x
@@ -19,17 +19,7 @@ const datasetScreenshotClip = {
 }
 
 
-beforeAll(() => {
-
-  if (config.regenerateTestData) {
-    if (existsSync(config.testDataRootPath)) rmSync(config.testDataRootPath, { recursive: true })
-  }
-
-  config.alwaysDelete.forEach(path => existsSync(path) ? rmSync(path, { recursive: true }) : '')
-
-  if (existsSync(config.screenshotPath)) rmSync(config.screenshotPath, { recursive: true })
-  mkdirSync(config.screenshotPath, { recursive: true })
-})
+beforeAll(() => initTests())
 
 describe('E2E Test', () => {
 
@@ -100,7 +90,12 @@ describe('E2E Test', () => {
 
     describe('Complete a multi-session workflow', async () => {
       const subdirectory = 'multiple'
-      await runWorkflow('Multi Session Workflow', { upload_to_dandi: false, multiple_sessions: true, locate_data: true }, subdirectory)
+      await runWorkflow('Multi Session Workflow', {
+        upload_to_dandi: false,
+        multiple_sessions: true,
+        locate_data: true,
+        base_directory: config.testDatasetPath,
+      }, subdirectory)
 
       test('Ensure there are two completed pipelines', async () => {
         await takeScreenshot(join(subdirectory, 'home-page-complete'), 100)
@@ -144,19 +139,10 @@ describe('E2E Test', () => {
 
         }, { upload_to_dandi: true })
 
-        await toNextPage('structure') // Save data without a popup
         await to('//conversion')
+        await to('//upload')
 
-        // Do not prompt to save
-        await evaluate(() => {
-          const dashboard = document.querySelector('nwb-dashboard')
-          const page = dashboard.page
-          page.unsavedUpdates = false
-        })
-
-        await to('//upload') // NOTE: It would be nice to avoid having to re-run the conversion...
-
-      })
+      }, 2000)
 
       uploadToDandi(subdirectory) // Upload to DANDI if the API key is provided
 

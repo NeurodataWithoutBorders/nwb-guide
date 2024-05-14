@@ -8,7 +8,12 @@ Begin a new conversion on the **Convert** page and provide a name for your pipel
 Workflow Configuration
 ----------------------
 
-On the Workflow page, confirm that this pipeline will be run on multiple sessions. After this, also select that you’d like to locate the source data programmatically and skip dataset publication.
+Update the Workflow page to indicate that you'll:
+
+1. Run on multiple sessions
+2. Locate the source data programmatically
+3. Find source files inside ``~/NWB_GUIDE/test-data/dataset``, where **~** is the home directory of your system.
+4. Skip dataset publication.
 
 .. figure:: ../assets/tutorials/multiple/workflow-page.png
   :align: center
@@ -35,9 +40,9 @@ While you don’t have to specify format strings for all of the pipeline’s dat
 
 Format strings are specified using two components: the **base directory**, which is the directory to search in, and the **format string path**, where the source data is within that directory.
 
-Given the structure of the tutorial dataset, we’ll select ``~/NWB_GUIDE/test-data/dataset`` as the **base directory**, where **~** is the home directory of your system.
+The base directory has been pre-populated based on your selection on the Workflow page.
 
-We can take advantage of the **Autocomplete** feature of this page. Instead of manually filling out the format string, click the **Autocomplete** button to open a pop-up form that will derive the format string from a single example path.
+To avoid specifying the format string path by hand, we can take advantage of **Autocomplete**. Click the **Autocomplete** button to open a pop-up form that will derive the format string from a single example path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-open.png
   :align: center
@@ -81,20 +86,6 @@ We should also indicate the ``sex`` of each subject since this is a requirement 
   :align: center
   :alt: Complete subject table
 
-.. note::
-    If you're trying to specify metadata that is shared across sessions, you can use the **Global Metadata** feature.
-
-    Pressing the Edit Global Metadata button at the top of the page will show a pop-up form which allows you to provide a
-    single default value for each property, as long as it’s expected not to be unique.
-
-    These values will take effect as soon as the pop-up form has been submitted.
-
-    While Global Metadata is less relevant when we’re working with two subjeccts, this feature can be very powerful when you’re working with tens or even hundreds of subjects in one conversion.
-
-    We recommend using Global Metadata to correct issues caught by the **NWB Inspector** that are seen across several sessions.
-
-    You’ll be able to specify Global Metadata on the Source Data and File Metadata pages as well.
-
 Advance to the next page when you have entered subject metadata for all subjects.
 
 Source Data Information
@@ -117,13 +108,15 @@ Aside from the session manager and global metadata features noted above, the fil
 
   A complete General Metadata form
 
-Acting as global metadata, the information supplied on the subject metadata page has pre-filled the Subject metadata for each session.
+Acting as default metadata, the information supplied on the subject metadata page has pre-filled the Subject metadata for each session.
 
 .. figure:: ../assets/tutorials/multiple/metadata-subject-complete.png
   :align: center
   :alt: Complete Subject metadata form
 
   A complete Subject metadata form
+
+You'll notice that there's an **Edit Default Metadata** button at the top of the page. This feature allows you to specify a single default value for each property that is expected to be the same across all sessions. **Use this button to fill in general metadata for your sessions**, which will save you time and effort while ensuring your files still follow Best Practices.
 
 Finish the rest of the workflow as you would for a single session by completing a full conversion after you review the preview files with the NWB Inspector and Neurosift.
 
