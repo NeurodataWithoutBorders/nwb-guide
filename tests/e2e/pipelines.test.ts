@@ -55,7 +55,7 @@ describe('Run example pipelines', () => {
             page.save()
         }, testGINPath)
 
-        // Transiton back to conversions page and count pipelines
+        // Transition back to the conversions page and count pipelines
         const pipelineNames = await evaluate(async () => {
           const dashboard = document.querySelector('nwb-dashboard')
           dashboard.sidebar.select('/')
