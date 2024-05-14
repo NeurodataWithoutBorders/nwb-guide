@@ -516,7 +516,7 @@ export class JSONSchemaForm extends LitElement {
                 // Allow using null to specify an immutable table
                 if (
                     e.message.includes("does not meet maximum length") ||
-                    e.message.includes("oes not meet minimum length")
+                    e.message.includes("does not meet minimum length")
                 ) {
                     if (e.argument === null) return;
                 }
