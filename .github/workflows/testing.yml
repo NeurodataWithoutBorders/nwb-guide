@@ -82,6 +82,15 @@ jobs:
         name: Run tests with xvfb
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
 
+      - name: Archive E2E Test Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots-${{ matrix.os }}
+          path: docs/assets/tutorials
+          retention-days: 1
+
+
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
