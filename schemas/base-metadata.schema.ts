@@ -40,6 +40,15 @@ function getSpeciesInfo(species: any[][] = []) {
 
 }
 
+
+// Borrowed from https://stackoverflow.com/a/29774197/7290573
+function getCurrentDate() {
+    const date = new Date()
+    const offset = date.getTimezoneOffset();
+    return (new Date(date.getTime() - (offset*60*1000))).toISOString();
+}
+
+
 function updateEcephysTable(propName, schema, schemaToMerge) {
 
     const ecephys = schema.properties.Ecephys
@@ -112,6 +121,8 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         strict: false,
         description: 'The species of your subject.'
     }
+    subjectProps.date_of_birth.minimum = "1900-01-01T00:00"
+    subjectProps.date_of_birth.maximum = getCurrentDate().slice(0, -2)
 
     // copy.order = ['NWBFile', 'Subject']
 
