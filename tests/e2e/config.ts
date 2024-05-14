@@ -15,8 +15,8 @@ export const screenshotPath = join(__dirname, '..', '..', 'docs', 'assets', 'tut
 const guideRootPath = join(homedir(), paths.root)
 const testRootPath = join(guideRootPath, '.test')
 export const testDataRootPath = join(testRootPath, 'test-data')
-const testDataPath = join(testDataRootPath, 'data')
-export const testDatasetPath = join(testDataRootPath, 'dataset')
+const testDataPath = join(testDataRootPath, 'single_session_data')
+export const testDatasetPath = join(testDataRootPath, 'multi_session_dataset')
 
 export const windowDims = {
   width: 1280,
@@ -102,7 +102,7 @@ export const subjectInfo = {
   }
 }
 
-export const regenerateTestData = !existsSync(testDataRootPath) || false // Generate only if doesn't exist
+export const regenerateTestData = !existsSync(testDataPath) || !existsSync(testDatasetPath) || false // Generate only if doesn't exist
 // export const regenerateTestData = true // Force regeneration
 
 export const dandiInfo = {

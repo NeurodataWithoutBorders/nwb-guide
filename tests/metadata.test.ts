@@ -201,12 +201,13 @@ test('inter-table updates are triggered', async () => {
 
     // Validate that the results are incorrect
     const errors = await form.validate().catch(() => true).catch((e) => e)
-    console.log(errors)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
     const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
-    const row = table.addRow()
+    const idx = await table.addRow()
+
+    const row = table.getRow(idx)
 
     const baseRow = table.getRow(0)
     row.forEach((cell, i) => {
@@ -214,9 +215,12 @@ test('inter-table updates are triggered', async () => {
         else cell.setInput(baseRow[i].value) // Otherwise carry over info
     })
 
-    form.requestUpdate() // Re-render the form to update the table
+    await sleep(1000) // Wait for the ElectrodeGroup table to update properly
+
+    form.requestUpdate() // Re-render the form to update the Electrodes table
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate().then(() => false).catch((e) => true)
+
     expect(hasErrors).toBe(false) // Is valid
 })

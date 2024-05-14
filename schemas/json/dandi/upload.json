@@ -2,7 +2,7 @@
     "properties": {
         "dandiset": {
             "type": "string",
-            "description": "The unique identifier for your Dandiset. Can also be created or searched by name."
+            "description": "The title of the Dandiset to upload to. Can also provide the Dandiset ID.<br><small><b>Example:</b> My Dandiset or <code>207698</code></small>"
         },
         "additional_settings": {
             "properties": {

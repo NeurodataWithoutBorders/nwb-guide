@@ -1,4 +1,4 @@
-name: Dev Tests
+name: Example Pipeline Tests
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -13,7 +13,7 @@ env:
 
 jobs:
   testing:
-    name: ${{ matrix.os }}  # Will read on the dashboard as 'Dev Tests / {os}'
+    name: Pipelines on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -76,16 +76,8 @@ jobs:
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
-        run: npm run test:coverage
+        run: npm run test:pipelines
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
-
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          fail_ci_if_error: true
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:pipelines
