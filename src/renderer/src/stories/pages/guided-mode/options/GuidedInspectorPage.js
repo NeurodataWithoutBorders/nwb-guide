@@ -17,6 +17,7 @@ import { getMessageType } from "../../../../validation/index.js";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
+import { createProgressPopup } from "../../../utils/progress.js";
 import { resolve } from "../../../../promises";
 
 const filter = (list, toFilter) => {
@@ -145,7 +146,12 @@ export class GuidedInspectorPage extends Page {
                                 "inspect_file",
                                 { nwbfile_path: fileArr[0].info.file, ...options },
                                 { title }
-                            );
+                            ).catch((error) => {
+                                this.notify(error.message, "error");
+                                return null;
+                            });
+
+                            if (!result) return "Failed to generate inspector report.";
 
                             this.report = globalState.preview.inspector = {
                                 ...result,
@@ -170,7 +176,24 @@ export class GuidedInspectorPage extends Page {
 
                     this.report = inspector;
                     if (!this.report) {
-                        const result = await run("inspect_folder", { path, ...options }, { title: title + "s" });
+                        const swalOpts = await createProgressPopup({ title: `${title}s` });
+
+                        const { close: closeProgressPopup } = swalOpts;
+
+                        const result = await run(
+                            "inspect_folder",
+                            { path, ...options, request_id: swalOpts.id },
+                            swalOpts
+                        ).catch((error) => {
+                            this.notify(error.message, "error");
+                            closeProgressPopup();
+                            return null;
+                        });
+
+                        if (!result) return "Failed to generate inspector report.";
+
+                        closeProgressPopup();
+
                         this.report = globalState.preview.inspector = {
                             ...result,
                             messages: truncateFilePaths(result.messages, path),
