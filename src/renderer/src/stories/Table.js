@@ -196,7 +196,7 @@ export class Table extends LitElement {
             }entry`;
 
         if (!message) {
-            const errors = this.querySelectorAll("[error]");
+            const errors = Array.from(this.querySelectorAll("[error]"));
             const len = errors.length;
             if (len === 1) message = errors[0].getAttribute("data-message") || "Error found";
             else if (len) message = `${len} errors exist on this table.`;
@@ -364,7 +364,7 @@ export class Table extends LitElement {
                 if (value && k === instanceThis.keyColumn) {
                     if (value in instanceThis.data && instanceThis.data[value]?.[rowSymbol] !== row) {
                         // Convert previously valid value to unresolved
-                        const previousKey = instanceThis.getRowName(rrow);
+                        const previousKey = instanceThis.getRowName(row);
                         if (previousKey) {
                             unresolved[row] = instanceThis.data[previousKey];
                             delete instanceThis.data[previousKey];

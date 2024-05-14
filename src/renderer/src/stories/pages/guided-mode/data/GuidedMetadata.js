@@ -239,13 +239,13 @@ export class GuidedMetadataPage extends ManagedPage {
         const schema = preprocessMetadataSchema(globalState.schema.metadata[subject][session]);
         delete schema.description;
 
-        const ephys = schema.properties.Ecephys;
-
         resolveMetadata(subject, session, globalState);
 
         const additionalPropertiesToRetitle = ["Ophys.ImageSegmentation"];
 
         const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
+
+        console.log("schema", structuredClone(schema), structuredClone(results));
 
         const ophys = schema.properties.Ophys;
         if (ophys) {
@@ -255,14 +255,12 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (path[0] === "Ophys") {
                         const name = path.slice(-1)[0];
 
-                        if (isPatternProperties)
-                            return (schema.minItems = schema.maxItems =
-                                Object.values(resolveFromPath(path, results)).length);
+                        if (isPatternProperties) schema.minItems = schema.maxItems = null; // Do not allow more than on the results
 
                         if (schema.type === "array") {
                             if (name !== "Device" && target) {
                                 // Set most Ophys tables to have minItems / maxItems equal (i.e. no editing possible)
-                                if (name in target) schema.minItems = schema.maxItems = target[name].length;
+                                if (name in target) schema.minItems = schema.maxItems = null;
                                 // Remove Ophys property requirement if left initially undefined
                                 else {
                                     target[name] = []; // Initialize empty array
@@ -278,6 +276,8 @@ export class GuidedMetadataPage extends ManagedPage {
         }
 
         console.log("schema", structuredClone(schema), structuredClone(results));
+
+        delete results.__generated; // Ignore generated results. NOTE: See if this fails
 
         // Create the form
         const form = new JSONSchemaForm({
@@ -304,7 +304,8 @@ export class GuidedMetadataPage extends ManagedPage {
                         ["Subject", "age"],
                         ["Subject", "date_of_birth"],
                     ],
-                    validate: true,
+                    link: true,
+                    conditional: true,
                 },
                 {
                     name: "Institutional Info",
@@ -312,6 +313,15 @@ export class GuidedMetadataPage extends ManagedPage {
                         ["NWBFile", "institution"],
                         ["NWBFile", "lab"],
                     ],
+                },
+
+                // For C. Elegans
+                {
+                    properties: [
+                        ["Subject", "sex"],
+                        ["Subject", "species"],
+                    ],
+                    link: true,
                 },
             ],
 
@@ -369,13 +379,12 @@ export class GuidedMetadataPage extends ManagedPage {
                             };
 
                             const table = createTable.call(mockInput, [...localPath], {
-                                onUpdate: (localPath, value) => {
+                                onUpdate: (localPath, value) =>
                                     onUpdate([name, ...localPath], value, true, {
                                         willTimeout: false,
                                         onError: (e) => e,
                                         onWarning: (e) => e,
-                                    });
-                                },
+                                    }),
                                 onThrow: onThrow,
                             });
 
@@ -391,75 +400,77 @@ export class GuidedMetadataPage extends ManagedPage {
                     if (patternPropsToRetitle.includes(this.form.base.join("."))) {
                         inputSchema.title = "Plane Metadata<hr>";
 
-                        return Object.entries(data)
-                            .map(([name, value]) => {
-                                const createNestedTable = (value, pattern, schema) => {
-                                    const mockInput = {
-                                        schema: {
-                                            type: "object",
-                                            items: schema,
+                        return html`<div style="width: 100%;">
+                            ${Object.entries(data)
+                                .map(([name, value]) => {
+                                    const createNestedTable = (value, pattern, schema) => {
+                                        const mockInput = {
+                                            schema: {
+                                                type: "object",
+                                                items: schema,
 
-                                            // Transfer a subset of item schema values
-                                            minItems: schema.minItems,
-                                            maxItems: schema.maxItems,
-                                        },
+                                                // Transfer a subset of item schema values
+                                                minItems: schema.minItems,
+                                                maxItems: schema.maxItems,
+                                            },
 
-                                        renderTable: this.renderTable,
-                                        value,
-                                        pattern: pattern,
-                                        form: {
-                                            ignore: this.form.ignore,
-                                        },
-                                    };
+                                            renderTable: this.renderTable,
+                                            value,
+                                            pattern: pattern,
+                                            form: {
+                                                ignore: this.form.ignore,
+                                            },
+                                        };
 
-                                    return html`
-                                        <div style="width: 100%;">
-                                            ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ""}
-                                            ${createTable.call(mockInput, [...localPath], {
-                                                overrides: {
-                                                    schema: {
-                                                        items: {
-                                                            order: ["name", "description"],
-                                                            additionalProperties: false,
+                                        return html`
+                                            <div style="width: 100%;">
+                                                ${nProps > 1 ? html`<h3>${header(name)}</h3>` : ""}
+                                                ${createTable.call(mockInput, [...localPath], {
+                                                    overrides: {
+                                                        schema: {
+                                                            items: {
+                                                                order: ["name", "description"],
+                                                                additionalProperties: false,
+                                                            },
+                                                        },
+                                                        ignore: {
+                                                            [tempPropertyKey]: true,
                                                         },
                                                     },
-                                                    ignore: {
-                                                        [tempPropertyKey]: true,
-                                                    },
-                                                },
-                                                onUpdate: (localPath, value) =>
-                                                    onUpdate([name, ...localPath], value, true, {
-                                                        willTimeout: false,
-                                                        onError: (e) => e,
-                                                        onWarning: (e) => e,
-                                                    }),
-                                                onThrow: onThrow,
-                                            })}
-                                        </div>
-                                    `;
-                                };
+                                                    onUpdate: (localPath, value) =>
+                                                        onUpdate([name, ...localPath], value, true, {
+                                                            willTimeout: false,
+                                                            onError: (e) => e,
+                                                            onWarning: (e) => e,
+                                                        }),
+                                                    onThrow: onThrow,
+                                                })}
+                                            </div>
+                                        `;
+                                    };
 
-                                if (isAdditional) {
-                                    const data = value.reduce((acc, item) => {
-                                        const name = item.name;
-                                        acc[name] = item;
-                                        return acc;
-                                    }, {});
+                                    if (isAdditional) {
+                                        const data = value.reduce((acc, item) => {
+                                            const name = item.name;
+                                            acc[name] = item;
+                                            return acc;
+                                        }, {});
 
-                                    return createNestedTable(data, undefined, {
-                                        type: "object",
-                                        items: {
+                                        return createNestedTable(data, undefined, {
                                             type: "object",
-                                            additionalProperties: true,
-                                        },
-                                    });
-                                }
+                                            items: {
+                                                type: "object",
+                                                additionalProperties: true,
+                                            },
+                                        });
+                                    }
 
-                                return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
-                                    return createNestedTable(value, pattern, schema);
-                                });
-                            })
-                            .flat();
+                                    return Object.entries(schemaCopy.patternProperties).map(([pattern, schema]) => {
+                                        return createNestedTable(value, pattern, schema);
+                                    });
+                                })
+                                .flat()}
+                        </div>`;
                     }
                 }
             },

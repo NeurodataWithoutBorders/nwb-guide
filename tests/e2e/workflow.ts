@@ -4,7 +4,7 @@ import { sleep } from '../puppeteer'
 
 import { join } from 'node:path'
 import { evaluate, takeScreenshot, toNextPage } from "./utils"
-import { dandiInfo, publish, subjectInfo, testDatasetPath, testInterfaceInfo } from "./config"
+import { dandiInfo, publish, subjectInfo, testInterfaceInfo } from "./config"
 
 export const uploadToDandi = (subdirectory, forceSkip = false) => {
 
@@ -410,7 +410,21 @@ export default async function runWorkflow(name, workflow, identifier) {
 
   test('Review NWB Inspector output', async () => {
 
-    await takeScreenshot(join(identifier, 'inspect-page'), 5000) // Allow for the completion of file validation
+
+    await evaluate(async () => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      await dashboard.page.rendered
+    })
+
+    await takeScreenshot(join(identifier, 'inspect-page'), 100) // Allow for the completion of file validation
+
+    const hasReport = await evaluate(() =>{
+      const dashboard = document.querySelector('nwb-dashboard')
+      return !!dashboard.page.report
+    })
+
+    expect(hasReport).toBe(true)
+
     await toNextPage('preview')
 
   })

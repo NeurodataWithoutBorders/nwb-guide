@@ -14,6 +14,7 @@ import tippy from "tippy.js";
 import { sortTable, getEditable } from "./Table";
 import { NestedInputCell } from "./table/cells/input";
 import { getIgnore } from "./JSONSchemaForm";
+import { merge } from "./pages/utils";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -428,9 +429,10 @@ export class SimpleTable extends LitElement {
         let message;
 
         if (!message) {
-            const errors = this.shadowRoot.querySelectorAll("[error]");
+            const errors = Array.from(this.shadowRoot.querySelectorAll("[error]"));
             const len = errors.length;
-            if (len === 1) message = errors[0].title || "Error found";
+            console.log(errors);
+            if (len === 1) message = errors[0].title || "An error exists on this table.";
             else if (len) {
                 message = `${len} errors exist on this table.`;
             }
@@ -468,23 +470,27 @@ export class SimpleTable extends LitElement {
         }
     };
 
-    addRow = (anchorRow = this.#cells.length - 1, n) => this.#updateRows(anchorRow, 1)[0];
+    addRow = async (anchorRow = this.#cells.length - 1, n) => (await this.#updateRows(anchorRow, 1))[0];
     getRow = (i) => Object.values(this.#cells[i]);
 
     #updateContextMenuRendering = () => {
         const { minItems, maxItems } = this.schema;
 
-        if (minItems || maxItems) {
-            const nRows = this.data.length;
-            const addRowButton = this.#context.shadowRoot.querySelector("#add-row");
-            const removeRowButton = this.#context.shadowRoot.querySelector("#remove-row");
+        const nRows = this.data.length;
+        const addRowButton = this.#context.shadowRoot.querySelector("#add-row");
+        const removeRowButton = this.#context.shadowRoot.querySelector("#remove-row");
 
-            removeRowButton.removeAttribute("disabled");
-            addRowButton.removeAttribute("disabled");
+        removeRowButton.removeAttribute("disabled");
+        addRowButton.removeAttribute("disabled");
 
-            if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
+        if (minItems !== undefined) {
+            if (minItems === null) removeRowButton.setAttribute("disabled", "");
+            else if (nRows <= minItems) removeRowButton.setAttribute("disabled", "");
+        }
 
-            if (nRows >= maxItems) addRowButton.setAttribute("disabled", "");
+        if (maxItems !== undefined) {
+            if (maxItems === null) addRowButton.setAttribute("disabled", "");
+            else if (nRows >= maxItems) addRowButton.setAttribute("disabled", "");
         }
     };
 
@@ -545,21 +551,31 @@ export class SimpleTable extends LitElement {
         },
     };
 
-    generateContextMenu(options) {
-        const items = [];
+    getEditOptions() {
+        const options = merge(this.contextOptions, { row: { add: true, remove: true } }, { clone: true });
 
         const { minItems, maxItems } = this.schema;
         const nRows = this.data.length;
 
         const noRowEdits = minItems && maxItems && minItems === maxItems && nRows === minItems && nRows === maxItems;
 
-        if (!noRowEdits) {
-            if (options.row?.add) items.push(this.#menuOptions.row.add);
-            if (options.row?.remove) items.push(this.#menuOptions.row.remove);
+        if (noRowEdits) options.row.add = options.row.remove = false;
+        else {
+            if (maxItems === null) options.row.add = false;
+            if (minItems === null) options.row.remove = false;
         }
 
-        if (options.column?.add) items.push(this.#menuOptions.column.add);
-        if (options.column?.remove) items.push(this.#menuOptions.column.remove);
+        return options;
+    }
+
+    generateContextMenu() {
+        const items = [];
+        const editOptions = this.getEditOptions();
+
+        if (editOptions.row?.add) items.push(this.#menuOptions.row.add);
+        if (editOptions.row?.remove) items.push(this.#menuOptions.row.remove);
+        if (editOptions.column?.add) items.push(this.#menuOptions.column.add);
+        if (editOptions.column?.remove) items.push(this.#menuOptions.column.remove);
 
         if (items.length) {
             this.#context = new ContextMenu({
@@ -649,13 +665,7 @@ export class SimpleTable extends LitElement {
             this.#loaded = true;
             this.onLoaded();
 
-            this.generateContextMenu({
-                row: {
-                    add: true,
-                    remove: true,
-                },
-                ...this.contextOptions,
-            });
+            this.generateContextMenu();
         }
     };
 
@@ -693,11 +703,16 @@ export class SimpleTable extends LitElement {
         // Remove elements and cell entries that correspond to the removed elements
         if (!isPositive) {
             const rowHeaders = Object.keys(this.#data);
-            range.map((i) => {
-                children[i].remove();
-                delete this.#data[rowHeaders[row]];
+            range.map((idx) => {
+                if (Array.isArray(this.#data)) this.#data.splice(idx, 1);
+                else delete this.#data[rowHeaders[idx]];
+
+                Array.from(children).forEach((el) => {
+                    if (el.getAttribute("data-row") === idx.toString()) el.remove();
+                });
+
                 delete this.#unresolved[row];
-                delete this.#cells[i];
+                delete this.#cells[idx];
             });
         }
 
@@ -717,24 +732,25 @@ export class SimpleTable extends LitElement {
 
             // Replace deleted base row(s) with new one
             let latest = current;
-            const mapped = range.map((idx) => {
+            range.forEach((idx) => {
                 const i = idx + 1;
                 delete this.#cells[i];
                 const data = this.#getRowData(); // Get information for an undefined row
                 const newRow = document.createElement("tr");
+                newRow.setAttribute("data-row", i);
                 newRow.append(...data.map((v, j) => this.#renderCell(v, { i, j })));
 
                 if (latest) latest.insertAdjacentElement("afterend", newRow);
                 else bodyEl.append(newRow);
-
-                return this.getRow(i);
             });
-
-            this.#onUpdate([], this.data);
-            return mapped;
         }
 
-        this.#onUpdate([], this.data);
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                this.#onUpdate([], this.data);
+                resolve(range.map((i) => i + 1));
+            }, 50); // Wait for table to update asynchronously
+        });
     }
 
     #renderHeader = (str, { title, description }) => {
@@ -968,6 +984,14 @@ export class SimpleTable extends LitElement {
             const foundKey = Object.keys(value).find((k) => value[k] === key);
             if (foundKey) this.keyColumn = foundKey;
         }
+
+        const editOptions = this.getEditOptions();
+
+        const rowEditOptions = [];
+        if (editOptions.row?.add) rowEditOptions.push("add");
+        if (editOptions.row?.remove) rowEditOptions.push("remove");
+
+        const description = rowEditOptions.length ? `Right click to ${rowEditOptions.join(" or ")} rows.` : "";
 
         return html`
             ${this.#context}

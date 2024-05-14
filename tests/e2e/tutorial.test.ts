@@ -1,12 +1,12 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import { sleep } from '../puppeteer'
 
-import { mkdirSync, existsSync, rmSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 import * as config from './config'
 import runWorkflow, { uploadToDandi } from './workflow'
-import { evaluate, takeScreenshot, to, toNextPage } from './utils'
+import { initTests, evaluate, takeScreenshot, to } from './utils'
 
 const x = 250 // Sidebar size
 const width = config.windowDims.width - x
@@ -19,17 +19,7 @@ const datasetScreenshotClip = {
 }
 
 
-beforeAll(() => {
-
-  if (config.regenerateTestData) {
-    if (existsSync(config.testDataRootPath)) rmSync(config.testDataRootPath, { recursive: true })
-  }
-
-  config.alwaysDelete.forEach(path => existsSync(path) ? rmSync(path, { recursive: true }) : '')
-
-  if (existsSync(config.screenshotPath)) rmSync(config.screenshotPath, { recursive: true })
-  mkdirSync(config.screenshotPath, { recursive: true })
-})
+beforeAll(() => initTests())
 
 describe('E2E Test', () => {
 
@@ -152,7 +142,7 @@ describe('E2E Test', () => {
         await to('//conversion')
         await to('//upload')
 
-      })
+      }, 2000)
 
       uploadToDandi(subdirectory) // Upload to DANDI if the API key is provided
 

@@ -13,11 +13,7 @@ from shutil import rmtree, copytree
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sse import MessageAnnouncer
-from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
-
-announcer = MessageAnnouncer()
-
+from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, announcer
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 
@@ -391,52 +387,19 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Clear the Electrodes information for being set as a collection of Interfaces
     has_ecephys = "Ecephys" in metadata
     has_units = False
+    ecephys_metadata = metadata.get("Ecephys")
+    ecephys_schema = schema["properties"].get("Ecephys", {"properties": {}})
 
-    if has_ecephys:
+    if not ecephys_schema.get("required"):
+        ecephys_schema["required"] = []
 
-        ecephys_schema = schema["properties"]["Ecephys"]
+    ecephys_properties = ecephys_schema["properties"]
+    original_electrodes_schema = ecephys_properties.get("Electrodes")
 
-        if not ecephys_schema.get("required"):
-            ecephys_schema["required"] = []
-
-        ecephys_properties = ecephys_schema["properties"]
-
-        # Populate Electrodes metadata
-        original_electrodes_schema = ecephys_properties["Electrodes"]
-
-        # Add Electrodes to the schema
-        metadata["Ecephys"]["Electrodes"] = {}
-        ecephys_schema["required"].append("Electrodes")
-
-        ecephys_properties["ElectrodeColumns"] = {
-            "type": "array",
-            "minItems": 0,
-            "items": {"$ref": "#/properties/Ecephys/definitions/ElectrodeColumn"},
-        }
-
-        ecephys_schema["required"].append("ElectrodeColumns")
-
-        ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
-
-        # Populate Units metadata
-        original_units_schema = ecephys_properties.pop("UnitProperties", None)
-        metadata["Ecephys"].pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
-
-        has_units = original_units_schema is not None
-
-        if has_units:
-
-            ecephys_properties["UnitColumns"] = {
-                "type": "array",
-                "minItems": 0,
-                "items": {"$ref": "#/properties/Ecephys/definitions/UnitColumn"},
-            }
-
-            schema["properties"]["Ecephys"]["required"].append("UnitColumns")
-
-            ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
-            metadata["Ecephys"]["Units"] = {}
-            schema["properties"]["Ecephys"]["required"].append("Units")
+    resolved_electrodes = {}
+    resolved_units = {}
+    resolved_electrodes_schema = {"type": "object", "properties": {}, "required": []}
+    resolved_units_schema = {"type": "object", "properties": {}, "required": []}
 
     def on_sorting_interface(name, sorting_interface):
 
@@ -453,11 +416,11 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         else:
             metadata["Ecephys"]["UnitColumns"] = unit_columns
 
-        units_data = metadata["Ecephys"]["Units"][name] = get_unit_table_json(sorting_interface)
+        units_data = resolved_units[name] = get_unit_table_json(sorting_interface)
 
         n_units = len(units_data)
 
-        ecephys_properties["Units"]["properties"][name] = {
+        resolved_units_schema["properties"][name] = {
             "type": "array",
             "minItems": n_units,
             "maxItems": n_units,
@@ -469,7 +432,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             },
         }
 
-        ecephys_properties["Units"]["required"].append(name)
+        resolved_units_schema["required"].append(name)
 
         return sorting_interface
 
@@ -479,7 +442,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         electrode_columns = get_electrode_columns_json(recording_interface)
 
         # Aggregate electrode column information across recording interfaces
-        existing_electrode_columns = metadata["Ecephys"].get("ElectrodeColumns")
+        existing_electrode_columns = ecephys_metadata.get("ElectrodeColumns")
         if existing_electrode_columns:
             for entry in electrode_columns:
                 if any(obj["name"] == entry["name"] for obj in existing_electrode_columns):
@@ -487,13 +450,13 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 else:
                     existing_electrode_columns.append(entry)
         else:
-            metadata["Ecephys"]["ElectrodeColumns"] = electrode_columns
+            ecephys_metadata["ElectrodeColumns"] = electrode_columns
 
-        electrode_data = metadata["Ecephys"]["Electrodes"][name] = get_electrode_table_json(recording_interface)
+        electrode_data = resolved_electrodes[name] = get_electrode_table_json(recording_interface)
 
         n_electrodes = len(electrode_data)
 
-        ecephys_properties["Electrodes"]["properties"][name] = {
+        resolved_electrodes_schema["properties"][name] = {
             "type": "array",
             "minItems": n_electrodes,
             "maxItems": n_electrodes,
@@ -505,7 +468,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             },
         }
 
-        ecephys_properties["Electrodes"]["required"].append(name)
+        resolved_electrodes_schema["required"].append(name)
 
         return recording_interface
 
@@ -518,9 +481,50 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Map sorting interfaces to metadata
     map_interfaces(BaseSortingExtractorInterface, on_sorting_interface, converter)
 
-    # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
 
+        has_electrodes = "ElectrodeColumns" in ecephys_metadata
+
+        original_units_schema = ecephys_properties.pop("UnitProperties", None)
+        ecephys_metadata.pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
+        has_units = original_units_schema is not None
+
+        # Populate Electrodes metadata
+        if has_electrodes:
+
+            # Add Electrodes to the schema
+            ecephys_metadata["Electrodes"] = resolved_electrodes
+            ecephys_schema["required"].append("Electrodes")
+
+            ecephys_properties["ElectrodeColumns"] = {
+                "type": "array",
+                "minItems": 0,
+                "items": {"$ref": "#/properties/Ecephys/definitions/ElectrodeColumn"},
+            }
+
+            ecephys_schema["required"].append("ElectrodeColumns")
+
+            ecephys_properties["Electrodes"] = resolved_electrodes_schema
+
+        else:
+            ecephys_properties.pop("Electrodes", None)
+
+        # Populate Units metadata
+        if has_units:
+
+            ecephys_properties["UnitColumns"] = {
+                "type": "array",
+                "minItems": 0,
+                "items": {"$ref": "#/properties/Ecephys/definitions/UnitColumn"},
+            }
+
+            schema["properties"]["Ecephys"]["required"].append("UnitColumns")
+
+            ecephys_properties["Units"] = resolved_units_schema
+            ecephys_metadata["Units"] = resolved_units
+            schema["properties"]["Ecephys"]["required"].append("Units")
+
+        # Delete Ecephys metadata if no interfaces processed
         defs = ecephys_schema["definitions"]
 
         electrode_def = defs["Electrodes"]
@@ -746,21 +750,25 @@ def convert_to_nwb(info: dict) -> str:
             del ecephys_metadata["Units"]
             del ecephys_metadata["UnitColumns"]
 
-        shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
+        has_electrodes = "Electrodes" in ecephys_metadata
+        if has_electrodes:
 
-        for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
-            interface = converter.data_interface_objects[interface_name]
+            shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
-            update_recording_properties_from_table_as_json(
-                interface,
-                electrode_table_json=interface_electrode_results,
-                electrode_column_info=shared_electrode_columns,
-            )
+            for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+                interface = converter.data_interface_objects[interface_name]
 
-        ecephys_metadata["Electrodes"] = [
-            {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
-        ]
-        del ecephys_metadata["ElectrodeColumns"]
+                update_recording_properties_from_table_as_json(
+                    interface,
+                    electrode_table_json=interface_electrode_results,
+                    electrode_column_info=shared_electrode_columns,
+                )
+
+            ecephys_metadata["Electrodes"] = [
+                {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
+            ]
+
+            del ecephys_metadata["ElectrodeColumns"]
 
     # Actually run the conversion
     converter.run_conversion(
@@ -938,14 +946,116 @@ def inspect_nwb_file(payload):
     return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
-def inspect_nwb_folder(payload):
-    from nwbinspector import inspect_all, load_config
+def _inspect_file_per_job(
+    nwbfile_path: str,
+    url,
+    ignore: Optional[List[str]] = None,
+    request_id: Optional[str] = None,
+):
+
+    from nwbinspector import nwbinspector
+    from pynwb import NWBHDF5IO
+    from tqdm_publisher import TQDMProgressSubscriber
+    import requests
+
+    checks = nwbinspector.configure_checks(
+        checks=nwbinspector.available_checks,
+        config=nwbinspector.load_config(filepath_or_keyword="dandi"),
+        ignore=ignore,
+    )
+
+    progress_bar_options = dict(
+        mininterval=0,
+        on_progress_update=lambda message: requests.post(url=url, json=dict(request_id=request_id, **message)),
+    )
+
+    with NWBHDF5IO(path=nwbfile_path, mode="r", load_namespaces=True) as io:
+        nwbfile = io.read()
+        messages = list(
+            nwbinspector.run_checks(
+                nwbfile=nwbfile,
+                checks=checks,
+                progress_bar_class=TQDMProgressSubscriber,
+                progress_bar_options=progress_bar_options,
+            )
+        )
+        for message in messages:
+            if message.file_path is None:
+                message.file_path = nwbfile_path  # Add file path to message if it is missing
+
+        return messages
+
+
+def inspect_all(url, config):
+
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    from nwbinspector.utils import calculate_number_of_cpu
+    from tqdm_publisher import TQDMProgressSubscriber
+
+    path = config["path"]
+    config.pop("path")
+
+    nwbfile_paths = list(Path(path).rglob("*.nwb"))
+
+    request_id = config.get("request_id")
+    if request_id:
+        config.pop("request_id")
+
+    n_jobs = config.get("n_jobs", -2)  # Default to all but one CPU
+    n_jobs = calculate_number_of_cpu(requested_cpu=n_jobs)
+    n_jobs = None if n_jobs == -1 else n_jobs
+
+    futures = list()
+
+    with ProcessPoolExecutor(max_workers=n_jobs) as executor:
+        for nwbfile_path in nwbfile_paths:
+            futures.append(
+                executor.submit(
+                    _inspect_file_per_job,
+                    nwbfile_path=str(nwbfile_path),
+                    ignore=config.get("ignore"),
+                    url=url,
+                    request_id=request_id,
+                )
+            )
+
+        messages = list()
+
+        # Announce directly
+        def on_progress_update(message):
+            message["progress_bar_id"] = request_id  # Ensure request_id matches
+            announcer.announce(
+                dict(
+                    request_id=request_id,
+                    **message,
+                )
+            )
+
+        inspection_iterable = TQDMProgressSubscriber(
+            iterable=as_completed(futures),
+            desc="Total files inspected",
+            total=len(futures),
+            mininterval=0,
+            on_progress_update=on_progress_update,
+        )
+
+        i = 0
+        for future in inspection_iterable:
+            i += 1
+            # on_progress_update(dict(progress_bar_id=request_id, format_dict=dict(total=len(futures), n=i)))
+            for message in future.result():
+                messages.append(message)
+
+    return messages
+
+
+def inspect_nwb_folder(url, payload):
+    from nwbinspector import load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
     kwargs = dict(
-        n_jobs=-2,  # uses number of CPU - 1
         ignore=[
             "check_description",
             "check_data_orientation",
@@ -955,11 +1065,11 @@ def inspect_nwb_folder(payload):
     )
 
     try:
-        messages = list(inspect_all(**kwargs))
+        messages = inspect_all(url, kwargs)
     except PicklingError as exception:
         if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(exception):
             del kwargs["n_jobs"]
-            messages = list(inspect_all(**kwargs))
+            messages = inspect_all(url, kwargs)
         else:
             raise exception
     except Exception as exception:
@@ -991,9 +1101,9 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
     return folder_path
 
 
-def inspect_multiple_filesystem_objects(paths):
+def inspect_multiple_filesystem_objects(url, paths, **kwargs):
     tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
-    result = inspect_nwb_folder({"path": tmp_folder_path})
+    result = inspect_nwb_folder(url, {"path": tmp_folder_path, **kwargs})
     rmtree(tmp_folder_path)
     return result
 
