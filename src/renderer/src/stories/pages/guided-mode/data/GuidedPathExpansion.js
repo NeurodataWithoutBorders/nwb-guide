@@ -3,17 +3,13 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { JSONSchemaForm, getSchema } from "../../../JSONSchemaForm.js";
-import { OptionalSection } from "../../../OptionalSection.js";
 import { run } from "../options/utils.js";
 import { onThrow } from "../../../../errors";
 
 import pathExpansionSchema from "../../../../../../../schemas/json/path-expansion.schema.json" assert { type: "json" };
-import { InfoBox } from "../../../InfoBox.js";
 import { merge } from "../../utils.js";
-import { CodeBlock } from "../../../CodeBlock.js";
 import { List } from "../../../List";
 import { fs } from "../../../../electron/index.js";
-import { joinPath } from "../../../../globals.js";
 import { Button } from "../../../Button.js";
 import { Modal } from "../../../Modal";
 import { header } from "../../../forms/utils";
@@ -166,89 +162,6 @@ export async function autocompleteFormatString(path) {
     });
 }
 
-const exampleFileStructure = `mylab/
-    ¦   Subjects/
-    ¦   +-- NR_0017/
-    ¦   ¦   +-- 2022-03-22/
-    ¦   ¦   ¦   +-- 001/
-    ¦   ¦   ¦   ¦   +-- raw_video_data/
-    ¦   ¦   ¦   ¦   ¦   +-- _leftCamera.raw.6252a2f0-c10f-4e49-b085-75749ba29c35.mp4
-    ¦   ¦   ¦   ¦   ¦   +-- ...
-    ¦   ¦   ¦   ¦   +-- ...
-    ¦   +-- NR_0019/
-    ¦   ¦   +-- 2022-04-29/
-    ¦   ¦   ¦   +-- 001/
-    ¦   ¦   ¦   ¦   +-- raw_video_data/
-    ¦   ¦   ¦   ¦   ¦   +-- _leftCamera.raw.9041b63e-02e2-480e-aaa7-4f6b776a647f.mp4
-    ¦   ¦   ¦   ¦   ¦   +-- ...
-    ¦   ¦   ¦   ¦   +-- ...
-    ¦   ...`;
-
-const exampleFormatPath =
-    "Subjects/{subject_id}/{session_start_time:%Y-%m-%d}/{session_id}/raw_video_data/leftCamera.raw.{}.mp4";
-
-const infoBox = new InfoBox({
-    header: "How do I use a Python format string to locate my files?",
-    content: html`
-        <div>
-            <p>
-                Consider a dataset of that includes video recordings from three cameras, stored in the following
-                directory structure.
-            </p>
-            ${new CodeBlock({ text: exampleFileStructure })}
-
-            <p>
-                Using <code>mylab</code> as the base directory, the correct format string to extract the subject ID,
-                session start time, and session number would be:
-            </p>
-            ${new CodeBlock({ text: exampleFormatPath })}
-
-            <hr />
-
-            <p>
-                The above example applies all of the supported f-string variables, which are used to extract information
-                into the resulting metadata:
-            </p>
-            ${new List({
-                items: [
-                    {
-                        value: "subject_id",
-                    },
-                    {
-                        value: "session_id",
-                    },
-                    {
-                        value: "session_start_time",
-                    },
-                ],
-                editable: false,
-            })}
-
-            <p>Wildcard patterns are specified by blank braces / non-standard variables.</p>
-
-            <small
-                >For complete documentation of the path expansion feature of NeuroConv, visit the
-                <a href="https://neuroconv.readthedocs.io/en/main/user_guide/expand_path.html" target="_blank"
-                    >path expansion documentation</a
-                >
-                page.
-            </small>
-        </div>
-    `,
-});
-
-function getFiles(dir) {
-    const dirents = fs.readdirSync(dir, { withFileTypes: true });
-    let entries = [];
-    for (const dirent of dirents) {
-        const res = joinPath(dir, dirent.name);
-        if (dirent.isDirectory()) entries.push(...getFiles(res));
-        else entries.push(res);
-    }
-
-    return entries;
-}
-
 export class GuidedPathExpansionPage extends Page {
     #notification;
 
@@ -281,7 +194,7 @@ export class GuidedPathExpansionPage extends Page {
                 // Map existing results to new subject information (if available)
                 const existingResults = Object.values(Object.values(globalState.results ?? {})[0] ?? {})[0] ?? {};
 
-                const existingMetadata = existingResults.metadata;
+                const existingMetadata = existingResults.metadata ?? {};
                 const existingSourceData = existingResults.source_data;
 
                 const source_data = {};
@@ -301,19 +214,13 @@ export class GuidedPathExpansionPage extends Page {
 
                     globalState.results[sub_id] = {};
 
-                    globalState.results[sub_id][ses_id] = {
-                        source_data,
-                        metadata: {
-                            NWBFile: {
-                                session_id: ses_id,
-                                ...(existingMetadata?.NWBFile ?? {}),
-                            },
-                            Subject: {
-                                subject_id: sub_id,
-                                ...(existingMetadata?.Subject ?? {}),
-                            },
-                        },
-                    };
+                    const metadata = structuredClone(existingMetadata);
+                    if (!metadata.NWBFile) metadata.NWBFile = {};
+                    if (!metadata.Subject) metadata.Subject = {};
+                    metadata.NWBFile.session_id = ses_id;
+                    metadata.Subject.subject_id = sub_id;
+
+                    globalState.results[sub_id][ses_id] = { source_data, metadata };
                 }
 
                 this.save({}, false); // Ensure this structure is saved
@@ -402,33 +309,9 @@ export class GuidedPathExpansionPage extends Page {
 
             await this.form.validate();
 
-            // if (!this.optional.toggled) {
-            //     const message = "Please select an option.";
-            //     this.notify(message, "error");
-            //     throw new Error(message);
-            // }
-
             return this.to(1);
         },
     };
-
-    // altForm = new JSONSchemaForm({
-    //   results: this.altInfo,
-    //   schema: {
-    //     type: 'object',
-    //     properties: {
-    //       subject_id: {
-    //         type: 'string',
-    //         description: 'Enter a subject ID.',
-    //       },
-    //       session_id: {
-    //         type: 'string',
-    //         description: 'Enter a session ID.',
-    //       },
-    //     },
-    //     required: ['subject_id', 'session_id']
-    //   }
-    // })
 
     localState = {};
 
@@ -550,7 +433,7 @@ export class GuidedPathExpansionPage extends Page {
 
         form.style.width = "100%";
 
-        return html`${infoBox}<br /><br />${form}`;
+        return form;
     }
 }
 
