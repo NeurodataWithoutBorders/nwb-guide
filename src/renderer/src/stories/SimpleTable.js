@@ -991,12 +991,12 @@ export class SimpleTable extends LitElement {
         if (editOptions.row?.add) rowEditOptions.push("add");
         if (editOptions.row?.remove) rowEditOptions.push("remove");
 
-        const description = rowEditOptions.length ? `Right click to ${rowEditOptions.join(" or ")} rows.` : "";
+        const genericDescription = rowEditOptions.length ? `Right click to ${rowEditOptions.join(" or ")} rows.` : "";
 
         return html`
             ${this.#context}
             <p style="margin: 0; margin-bottom: 10px">
-                <small style="color: gray;">Right click to add or remove rows.</small>
+                <small style="color: gray;">${genericDescription}</small>
             </p>
             <div class="table-container">
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
