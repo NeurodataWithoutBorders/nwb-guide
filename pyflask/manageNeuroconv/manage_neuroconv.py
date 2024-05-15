@@ -443,7 +443,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         return sorting_interface
 
     def on_recording_interface(name, recording_interface):
-        global aggregate_electrode_columns
 
         electrode_columns = get_electrode_columns_json(recording_interface)
 
@@ -777,7 +776,7 @@ def convert_to_nwb(info: dict) -> str:
                     {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
                 ]
 
-                del ecephys_metadata["ElectrodeColumns"]
+            del ecephys_metadata["ElectrodeColumns"]
 
     # Actually run the conversion
     converter.run_conversion(

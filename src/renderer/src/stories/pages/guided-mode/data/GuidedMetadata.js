@@ -116,6 +116,7 @@ const propsToIgnore = {
         ElectricalSeries: true,
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
+        ElectricalSeriesNIDQ: true,
         Units: {
             "*": {
                 UnitColumns: {
