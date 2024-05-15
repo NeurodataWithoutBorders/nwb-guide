@@ -303,6 +303,8 @@ export class Table extends LitElement {
             if (colInfo.format === "date-time") {
                 info.type = "date-time";
                 info.correctFormat = false;
+                info.min = colInfo.exclusiveMinimum ?? colInfo.minimum;
+                info.max = colInfo.exclusiveMaximum ?? colInfo.maximum;
             }
 
             if (colInfo.type === "array") {

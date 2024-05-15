@@ -32,10 +32,15 @@ export class DateTimeSelector extends LitElement {
         }
     }
 
-    constructor({ value } = {}) {
+    constructor({ value, schema } = {}) {
         super();
         this.input = document.createElement("input");
         this.input.type = "datetime-local";
+        if (schema) {
+            const { min, max } = schema;
+            if (min) this.input.min = min;
+            if (max) this.input.max = max;
+        }
 
         this.addEventListener("click", () => {
             this.input.focus();

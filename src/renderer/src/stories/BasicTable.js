@@ -476,6 +476,11 @@ export class BasicTable extends LitElement {
         const description = this.#schema.description;
 
         return html`
+            ${description
+                ? html`<p style="margin: 0; margin-bottom: 10px">
+                      <small style="color: gray;">${description}</small>
+                  </p>`
+                : ""}
             <div class="table-container">
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                     <thead>
@@ -539,11 +544,6 @@ export class BasicTable extends LitElement {
                 : ""}
             ${this.truncated
                 ? html`<p style="margin: 0; width: 100%; text-align: center; font-size: 150%;">...</p>`
-                : ""}
-            ${description
-                ? html`<p style="margin: 0; margin-top: 10px">
-                      <small style="color: gray;">${description}</small>
-                  </p>`
                 : ""}
         `;
     }

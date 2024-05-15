@@ -1,9 +1,19 @@
-// import { merge } from "../src/renderer/src/stories/pages/utils"
+
+import interfaceInfo from './interfaces.info'
 
 export default function preprocessSourceDataSchema (schema) {
 
+    const interfaces = Object.values(interfaceInfo.interfaces).reduce((acc, { name, ...rest }) => {
+        acc[name] = rest
+        return acc
+    }, {})
+
     // Abstract across different interfaces
     Object.entries(schema.properties ?? {}).forEach(([key, schema]: [string, any]) => {
+
+            const info = interfaces[key] ?? {}
+
+            const singleLocationInfo = schema.properties.file_path ?? schema.properties.folder_path
 
             if (schema.properties.file_paths) {
                 Object.assign(schema.properties.file_paths, {
@@ -11,6 +21,12 @@ export default function preprocessSourceDataSchema (schema) {
                     description: '<b>Only one file supported at this time.</b> Multiple file support coming soon.',
                     maxItems: 1,
                 })
+            }
+
+            else if (singleLocationInfo) {
+
+                if (!singleLocationInfo.description && info.suffixes) singleLocationInfo.description = `<b>Suffixes:</b> ${info.suffixes.join(', ')}`
+
             }
 
             // Do not show steps

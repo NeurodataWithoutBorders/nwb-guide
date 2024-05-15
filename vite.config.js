@@ -7,6 +7,6 @@ export default defineConfig({
     test: {
         environment: "jsdom",
         setupFiles: ["dotenv/config"],
-        testTimeout: 3 * 60 * 1000,
+        testTimeout: 4 * 60 * 1000,
     },
 });

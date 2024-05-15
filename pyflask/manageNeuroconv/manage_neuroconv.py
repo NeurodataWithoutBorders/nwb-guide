@@ -13,11 +13,7 @@ from shutil import rmtree, copytree
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sse import MessageAnnouncer
-from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
-
-announcer = MessageAnnouncer()
-
+from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, announcer
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 
@@ -959,14 +955,116 @@ def inspect_nwb_file(payload):
     return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
-def inspect_nwb_folder(payload):
-    from nwbinspector import inspect_all, load_config
+def _inspect_file_per_job(
+    nwbfile_path: str,
+    url,
+    ignore: Optional[List[str]] = None,
+    request_id: Optional[str] = None,
+):
+
+    from nwbinspector import nwbinspector
+    from pynwb import NWBHDF5IO
+    from tqdm_publisher import TQDMProgressSubscriber
+    import requests
+
+    checks = nwbinspector.configure_checks(
+        checks=nwbinspector.available_checks,
+        config=nwbinspector.load_config(filepath_or_keyword="dandi"),
+        ignore=ignore,
+    )
+
+    progress_bar_options = dict(
+        mininterval=0,
+        on_progress_update=lambda message: requests.post(url=url, json=dict(request_id=request_id, **message)),
+    )
+
+    with NWBHDF5IO(path=nwbfile_path, mode="r", load_namespaces=True) as io:
+        nwbfile = io.read()
+        messages = list(
+            nwbinspector.run_checks(
+                nwbfile=nwbfile,
+                checks=checks,
+                progress_bar_class=TQDMProgressSubscriber,
+                progress_bar_options=progress_bar_options,
+            )
+        )
+        for message in messages:
+            if message.file_path is None:
+                message.file_path = nwbfile_path  # Add file path to message if it is missing
+
+        return messages
+
+
+def inspect_all(url, config):
+
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    from nwbinspector.utils import calculate_number_of_cpu
+    from tqdm_publisher import TQDMProgressSubscriber
+
+    path = config["path"]
+    config.pop("path")
+
+    nwbfile_paths = list(Path(path).rglob("*.nwb"))
+
+    request_id = config.get("request_id")
+    if request_id:
+        config.pop("request_id")
+
+    n_jobs = config.get("n_jobs", -2)  # Default to all but one CPU
+    n_jobs = calculate_number_of_cpu(requested_cpu=n_jobs)
+    n_jobs = None if n_jobs == -1 else n_jobs
+
+    futures = list()
+
+    with ProcessPoolExecutor(max_workers=n_jobs) as executor:
+        for nwbfile_path in nwbfile_paths:
+            futures.append(
+                executor.submit(
+                    _inspect_file_per_job,
+                    nwbfile_path=str(nwbfile_path),
+                    ignore=config.get("ignore"),
+                    url=url,
+                    request_id=request_id,
+                )
+            )
+
+        messages = list()
+
+        # Announce directly
+        def on_progress_update(message):
+            message["progress_bar_id"] = request_id  # Ensure request_id matches
+            announcer.announce(
+                dict(
+                    request_id=request_id,
+                    **message,
+                )
+            )
+
+        inspection_iterable = TQDMProgressSubscriber(
+            iterable=as_completed(futures),
+            desc="Total files inspected",
+            total=len(futures),
+            mininterval=0,
+            on_progress_update=on_progress_update,
+        )
+
+        i = 0
+        for future in inspection_iterable:
+            i += 1
+            # on_progress_update(dict(progress_bar_id=request_id, format_dict=dict(total=len(futures), n=i)))
+            for message in future.result():
+                messages.append(message)
+
+    return messages
+
+
+def inspect_nwb_folder(url, payload):
+    from nwbinspector import load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pickle import PicklingError
 
     kwargs = dict(
-        n_jobs=-2,  # uses number of CPU - 1
         ignore=[
             "check_description",
             "check_data_orientation",
@@ -976,11 +1074,11 @@ def inspect_nwb_folder(payload):
     )
 
     try:
-        messages = list(inspect_all(**kwargs))
+        messages = inspect_all(url, kwargs)
     except PicklingError as exception:
         if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(exception):
             del kwargs["n_jobs"]
-            messages = list(inspect_all(**kwargs))
+            messages = inspect_all(url, kwargs)
         else:
             raise exception
     except Exception as exception:
@@ -1012,9 +1110,9 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
     return folder_path
 
 
-def inspect_multiple_filesystem_objects(paths):
+def inspect_multiple_filesystem_objects(url, paths, **kwargs):
     tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
-    result = inspect_nwb_folder({"path": tmp_folder_path})
+    result = inspect_nwb_folder(url, {"path": tmp_folder_path, **kwargs})
     rmtree(tmp_folder_path)
     return result
 

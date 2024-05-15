@@ -1,9 +1,7 @@
 
-import { LitElement } from 'lit';
 import { DateTimeSelector } from '../../DateTimeSelector'
 import { TableCellBase } from "./base";
 import { BaseRenderer } from './renderers/base';
-
 
 export class DateTimeCell extends TableCellBase {
 
@@ -79,8 +77,6 @@ export class DateTimeEditor extends BaseRenderer {
         this.DATETIME.type = "datetime-local";
         this.DATETIME.style.position = "absolute";
         this.DATETIME.style.display = "none";
-        // this.DATETIME.input.style.width = "0px"; // Don't actually show the input, just the picker
-        // this.DATETIME.value = this.value
     }
 
     render() {
