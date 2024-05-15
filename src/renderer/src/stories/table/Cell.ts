@@ -181,6 +181,7 @@ export class TableCell extends LitElement {
 
         if (this.input) this.input.set(value)  // Ensure all operations are undoable
         else this.#value = value // Silently set value if not rendered yet
+
     }
 
     #value

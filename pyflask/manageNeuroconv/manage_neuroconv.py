@@ -387,52 +387,19 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Clear the Electrodes information for being set as a collection of Interfaces
     has_ecephys = "Ecephys" in metadata
     has_units = False
+    ecephys_metadata = metadata.get("Ecephys")
+    ecephys_schema = schema["properties"].get("Ecephys", {"properties": {}})
 
-    if has_ecephys:
+    if not ecephys_schema.get("required"):
+        ecephys_schema["required"] = []
 
-        ecephys_schema = schema["properties"]["Ecephys"]
+    ecephys_properties = ecephys_schema["properties"]
+    original_electrodes_schema = ecephys_properties.get("Electrodes")
 
-        if not ecephys_schema.get("required"):
-            ecephys_schema["required"] = []
-
-        ecephys_properties = ecephys_schema["properties"]
-
-        # Populate Electrodes metadata
-        original_electrodes_schema = ecephys_properties["Electrodes"]
-
-        # Add Electrodes to the schema
-        metadata["Ecephys"]["Electrodes"] = {}
-        ecephys_schema["required"].append("Electrodes")
-
-        ecephys_properties["ElectrodeColumns"] = {
-            "type": "array",
-            "minItems": 0,
-            "items": {"$ref": "#/properties/Ecephys/definitions/ElectrodeColumn"},
-        }
-
-        ecephys_schema["required"].append("ElectrodeColumns")
-
-        ecephys_properties["Electrodes"] = {"type": "object", "properties": {}, "required": []}
-
-        # Populate Units metadata
-        original_units_schema = ecephys_properties.pop("UnitProperties", None)
-        metadata["Ecephys"].pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
-
-        has_units = original_units_schema is not None
-
-        if has_units:
-
-            ecephys_properties["UnitColumns"] = {
-                "type": "array",
-                "minItems": 0,
-                "items": {"$ref": "#/properties/Ecephys/definitions/UnitColumn"},
-            }
-
-            schema["properties"]["Ecephys"]["required"].append("UnitColumns")
-
-            ecephys_properties["Units"] = {"type": "object", "properties": {}, "required": []}
-            metadata["Ecephys"]["Units"] = {}
-            schema["properties"]["Ecephys"]["required"].append("Units")
+    resolved_electrodes = {}
+    resolved_units = {}
+    resolved_electrodes_schema = {"type": "object", "properties": {}, "required": []}
+    resolved_units_schema = {"type": "object", "properties": {}, "required": []}
 
     def on_sorting_interface(name, sorting_interface):
 
@@ -449,11 +416,11 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         else:
             metadata["Ecephys"]["UnitColumns"] = unit_columns
 
-        units_data = metadata["Ecephys"]["Units"][name] = get_unit_table_json(sorting_interface)
+        units_data = resolved_units[name] = get_unit_table_json(sorting_interface)
 
         n_units = len(units_data)
 
-        ecephys_properties["Units"]["properties"][name] = {
+        resolved_units_schema["properties"][name] = {
             "type": "array",
             "minItems": n_units,
             "maxItems": n_units,
@@ -465,7 +432,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             },
         }
 
-        ecephys_properties["Units"]["required"].append(name)
+        resolved_units_schema["required"].append(name)
 
         return sorting_interface
 
@@ -475,7 +442,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         electrode_columns = get_electrode_columns_json(recording_interface)
 
         # Aggregate electrode column information across recording interfaces
-        existing_electrode_columns = metadata["Ecephys"].get("ElectrodeColumns")
+        existing_electrode_columns = ecephys_metadata.get("ElectrodeColumns")
         if existing_electrode_columns:
             for entry in electrode_columns:
                 if any(obj["name"] == entry["name"] for obj in existing_electrode_columns):
@@ -483,13 +450,13 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 else:
                     existing_electrode_columns.append(entry)
         else:
-            metadata["Ecephys"]["ElectrodeColumns"] = electrode_columns
+            ecephys_metadata["ElectrodeColumns"] = electrode_columns
 
-        electrode_data = metadata["Ecephys"]["Electrodes"][name] = get_electrode_table_json(recording_interface)
+        electrode_data = resolved_electrodes[name] = get_electrode_table_json(recording_interface)
 
         n_electrodes = len(electrode_data)
 
-        ecephys_properties["Electrodes"]["properties"][name] = {
+        resolved_electrodes_schema["properties"][name] = {
             "type": "array",
             "minItems": n_electrodes,
             "maxItems": n_electrodes,
@@ -501,7 +468,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             },
         }
 
-        ecephys_properties["Electrodes"]["required"].append(name)
+        resolved_electrodes_schema["required"].append(name)
 
         return recording_interface
 
@@ -514,9 +481,50 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     # Map sorting interfaces to metadata
     map_interfaces(BaseSortingExtractorInterface, on_sorting_interface, converter)
 
-    # Delete Ecephys metadata if no interfaces processed
     if has_ecephys:
 
+        has_electrodes = "ElectrodeColumns" in ecephys_metadata
+
+        original_units_schema = ecephys_properties.pop("UnitProperties", None)
+        ecephys_metadata.pop("UnitProperties", None)  # Always remove top-level UnitProperties from metadata
+        has_units = original_units_schema is not None
+
+        # Populate Electrodes metadata
+        if has_electrodes:
+
+            # Add Electrodes to the schema
+            ecephys_metadata["Electrodes"] = resolved_electrodes
+            ecephys_schema["required"].append("Electrodes")
+
+            ecephys_properties["ElectrodeColumns"] = {
+                "type": "array",
+                "minItems": 0,
+                "items": {"$ref": "#/properties/Ecephys/definitions/ElectrodeColumn"},
+            }
+
+            ecephys_schema["required"].append("ElectrodeColumns")
+
+            ecephys_properties["Electrodes"] = resolved_electrodes_schema
+
+        else:
+            ecephys_properties.pop("Electrodes", None)
+
+        # Populate Units metadata
+        if has_units:
+
+            ecephys_properties["UnitColumns"] = {
+                "type": "array",
+                "minItems": 0,
+                "items": {"$ref": "#/properties/Ecephys/definitions/UnitColumn"},
+            }
+
+            schema["properties"]["Ecephys"]["required"].append("UnitColumns")
+
+            ecephys_properties["Units"] = resolved_units_schema
+            ecephys_metadata["Units"] = resolved_units
+            schema["properties"]["Ecephys"]["required"].append("Units")
+
+        # Delete Ecephys metadata if no interfaces processed
         defs = ecephys_schema["definitions"]
 
         electrode_def = defs["Electrodes"]
@@ -760,21 +768,25 @@ def convert_to_nwb(info: dict) -> str:
             del ecephys_metadata["Units"]
             del ecephys_metadata["UnitColumns"]
 
-        shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
+        has_electrodes = "Electrodes" in ecephys_metadata
+        if has_electrodes:
 
-        for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
-            interface = converter.data_interface_objects[interface_name]
+            shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
-            update_recording_properties_from_table_as_json(
-                interface,
-                electrode_table_json=interface_electrode_results,
-                electrode_column_info=shared_electrode_columns,
-            )
+            for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+                interface = converter.data_interface_objects[interface_name]
 
-        ecephys_metadata["Electrodes"] = [
-            {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
-        ]
-        del ecephys_metadata["ElectrodeColumns"]
+                update_recording_properties_from_table_as_json(
+                    interface,
+                    electrode_table_json=interface_electrode_results,
+                    electrode_column_info=shared_electrode_columns,
+                )
+
+            ecephys_metadata["Electrodes"] = [
+                {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
+            ]
+
+            del ecephys_metadata["ElectrodeColumns"]
 
     # Actually run the conversion
     converter.run_conversion(

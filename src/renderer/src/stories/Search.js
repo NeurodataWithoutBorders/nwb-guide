@@ -167,7 +167,7 @@ export class Search extends LitElement {
             }
 
             .option {
-                padding: 25px;
+                padding: 10px 18px;
                 border-top: 1px solid #f2f2f2;
             }
 
