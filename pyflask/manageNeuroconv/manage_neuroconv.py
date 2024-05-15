@@ -708,8 +708,8 @@ def convert_to_nwb(info: dict) -> str:
 
     converter = instantiate_custom_converter(resolved_source_data, info["interfaces"])
 
-    def update_conversion_progress(**kwargs):
-        update_dict = dict(request_id=request_id, **kwargs)
+    def update_conversion_progress(message):
+        update_dict = dict(request_id=request_id, **message)
         if (url) or not run_stub_test:
             requests.post(url=url, json=update_dict)
         else:

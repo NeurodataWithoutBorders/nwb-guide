@@ -100,8 +100,10 @@ export class ProgressBar extends LitElement {
 
     render() {
 
-        const percent = this.format.total ? 100 * (this.format.n / this.format.total) : 0;
-        const remaining = this.format.rate && this.format.total ? (this.format.total - this.format.n) / this.format.rate : 0; // Seconds
+        const n = this.format.n > this.format.total ? this.format.total : this.format.n
+        const ratio = n/ this.format.total;
+        const percent = this.format.total ? 100 * ratio : 0;
+        const remaining = this.format.rate && this.format.total ? (this.format.total - n) / this.format.rate : 0; // Seconds
 
         return html`
         <div class="bar">
@@ -112,7 +114,7 @@ export class ProgressBar extends LitElement {
                 <div class="progress">
                     <div style="width: ${percent}%"></div>
                 </div>
-                <small>${this.format.n} / ${this.format.total} (${percent.toFixed(1)}%)</small>
+                <small>${n} / ${this.format.total} (${percent.toFixed(1)}%)</small>
             </div>
             <div>
             ${'elapsed' in this.format && 'rate' in this.format ? html`<small>${this.format.elapsed?.toFixed(1)}s elapsed, ${remaining.toFixed(1)}s remaining</small>` : ''}
