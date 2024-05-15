@@ -183,7 +183,27 @@ export class Modal extends LitElement {
 
     }
 
+    // Use escape key to close modal
+    #handleKeyDown = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') {
+        const selected = document.activeElement
+        if (selected instanceof HTMLElement) selected.blur()
+        this.toggle(false)
+      }
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      document.addEventListener('keydown', this.#handleKeyDown)
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      document.removeEventListener('keydown', this.#handleKeyDown)
+    }
+
     render() {
+
 
       return html`
       <nwb-overlay .open=${this.open}>

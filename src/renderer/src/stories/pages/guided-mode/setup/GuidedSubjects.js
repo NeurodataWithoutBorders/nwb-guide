@@ -85,7 +85,13 @@ export class GuidedSubjectsPage extends Page {
         updateResultsFromSubjects(results, subjects, sourceDataObject, nameMap); // NOTE: This directly mutates the results object
     };
 
-    footer = {};
+    footer = {
+        onNext: () => {
+            const extraElements = document.querySelectorAll(".HandsontableCopyPaste");
+            extraElements.forEach((element) => element.remove());
+            return this.to(1);
+        },
+    };
 
     updated() {
         super.updated(); // Call if updating data

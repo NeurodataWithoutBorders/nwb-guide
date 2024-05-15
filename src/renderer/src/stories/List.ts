@@ -99,6 +99,10 @@ export class List extends LitElement {
         cursor: text;
       }
 
+      [contenteditable="true"]:hover  {
+        background-color: rgba(217, 245, 255, 0.6);
+      }
+
       [data-idx]{
         background: #f0f0f0;
         height: 25px;
