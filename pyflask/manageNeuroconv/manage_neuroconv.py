@@ -796,9 +796,9 @@ def convert_to_nwb(info: dict) -> str:
                         electrode_column_info=shared_electrode_columns,
                     )
 
-                ecephys_metadata["Electrodes"] = [
-                    {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
-                ]
+            ecephys_metadata["Electrodes"] = [
+                {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
+            ]
 
             del ecephys_metadata["ElectrodeColumns"]
 
