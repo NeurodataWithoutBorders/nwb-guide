@@ -690,9 +690,9 @@ def get_interface_alignment(info: dict) -> dict:
 
 
 def convert_to_nwb(
-        info: dict,
-        log_url=None,
-    ) -> str:
+    info: dict,
+    log_url=None,
+) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
     from neuroconv import NWBConverter
@@ -709,7 +709,6 @@ def convert_to_nwb(
     default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
     default_output_directory = default_output_base / project_name
     run_stub_test = info.get("stub_test", False)
-
 
     try:
 
@@ -762,7 +761,6 @@ def convert_to_nwb(
                     progress_bar_options=progress_bar_options,
                 )
 
-
         # Ensure Ophys NaN values are resolved
         resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
 
@@ -795,7 +793,6 @@ def convert_to_nwb(
 
             has_electrodes = "Electrodes" in ecephys_metadata
             if has_electrodes:
-
 
                 shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
@@ -832,7 +829,6 @@ def convert_to_nwb(
 
                 del ecephys_metadata["ElectrodeColumns"]
 
-
         # Actually run the conversion
         converter.run_conversion(
             metadata=resolved_metadata,
@@ -861,16 +857,18 @@ def convert_to_nwb(
                 os.symlink(resolved_output_directory, default_output_directory)
 
         return dict(file=str(resolved_output_path))
-    
 
     except Exception as e:
         if log_url:
-            requests.post(url=log_url, json=dict(
-                header=f"Conversion failed for {project_name} — {nwbfile_path} (convert_to_nwb)",
-                inputs=dict(info=info),
-                traceback=traceback.format_exc(),
-                type="error"
-            ))
+            requests.post(
+                url=log_url,
+                json=dict(
+                    header=f"Conversion failed for {project_name} — {nwbfile_path} (convert_to_nwb)",
+                    inputs=dict(info=info),
+                    traceback=traceback.format_exc(),
+                    type="error",
+                ),
+            )
 
         raise e
 

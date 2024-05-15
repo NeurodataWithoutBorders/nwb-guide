@@ -111,13 +111,13 @@ class Convert(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         log_url = f"{request.url_root}log"
-    
+
         try:
 
             url = f"{request.url_root}neuroconv/announce"
 
             return convert_all_to_nwb(
-                url, 
+                url,
                 **neuroconv_api.payload,
                 log_url=log_url,
             )

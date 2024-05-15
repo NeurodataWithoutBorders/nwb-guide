@@ -108,12 +108,12 @@ def get_species():
 
     return species_map
 
+
 @api.route("/log")
 class Log(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-
 
             payload = api.payload
             type = payload["type"]
@@ -122,12 +122,13 @@ class Log(Resource):
             traceback = payload["traceback"]
 
             message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n\n{traceback}\n"
-            selected_logger = getattr(api.logger, type)  
+            selected_logger = getattr(api.logger, type)
             selected_logger(message)
 
         except Exception as exception:
             if notBadRequestException(exception):
                 api.abort(500, str(exception))
+
 
 @api.route("/server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
