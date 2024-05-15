@@ -108,7 +108,7 @@ const componentCSS = `
 
 
 
-    .form-section:not(:last-child), .link:not(:last-child){
+    .form-section:not(:last-child):not(:empty), .link:not(:last-child){
         margin-bottom: 15px;
     }
 
@@ -513,6 +513,14 @@ export class JSONSchemaForm extends LitElement {
                 const resolvedSchema = e.schema; // Get offending schema
 
                 // ------------ Exclude Certain Errors ------------
+                // Allow using null to specify an immutable table
+                if (
+                    e.message.includes("does not meet maximum length") ||
+                    e.message.includes("does not meet minimum length")
+                ) {
+                    if (e.argument === null) return;
+                }
+
                 // Allow referring to floats as null (i.e. JSON NaN representation)
                 if (e.message.includes("is not of a type(s)")) {
                     if (resolvedSchema.type === "number") {
@@ -561,7 +569,9 @@ export class JSONSchemaForm extends LitElement {
         const isValid = !requiredButNotSpecified.length;
 
         // Check if all inputs are valid
-        const flaggedInputs = this.shadowRoot ? this.shadowRoot.querySelectorAll(".invalid") : [];
+        const flaggedInputs = (this.shadowRoot ? Array.from(this.shadowRoot.querySelectorAll(".invalid")) : []).filter(
+            (el) => el.nextElementSibling
+        ); // Skip tables
 
         if (resolvedErrors.length) {
             const len = resolvedErrors.length;
@@ -569,11 +579,8 @@ export class JSONSchemaForm extends LitElement {
             else this.throw(`${len} JSON Schema errors detected.`);
         }
 
-        const allErrors = Array.from(flaggedInputs)
-            .map((inputElement) => {
-                if (!inputElement.nextElementSibling) return; // Skip tables
-                return Array.from(inputElement.nextElementSibling.children).map((li) => li.message);
-            })
+        const allErrors = flaggedInputs
+            .map((inputElement) => Array.from(inputElement.nextElementSibling.children).map((li) => li.message))
             .flat();
 
         const nMissingRequired = allErrors.reduce((acc, curr) => {
@@ -664,7 +671,7 @@ export class JSONSchemaForm extends LitElement {
         const resolved = this.#get(path, this.resolved);
         if (value === undefined) value = resolved[name];
 
-        const isConditional = this.#getLink(externalPath) || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
+        const isConditional = this.#getLink(externalPath)?.conditional || typeof isRequired === "function"; // Check the two possible ways of determining if a field is conditional
 
         if (isConditional && !isRequired)
             isRequired = required[name] = async () => {
@@ -691,7 +698,7 @@ export class JSONSchemaForm extends LitElement {
             pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
             renderTable: this.renderTable,
             renderCustomHTML: this.renderCustomHTML,
-            showLabel: true,
+            showLabel: !("title" in info && !info.title),
         });
 
         this.inputs[localPath.join("-")] = interactiveInput;
@@ -812,7 +819,7 @@ export class JSONSchemaForm extends LitElement {
         if (typeof args === "string") args = args.split("-");
         const group = this.#getGroup(args);
         if (!group) return;
-        return group.validate ? group : undefined;
+        return group.link ? group : undefined;
     };
 
     #getGroup = (args) => {
@@ -924,27 +931,12 @@ export class JSONSchemaForm extends LitElement {
 
         const isUndefined = this.isUndefined(parent[name]);
 
-        const hasLinks = this.#getLink(externalPath);
-        if (hasLinks) {
-            if (checkLinks) {
-                if (!(await this.#isLinkResolved(externalPath))) {
-                    errors.push(...warnings); // Move warnings to errors if the element is linked
-                    warnings = [];
-
-                    // Clear old errors and warnings on linked properties
-                    this.#applyToLinkedProperties((path) => {
-                        const internalPath = path.slice((this.base ?? []).length);
-                        this.#clearMessages(internalPath, "errors");
-                        this.#clearMessages(internalPath, "warnings");
-                    }, externalPath);
-                }
-            }
-        }
+        const link = this.#getLink(externalPath);
 
         if (!errors.length) {
             if (isUndefined) {
                 // Throw at least a basic warning if a non-linked property is required and missing
-                if (!hasLinks && isRequired) {
+                if (!link && isRequired) {
                     if (this.validateEmptyValues === null) {
                         warnings.push({
                             message: `${schema.title ?? header(name)} is a suggested property.`,
@@ -1017,7 +1009,8 @@ export class JSONSchemaForm extends LitElement {
             groupEl.classList[warnings.length ? "add" : "remove"]("warning");
         }
 
-        if (isValid && updatedErrors.length === 0) {
+        const clearAllErrors = isValid && updatedErrors.length === 0;
+        if (clearAllErrors) {
             input.classList.remove("invalid");
 
             await this.#applyToLinkedProperties((path, element) => {
@@ -1025,8 +1018,6 @@ export class JSONSchemaForm extends LitElement {
             }, localPath);
 
             if (isFunction) valid(); // Run if returned value is a function
-
-            return true;
         } else {
             if (this.validateEmptyValues) {
                 // Add new invalid classes and errors
@@ -1041,15 +1032,32 @@ export class JSONSchemaForm extends LitElement {
                 updatedErrors.forEach((info) => (onError ? "" : this.#addMessage(localPath, info, "errors")));
             }
             // element.title = errors.map((info) => info.message).join("\n"); // Set all errors to show on hover
-
-            return false;
         }
+
+        // Update link
+        if (link) {
+            if (checkLinks) {
+                if (!(await this.#isLinkResolved(externalPath))) {
+                    errors.push(...warnings); // Move warnings to errors if the element is linked
+                    warnings = [];
+
+                    this.#applyToLinkedProperties((path) => {
+                        const internalPath = path.slice((this.base ?? []).length);
+                        if (internalPath.join("-") === externalPath.join("-")) return;
+                        const name = internalPath.slice(-1)[0];
+                        this.triggerValidation(name, internalPath.slice(0, -1), false);
+                    }, externalPath);
+                }
+            }
+        }
+
+        return clearAllErrors;
     };
 
     accordions = {};
 
     #render = (schema, results, required = {}, ignore = {}, path = []) => {
-        let isLink = Symbol("isLink");
+        let isRenderableGroup = Symbol("isRenderableGroup");
 
         const hasPatternProperties = !!schema.patternProperties;
         const allowAdditionalProperties = schema.additionalProperties !== false;
@@ -1064,11 +1072,11 @@ export class JSONSchemaForm extends LitElement {
         if (!hasProperties) return html`<div id="empty">${this.emptyMessage}</div>`;
         let renderableWithLinks = renderable.reduce((acc, [name, info]) => {
             const externalPath = [...this.base, ...path, name];
-            const link = this.#getGroup(externalPath); // Use the base path to find a link
-            if (link) {
-                if (!acc.find(([_, info]) => info === link)) {
-                    const entry = [link.name, link];
-                    entry[isLink] = true;
+            const group = this.#getGroup(externalPath); // Use the base path to find a group
+            if (group && group.name) {
+                if (!acc.find(([_, info]) => info === group)) {
+                    const entry = [group.name, group];
+                    entry[isRenderableGroup] = true;
                     acc.push(entry);
                 }
             } else acc.push([name, info]);
@@ -1104,8 +1112,8 @@ export class JSONSchemaForm extends LitElement {
                 if (getRequiredValue(name) && !getRequiredValue(name2)) return -1; // first required
                 if (!getRequiredValue(name) && getRequiredValue(name2)) return 1; // second required
 
-                if (e1[isLink] && !e2[isLink]) return -1; // first link
-                if (!e1[isLink] && e2[isLink]) return 1; // second link
+                if (e1[isRenderableGroup] && !e2[isRenderableGroup]) return -1; // first link
+                if (!e1[isRenderableGroup] && e2[isRenderableGroup]) return 1; // second link
 
                 return 0; // Both required
             })
@@ -1115,7 +1123,7 @@ export class JSONSchemaForm extends LitElement {
                 const [_, info] = e1;
                 const [__, info2] = e2;
 
-                if (e1[isLink] || e2[isLink]) return 0;
+                if (e1[isRenderableGroup] || e2[isRenderableGroup]) return 0;
 
                 if (info2.properties && info.properties) return 0;
                 else if (info2.properties) return -1;
@@ -1141,7 +1149,7 @@ export class JSONSchemaForm extends LitElement {
             const hasPatternProperties = !!info.patternProperties;
 
             // Render linked properties
-            if (entry[isLink]) {
+            if (entry[isRenderableGroup]) {
                 const linkedProperties = info.properties.map((path) => {
                     const pathCopy = [...path].slice((this.base ?? []).length);
                     const name = pathCopy.pop();

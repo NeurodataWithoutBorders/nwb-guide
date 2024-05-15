@@ -235,9 +235,9 @@ export class BasicTable extends LitElement {
     validate = () => {
         let message;
 
-        const errors = this.shadowRoot.querySelectorAll("[error]");
+        const errors = Array.from(this.shadowRoot.querySelectorAll("[error]"));
         const len = errors.length;
-        if (len === 1) message = errors[0].title || "Error found";
+        if (len === 1) message = errors[0].title || "An error exists on this table.";
         else if (len) {
             message = `${len} errors exist on this table.`;
             console.error(Array.from(errors).map((error) => error.title));
@@ -476,6 +476,11 @@ export class BasicTable extends LitElement {
         const description = this.#schema.description;
 
         return html`
+            ${description
+                ? html`<p style="margin: 0; margin-bottom: 10px">
+                      <small style="color: gray;">${description}</small>
+                  </p>`
+                : ""}
             <div class="table-container">
                 <table cellspacing="0" style=${styleMap({ maxHeight: this.maxHeight })}>
                     <thead>
@@ -539,11 +544,6 @@ export class BasicTable extends LitElement {
                 : ""}
             ${this.truncated
                 ? html`<p style="margin: 0; width: 100%; text-align: center; font-size: 150%;">...</p>`
-                : ""}
-            ${description
-                ? html`<p style="margin: 0; margin-top: 10px">
-                      <small style="color: gray;">${description}</small>
-                  </p>`
                 : ""}
         `;
     }

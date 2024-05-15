@@ -1,71 +1,125 @@
 
 
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 
 export type ProgressProps = {
-    value?: {
-        b: number,
-        bsize?: number,
-        tsize: number
+    size?: string,
+
+    format?: {
+        n: number,
+        total: number,
+        [key: string]: any,
     },
 }
 
+const animationDuration = 500 // ms
+
 export class ProgressBar extends LitElement {
 
+    static animationDuration = animationDuration // ms
+
     static get styles() {
-    return css`
 
-        :host {
-            display: flex;
-            align-items: center;
-        }
+        return css`
 
-        :host > div {
-            width: 100%;
-            height: 10px;
-            border: 1px solid lightgray;
-            overflow: hidden;
-        }
+            /* Small Bar */
 
-        :host > div > div {
-            width: 0%;
-            height: 100%;
-            background-color: #029CFD;
-            transition: width 0.5s;
-        }
+            .bar > div {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              gap: 10px;
+            }
 
-        small {
-            white-space: nowrap;
-            margin-left: 10px;
-        }
+            .bar label {
+              font-size: 0.85rem;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
 
-    `;
+            .progress {
+              height: 10px;
+              width: 100%;
+              border: 1px solid lightgray;
+            }
+
+            .progress div {
+              height: 100%;
+              background-color: #029CFD;
+              width: 0%;
+              transition: width ${unsafeCSS((animationDuration / 1000).toFixed(2))}s;
+            }
+
+
+            small {
+              font-size: 0.8rem;
+              color: gray;
+              width: min-content;
+              white-space: nowrap;
+            }
+
+            :host([size="small"]) > .progress {
+                height: 5px;
+            }
+
+            :host([size="small"]) small {
+                font-size: 0.7rem;
+            }
+
+            :host([size="small"]) .progress:last-child {
+                border-bottom: none;
+            }
+        `
     }
+
 
     static get properties() {
         return {
-            value: {
+            format: {
                 type: Object,
+                reflect: true,
+            },
+            size: {
+                type: String,
                 reflect: true,
             }
         };
     }
 
-    declare value: any
+    declare format: any
+    declare size: string
+
 
     constructor(props: ProgressProps = {}) {
         super();
-
-        this.value = props.value ?? {}
-        if (!('b' in this.value)) this.value.b = 0
-        if (!('tsize' in this.value)) this.value.tsize = 0
-
+        this.size = props.size ?? 'medium'
+        this.format = props.format ?? {}
+        if (!('n' in this.format)) this.format.n = 0
+        if (!('total' in this.format)) this.format.total = 0
     }
 
     render() {
-        const value = this.value.b / this.value.tsize * 100
-        return html`<div><div style="width: ${value}%"></div></div><small>${this.value.b}/${this.value.tsize} ${isNaN(value) ? '' : `(${value.toFixed(0)}%)`}</small>`
+
+        const percent = this.format.total ? 100 * (this.format.n / this.format.total) : 0;
+        const remaining = this.format.rate && this.format.total ? (this.format.total - this.format.n) / this.format.rate : 0; // Seconds
+
+        return html`
+        <div class="bar">
+            ${this.format.prefix ? html`<div>
+                <label>${this.format.prefix || ''}</label>
+            </div>` : ''}
+            <div>
+                <div class="progress">
+                    <div style="width: ${percent}%"></div>
+                </div>
+                <small>${this.format.n} / ${this.format.total} (${percent.toFixed(1)}%)</small>
+            </div>
+            <div>
+            ${'elapsed' in this.format && 'rate' in this.format ? html`<small>${this.format.elapsed?.toFixed(1)}s elapsed, ${remaining.toFixed(1)}s remaining</small>` : ''}
+            </div>
+        </div>
+        `;
     }
 }
 
-customElements.get('nwb-progress') || customElements.define('nwb-progress',  ProgressBar);
+customElements.get('nwb-progress') || customElements.define('nwb-progress', ProgressBar);

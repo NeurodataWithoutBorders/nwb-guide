@@ -17,6 +17,8 @@ import { getMessageType } from "../../../../validation/index.js";
 import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
+import { createProgressPopup } from "../../../utils/progress.js";
+import { resolve } from "../../../../promises";
 
 const filter = (list, toFilter) => {
     return list.filter((item) => {
@@ -44,6 +46,10 @@ export class GuidedInspectorPage extends Page {
             rowGap: "10px",
         });
     }
+
+    workflow = {
+        multiple_sessions: {},
+    };
 
     headerButtons = [
         new Button({
@@ -78,6 +84,19 @@ export class GuidedInspectorPage extends Page {
     // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
     footer = {};
 
+    #toggleRendered;
+    #rendered;
+    #updateRendered = (force) =>
+        force || this.#rendered === true
+            ? (this.#rendered = new Promise(
+                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
+              ))
+            : this.#rendered;
+
+    get rendered() {
+        return resolve(this.#rendered, () => true);
+    }
+
     getStatus = (list) => {
         return list.reduce((acc, messageInfo) => {
             const res = getMessageType(messageInfo);
@@ -99,8 +118,12 @@ export class GuidedInspectorPage extends Page {
     }
 
     render() {
+        this.#updateRendered(true);
+
         const { globalState } = this.info;
         const { stubs, inspector } = globalState.preview;
+
+        const legendProps = { multiple: this.workflow.multiple_sessions.value };
 
         const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
@@ -123,7 +146,12 @@ export class GuidedInspectorPage extends Page {
                                 "inspect_file",
                                 { nwbfile_path: fileArr[0].info.file, ...options },
                                 { title }
-                            );
+                            ).catch((error) => {
+                                this.notify(error.message, "error");
+                                return null;
+                            });
+
+                            if (!result) return "Failed to generate inspector report.";
 
                             this.report = globalState.preview.inspector = {
                                 ...result,
@@ -141,14 +169,31 @@ export class GuidedInspectorPage extends Page {
                             height: "100%",
                         });
 
-                        return html`${list}${new InspectorLegend()}`;
+                        return html`${list}${new InspectorLegend(legendProps)}`;
                     }
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
 
                     this.report = inspector;
                     if (!this.report) {
-                        const result = await run("inspect_folder", { path, ...options }, { title: title + "s" });
+                        const swalOpts = await createProgressPopup({ title: `${title}s` });
+
+                        const { close: closeProgressPopup } = swalOpts;
+
+                        const result = await run(
+                            "inspect_folder",
+                            { path, ...options, request_id: swalOpts.id },
+                            swalOpts
+                        ).catch((error) => {
+                            this.notify(error.message, "error");
+                            closeProgressPopup();
+                            return null;
+                        });
+
+                        if (!result) return "Failed to generate inspector report.";
+
+                        closeProgressPopup();
+
                         this.report = globalState.preview.inspector = {
                             ...result,
                             messages: truncateFilePaths(result.messages, path),
@@ -208,8 +253,10 @@ export class GuidedInspectorPage extends Page {
                         instances: allInstances,
                     });
 
-                    return html`${manager}${new InspectorLegend()}`;
-                })(),
+                    return html`${manager}${new InspectorLegend(legendProps)}`;
+                })().finally(() => {
+                    this.#toggleRendered();
+                }),
                 "Loading inspector report..."
             )}
         `;

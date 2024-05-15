@@ -144,10 +144,11 @@ const pages = {
                 title: "Conversion Review",
                 label: "Review conversion",
                 section: sections[2],
+                sync: ["conversion"],
             }),
 
             upload: new GuidedUploadPage({
-                title: "DANDI Upload Options",
+                title: "DANDI Upload",
                 label: "Upload to DANDI",
                 section: sections[3],
                 sync: ["conversion"],

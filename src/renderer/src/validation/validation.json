@@ -6,6 +6,8 @@
     "NWBFile": {
         "description": "check_description",
         "experiment_description": "check_experiment_description",
+        "institution": "check_institution",
+        "keywords": "check_keywords",
         "identifier": false,
         "session_description": false,
         "lab": false,

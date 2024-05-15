@@ -45,7 +45,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
     #globalButton = new Button({
         icon: globalIcon,
-        label: "Edit Global Source Data",
+        label: "Edit Default Values",
         onClick: () => {
             this.#globalModal.form.results = structuredClone(this.info.globalState.project.SourceData ?? {});
             this.#globalModal.open = true;
@@ -132,18 +132,14 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     const { results: metadata, schema } = result;
 
-                    // Always delete Ecephys if absent ( NOTE: temporarily manually removing from schema on backend...)
-                    const alwaysDelete = ["Ecephys"];
-                    alwaysDelete.forEach((k) => {
-                        if (!metadata[k]) delete info.metadata[k]; // Delete directly on metadata
-                    });
-
-                    for (let key in info.metadata) {
-                        if (!alwaysDelete.includes(key) && !(key in schema.properties)) metadata[key] = undefined;
+                    // Merge arrays from generated pipeline data
+                    if (info.metadata.__generated) {
+                        const generated = info.metadata.__generated;
+                        info.metadata = merge(merge(generated, metadata, { arrays: true }), info.metadata);
                     }
 
-                    // Merge metadata results with the generated info
-                    merge(metadata, info.metadata);
+                    // Merge new results with old metadata
+                    else merge(metadata, info.metadata);
 
                     // Mirror structure with metadata schema
                     const schemaGlobal = this.info.globalState.schema;
@@ -164,7 +160,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
         const instanceId = `sub-${subject}/ses-${session}`;
 
-        const schema = this.info.globalState.schema.source_data;
+        const schema = structuredClone(this.info.globalState.schema.source_data);
         delete schema.description;
 
         const form = new JSONSchemaForm({

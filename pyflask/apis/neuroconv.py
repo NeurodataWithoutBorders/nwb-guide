@@ -3,7 +3,9 @@
 import traceback
 
 from flask_restx import Namespace, Resource, reqparse
-from flask import Response
+from flask import Response, request
+
+from manageNeuroconv.info import announcer
 
 from manageNeuroconv import (
     get_all_interface_info,
@@ -25,6 +27,7 @@ from manageNeuroconv import (
 )
 
 from errorHandlers import notBadRequestException
+
 
 neuroconv_api = Namespace("neuroconv", description="Neuroconv neuroconv_api for the NWB GUIDE.")
 
@@ -227,8 +230,22 @@ class InspectNWBFolder(Resource):
     @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         try:
-            return inspect_nwb_folder(neuroconv_api.payload)
+            url = f"{request.url_root}neuroconv/announce"
+            return inspect_nwb_folder(url, neuroconv_api.payload)
 
+        except Exception as exception:
+            if notBadRequestException(exception):
+                neuroconv_api.abort(500, str(exception))
+
+
+@neuroconv_api.route("/announce")
+class InspectNWBFolder(Resource):
+    @neuroconv_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            data = neuroconv_api.payload
+            announcer.announce(data)
+            return True
         except Exception as exception:
             if notBadRequestException(exception):
                 neuroconv_api.abort(500, str(exception))
@@ -240,6 +257,8 @@ class InspectNWBFolder(Resource):
     def post(self):
         from os.path import isfile
 
+        url = f"{request.url_root}neuroconv/announce"
+
         try:
             paths = neuroconv_api.payload["paths"]
 
@@ -250,10 +269,10 @@ class InspectNWBFolder(Resource):
                 if isfile(paths[0]):
                     return inspect_nwb_file({"nwbfile_path": paths[0], **kwargs})
                 else:
-                    return inspect_nwb_folder({"path": paths[0], **kwargs})
+                    return inspect_nwb_folder(url, {"path": paths[0], **kwargs})
 
             else:
-                return inspect_multiple_filesystem_objects(paths)
+                return inspect_multiple_filesystem_objects(url, paths, **kwargs)
 
         except Exception as exception:
             if notBadRequestException(exception):

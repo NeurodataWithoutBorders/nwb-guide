@@ -27,8 +27,11 @@ jobs:
           - os: ubuntu-latest
             label: environments/environment-Linux.yml
 
-          - os: macos-latest
-            label: environments/environment-Mac.yml
+          - os: macos-latest  # Mac arm64 runner
+            label: environments/environment-MAC-apple-silicon.yml
+
+          - os: macos-13  # Mac x64 runner
+            label: environments/environment-MAC-intel.yml
 
           - os: windows-latest
             label: environments/environment-Windows.yml
