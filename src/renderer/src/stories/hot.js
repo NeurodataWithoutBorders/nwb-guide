@@ -59,6 +59,9 @@ class DateTimeEditor extends Handsontable.editors.BaseEditor {
         style[this.hot.isRtl() ? "right" : "left"] = `${start}px`;
         style.margin = "0px";
         style.display = "";
+
+        this.DATETIME.input.min = this.cellProperties.min;
+        this.DATETIME.input.max = this.cellProperties.max;
     }
 
     focus() {

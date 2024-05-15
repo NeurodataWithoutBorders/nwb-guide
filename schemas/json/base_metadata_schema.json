@@ -11,11 +11,10 @@
       "required": ["session_start_time"],
       "properties": {
         "keywords": {
-          "title": "Keyword",
           "description": "Terms to search over",
           "type": "array",
           "items": {
-            "title": "keyword",
+            "title": "Keyword",
             "type": "string"
           }
         },
