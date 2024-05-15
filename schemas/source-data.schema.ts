@@ -13,6 +13,7 @@ export default function preprocessSourceDataSchema (schema) {
 
             const info = interfaces[key] ?? {}
 
+            const files = schema.properties.file_paths ?? schema.properties.file_path
             const singleLocationInfo = schema.properties.file_path ?? schema.properties.folder_path
 
             if (schema.properties.file_paths) {
@@ -27,6 +28,11 @@ export default function preprocessSourceDataSchema (schema) {
 
                 if (!singleLocationInfo.description && info.suffixes) singleLocationInfo.description = `<b>Suffixes:</b> ${info.suffixes.join(', ')}`
 
+            }
+
+            if (files) {
+                const base = singleLocationInfo ? files : files.items
+                if (!base.accept && info.suffixes) base.accept = info.suffixes.join(',')
             }
 
             // Do not show steps

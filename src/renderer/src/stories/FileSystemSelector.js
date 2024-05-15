@@ -103,6 +103,8 @@ export class FilesystemSelector extends LitElement {
         if (props.onSelect) this.onSelect = props.onSelect;
         if (props.onChange) this.onChange = props.onChange;
         if (props.onThrow) this.onThrow = props.onThrow;
+
+        this.accept = props.accept;
         this.multiple = props.multiple;
         this.type = props.type ?? "file";
         this.value = props.value ?? "";
@@ -125,6 +127,11 @@ export class FilesystemSelector extends LitElement {
 
     #useElectronDialog = async (type) => {
         const options = { ...this.dialogOptions };
+
+        if (!options.filters && this.accept) {
+            options.filters = [{ name: "Selected Files", extensions: this.accept.split(",") }];
+        }
+
         options.properties = [
             type === "file" ? "openFile" : "openDirectory",
             "noResolveAliases",
