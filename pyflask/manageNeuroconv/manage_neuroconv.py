@@ -369,8 +369,9 @@ def map_interfaces(callback, converter, to_match: Union["BaseDataInterface", Non
 
         associated_name = f"{parent_name} — {name}" if parent_name else name
         if isinstance(interface, NWBConverter):
-            result = map_interfaces(callback=callback, converter=interface, to_match=to_match,
-                                    parent_name=associated_name)
+            result = map_interfaces(
+                callback=callback, converter=interface, to_match=to_match, parent_name=associated_name
+            )
             output.extend(result)
         elif to_match is None or isinstance(interface, to_match):
             result = callback(associated_name, interface)
@@ -583,8 +584,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     with open(file=log_base / "file_metadata_page_results.json", mode="w") as fp:
         json.dump(obj=dict(results=metadata), fp=fp, cls=NWBMetaDataEncoder, indent=2)
 
-    return json.loads(json.dumps(obj=replace_nan_with_none(dict(results=metadata, schema=schema)),
-                                 cls=NWBMetaDataEncoder))
+    return json.loads(
+        json.dumps(obj=replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder)
+    )
 
 
 def get_check_function(check_function_name: str) -> callable:
