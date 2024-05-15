@@ -12,6 +12,9 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from urllib.parse import unquote
 
+from errorHandlers import notBadRequestException
+from datetime import datetime
+
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
@@ -22,7 +25,8 @@ from flask_cors import CORS
 from flask_restx import Api, Resource
 
 from apis import startup_api, neuroconv_api, data_api
-from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from manageNeuroconv.info import resource_path, GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+
 
 app = Flask(__name__)
 
@@ -30,20 +34,11 @@ app = Flask(__name__)
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
 
-# Configure logger
-LOG_FILE_PATH = Path.home() / "NWB_GUIDE" / "logs" / "api.log"
-LOG_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-log_handler = RotatingFileHandler(LOG_FILE_PATH, maxBytes=5 * 1024 * 1024, backupCount=3)
-log_formatter = Formatter(
-    fmt="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-log_handler.setFormatter(log_formatter)
-
-app.logger.addHandler(log_handler)
-app.logger.setLevel(DEBUG)
-
+# Create logger configuration
+LOG_FOLDER = Path(GUIDE_ROOT_FOLDER, "logs")
+LOG_FOLDER.mkdir(exist_ok=True, parents=True)
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+LOG_FILE_PATH = Path(LOG_FOLDER, f"{timestamp}.log")
 
 # Initialize API
 package_json_file_path = resource_path("package.json")
@@ -113,6 +108,26 @@ def get_species():
 
     return species_map
 
+@api.route("/log")
+class Log(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+
+
+            payload = api.payload
+            type = payload["type"]
+            header = payload["header"]
+            inputs = payload["inputs"]
+            traceback = payload["traceback"]
+
+            message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n\n{traceback}\n"
+            selected_logger = getattr(api.logger, type)  
+            selected_logger(message)
+
+        except Exception as exception:
+            if notBadRequestException(exception):
+                api.abort(500, str(exception))
 
 @api.route("/server_shutdown", endpoint="shutdown")
 class Shutdown(Resource):
@@ -130,6 +145,21 @@ class Shutdown(Resource):
 if __name__ == "__main__":
     port = sys.argv[len(sys.argv) - 1]
     if port.isdigit():
+
+        # Configure logger (avoid reinstantiation for processes)
+        log_handler = RotatingFileHandler(LOG_FILE_PATH, maxBytes=5 * 1024 * 1024, backupCount=3)
+        log_formatter = Formatter(
+            fmt="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        log_handler.setFormatter(log_formatter)
+
+        app.logger.addHandler(log_handler)
+        app.logger.setLevel(DEBUG)
+
+        app.logger.info(f"Logging to {LOG_FILE_PATH}")
+
+        # Run the server
         api.logger.info(f"Starting server on port {port}")
         app.run(host="127.0.0.1", port=port)
     else:
