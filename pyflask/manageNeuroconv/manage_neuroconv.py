@@ -8,7 +8,7 @@ import re
 import hashlib
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from shutil import rmtree, copytree
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -360,7 +360,7 @@ def get_source_schema(interface_class_dict: dict) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def map_interfaces(callback, converter, to_match=None, parent_name=None):
+def map_interfaces(callback, converter, to_match: Union["BaseDataInterface", None] = None, parent_name=None):
     from neuroconv import NWBConverter
 
     output = []
@@ -369,9 +369,10 @@ def map_interfaces(callback, converter, to_match=None, parent_name=None):
 
         associated_name = f"{parent_name} — {name}" if parent_name else name
         if isinstance(interface, NWBConverter):
-            result = map_interfaces(callback, interface, to_match, associated_name)
+            result = map_interfaces(callback=callback, converter=interface, to_match=to_match,
+                                    parent_name=associated_name)
             output.extend(result)
-        elif to_match == None or isinstance(interface, to_match):
+        elif to_match is None or isinstance(interface, to_match):
             result = callback(associated_name, interface)
             output.append(result)
 
@@ -443,8 +444,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         return sorting_interface
 
     def on_recording_interface(name, recording_interface):
-        global aggregate_electrode_columns
-
         electrode_columns = get_electrode_columns_json(recording_interface)
 
         # Aggregate electrode column information across recording interfaces
@@ -482,10 +481,10 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
     from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
 
     # Map recording interfaces to metadata
-    map_interfaces(on_recording_interface, converter, BaseRecordingExtractorInterface)
+    map_interfaces(on_recording_interface, converter=converter, to_match=BaseRecordingExtractorInterface)
 
     # Map sorting interfaces to metadata
-    map_interfaces(on_sorting_interface, converter, BaseSortingExtractorInterface)
+    map_interfaces(on_sorting_interface, converter=converter, to_match=BaseSortingExtractorInterface)
 
     if has_ecephys:
 
@@ -577,7 +576,14 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "additionalProperties": True,  # Allow for new columns
             }
 
-    return json.loads(json.dumps(replace_nan_with_none(dict(results=metadata, schema=schema)), cls=NWBMetaDataEncoder))
+    # TODO: generalize as log
+    with open(file="C:/Users/theac/Downloads/file_metadata_page_schema.json", mode="w") as fp:
+        json.dump(obj=dict(schema=schema), fp=fp, cls=NWBMetaDataEncoder, indent=2)
+    with open(file="C:/Users/theac/Downloads/file_metadata_page_results.json", mode="w") as fp:
+        json.dump(obj=dict(results=metadata), fp=fp, cls=NWBMetaDataEncoder, indent=2)
+
+    return json.loads(json.dumps(obj=replace_nan_with_none(dict(results=metadata, schema=schema)),
+                                 cls=NWBMetaDataEncoder))
 
 
 def get_check_function(check_function_name: str) -> callable:
@@ -681,6 +687,8 @@ def get_interface_alignment(info: dict) -> dict:
 def convert_to_nwb(info: dict) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
+    from neuroconv import NWBConverter
+
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
@@ -762,13 +770,28 @@ def convert_to_nwb(info: dict) -> str:
             shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
             for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+                name_split = interface_name.split(" — ")
 
-                interface = converter
-                for sub_interface in interface_name.split(" — "):
-                    interface = interface.data_interface_objects[sub_interface]
+                if len(name_split) == 1:
+                    sub_interface = name_split[0]
+                elif len(name_split) == 2:
+                    sub_interface, sub_sub_interface = name_split
+
+                interface_or_subconverter = converter.data_interface_objects[sub_interface]
+
+                if isinstance(interface_or_subconverter, NWBConverter):
+                    subconverter = interface_or_subconverter
 
                     update_recording_properties_from_table_as_json(
-                        interface,
+                        recording_interface=subconverter.data_interface_objects[sub_sub_interface],
+                        electrode_table_json=interface_electrode_results,
+                        electrode_column_info=shared_electrode_columns,
+                    )
+                else:
+                    interface = interface_or_subconverter
+
+                    update_recording_properties_from_table_as_json(
+                        recording_interface=interface,
                         electrode_table_json=interface_electrode_results,
                         electrode_column_info=shared_electrode_columns,
                     )
@@ -777,7 +800,7 @@ def convert_to_nwb(info: dict) -> str:
                     {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
                 ]
 
-                del ecephys_metadata["ElectrodeColumns"]
+            del ecephys_metadata["ElectrodeColumns"]
 
     # Actually run the conversion
     converter.run_conversion(
