@@ -722,21 +722,23 @@ def convert_to_nwb(info: dict) -> str:
 
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
-    options = (
-        {
-            interface: (
-                {
-                    "stub_test": info["stub_test"],
-                    # "iterator_opts": dict( display_progress=True, progress_bar_class=TQDMProgressSubscriber, progress_bar_options=progress_bar_options )
-                }
-                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
-                else {}
+    options = {interface: {} for interface in info["source_data"]}
+
+    for interface in options:
+        available_opts = available_options.get("properties").get(interface).get("properties", {})
+
+        # Specify if stub test
+        if run_stub_test:
+            if available_opts.get("stub_test"):
+                options[interface]["stub_test"] = True
+
+        # Specify if iterator options are available
+        elif available_opts.get("iterator_opts"):
+            options[interface]["iterator_opts"] = dict(
+                display_progress=True, 
+                progress_bar_class=TQDMProgressSubscriber, 
+                progress_bar_options=progress_bar_options
             )
-            for interface in info["source_data"]
-        }
-        if run_stub_test
-        else None
-    )
 
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
