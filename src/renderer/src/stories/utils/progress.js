@@ -30,7 +30,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        width: '100%',
+        width: "100%",
         gap: "5px",
     });
     element.append(container);
