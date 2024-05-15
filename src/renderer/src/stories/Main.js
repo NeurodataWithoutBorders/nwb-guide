@@ -161,7 +161,6 @@ export class Main extends LitElement {
             // Define header states
             const section = sections[info.section];
             if (section) {
-
                 if (header === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.entries(sections)
                         .filter(([name, info]) => !Object.values(info.pages).every((state) => state.skipped))
@@ -208,9 +207,7 @@ export class Main extends LitElement {
                     : ""
             }
 
-            <main id="content" class="js-content" style="overflow: hidden; ${
-                title ? "" : "padding-top: 35px;"
-            }"">
+            <main id="content" class="js-content" style="overflow: hidden; ${title ? "" : "padding-top: 35px;"}"">
                 <section class="section">${page}</section>
             </main>
             ${footerEl}
