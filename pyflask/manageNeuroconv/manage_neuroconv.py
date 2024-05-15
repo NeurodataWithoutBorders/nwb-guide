@@ -576,10 +576,11 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "additionalProperties": True,  # Allow for new columns
             }
 
-    # TODO: generalize as log
-    with open(file="C:/Users/theac/Downloads/file_metadata_page_schema.json", mode="w") as fp:
+    # TODO: generalize logging stuff
+    log_base = GUIDE_ROOT_FOLDER / "logs"
+    with open(file=log_base / "file_metadata_page_schema.json", mode="w") as fp:
         json.dump(obj=dict(schema=schema), fp=fp, cls=NWBMetaDataEncoder, indent=2)
-    with open(file="C:/Users/theac/Downloads/file_metadata_page_results.json", mode="w") as fp:
+    with open(file=log_base / "file_metadata_page_results.json", mode="w") as fp:
         json.dump(obj=dict(results=metadata), fp=fp, cls=NWBMetaDataEncoder, indent=2)
 
     return json.loads(json.dumps(obj=replace_nan_with_none(dict(results=metadata, schema=schema)),
