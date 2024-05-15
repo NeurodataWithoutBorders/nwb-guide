@@ -32,7 +32,7 @@ export default function preprocessSourceDataSchema (schema) {
 
             if (files) {
                 const base = singleLocationInfo ? files : files.items
-                if (!base.accept && info.suffixes) base.accept = info.suffixes.join(',')
+                if (!base.accept && info.suffixes) base.accept = info.suffixes
             }
 
             // Do not show steps

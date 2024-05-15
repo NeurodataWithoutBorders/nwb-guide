@@ -129,7 +129,7 @@ export class FilesystemSelector extends LitElement {
         const options = { ...this.dialogOptions };
 
         if (!options.filters && this.accept) {
-            options.filters = [{ name: "Selected Files", extensions: this.accept.split(",") }];
+            options.filters = [{ name: "Selected Files", extensions: this.accept }];
         }
 
         options.properties = [
@@ -149,18 +149,29 @@ export class FilesystemSelector extends LitElement {
         return result;
     };
 
-    #checkType = (value) => {
+    #check = (value) => {
+
+        // Check type
         const isLikelyFile = fs ? fs.statSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
+
+        if (this.accept) {
+            const ext = value.split(".").pop();
+            if (!this.accept.includes(ext))
+                this.#onThrow(
+                    "Incorrect file extension",
+                    `Please provide a file with the extension <b>${this.accept.join(', ')}</b> instead.`
+                );
+        }
     };
 
     #handleFiles = async (pathOrPaths, type) => {
         const resolvedType = type ?? this.type;
 
         if (pathOrPaths) {
-            if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#checkType);
-            else if (!type) this.#checkType(pathOrPaths);
+            if (Array.isArray(pathOrPaths)) pathOrPaths.forEach(this.#check);
+            else if (!type) this.#check(pathOrPaths);
         }
 
         let resolvedValue = pathOrPaths;
