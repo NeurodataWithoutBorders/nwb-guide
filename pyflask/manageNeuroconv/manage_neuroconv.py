@@ -579,6 +579,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     # TODO: generalize logging stuff
     log_base = GUIDE_ROOT_FOLDER / "logs"
+    log_base.mkdir(exist_ok=True)
     with open(file=log_base / "file_metadata_page_schema.json", mode="w") as fp:
         json.dump(obj=dict(schema=schema), fp=fp, cls=NWBMetaDataEncoder, indent=2)
     with open(file=log_base / "file_metadata_page_results.json", mode="w") as fp:
