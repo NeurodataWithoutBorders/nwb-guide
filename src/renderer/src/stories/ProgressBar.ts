@@ -114,7 +114,7 @@ export class ProgressBar extends LitElement {
                 <div class="progress">
                     <div style="width: ${percent}%"></div>
                 </div>
-                <small>${n} / ${this.format.total} (${percent.toFixed(1)}%)</small>
+                <small>${this.format.n} / ${this.format.total} (${percent.toFixed(1)}%)</small>
             </div>
             <div>
             ${'elapsed' in this.format && 'rate' in this.format ? html`<small>${this.format.elapsed?.toFixed(1)}s elapsed, ${remaining.toFixed(1)}s remaining</small>` : ''}
