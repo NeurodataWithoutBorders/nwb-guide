@@ -735,9 +735,9 @@ def convert_to_nwb(info: dict) -> str:
         # Specify if iterator options are available
         elif available_opts.get("iterator_opts"):
             options[interface]["iterator_opts"] = dict(
-                display_progress=True, 
-                progress_bar_class=TQDMProgressSubscriber, 
-                progress_bar_options=progress_bar_options
+                display_progress=True,
+                progress_bar_class=TQDMProgressSubscriber,
+                progress_bar_options=progress_bar_options,
             )
 
     # Ensure Ophys NaN values are resolved
