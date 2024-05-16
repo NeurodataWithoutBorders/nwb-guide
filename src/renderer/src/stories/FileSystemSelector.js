@@ -130,8 +130,11 @@ export class FilesystemSelector extends LitElement {
 
         if (!options.filters && this.accept) {
             options.filters = [
-                { name: "Suggested Files", extensions: this.accept.map(ext => ext[0] === '.' ? ext.slice(1) : ext) },
-                { name: "All Files", extensions: [ "*" ]}
+                {
+                    name: "Suggested Files",
+                    extensions: this.accept.map((ext) => (ext[0] === "." ? ext.slice(1) : ext)),
+                },
+                { name: "All Files", extensions: ["*"] },
             ];
         }
 
