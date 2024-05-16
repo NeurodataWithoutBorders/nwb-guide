@@ -153,19 +153,21 @@ export class FilesystemSelector extends LitElement {
     };
 
     #check = (value) => {
+
         // Check type
         const isLikelyFile = fs ? fs.statSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
 
-        if (this.accept) {
-            const ext = value.split(".").pop();
-            if (!this.accept.includes(ext))
-                this.#onThrow(
-                    "Incorrect file extension",
-                    `Please provide a file with the extension <b>${this.accept.join(", ")}</b> instead.`
-                );
-        }
+        // if (this.accept) {
+        //     const ext = value.split(".").pop();
+        //     const noDot = this.accept.map(ext => ext[0] === "." ? ext.slice(1) : ext)
+        //     if (!noDot.includes(ext))
+        //         this.#onThrow(
+        //             "Incorrect file extension",
+        //             `Please provide a file with the extension <b>${this.accept.join(", ")}</b> instead.`
+        //         );
+        // }
     };
 
     #handleFiles = async (pathOrPaths, type) => {
