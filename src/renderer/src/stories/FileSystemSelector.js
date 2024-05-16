@@ -156,7 +156,6 @@ export class FilesystemSelector extends LitElement {
     };
 
     #check = (value) => {
-
         // Check type
         const isLikelyFile = fs ? fs.statSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
