@@ -893,6 +893,7 @@ export class JSONSchemaInput extends LitElement {
             const filesystemSelectorElement = new FilesystemSelector({
                 type: format,
                 value: this.value,
+                accept: schema.accept,
                 onSelect: (paths = []) => {
                     const value = paths.length ? paths : undefined;
                     this.#updateData(fullPath, value);
