@@ -1,7 +1,6 @@
 import { LitElement, html } from "lit";
 import useGlobalStyles from "./utils/useGlobalStyles.js";
 import { GuidedFooter } from "./pages/guided-mode/GuidedFooter";
-import { GuidedCapsules } from "./pages/guided-mode/GuidedCapsules.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
@@ -131,7 +130,6 @@ export class Main extends LitElement {
 
         let footer = page?.footer; // Page-specific footer
         let header = page?.header; // Page-specific header
-        let capsules = page?.capsules; // Page-specific capsules
 
         if (page) {
             this.to = page.to;
@@ -160,24 +158,9 @@ export class Main extends LitElement {
             if (footer === true) footer = {};
             if (footer && "onNext" in footer && !("next" in footer)) footer.next = "Next";
 
-            // Default Capsules Behavior
+            // Define header states
             const section = sections[info.section];
             if (section) {
-                if (capsules === true || !("capsules" in page)) {
-                    let pages = Object.values(section.pages);
-                    const pageIds = Object.keys(section.pages);
-                    if (pages.length > 1) {
-                        const capsulesProps = {
-                            n: pages.length,
-                            skipped: pages.map((page) => page.skipped),
-                            selected: pages.map((page) => page.pageLabel).indexOf(page.info.label),
-                        };
-
-                        capsules = new GuidedCapsules(capsulesProps);
-                        capsules.onClick = (i) => this.toRender.page.to(pageIds[i]);
-                    }
-                }
-
                 if (header === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.entries(sections)
                         .filter(([name, info]) => !Object.values(info.pages).every((state) => state.skipped))
@@ -208,16 +191,9 @@ export class Main extends LitElement {
         return html`
             ${headerEl}
             ${
-                capsules
-                    ? html`<div style="width: 100%; text-align: center; padding-top: 15px;">${capsules}</div>`
-                    : html``
-            }
-            ${
                 title
                     ? html`<div
-                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; ${capsules
-                              ? ""
-                              : "padding-top: 35px;"}"
+                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; padding-top: 35px;"
                       >
                           <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
                               <div style="line-height: 1em; color: gray;">
@@ -231,9 +207,7 @@ export class Main extends LitElement {
                     : ""
             }
 
-            <main id="content" class="js-content" style="overflow: hidden; ${
-                capsules || title ? "" : "padding-top: 35px;"
-            }"">
+            <main id="content" class="js-content" style="overflow: hidden; ${title ? "" : "padding-top: 35px;"}"">
                 <section class="section">${page}</section>
             </main>
             ${footerEl}
