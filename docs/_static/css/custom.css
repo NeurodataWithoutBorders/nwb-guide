@@ -3,7 +3,6 @@
     margin-left: 10px;
 }
 
-
 button.btn.version-switcher__button {
     margin-bottom: 0px;
 }
@@ -27,7 +26,6 @@ button.btn.version-switcher__button:hover {
 
 .version-switcher__menu a.list-group-item {
     border: none !important;
-    
 }
 
 .version-switcher__menu a.list-group-item:hover {
