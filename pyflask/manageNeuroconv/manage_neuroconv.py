@@ -8,11 +8,15 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from shutil import rmtree, copytree
-from typing import Any, Dict, List, Optional
-from typing import Union
+from shutil import copytree, rmtree
+from typing import Any, Dict, List, Optional, Union
 
-from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, announcer
+from .info import (
+    CONVERSION_SAVE_FOLDER_PATH,
+    GUIDE_ROOT_FOLDER,
+    STUB_SAVE_FOLDER_PATH,
+    announcer,
+)
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 
@@ -337,7 +341,7 @@ def get_all_interface_info() -> dict:
 
 # Combine Multiple Interfaces
 def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
-    from neuroconv import converters, datainterfaces, NWBConverter
+    from neuroconv import NWBConverter, converters, datainterfaces
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
@@ -477,8 +481,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         return recording_interface
 
-    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
+    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+        BaseRecordingExtractorInterface,
+    )
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
 
     # Map recording interfaces to metadata
     map_interfaces(on_recording_interface, converter=converter, to_match=BaseRecordingExtractorInterface)
@@ -605,7 +613,7 @@ def get_check_function(check_function_name: str) -> callable:
 
 def run_check_function(check_function: callable, arg: dict) -> dict:
     """.Function used to run an arbitrary NWB Inspector function."""
-    from nwbinspector.register_checks import InspectorMessage, Importance
+    from nwbinspector.register_checks import Importance, InspectorMessage
 
     output = check_function(arg)
     if isinstance(output, InspectorMessage):
@@ -648,8 +656,8 @@ def validate_nwbfile_metadata(
 
 def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     """Function used to validate data using an arbitrary NWB Inspector function."""
-    from pynwb.file import NWBFile, Subject
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from pynwb.file import NWBFile, Subject
 
     check_function = get_check_function(check_function_name)
 
@@ -988,10 +996,10 @@ def _inspect_file_per_job(
     request_id: Optional[str] = None,
 ) -> list:
 
+    import requests
     from nwbinspector import nwbinspector
     from pynwb import NWBHDF5IO
     from tqdm_publisher import TQDMProgressSubscriber
-    import requests
 
     checks = nwbinspector.configure_checks(
         checks=nwbinspector.available_checks,
@@ -1024,6 +1032,7 @@ def _inspect_file_per_job(
 def inspect_all(url, config):
 
     from concurrent.futures import ProcessPoolExecutor, as_completed
+
     from nwbinspector.utils import calculate_number_of_cpu
     from tqdm_publisher import TQDMProgressSubscriber
 
@@ -1085,10 +1094,11 @@ def inspect_all(url, config):
 
 
 def inspect_nwb_folder(url, payload) -> dict:
+    from pickle import PicklingError
+
     from nwbinspector import load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-    from pickle import PicklingError
 
     kwargs = dict(
         ignore=[
@@ -1211,7 +1221,7 @@ def generate_test_data(output_path: str):
     """
     import spikeinterface
     from spikeinterface.exporters import export_to_phy
-    from spikeinterface.preprocessing import scale, bandpass_filter, resample
+    from spikeinterface.preprocessing import bandpass_filter, resample, scale
 
     base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"

@@ -1,5 +1,5 @@
-import pytest
 import app as flask
+import pytest
 
 
 def pytest_addoption(parser):
