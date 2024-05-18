@@ -2,10 +2,9 @@
 
 import traceback
 
-from flask_restx import Namespace, Resource, reqparse
-
-from manageNeuroconv import generate_test_data, generate_dataset
 from errorHandlers import notBadRequestException
+from flask_restx import Namespace, Resource, reqparse
+from manageNeuroconv import generate_dataset, generate_test_data
 
 data_api = Namespace("data", description="API route for dataset generation in the NWB GUIDE.")
 

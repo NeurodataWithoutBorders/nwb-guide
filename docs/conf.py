@@ -1,14 +1,13 @@
-import sys
 import inspect
-from pathlib import Path
 import json
 import os
+import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[0]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from conf_extlinks import extlinks, intersphinx_mapping  # noqa: E402, F401
-
 
 project = "NWB GUIDE"
 copyright = "2022, CatalystNeuro"  # TODO: how to include NWB?

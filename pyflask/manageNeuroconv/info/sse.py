@@ -1,5 +1,5 @@
-import queue
 import json
+import queue
 
 
 def format_sse(data: str, event=None) -> str:

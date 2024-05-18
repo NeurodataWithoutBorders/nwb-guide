@@ -1,8 +1,7 @@
 """API endpoint definitions for startup operations."""
 
-from flask_restx import Namespace, Resource
-
 from errorHandlers import notBadRequestException
+from flask_restx import Namespace, Resource
 
 startup_api = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
 

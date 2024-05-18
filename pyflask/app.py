@@ -1,28 +1,29 @@
 """The primary Flask server for the Python backend."""
 
-import sys
 import json
 import multiprocessing
-from os import kill, getpid
-from os.path import isabs
-
-from signal import SIGINT
-from logging import Formatter, DEBUG
+import sys
+from logging import DEBUG, Formatter
 from logging.handlers import RotatingFileHandler
+from os import getpid, kill
+from os.path import isabs
 from pathlib import Path
+from signal import SIGINT
 from urllib.parse import unquote
-
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
 
 
-from flask import Flask, request, send_from_directory, send_file
+from apis import data_api, neuroconv_api, startup_api
+from flask import Flask, request, send_file, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource
-
-from apis import startup_api, neuroconv_api, data_api
-from manageNeuroconv.info import resource_path, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
+from manageNeuroconv.info import (
+    CONVERSION_SAVE_FOLDER_PATH,
+    STUB_SAVE_FOLDER_PATH,
+    resource_path,
+)
 
 app = Flask(__name__)
 
