@@ -33,7 +33,7 @@ export class DateTimeSelector extends LitElement {
     }
 
     get min() {
-        return this.input.min
+        return this.input.min;
     }
 
     set min(newValue) {
@@ -41,7 +41,7 @@ export class DateTimeSelector extends LitElement {
     }
 
     get max() {
-        return this.input.max
+        return this.input.max;
     }
 
     set max(newValue) {
