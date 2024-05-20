@@ -37,7 +37,7 @@ import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
 import { run } from "../guided-mode/options/utils.js";
 import { joinPath } from "../../../globals.js";
 import { Modal } from "../../Modal";
-import { ProgressBar } from "../../ProgressBar";
+import { ProgressBar, humanReadableBytes } from "../../ProgressBar";
 
 const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
 const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");
@@ -240,6 +240,13 @@ export class SettingsPage extends Page {
         if (updateDiv.innerHTML) return; // Only populate once
 
         onUpdateAvailable((updateInfo) => {
+
+            console.warn("Update Available", updateInfo);
+
+            const relativePath = updateInfo.path
+            const file = updateInfo.files.find((f) => f.url === relativePath);
+            const filesize = file.size;
+
             const container = document.createElement("div");
             container.classList.add("update-container");
 
@@ -267,7 +274,7 @@ export class SettingsPage extends Page {
             controls.classList.add("controls");
             const downloadButton = new Button({
                 icon: downloadSVG,
-                label: `Update`,
+                label: `Update (${humanReadableBytes(filesize)})`,
                 size: "extra-small",
                 onClick: () => electron.ipcRenderer.send("download-update"),
             });
@@ -291,7 +298,10 @@ export class SettingsPage extends Page {
             let progressBarEl;
             onUpdateProgress((progress) => {
                 if (!progressBarEl) {
-                    progressBarEl = new ProgressBar();
+                    progressBarEl = new ProgressBar({
+                        isBytes: true,
+                        format: { total: filesize }
+                    });
                     const hr = document.createElement("hr");
                     updateDiv.append(hr, progressBarEl);
                 }
