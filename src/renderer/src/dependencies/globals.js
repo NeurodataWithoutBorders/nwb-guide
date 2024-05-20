@@ -109,10 +109,40 @@ export const notyf = new Notyf({
     ],
 });
 
+let activeNotifications = []; // Counter for active error notifications
+const maxConcurrentErrors = 3; // Maximum number of concurrent error notifications
+
+function removeNotification(notification) {
+    const index = activeNotifications.indexOf(notification);
+    if (index > -1) activeNotifications.splice(index, 1);
+}
+
 export const notify = (message, type = "success", duration) => {
+
+    const id = `${type}_${message}`;
+
+    const duplicate = activeNotifications.find((n) => n.id === id)
+    if (duplicate) {
+        removeNotification(duplicate)
+        dismissNotification(duplicate)
+    }
+
+    if (Object.keys(activeNotifications).length >= maxConcurrentErrors) {
+        const popped = activeNotifications.shift();
+        dismissNotification(popped)
+    }
+
     const info = { type, message };
     if (duration) info.duration = duration;
-    return notyf.open(info);
+
+    const notification = notyf.open(info);
+    notification.id = id;
+
+    activeNotifications.push(notification);
+
+    notification.on('dismiss', () => removeNotification(notification))
+
+    return notification;
 };
 
 export const dismissNotification = (notification) => notyf.dismiss(notification);
