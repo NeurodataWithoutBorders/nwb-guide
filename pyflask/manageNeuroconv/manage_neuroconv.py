@@ -341,7 +341,7 @@ def get_all_interface_info() -> dict:
 
 # Combine Multiple Interfaces
 def get_custom_converter(interface_class_dict: dict, alignment_info: dict = dict()):  -> "NWBConverter":
-    from neuroconv import converters, datainterfaces, NWBConverter
+    from neuroconv import NWBConverter, converters, datainterfaces
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
@@ -682,8 +682,9 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
 
 def set_interface_alignment(converter, alignment_info):
 
-    import numpy as np
     import csv
+
+    import numpy as np
     from neuroconv.tools.testing.mock_interfaces import MockRecordingInterface
 
     errors = {}
