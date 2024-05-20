@@ -359,7 +359,7 @@ function initialize() {
         createWindow();
 
         // Check for updates
-        autoUpdater.checkForUpdates(); 
+        autoUpdater.checkForUpdates();
 
         // Clear ready queue
         readyQueue.forEach(f => onWindowReady(f))

@@ -191,7 +191,6 @@ export class Sidebar extends LitElement {
 
                         a.append(labelContainer);
 
-
                         a.onclick = () => this.#onClick(id);
 
                         const li = document.createElement("li");

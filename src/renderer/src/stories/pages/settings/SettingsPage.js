@@ -13,7 +13,16 @@ import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { homeDirectory, notyf, testDataFolderPath } from "../../../dependencies/globals.js";
-import { SERVER_FILE_PATH, electron, path, port, fs, onUpdateAvailable, onUpdateProgress, registerUpdateProgress } from "../../../electron/index.js";
+import {
+    SERVER_FILE_PATH,
+    electron,
+    path,
+    port,
+    fs,
+    onUpdateAvailable,
+    onUpdateProgress,
+    registerUpdateProgress,
+} from "../../../electron/index.js";
 
 import saveSVG from "../../assets/save.svg?raw";
 import folderSVG from "../../assets/folder_open.svg?raw";
@@ -222,87 +231,80 @@ export class SettingsPage extends Page {
         this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
-
     #releaseNotesModal;
-
 
     // Populate the Update Available display
     updated() {
-        
-        const updateDiv = this.querySelector('#update-available')
+        const updateDiv = this.querySelector("#update-available");
 
-        if (updateDiv.innerHTML) return // Only populate once
+        if (updateDiv.innerHTML) return; // Only populate once
 
-        onUpdateAvailable(( updateInfo ) => {
+        onUpdateAvailable((updateInfo) => {
+            const container = document.createElement("div");
+            container.classList.add("update-container");
 
-            const container = document.createElement('div')
-            container.classList.add('update-container')
+            const mainUpdateInfo = document.createElement("div");
 
-            const mainUpdateInfo = document.createElement('div')
-
-            const infoIcon = document.createElement('slot')
-            infoIcon.innerHTML = infoSVG
+            const infoIcon = document.createElement("slot");
+            infoIcon.innerHTML = infoSVG;
 
             infoIcon.onclick = () => {
-                if (this.#releaseNotesModal) return this.#releaseNotesModal.open = true
+                if (this.#releaseNotesModal) return (this.#releaseNotesModal.open = true);
 
-                const modal = this.#releaseNotesModal = new Modal({ header: `Release Notes` })
+                const modal = (this.#releaseNotesModal = new Modal({ header: `Release Notes` }));
 
-                const releaseNotes = document.createElement('div')
-                releaseNotes.style.padding = '25px'
-                releaseNotes.innerHTML = updateInfo.releaseNotes
-                modal.append(releaseNotes)
+                const releaseNotes = document.createElement("div");
+                releaseNotes.style.padding = "25px";
+                releaseNotes.innerHTML = updateInfo.releaseNotes;
+                modal.append(releaseNotes);
 
-                document.body.append(modal)
+                document.body.append(modal);
 
-                modal.open = true
-            }
+                modal.open = true;
+            };
 
-            const controls = document.createElement('div')
-            controls.classList.add('controls')
+            const controls = document.createElement("div");
+            controls.classList.add("controls");
             const downloadButton = new Button({
                 icon: downloadSVG,
                 label: `Update`,
-                size: 'extra-small',
-                onClick: () => electron.ipcRenderer.send('download-update')
-            })
+                size: "extra-small",
+                onClick: () => electron.ipcRenderer.send("download-update"),
+            });
 
-            controls.append(downloadButton)
+            controls.append(downloadButton);
 
+            const header = document.createElement("div");
+            header.classList.add("header");
 
-            const header = document.createElement('div')
-            header.classList.add('header')
+            const title = document.createElement("h4");
+            title.innerText = `NWB GUIDE ${updateInfo.version}`;
+            header.append(title, infoIcon);
 
-            const title = document.createElement('h4')
-            title.innerText = `NWB GUIDE ${updateInfo.version}`
-            header.append(title, infoIcon)
-            
-            const description = document.createElement('span')
-            description.innerText = `A new version of the application is available.`
-            
-            mainUpdateInfo.append(header, description)
+            const description = document.createElement("span");
+            description.innerText = `A new version of the application is available.`;
 
-            container.append(mainUpdateInfo, controls)
+            mainUpdateInfo.append(header, description);
+
+            container.append(mainUpdateInfo, controls);
 
             let progressBarEl;
-            onUpdateProgress(( progress ) => {
+            onUpdateProgress((progress) => {
                 if (!progressBarEl) {
-                    progressBarEl = new ProgressBar()
-                    const hr = document.createElement('hr')
-                    updateDiv.append(hr, progressBarEl)
+                    progressBarEl = new ProgressBar();
+                    const hr = document.createElement("hr");
+                    updateDiv.append(hr, progressBarEl);
                 }
                 progressBarEl.format = {
                     prefix: `Download Progress for NWB GUIDE ${updateInfo.version}`,
-                    ...progress
-                }
-            })
-            updateDiv.append(container)
-            
-        })
+                    ...progress,
+                };
+            });
+            updateDiv.append(container);
+        });
     }
 
     render() {
-
         this.localState = structuredClone(global.data);
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
