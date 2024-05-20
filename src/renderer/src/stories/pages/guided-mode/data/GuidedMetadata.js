@@ -85,6 +85,15 @@ const tableRenderConfig = {
 
 const imagingPlaneKey = "imaging_plane";
 const propsToIgnore = {
+    NWBFile: {
+        session_id: true,
+        source_script: true,
+        source_script_file_name: true,
+        identifier: true,
+    },
+    Subject: {
+        subject_id: true,
+    },
     Ophys: {
         "*": {
             starting_time: true,
@@ -116,6 +125,7 @@ const propsToIgnore = {
         ElectricalSeries: true,
         ElectricalSeriesLF: true,
         ElectricalSeriesAP: true,
+        ElectricalSeriesNIDQ: true,
         Units: {
             "*": {
                 UnitColumns: {
@@ -129,14 +139,6 @@ const propsToIgnore = {
     Icephys: true, // Always ignore icephys metadata (for now)
     Behavior: true, // Always ignore behavior metadata (for now)
     "ndx-dandi-icephys": true,
-    Subject: {
-        subject_id: true,
-    },
-    NWBFile: {
-        session_id: true,
-        source_script: true,
-        source_script_file_name: true,
-    },
 };
 
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";

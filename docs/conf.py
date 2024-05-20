@@ -1,14 +1,13 @@
-import sys
 import inspect
-from pathlib import Path
 import json
 import os
+import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[0]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from conf_extlinks import extlinks, intersphinx_mapping  # noqa: E402, F401
-
 
 project = "NWB GUIDE"
 copyright = "2022, CatalystNeuro"  # TODO: how to include NWB?
@@ -45,9 +44,9 @@ favicons = [
 ]
 
 # These paths are either relative to html_static_path or fully qualified paths (eg. https://...)
-# html_css_files = [
-#     "css/custom.css",
-# ]
+html_css_files = [
+    "css/custom.css",
+]
 
 linkcheck_anchors = False
 
@@ -85,6 +84,7 @@ json_url = "https://nwb-guide.readthedocs.io/en/latest/_static/switcher.json"
 version_match = os.environ.get("READTHEDOCS_VERSION")
 with open("../package.json") as f:
     release = json.load(f)["version"]
+
 # If READTHEDOCS_VERSION doesn't exist, we're not on RTD
 # If it is an integer, we're in a PR build and the version isn't correct.
 # If it's "latest" → change to "dev" (that's what we want the switcher to call it)
@@ -144,3 +144,6 @@ def _correct_signatures(app, what, name, obj, options, signature, return_annotat
 
 def setup(app):  # This makes the data-interfaces signatures display on the docs/api, they don't otherwise
     app.connect("autodoc-process-signature", _correct_signatures)
+
+    # Add custom CSS
+    app.add_css_file("css/custom.css")

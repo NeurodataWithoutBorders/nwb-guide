@@ -1,6 +1,7 @@
-from pathlib import Path
 import json
-from neuroconv import converters, datainterfaces, NWBConverter
+from pathlib import Path
+
+from neuroconv import NWBConverter, converters, datainterfaces
 
 filepath = Path("guideGlobalMetadata.json")
 generatedJSONSchemaPath = Path("schemas", "json", "generated")
