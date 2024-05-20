@@ -240,10 +240,9 @@ export class SettingsPage extends Page {
         if (updateDiv.innerHTML) return; // Only populate once
 
         onUpdateAvailable((updateInfo) => {
-
             console.warn("Update Available", updateInfo);
 
-            const relativePath = updateInfo.path
+            const relativePath = updateInfo.path;
             const file = updateInfo.files.find((f) => f.url === relativePath);
             const filesize = file.size;
 
@@ -300,7 +299,7 @@ export class SettingsPage extends Page {
                 if (!progressBarEl) {
                     progressBarEl = new ProgressBar({
                         isBytes: true,
-                        format: { total: filesize }
+                        format: { total: filesize },
                     });
                     const hr = document.createElement("hr");
                     updateDiv.append(hr, progressBarEl);
