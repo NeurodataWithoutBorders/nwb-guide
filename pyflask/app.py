@@ -3,6 +3,7 @@
 import json
 import multiprocessing
 import sys
+from datetime import datetime
 from logging import DEBUG, Formatter
 from logging.handlers import RotatingFileHandler
 from os import getpid, kill
@@ -12,8 +13,6 @@ from signal import SIGINT
 from urllib.parse import unquote
 
 from errorHandlers import notBadRequestException
-from datetime import datetime
-
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
@@ -23,12 +22,9 @@ from apis import data_api, neuroconv_api, startup_api
 from flask import Flask, request, send_file, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource
-
-from apis import startup_api, neuroconv_api, data_api
-
 from manageNeuroconv.info import (
-    GUIDE_ROOT_FOLDER,
     CONVERSION_SAVE_FOLDER_PATH,
+    GUIDE_ROOT_FOLDER,
     STUB_SAVE_FOLDER_PATH,
     resource_path,
 )

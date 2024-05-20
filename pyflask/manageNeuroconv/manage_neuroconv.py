@@ -6,12 +6,11 @@ import json
 import math
 import os
 import re
+import traceback
 from datetime import datetime
 from pathlib import Path
-
-from typing import Any, Dict, List, Optional, Union
-import traceback
 from shutil import copytree, rmtree
+from typing import Any, Dict, List, Optional, Union
 
 from .info import (
     CONVERSION_SAVE_FOLDER_PATH,
@@ -703,9 +702,9 @@ def convert_to_nwb(
 ) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
+    import requests
     from neuroconv import NWBConverter
     from tqdm_publisher import TQDMProgressSubscriber
-    import requests
 
     url = info.get("url", None)
     request_id = info.get("request_id", None)
@@ -889,8 +888,9 @@ def convert_all_to_nwb(
     log_url: Optional[str] = None,
 ) -> List[str]:
 
-    from tqdm_publisher import TQDMProgressSubscriber
     from concurrent.futures import ProcessPoolExecutor, as_completed
+
+    from tqdm_publisher import TQDMProgressSubscriber
 
     def on_progress_update(message):
         message["progress_bar_id"] = request_id  # Ensure request_id matches

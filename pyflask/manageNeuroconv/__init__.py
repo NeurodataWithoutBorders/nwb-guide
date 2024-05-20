@@ -1,8 +1,8 @@
 from .info import CONVERSION_SAVE_FOLDER_PATH, STUB_SAVE_FOLDER_PATH
 from .manage_neuroconv import (
     autocomplete_format_string,
-    convert_to_nwb,
     convert_all_to_nwb,
+    convert_to_nwb,
     generate_dataset,
     generate_test_data,
     get_all_converter_info,
