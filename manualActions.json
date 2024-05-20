@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Annotate Time Intervals",
+        "description": "Annotating events in time is a common need in neuroscience, e.g. to describe epochs, trials, and invalid times during an experimental session.",
+        "url": "https://pynwb.readthedocs.io/en/stable/tutorials/general/plot_timeintervals.html#sphx-glr-tutorials-general-plot-timeintervals-py"
+    },
+    {
+        "name": "Extend NWB",
+        "description": "The NWB format was designed to be easily extendable, allowing users to add new data types and attributes to the format.",
+        "url": "https://pynwb.readthedocs.io/en/stable/tutorials/general/extensions.html"
+    }
+]
