@@ -181,7 +181,17 @@ export class Sidebar extends LitElement {
                         const a = document.createElement("a");
                         a.setAttribute("data-id", id);
                         a.href = "#";
-                        a.innerHTML = `${icon} ${label}`;
+
+                        a.insertAdjacentHTML("afterbegin", icon);
+
+                        const labelContainer = document.createElement("div");
+                        const labelEl = document.createElement("span");
+                        labelEl.innerHTML = label;
+                        labelContainer.append(labelEl);
+
+                        a.append(labelContainer);
+
+
                         a.onclick = () => this.#onClick(id);
 
                         const li = document.createElement("li");

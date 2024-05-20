@@ -5,6 +5,8 @@ import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
 import { NavigationSidebar } from "./NavigationSidebar.js";
 
+import "../../assets/css/custom.css"; // Defined by Garrett late in GUIDE development to clearly separate global styles unrelated to SODA (May 20th, 2024)
+
 // Global styles to apply with the dashboard
 import "../../assets/css/variables.css";
 import "../../assets/css/nativize.css";

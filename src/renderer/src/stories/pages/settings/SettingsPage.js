@@ -13,18 +13,22 @@ import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../utils.js";
 
 import { homeDirectory, notyf, testDataFolderPath } from "../../../dependencies/globals.js";
-import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/index.js";
+import { SERVER_FILE_PATH, electron, path, port, fs, onUpdateAvailable, onUpdateProgress, registerUpdateProgress } from "../../../electron/index.js";
 
 import saveSVG from "../../assets/save.svg?raw";
 import folderSVG from "../../assets/folder_open.svg?raw";
 import deleteSVG from "../../assets/delete.svg?raw";
 import generateSVG from "../../assets/restart.svg?raw";
+import downloadSVG from "../../assets/download.svg?raw";
+import infoSVG from "../../assets/info.svg?raw";
 
 import { header } from "../../forms/utils";
 
 import testingSuiteYaml from "../../../../../../guide_testing_suite.yml";
 import { run } from "../guided-mode/options/utils.js";
 import { joinPath } from "../../../globals.js";
+import { Modal } from "../../Modal";
+import { ProgressBar } from "../../ProgressBar";
 
 const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
 const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");
@@ -218,7 +222,87 @@ export class SettingsPage extends Page {
         this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
+
+    #releaseNotesModal;
+
+
+    // Populate the Update Available display
+    updated() {
+        
+        const updateDiv = this.querySelector('#update-available')
+
+        if (updateDiv.innerHTML) return // Only populate once
+
+        onUpdateAvailable(( updateInfo ) => {
+
+            const container = document.createElement('div')
+            container.classList.add('update-container')
+
+            const mainUpdateInfo = document.createElement('div')
+
+            const infoIcon = document.createElement('slot')
+            infoIcon.innerHTML = infoSVG
+
+            infoIcon.onclick = () => {
+                if (this.#releaseNotesModal) return this.#releaseNotesModal.open = true
+
+                const modal = this.#releaseNotesModal = new Modal({ header: `Release Notes` })
+
+                const releaseNotes = document.createElement('div')
+                releaseNotes.style.padding = '25px'
+                releaseNotes.innerHTML = updateInfo.releaseNotes
+                modal.append(releaseNotes)
+
+                document.body.append(modal)
+
+                modal.open = true
+            }
+
+            const controls = document.createElement('div')
+            controls.classList.add('controls')
+            const downloadButton = new Button({
+                icon: downloadSVG,
+                label: `Update`,
+                size: 'extra-small',
+                onClick: () => electron.ipcRenderer.send('download-update')
+            })
+
+            controls.append(downloadButton)
+
+
+            const header = document.createElement('div')
+            header.classList.add('header')
+
+            const title = document.createElement('h4')
+            title.innerText = `NWB GUIDE ${updateInfo.version}`
+            header.append(title, infoIcon)
+            
+            const description = document.createElement('span')
+            description.innerText = `A new version of the application is available.`
+            
+            mainUpdateInfo.append(header, description)
+
+            container.append(mainUpdateInfo, controls)
+
+            let progressBarEl;
+            onUpdateProgress(( progress ) => {
+                if (!progressBarEl) {
+                    progressBarEl = new ProgressBar()
+                    const hr = document.createElement('hr')
+                    updateDiv.append(hr, progressBarEl)
+                }
+                progressBarEl.format = {
+                    prefix: `Download Progress for NWB GUIDE ${updateInfo.version}`,
+                    ...progress
+                }
+            })
+            updateDiv.append(container)
+            
+        })
+    }
+
     render() {
+
         this.localState = structuredClone(global.data);
 
         // NOTE: API Keys and Dandiset IDs persist across selected project
@@ -337,6 +421,7 @@ export class SettingsPage extends Page {
                     </div>
                 </div>
             </div>
+            <div id="update-available"></div>
             <hr />
             <br />
             ${this.form}
