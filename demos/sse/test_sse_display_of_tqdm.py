@@ -1,12 +1,12 @@
-from flask import Flask, render_template, Response
-from typing import List
-import random
 import asyncio
-import time
-from tqdm import tqdm as base_tqdm
-
-import sys
 import os
+import random
+import sys
+import time
+from typing import List
+
+from flask import Flask, Response, render_template
+from tqdm import tqdm as base_tqdm
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(os.path.join(__file__, "..", "..", "pyflask")))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
