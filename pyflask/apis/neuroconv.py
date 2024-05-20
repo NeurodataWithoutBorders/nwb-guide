@@ -2,33 +2,28 @@
 
 import traceback
 
-from flask_restx import Namespace, Resource, reqparse
+from errorHandlers import notBadRequestException
 from flask import Response, request
-
-from manageNeuroconv.info import announcer
-
+from flask_restx import Namespace, Resource, reqparse
 from manageNeuroconv import (
-    get_all_interface_info,
-    get_all_converter_info,
-    locate_data,
     autocomplete_format_string,
-    get_source_schema,
-    get_metadata_schema,
-    convert_to_nwb,
     convert_all_to_nwb,
-    validate_metadata,
-    listen_to_neuroconv_events,
+    get_all_converter_info,
+    get_all_interface_info,
+    get_interface_alignment,
+    get_metadata_schema,
+    get_source_schema,
+    inspect_multiple_filesystem_objects,
     inspect_nwb_file,
     inspect_nwb_folder,
-    inspect_multiple_filesystem_objects,
-    upload_project_to_dandi,
+    listen_to_neuroconv_events,
+    locate_data,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
-    get_interface_alignment,
+    upload_project_to_dandi,
+    validate_metadata,
 )
-
-from errorHandlers import notBadRequestException
-
+from manageNeuroconv.info import announcer
 
 neuroconv_api = Namespace("neuroconv", description="Neuroconv neuroconv_api for the NWB GUIDE.")
 

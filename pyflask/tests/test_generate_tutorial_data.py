@@ -1,5 +1,6 @@
-from utils import post
 from pathlib import Path
+
+from utils import post
 
 
 def test_generate_test_data(client, tmp_path: Path):

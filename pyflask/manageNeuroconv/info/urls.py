@@ -1,7 +1,7 @@
-from pathlib import Path
 import json
 import os
 import sys
+from pathlib import Path
 
 
 def resource_path(relative_path):

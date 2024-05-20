@@ -1,20 +1,24 @@
 """Collection of utility functions used by the NeuroConv Flask API."""
 
-import os
+import copy
+import hashlib
 import json
 import math
-import copy
+import os
 import re
-import hashlib
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Optional, Union
-from shutil import rmtree, copytree
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-import traceback
 
-from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH, announcer
+from typing import Any, Dict, List, Optional, Union
+import traceback
+from shutil import copytree, rmtree
+
+from .info import (
+    CONVERSION_SAVE_FOLDER_PATH,
+    GUIDE_ROOT_FOLDER,
+    STUB_SAVE_FOLDER_PATH,
+    announcer,
+)
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 
@@ -113,7 +117,7 @@ def replace_nan_with_none(data):
         return data
 
 
-def resolve_references(schema, root_schema=None):
+def resolve_references(schema: dict, root_schema: Optional[dict] = None) -> dict:
     """
     Recursively resolve references in a JSON schema based on the root schema.
 
@@ -143,7 +147,7 @@ def resolve_references(schema, root_schema=None):
     return schema
 
 
-def replace_none_with_nan(json_object, json_schema):
+def replace_none_with_nan(json_object: dict, json_schema: dict) -> dict:
     """
     Recursively search a JSON object and replace None values with NaN where appropriate.
 
@@ -255,7 +259,7 @@ def locate_data(info: dict) -> dict:
     return json.loads(json.dumps(obj=organized_output, cls=NWBMetaDataEncoder))
 
 
-def module_to_dict(my_module):
+def module_to_dict(my_module) -> dict:
     # Create an empty dictionary
     module_dict = {}
 
@@ -279,7 +283,7 @@ def get_class_ref_in_docstring(input_string):
         return match.group(1)
 
 
-def derive_interface_info(interface):
+def derive_interface_info(interface) -> dict:
 
     info = {"keywords": getattr(interface, "keywords", []), "description": ""}
 
@@ -339,7 +343,7 @@ def get_all_interface_info() -> dict:
 
 # Combine Multiple Interfaces
 def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
-    from neuroconv import converters, datainterfaces, NWBConverter
+    from neuroconv import NWBConverter, converters, datainterfaces
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
@@ -350,7 +354,7 @@ def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
     return CustomNWBConverter
 
 
-def instantiate_custom_converter(source_data, interface_class_dict):  # -> NWBConverter:
+def instantiate_custom_converter(source_data: dict, interface_class_dict: dict):  # -> NWBConverter:
     CustomNWBConverter = get_custom_converter(interface_class_dict)
     return CustomNWBConverter(source_data)
 
@@ -361,7 +365,7 @@ def get_source_schema(interface_class_dict: dict) -> dict:
     return CustomNWBConverter.get_source_schema()
 
 
-def map_interfaces(callback, converter, to_match: Union["BaseDataInterface", None] = None, parent_name=None):
+def map_interfaces(callback, converter, to_match: Union["BaseDataInterface", None] = None, parent_name=None) -> list:
     from neuroconv import NWBConverter
 
     output = []
@@ -479,8 +483,12 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         return recording_interface
 
-    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
+    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+        BaseRecordingExtractorInterface,
+    )
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
 
     # Map recording interfaces to metadata
     map_interfaces(on_recording_interface, converter=converter, to_match=BaseRecordingExtractorInterface)
@@ -607,7 +615,7 @@ def get_check_function(check_function_name: str) -> callable:
 
 def run_check_function(check_function: callable, arg: dict) -> dict:
     """.Function used to run an arbitrary NWB Inspector function."""
-    from nwbinspector.register_checks import InspectorMessage, Importance
+    from nwbinspector.register_checks import Importance, InspectorMessage
 
     output = check_function(arg)
     if isinstance(output, InspectorMessage):
@@ -650,8 +658,8 @@ def validate_nwbfile_metadata(
 
 def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     """Function used to validate data using an arbitrary NWB Inspector function."""
-    from pynwb.file import NWBFile, Subject
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from pynwb.file import NWBFile, Subject
 
     check_function = get_check_function(check_function_name)
 
@@ -927,7 +935,7 @@ def convert_all_to_nwb(
         return file_paths
 
 
-def upload_multiple_filesystem_objects_to_dandi(**kwargs):
+def upload_multiple_filesystem_objects_to_dandi(**kwargs) -> list[Path]:
     tmp_folder_path = _aggregate_symlinks_in_new_directory(kwargs["filesystem_paths"], "upload")
     innerKwargs = {**kwargs}
     del innerKwargs["filesystem_paths"]
@@ -946,7 +954,7 @@ def upload_folder_to_dandi(
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
     ignore_cache: bool = False,
-):
+) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     os.environ["DANDI_API_KEY"] = api_key  # Update API Key
@@ -975,7 +983,7 @@ def upload_project_to_dandi(
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
     ignore_cache: bool = False,
-):
+) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
@@ -1005,7 +1013,7 @@ def listen_to_neuroconv_events():
         yield msg
 
 
-def generate_dataset(input_path: str, output_path: str):
+def generate_dataset(input_path: str, output_path: str) -> dict:
     base_path = Path(input_path)
     output_path = Path(output_path)
 
@@ -1047,7 +1055,7 @@ def generate_dataset(input_path: str, output_path: str):
     return {"output_path": str(output_path)}
 
 
-def inspect_nwb_file(payload):
+def inspect_nwb_file(payload) -> dict:
     from nwbinspector import inspect_nwbfile, load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
@@ -1078,12 +1086,12 @@ def _inspect_file_per_job(
     url,
     ignore: Optional[List[str]] = None,
     request_id: Optional[str] = None,
-):
+) -> list:
 
+    import requests
     from nwbinspector import nwbinspector
     from pynwb import NWBHDF5IO
     from tqdm_publisher import TQDMProgressSubscriber
-    import requests
 
     checks = nwbinspector.configure_checks(
         checks=nwbinspector.available_checks,
@@ -1116,6 +1124,7 @@ def _inspect_file_per_job(
 def inspect_all(url, config):
 
     from concurrent.futures import ProcessPoolExecutor, as_completed
+
     from nwbinspector.utils import calculate_number_of_cpu
     from tqdm_publisher import TQDMProgressSubscriber
 
@@ -1176,11 +1185,12 @@ def inspect_all(url, config):
     return messages
 
 
-def inspect_nwb_folder(url, payload):
+def inspect_nwb_folder(url, payload) -> dict:
+    from pickle import PicklingError
+
     from nwbinspector import load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-    from pickle import PicklingError
 
     kwargs = dict(
         ignore=[
@@ -1209,7 +1219,7 @@ def inspect_nwb_folder(url, payload):
     return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
 
 
-def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
+def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None) -> Path:
     if folder_path is None:
         folder_path = GUIDE_ROOT_FOLDER / ".temp" / reason / f"temp_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
@@ -1228,7 +1238,7 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
     return folder_path
 
 
-def inspect_multiple_filesystem_objects(url, paths, **kwargs):
+def inspect_multiple_filesystem_objects(url, paths, **kwargs) -> dict:
     tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
     result = inspect_nwb_folder(url, {"path": tmp_folder_path, **kwargs})
     rmtree(tmp_folder_path)
@@ -1302,9 +1312,8 @@ def generate_test_data(output_path: str):
     Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy spiking data.
     """
     import spikeinterface
-    from spikeinterface.extractors import NumpyRecording
     from spikeinterface.exporters import export_to_phy
-    from spikeinterface.preprocessing import scale, bandpass_filter, resample
+    from spikeinterface.preprocessing import bandpass_filter, resample, scale
 
     base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
@@ -1374,7 +1383,7 @@ def map_dtype(dtype: str) -> str:
         return dtype
 
 
-def get_property_dtype(extractor, property_name: str, ids: list, extra_props: dict):
+def get_property_dtype(extractor, property_name: str, ids: list, extra_props: dict) -> str:
     if property_name in extra_props:
         dtype = extra_props[property_name]["data_type"]
     else:
