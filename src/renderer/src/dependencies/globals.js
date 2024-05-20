@@ -118,18 +118,17 @@ function removeNotification(notification) {
 }
 
 export const notify = (message, type = "success", duration) => {
-
     const id = `${type}_${message}`;
 
-    const duplicate = activeNotifications.find((n) => n.id === id)
+    const duplicate = activeNotifications.find((n) => n.id === id);
     if (duplicate) {
-        removeNotification(duplicate)
-        dismissNotification(duplicate)
+        removeNotification(duplicate);
+        dismissNotification(duplicate);
     }
 
     if (Object.keys(activeNotifications).length >= maxConcurrentErrors) {
         const popped = activeNotifications.shift();
-        dismissNotification(popped)
+        dismissNotification(popped);
     }
 
     const info = { type, message };
@@ -140,7 +139,7 @@ export const notify = (message, type = "success", duration) => {
 
     activeNotifications.push(notification);
 
-    notification.on('dismiss', () => removeNotification(notification))
+    notification.on("dismiss", () => removeNotification(notification));
 
     return notification;
 };
