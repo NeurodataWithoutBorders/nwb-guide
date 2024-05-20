@@ -340,7 +340,7 @@ def get_all_interface_info() -> dict:
 
 
 # Combine Multiple Interfaces
-def get_custom_converter(interface_class_dict: dict, alignment_info: dict = dict()):  -> "NWBConverter":
+def get_custom_converter(interface_class_dict: dict, alignment_info: dict = dict())  -> "NWBConverter":
     from neuroconv import NWBConverter, converters, datainterfaces
 
     class CustomNWBConverter(NWBConverter):
