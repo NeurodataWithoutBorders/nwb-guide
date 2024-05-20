@@ -32,13 +32,13 @@ export class CodeBlock extends LitElement {
 
     render() {
         const controls = document.createElement("div");
-        
-        setTimeout(() => {
-            console.log(controls)
-        }, 1000)
 
-        const copyButton = new Button({ 
-            label: "Copy", 
+        setTimeout(() => {
+            console.log(controls);
+        }, 1000);
+
+        const copyButton = new Button({
+            label: "Copy",
             onClick: () => navigator.clipboard.writeText(this.text),
             primary: true,
             color: "rgba(0, 0, 0, 0.3)",
@@ -47,14 +47,14 @@ export class CodeBlock extends LitElement {
                 fontSize: "85%",
                 borderRadius: "5px",
                 border: "1px solid rgba(255, 255, 255, 0.5)",
-            }
-        })
-        
+            },
+        });
+
         Object.assign(controls.style, {
             position: "absolute",
             bottom: "10px",
             right: "10px",
-        })
+        });
 
         controls.append(copyButton);
 
