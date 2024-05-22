@@ -14,7 +14,6 @@ coverage
 node_modules
 build/api
 src/pyflask/ds
-src/Users
 semantic
 semantic.json
 .env
@@ -22,7 +21,6 @@ build/
 yarn.lock
 
 *.pyc
-src/.DS_Store
 .DS_Store
 electron-builder.yml
 website/.eslintcache
