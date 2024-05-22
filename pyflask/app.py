@@ -12,6 +12,8 @@ from pathlib import Path
 from signal import SIGINT
 from urllib.parse import unquote
 
+from typing import Union
+
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
 
@@ -66,7 +68,7 @@ nwbfile_registry = []
     responses=server_error_responses(codes=[200, 400, 500]),
 )
 class Log(Resource):
-    @api.doc(description="Nicely format the exception and the payload that caused it.", responses=all_error_responses)
+    @api.doc(description="Nicely format the exception and the payload that caused it.", responses=server_error_responses(codes=[200, 400, 404, 500]))
     @catch_exception_and_abort(api=api, code=500)
     def post(self):
         payload = api.payload
@@ -79,18 +81,8 @@ class Log(Resource):
         selected_logger = getattr(api.logger, type)
         selected_logger(message)
 
-
-@flask_app.route(rule="/files")
-@api.doc(
-    description="Get a list of all files that have been nwbfile_registry with the server.",
-    responses=server_error_responses(codes=[200, 400, 500]),
-)
-@catch_exception_and_abort(api=api, code=500)
-def get_all_files():
-    return list(nwbfile_registry.keys())
-
-
-@flask_app.route(rule="/files/<file_path:path>", methods=["GET", "POST"])
+# Used for the standalone preview page
+@flask_app.route(rule="/files/<path:file_path>", methods=["GET", "POST"])
 @api.doc(
     description="Handle adding and fetching NWB files from the global file registry.",
     responses=server_error_responses(codes=[200, 400, 404, 500]),
@@ -101,36 +93,27 @@ def handle_file_request(file_path: str) -> Union[str, Response, None]:
         code = 400
         base_message = server_error_responses(codes=[code])[code]
         message = f"{base_message}: Path does not point to an NWB file."
-        flask_app.abort(code=code, message=message)
+        api.abort(code=code, message=message)
         return
 
     if request.method == "GET" and file_path not in nwbfile_registry:
         code = 404
         base_message = server_error_responses(codes=[code])[code]
         message = f"{base_message}: Path does not point to an NWB file."
-        flask_app.abort(code=code, message=message)
+        api.abort(code=code, message=message)
         return
 
     if request.method == "GET":
-        parsed_file_path = unquote(file_path)
-        is_file_relative = not isabs(parsed_file_path)
+        parsed_file_path = unquote(file_path) # Decode any URL encoding applied to the file path
+        is_file_relative = not isabs(parsed_file_path) # Check if the file path is relative
         if is_file_relative:
             parsed_file_path = f"/{parsed_file_path}"
         return send_file(path_or_file=parsed_file_path)
+    
+    # Register access to the provided file path
     elif request.method == "POST":
         nwbfile_registry.append(file_path)
-        return request.base_url
-
-
-@flask_app.route("/conversions/<path:path>")
-def send_conversions(path):
-    return send_from_directory(CONVERSION_SAVE_FOLDER_PATH, path)
-
-
-@flask_app.route("/preview/<path:path>")
-def send_preview(path):
-    return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
-
+        return request.base_url # Return the URL of the newly added file
 
 @flask_app.route("/cpus")
 def get_cpu_count():

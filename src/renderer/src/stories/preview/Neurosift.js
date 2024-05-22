@@ -2,12 +2,6 @@ import { LitElement, css, html } from "lit";
 
 import { Loader } from "../Loader";
 import { FullScreenToggle } from "../FullScreenToggle";
-import { baseUrl } from "../../server/globals";
-
-export function getURLFromFilePath(file, projectName) {
-    const regexp = new RegExp(`.+(${projectName}.+)`);
-    return `${baseUrl}/preview/${file.match(regexp)[1]}`;
-}
 
 export class Neurosift extends LitElement {
     static get styles() {

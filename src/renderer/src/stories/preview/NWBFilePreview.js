@@ -1,12 +1,13 @@
 import { LitElement, css, html } from "lit";
 import { InspectorList } from "./inspector/InspectorList";
-import { Neurosift, getURLFromFilePath } from "./Neurosift";
+import { Neurosift } from "./Neurosift";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { run } from "../pages/guided-mode/options/utils";
 import { until } from "lit/directives/until.js";
 import { InstanceManager } from "../InstanceManager";
 import { path } from "../../electron";
 import { FullScreenToggle } from "../FullScreenToggle";
+import { baseUrl } from "../../server/globals";
 
 export function getSharedPath(array) {
     array = array.map((str) => str.replace(/\\/g, "/")); // Convert to Mac-style path
@@ -55,15 +56,27 @@ class NWBPreviewInstance extends LitElement {
     render() {
         const isOnline = navigator.onLine;
 
-        return isOnline
-            ? new Neurosift({ url: getURLFromFilePath(this.file, this.project), fullscreen: false })
-            : until(
-                  (async () => {
-                      const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
-                      return unsafeHTML(htmlRep);
-                  })(),
-                  html`<small>Loading HTML representation...</small>`
-              );
+        if (!isOnline) return until(
+            (async () => {
+                const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
+                return unsafeHTML(htmlRep);
+            })(),
+            html`<small>Loading HTML representation...</small>`
+        );
+
+        const neurosift = new Neurosift({ fullscreen: false })
+
+        // Enable access to the explicit file path
+        fetch(`${baseUrl}/files/${this.file}`, { method: "POST" })
+        .then((res) => res.text())
+        .then((result) => {
+
+            // Set Neurosift to access the returned URL
+            if (result) neurosift.url = result;
+        })
+
+
+        return neurosift
     }
 }
 

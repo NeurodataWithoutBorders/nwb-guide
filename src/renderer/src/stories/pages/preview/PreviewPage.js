@@ -18,8 +18,13 @@ export class PreviewPage extends Page {
 
     updatePath = async (path) => {
         if (path) {
+
+            // Enable access to the explicit file path
             const result = await fetch(`${baseUrl}/files/${path}`, { method: "POST" }).then((res) => res.text());
+
+            // Set Neurosift to access the returned URL
             if (result) this.neurosift.url = result;
+
         } else this.neurosift.url = undefined;
     };
 
