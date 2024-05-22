@@ -1,8 +1,9 @@
-name: Dev Tests
+name: App and Flask Coverage
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
   pull_request:
+  workflow_dispatch:
 
 concurrency:  # Cancel previous workflows on the same pull request
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,7 +14,7 @@ env:
 
 jobs:
   testing:
-    name: ${{ matrix.os }}  # Will read on the dashboard as 'Dev Tests / {os}'
+    name: ${{ matrix.os }}  # Will read on the dashboard as 'App and Flask Coverage / {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
