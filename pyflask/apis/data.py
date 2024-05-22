@@ -2,7 +2,6 @@
 
 import traceback
 
-from errorHandlers import notBadRequestException
 from flask_restx import Namespace, Resource, reqparse
 from manageNeuroconv import generate_dataset, generate_test_data
 from utils import catch_exception_and_abort, server_error_responses
@@ -48,5 +47,4 @@ class GenerateDataset(Resource):
             return generate_dataset(input_path=arguments["input_path"], output_path=arguments["output_path"])
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                data_api.abort(500, str(exception))
+            data_api.abort(500, str(exception))

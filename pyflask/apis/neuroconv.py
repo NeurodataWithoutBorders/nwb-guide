@@ -3,7 +3,6 @@
 import traceback
 from typing import Dict
 
-from errorHandlers import notBadRequestException
 from flask import Response, request
 from flask_restx import Namespace, Resource, reqparse
 from manageNeuroconv import (
@@ -53,8 +52,7 @@ class AllInterfaces(Resource):
                 **get_all_converter_info(),
             }
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
             raise exception
 
 
@@ -65,8 +63,7 @@ class Schemas(Resource):
         try:
             return get_source_schema(neuroconv_api.payload)
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/locate")
@@ -76,8 +73,7 @@ class LocateData(Resource):
         try:
             return locate_data(neuroconv_api.payload)
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/locate/autocomplete")
@@ -87,8 +83,7 @@ class AutoCompleteFormatString(Resource):
         try:
             return autocomplete_format_string(neuroconv_api.payload)
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/metadata")
@@ -100,8 +95,7 @@ class Metadata(Resource):
                 neuroconv_api.payload.get("source_data"), neuroconv_api.payload.get("interfaces")
             )
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/convert")
@@ -112,8 +106,7 @@ class Convert(Resource):
             return convert_to_nwb(neuroconv_api.payload)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/alignment")
@@ -124,8 +117,7 @@ class Alignment(Resource):
             return get_interface_alignment(neuroconv_api.payload)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 validate_parser = neuroconv_api.parser()
@@ -146,8 +138,7 @@ class Validate(Resource):
             return validate_metadata(args.get("parent"), args.get("function_name"))
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload/project")
@@ -166,8 +157,7 @@ class UploadProject(Resource):
             return upload_project_to_dandi(**upload_options)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload/folder")
@@ -186,8 +176,7 @@ class UploadFolder(Resource):
             return upload_folder_to_dandi(**upload_options)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/upload")
@@ -209,8 +198,7 @@ class Upload(Resource):
                 return upload_multiple_filesystem_objects_to_dandi(**neuroconv_api.payload)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect_file")
@@ -220,8 +208,7 @@ class InspectNWBFile(Resource):
         try:
             return inspect_nwb_file(neuroconv_api.payload)
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect_folder")
@@ -233,8 +220,7 @@ class InspectNWBFolder(Resource):
             return inspect_nwb_folder(url, neuroconv_api.payload)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/announce")
@@ -246,8 +232,7 @@ class InspectNWBFolder(Resource):
             announcer.announce(data)
             return True
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/inspect")
@@ -274,8 +259,7 @@ class InspectNWBFolder(Resource):
                 return inspect_multiple_filesystem_objects(url, paths, **kwargs)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 @neuroconv_api.route("/html")
@@ -290,8 +274,7 @@ class NWBToHTML(Resource):
             return html
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))
 
 
 # Create an events endpoint
@@ -304,5 +287,4 @@ class Events(Resource):
             return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                neuroconv_api.abort(500, str(exception))
+            neuroconv_api.abort(500, str(exception))

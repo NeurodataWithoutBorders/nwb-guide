@@ -96,6 +96,7 @@ def get_all_files():
     responses=server_error_responses(codes=[200, 400, 404, 500]),
 )
 def handle_file_request(file_path: str) -> Union[str, Response, None]:
+    """Used by the PreviewPage to serve the URL to Neurosift."""
     if ".nwb" not in file_path:
         code = 400
         base_message = server_error_responses(codes=[code])[code]
