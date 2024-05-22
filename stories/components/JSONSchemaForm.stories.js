@@ -1,4 +1,4 @@
-import { JSONSchemaForm } from "./JSONSchemaForm";
+import { JSONSchemaForm } from "../../src/electron/renderer/src/stories/JSONSchemaForm";
 
 export default {
     title: "Components/JSON Schema Form",

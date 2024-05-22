@@ -10,7 +10,7 @@ import { Button } from "../../../Button.js";
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { header } from "../../../forms/utils";
 
-import globalIcon from "../../../assets/global.svg?raw";
+import globalIcon from "../../../../../assets/icons/global.svg?raw";
 
 export class GuidedSubjectsPage extends Page {
     constructor(...args) {

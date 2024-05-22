@@ -1,4 +1,4 @@
-import { Accordion } from "./Accordion";
+import { Accordion } from "../../src/electron/renderer/src/stories/Accordion";
 
 export default {
     title: "Components/Accordion",

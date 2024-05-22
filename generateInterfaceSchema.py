@@ -4,7 +4,7 @@ from pathlib import Path
 from neuroconv import NWBConverter, converters, datainterfaces
 
 filepath = Path("src") / "supported_interfaces.json"
-generatedJSONSchemaPath = Path("schemas", "json", "generated")
+generatedJSONSchemaPath = Path("stories") / "inputs" / "interface_schemas"
 generatedJSONSchemaPath.mkdir(exist_ok=True, parents=True)
 
 f = filepath.open()
@@ -29,9 +29,9 @@ for interface in supported_interfaces:
         outfile.write(json.dumps(schema, indent=4))
 
 
-sourceDataStoryPath = Path("src/electron/renderer/src/stories/pages/guided-mode/SourceData.stories.js")
+sourceDataStoryPath = Path("stories/pages/SourceData.stories.js")
 
-importCode = "\n".join(map(lambda arr: f"import {arr[0]}Schema from '../../../../../../{arr[1]}'", paths.items()))
+importCode = "\n".join(map(lambda arr: f"import {arr[0]}Schema from '../inputs/interface_schemas/{arr[1]}'", paths.items()))
 storyCode = "\n".join(
     map(
         lambda arr: f"""export const {arr[0]} = PageTemplate.bind({{}});

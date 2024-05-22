@@ -32,7 +32,7 @@ import { validateDANDIApiKey } from "../../../validation/dandi";
 
 import * as dandi from "dandi";
 
-import keyIcon from "../../assets/key.svg?raw";
+import keyIcon from "../../../../assets/icons/key.svg?raw";
 
 import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";

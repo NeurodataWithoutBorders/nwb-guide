@@ -16,11 +16,11 @@ import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedI
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
-import uploadIcon from "./stories/assets/dandi.svg?raw";
-import inspectIcon from "./stories/assets/inspect.svg?raw";
-import neurosiftIcon from "./stories/assets/neurosift-logo.svg?raw";
+import uploadIcon from "../assets/icons/dandi.svg?raw";
+import inspectIcon from "../assets/icons/inspect.svg?raw";
+import neurosiftIcon from "../assets/icons/neurosift-logo.svg?raw";
 
-import settingsIcon from "./stories/assets/settings.svg?raw";
+import settingsIcon from "../assets/icons/settings.svg?raw";
 
 import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
 import { SettingsPage } from "./stories/pages/settings/SettingsPage";

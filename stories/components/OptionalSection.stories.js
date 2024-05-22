@@ -1,4 +1,4 @@
-import { OptionalSection } from "./OptionalSection";
+import { OptionalSection } from "../../src/electron/renderer/src/stories/OptionalSection";
 
 export default {
     title: "Components/Optional Section",

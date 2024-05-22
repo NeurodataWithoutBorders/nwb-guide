@@ -15,10 +15,10 @@ import { merge, setUndefinedIfNotDeclared } from "../utils";
 import { homeDirectory, notyf, testDataFolderPath } from "../../../dependencies/globals";
 import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../electron/index.js";
 
-import saveSVG from "../../assets/save.svg?raw";
-import folderSVG from "../../assets/folder_open.svg?raw";
-import deleteSVG from "../../assets/delete.svg?raw";
-import generateSVG from "../../assets/restart.svg?raw";
+import saveSVG from "../../../../assets/icons/save.svg?raw";
+import folderSVG from "../../../../assets/icons/folder_open.svg?raw";
+import deleteSVG from "../../../../assets/icons/delete.svg?raw";
+import generateSVG from "../../../../assets/icons/restart.svg?raw";
 
 import { header } from "../../forms/utils";
 

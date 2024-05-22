@@ -14,7 +14,7 @@ import { Button } from "../../../Button.js";
 import { Modal } from "../../../Modal";
 import { header } from "../../../forms/utils";
 
-import autocompleteIcon from "../../../assets/inspect.svg?raw";
+import autocompleteIcon from "../../../../../assets/icons/inspect.svg?raw";
 
 const propOrder = ["path", "subject_id", "session_id"];
 

@@ -2,7 +2,7 @@ import { html } from "lit";
 import { Page } from "../../Page.js";
 
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import folderOpenSVG from "../../../assets/folder_open.svg?raw";
+import folderOpenSVG from "../../../../../assets/icons/folder_open.svg?raw";
 
 import { electron } from "../../../../electron/index.js";
 import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";

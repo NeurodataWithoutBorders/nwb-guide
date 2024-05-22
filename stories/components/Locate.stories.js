@@ -1,4 +1,4 @@
-import { globalState, PageTemplate } from "./storyStates";
+import { globalState, PageTemplate } from "../pages/storyStates";
 
 export default {
     title: "Pages/Guided Mode/Locate",
