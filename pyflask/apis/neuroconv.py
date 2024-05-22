@@ -1,6 +1,7 @@
 """API endpoint definitions for interacting with NeuroConv."""
 
 import traceback
+from typing import Dict
 
 from errorHandlers import notBadRequestException
 from flask import Response, request
@@ -25,16 +26,18 @@ from manageNeuroconv import (
 )
 from manageNeuroconv.info import announcer
 
-neuroconv_api = Namespace("neuroconv", description="Neuroconv neuroconv_api for the NWB GUIDE.")
+neuroconv_api = Namespace(name="neuroconv", description="Neuroconv neuroconv_api for the NWB GUIDE.")
 
 parser = reqparse.RequestParser()
-parser.add_argument("interfaces", type=str, action="split", help="Interfaces cannot be converted")
+parser.add_argument("interfaces", type=str, action="split", help="Interfaces cannot be converted.")
 
 
 @neuroconv_api.errorhandler(Exception)
-def exception_handler(error):
-    exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
-    return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
+def exception_handler(error: Exception) -> Dict[str, str]:
+    full_traceback = traceback.format_exception(type(error), error, error.__traceback__)
+    message = full_traceback[-1]
+    remaining_traceback = "".join(full_traceback[:-1])
+    return {"message": message, "traceback": remaining_traceback}
 
 
 @neuroconv_api.route("/")
