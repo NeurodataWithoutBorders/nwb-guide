@@ -26,8 +26,8 @@ from manageNeuroconv.info import (
     CONVERSION_SAVE_FOLDER_PATH,
     GUIDE_ROOT_FOLDER,
     STUB_SAVE_FOLDER_PATH,
+    is_packaged,
     resource_path,
-    is_packaged
 )
 
 app = Flask(__name__)
