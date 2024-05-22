@@ -56,27 +56,26 @@ class NWBPreviewInstance extends LitElement {
     render() {
         const isOnline = navigator.onLine;
 
-        if (!isOnline) return until(
-            (async () => {
-                const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
-                return unsafeHTML(htmlRep);
-            })(),
-            html`<small>Loading HTML representation...</small>`
-        );
+        if (!isOnline)
+            return until(
+                (async () => {
+                    const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
+                    return unsafeHTML(htmlRep);
+                })(),
+                html`<small>Loading HTML representation...</small>`
+            );
 
-        const neurosift = new Neurosift({ fullscreen: false })
+        const neurosift = new Neurosift({ fullscreen: false });
 
         // Enable access to the explicit file path
         fetch(`${baseUrl}/files/${this.file}`, { method: "POST" })
-        .then((res) => res.text())
-        .then((result) => {
+            .then((res) => res.text())
+            .then((result) => {
+                // Set Neurosift to access the returned URL
+                if (result) neurosift.url = result;
+            });
 
-            // Set Neurosift to access the returned URL
-            if (result) neurosift.url = result;
-        })
-
-
-        return neurosift
+        return neurosift;
     }
 }
 

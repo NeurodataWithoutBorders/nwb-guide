@@ -10,9 +10,8 @@ from os import getpid, kill
 from os.path import isabs
 from pathlib import Path
 from signal import SIGINT
-from urllib.parse import unquote
-
 from typing import Union
+from urllib.parse import unquote
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
@@ -68,7 +67,10 @@ nwbfile_registry = []
     responses=server_error_responses(codes=[200, 400, 500]),
 )
 class Log(Resource):
-    @api.doc(description="Nicely format the exception and the payload that caused it.", responses=server_error_responses(codes=[200, 400, 404, 500]))
+    @api.doc(
+        description="Nicely format the exception and the payload that caused it.",
+        responses=server_error_responses(codes=[200, 400, 404, 500]),
+    )
     @catch_exception_and_abort(api=api, code=500)
     def post(self):
         payload = api.payload
@@ -80,6 +82,7 @@ class Log(Resource):
         message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n\n{exception_traceback}\n"
         selected_logger = getattr(api.logger, type)
         selected_logger(message)
+
 
 # Used for the standalone preview page
 @flask_app.route(rule="/files/<path:file_path>", methods=["GET", "POST"])
@@ -104,16 +107,17 @@ def handle_file_request(file_path: str) -> Union[str, Response, None]:
         return
 
     if request.method == "GET":
-        parsed_file_path = unquote(file_path) # Decode any URL encoding applied to the file path
-        is_file_relative = not isabs(parsed_file_path) # Check if the file path is relative
+        parsed_file_path = unquote(file_path)  # Decode any URL encoding applied to the file path
+        is_file_relative = not isabs(parsed_file_path)  # Check if the file path is relative
         if is_file_relative:
             parsed_file_path = f"/{parsed_file_path}"
         return send_file(path_or_file=parsed_file_path)
-    
+
     # Register access to the provided file path
     elif request.method == "POST":
         nwbfile_registry.append(file_path)
-        return request.base_url # Return the URL of the newly added file
+        return request.base_url  # Return the URL of the newly added file
+
 
 @flask_app.route("/cpus")
 def get_cpu_count():

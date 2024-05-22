@@ -1,7 +1,7 @@
 import contextlib
+from typing import Dict, List, Union
 
 import flask_restx
-from typing import List, Union, Dict
 
 
 def server_error_responses(*, codes: List[str]) -> Dict[int, str]:
