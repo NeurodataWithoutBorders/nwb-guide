@@ -13,7 +13,7 @@ coverage
 # Ignore node_modules folder
 node_modules
 build/api
-pyflask/ds
+src/pyflask/ds
 src/Users
 semantic
 semantic.json
