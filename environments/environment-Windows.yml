@@ -12,7 +12,7 @@ dependencies:
   - pip:
       - setuptools==70.0.0
       - PyInstaller==6.7.0
-      - pyinstaller-hooks-contrib == 2024.2  # Fix needed for pydantic v2; otherwise imports pydantic.compiled
+      - pyinstaller-hooks-contrib == 2024.6  # Fix needed for pydantic v2; otherwise imports pydantic.compiled
       - chardet == 5.1.0
       - configparser == 6.0.0
       - flask == 2.3.2
