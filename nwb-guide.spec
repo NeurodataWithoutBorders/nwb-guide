@@ -10,7 +10,7 @@ import scipy
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('./src/paths.config.json', './src'), ('./package.json', '.')]
+datas = [('./src/paths.config.json', '.'), ('./package.json', '.')]
 binaries = []
 hiddenimports = [
     'email_validator',
