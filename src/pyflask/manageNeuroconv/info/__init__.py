@@ -4,4 +4,5 @@ from .urls import (
     GUIDE_ROOT_FOLDER,
     STUB_SAVE_FOLDER_PATH,
     resource_path,
+    is_packaged
 )

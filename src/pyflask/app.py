@@ -27,6 +27,7 @@ from manageNeuroconv.info import (
     GUIDE_ROOT_FOLDER,
     STUB_SAVE_FOLDER_PATH,
     resource_path,
+    is_packaged
 )
 
 app = Flask(__name__)
@@ -42,7 +43,7 @@ timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 LOG_FILE_PATH = Path(LOG_FOLDER, f"{timestamp}.log")
 
 # Initialize API
-package_json_file_path = resource_path("../package.json")
+package_json_file_path = resource_path("package.json" if is_packaged() else "../package.json")
 with open(file=package_json_file_path) as fp:
     package_json = json.load(fp=fp)
 
