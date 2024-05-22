@@ -9,6 +9,4 @@ export let runOnLoad = (fn) => {
     else window.addEventListener("load", fn);
 };
 
-export {
-    supportedInterfaces
-}
+export { supportedInterfaces };
