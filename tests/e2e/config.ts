@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
 import { existsSync } from 'node:fs'
 
-import paths from "../../paths.config.json" assert { type: "json" };
+import paths from "../../src/paths.config.json" assert { type: "json" };
 import { connect as connectToElectron } from '../puppeteer';
 
 // ------------------------------------------------------------------
