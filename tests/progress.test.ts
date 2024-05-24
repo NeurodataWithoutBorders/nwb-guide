@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
-import { updateAppProgress, updateFile, rename } from '../src/renderer/src/progress/update'
-import { get } from '../src/renderer/src/progress'
-import { remove } from '../src/renderer/src/progress/operations'
+import { updateAppProgress, updateFile, rename } from '../src/electron/renderer/src/progress/update'
+import { get } from '../src/electron/renderer/src/progress'
+import { remove } from '../src/electron/renderer/src/progress/operations'
 
 test('updates to app progress do not fail', () => updateAppProgress('/', {}))
 
