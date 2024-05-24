@@ -2,9 +2,9 @@
 
 from typing import List, Tuple, Union
 
-import flask.restx
+import flask_restx
 
-from ..utils import catch_exception_and_abort, server_error_responses
+from .utils import catch_exception_and_abort, server_error_responses
 
 dandi_api = flask_restx.Namespace(
     name="dandi", description="Request various static listings from the DANDI Python API."
@@ -14,7 +14,7 @@ dandi_api = flask_restx.Namespace(
 @dandi_api.route(rule="/get-recommended-species")
 class SupportedSpecies(flask_restx.Resource):
 
-    @neurosift_api.doc(
+    @dandi_api.doc(
         description="Request the list of currently supported species (by Latin Binomial name) for DANDI. Note that any "
         "explicit NCBI taxonomy link is also supported.",
         responses=server_error_responses(codes=[200, 500]),

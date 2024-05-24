@@ -3,5 +3,6 @@ from .urls import (
     CONVERSION_SAVE_FOLDER_PATH,
     GUIDE_ROOT_FOLDER,
     STUB_SAVE_FOLDER_PATH,
-    resource_path,
+    get_project_root_path,
+    get_source_base_path,
 )

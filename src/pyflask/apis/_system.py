@@ -2,9 +2,9 @@
 
 from typing import Dict, Union
 
-import flask.restx
+import flask_restx
 
-from ..utils import catch_exception_and_abort, server_error_responses
+from .utils import catch_exception_and_abort, server_error_responses
 
 system_api = flask_restx.Namespace(name="system", description="Request various system specific information.")
 

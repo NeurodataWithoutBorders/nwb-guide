@@ -1,36 +1,50 @@
 import json
 import os
+import pathlib
 import sys
-from pathlib import Path
 
 
-def resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller"""
-    try:
+def get_source_base_path() -> pathlib.Path:
+    """Get absolute path of a relative resource to the app; works for both dev mode and for PyInstaller."""
+    # Production: PyInstaller creates a temp folder and stores path in _MEIPASS
+    if hasattr(sys, "_MEIPASS"):
         # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = Path(__file__).parent.parent.parent.parent
+        base_path = pathlib.Path(sys._MEIPASS)
 
-    return Path(base_path) / relative_path
+    # Dev mode: base is the root of the `src` directory for the project
+    else:
+        base_path = pathlib.Path(__file__).parent.parent.parent.parent
+
+    return base_path
+
+
+def get_project_root_path() -> pathlib.Path:
+    """Get absolute path of a relative resource to the app; works for both dev mode and for PyInstaller."""
+    # Production: PyInstaller creates a temp folder and stores path in _MEIPASS
+    if hasattr(sys, "_MEIPASS"):
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = pathlib.Path(sys._MEIPASS).parent
+
+    # Dev mode: base is the root of the `src` directory for the project
+    else:
+        base_path = pathlib.Path(__file__).parent.parent.parent.parent.parent
+
+    return base_path
 
 
 is_test_environment = os.environ.get("VITEST")
 
-path_config = resource_path(
-    "paths.config.json"
-)  # NOTE: Must have pyflask for running the GUIDE as a whole, but errors for just the server
-f = path_config.open()
-data = json.load(f)
-GUIDE_ROOT_FOLDER = Path(Path.home(), data["root"])
+
+path_config_file_path = get_source_base_path() / "paths.config.json"
+with open(file=path_config_file_path, mode="r") as fp:
+    path_config = json.load(fp=fp)
+GUIDE_ROOT_FOLDER = pathlib.Path.home() / path_config["root"]
 
 if is_test_environment:
     GUIDE_ROOT_FOLDER = GUIDE_ROOT_FOLDER / ".test"
 
-STUB_SAVE_FOLDER_PATH = Path(GUIDE_ROOT_FOLDER, *data["subfolders"]["preview"])
-CONVERSION_SAVE_FOLDER_PATH = Path(GUIDE_ROOT_FOLDER, *data["subfolders"]["conversions"])
-
-f.close()
+STUB_SAVE_FOLDER_PATH = pathlib.Path(GUIDE_ROOT_FOLDER, *path_config["subfolders"]["preview"])
+CONVERSION_SAVE_FOLDER_PATH = pathlib.Path(GUIDE_ROOT_FOLDER, *path_config["subfolders"]["conversions"])
 
 # Create all nested home folders
 STUB_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)

@@ -7,11 +7,8 @@ import sys
 from datetime import datetime
 from logging import DEBUG, Formatter
 from logging.handlers import RotatingFileHandler
-from os.path import isabs
 from pathlib import Path
 from signal import SIGINT
-from typing import Union
-from urllib.parse import unquote
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
@@ -25,16 +22,11 @@ from apis import (
     startup_api,
     system_api,
 )
-from flask import Flask, Response, send_file, send_from_directory
+from apis.utils import catch_exception_and_abort, server_error_responses
+from flask import Flask
 from flask_cors import CORS
 from flask_restx import Api, Resource
-from manageNeuroconv.info import (
-    CONVERSION_SAVE_FOLDER_PATH,
-    GUIDE_ROOT_FOLDER,
-    STUB_SAVE_FOLDER_PATH,
-    resource_path,
-)
-from utils import catch_exception_and_abort, server_error_responses
+from manageNeuroconv.info import GUIDE_ROOT_FOLDER, get_project_root_path
 
 all_apis = [data_api, neuroconv_api, startup_api, neurosift_api, dandi_api, system_api]
 
@@ -51,8 +43,8 @@ timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 LOG_FILE_PATH = Path(LOG_FOLDER) / f"{timestamp}.log"
 
 # Fetch version from package.json
-package_json_file_path = resource_path("package.json")
-with open(file=package_json_file_path) as fp:
+package_json_file_path = get_project_root_path() / "package.json"
+with open(file=package_json_file_path, mode="r") as fp:
     package_json = json.load(fp=fp)
 
 # Initialize top-level API and set namespaces
@@ -89,21 +81,14 @@ class Log(Resource):
         selected_logger(message)
 
 
-@flask_app.route("/cpus")
-def get_cpu_count():
-    from psutil import cpu_count
-
-    physical = cpu_count(logical=False)
-    logical = cpu_count()
-
-    return dict(physical=physical, logical=logical)
-
-
 @flask_api.route("/server_shutdown", endpoint="shutdown")
-@neurosift_api.doc(
-    description="Handle adding and fetching NWB files from the global file registry.",
-)
+@flask_api.doc(description="Close the Flask server.")
 class Shutdown(Resource):
+
+    @flask_api.doc(
+        description="To trigger a shutdown, set a GET request to this endpoint. It will not return a response.",
+        responses=server_error_responses(codes=[200, 500]),
+    )
     def get(self) -> None:
         werkzeug_shutdown_function = flask.request.environ.get("werkzeug.server.shutdown")
         flask_api.logger.info("Shutting down server...")
