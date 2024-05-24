@@ -21,11 +21,11 @@ neurosift_api = flask_restx.Namespace(
 neurosift_file_registry = collections.defaultdict(bool)
 
 
-@neurosift_api.route(rule="/files/<path:file_path>", methods=["GET", "POST"])
+@neurosift_api.route(rule="/files/<path:file_path>")
 @neurosift_api.doc(
     description="Handle adding and fetching NWB files from the global file registry.",
 )
-class AllInterfaces(flask_restx.Resource):
+class NeurosiftFileManager(flask_restx.Resource):
 
     @neurosift_api.doc(
         description="If the file path has been added to the registry (and therefore sent its base "
