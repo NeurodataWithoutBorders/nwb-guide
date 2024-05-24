@@ -127,7 +127,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "electron/renderer/assets/app-icon/logo-guide-draft.ico"
+      "installerIcon": "src/electron/renderer/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
       "provider": "github"
