@@ -4,7 +4,7 @@ import ViteYaml from "@modyfi/vite-plugin-yaml";
 
 import { resolve } from "path";
 
-const htmlRoot = 'src/electron/renderer'
+const htmlRoot = "src/electron/renderer";
 
 export default defineConfig({
     main: {
@@ -35,7 +35,7 @@ export default defineConfig({
                 },
                 output: {
                     dir: resolve(__dirname, "build", "renderer"),
-                }
+                },
             },
         },
     },
