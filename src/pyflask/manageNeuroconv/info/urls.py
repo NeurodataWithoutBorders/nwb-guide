@@ -4,16 +4,6 @@ import sys
 from pathlib import Path
 
 
-def is_packaged():
-    deployed = True
-    try:
-        sys._MEIPASS  # PyInstaller creates a temp folder and stores path in _MEIPASS
-    except Exception:
-        deployed = False
-
-    return deployed
-
-
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
@@ -30,7 +20,6 @@ is_test_environment = os.environ.get("VITEST")
 path_config = resource_path(
     "paths.config.json"
 )  # NOTE: Must have pyflask for running the GUIDE as a whole, but errors for just the server
-
 f = path_config.open()
 data = json.load(f)
 GUIDE_ROOT_FOLDER = Path(Path.home(), data["root"])

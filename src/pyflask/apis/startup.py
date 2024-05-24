@@ -1,9 +1,8 @@
 """API endpoint definitions for startup operations."""
 
-from errorHandlers import notBadRequestException
 from flask_restx import Namespace, Resource
 
-startup_api = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
+startup_api = Namespace(name="startup", description="API for startup commands related to the NWB GUIDE.")
 
 parser = startup_api.parser()
 parser.add_argument(
@@ -40,6 +39,5 @@ class PreloadImports(Resource):
 
             return True
         except Exception as exception:
-            if notBadRequestException(exception=exception):
-                startup_api.abort(500, str(exception))
+            startup_api.abort(500, str(exception))
             raise exception

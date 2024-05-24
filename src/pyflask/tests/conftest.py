@@ -3,7 +3,7 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption("--target", action="store", help="Run the executable instead of the standard Flask app")
+    parser.addoption("--target", action="store", help="Run the executable instead of the standard Flask flask_app")
 
 
 @pytest.fixture(scope="session")
@@ -12,7 +12,7 @@ def client(request):
     if target:
         return target
     else:
-        app = flask.app
+        app = flask.flask_app
         app.config.update(
             {
                 "TESTING": True,
