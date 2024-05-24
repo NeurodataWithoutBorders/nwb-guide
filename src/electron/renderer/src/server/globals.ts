@@ -56,7 +56,7 @@ export const activateServer = () => {
 export const serverGlobals = {
     species: new Promise((res, rej) => {
       onServerOpen(() => {
-        fetch(new URL("get-recommended-species", baseUrl))
+        fetch(new URL("dandi/get-recommended-species", baseUrl))
           .then((res) => res.json())
           .then((species) => {
             res(species)
