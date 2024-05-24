@@ -8,7 +8,7 @@ from typing import List
 from flask import Flask, Response, render_template
 from tqdm import tqdm as base_tqdm
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(os.path.join(__file__, "..", "..", "pyflask")))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(os.path.join(__file__, "..", "..", "src", "pyflask")))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 from pyflask.manageNeuroconv.info.sse import MessageAnnouncer
 

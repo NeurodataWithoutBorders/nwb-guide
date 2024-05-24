@@ -11,11 +11,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const screenshotPath = join( __dirname, 'screenshots')
 mkdirSync(screenshotPath, { recursive: true })
 
-import testingSuiteYaml from "../../guide_testing_suite.yml";
+import examplePipelines from "../../src/example_pipelines.yml";
 
-import paths from "../../paths.config.json" assert { type: "json" };
+import paths from "../../src/paths.config.json" assert { type: "json" };
 import { evaluate, initTests } from './utils'
-import { header } from '../../src/renderer/src/stories/forms/utils'
+import { header } from '../../src/electron/renderer/src/stories/forms/utils'
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data
 const guideRootPath = join(homedir(), paths.root)
@@ -65,15 +65,15 @@ describe('Run example pipelines', () => {
         })
 
         // Assert all the pipelines are present
-        expect(pipelineNames.sort()).toEqual(Object.keys(testingSuiteYaml.pipelines).map(header).sort())
+        expect(pipelineNames.sort()).toEqual(Object.keys(examplePipelines).map(header).sort())
 
       })
 
 
-      for (let pipeline in testingSuiteYaml.pipelines) {
+      for (let pipeline in examplePipelines) {
 
         const pipelineParsed = header(pipeline)
-        const info = testingSuiteYaml.pipelines[pipeline]
+        const info = examplePipelines[pipeline]
         const describeFn = info.test === false ? describe.skip : describe
 
         describeFn(`${pipelineParsed}`, async ( ) => {
