@@ -10,6 +10,9 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from signal import SIGINT
 
+from urllib.parse import unquote
+
+
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
 
@@ -79,6 +82,7 @@ class Log(Resource):
         message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n\n{exception_traceback}\n"
         selected_logger = getattr(flask_api.logger, type)
         selected_logger(message)
+
 
 
 @flask_api.route("/server_shutdown", endpoint="shutdown")
