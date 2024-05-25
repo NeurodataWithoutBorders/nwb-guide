@@ -12,7 +12,7 @@ def client(request):
     if target:
         return target
     else:
-        app = flask.flask_app
+        app = flask.app
         app.config.update(
             {
                 "TESTING": True,

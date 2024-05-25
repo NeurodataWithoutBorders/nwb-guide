@@ -6,9 +6,8 @@ import sys
 
 def get_source_base_path() -> pathlib.Path:
     """Get absolute path of a relative resource to the app; works for both dev mode and for PyInstaller."""
-    # Production: PyInstaller creates a temp folder and stores path in _MEIPASS
+    # Production: PyInstaller creates a temp folder at runtime and stores path in _MEIPASS
     if hasattr(sys, "_MEIPASS"):
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = pathlib.Path(sys._MEIPASS)
 
     # Dev mode: base is the root of the `src` directory for the project
@@ -20,12 +19,11 @@ def get_source_base_path() -> pathlib.Path:
 
 def get_project_root_path() -> pathlib.Path:
     """Get absolute path of a relative resource to the app; works for both dev mode and for PyInstaller."""
-    # Production: PyInstaller creates a temp folder and stores path in _MEIPASS
+    # Production: PyInstaller creates a temp folder at runtime and stores path in _MEIPASS
     if hasattr(sys, "_MEIPASS"):
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = pathlib.Path(sys._MEIPASS).parent
 
-    # Dev mode: base is the root of the `src` directory for the project
+    # Dev mode: root of project is one level above root of `src`
     else:
         base_path = pathlib.Path(__file__).parent.parent.parent.parent.parent
 
