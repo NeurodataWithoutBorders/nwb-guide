@@ -67,7 +67,7 @@ export const serverGlobals = {
     }),
     cpus: new Promise((res, rej) => {
       onServerOpen(() => {
-        fetch(new URL("cpus", baseUrl))
+        fetch(new URL("system/cpus", baseUrl))
           .then((res) => res.json())
           .then((cpus) => {
             res(cpus)

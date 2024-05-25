@@ -13,7 +13,7 @@ export const ready = {
     interfaces: createPromise("interfaces"),
 }
 
-//  Get CPUs
+//  Fetch data formats
 onServerOpen(async () => {
     await fetch(`${baseUrl}/neuroconv`).then((res) => res.json())
     .then((interfaces) => setReady.interfaces(interfaces))

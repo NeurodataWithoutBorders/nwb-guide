@@ -1,9 +1,9 @@
-from ._dandi import dandi_api
-from ._neurosift import neurosift_api
-from ._system import system_api
+from .dandi import dandi_api
 from .data import data_api
 from .neuroconv import neuroconv_api
+from .neurosift import neurosift_api
 from .startup import startup_api
+from .system import system_api
 
 __all__ = [
     "neurosift_api",
