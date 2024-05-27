@@ -4,13 +4,13 @@ from typing import Dict, Union
 
 import flask_restx
 
-system_api = flask_restx.Namespace(name="system", description="Request various system specific information.")
+system_namespace = flask_restx.Namespace(name="system", description="Request various system specific information.")
 
 
-@system_api.route("/cpus")
+@system_namespace.route("/cpus")
 class SupportedSpecies(flask_restx.Resource):
 
-    @system_api.doc(
+    @system_namespace.doc(
         description="Request the number of physical and logical cores on the system.",
     )
     def get(self) -> Union[Dict[str, int], None]:

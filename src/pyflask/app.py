@@ -16,14 +16,6 @@ from urllib.parse import unquote
 multiprocessing.freeze_support()
 
 
-from apis import (
-    dandi_api,
-    data_api,
-    neuroconv_api,
-    neurosift_api,
-    startup_api,
-    system_api,
-)
 from flask import Flask, request, send_file, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource
@@ -33,6 +25,14 @@ from manageNeuroconv.info import (
     STUB_SAVE_FOLDER_PATH,
     is_packaged,
     resource_path,
+)
+from namespaces import (
+    dandi_namespace,
+    data_namespace,
+    neuroconv_namespace,
+    neurosift_namespace,
+    startup_namespace,
+    system_namespace,
 )
 
 app = Flask(__name__)
@@ -57,15 +57,13 @@ api = Api(
     title="NWB GUIDE API",
     description="The REST API for the NWB GUIDE provided by the Python Flask Server.",
 )
-api.add_namespace(startup_api)
-api.add_namespace(neuroconv_api)
-api.add_namespace(data_api)
-api.add_namespace(system_api)
-api.add_namespace(dandi_api)
-api.add_namespace(neurosift_api)
+api.add_namespace(startup_namespace)
+api.add_namespace(neuroconv_namespace)
+api.add_namespace(data_namespace)
+api.add_namespace(system_namespace)
+api.add_namespace(dandi_namespace)
+api.add_namespace(neurosift_namespace)
 api.init_app(app)
-
-registered = {}
 
 
 @api.route("/log")

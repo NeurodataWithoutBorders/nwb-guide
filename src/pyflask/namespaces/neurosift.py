@@ -6,7 +6,7 @@ from typing import Union
 import flask
 import flask_restx
 
-neurosift_api = flask_restx.Namespace(
+neurosift_namespace = flask_restx.Namespace(
     name="neurosift", description="Handle file system communication with the " "standalone Neurosift preview page."
 )
 
@@ -15,18 +15,18 @@ neurosift_api = flask_restx.Namespace(
 neurosift_file_registry = collections.defaultdict(bool)
 
 
-@neurosift_api.route(rule="/files/<path:file_path>")
-@neurosift_api.doc(
+@neurosift_namespace.route(rule="/files/<path:file_path>")
+@neurosift_namespace.doc(
     description="Handle adding and fetching NWB files from the global file registry.",
 )
 class NeurosiftFileManager(flask_restx.Resource):
 
-    @neurosift_api.doc(
+    @neurosift_namespace.doc(
         description="If the file path has been added to the registry (and therefore sent its base "
         "URL), return the absolute file path. This is implicitly called by Neurosift.",
     )
     def get(self, file_path: str) -> Union[flask.Response, None]:
-        abort_if_not_nwb_file(file_path=file_path, api=neurosift_api)
+        abort_if_not_nwb_file(file_path=file_path, api=neurosift_namespace)
         if neurosift_file_registry[file_path]:
             code = 404
             base_message = server_error_responses(codes=[code])[code]
@@ -45,13 +45,13 @@ class NeurosiftFileManager(flask_restx.Resource):
 
         return flask.send_file(path_or_file=parsed_file_path)
 
-    @neurosift_api.doc(
+    @neurosift_namespace.doc(
         description="Add the file to a global in-memory registry (refreshes on App restart) and return "
         "the base URL of the newly "
         "added file",
     )
     def post(self, file_path: str) -> Union[str, None]:
-        abort_if_not_nwb_file(file_path=file_path, api=neurosift_api)
+        abort_if_not_nwb_file(file_path=file_path, api=neurosift_namespace)
 
         neurosift_file_registry[file_path] = True
 

@@ -4,15 +4,15 @@ from typing import List, Tuple, Union
 
 import flask_restx
 
-dandi_api = flask_restx.Namespace(
+dandi_namespace = flask_restx.Namespace(
     name="dandi", description="Request various static listings from the DANDI Python API."
 )
 
 
-@dandi_api.route(rule="/get-recommended-species")
+@dandi_namespace.route(rule="/get-recommended-species")
 class SupportedSpecies(flask_restx.Resource):
 
-    @dandi_api.doc(
+    @dandi_namespace.doc(
         description="Request the list of currently supported species (by Latin Binomial name) for DANDI. Note that any "
         "explicit NCBI taxonomy link is also supported.",
     )
