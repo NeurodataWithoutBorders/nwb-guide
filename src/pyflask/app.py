@@ -16,7 +16,14 @@ from urllib.parse import unquote
 multiprocessing.freeze_support()
 
 
-from apis import data_api, neuroconv_api, startup_api
+from apis import (
+    dandi_api,
+    data_api,
+    neuroconv_api,
+    neurosift_api,
+    startup_api,
+    system_api,
+)
 from flask import Flask, request, send_file, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource
@@ -53,60 +60,12 @@ api = Api(
 api.add_namespace(startup_api)
 api.add_namespace(neuroconv_api)
 api.add_namespace(data_api)
+api.add_namespace(system_api)
+api.add_namespace(dandi_api)
+api.add_namespace(neurosift_api)
 api.init_app(app)
 
 registered = {}
-
-
-@app.route("/files")
-def get_all_files():
-    return list(registered.keys())
-
-
-@app.route("/files/<path:path>", methods=["GET", "POST"])
-def handle_file_request(path):
-    if request.method == "GET":
-        if registered[path]:
-            path = unquote(path)
-            if not isabs(path):
-                path = f"/{path}"
-            return send_file(path)
-        else:
-            app.abort(404, "Resource is not accessible.")
-
-    else:
-        if ".nwb" in path:
-            registered[path] = True
-            return request.base_url
-        else:
-            app.abort(400, str("Path does not point to an NWB file."))
-
-
-@app.route("/conversions/<path:path>")
-def send_conversions(path):
-    return send_from_directory(CONVERSION_SAVE_FOLDER_PATH, path)
-
-
-@app.route("/preview/<path:path>")
-def send_preview(path):
-    return send_from_directory(STUB_SAVE_FOLDER_PATH, path)
-
-
-@app.route("/cpus")
-def get_cpu_count():
-    from psutil import cpu_count
-
-    physical = cpu_count(logical=False)
-    logical = cpu_count()
-
-    return dict(physical=physical, logical=logical)
-
-
-@app.route("/get-recommended-species")
-def get_species():
-    from dandi.metadata.util import species_map
-
-    return species_map
 
 
 @api.route("/log")
