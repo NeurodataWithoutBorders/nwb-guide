@@ -62,10 +62,10 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - if: steps.cache-ephys-datasets.outputs.cache-hit != 'true'
         name: Download ephys dataset from S3
-        run: aws s3 cp --recursive --region=us-east-2 ${{ secrets.S3_GIN_BUCKET }}/ephy_testing_data ./ephy_testing_data
+        run: aws s3 cp --recursive --region=us-east-2 ${{ secrets.S3_GIN_BUCKET }}/ephy_testing_data ~/NWB_GUIDE/test-data/GIN/ephy_testing_data
       - if: steps.cache-ophys-datasets.outputs.cache-hit != 'true'
         name: Download ophys dataset from S3
-        run: aws s3 cp --recursive --region=us-east-2 ${{ secrets.S3_GIN_BUCKET }}/ophys_testing_data ./ophys_testing_data
+        run: aws s3 cp --recursive --region=us-east-2 ${{ secrets.S3_GIN_BUCKET }}/ophys_testing_data ~/NWB_GUIDE/test-data/GIN/ophys_testing_data
       - if: steps.cache-behavior-datasets.outputs.cache-hit != 'true'
         name: Download behavior dataset from S3
-        run: aws s3 cp --recursive --region=us-east-2 ${{ secrets.S3_GIN_BUCKET }}/behavior_testing_data ./behavior_testing_data
+        run: aws s3 cp --recursive --region=us-east-2 ${{ secrets.S3_GIN_BUCKET }}/behavior_testing_data ~/NWB_GUIDE/test-data/GIN/behavior_testing_data
