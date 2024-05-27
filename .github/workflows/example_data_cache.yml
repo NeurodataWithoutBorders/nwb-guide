@@ -12,6 +12,7 @@ on:
 
 jobs:
 
+  run:
     name: Example data cache
     runs-on: ${{ matrix.os }}
     strategy:
