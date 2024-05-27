@@ -5,6 +5,7 @@ _build
 dist
 out
 tests/screenshots
+docs/assets/tutorials/test-pipelines
 
 coverage
 
