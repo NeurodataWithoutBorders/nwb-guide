@@ -12,8 +12,6 @@ from pathlib import Path
 from signal import SIGINT
 from urllib.parse import unquote
 
-from errorHandlers import notBadRequestException
-
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
 
@@ -128,8 +126,7 @@ class Log(Resource):
             selected_logger(message)
 
         except Exception as exception:
-            if notBadRequestException(exception):
-                api.abort(500, str(exception))
+            api.abort(500, str(exception))
 
 
 @api.route("/server_shutdown", endpoint="shutdown")

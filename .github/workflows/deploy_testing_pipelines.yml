@@ -1,0 +1,22 @@
+name: Deploy Pipeline tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  example_data_cache:
+    uses: ./.github/workflows/example_data_cache.yml
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      S3_GIN_BUCKET: ${{ secrets.S3_GIN_BUCKET }}
+
+  pipeline_tests:
+    needs: example_data_cache
+    uses: ./.github/workflows/testing_pipelines.yml

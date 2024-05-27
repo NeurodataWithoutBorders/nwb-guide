@@ -1,19 +1,16 @@
-name: Example Pipeline Tests
+name: Pipeline Tests
 on:
-  schedule:
-    - cron: "0 16 * * *"  # Daily at noon EST
-  pull_request:
+  workflow_call:
+  workflow_dispatch:
 
-concurrency:  # Cancel previous workflows on the same pull request
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  CACHE_NUMBER: 2  # increase to reset cache manually
-
 jobs:
+
   testing:
-    name: Pipelines on ${{ matrix.os }}
+    name: on ${{ matrix.os }}  # Will read on the dashboard as 'Pipeline Tests / on {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -22,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
         include:
           - os: ubuntu-latest
             label: environments/environment-Linux.yml
@@ -50,7 +47,7 @@ jobs:
           activate-environment: nwb-guide
           use-mamba: true
 
-      - name: Set cache date
+      - name: Set environment cache date
         id: get-date
         run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
         shell: bash
@@ -74,7 +71,7 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
-      # Download GIN Testing Data (modified from https://github.com/catalystneuro/neuroconv/blob/main/.github/workflows/testing.yml)
+      # Load example data caches
       - name: Get ephy_testing_data current head hash
         id: ephys
         run: echo "::set-output name=HASH_EPHY_DATASET::$(git ls-remote https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git HEAD | cut -f1)"
@@ -83,7 +80,7 @@ jobs:
         id: cache-ephys-datasets
         with:
           path: ./ephy_testing_data
-          key: ephys-datasets-2024-03-27-${{ matrix.os }}-${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
+          key: ephys-datasets-${{ matrix.os }}-${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
       - name: Get ophys_testing_data current head hash
         id: ophys
         run: echo "::set-output name=HASH_OPHYS_DATASET::$(git ls-remote https://gin.g-node.org/CatalystNeuro/ophys_testing_data.git HEAD | cut -f1)"
@@ -92,7 +89,7 @@ jobs:
         id: cache-ophys-datasets
         with:
           path: ./ophys_testing_data
-          key: ophys-datasets-2022-08-18-${{ matrix.os }}-${{ steps.ophys.outputs.HASH_OPHYS_DATASET }}
+          key: ophys-datasets-${{ matrix.os }}-${{ steps.ophys.outputs.HASH_OPHYS_DATASET }}
       - name: Get behavior_testing_data current head hash
         id: behavior
         run: echo "::set-output name=HASH_BEHAVIOR_DATASET::$(git ls-remote https://gin.g-node.org/CatalystNeuro/behavior_testing_data.git HEAD | cut -f1)"
@@ -101,27 +98,7 @@ jobs:
         id: cache-behavior-datasets
         with:
           path: ./behavior_testing_data
-          key: behavior-datasets-2023-07-26-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
-
-
-
-      - if: steps.cache-ephys-datasets.outputs.cache-hit != 'true' || steps.cache-ophys-datasets.outputs.cache-hit != 'true' || steps.cache-behavior-datasets.outputs.cache-hit != 'true'
-        name: Install and configure AWS CLI
-        run: |
-          pip install awscli
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - if: steps.cache-ephys-datasets.outputs.cache-hit != 'true'
-        name: Download ephys dataset from S3
-        run: aws s3 cp --recursive ${{ secrets.S3_GIN_BUCKET }}/ephy_testing_data ~/NWB_GUIDE/test-data/GIN/ephy_testing_data
-      - if: steps.cache-ophys-datasets.outputs.cache-hit != 'true'
-        name: Download ophys dataset from S3
-        run: aws s3 cp --recursive ${{ secrets.S3_GIN_BUCKET }}/ophys_testing_data ~/NWB_GUIDE/test-data/GIN/ophys_testing_data
-      - if: steps.cache-behavior-datasets.outputs.cache-hit != 'true'
-        name: Download behavior dataset from S3
-        run: aws s3 cp --recursive ${{ secrets.S3_GIN_BUCKET }}/behavior_testing_data ~/NWB_GUIDE/test-data/GIN/behavior_testing_data
-
-
+          key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
