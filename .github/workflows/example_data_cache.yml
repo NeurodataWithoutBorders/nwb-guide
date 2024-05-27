@@ -1,4 +1,4 @@
-name: Example data cache
+name: Data
 on:
   workflow_call:
     secrets:
@@ -8,12 +8,14 @@ on:
         required: true
       S3_GIN_BUCKET:
         required: true
-  workflow_dispatch:
 
 jobs:
 
   run:
-    name: Example data cache
+    # Will read on PR dashboard as 'Deploy / Data / {os} cache'
+    # Action dashboard identified by 'Deploy'
+    # Requirement settings identified as '{os} cache'
+    name: ${{ matrix.os }} cache
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

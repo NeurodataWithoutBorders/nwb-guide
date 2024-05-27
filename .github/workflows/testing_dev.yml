@@ -1,24 +1,21 @@
-name: Dev Tests (Live)
+name: Dev
 on:
-  schedule:
-    - cron: "0 16 * * *"  # Daily at noon EST
-  pull_request:
-
-concurrency:  # Cancel previous workflows on the same pull request
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  CACHE_NUMBER: 2  # increase to reset cache manually
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
 jobs:
-  testing:
-    name: Services on ${{ matrix.os }}  # Will read on the dashboard as 'Dev Tests (Live) / Services on {os}'
+
+  run:
+    # Will read on PR dashboard as 'Deploy / Dev / {os} tests'
+    # Action dashboard identified by 'Deploy'
+    # Requirement settings identified as '{os} tests'
+    name: ${{ matrix.os }} tests  # Will read on PR dashboard as 'Deploy / Dev / {os} tests'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -l {0}
-
     strategy:
       fail-fast: false
       matrix:
@@ -35,7 +32,6 @@ jobs:
 
           - os: windows-latest
             label: environments/environment-Windows.yml
-
 
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +60,7 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Create and activate environment
-        run: mamba env update -n nwb-guide -f ${{ matrix.label }}
+        run: mamba env update --name nwb-guide --file ${{ matrix.label }}
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
@@ -74,19 +70,21 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
-      - name: Create env file
-        run: |
-          touch .env
-          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
-
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
-        run: npm run coverage:app
+        run: npm run test:coverage
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:app
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
 
+      - name: Archive E2E Test Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots-${{ matrix.os }}
+          path: docs/assets/tutorials
+          retention-days: 1
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4

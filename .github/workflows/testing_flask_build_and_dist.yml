@@ -1,31 +1,23 @@
-name: Build Tests
+name: Build
 on:
-  schedule:
-    - cron: "0 16 * * *"  # Daily at noon EST
-  pull_request:
-  workflow_dispatch:
-
-# Cancel previous workflows on the same pull request
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  CACHE_NUMBER: 1  # increase to reset cache manually
+  workflow_call:
 
 jobs:
-  testing:
-    name: PyInstaller on ${{ matrix.os }}  # Will read on the dashboard as 'Build Tests / PyInstaller on {os}'
+
+  run:
+    # Will read on PR dashboard as 'Deploy / Build / {os} flask'
+    # Action dashboard identified by 'Deploy'
+    # Requirement settings identified as '{os} flask'
+    name: ${{ matrix.os }} flask
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -l {0}
-
     strategy:
       fail-fast: false
       matrix:
         include:
-          # current linux installation instructions use dev mode instead of distributable
+          # linux installation instructions use dev mode instead of distributable
           # - python-version: "3.9"
           #   os: ubuntu-latest
           #   label: environments/environment-Linux.yml
@@ -88,7 +80,7 @@ jobs:
 
       - run: npm ci --verbose
 
-      # fix for macos build
+      # Fix for macos build - remove bad sonpy file
       - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
         run: rm -f /Users/runner/miniconda3/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
 
