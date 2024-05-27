@@ -9,13 +9,12 @@ concurrency:
 
 jobs:
 
-  testing:
+  run:
     name: on ${{ matrix.os }}  # Will read on the dashboard as 'Pipeline Tests / on {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -l {0}
-
     strategy:
       fail-fast: false
       matrix:
@@ -47,18 +46,17 @@ jobs:
           activate-environment: nwb-guide
           use-mamba: true
 
+      # Setup conda environment from cache
       - name: Set environment cache date
         id: get-date
         run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
         shell: bash
-
       - name: Cache Conda env
         uses: actions/cache@v4
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
         id: cache
-
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Create and activate environment
         run: mamba env update --name nwb-guide --file ${{ matrix.label }}
@@ -100,6 +98,7 @@ jobs:
           path: ./behavior_testing_data
           key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
 
+      # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
         run: npm run test:pipelines
