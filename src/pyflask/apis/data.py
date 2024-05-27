@@ -6,29 +6,20 @@ from apis.utils import catch_exception_and_abort
 from flask_restx import Namespace, Resource, reqparse
 from manageNeuroconv import generate_dataset, generate_test_data
 
-data_api = Namespace("data", description="API route for dataset generation in the NWB GUIDE.")
-
-
-@data_api.errorhandler(Exception)
-def exception_handler(error):
-    exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
-    return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
+data_api = Namespace(name="example-data", description="API route for dataset generation in the NWB GUIDE.")
 
 
 generate_test_data_parser = reqparse.RequestParser()
 generate_test_data_parser.add_argument("output_path", type=str, required=True)
 
 
-@data_api.route("/generate")
+@data_api.route("/generate/single-session")
 @data_api.expect(generate_test_data_parser)
-class GeneratetestData(Resource):
-    @data_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-
-    # @catch_exception_and_abort(api=data_api, code=500)
+class GenerateSingleSessions(Resource):
+    @data_api.doc(description="Generate synthetic data for a single session.")
     def post(self):
         arguments = generate_test_data_parser.parse_args()
 
-        raise NotImplementedError("test")
         generate_test_data(output_path=arguments["output_path"])
 
 
@@ -40,10 +31,13 @@ generate_test_dataset_parser.add_argument("input_path", type=str, required=True)
 @data_api.route("/generate/dataset")
 @data_api.expect(generate_test_data_parser)
 class GenerateDataset(Resource):
-    @data_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    @catch_exception_and_abort(api=data_api, code=500)
+    @data_api.doc(
+        description=(
+            "Copy the data from /generate/single-session into a folder structure "
+            "representing a multi-session experiment."
+        )
+    )
     def post(self):
         arguments = generate_test_dataset_parser.parse_args()
 
-        raise NotImplementedError("test2")
         return generate_dataset(input_path=arguments["input_path"], output_path=arguments["output_path"])
