@@ -1,25 +1,18 @@
-import { describe, expect, test, skip, beforeAll } from 'vitest'
-import { connect } from '../puppeteer'
+import { describe, expect, test, beforeAll } from 'vitest'
 
+import { join } from 'node:path'
 import { mkdirSync, existsSync } from 'node:fs'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { homedir } from 'node:os'
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const screenshotPath = join( __dirname, 'screenshots')
-mkdirSync(screenshotPath, { recursive: true })
 
 import examplePipelines from "../../src/example_pipelines.yml";
 
 import paths from "../../src/paths.config.json" assert { type: "json" };
-import { evaluate, initTests } from './utils'
+import { evaluate, initTests, takeScreenshot } from './utils'
 import { header } from '../../src/electron/renderer/src/stories/forms/utils'
 
-// NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data
-const guideRootPath = join(homedir(), paths.root)
-const testGINPath = join(guideRootPath, 'test-data', 'GIN')
+// NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data/GIN
+const testGINPath = join(homedir(), paths.root, 'test-data', 'GIN')
 // const hasGINPath = existsSync(testGINPath)
 const pipelineDescribeFn = describe // hasGINPath ? describe : describe.skip
 
@@ -55,6 +48,9 @@ describe('Run example pipelines', () => {
             page.save()
         }, testGINPath)
 
+        await takeScreenshot('test-pipelines/created')
+
+
         // Transition back to the conversions page and count pipelines
         const pipelineNames = await evaluate(async () => {
           const dashboard = document.querySelector('nwb-dashboard')
@@ -63,6 +59,9 @@ describe('Run example pipelines', () => {
           const pipelineCards = document.getElementById('guided-div-resume-progress-cards').children
           return Array.from(pipelineCards).map(card => card.info.project.name)
         })
+
+        await takeScreenshot('test-pipelines/list', 500)
+
 
         // Assert all the pipelines are present
         expect(pipelineNames.sort()).toEqual(Object.keys(examplePipelines).map(header).sort())
