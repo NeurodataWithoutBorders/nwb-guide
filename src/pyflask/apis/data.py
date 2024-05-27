@@ -2,7 +2,6 @@
 
 import traceback
 
-from apis.utils import catch_exception_and_abort
 from flask_restx import Namespace, Resource, reqparse
 from manageNeuroconv import generate_dataset, generate_test_data
 
