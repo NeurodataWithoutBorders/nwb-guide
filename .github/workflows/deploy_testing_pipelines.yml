@@ -19,4 +19,4 @@ jobs:
 
   pipeline_tests:
     needs: example_data_cache
-    uses: ./.github/workflows/pipeline_tests.yml
+    uses: ./.github/workflows/testing_pipelines.yml
