@@ -8,7 +8,7 @@ on:
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / Dev (live) / {os} services'
+    # Will read on PR dashboard as 'Deploy / Live / {os} services'
     # Action dashboard identified by 'Deploy'
     # Requirement settings identified as '{os} services'
     name: ${{ matrix.os }} services
