@@ -20,8 +20,8 @@ import { header } from '../../src/electron/renderer/src/stories/forms/utils'
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data
 const guideRootPath = join(homedir(), paths.root)
 const testGINPath = join(guideRootPath, 'test-data', 'GIN')
-const hasGINPath = existsSync(testGINPath)
-const pipelineDescribeFn = hasGINPath ? describe : describe.skip
+// const hasGINPath = existsSync(testGINPath)
+const pipelineDescribeFn = describe // hasGINPath ? describe : describe.skip
 
 beforeAll(() => initTests({ screenshots: false, data: false }))
 
