@@ -6,12 +6,6 @@ from typing import Union
 import flask
 import flask_restx
 
-from .utils import (
-    abort_if_not_nwb_file,
-    catch_exception_and_abort,
-    server_error_responses,
-)
-
 neurosift_api = flask_restx.Namespace(
     name="neurosift", description="Handle file system communication with the " "standalone Neurosift preview page."
 )
@@ -30,9 +24,7 @@ class NeurosiftFileManager(flask_restx.Resource):
     @neurosift_api.doc(
         description="If the file path has been added to the registry (and therefore sent its base "
         "URL), return the absolute file path. This is implicitly called by Neurosift.",
-        responses=server_error_responses(codes=[200, 400, 500]),
     )
-    @catch_exception_and_abort(api=neurosift_api, code=500)
     def get(self, file_path: str) -> Union[flask.Response, None]:
         abort_if_not_nwb_file(file_path=file_path, api=neurosift_api)
         if neurosift_file_registry[file_path]:
@@ -57,9 +49,7 @@ class NeurosiftFileManager(flask_restx.Resource):
         description="Add the file to a global in-memory registry (refreshes on App restart) and return "
         "the base URL of the newly "
         "added file",
-        responses=server_error_responses(codes=[200, 400, 500]),
     )
-    @catch_exception_and_abort(api=neurosift_api, code=500)
     def post(self, file_path: str) -> Union[str, None]:
         abort_if_not_nwb_file(file_path=file_path, api=neurosift_api)
 
