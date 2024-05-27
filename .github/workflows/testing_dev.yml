@@ -1,4 +1,4 @@
-name: Dev
+name: Dev tests
 on:
   workflow_call:
     secrets:

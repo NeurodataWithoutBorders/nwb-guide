@@ -1,4 +1,4 @@
-name: Dev (Live)
+name: Dev tests with live services
 on:
   workflow_call:
     secrets:

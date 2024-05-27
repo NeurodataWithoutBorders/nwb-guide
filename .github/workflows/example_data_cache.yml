@@ -1,4 +1,4 @@
-name: Data
+name: Example data cache
 on:
   workflow_call:
     secrets:

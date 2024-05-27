@@ -1,4 +1,4 @@
-name: Build
+name: Test Flask build and dev tests on Flask distributable
 on:
   workflow_call:
 
