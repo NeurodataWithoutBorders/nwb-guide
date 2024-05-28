@@ -4,7 +4,7 @@ import { fs, remote } from "../electron/index";
 import { List } from "./List";
 const { dialog } = remote;
 
-import restartSVG from "./assets/restart.svg?raw";
+import restartSVG from "../../assets/icons/restart.svg?raw";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 
 function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
