@@ -30,28 +30,34 @@ describe('Run example pipelines', () => {
 
       test('All example pipelines are created', async ( ) => {
 
-        await evaluate(async (testGINPath) => {
+        const result = await evaluate(async (testGINPath) => {
 
             // Transition to settings page
             const dashboard = document.querySelector('nwb-dashboard')
             dashboard.sidebar.select('settings')
             await new Promise(resolve => setTimeout(resolve, 200))
 
-            // Generate example pipelines
             const page = dashboard.page
-            const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
-            folderInput.updateData(testGINPath)
-
 
             // Open relevant accordion
             const accordion = page.form.accordions['developer']
             accordion.toggle(true)
+            
+
+            // Generate example pipelines
+            const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
+            folderInput.updateData(testGINPath)
 
             const button = folderInput.nextSibling
             await button.onClick()
 
             page.save()
+
+            return true
+
         }, testGINPath)
+
+        expect(result).toBe(true)
 
         await takeScreenshot(join('test-pipelines', 'created'))
 
