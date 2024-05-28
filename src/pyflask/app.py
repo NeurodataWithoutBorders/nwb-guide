@@ -4,7 +4,6 @@ import collections
 import json
 import multiprocessing
 import sys
-import traceback
 from datetime import datetime
 from logging import DEBUG, Formatter
 from logging.handlers import RotatingFileHandler
@@ -72,11 +71,10 @@ api.init_app(flask_app)
 
 @api.errorhandler(Exception)
 def exception_handler(error: Exception) -> Dict[str, str]:
-    full_traceback = traceback.format_exc()
 
-    message = f"{type(error)}: {str(error)}"
+    message = f"{type(error).__name__}: {str(error)}"
 
-    return {"message": message, "traceback": full_traceback}
+    return { "message": message }
 
 
 @flask_app.route("/preview/<path:file_path>")

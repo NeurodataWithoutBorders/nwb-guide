@@ -81,7 +81,6 @@ export class GuidedSourceDataPage extends ManagedPage {
                         },
                         {
                             title: "Getting metadata for source data",
-                            verbose: true,
                         }
                     ).catch((e) => {
                         this.notify(e.message, "error");
