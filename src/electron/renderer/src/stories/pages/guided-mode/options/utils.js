@@ -87,8 +87,6 @@ export const run = async (url, payload, options = {}) => {
 
     if (internalSwal) Swal.close();
 
-    if (results?.message) throw new Error(`Request to ${url} failed: ${results.message}`);
-
     return results || true;
 };
 
