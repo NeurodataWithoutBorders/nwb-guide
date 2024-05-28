@@ -42,6 +42,11 @@ describe('Run example pipelines', () => {
             const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
             folderInput.updateData(testGINPath)
 
+
+            // Open relevant accordion
+            const accordion = page.form.accordions['developer']
+            accordion.toggle(true)
+
             const button = folderInput.nextSibling
             await button.onClick()
 
