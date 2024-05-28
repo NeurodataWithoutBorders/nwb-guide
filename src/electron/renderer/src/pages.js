@@ -16,7 +16,7 @@ import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedI
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
 import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
-import uploadIcon from "../assets/icons/dandi.svg";
+import uploadIcon from "../assets/icons/dandi.svg?raw";
 import inspectIcon from "../assets/icons/inspect.svg?raw";
 import neurosiftIcon from "../assets/icons/neurosift-logo.svg?raw";
 
