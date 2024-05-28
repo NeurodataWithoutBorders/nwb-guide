@@ -40,81 +40,57 @@ def exception_handler(error):
 class AllInterfaces(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
-        try:
-            # return get_all_interface_info()
-            # return get_all_converter_info()
+        # return get_all_interface_info()
+        # return get_all_converter_info()
 
-            return {
-                **get_all_interface_info(),
-                **get_all_converter_info(),
-            }
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
-            raise exception
+        return {
+            **get_all_interface_info(),
+            **get_all_converter_info(),
+        }
 
 
 @neuroconv_namespace.route("/schema")
 class Schemas(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            return get_source_schema(neuroconv_namespace.payload)
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return get_source_schema(neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/locate")
 class LocateData(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            return locate_data(neuroconv_namespace.payload)
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return locate_data(neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/locate/autocomplete")
 class AutoCompleteFormatString(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            return autocomplete_format_string(neuroconv_namespace.payload)
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return autocomplete_format_string(neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/metadata")
 class Metadata(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            return get_metadata_schema(
-                neuroconv_namespace.payload.get("source_data"), neuroconv_namespace.payload.get("interfaces")
-            )
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return get_metadata_schema(
+            neuroconv_namespace.payload.get("source_data"), neuroconv_namespace.payload.get("interfaces")
+        )
 
 
 @neuroconv_namespace.route("/convert")
 class Convert(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            return convert_to_nwb(neuroconv_namespace.payload)
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return convert_to_nwb(neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/alignment")
 class Alignment(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            return get_interface_alignment(neuroconv_namespace.payload)
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return get_interface_alignment(neuroconv_namespace.payload)
 
 
 validate_parser = neuroconv_namespace.parser()
@@ -130,50 +106,38 @@ validate_parser.add_argument("function_name", type=str, required=True)
 class Validate(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            args = validate_parser.parse_args()
-            return validate_metadata(args.get("parent"), args.get("function_name"))
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        args = validate_parser.parse_args()
+        return validate_metadata(args.get("parent"), args.get("function_name"))
 
 
 @neuroconv_namespace.route("/upload/project")
 class UploadProject(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            import psutil
+        import psutil
 
-            upload_options = neuroconv_namespace.payload
-            if "number_of_jobs" not in upload_options:
-                upload_options.update(number_of_jobs=1)
-            if "number_of_threads" not in upload_options:
-                upload_options.update(number_of_threads=1)
+        upload_options = neuroconv_namespace.payload
+        if "number_of_jobs" not in upload_options:
+            upload_options.update(number_of_jobs=1)
+        if "number_of_threads" not in upload_options:
+            upload_options.update(number_of_threads=1)
 
-            return upload_project_to_dandi(**upload_options)
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return upload_project_to_dandi(**upload_options)
 
 
 @neuroconv_namespace.route("/upload/folder")
 class UploadFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            import psutil
+        import psutil
 
-            upload_options = neuroconv_namespace.payload
-            if "number_of_jobs" not in upload_options:
-                upload_options.update(number_of_jobs=1)
-            if "number_of_threads" not in upload_options:
-                upload_options.update(number_of_threads=1)
+        upload_options = neuroconv_namespace.payload
+        if "number_of_jobs" not in upload_options:
+            upload_options.update(number_of_jobs=1)
+        if "number_of_threads" not in upload_options:
+            upload_options.update(number_of_threads=1)
 
-            return upload_folder_to_dandi(**upload_options)
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return upload_folder_to_dandi(**upload_options)
 
 
 @neuroconv_namespace.route("/upload")
@@ -182,54 +146,41 @@ class Upload(Resource):
     def post(self):
         from os.path import isdir
 
-        try:
-            paths = neuroconv_namespace.payload["filesystem_paths"]
+        paths = neuroconv_namespace.payload["filesystem_paths"]
 
-            if len(paths) == 1 and isdir(paths[0]):
-                kwargs = {**neuroconv_namespace.payload}
-                del kwargs["filesystem_paths"]
-                kwargs["nwb_folder_path"] = paths[0]
-                return upload_folder_to_dandi(**kwargs)
+        if len(paths) == 1 and isdir(paths[0]):
+            kwargs = {**neuroconv_namespace.payload}
+            del kwargs["filesystem_paths"]
+            kwargs["nwb_folder_path"] = paths[0]
+            return upload_folder_to_dandi(**kwargs)
 
-            else:
-                return upload_multiple_filesystem_objects_to_dandi(**neuroconv_namespace.payload)
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        else:
+            return upload_multiple_filesystem_objects_to_dandi(**neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/inspect_file")
 class InspectNWBFile(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            return inspect_nwb_file(neuroconv_namespace.payload)
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return inspect_nwb_file(neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/inspect_folder")
 class InspectNWBFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            url = f"{request.url_root}neuroconv/announce"
-            return inspect_nwb_folder(url, neuroconv_namespace.payload)
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        url = f"{request.url_root}neuroconv/announce"
+        return inspect_nwb_folder(url, neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/announce")
 class InspectNWBFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            data = neuroconv_namespace.payload
-            announcer.announce(data)
-            return True
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        data = neuroconv_namespace.payload
+        announcer.announce(data)
+
+        return True
 
 
 @neuroconv_namespace.route("/inspect")
@@ -240,38 +191,30 @@ class InspectNWBFolder(Resource):
 
         url = f"{request.url_root}neuroconv/announce"
 
-        try:
-            paths = neuroconv_namespace.payload["paths"]
+        paths = neuroconv_namespace.payload["paths"]
 
-            kwargs = {**neuroconv_namespace.payload}
-            del kwargs["paths"]
+        kwargs = {**neuroconv_namespace.payload}
+        del kwargs["paths"]
 
-            if len(paths) == 1:
-                if isfile(paths[0]):
-                    return inspect_nwb_file({"nwbfile_path": paths[0], **kwargs})
-                else:
-                    return inspect_nwb_folder(url, {"path": paths[0], **kwargs})
-
+        if len(paths) == 1:
+            if isfile(paths[0]):
+                return inspect_nwb_file({"nwbfile_path": paths[0], **kwargs})
             else:
-                return inspect_multiple_filesystem_objects(url, paths, **kwargs)
+                return inspect_nwb_folder(url, {"path": paths[0], **kwargs})
 
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        else:
+            return inspect_multiple_filesystem_objects(url, paths, **kwargs)
 
 
 @neuroconv_namespace.route("/html")
 class NWBToHTML(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
-            from pynwb import NWBHDF5IO
+        from pynwb import NWBHDF5IO
 
-            with NWBHDF5IO(neuroconv_namespace.payload.nwbfile_path, mode="r") as io:
-                html = io.read()._repr_html_()
-            return html
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        with NWBHDF5IO(neuroconv_namespace.payload.nwbfile_path, mode="r") as io:
+            html = io.read()._repr_html_()
+        return html
 
 
 # Create an events endpoint
@@ -280,8 +223,4 @@ class NWBToHTML(Resource):
 class Events(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
-        try:
-            return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
-
-        except Exception as exception:
-            neuroconv_namespace.abort(500, str(exception))
+        return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
