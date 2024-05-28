@@ -14,6 +14,8 @@ from signal import SIGINT
 from typing import Union
 from urllib.parse import unquote
 
+import traceback
+
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
 
@@ -68,6 +70,11 @@ api.add_namespace(dandi_namespace)
 # api.add_namespace(neurosift_namespace)  # TODO: enable later
 api.init_app(flask_app)
 
+
+# @api.errorhandler(Exception)
+# def exception_handler(error):
+#     exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
+#     return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
 
 @flask_app.route("/preview/<path:file_path>")
 def send_preview(file_path):

@@ -21,7 +21,7 @@ export const openProgressSwal = (options, callback) => {
     });
 };
 
-export const run = async (url, payload, options = {}) => {
+export const run = async (pathname, payload, options = {}) => {
     let internalSwal;
 
     if (options.swal === false) {
@@ -72,26 +72,39 @@ export const run = async (url, payload, options = {}) => {
         element.insertAdjacentHTML("beforeend", `<hr style="margin-bottom: 0;">`);
     }
 
-    if (!("base" in options)) options.base = "/neuroconv";
-    if (options.base[0] !== "/") options.base = `/${options.base}`;
-
     // Clear private keys from being passed
     payload = sanitize(structuredClone(payload));
 
-    const results = await fetch(`${baseUrl}${options.base || ""}/${url}`, {
+    const results = await fetch(new URL(pathname, baseUrl), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         ...(options.fetch ?? {}),
-    }).then((res) => res.json());
+    }).then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) {
+            const [type, ...splitText] = json.message.split(":");
+            const header = `<h4 style="margin: 0;">Request to ${pathname} failed</h4><small>${type}</small>`
 
-    if (internalSwal) Swal.close();
+            const text = splitText.length
+                ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
+                : (json.traceback && options.verbose)
+                    ? `<small><pre>${json.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`
+                    : "";
+
+            throw new Error(`${header}<p>${text}</p>`);
+            
+        }
+        return json
+    }).finally(() => {
+        if (internalSwal) Swal.close();
+    });
 
     return results || true;
 };
 
 export const runConversion = async (info, options = {}) =>
-    run(`convert`, info, {
+    run(`neuroconv/convert`, info, {
         title: "Running the conversion",
         onError: (results) => {
             if (results.message.includes("already exists")) {

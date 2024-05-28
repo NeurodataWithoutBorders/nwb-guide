@@ -259,7 +259,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
     if (info.project) payload.project = info.project;
     else payload.filesystem_paths = info.filesystem_paths;
 
-    const result = await run(type ? `upload/${type}` : "upload", payload, {
+    const result = await run(type ? `neuroconv/upload/${type}` : "neuroconv/upload", payload, {
         title: "Uploading your files to DANDI",
     }).catch((error) => {
         this.notify(error.message, "error");

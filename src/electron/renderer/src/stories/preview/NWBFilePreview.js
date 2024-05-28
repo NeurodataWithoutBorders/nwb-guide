@@ -62,7 +62,7 @@ class NWBPreviewInstance extends LitElement {
               })
             : until(
                   (async () => {
-                      const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });
+                      const htmlRep = await run("neuroconv/html", { nwbfile_path: this.file }, { swal: false });
                       return unsafeHTML(htmlRep);
                   })(),
                   html`<small>Loading HTML representation...</small>`
@@ -154,11 +154,11 @@ export class NWBFilePreview extends LitElement {
 
                                   const report = onlyFirstFile
                                       ? await run(
-                                            "inspect_file",
+                                            "neuroconv/inspect_file",
                                             { nwbfile_path: fileArr[0].info.file, ...options },
                                             { title }
                                         ) // Inspect the first file
-                                      : await run("inspect_folder", { path, ...options }, { title: title + "s" }); // Inspect the folder
+                                      : await run("neuroconv/inspect_folder", { path, ...options }, { title: title + "s" }); // Inspect the folder
 
                                   const result = onlyFirstFile
                                       ? {

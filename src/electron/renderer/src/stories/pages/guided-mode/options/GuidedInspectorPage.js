@@ -143,7 +143,7 @@ export class GuidedInspectorPage extends Page {
 
                         if (!this.report) {
                             const result = await run(
-                                "inspect_file",
+                                "neuroconv/inspect_file",
                                 { nwbfile_path: fileArr[0].info.file, ...options },
                                 { title }
                             ).catch((error) => {
@@ -181,7 +181,7 @@ export class GuidedInspectorPage extends Page {
                         const { close: closeProgressPopup } = swalOpts;
 
                         const result = await run(
-                            "inspect_folder",
+                            "neuroconv/inspect_folder",
                             { path, ...options, request_id: swalOpts.id },
                             swalOpts
                         ).catch((error) => {

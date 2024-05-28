@@ -140,7 +140,7 @@ export async function autocompleteFormatString(path) {
                     throw e;
                 });
 
-                const results = await run("locate/autocomplete", {
+                const results = await run("neuroconv/locate/autocomplete", {
                     base_directory,
                     additional_metadata: {},
                     ...form.results,
@@ -259,7 +259,7 @@ export class GuidedPathExpansionPage extends Page {
             throw message;
         }
 
-        const results = await run(`locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
+        const results = await run(`neuroconv/locate`, finalStructure, { title: "Locating Data" }).catch((error) => {
             this.notify(error.message, "error");
             throw error;
         });
@@ -394,7 +394,7 @@ export class GuidedPathExpansionPage extends Page {
 
                         const interfaceName = parentPath.slice(-1)[0];
 
-                        const results = await run(`locate`, { [interfaceName]: entry }, { swal: false }).catch(
+                        const results = await run(`neuroconv/locate`, { [interfaceName]: entry }, { swal: false }).catch(
                             (error) => {
                                 this.notify(error.message, "error");
                                 throw error;

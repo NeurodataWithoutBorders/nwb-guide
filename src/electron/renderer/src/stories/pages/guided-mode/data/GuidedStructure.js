@@ -9,6 +9,7 @@ import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 import { baseUrl } from "../../../../server/globals";
 import { ready } from "../../../../../../../schemas/interfaces.info";
+import { run } from "../options/utils.js";
 
 const defaultEmptyMessage = "No formats selected";
 
@@ -69,11 +70,7 @@ export class GuidedStructurePage extends Page {
         const schema =
             Object.keys(interfaces).length === 0
                 ? {}
-                : await fetch(`${baseUrl}/neuroconv/schema`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(interfaces),
-                  }).then((res) => res.json());
+                : await run(`neuroconv/schema`, interfaces)
 
         let schemas = this.info.globalState.schema;
         if (!schemas) schemas = this.info.globalState.schema = {};

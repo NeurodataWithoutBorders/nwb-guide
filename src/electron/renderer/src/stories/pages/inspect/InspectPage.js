@@ -29,7 +29,7 @@ export class InspectPage extends Page {
 
         const { close: closeProgressPopup } = swalOpts;
 
-        const result = await run("inspect", { request_id: swalOpts.id, paths, ...kwargs }, swalOpts).catch((error) => {
+        const result = await run("neuroconv/inspect", { request_id: swalOpts.id, paths, ...kwargs }, swalOpts).catch((error) => {
             this.notify(error.message, "error");
             closeProgressPopup();
             throw error;

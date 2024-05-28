@@ -171,14 +171,13 @@ export class SettingsPage extends Page {
     generateTestData = async () => {
         if (!fs.existsSync(DATA_OUTPUT_PATH)) {
             await run(
-                "generate",
+                "data/generate",
                 {
                     output_path: DATA_OUTPUT_PATH,
                 },
                 {
                     title: "Generating test data",
-                    html: "<small>This will take several minutes to complete.</small>",
-                    base: "data",
+                    html: "<small>This will take several minutes to complete.</small>"
                 }
             ).catch((error) => {
                 this.notify(error.message, "error");
@@ -187,7 +186,7 @@ export class SettingsPage extends Page {
         }
 
         await run(
-            "generate/dataset",
+            "data/generate/dataset",
             {
                 input_path: DATA_OUTPUT_PATH,
                 output_path: DATASET_OUTPUT_PATH,

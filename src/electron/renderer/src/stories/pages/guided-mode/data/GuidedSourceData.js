@@ -1,10 +1,9 @@
-import Swal from "sweetalert2";
 import { isStorybook } from "../../../../dependencies/globals";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { onThrow } from "../../../../errors";
-import { merge, sanitize } from "../../utils";
+import { merge } from "../../utils";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
@@ -12,8 +11,6 @@ import { header } from "../../../forms/utils";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../assets/global.svg?raw";
-
-import { baseUrl } from "../../../../server/globals";
 
 import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils";
@@ -71,63 +68,23 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             // const previousResults = this.info.globalState.metadata.results
 
-            let stillFireSwal = true;
-            const fireSwal = () => {
-                Swal.fire({
-                    title: "Getting metadata for source data",
-                    html: "Please wait...",
-                    allowEscapeKey: false,
-                    allowOutsideClick: false,
-                    heightAuto: false,
-                    backdrop: "rgba(0,0,0, 0.4)",
-                    timerProgressBar: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                });
-            };
-
-            setTimeout(() => {
-                if (stillFireSwal) fireSwal();
-            });
-
             await Promise.all(
                 Object.values(this.forms).map(async ({ subject, session, form }) => {
                     const info = this.info.globalState.results[subject][session];
 
                     // NOTE: This clears all user-defined results
-                    const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            source_data: sanitize(structuredClone(form.resolved)), // Use resolved values, including global source data
-                            interfaces: this.info.globalState.interfaces,
-                        }),
-                    })
-                        .then((res) => res.json())
-                        .catch((error) => {
-                            Swal.close();
-                            stillFireSwal = false;
-                            this.notify(`<b>Critical Error:</b> ${error.message}`, "error", 4000);
-                            throw error;
-                        });
-
-                    Swal.close();
+                    const result = await run(`neuroconv/metadata`, {
+                        source_data: form.resolved, // Use resolved values, including global source data
+                        interfaces: this.info.globalState.interfaces,
+                    }, {
+                        title: "Getting metadata for source data",
+                        verbose: true
+                    }).catch((e) => {
+                        this.notify(e.message, "error");
+                        throw e;
+                    });
 
                     if (isStorybook) return;
-
-                    if (result.message) {
-                        const [type, ...splitText] = result.message.split(":");
-                        const text = splitText.length
-                            ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
-                            : result.traceback
-                              ? `<small><pre>${result.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`
-                              : "";
-
-                        const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
-                        this.notify(message, "error");
-                        throw result;
-                    }
 
                     const { results: metadata, schema } = result;
 
@@ -253,7 +210,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                             source_data: merge(globalState.project.SourceData, souceCopy),
                         };
 
-                        const results = await run("alignment", sessionInfo, {
+                        const results = await run("neuroconv/alignment", sessionInfo, {
                             title: "Checking Alignment",
                             message: "Please wait...",
                         });

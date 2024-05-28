@@ -1,7 +1,5 @@
 """API endpoint definitions for interacting with NeuroConv."""
 
-import traceback
-
 from flask import Response, request
 from flask_restx import Namespace, Resource, reqparse
 from manageNeuroconv import (
@@ -91,10 +89,6 @@ validate_parser = neuroconv_namespace.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
 validate_parser.add_argument("function_name", type=str, required=True)
 
-
-# await fetch('neuroconv/validate', {method:"POST", body: JSON.stringify({nwb_file_object: {related_publications: ['name']}, function: 'check_doi_publications'}), headers: {
-#     "Content-Type": "application/json",
-#   }}).then(res => res.text())
 @neuroconv_namespace.route("/validate")
 @neuroconv_namespace.expect(validate_parser)
 class Validate(Resource):
