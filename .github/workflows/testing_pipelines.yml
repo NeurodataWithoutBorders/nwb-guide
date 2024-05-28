@@ -112,3 +112,4 @@ jobs:
           name: test-pipelines-screenshots-${{ matrix.os }}
           path: docs/assets/tutorials/test-pipelines
           retention-days: 1
+          overwrite: true

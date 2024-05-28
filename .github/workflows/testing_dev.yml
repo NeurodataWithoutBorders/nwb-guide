@@ -85,6 +85,8 @@ jobs:
           name: test-screenshots-${{ matrix.os }}
           path: docs/assets/tutorials
           retention-days: 1
+          overwrite: true
+
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
