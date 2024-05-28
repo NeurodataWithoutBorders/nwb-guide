@@ -24,7 +24,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
 
     steps:
-    
+
       - name: Get ephy_testing_data current head hash
         id: ephys
         run: echo "::set-output name=HASH_EPHY_DATASET::$(git ls-remote https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git HEAD | cut -f1)"
