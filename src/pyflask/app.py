@@ -74,7 +74,7 @@ api.init_app(flask_app)
 def exception_handler(error: Exception) -> Dict[str, str]:
     full_traceback = traceback.format_exc()
 
-    message = f"{type(error), str(error)}"
+    message = f"{type(error)}: {str(error)}"
 
     return {"message": message, "traceback": "".join(full_traceback)}
 
