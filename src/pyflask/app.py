@@ -12,7 +12,7 @@ from os import getpid, kill
 from os.path import isabs
 from pathlib import Path
 from signal import SIGINT
-from typing import Union
+from typing import Dict, Union
 from urllib.parse import unquote
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
@@ -70,10 +70,13 @@ api.add_namespace(dandi_namespace)
 api.init_app(flask_app)
 
 
-# @api.errorhandler(Exception)
-# def exception_handler(error):
-#     exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
-#     return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
+@api.errorhandler(Exception)
+def exception_handler(error: Exception) -> Dict[str, str]:
+    full_traceback = traceback.format_exc()
+
+    message = f"{type(error), str(error)}"
+
+    return {"message": message, "traceback": "".join(full_traceback)}
 
 
 @flask_app.route("/preview/<path:file_path>")
