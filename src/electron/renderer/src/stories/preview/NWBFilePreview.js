@@ -56,7 +56,10 @@ class NWBPreviewInstance extends LitElement {
         const isOnline = navigator.onLine;
 
         return isOnline
-            ? new Neurosift({ url: getURLFromFilePath(this.file, this.project), fullscreen: false })
+            ? new Neurosift({
+                  url: getURLFromFilePath(this.file, this.project),
+                  fullscreen: false,
+              })
             : until(
                   (async () => {
                       const htmlRep = await run("html", { nwbfile_path: this.file }, { swal: false });

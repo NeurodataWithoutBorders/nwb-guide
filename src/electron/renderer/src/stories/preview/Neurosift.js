@@ -80,7 +80,12 @@ export class Neurosift extends LitElement {
     render() {
         return this.url
             ? html` <div class="loader-container">
-                      ${new Loader({ message: `Loading Neurosift view...<br/><small>${this.url}</small>` })}
+                      ${new Loader({
+                          message: `Loading Neurosift view...<br/><small>${this.url}</small>`,
+                      })}
+                      ${new Loader({
+                          message: `Loading Neurosift view...<br/><small>${this.url}</small>`,
+                      })}
                   </div>
                   ${this.fullscreen ? new FullScreenToggle({ target: this }) : ""}
                   <iframe
