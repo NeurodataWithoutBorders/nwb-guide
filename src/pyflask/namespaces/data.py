@@ -8,6 +8,7 @@ data_namespace = Namespace(name="data", description="API route for dataset gener
 generate_test_data_parser = reqparse.RequestParser()
 generate_test_data_parser.add_argument("output_path", type=str, required=True)
 
+
 @data_namespace.route("/generate")
 @data_namespace.expect(generate_test_data_parser)
 class GenerateSingleSessions(Resource):
@@ -33,7 +34,6 @@ class GenerateDataset(Resource):
             "representing a multi-session experiment."
         )
     )
-
     def post(self):
         arguments = generate_test_dataset_parser.parse_args()
         return generate_dataset(input_path=arguments["input_path"], output_path=arguments["output_path"])

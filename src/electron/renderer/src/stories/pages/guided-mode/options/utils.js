@@ -80,25 +80,26 @@ export const run = async (pathname, payload, options = {}) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         ...(options.fetch ?? {}),
-    }).then(async (res) => {
-        const json = await res.json();
-        if (!res.ok) {
-            const [type, ...splitText] = json.message.split(":");
-            const header = `<h4 style="margin: 0;">Request to ${pathname} failed</h4><small>${type}</small>`
+    })
+        .then(async (res) => {
+            const json = await res.json();
+            if (!res.ok) {
+                const [type, ...splitText] = json.message.split(":");
+                const header = `<h4 style="margin: 0;">Request to ${pathname} failed</h4><small>${type}</small>`;
 
-            const text = splitText.length
-                ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
-                : (json.traceback && options.verbose)
-                    ? `<small><pre>${json.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`
-                    : "";
+                const text = splitText.length
+                    ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
+                    : json.traceback && options.verbose
+                      ? `<small><pre>${json.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`
+                      : "";
 
-            throw new Error(`${header}<p>${text}</p>`);
-            
-        }
-        return json
-    }).finally(() => {
-        if (internalSwal) Swal.close();
-    });
+                throw new Error(`${header}<p>${text}</p>`);
+            }
+            return json;
+        })
+        .finally(() => {
+            if (internalSwal) Swal.close();
+        });
 
     return results || true;
 };

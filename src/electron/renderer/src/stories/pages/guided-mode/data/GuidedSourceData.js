@@ -73,13 +73,17 @@ export class GuidedSourceDataPage extends ManagedPage {
                     const info = this.info.globalState.results[subject][session];
 
                     // NOTE: This clears all user-defined results
-                    const result = await run(`neuroconv/metadata`, {
-                        source_data: form.resolved, // Use resolved values, including global source data
-                        interfaces: this.info.globalState.interfaces,
-                    }, {
-                        title: "Getting metadata for source data",
-                        verbose: true
-                    }).catch((e) => {
+                    const result = await run(
+                        `neuroconv/metadata`,
+                        {
+                            source_data: form.resolved, // Use resolved values, including global source data
+                            interfaces: this.info.globalState.interfaces,
+                        },
+                        {
+                            title: "Getting metadata for source data",
+                            verbose: true,
+                        }
+                    ).catch((e) => {
                         this.notify(e.message, "error");
                         throw e;
                     });

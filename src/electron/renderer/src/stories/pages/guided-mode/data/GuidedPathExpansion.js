@@ -394,12 +394,14 @@ export class GuidedPathExpansionPage extends Page {
 
                         const interfaceName = parentPath.slice(-1)[0];
 
-                        const results = await run(`neuroconv/locate`, { [interfaceName]: entry }, { swal: false }).catch(
-                            (error) => {
-                                this.notify(error.message, "error");
-                                throw error;
-                            }
-                        );
+                        const results = await run(
+                            `neuroconv/locate`,
+                            { [interfaceName]: entry },
+                            { swal: false }
+                        ).catch((error) => {
+                            this.notify(error.message, "error");
+                            throw error;
+                        });
 
                         const resolved = [];
 

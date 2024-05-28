@@ -67,10 +67,7 @@ export class GuidedStructurePage extends Page {
     getSchema = async () => {
         const interfaces = { ...this.list.object };
 
-        const schema =
-            Object.keys(interfaces).length === 0
-                ? {}
-                : await run(`neuroconv/schema`, interfaces)
+        const schema = Object.keys(interfaces).length === 0 ? {} : await run(`neuroconv/schema`, interfaces);
 
         let schemas = this.info.globalState.schema;
         if (!schemas) schemas = this.info.globalState.schema = {};

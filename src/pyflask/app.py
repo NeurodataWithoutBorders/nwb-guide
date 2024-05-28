@@ -4,6 +4,7 @@ import collections
 import json
 import multiprocessing
 import sys
+import traceback
 from datetime import datetime
 from logging import DEBUG, Formatter
 from logging.handlers import RotatingFileHandler
@@ -13,8 +14,6 @@ from pathlib import Path
 from signal import SIGINT
 from typing import Union
 from urllib.parse import unquote
-
-import traceback
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
@@ -75,6 +74,7 @@ api.init_app(flask_app)
 # def exception_handler(error):
 #     exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
 #     return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
+
 
 @flask_app.route("/preview/<path:file_path>")
 def send_preview(file_path):
