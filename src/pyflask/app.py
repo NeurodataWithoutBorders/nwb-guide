@@ -71,7 +71,6 @@ api.init_app(flask_app)
 
 @api.errorhandler(Exception)
 def exception_handler(error: Exception) -> Dict[str, str]:
-
     return { "message": str(error), "type": type(error).__name__ }
 
 
