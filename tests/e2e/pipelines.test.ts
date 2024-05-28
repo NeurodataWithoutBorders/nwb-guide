@@ -43,7 +43,7 @@ describe('Run example pipelines', () => {
             // Open relevant accordion
             const accordion = page.form.accordions['developer']
             accordion.toggle(true)
-            
+
 
             // Generate example pipelines
             const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
