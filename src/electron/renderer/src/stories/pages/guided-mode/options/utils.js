@@ -84,10 +84,9 @@ export const run = async (pathname, payload, options = {}) => {
         .then(async (res) => {
             const json = await res.json();
             if (!res.ok) {
-                const [ type, ...splitText ] = json.message.split(":");
-                const header = `<h4 style="margin: 0;">Request to ${pathname} failed</h4><small>${type}</small>`;
-                const splitTextResult = splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt").trim()
-                const text = splitTextResult
+                const message = json.message;
+                const header = `<h4 style="margin: 0;">Request to ${pathname} failed</h4><small>${json.type}</small>`;
+                const text = message.replaceAll("<", "&lt").replaceAll(">", "&gt").trim()
                 throw new Error(`${header}<p>${text}</p>`);
             }
             return json;
