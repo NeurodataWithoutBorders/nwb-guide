@@ -79,15 +79,15 @@ def handle_file_request(file_path) -> Union[str, None]:
     if ".nwb" not in file_path:
         raise ValueError("This endpoint must be called on an NWB file!")
 
-    if request.method == "GET":
-        if neurosift_file_registry[file_path] is True:
-            file_path = unquote(file_path)
-            if not isabs(file_path):
-                file_path = f"/{file_path}"
+    if request.method == "GET" and neurosift_file_registry[file_path] is False:
+        raise KeyError("Resource is not accessible.")
 
-            return send_file(path_or_file=file_path)
-        else:
-            app.abort(404, "Resource is not accessible.")
+    if request.method == "GET":
+        file_path = unquote(file_path)
+        if not isabs(file_path):
+            file_path = f"/{file_path}"
+
+        return send_file(path_or_file=file_path)
 
     else:
         neurosift_file_registry[file_path] = True
@@ -97,22 +97,16 @@ def handle_file_request(file_path) -> Union[str, None]:
 
 @api.route("/log")
 class Log(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        try:
+        payload = api.payload
+        type = payload["type"]
+        header = payload["header"]
+        inputs = payload["inputs"]
+        traceback = payload["traceback"]
 
-            payload = api.payload
-            type = payload["type"]
-            header = payload["header"]
-            inputs = payload["inputs"]
-            traceback = payload["traceback"]
-
-            message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n\n{traceback}\n"
-            selected_logger = getattr(api.logger, type)
-            selected_logger(message)
-
-        except Exception as exception:
-            api.abort(500, str(exception))
+        message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n\n{traceback}\n"
+        selected_logger = getattr(api.logger, type)
+        selected_logger(message)
 
 
 @api.route("/server_shutdown", endpoint="shutdown")
