@@ -76,7 +76,7 @@ def exception_handler(error: Exception) -> Dict[str, str]:
 
     message = f"{type(error)}: {str(error)}"
 
-    return {"message": message, "traceback": "".join(full_traceback)}
+    return {"message": message, "traceback": full_traceback}
 
 
 @flask_app.route("/preview/<path:file_path>")
