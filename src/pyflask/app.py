@@ -74,7 +74,7 @@ def exception_handler(error: Exception) -> Dict[str, str]:
 
     message = f"{type(error).__name__}: {str(error)}"
 
-    return { "message": message }
+    return {"message": message}
 
 
 @flask_app.route("/preview/<path:file_path>")
