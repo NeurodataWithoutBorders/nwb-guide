@@ -39,9 +39,8 @@ describe('Run example pipelines', () => {
 
             // Transition to settings page
             const dashboard = document.querySelector('nwb-dashboard')
-            dashboard.page.dismiss() // Dismiss any notifications
             dashboard.sidebar.select('settings')
-            await new Promise(resolve => setTimeout(resolve, 500))
+            await new Promise(resolve => setTimeout(resolve, 200))
 
             const page = dashboard.page
 
@@ -58,10 +57,13 @@ describe('Run example pipelines', () => {
             await button.onClick()
 
             page.save()
+            page.dismiss() // Dismiss any notifications
 
             return true
 
         }, testGINPath)
+
+        await sleep(500) // Wait for notification to dismiss
 
         expect(result).toBe(true)
 
