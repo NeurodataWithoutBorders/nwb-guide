@@ -4,6 +4,8 @@ import ViteYaml from "@modyfi/vite-plugin-yaml";
 
 import { resolve } from "path";
 
+const htmlRoot = "src/electron/renderer";
+
 export default defineConfig({
     main: {
         build: {
@@ -24,12 +26,15 @@ export default defineConfig({
         },
     },
     renderer: {
-        root: "./src/electron/renderer",
+        root: `./${htmlRoot}`,
         plugins: [ViteYaml()],
         build: {
             rollupOptions: {
                 input: {
-                    index: resolve(__dirname, "index.html"),
+                    index: resolve(__dirname, htmlRoot, "index.html"),
+                },
+                output: {
+                    dir: resolve(__dirname, "build", "renderer"),
                 },
             },
         },

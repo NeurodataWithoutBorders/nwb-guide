@@ -3,14 +3,16 @@ import os
 import sys
 from pathlib import Path
 
+
 def is_packaged():
     deployed = True
     try:
-        sys._MEIPASS # PyInstaller creates a temp folder and stores path in _MEIPASS
+        sys._MEIPASS  # PyInstaller creates a temp folder and stores path in _MEIPASS
     except Exception:
         deployed = False
 
     return deployed
+
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
