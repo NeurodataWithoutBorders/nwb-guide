@@ -86,7 +86,7 @@ export const run = async (pathname, payload, options = {}) => {
             if (!res.ok) {
                 const message = json.message;
                 const header = `<h4 style="margin: 0;">Request to ${pathname} failed</h4><small>${json.type}</small>`;
-                const text = message.replaceAll("<", "&lt").replaceAll(">", "&gt").trim()
+                const text = message.replaceAll("<", "&lt").replaceAll(">", "&gt").trim();
                 throw new Error(`${header}<p>${text}</p>`);
             }
             return json;
