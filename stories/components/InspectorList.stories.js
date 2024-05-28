@@ -1,5 +1,5 @@
 import { InspectorList } from "../../src/electron/renderer/src/stories/preview/inspector/InspectorList";
-import testInspectorList from "../data/inspector_output.json";
+import testInspectorList from "../inputs/inspector_output.json";
 
 export default {
     title: "Components/Inspector List",
