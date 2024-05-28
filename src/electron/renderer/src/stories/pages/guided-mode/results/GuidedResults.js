@@ -1,6 +1,6 @@
 import { html } from "lit";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import folderOpenSVG from "../../../assets/folder_open.svg?raw";
+import folderOpenSVG from "../../../../../assets/icons/folder_open.svg?raw";
 
 import { Page } from "../../Page.js";
 import { getStubArray } from "../options/GuidedStubPreview.js";

@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
-import searchSVG from "./assets/search.svg?raw";
+import searchSVG from "../../assets/icons/search.svg?raw";
 
 import tippy from "tippy.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";

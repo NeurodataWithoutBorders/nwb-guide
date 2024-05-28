@@ -10,7 +10,7 @@ import { until } from "lit/directives/until.js";
 
 import { Button } from "../../../Button.js";
 
-import keyIcon from "../../../assets/key.svg?raw";
+import keyIcon from "../../../../../assets/icons/key.svg?raw";
 
 import { validate } from "../../uploads/utils";
 import { global } from "../../../../progress/index.js";

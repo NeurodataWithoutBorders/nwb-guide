@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 
-import fullScreenIcon from './assets/fullscreen.svg?raw'
-import fullScreenExitIcon from './assets/fullscreen_exit.svg?raw'
+import fullScreenIcon from '../../assets/icons/fullscreen.svg?raw'
+import fullScreenExitIcon from '../../assets/icons/fullscreen_exit.svg?raw'
 
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 

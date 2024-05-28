@@ -23,7 +23,7 @@ import { header, tempPropertyKey } from "../../../forms/utils";
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { Button } from "../../../Button.js";
 
-import globalIcon from "../../../assets/global.svg?raw";
+import globalIcon from "../../../../../assets/icons/global.svg?raw";
 
 const parentTableRenderConfig = {
     Electrodes: (metadata) => {
