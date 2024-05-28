@@ -1,8 +1,8 @@
 import { isElectron, app, port } from '../electron/index.js'
 
-import serverSVG from "../stories/assets/server.svg?raw";
-import webAssetSVG from "../stories/assets/web_asset.svg?raw";
-import wifiSVG from "../stories/assets/wifi.svg?raw";
+import serverSVG from "../../assets/icons/server.svg?raw";
+import webAssetSVG from "../../assets/icons/web_asset.svg?raw";
+import wifiSVG from "../../assets/icons/wifi.svg?raw";
 
 // Base Request URL for Python Server
 export const baseUrl = `http://127.0.0.1:${port}`;

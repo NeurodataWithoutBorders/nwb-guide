@@ -11,7 +11,7 @@ import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { header } from "../../../forms/utils";
 import { Button } from "../../../Button.js";
 
-import globalIcon from "../../../assets/global.svg?raw";
+import globalIcon from "../../../../../assets/icons/global.svg?raw";
 
 import { baseUrl } from "../../../../server/globals";
 
