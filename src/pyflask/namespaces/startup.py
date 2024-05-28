@@ -2,9 +2,9 @@
 
 from flask_restx import Namespace, Resource
 
-startup_api = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
+startup_namespace = Namespace("startup", description="API for startup commands related to the NWB GUIDE.")
 
-parser = startup_api.parser()
+parser = startup_namespace.parser()
 parser.add_argument(
     "arg",
     type=str,
@@ -14,15 +14,15 @@ parser.add_argument(
 )
 
 
-@startup_api.route("/echo")
+@startup_namespace.route("/echo")
 class Echo(Resource):
-    @startup_api.expect(parser)
+    @startup_namespace.expect(parser)
     def get(self):
         args = parser.parse_args()
         return args["arg"]
 
 
-@startup_api.route("/preload-imports")
+@startup_namespace.route("/preload-imports")
 class PreloadImports(Resource):
     """
     Preload various imports on startup instead of waiting for them later on.
@@ -32,12 +32,12 @@ class PreloadImports(Resource):
     simply expose the cached namespaces to their scope instead of retriggering the entire import.
     """
 
-    @startup_api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @startup_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
         try:
             import neuroconv
 
             return True
         except Exception as exception:
-            startup_api.abort(500, str(exception))
+            startup_namespace.abort(500, str(exception))
             raise exception
