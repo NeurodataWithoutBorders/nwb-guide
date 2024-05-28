@@ -8,7 +8,7 @@ system_namespace = flask_restx.Namespace(name="system", description="Request var
 
 
 @system_namespace.route("/cpus")
-class SupportedSpecies(flask_restx.Resource):
+class GetCPUInfo(flask_restx.Resource):
 
     @system_namespace.doc(
         description="Request the number of physical and logical cores on the system.",
