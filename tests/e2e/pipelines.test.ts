@@ -14,12 +14,16 @@ import { sleep } from '../puppeteer';
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data/GIN
 const testGINPath = join(homedir(), paths.root, 'test-data', 'GIN')
-// const hasGINPath = existsSync(testGINPath)
-const pipelineDescribeFn = describe // hasGINPath ? describe : describe.skip
+const pipelineDescribeFn = existsSync(testGINPath) ? describe : describe.skip
 
 beforeAll(() => initTests({ screenshots: false, data: false }))
 
 describe('Run example pipelines', () => {
+
+    test('Ensure test data is present', () => { 
+      expect(existsSync(testGINPath)).toBe(true)
+    })
+  
 
     test('Ensure number of example pipelines starts at zero', async () => {
       const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
