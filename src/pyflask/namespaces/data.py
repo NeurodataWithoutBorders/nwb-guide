@@ -7,13 +7,6 @@ from manageNeuroconv import generate_dataset, generate_test_data
 
 data_namespace = Namespace(name="data", description="API route for dataset generation in the NWB GUIDE.")
 
-
-@data_namespace.errorhandler(Exception)
-def exception_handler(error):
-    exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
-    return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
-
-
 generate_test_data_parser = reqparse.RequestParser()
 generate_test_data_parser.add_argument("output_path", type=str, required=True)
 

@@ -30,12 +30,6 @@ parser = reqparse.RequestParser()
 parser.add_argument("interfaces", type=str, action="split", help="Interfaces cannot be converted")
 
 
-@neuroconv_namespace.errorhandler(Exception)
-def exception_handler(error):
-    exceptiondata = traceback.format_exception(type(error), error, error.__traceback__)
-    return {"message": exceptiondata[-1], "traceback": "".join(exceptiondata)}
-
-
 @neuroconv_namespace.route("/")
 class AllInterfaces(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
