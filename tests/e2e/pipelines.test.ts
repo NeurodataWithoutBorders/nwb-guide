@@ -35,6 +35,7 @@ describe('Run example pipelines', () => {
 
             // Transition to settings page
             const dashboard = document.querySelector('nwb-dashboard')
+            dashboard.page.dismiss() // Dismiss any notifications
             dashboard.sidebar.select('settings')
             await new Promise(resolve => setTimeout(resolve, 500))
 
@@ -43,7 +44,7 @@ describe('Run example pipelines', () => {
             // Open relevant accordion
             const accordion = page.form.accordions['developer']
             accordion.toggle(true)
-
+            
 
             // Generate example pipelines
             const folderInput = page.form.getFormElement(["developer", "testing_data_folder"])
