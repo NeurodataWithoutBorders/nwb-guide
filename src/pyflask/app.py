@@ -1,5 +1,6 @@
 """The primary Flask server for the Python backend."""
 
+import collections
 import json
 import multiprocessing
 import sys
@@ -10,11 +11,11 @@ from os import getpid, kill
 from os.path import isabs
 from pathlib import Path
 from signal import SIGINT
+from typing import Union
 from urllib.parse import unquote
 
 # https://stackoverflow.com/questions/32672596/pyinstaller-loads-script-multiple-times#comment103216434_32677108
 multiprocessing.freeze_support()
-
 
 from flask import Flask, request, send_file, send_from_directory
 from flask_cors import CORS
@@ -35,11 +36,13 @@ from namespaces import (
     system_namespace,
 )
 
-app = Flask(__name__)
+neurosift_file_registry = collections.defaultdict(bool)
+
+flask_app = Flask(__name__)
 
 # Always enable CORS to allow distinct processes to handle frontend vs. backend
-CORS(app)
-app.config["CORS_HEADERS"] = "Content-Type"
+CORS(flask_app)
+flask_app.config["CORS_HEADERS"] = "Content-Type"
 
 # Create logger configuration
 LOG_FOLDER = Path(GUIDE_ROOT_FOLDER, "logs")
@@ -62,8 +65,34 @@ api.add_namespace(neuroconv_namespace)
 api.add_namespace(data_namespace)
 api.add_namespace(system_namespace)
 api.add_namespace(dandi_namespace)
-api.add_namespace(neurosift_namespace)
-api.init_app(app)
+# api.add_namespace(neurosift_namespace)  # TODO: enable later
+api.init_app(flask_app)
+
+
+@flask_app.route("/preview/<path:file_path>")
+def send_preview(file_path):
+    return send_from_directory(directory=STUB_SAVE_FOLDER_PATH, path=file_path)
+
+
+@flask_app.route("/files/<path:file_path>", methods=["GET", "POST"])
+def handle_file_request(file_path) -> Union[str, None]:
+    if ".nwb" not in file_path:
+        raise ValueError("This endpoint must be called on an NWB file!")
+
+    if request.method == "GET":
+        if neurosift_file_registry[file_path] is True:
+            file_path = unquote(file_path)
+            if not isabs(file_path):
+                file_path = f"/{file_path}"
+
+            return send_file(path_or_file=file_path)
+        else:
+            app.abort(404, "Resource is not accessible.")
+
+    else:
+        neurosift_file_registry[file_path] = True
+
+        return request.base_url
 
 
 @api.route("/log")
@@ -111,13 +140,13 @@ if __name__ == "__main__":
         )
         log_handler.setFormatter(log_formatter)
 
-        app.logger.addHandler(log_handler)
-        app.logger.setLevel(DEBUG)
+        flask_app.logger.addHandler(log_handler)
+        flask_app.logger.setLevel(DEBUG)
 
-        app.logger.info(f"Logging to {LOG_FILE_PATH}")
+        flask_app.logger.info(f"Logging to {LOG_FILE_PATH}")
 
         # Run the server
         api.logger.info(f"Starting server on port {port}")
-        app.run(host="127.0.0.1", port=port)
+        flask_app.run(host="127.0.0.1", port=port)
     else:
         raise Exception("No port provided for the NWB GUIDE backend.")

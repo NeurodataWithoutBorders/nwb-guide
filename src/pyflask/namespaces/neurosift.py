@@ -1,4 +1,8 @@
-"""An API for handling file system communication with the standalone Neurosift preview page."""
+"""
+An API for handling file system communication with the standalone Neurosift preview page.
+
+NOTE: not currently used due to ongoing issues
+"""
 
 import collections
 import os
@@ -7,6 +11,7 @@ from typing import Union
 
 import flask
 import flask_restx
+from manageNeuroconv.info import STUB_SAVE_FOLDER_PATH
 
 neurosift_namespace = flask_restx.Namespace(
     name="neurosift", description="Handle file system communication with the " "standalone Neurosift preview page."
