@@ -31,7 +31,9 @@ for interface in supported_interfaces:
 
 sourceDataStoryPath = Path("stories/pages/SourceData.stories.js")
 
-importCode = "\n".join(map(lambda arr: f"import {arr[0]}Schema from '../inputs/interface_schemas/{arr[1]}'", paths.items()))
+importCode = "\n".join(
+    map(lambda arr: f"import {arr[0]}Schema from '../inputs/interface_schemas/{arr[1]}'", paths.items())
+)
 storyCode = "\n".join(
     map(
         lambda arr: f"""export const {arr[0]} = PageTemplate.bind({{}});
