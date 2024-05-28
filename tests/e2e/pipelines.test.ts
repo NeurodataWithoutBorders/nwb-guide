@@ -48,7 +48,7 @@ describe('Run example pipelines', () => {
             page.save()
         }, testGINPath)
 
-        await takeScreenshot('test-pipelines/created')
+        await takeScreenshot(join('test-pipelines', 'created'))
 
 
         // Transition back to the conversions page and count pipelines
@@ -60,7 +60,7 @@ describe('Run example pipelines', () => {
           return Array.from(pipelineCards).map(card => card.info.project.name)
         })
 
-        await takeScreenshot('test-pipelines/list', 500)
+        await takeScreenshot(join('test-pipelines', 'list'), 500)
 
 
         // Assert all the pipelines are present
