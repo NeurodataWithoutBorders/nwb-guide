@@ -10,6 +10,7 @@ import examplePipelines from "../../src/example_pipelines.yml";
 import paths from "../../src/paths.config.json" assert { type: "json" };
 import { evaluate, initTests, takeScreenshot } from './utils'
 import { header } from '../../src/electron/renderer/src/stories/forms/utils'
+import { sleep } from '../puppeteer';
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data/GIN
 const testGINPath = join(homedir(), paths.root, 'test-data', 'GIN')
@@ -35,7 +36,7 @@ describe('Run example pipelines', () => {
             // Transition to settings page
             const dashboard = document.querySelector('nwb-dashboard')
             dashboard.sidebar.select('settings')
-            await new Promise(resolve => setTimeout(resolve, 200))
+            await new Promise(resolve => setTimeout(resolve, 500))
 
             const page = dashboard.page
 
