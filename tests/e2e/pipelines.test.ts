@@ -20,10 +20,10 @@ beforeAll(() => initTests({ screenshots: false, data: false }))
 
 describe('Run example pipelines', () => {
 
-    test('Ensure test data is present', () => { 
+    test('Ensure test data is present', () => {
       expect(existsSync(testGINPath)).toBe(true)
     })
-  
+
 
     test('Ensure number of example pipelines starts at zero', async () => {
       const nPipelines = await evaluate(() => document.getElementById('guided-div-resume-progress-cards').children.length)
