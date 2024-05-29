@@ -112,7 +112,7 @@ jobs:
         run: cat .env
       - name: Display .env (Windows)
         if: matrix.os == 'windows-latest'
-        run: type .env
+        run: more .env
 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
