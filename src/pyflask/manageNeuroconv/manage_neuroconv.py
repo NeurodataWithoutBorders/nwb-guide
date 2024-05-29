@@ -1081,7 +1081,6 @@ def inspect_all(url, config):
         i = 0
         for future in inspection_iterable:
             i += 1
-            # on_progress_update(dict(progress_bar_id=request_id, format_dict=dict(total=len(futures), n=i)))
             for message in future.result():
                 messages.append(message)
 
