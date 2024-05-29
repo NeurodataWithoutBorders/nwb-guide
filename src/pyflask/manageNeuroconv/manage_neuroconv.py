@@ -1091,37 +1091,15 @@ def inspect_all(url, config):
 def inspect_nwb_folder(url, payload) -> dict:
     from pickle import PicklingError
 
-    request_id = payload.get("request_id", None)
-
-    from nwbinspector import load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-    from nwbinspector.utils import calculate_number_of_cpu
-
-    # Prepare n_jobs
-    n_jobs = payload.pop("n_jobs", -2)  # Default to all but one CPU
-    n_jobs = calculate_number_of_cpu(requested_cpu=n_jobs)
-    n_jobs = None if n_jobs == -1 else n_jobs
-
-    # Organize keyword arguments
-    kwargs = dict(
-        n_jobs=n_jobs,
-        progress_bar_class=progress_handler.create_progress_subscriber,
-        progress_bar_options=dict(additional_metadata=dict(request_id=request_id)),
-        ignore=[
-            "check_description",
-            "check_data_orientation",
-        ],  # TODO: remove when metadata control is exposed
-        config=load_config(filepath_or_keyword="dandi"),
-        **payload,
-    )
 
     try:
-        messages = inspect_all(url, kwargs)
+        messages = inspect_all(url, payload)
     except PicklingError as exception:
         if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(exception):
-            del kwargs["n_jobs"]
-            messages = inspect_all(url, kwargs)
+            del payload["n_jobs"]
+            messages = inspect_all(url, payload)
         else:
             raise exception
     except Exception as exception:
