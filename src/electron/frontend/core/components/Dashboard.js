@@ -268,7 +268,15 @@ export class Dashboard extends LitElement {
                 if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
                 else await this.page.onTransition(1);
             }
-        });
+        }).catch((e) => {
+            const previousId = previous?.info?.id
+            if (previousId) {
+                page.onTransition(previousId); // Revert back to previous page
+                page.notify(`<h4 style="margin: 0">Previous page loaded after error occured</h4><small>${e}</small>`, "error");
+            }
+            
+            else reloadPageToHome();
+        })
     }
 
     // Populate the sections tracked for this page by using the global state as a model
