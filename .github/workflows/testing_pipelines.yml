@@ -102,7 +102,7 @@ jobs:
         run: |
           touch .env
           echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
-          run: cat .env
+          cat .env
 
 
       - name: Save working directory to .env (Windows)
