@@ -404,14 +404,12 @@ export class GuidedPathExpansionPage extends Page {
                     if (value.split(".").length > 1) entry.file_path = value;
                     else entry.folder_path = value;
 
-                    const results = await run(
-                        `neuroconv/locate`,
-                        { [interfaceName]: entry },
-                        { swal: false }
-                    ).catch((error) => {
-                        this.notify(error.message, "error");
-                        throw error;
-                    });
+                    const results = await run(`neuroconv/locate`, { [interfaceName]: entry }, { swal: false }).catch(
+                        (error) => {
+                            this.notify(error.message, "error");
+                            throw error;
+                        }
+                    );
 
                     const resolved = [];
 
@@ -434,8 +432,7 @@ export class GuidedPathExpansionPage extends Page {
                     return [
                         {
                             message: html` <h4 style="margin: 0;">
-                                    <span style="margin-right: 7px;">✅</span>Source Files Found for
-                                    ${interfaceName}
+                                    <span style="margin-right: 7px;">✅</span>Source Files Found for ${interfaceName}
                                 </h4>
                                 <small>${base_directory}</small>
                                 <small

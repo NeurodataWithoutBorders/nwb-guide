@@ -16,7 +16,6 @@ export const rename = (newDatasetName, previousDatasetName) => {
         const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
         const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
         fs.renameSync(oldProgressFilePath, newProgressFilePath);
-        
     } else throw new Error("No previous project name provided");
 };
 
@@ -53,7 +52,7 @@ export const updateFile = (projectName, callback) => {
 
     var guidedFilePath = joinPath(guidedProgressFilePath, projectName + ".json");
 
-    console.log(guidedProgressFilePath)
+    console.log(guidedProgressFilePath);
 
     // Save the file through the available mechanisms
     if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create progress folder if one does not exist
