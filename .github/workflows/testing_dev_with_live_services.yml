@@ -70,17 +70,33 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
-      - name: Create env file
-        run: |
-          touch .env
-          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+      - name: Create environment file
+        run: echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+        if: runner.os != 'Windows'
+
+      - name: Create environment file (Windows)
+        run: echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+        shell: bash
+        if: runner.os == 'Windows'
+
+      # Display environment file for debugging
+      - name: Print environment file
+        run: cat .env
+        if: runner.os != 'Windows'
+
+      - name: Print environment file
+        run: type .env
+        shell: bash
+        if: runner.os == 'Windows'
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
+        shell: bash
         run: npm run coverage:app
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
+        shell: bash
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:app
 
       - name: Upload coverage reports to Codecov
