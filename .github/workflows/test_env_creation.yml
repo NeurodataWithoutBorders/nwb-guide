@@ -50,8 +50,8 @@ jobs:
         run: echo "CURRENT_WORKING_DIR=%cd%" >> .env
         shell: cmd
         if: runner.os == 'Windows'
-      
-      
+
+
       - name: Print working directory
         run: echo "The current working directory is $CURRENT_WORKING_DIR"
 
@@ -64,4 +64,4 @@ jobs:
         run: type .env
         shell: cmd
         if: runner.os == 'Windows'
-      
+
