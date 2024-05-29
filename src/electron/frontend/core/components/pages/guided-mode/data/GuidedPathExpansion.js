@@ -21,6 +21,8 @@ const propOrder = ["path", "subject_id", "session_id"];
 export async function autocompleteFormatString(path) {
     let notification;
 
+    const interfaceName = path[0];
+
     const { base_directory } = path.reduce((acc, key) => acc[key] ?? {}, this.form.resolved);
 
     const schema = getSchema(path, this.info.globalState.schema.source_data);
@@ -42,7 +44,7 @@ export async function autocompleteFormatString(path) {
     }
 
     const modal = new Modal({
-        header: "Autocomplete Format String",
+        header: `${interfaceName} — Autocomplete Format String`,
     });
 
     const content = document.createElement("div");
@@ -377,6 +379,8 @@ export class GuidedPathExpansionPage extends Page {
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
 
+                const interfaceName = parentPath.slice(-1)[0];
+
                 if (fs) {
                     const baseDir = form.getFormElement([...parentPath, "base_directory"]);
                     if (name === "format_string_path") {
@@ -400,8 +404,6 @@ export class GuidedPathExpansionPage extends Page {
 
                         if (value.split(".").length > 1) entry.file_path = value;
                         else entry.folder_path = value;
-
-                        const interfaceName = parentPath.slice(-1)[0];
 
                         const results = await run(
                             `neuroconv/locate`,
@@ -432,7 +434,10 @@ export class GuidedPathExpansionPage extends Page {
 
                         return [
                             {
-                                message: html`<h4 style="margin: 0;">Source Files Found</h4>
+                                message: html` <h4 style="margin: 0;">
+                                        <span style="margin-right: 7px;">✅</span>Source Files Found for
+                                        ${interfaceName}
+                                    </h4>
                                     <small>${base_directory}</small>
                                     <small
                                         >${new List({
