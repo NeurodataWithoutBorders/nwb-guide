@@ -1,33 +1,32 @@
-import { GettingStartedPage } from "./stories/pages/getting-started/GettingStarted";
-import { DocumentationPage } from "./stories/pages/documentation/Documentation";
-import { ContactPage } from "./stories/pages/contact-us/Contact";
-import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome";
-import { GuidedNewDatasetPage } from "./stories/pages/guided-mode/setup/GuidedNewDatasetInfo";
-import { GuidedStructurePage } from "./stories/pages/guided-mode/data/GuidedStructure";
-import { sections } from "./stories/pages/globals";
-import { GuidedSubjectsPage } from "./stories/pages/guided-mode/setup/GuidedSubjects";
-import { GuidedSourceDataPage } from "./stories/pages/guided-mode/data/GuidedSourceData";
-import { GuidedMetadataPage } from "./stories/pages/guided-mode/data/GuidedMetadata";
-import { GuidedUploadPage } from "./stories/pages/guided-mode/options/GuidedUpload";
-import { GuidedResultsPage } from "./stories/pages/guided-mode/results/GuidedResults";
-import { Dashboard } from "./stories/Dashboard";
-import { GuidedStubPreviewPage } from "./stories/pages/guided-mode/options/GuidedStubPreview";
-import { GuidedInspectorPage } from "./stories/pages/guided-mode/options/GuidedInspectorPage";
+import { DocumentationPage } from "./components/pages/documentation/Documentation";
+import { ContactPage } from "./components/pages/contact-us/Contact";
+import { GuidedHomePage } from "./components/pages/guided-mode/GuidedHome";
+import { GuidedNewDatasetPage } from "./components/pages/guided-mode/setup/GuidedNewDatasetInfo";
+import { GuidedStructurePage } from "./components/pages/guided-mode/data/GuidedStructure";
+import { sections } from "./components/pages/globals";
+import { GuidedSubjectsPage } from "./components/pages/guided-mode/setup/GuidedSubjects";
+import { GuidedSourceDataPage } from "./components/pages/guided-mode/data/GuidedSourceData";
+import { GuidedMetadataPage } from "./components/pages/guided-mode/data/GuidedMetadata";
+import { GuidedUploadPage } from "./components/pages/guided-mode/options/GuidedUpload";
+import { GuidedResultsPage } from "./components/pages/guided-mode/results/GuidedResults";
+import { Dashboard } from "./components/Dashboard";
+import { GuidedStubPreviewPage } from "./components/pages/guided-mode/options/GuidedStubPreview";
+import { GuidedInspectorPage } from "./components/pages/guided-mode/options/GuidedInspectorPage";
 
 import logo from "../assets/img/logo-guide-draft-transparent-tight.png";
-import { GuidedPathExpansionPage } from "./stories/pages/guided-mode/data/GuidedPathExpansion";
-import uploadIcon from "./stories/assets/dandi.svg?raw";
-import inspectIcon from "./stories/assets/inspect.svg?raw";
-import neurosiftIcon from "./stories/assets/neurosift-logo.svg?raw";
+import { GuidedPathExpansionPage } from "./components/pages/guided-mode/data/GuidedPathExpansion";
+import uploadIcon from "../assets/icons/dandi.svg?raw";
+import inspectIcon from "../assets/icons/inspect.svg?raw";
+import neurosiftIcon from "../assets/icons/neurosift-logo.svg?raw";
 
-import settingsIcon from "./stories/assets/settings.svg?raw";
+import settingsIcon from "../assets/icons/settings.svg?raw";
 
-import { UploadsPage } from "./stories/pages/uploads/UploadsPage";
-import { SettingsPage } from "./stories/pages/settings/SettingsPage";
-import { InspectPage } from "./stories/pages/inspect/InspectPage";
-import { PreviewPage } from "./stories/pages/preview/PreviewPage";
-import { GuidedPreform } from "./stories/pages/guided-mode/setup/Preform";
-import { GuidedDandiResultsPage } from "./stories/pages/guided-mode/results/GuidedDandiResults";
+import { UploadsPage } from "./components/pages/uploads/UploadsPage";
+import { SettingsPage } from "./components/pages/settings/SettingsPage";
+import { InspectPage } from "./components/pages/inspect/InspectPage";
+import { PreviewPage } from "./components/pages/preview/PreviewPage";
+import { GuidedPreform } from "./components/pages/guided-mode/setup/Preform";
+import { GuidedDandiResultsPage } from "./components/pages/guided-mode/results/GuidedDandiResults";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -80,114 +79,114 @@ style="margin-right: 30px;"
 `;
 
 const pages = {
-    "/": new GuidedHomePage({
-        label: "Convert",
-        icon: guidedIcon,
-        pages: {
-            details: new GuidedNewDatasetPage({
-                title: "Project Setup",
-                label: "Project details",
-                section: sections[0],
-            }),
+  "/": new GuidedHomePage({
+    label: "Convert",
+    icon: guidedIcon,
+    pages: {
+      details: new GuidedNewDatasetPage({
+        title: "Project Setup",
+        label: "Project details",
+        section: sections[0],
+      }),
 
-            workflow: new GuidedPreform({
-                title: "Pipeline Workflow",
-                label: "Pipeline workflow",
-                section: sections[0],
-            }),
+      workflow: new GuidedPreform({
+        title: "Pipeline Workflow",
+        label: "Pipeline workflow",
+        section: sections[0],
+      }),
 
-            structure: new GuidedStructurePage({
-                title: "Provide Data Formats",
-                label: "Data formats",
-                section: sections[0],
-            }),
+      structure: new GuidedStructurePage({
+        title: "Provide Data Formats",
+        label: "Data formats",
+        section: sections[0],
+      }),
 
-            locate: new GuidedPathExpansionPage({
-                title: "Locate Data",
-                label: "Locate data",
-                section: sections[0],
-            }),
+      locate: new GuidedPathExpansionPage({
+        title: "Locate Data",
+        label: "Locate data",
+        section: sections[0],
+      }),
 
-            subjects: new GuidedSubjectsPage({
-                title: "Subject Metadata",
-                label: "Subject details",
-                section: sections[0],
-            }),
+      subjects: new GuidedSubjectsPage({
+        title: "Subject Metadata",
+        label: "Subject details",
+        section: sections[0],
+      }),
 
-            sourcedata: new GuidedSourceDataPage({
-                title: "Source Data Information",
-                label: "Source data",
-                section: sections[1],
-            }),
+      sourcedata: new GuidedSourceDataPage({
+        title: "Source Data Information",
+        label: "Source data",
+        section: sections[1],
+      }),
 
-            metadata: new GuidedMetadataPage({
-                title: "File Metadata",
-                label: "File metadata",
-                section: sections[1],
-            }),
+      metadata: new GuidedMetadataPage({
+        title: "File Metadata",
+        label: "File metadata",
+        section: sections[1],
+      }),
 
-            inspect: new GuidedInspectorPage({
-                title: "Inspector Report",
-                label: "Validate metadata",
-                section: sections[2],
-                sync: ["preview"],
-            }),
+      inspect: new GuidedInspectorPage({
+        title: "Inspector Report",
+        label: "Validate metadata",
+        section: sections[2],
+        sync: ["preview"],
+      }),
 
-            preview: new GuidedStubPreviewPage({
-                title: "Conversion Preview",
-                label: "Preview NWB files",
-                section: sections[2],
-                sync: ["preview"],
-            }),
+      preview: new GuidedStubPreviewPage({
+        title: "Conversion Preview",
+        label: "Preview NWB files",
+        section: sections[2],
+        sync: ["preview"],
+      }),
 
-            conversion: new GuidedResultsPage({
-                title: "Conversion Review",
-                label: "Review conversion",
-                section: sections[2],
-                sync: ["conversion"],
-            }),
+      conversion: new GuidedResultsPage({
+        title: "Conversion Review",
+        label: "Review conversion",
+        section: sections[2],
+        sync: ["conversion"],
+      }),
 
-            upload: new GuidedUploadPage({
-                title: "DANDI Upload",
-                label: "Upload to DANDI",
-                section: sections[3],
-                sync: ["conversion"],
-            }),
+      upload: new GuidedUploadPage({
+        title: "DANDI Upload",
+        label: "Upload to DANDI",
+        section: sections[3],
+        sync: ["conversion"],
+      }),
 
-            review: new GuidedDandiResultsPage({
-                title: "Upload Review",
-                label: "Review published data",
-                section: sections[3],
-            }),
-        },
-    }),
-    validate: new InspectPage({
-        label: "Validate",
-        icon: inspectIcon,
-    }),
-    explore: new PreviewPage({
-        label: "Explore",
-        icon: neurosiftIcon,
-    }),
-    uploads: new UploadsPage({
-        label: "Upload",
-        icon: uploadIcon,
-    }),
-    docs: new DocumentationPage({
-        label: "Documentation",
-        icon: documentationIcon,
-        group: resourcesGroup,
-    }),
-    contact: new ContactPage({
-        label: "Contact Us",
-        icon: contactIcon,
-        group: resourcesGroup,
-    }),
-    settings: new SettingsPage({
-        label: "Settings",
-        icon: settingsIcon,
-        group: "bottom",
-    }),
+      review: new GuidedDandiResultsPage({
+        title: "Upload Review",
+        label: "Review published data",
+        section: sections[3],
+      }),
+    },
+  }),
+  validate: new InspectPage({
+    label: "Validate",
+    icon: inspectIcon,
+  }),
+  explore: new PreviewPage({
+    label: "Explore",
+    icon: neurosiftIcon,
+  }),
+  uploads: new UploadsPage({
+    label: "Upload",
+    icon: uploadIcon,
+  }),
+  docs: new DocumentationPage({
+    label: "Documentation",
+    icon: documentationIcon,
+    group: resourcesGroup,
+  }),
+  contact: new ContactPage({
+    label: "Contact Us",
+    icon: contactIcon,
+    group: resourcesGroup,
+  }),
+  settings: new SettingsPage({
+    label: "Settings",
+    icon: settingsIcon,
+    group: "bottom",
+  }),
 };
 
 dashboard.pages = pages;
