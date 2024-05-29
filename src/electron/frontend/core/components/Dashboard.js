@@ -245,32 +245,44 @@ export class Dashboard extends LitElement {
 
         this.page.set(toPass, false);
 
-        this.page.checkSyncState().then(async () => {
-            const projectName = info.globalState?.project?.name;
+        this.page
+            .checkSyncState()
+            .then(async () => {
+                const projectName = info.globalState?.project?.name;
 
-            this.subSidebar.header = projectName
-                ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
-                : projectName;
+                this.subSidebar.header = projectName
+                    ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
+                    : projectName;
 
-            this.updateSections({ sidebar: false, main: true });
+                this.updateSections({ sidebar: false, main: true });
 
-            if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
+                if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
 
-            const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
+                const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
-            if (skipped) {
-                if (isStorybook) return; // Do not skip on storybook
+                if (skipped) {
+                    if (isStorybook) return; // Do not skip on storybook
 
-                // Run skip functions
-                Object.entries(page.workflow).forEach(([key, state]) => {
-                    if (typeof state.skip === "function") state.skip();
-                });
+                    // Run skip functions
+                    Object.entries(page.workflow).forEach(([key, state]) => {
+                        if (typeof state.skip === "function") state.skip();
+                    });
 
-                // Skip right over the page if configured as such
-                if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
-                else await this.page.onTransition(1);
-            }
-        });
+                    // Skip right over the page if configured as such
+                    if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
+                    else await this.page.onTransition(1);
+                }
+            })
+            .catch((e) => {
+                const previousId = previous?.info?.id;
+                if (previousId) {
+                    page.onTransition(previousId); // Revert back to previous page
+                    page.notify(
+                        `<h4 style="margin: 0">Fallback to previous page after error occurred</h4><small>${e}</small>`,
+                        "error"
+                    );
+                } else reloadPageToHome();
+            });
     }
 
     // Populate the sections tracked for this page by using the global state as a model
