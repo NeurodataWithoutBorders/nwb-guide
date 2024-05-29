@@ -272,7 +272,8 @@ export class Dashboard extends LitElement {
             const previousId = previous?.info?.id
             if (previousId) {
                 page.onTransition(previousId); // Revert back to previous page
-                page.notify(`<h4 style="margin: 0">Fallback to previous page after error occured</h4><small>${e}</small>`, "error");
+                page.notify(`<h4 style="margin: 0">Fallback to previous page after error occurred</h4><small>${e}</small>`, "error");
+
             }
             
             else reloadPageToHome();
