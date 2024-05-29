@@ -6,18 +6,18 @@ export const isElectron = userAgent.indexOf(" electron/") > -1;
 export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 
 // Node Modules
-export const fs = require("fs-extra"); // File System
-export const os = require("os");
-export const crypto = require("crypto");
-export const path = require("path");
+export const fs = isElectron && require("fs-extra"); // File System
+export const os = isElectron && require("os");
+export const crypto = isElectron && require("crypto");
+export const path = isElectron && require("path");
 
 // Remote Electron Modules
 export const remote = isElectron ? require("@electron/remote") : {};
 export const app = remote.app;
 
 // Electron Information
-export const port = electron.ipcRenderer ? electron.ipcRenderer.sendSync("get-port") : 4242;
-export const SERVER_FILE_PATH = electron.ipcRenderer ? electron.ipcRenderer.sendSync("get-server-file-path") : "";
+export const port = isElectron ? electron.ipcRenderer.sendSync("get-port") : 4242;
+export const SERVER_FILE_PATH = isElectron ? electron.ipcRenderer.sendSync("get-server-file-path") : "";
 
 // Link the renderer to the main process
 if (isElectron) {
