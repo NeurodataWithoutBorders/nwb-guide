@@ -61,6 +61,9 @@ export class GuidedResultsPage extends Page {
             <p>
                 The GUIDE still can't do everything. You may need to manually adjust the NWB file to ensure it contains
                 all the necessary data.
+                
+                For example, to append to the file using PyNWB you would start with:
+
             </p>
             ${new CodeBlock({
                 text: `from pynwb import NWBHDF5IO, NWBFile
@@ -71,7 +74,8 @@ nwbfile_path= "${this.#sharedPath()}"
 with NWBHDF5IO(path=nwbfile_path, mode="r+") as io:
     nwbfile = io.read()
 
-    # Adjust the file as needed
+    # Then adjust the file as needed
+
     # ...
 `,
             })}
