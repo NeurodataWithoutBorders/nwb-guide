@@ -96,23 +96,24 @@ jobs:
           path: ./behavior_testing_data
           key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
 
-      # Save environment variables to .env file
-      - name: Save working directory to .env (Unix)
-        if: matrix.os != 'windows-latest'
-        run: |
-          touch .env
-          echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
-      - name: Save working directory to .env (Windows)
-        if: matrix.os == 'windows-latest'
-        run: echo "GIN_TESTING_DATA_DIRECTORY=%cd%" >> .env
+      - name: Save working directory to environment file
+        run: echo "GIN_DATA_DIR=$(pwd)" >> .env
+        if: runner.os != 'Windows'
+
+      - name: Save working directory to environment file (Windows)
+        run: echo "GIN_DATA_DIR=%cd%" >> .env
+        shell: cmd
+        if: runner.os == 'Windows'
 
       # Display environment file for debugging
-      - name: Display .env (Unix)
-        if: matrix.os != 'windows-latest'
+      - name: Print environment file
         run: cat .env
-      - name: Display .env (Windows)
-        if: matrix.os == 'windows-latest'
+        if: runner.os != 'Windows'
+
+      - name: Print environment file
         run: type .env
+        shell: cmd
+        if: runner.os == 'Windows'
 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
