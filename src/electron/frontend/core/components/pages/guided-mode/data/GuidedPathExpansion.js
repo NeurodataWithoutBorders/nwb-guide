@@ -377,75 +377,73 @@ export class GuidedPathExpansionPage extends Page {
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
 
-                if (fs) {
-                    const baseDir = form.getFormElement([...parentPath, "base_directory"]);
-                    if (name === "format_string_path") {
-                        if (value && baseDir && !baseDir.value) {
-                            return [
-                                {
-                                    message: html`A base directory must be provided to locate your files.`,
-                                    type: "error",
-                                },
-                            ];
-                        }
-
-                        const base_directory = [...parentPath, "base_directory"].reduce(
-                            (acc, key) => acc[key],
-                            this.form.resolved
-                        );
-
-                        if (!base_directory) return true; // Do not calculate if base is not found
-
-                        const entry = { base_directory };
-
-                        if (value.split(".").length > 1) entry.file_path = value;
-                        else entry.folder_path = value;
-
-                        const interfaceName = parentPath.slice(-1)[0];
-
-                        const results = await run(
-                            `neuroconv/locate`,
-                            { [interfaceName]: entry },
-                            { swal: false }
-                        ).catch((error) => {
-                            this.notify(error.message, "error");
-                            throw error;
-                        });
-
-                        const resolved = [];
-
-                        for (let sub in results) {
-                            for (let ses in results[sub]) {
-                                const source_data = results[sub][ses].source_data[interfaceName];
-                                const path = source_data.file_path ?? source_data.folder_path;
-                                resolved.push(path.slice(base_directory.length + 1));
-                            }
-                        }
-
-                        if (resolved.length === 0)
-                            return [
-                                {
-                                    message: html`No source files found using the provided information.`,
-                                    type: "warning",
-                                },
-                            ];
-
+                const baseDir = form.getFormElement([...parentPath, "base_directory"]);
+                if (name === "format_string_path") {
+                    if (value && baseDir && !baseDir.value) {
                         return [
                             {
-                                message: html`<h4 style="margin: 0;">Source Files Found</h4>
-                                    <small>${base_directory}</small>
-                                    <small
-                                        >${new List({
-                                            items: resolved.map((path) => {
-                                                return { value: path };
-                                            }),
-                                            editable: false,
-                                        })}</small
-                                    >`,
-                                type: "info",
+                                message: html`A base directory must be provided to locate your files.`,
+                                type: "error",
                             },
                         ];
                     }
+
+                    const base_directory = [...parentPath, "base_directory"].reduce(
+                        (acc, key) => acc[key],
+                        this.form.resolved
+                    );
+
+                    if (!base_directory) return true; // Do not calculate if base is not found
+
+                    const entry = { base_directory };
+
+                    if (value.split(".").length > 1) entry.file_path = value;
+                    else entry.folder_path = value;
+
+                    const interfaceName = parentPath.slice(-1)[0];
+
+                    const results = await run(
+                        `neuroconv/locate`,
+                        { [interfaceName]: entry },
+                        { swal: false }
+                    ).catch((error) => {
+                        this.notify(error.message, "error");
+                        throw error;
+                    });
+
+                    const resolved = [];
+
+                    for (let sub in results) {
+                        for (let ses in results[sub]) {
+                            const source_data = results[sub][ses].source_data[interfaceName];
+                            const path = source_data.file_path ?? source_data.folder_path;
+                            resolved.push(path.slice(base_directory.length + 1));
+                        }
+                    }
+
+                    if (resolved.length === 0)
+                        return [
+                            {
+                                message: html`No source files found using the provided information.`,
+                                type: "warning",
+                            },
+                        ];
+
+                    return [
+                        {
+                            message: html`<h4 style="margin: 0;">Source Files Found</h4>
+                                <small>${base_directory}</small>
+                                <small
+                                    >${new List({
+                                        items: resolved.map((path) => {
+                                            return { value: path };
+                                        }),
+                                        editable: false,
+                                    })}</small
+                                >`,
+                            type: "info",
+                        },
+                    ];
                 }
             },
         }));

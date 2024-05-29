@@ -15,11 +15,8 @@ export const rename = (newDatasetName, previousDatasetName) => {
         // update old progress file with new dataset name
         const oldProgressFilePath = `${guidedProgressFilePath}/${previousDatasetName}.json`;
         const newProgressFilePath = `${guidedProgressFilePath}/${newDatasetName}.json`;
-        if (fs) fs.renameSync(oldProgressFilePath, newProgressFilePath);
-        else {
-            localStorage.setItem(newProgressFilePath, localStorage.getItem(oldProgressFilePath));
-            localStorage.removeItem(oldProgressFilePath);
-        }
+        fs.renameSync(oldProgressFilePath, newProgressFilePath);
+        
     } else throw new Error("No previous project name provided");
 };
 
@@ -56,9 +53,9 @@ export const updateFile = (projectName, callback) => {
 
     var guidedFilePath = joinPath(guidedProgressFilePath, projectName + ".json");
 
+    console.log(guidedProgressFilePath)
+
     // Save the file through the available mechanisms
-    if (fs) {
-        if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create progress folder if one does not exist
-        fs.writeFileSync(guidedFilePath, JSON.stringify(data, null, 2));
-    } else localStorage.setItem(guidedFilePath, JSON.stringify(data));
+    if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create progress folder if one does not exist
+    fs.writeFileSync(guidedFilePath, JSON.stringify(data, null, 2));
 };

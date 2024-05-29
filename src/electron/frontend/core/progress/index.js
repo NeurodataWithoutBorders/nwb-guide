@@ -8,6 +8,7 @@ import {
     ENCRYPTION_KEY,
     ENCRYPTION_IV,
 } from "../globals.js";
+
 import { fs, crypto } from "../../utils/electron.js";
 
 import { joinPath, runOnLoad } from "../globals";
@@ -87,8 +88,7 @@ class GlobalAppConfig {
     save() {
         const encoded = encodeObject(this.data);
 
-        if (fs) fs.writeFileSync(this.path, JSON.stringify(encoded, null, 2));
-        else localStorage.setItem(this.path, JSON.stringify(encoded));
+        fs.writeFileSync(this.path, JSON.stringify(encoded, null, 2));
     }
 }
 
