@@ -82,10 +82,9 @@ export class GuidedSourceDataPage extends ManagedPage {
                     heightAuto: false,
                     backdrop: "rgba(0,0,0, 0.4)",
                     timerProgressBar: false,
-                    didOpen: () => Swal.showLoading()
+                    didOpen: () => Swal.showLoading(),
                 });
             };
-
 
             setTimeout(() => {
                 if (stillFireSwal) fireSwal();
