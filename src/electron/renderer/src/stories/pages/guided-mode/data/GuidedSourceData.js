@@ -15,6 +15,7 @@ import globalIcon from "../../../../../assets/icons/global.svg?raw";
 import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils";
 import { Modal } from "../../../Modal";
+import Swal from "sweetalert2";
 
 const propsToIgnore = {
     "*": {
@@ -68,6 +69,25 @@ export class GuidedSourceDataPage extends ManagedPage {
 
             // const previousResults = this.info.globalState.metadata.results
 
+            let stillFireSwal = true;
+            const fireSwal = () => {
+                Swal.fire({
+                    title: "Getting metadata for source data",
+                    html: "Please wait...",
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    heightAuto: false,
+                    backdrop: "rgba(0,0,0, 0.4)",
+                    timerProgressBar: false,
+                    didOpen: () => Swal.showLoading()
+                });
+            };
+
+
+            setTimeout(() => {
+                if (stillFireSwal) fireSwal();
+            });
+
             await Promise.all(
                 Object.values(this.forms).map(async ({ subject, session, form }) => {
                     const info = this.info.globalState.results[subject][session];
@@ -79,10 +99,10 @@ export class GuidedSourceDataPage extends ManagedPage {
                             source_data: form.resolved, // Use resolved values, including global source data
                             interfaces: this.info.globalState.interfaces,
                         },
-                        {
-                            title: "Getting metadata for source data",
-                        }
+                        { swal: false }
                     ).catch((e) => {
+                        Swal.close();
+                        stillFireSwal = false;
                         this.notify(e.message, "error");
                         throw e;
                     });
@@ -107,6 +127,8 @@ export class GuidedSourceDataPage extends ManagedPage {
                     schemaGlobal.metadata[subject][session] = schema;
                 })
             );
+
+            Swal.close();
 
             await this.save(undefined, false); // Just save new raw values
 
