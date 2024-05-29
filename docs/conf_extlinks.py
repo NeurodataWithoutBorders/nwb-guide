@@ -5,6 +5,11 @@ extlinks = {
     "pynwb-docs": ("https://pynwb.readthedocs.io/en/stable/%s", "%s"),
     "matnwb-src": ("https://github.com/NeurodataWithoutBorders/matnwb/%s", "%s"),
     "nwb-overview": ("https://nwb-overview.readthedocs.io/en/latest/%s", "%s"),
+    "guide-issues": ("https://github.com/NeurodataWithoutBorders/nwb-guide/issues/%s", "%s"),
+    "request-format-support": ("https://github.com/catalystneuro/neuroconv/issues/new?assignees=&labels=enhancement%%2Cdata+interfaces&projects=&template=format_request.yml&title=%%5BNew+Format%%5D%%3A+%s", "%s"),
+    "path-expansion-guide": ("https://neuroconv.readthedocs.io/en/main/user_guide/expand_path.html%s", "%s"),
+    "dandi-staging": ("https://gui-staging.dandiarchive.org/%s", "%s"),
+    "dandi-archive": ("https://dandiarchive.org/%s", "%s"),
     "conda-install": (
         "https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation%s",
         "%s",
@@ -40,7 +45,11 @@ extlinks = {
     "ontobee": ("https://ontobee.org/%s", None),
 
     "web-components": ("https://www.webcomponents.org/%s", None),
-    "npm": ("https://www.npmjs.com/%s", None)
+    "npm": ("https://www.npmjs.com/%s", None),
+
+    "sphinx": ("https://www.sphinx-doc.org/en/master/%s", None),
+    "pydata-sphinx-theme": ("https://pydata-sphinx-theme.readthedocs.io/en/stable/%s", None),
+    "readthedocs": ("https://docs.readthedocs.io/en/stable/%s", None),
 }
 
 # Use this for mapping for links to commonly used documentation

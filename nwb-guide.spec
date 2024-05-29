@@ -10,9 +10,14 @@ import scipy
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('./paths.config.json', '.'), ('./package.json', '.')]
+datas = [('./src/paths.config.json', '.'), ('./package.json', '.')]
 binaries = []
-hiddenimports = [ 'email_validator', *collect_submodules('scipy.special.cython_special'), *os.path.join(os.path.dirname(scipy.__file__), '.libs')]
+hiddenimports = [
+    'email_validator',
+    *collect_submodules('scipy.special.cython_special'),
+    *collect_submodules('scipy.special._cdflib'),
+    *os.path.join(os.path.dirname(scipy.__file__), '.libs')
+]
 
 datas += collect_data_files('jsonschema_specifications')
 tmp_ret = collect_all('dandi')
@@ -37,13 +42,18 @@ tmp_ret = collect_all('sklearn')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('ci_info')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-
+tmp_ret = collect_all('tifffile')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('dlc2nwb')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('ndx-pose')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 block_cipher = None
 
 
 a = Analysis(
-    [f"{Path('pyflask') / 'app.py'}"],
+    [f"{Path('src') / 'pyflask' / 'app.py'}"],
     pathex=[],
     binaries=binaries,
     datas=datas,

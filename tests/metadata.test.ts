@@ -1,19 +1,19 @@
 import { describe, expect, test } from 'vitest'
-import { createResults } from '../src/renderer/src/stories/pages/guided-mode/data/utils'
-import { mapSessions } from '../src/renderer/src/stories/pages/utils'
+import { createResults } from '../src/electron/renderer/src/stories/pages/guided-mode/data/utils'
+import { mapSessions } from '../src/electron/renderer/src/stories/pages/utils'
 
-import baseMetadataSchema from '../schemas/base-metadata.schema'
+import baseMetadataSchema from '../src/schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { tempPropertyKey, textToArray } from '../src/renderer/src/stories/forms/utils'
-import { updateResultsFromSubjects } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
-import { JSONSchemaForm } from '../src/renderer/src/stories/JSONSchemaForm'
+import { tempPropertyKey, textToArray } from '../src/electron/renderer/src/stories/forms/utils'
+import { updateResultsFromSubjects } from '../src/electron/renderer/src/stories/pages/guided-mode/setup/utils'
+import { JSONSchemaForm } from '../src/electron/renderer/src/stories/JSONSchemaForm'
 
-import { validateOnChange } from "../src/renderer/src/validation/index.js";
-import { SimpleTable } from '../src/renderer/src/stories/SimpleTable'
-import { JSONSchemaInput } from '../src/renderer/src/stories/JSONSchemaInput.js'
+import { validateOnChange } from "../src/electron/renderer/src/validation/index.js";
+import { SimpleTable } from '../src/electron/renderer/src/stories/SimpleTable'
+import { JSONSchemaInput } from '../src/electron/renderer/src/stories/JSONSchemaInput.js'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -31,7 +31,7 @@ describe('metadata is specified correctly', () => {
         // Allow mouse (full list populated from server)
         baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
 
-        const result = mapSessions(info => createResults(info, globalState), globalState)
+        const result = mapSessions(info => createResults(info, globalState), globalState.results)
         const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
@@ -53,92 +53,6 @@ test('removing all existing sessions will maintain the related subject entry on 
 
     updateResultsFromSubjects(results, subjects)
     expect(Object.keys(results)).toEqual(Object.keys(copy))
-})
-
-
-// TODO: Convert an integration
-test('inter-table updates are triggered', async () => {
-
-    const results = {
-        Ecephys: { // NOTE: This layer is required to place the properties at the right level for the hardcoded validation function
-            ElectrodeGroup: [{ name: 's1' }],
-            Electrodes: [{ group_name: 's1' }]
-        }
-    }
-
-    const schema = {
-        properties: {
-            Ecephys: {
-                properties: {
-                    ElectrodeGroup: {
-                        type: "array",
-                        items: {
-                            required: ["name"],
-                            properties: {
-                                name: {
-                                    type: "string"
-                                },
-                            },
-                            type: "object",
-                        },
-                    },
-                    Electrodes: {
-                        type: "array",
-                        items: {
-                            type: "object",
-                            properties: {
-                                group_name: {
-                                    type: "string",
-                                },
-                            },
-                        }
-                    },
-                }
-            }
-        }
-    }
-
-
-
-    // Add invalid electrode
-    const randomStringId = Math.random().toString(36).substring(7)
-    results.Ecephys.Electrodes.push({ group_name: randomStringId })
-
-    // Create the form
-    const form = new JSONSchemaForm({
-        schema,
-        results,
-        validateOnChange,
-        renderTable: (name, metadata, path) => {
-            if (name !== "Electrodes") return new SimpleTable(metadata);
-            else return true
-        },
-    })
-
-    document.body.append(form)
-
-    await form.rendered
-
-    // Validate that the results are incorrect
-    const errors = await form.validate().catch(() => true).catch(() => true)
-    expect(errors).toBe(true) // Is invalid
-
-    // Update the table with the missing electrode group
-    const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
-    const row = table.addRow()
-
-    const baseRow = table.getRow(0)
-    row.forEach((cell, i) => {
-        if (cell.simpleTableInfo.col === 'name') cell.setInput(randomStringId) // Set name to random string id
-        else cell.setInput(baseRow[i].value) // Otherwise carry over info
-    })
-
-    // Wait a second for new row values to resolve as table data (async)
-    await new Promise((res) => setTimeout(() => res(true), 1000))
-
-    // Validate that the new structure is correct
-    const hasErrors = await form.validate().then(() => false).catch((e) => true)
-    expect(hasErrors).toBe(false) // Is valid
 })
 
 const popupSchemas = {
@@ -222,7 +136,6 @@ test('pop-up inputs work correctly', async () => {
     expect(hasErrors).toBe(false) // Is valid
 })
 
-
 // TODO: Convert an integration
 test('inter-table updates are triggered', async () => {
 
@@ -287,12 +200,14 @@ test('inter-table updates are triggered', async () => {
     await form.rendered
 
     // Validate that the results are incorrect
-    const errors = await form.validate().catch(() => true).catch(() => true)
+    const errors = await form.validate().catch(() => true).catch((e) => e)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
     const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
-    const row = table.addRow()
+    const idx = await table.addRow()
+
+    const row = table.getRow(idx)
 
     const baseRow = table.getRow(0)
     row.forEach((cell, i) => {
@@ -300,10 +215,12 @@ test('inter-table updates are triggered', async () => {
         else cell.setInput(baseRow[i].value) // Otherwise carry over info
     })
 
-    // Wait a second for new row values to resolve as table data (async)
-    await new Promise((res) => setTimeout(() => res(true), 1000))
+    await sleep(1000) // Wait for the ElectrodeGroup table to update properly
+
+    form.requestUpdate() // Re-render the form to update the Electrodes table
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate().then(() => false).catch((e) => true)
+
     expect(hasErrors).toBe(false) // Is valid
 })

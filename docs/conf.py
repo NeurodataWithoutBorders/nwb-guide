@@ -1,10 +1,13 @@
-import sys
 import inspect
+import json
+import os
+import sys
 from pathlib import Path
 
-from conf_extlinks import extlinks, intersphinx_mapping
-
+sys.path.insert(0, str(Path(__file__).resolve().parents[0]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from conf_extlinks import extlinks, intersphinx_mapping  # noqa: E402, F401
 
 project = "NWB GUIDE"
 copyright = "2022, CatalystNeuro"  # TODO: how to include NWB?
@@ -17,26 +20,33 @@ extensions = [
     "sphinx_search.extension",  # Allows for auto search function the documentation
     "sphinx.ext.viewcode",  # Shows source code in the documentation
     "sphinx.ext.extlinks",  # Allows to use shorter external links defined in the extlinks variable.
+    "sphinx_favicon",  # Allows to set a favicon for the documentation
 ]
 
 templates_path = ["_templates"]
 master_doc = "index"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "pydata_sphinx_theme"
+html_static_path = ["_static"]
 
-# The name of an image file (within the static path) to use as favicon of the
-# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
-#html_favicon = 'img/favicon.ico'  # TODO
+html_show_sourcelink = False
+
+html_logo = "assets/logo-guide-draft-transparent-tight.png"
+
+# configure the favicon via the sphinx_favicon extension
+favicons = [
+    "favicon.ico",
+    "favicon-16x16.png",
+    "favicon-32x32.png",
+    "android-chrome-192x192.png",
+    "android-chrome-512x512.png",
+    "apple-touch-icon.png",
+]
 
 # These paths are either relative to html_static_path or fully qualified paths (eg. https://...)
 html_css_files = [
     "css/custom.css",
 ]
-
-html_theme_options = {
-    "collapse_navigation": False,
-}
 
 linkcheck_anchors = False
 
@@ -66,6 +76,35 @@ autodoc_default_options = {
 }
 add_module_names = False
 
+# Define the json_url for our version switcher.
+json_url = "https://nwb-guide.readthedocs.io/en/latest/_static/switcher.json"
+
+# Define the version we use for matching in the version switcher.
+# Adapted from https://github.com/pydata/pydata-sphinx-theme/blob/a4eaf774f97400d12d9cfc53b410122f1a8d88c6/docs/conf.py
+version_match = os.environ.get("READTHEDOCS_VERSION")
+with open("../package.json") as f:
+    release = json.load(f)["version"]
+
+# If READTHEDOCS_VERSION doesn't exist, we're not on RTD
+# If it is an integer, we're in a PR build and the version isn't correct.
+# If it's "latest" → change to "dev" (that's what we want the switcher to call it)
+if not version_match or version_match.isdigit() or version_match == "latest":
+    # For local development, infer the version to match from the package.
+    # NOTE: In local development, you can't just open the built HTML file and have the version switcher work
+    # Use `python -m http.server -d docs/build/html/` and open the page at http://localhost:8000
+    # In local development, the version switcher will always show "dev" and use the local switcher.json
+    version_match = "dev"
+    json_url = "_static/switcher.json"
+    # if "dev" in release or "rc" in release:
+    #     version_match = "dev"
+    #     # We want to keep the relative reference if we are in dev mode
+    #     # but we want the whole url if we are effectively in a released version
+    #     json_url = "_static/switcher.json"
+    # else:
+    #     version_match = f"v{release}"
+elif version_match == "stable":
+    version_match = f"v{release}"
+
 html_theme_options = {
     "use_edit_page_button": True,
     "icon_links": [
@@ -76,6 +115,16 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "switcher": {
+        "json_url": json_url,
+        "version_match": version_match,
+    },
+    "logo": {
+        "text": "NWB GUIDE",
+        "alt_text": "NWB GUIDE - Home",
+    },
+    "navbar_start": ["navbar-logo", "version-switcher"],
+    "show_version_warning_banner": True,
 }
 
 html_context = {
@@ -95,3 +144,6 @@ def _correct_signatures(app, what, name, obj, options, signature, return_annotat
 
 def setup(app):  # This makes the data-interfaces signatures display on the docs/api, they don't otherwise
     app.connect("autodoc-process-signature", _correct_signatures)
+
+    # Add custom CSS
+    app.add_css_file("css/custom.css")

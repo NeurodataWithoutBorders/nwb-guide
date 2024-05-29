@@ -1,4 +1,4 @@
-name: Build Tests — Flask
+name: Build Tests
 on:
   schedule:
     - cron: "0 16 * * *"  # Daily at noon EST
@@ -15,7 +15,7 @@ env:
 
 jobs:
   testing:
-    name: PyFlask build and distributable tests on ${{ matrix.os }}
+    name: PyInstaller on ${{ matrix.os }}  # Will read on the dashboard as 'Build Tests / PyInstaller on {os}'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -32,8 +32,13 @@ jobs:
           #   prefix: /usr/share/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
-            os: macos-latest
-            label: environments/environment-Mac.yml
+            os: macos-latest  # Mac arm64 runner
+            label: environments/environment-MAC-apple-silicon.yml
+            prefix: /Users/runner/miniconda3/envs/nwb-guide
+
+          - python-version: "3.9"
+            os: macos-13  # Mac x64 runner
+            label: environments/environment-MAC-intel.yml
             prefix: /Users/runner/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
@@ -44,6 +49,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch --prune --unshallow --tags
+
+      - name: Printout architecture
+        run: uname -m
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Setup Mambaforge
@@ -81,7 +89,7 @@ jobs:
       - run: npm ci --verbose
 
       # fix for macos build
-      - if: matrix.os == 'macos-latest'
+      - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
         run: rm -f /Users/runner/miniconda3/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
 
       - name: Build PyFlask distribution

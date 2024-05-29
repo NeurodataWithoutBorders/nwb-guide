@@ -1,17 +1,18 @@
-from pathlib import Path
 import json
-from neuroconv import converters, datainterfaces, NWBConverter
+from pathlib import Path
 
-filepath = Path("guideGlobalMetadata.json")
-generatedJSONSchemaPath = Path("schemas", "json", "generated")
+from neuroconv import NWBConverter, converters, datainterfaces
+
+filepath = Path("src") / "supported_interfaces.json"
+generatedJSONSchemaPath = Path("stories") / "inputs" / "interface_schemas"
 generatedJSONSchemaPath.mkdir(exist_ok=True, parents=True)
 
 f = filepath.open()
-data = json.load(f)
+supported_interfaces = json.load(f)
 
 # Create JSON for the Schema
 paths = {}
-for interface in data["supported_interfaces"]:
+for interface in supported_interfaces:
     interface_class_dict = {interface: interface}
 
     class CustomNWBConverter(NWBConverter):
@@ -28,9 +29,11 @@ for interface in data["supported_interfaces"]:
         outfile.write(json.dumps(schema, indent=4))
 
 
-sourceDataStoryPath = Path("src/renderer/src/stories/pages/guided-mode/SourceData.stories.js")
+sourceDataStoryPath = Path("stories/pages/SourceData.stories.js")
 
-importCode = "\n".join(map(lambda arr: f"import {arr[0]}Schema from '../../../../../../{arr[1]}'", paths.items()))
+importCode = "\n".join(
+    map(lambda arr: f"import {arr[0]}Schema from '../inputs/interface_schemas/{arr[1]}'", paths.items())
+)
 storyCode = "\n".join(
     map(
         lambda arr: f"""export const {arr[0]} = PageTemplate.bind({{}});
