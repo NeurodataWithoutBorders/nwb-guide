@@ -11,10 +11,10 @@ from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Dict, List, Optional, Union
 
-from .info.sse import format_sse
-from .info import GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, CONVERSION_SAVE_FOLDER_PATH
-
 from tqdm_publisher import TQDMProgressHandler
+
+from .info import CONVERSION_SAVE_FOLDER_PATH, GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH
+from .info.sse import format_sse
 
 progress_handler = TQDMProgressHandler()
 
