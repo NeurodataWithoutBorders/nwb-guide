@@ -24,12 +24,6 @@
                     "type": "boolean",
                     "description": "Ignore the cache used by DANDI to speed up repeated operations.",
                     "default": false
-                },
-                "cleanup": {
-                    "type": "boolean",
-                    "title": "Cleanup Local Filesystem",
-                    "description": "Delete local files after upload",
-                    "default": false
                 }
             }
         }
