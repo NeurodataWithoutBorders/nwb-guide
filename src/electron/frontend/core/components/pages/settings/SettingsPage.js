@@ -15,18 +15,30 @@ import { merge, setUndefinedIfNotDeclared } from "../utils";
 import { notyf } from "../../../dependencies.js";
 import { homeDirectory, testDataFolderPath } from "../../../globals.js";
 
-import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../../utils/electron.js";
+import {
+    SERVER_FILE_PATH,
+    electron,
+    path,
+    port,
+    fs,
+    onUpdateAvailable,
+    onUpdateProgress,
+} from "../../../../utils/electron.js";
 
 import saveSVG from "../../../../assets/icons/save.svg?raw";
 import folderSVG from "../../../../assets/icons/folder_open.svg?raw";
 import deleteSVG from "../../../../assets/icons/delete.svg?raw";
 import generateSVG from "../../../../assets/icons/restart.svg?raw";
+import downloadSVG from "../../../../assets/icons/download.svg?raw";
+import infoSVG from "../../../../assets/icons/info.svg?raw";
 
 import { header } from "../../forms/utils";
 
 import examplePipelines from "../../../../../../example_pipelines.yml";
 import { run } from "../guided-mode/options/utils.js";
 import { joinPath } from "../../../globals";
+import { Modal } from "../../Modal";
+import { ProgressBar, humanReadableBytes } from "../../ProgressBar";
 
 const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
 const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");
@@ -180,6 +192,7 @@ export class SettingsPage extends Page {
                 {
                     title: "Generating test data",
                     html: "<small>This will take several minutes to complete.</small>",
+                    base: "data",
                 }
             ).catch((error) => {
                 this.notify(error.message, "error");
@@ -219,6 +232,90 @@ export class SettingsPage extends Page {
         this.#openNotyf(`Global settings changes saved.`, "success");
     };
 
+    #releaseNotesModal;
+
+    // Populate the Update Available display
+    updated() {
+        const updateDiv = this.querySelector("#update-available");
+
+        if (updateDiv.innerHTML) return; // Only populate once
+
+        onUpdateAvailable((updateInfo) => {
+            console.warn("Update Available", updateInfo);
+
+            const relativePath = updateInfo.path;
+            const file = updateInfo.files.find((f) => f.url === relativePath);
+            const filesize = file.size;
+
+            const container = document.createElement("div");
+            container.classList.add("update-container");
+
+            const mainUpdateInfo = document.createElement("div");
+
+            const infoIcon = document.createElement("slot");
+            infoIcon.innerHTML = infoSVG;
+
+            infoIcon.onclick = () => {
+                if (this.#releaseNotesModal) return (this.#releaseNotesModal.open = true);
+
+                const modal = (this.#releaseNotesModal = new Modal({
+                    header: `Release Notes`,
+                }));
+
+                const releaseNotes = document.createElement("div");
+                releaseNotes.style.padding = "25px";
+                releaseNotes.innerHTML = updateInfo.releaseNotes;
+                modal.append(releaseNotes);
+
+                document.body.append(modal);
+
+                modal.open = true;
+            };
+
+            const controls = document.createElement("div");
+            controls.classList.add("controls");
+            const downloadButton = new Button({
+                icon: downloadSVG,
+                label: `Update (${humanReadableBytes(filesize)})`,
+                size: "extra-small",
+                onClick: () => electron.ipcRenderer.send("download-update"),
+            });
+
+            controls.append(downloadButton);
+
+            const header = document.createElement("div");
+            header.classList.add("header");
+
+            const title = document.createElement("h4");
+            title.innerText = `NWB GUIDE ${updateInfo.version}`;
+            header.append(title, infoIcon);
+
+            const description = document.createElement("span");
+            description.innerText = `A new version of the application is available.`;
+
+            mainUpdateInfo.append(header, description);
+
+            container.append(mainUpdateInfo, controls);
+
+            let progressBarEl;
+            onUpdateProgress((progress) => {
+                if (!progressBarEl) {
+                    progressBarEl = new ProgressBar({
+                        isBytes: true,
+                        format: { total: filesize },
+                    });
+                    const hr = document.createElement("hr");
+                    updateDiv.append(hr, progressBarEl);
+                }
+                progressBarEl.format = {
+                    prefix: `Download Progress for NWB GUIDE ${updateInfo.version}`,
+                    ...progress,
+                };
+            });
+            updateDiv.append(container);
+        });
+    }
+
     render() {
         this.localState = structuredClone(global.data);
 
@@ -236,7 +333,7 @@ export class SettingsPage extends Page {
         });
 
         const generatePipelineButton = new Button({
-            label: "Generate Example Pipelines",
+            label: "Generate Test Pipelines",
             onClick: async () => {
                 const { testing_data_folder } = this.form.results.developer ?? {};
 
@@ -336,6 +433,7 @@ export class SettingsPage extends Page {
                     </div>
                 </div>
             </div>
+            <div id="update-available"></div>
             <hr />
             <br />
             ${this.form}
