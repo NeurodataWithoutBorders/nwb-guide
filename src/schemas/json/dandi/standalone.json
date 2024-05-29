@@ -1,0 +1,26 @@
+{
+    "order": [
+        "filesystem_paths"
+    ],
+    "properties": {
+        "filesystem_paths": {
+            "type": "array",
+            "items":{
+                "type": "string",
+                "format": ["file", "directory"]
+            },
+            "minItems": 1
+        },
+        "additional_settings": {
+            "properties": {
+                "cleanup": {
+                    "type": "boolean",
+                    "title": "Cleanup Local Filesystem",
+                    "description": "Delete local files after upload",
+                    "default": false
+                }
+            }
+        }
+    },
+    "required": ["filesystem_paths"]
+}

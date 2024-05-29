@@ -13,6 +13,6 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true
   },
-  "include": ["src"],
+  "include": ["src", "src/schemas", "frontend", "stories/components/Table.stories.js", "stories/components/Search.stories.js", "stories/components/ProgressBar.stories.js", "stories/components/OptionalSection.stories.js", "stories/components/List.stories.js", "stories/components/JSONSchemaForm.stories.js", "stories/components/InstanceManager.stories.js", "stories/components/FileSystemSelector.stories.js", "stories/components/Button.stories.js", "stories/components/Accordion.stories.js", "stories/components/InspectorList.stories.js", "stories/components/StatusBar.stories.js", "stories/components/Multiselect.stories.js", "stories/Pages.stories.js", "stories/pages/GuidedHome.stories.js", "stories/components/Locate.stories.js", "stories/pages/Metadata.stories.js", "stories/pages/NewDataset.stories.js", "stories/pages/Preview.stories.js", "stories/pages/Review.stories.js", "stories/pages/SourceData.stories.js", "stories/pages/Structure.stories.js", "stories/pages/Subjects.stories.js", "stories/pages/Upload.stories.js", "stories/pages/storyStates.ts"],
   "exclude": ["node_modules"]
 }

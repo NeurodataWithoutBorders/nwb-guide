@@ -3,16 +3,14 @@
   "productName": "NWB GUIDE",
   "version": "0.0.16",
   "description": "NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.",
-  "main": "./build/main/main.js",
+  "main": "./build/main/index.js",
   "engine": {
     "node": ">=18"
   },
   "scripts": {
     "start": "electron-vite dev --outDir build",
     "postinstall": "electron-builder install-app-deps",
-    "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
-    "dev:app": "vite src/renderer",
-    "dev:server": "cd pyflask && python -m flask run --port 4242",
+    "server": "cd src/pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
     "echo": "python -c \"print('hello')\"",
     "build:app": "electron-vite build --outDir build",
@@ -27,12 +25,12 @@
     "test:app": "vitest run --exclude \"**/pipelines.test.ts\"",
     "test:tutorial": "vitest tutorial",
     "test:pipelines": "vitest pipelines",
-    "test:server": "pytest pyflask/tests/ -s -vv",
+    "test:server": "pytest src/pyflask/tests/ -s -vv",
     "wait5s": "node -e \"setTimeout(() => process.exit(0),5000)\"",
-    "test:executable": "concurrently -n EXE,TEST --kill-others --success first \"node tests/testPyinstallerExecutable.js --port 3434 --forever\" \"npm run wait5s && pytest pyflask/tests/ -s --target http://localhost:3434\"",
+    "test:executable": "concurrently -n EXE,TEST --kill-others --success first \"node tests/testPyinstallerExecutable.js --port 3434 --forever\" \"npm run wait5s && pytest src/pyflask/tests/ -s --target http://localhost:3434\"",
     "test:coverage": "npm run coverage:app && npm run coverage:server",
     "coverage:app": "npm run test:app -- --coverage",
-    "coverage:server": "pytest pyflask/tests/ -s --cov=pyflask --cov-report=xml",
+    "coverage:server": "pytest src/pyflask/tests/ -s --cov=pyflask --cov-report=xml",
     "deploy:win": "npm run build && npm run build:flask && npm run deploy:electron:win",
     "deploy:mac": "npm run build && npm run build:flask && npm run deploy:electron:mac",
     "deploy:linux": "npm run build && npm run build:flask && npm run deploy:electron:linux",
@@ -77,7 +75,7 @@
     "win": {
       "asar": false,
       "target": "nsis",
-      "icon": "src/renderer/assets/app-icon/logo-guide-draft.ico",
+      "icon": "src/electron/frontend/assets/app-icon/logo-guide-draft.ico",
       "requestedExecutionLevel": "requireAdministrator"
     },
     "mac": {
@@ -98,7 +96,7 @@
           ]
         }
       ],
-      "icon": "src/renderer/assets/img/logo-guide-draft.png",
+      "icon": "src/electron/frontend/assets/img/logo-guide-draft.png",
       "darkModeSupport": false,
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -114,7 +112,7 @@
     "linux": {
       "asar": true,
       "target": "AppImage",
-      "icon": "src/renderer/assets/img/logo-guide-draft.png",
+      "icon": "src/electron/frontend/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
           "from": "./build/flask/nwb-guide",
@@ -127,7 +125,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/renderer/assets/app-icon/logo-guide-draft.ico"
+      "installerIcon": "src/electron/frontend/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
       "provider": "github"
