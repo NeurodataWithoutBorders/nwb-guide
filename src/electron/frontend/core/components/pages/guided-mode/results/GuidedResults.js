@@ -60,7 +60,7 @@ export class GuidedResultsPage extends Page {
             <h4>But what about my other data?</h4>
             <p>
                 The GUIDE still can't do everything. You may need to manually adjust the NWB file to ensure it contains
-                all the necessary data.
+                all the necessary data. <br><br>
                 
                 For example, to append to the file using PyNWB you would start with:
 
