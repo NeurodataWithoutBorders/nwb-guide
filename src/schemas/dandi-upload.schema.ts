@@ -1,10 +1,10 @@
 import { Dandiset, getMine } from 'dandi'
 
-import { global } from '../electron/renderer/src/progress'
+import { global } from '../electron/frontend/core/progress'
 import upload from './json/dandi/upload.json' assert { type: "json" }
-import { isStaging } from '../electron/renderer/src/stories/pages/uploads/utils'
-import { baseUrl, onServerOpen } from '../electron/renderer/src/server/globals'
-import { isStorybook } from '../electron/renderer/src/dependencies/simple'
+import { isStaging } from '../electron/frontend/core/components/pages/uploads/utils'
+import { baseUrl, onServerOpen } from '../electron/frontend/core/server/globals'
+import { isStorybook } from '../electron/frontend/core/globals'
 
 
 const schema = structuredClone(upload)

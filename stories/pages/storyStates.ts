@@ -1,8 +1,8 @@
 import nwbBaseSchema from "../../src/schemas/base-metadata.schema.js";
 // import exephysExampleSchema from "../../../../../../schemas/json/ecephys_metadata_schema_example.json";
 
-import { dashboard } from "../../src/electron/renderer/src/pages.js";
-import { activateServer } from "../../src/electron/renderer/src/server/globals.js";
+import { dashboard } from "../../src/electron/frontend/core/pages.js";
+import { activateServer } from "../../src/electron/frontend/core/server/globals.js";
 
 activateServer();
 

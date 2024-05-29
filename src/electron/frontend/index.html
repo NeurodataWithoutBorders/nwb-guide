@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>NWB GUIDE</title>
+
+    <link rel="preload" href="./assets/img/logo-guide-draft-transparent-tight.png" as="image" />
+
+    <style>
+      #version {
+        white-space: nowrap;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+
+      [contenteditable] {
+        text-decoration: underline;
+        cursor: text;
+      }
+
+      [contenteditable]:focus {
+        text-decoration: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nwb-dashboard></nwb-dashboard>
+
+    <script type="module" src="./core/index"></script>
+    <script async src="https://w.appzi.io/w.js?token=hUmCm"></script>
+    <script defer>
+
+      let appziFeedbackWidget
+
+      function iframe(title) {
+          const iframes =  Array.from(document.querySelectorAll('iframe'))  // get all iframes
+          return Array.from(iframes).find((iframe) => iframe.title === title);
+      }
+
+      const interval = setInterval(() => {
+        const appziFeedbackButton = iframe('Feedback Button');
+        if (appziFeedbackButton) clearInterval(interval)
+        else return
+
+        const div = appziFeedbackButton.contentWindow.document.querySelector('div')
+        if (!div) return
+
+        div.addEventListener('click', () => {
+          if (!appziFeedbackWidget) setTimeout(() => appziFeedbackWidget = iframe('Feedback Widget'), 200)
+        })
+
+      }, 100)
+
+      window.addEventListener('beforeunload', (ev) => {
+          const isOpen = appziFeedbackWidget ? ! appziFeedbackWidget.parentElement.parentElement.classList.length : false
+          if (!isOpen) return // Allow reload if feedback widget is closed (e.g. hot reloading)
+          const message = "You have unsaved changes. Are you sure you want to leave?";
+          event.returnValue = message;
+          return message;
+        });
+
+    </script>
+
+  </body>
+</html>
