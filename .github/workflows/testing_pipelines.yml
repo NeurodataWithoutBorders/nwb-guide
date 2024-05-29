@@ -100,7 +100,7 @@ jobs:
       - name: Make .env file
         uses: SpicyPizza/create-envfile@v1
         with:
-          envkey_GIN_TESTING_DATA_DIRECTORY: ${{ github.workspace }}
+          GIN_TESTING_DATA_DIRECTORY: ${{ github.workspace }}
 
       # Display environment file for debugging
       - name: Display .env (Unix)
