@@ -96,23 +96,19 @@ jobs:
           path: ./behavior_testing_data
           key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
 
-      # Save environment variables
-      - name: Save working directory to .env (Unix)
-        if: matrix.os != 'windows-latest'
-        run: |
-          touch .env
-          echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
-      - name: Save working directory to .env (Windows)
-        if: matrix.os == 'windows-latest'
-        run: echo GIN_TESTING_DATA_DIRECTORY=%CD% >> .env
-
+      # Save environment variables to .env file
+      - name: Make .env file
+        uses: SpicyPizza/create-envfile@v1
+        with:
+          envkey_GIN_TESTING_DATA_DIRECTORY: ${{ github.workspace }}
+  
       # Display environment file for debugging
       - name: Display .env (Unix)
         if: matrix.os != 'windows-latest'
         run: cat .env
       - name: Display .env (Windows)
         if: matrix.os == 'windows-latest'
-        run: more .env
+        run: type .env
 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
