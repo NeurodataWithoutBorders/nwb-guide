@@ -4,6 +4,8 @@ on:
     secrets:
       CODECOV_TOKEN:
         required: true
+      DANDI_STAGING_API_KEY:
+        required: true
 
 jobs:
 
