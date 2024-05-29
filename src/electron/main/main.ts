@@ -455,7 +455,8 @@ app.on("before-quit", async (ev: Event) => {
       type: "question",
       buttons: ["Yes", "No"],
       title: "Confirm",
-      message: "Any running process will be stopped. Are you sure you want to quit?",
+      message: 'Are you sure you want to quit?',
+      detail: 'Any running processes will be stopped.'
     })
 
     if (response !== 0) return // Skip quitting
