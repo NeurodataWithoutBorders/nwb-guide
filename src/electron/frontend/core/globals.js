@@ -35,7 +35,9 @@ export const testDataFolderPath = joinPath(appDirectory, ...paths.subfolders.tes
 // Encryption
 const IV_LENGTH = 16;
 const KEY_LENGTH = 32;
-export const ENCRYPTION_KEY = isElectron ? Buffer.concat([Buffer.from(appDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH) : ""
+export const ENCRYPTION_KEY = isElectron
+    ? Buffer.concat([Buffer.from(appDirectory), Buffer.alloc(KEY_LENGTH)], KEY_LENGTH)
+    : "";
 
 export const ENCRYPTION_IV = isElectron ? crypto.randomBytes(IV_LENGTH) : "";
 
