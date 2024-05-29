@@ -88,13 +88,18 @@ Repo Structure
         - `main`
             - `src` - Contains all the source code for the backend
             - `assets` - Contains all the backend-facing assets (e.g. images, css, etc.)
-        - `renderer`
-            - `src` - Contains all the source code for the frontend
+        - `preload`
+            - `preload.js` - Exposes electron-specific variables to the frontend
+        - `frontend`
+            - `core` - Contains all the source code for the frontend
                 - `index.js` - The entry point for the application
                 - `pages.js` - The main code that controls which pages are rendered and how they are linked together
                 - `stories` - Contains all the Web Components and related Storybook stories
                 - `electron` - Contains all the Electron-related code to enable conditional inclusion for development mode
             - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
+            - `utils`
+                - `electron.js` - Contains electron-exposed variables
+                - `url.js` - Saving the history state for hot reloading and refresh page functionality
     - `pyflask` - Contains all the source code for the backend
     - `schemas` - Contains all the JSON schemas used for validation
 
