@@ -74,8 +74,6 @@ with NWBHDF5IO(filename, "r+") as io:
     # Adjust the file as needed
     # ...
 
-    # Write the modified file
-    io.write(nwbfile)
 `,
             })}
             <h5>Related Documentation</h5>
