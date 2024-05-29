@@ -1,19 +1,19 @@
 import { describe, expect, test } from 'vitest'
-import { createResults } from '../src/electron/renderer/src/stories/pages/guided-mode/data/utils'
-import { mapSessions } from '../src/electron/renderer/src/stories/pages/utils'
+import { createResults } from '../src/electron/frontend/core/components/pages/guided-mode/data/utils'
+import { mapSessions } from '../src/electron/frontend/core/components/pages/utils'
 
 import baseMetadataSchema from '../src/schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { tempPropertyKey, textToArray } from '../src/electron/renderer/src/stories/forms/utils'
-import { updateResultsFromSubjects } from '../src/electron/renderer/src/stories/pages/guided-mode/setup/utils'
-import { JSONSchemaForm } from '../src/electron/renderer/src/stories/JSONSchemaForm'
+import { tempPropertyKey, textToArray } from '../src/electron/frontend/core/components/forms/utils'
+import { updateResultsFromSubjects } from '../src/electron/frontend/core/components/pages/guided-mode/setup/utils'
+import { JSONSchemaForm } from '../src/electron/frontend/core/components/JSONSchemaForm'
 
-import { validateOnChange } from "../src/electron/renderer/src/validation/index.js";
-import { SimpleTable } from '../src/electron/renderer/src/stories/SimpleTable'
-import { JSONSchemaInput } from '../src/electron/renderer/src/stories/JSONSchemaInput.js'
+import { validateOnChange } from "../src/electron/frontend/core/validation/index.js";
+import { SimpleTable } from '../src/electron/frontend/core/components/SimpleTable'
+import { JSONSchemaInput } from '../src/electron/frontend/core/components/JSONSchemaInput.js'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

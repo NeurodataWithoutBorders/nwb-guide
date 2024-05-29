@@ -1,4 +1,4 @@
-import { FilesystemSelector } from "../../src/electron/renderer/src/stories/FileSystemSelector";
+import { FilesystemSelector } from "../../src/electron/frontend/core/components/FileSystemSelector";
 
 export default {
     title: "Components/Filesystem Selector",

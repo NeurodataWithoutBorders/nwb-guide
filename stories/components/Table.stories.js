@@ -1,8 +1,8 @@
-import { Table } from "../../src/electron/renderer/src/stories/Table.js";
+import { Table } from "../../src/electron/frontend/core/components/Table.js";
 
 import getSubjectSchema from "../../src/schemas/subject.schema";
-import { SimpleTable } from "../../src/electron/renderer/src/stories/SimpleTable.js";
-import { BasicTable } from "../../src/electron/renderer/src/stories/BasicTable.js";
+import { SimpleTable } from "../../src/electron/frontend/core/components/SimpleTable.js";
+import { BasicTable } from "../../src/electron/frontend/core/components/BasicTable.js";
 
 export default {
     title: "Components/Table",

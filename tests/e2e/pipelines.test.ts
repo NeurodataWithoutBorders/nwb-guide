@@ -8,9 +8,11 @@ import { homedir } from 'node:os'
 import examplePipelines from "../../src/example_pipelines.yml";
 
 import paths from "../../src/paths.config.json" assert { type: "json" };
+
 import { evaluate, initTests, takeScreenshot } from './utils'
-import { header } from '../../src/electron/renderer/src/stories/forms/utils'
+import { header } from '../../src/electron/frontend/core/components/forms/utils'
 import { sleep } from '../puppeteer';
+
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data/GIN
 const testGINPath = process.env.GIN_TESTING_DATA_DIRECTORY ?? join(homedir(), paths.root, 'test-data', 'GIN')
