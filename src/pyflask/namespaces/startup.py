@@ -34,10 +34,6 @@ class PreloadImports(Resource):
 
     @startup_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
-        try:
-            import neuroconv
+        import neuroconv
 
-            return True
-        except Exception as exception:
-            startup_namespace.abort(500, str(exception))
-            raise exception
+        return True

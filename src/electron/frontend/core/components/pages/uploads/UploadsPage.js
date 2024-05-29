@@ -117,7 +117,10 @@ export async function createDandiset(results = {}) {
 
                 const api_key = await getAPIKey.call(this, staging);
 
-                const api = new dandi.API({ token: api_key, type: staging ? "staging" : undefined });
+                const api = new dandi.API({
+                    token: api_key,
+                    type: staging ? "staging" : undefined,
+                });
                 await api.init();
 
                 const metadata = {
@@ -259,7 +262,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
     if (info.project) payload.project = info.project;
     else payload.filesystem_paths = info.filesystem_paths;
 
-    const result = await run(type ? `upload/${type}` : "upload", payload, {
+    const result = await run(type ? `neuroconv/upload/${type}` : "neuroconv/upload", payload, {
         title: "Uploading your files to DANDI",
     }).catch((error) => {
         this.notify(error.message, "error");
@@ -348,7 +351,9 @@ export class UploadsPage extends Page {
             onClick: async () => {
                 await this.form.validate(); // Will throw an error in the callback
 
-                const results = await uploadToDandi.call(this, { ...global.data.uploads });
+                const results = await uploadToDandi.call(this, {
+                    ...global.data.uploads,
+                });
                 global.data.uploads = {};
                 global.save();
 
@@ -387,7 +392,9 @@ export class UploadsPage extends Page {
                                     width: "max-content",
                                 },
                                 onClick: async () => {
-                                    await createDandiset.call(this, { title: this.form.resolved.dandiset });
+                                    await createDandiset.call(this, {
+                                        title: this.form.resolved.dandiset,
+                                    });
                                     this.requestUpdate();
                                 },
                             }),
