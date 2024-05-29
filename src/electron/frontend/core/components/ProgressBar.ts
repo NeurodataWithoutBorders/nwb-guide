@@ -26,8 +26,8 @@ export function humanReadableBytes(size: number | string) {
     size = parseFloat(size);
 
     // Loop until the size is less than 1024 and increment the unit
-    while (size >= 1024 && index < units.length - 1) {
-        size /= 1024;
+    while (size >= 1000 && index < units.length - 1) {
+        size /= 1000;
         index += 1;
     }
 
