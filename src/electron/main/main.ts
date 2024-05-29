@@ -21,15 +21,23 @@ import icon from '../frontend/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
 import preloadUrl from '../preload/preload.js?asset'
 
+import devUpdateConfig from './dev-app-update.yml?asset'
+
+
+import { autoUpdater } from 'electron-updater';
+
+
 const runByTestSuite = !!process.env.VITEST
+
+// Configure AutoUpdater
+autoUpdater.autoDownload = false; // Disable auto download of updates
+autoUpdater.channel = "latest";
 
 // Enable remote debugging port for Vitest
 if (runByTestSuite) {
   app.commandLine.appendSwitch('remote-debugging-port', `${8315}`) // Mirrors the global electronDebugPort variable
   app.commandLine.appendSwitch('remote-allow-origins', '*') // Allow all remote origins
 }
-
-// autoUpdater.channel = "latest";
 
 /*************************************************************
  * Python Process
@@ -215,8 +223,6 @@ const killAllPreviousProcesses = async () => {
   } else console.error('Cannot kill previous processes because fetch is not defined in this version of Node.js')
 };
 
-let updatechecked = false;
-
 let hasBeenOpened = false;
 
 function initialize() {
@@ -352,8 +358,8 @@ function initialize() {
         win.show();
         createWindow();
 
-        // autoUpdater.checkForUpdatesAndNotify();
-        updatechecked = true;
+        // Check for updates
+        autoUpdater.checkForUpdates();
 
         // Clear ready queue
         readyQueue.forEach(f => onWindowReady(f))
@@ -361,6 +367,7 @@ function initialize() {
 
       }, hasBeenOpened ? 100 : 1000);
     });
+
   }
 
 
@@ -515,4 +522,49 @@ ipcMain.on("get-server-file-path", (event) => {
 // Allow the browser to request status if already sent once
 ipcMain.on("python.status", (event) => {
   if (globals.python.sent) ((globals.python.status) ? pythonIsOpen : pythonIsClosed)(true); // Force send
+});
+
+// Add auto-updater events
+
+ipcMain.on('download-update', () => {
+  autoUpdater.downloadUpdate()
+})
+
+autoUpdater.on('update-available', (info) => {
+  onWindowReady((win) => send.call(win, 'update-available', info))
+});
+
+autoUpdater.on('update-not-available', () => {
+  onWindowReady((win) => send.call(win, 'update-available', false))
+});
+
+autoUpdater.on('error', (err) => {
+  onWindowReady((win) => send.call(win, 'update-error', err))
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  onWindowReady((win) => send.call(win, 'update-progress', {
+    n: progressObj.transferred,
+    total: progressObj.total,
+    rate: progressObj.bytesPerSecond,
+  }))
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+
+  onWindowReady((win) => {
+    send.call(win, 'update-complete', info)
+
+    // Prompt user to install update
+    dialog
+      .showMessageBox(win, {
+        type: 'info',
+        buttons: ['Restart', 'Later'],
+        title: 'Update available',
+        message: 'A new version has been downloaded. Restart now to install the update?',
+      })
+      .then((result) => {
+        if (result.response === 0) autoUpdater.quitAndInstall();
+      });
+    })
 });
