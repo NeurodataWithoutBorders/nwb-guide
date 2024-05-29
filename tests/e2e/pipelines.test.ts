@@ -13,7 +13,8 @@ import { header } from '../../src/electron/renderer/src/stories/forms/utils'
 import { sleep } from '../puppeteer';
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data/GIN
-const testGINPath = join(homedir(), paths.root, 'test-data', 'GIN')
+const testGINPath = process.env.GIN_TESTING_DATA_DIRECTORY ?? join(homedir(), paths.root, 'test-data', 'GIN')
+
 const pipelineDescribeFn = existsSync(testGINPath) ? describe : describe.skip
 
 beforeAll(() => initTests({ screenshots: false, data: false }))

@@ -75,7 +75,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-ephys-datasets
         with:
-          path: ~/NWB_GUIDE/test-data/GIN/ephy_testing_data
+          path: ./ephy_testing_data
           key: ephys-datasets-${{ matrix.os }}-${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
       - name: Get ophys_testing_data current head hash
         id: ophys
@@ -84,7 +84,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-ophys-datasets
         with:
-          path: ~/NWB_GUIDE/test-data/GIN/ophys_testing_data
+          path: ./ophys_testing_data
           key: ophys-datasets-${{ matrix.os }}-${{ steps.ophys.outputs.HASH_OPHYS_DATASET }}
       - name: Get behavior_testing_data current head hash
         id: behavior
@@ -93,8 +93,22 @@ jobs:
         uses: actions/cache@v4
         id: cache-behavior-datasets
         with:
-          path: ~/NWB_GUIDE/test-data/GIN/behavior_testing_data
+          path: ./behavior_testing_data
           key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
+
+      # Save environment variables
+      - name: Save working directory to .env (Unix)
+        if: matrix.os != 'Windows'
+        run: |
+          touch .env
+          echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
+
+      - name: Save working directory to .env (Windows)
+        if: matrix.os == 'Windows'
+        run: |
+          touch .env
+          echo GIN_TESTING_DATA_DIRECTORY=%CD% >> .env
+
 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
