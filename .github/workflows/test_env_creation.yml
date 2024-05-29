@@ -5,8 +5,8 @@ on:
 jobs:
 
   run:
-  
-    name: ${{ matrix.os }} data
+
+    name: ${{ matrix.os }} environment test
     runs-on: ${{ matrix.os }}
     defaults:
       run:
