@@ -98,13 +98,13 @@ jobs:
 
       # Save environment variables
       - name: Save working directory to .env (Unix)
-        if: matrix.os != 'Windows'
+        if: matrix.os != 'windows-latest'
         run: |
           touch .env
           echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
 
       - name: Save working directory to .env (Windows)
-        if: matrix.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         run: |
           touch .env
           echo GIN_TESTING_DATA_DIRECTORY=%CD% >> .env
