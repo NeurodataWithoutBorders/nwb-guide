@@ -15,14 +15,14 @@ import { merge, setUndefinedIfNotDeclared } from "../utils";
 import { notyf } from "../../../dependencies.js";
 import { homeDirectory, testDataFolderPath } from "../../../globals.js";
 
-import { 
-    SERVER_FILE_PATH, 
-    electron, 
-    path, 
-    port, 
-    fs, 
-    onUpdateAvailable, 
-    onUpdateProgress
+import {
+    SERVER_FILE_PATH,
+    electron,
+    path,
+    port,
+    fs,
+    onUpdateAvailable,
+    onUpdateProgress,
 } from "../../../../utils/electron.js";
 
 import saveSVG from "../../../../assets/icons/save.svg?raw";
