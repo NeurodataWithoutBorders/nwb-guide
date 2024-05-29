@@ -109,6 +109,9 @@ jobs:
           touch .env
           echo GIN_TESTING_DATA_DIRECTORY=%CD% >> .env
 
+      - name: Display .env contents
+        run: cat .env
+        shell: bash
 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'

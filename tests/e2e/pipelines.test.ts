@@ -14,6 +14,7 @@ import { sleep } from '../puppeteer';
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data/GIN
 const testGINPath = process.env.GIN_TESTING_DATA_DIRECTORY ?? join(homedir(), paths.root, 'test-data', 'GIN')
+console.log('Using test GIN data at:', testGINPath)
 
 const pipelineDescribeFn = existsSync(testGINPath) ? describe : describe.skip
 
