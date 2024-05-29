@@ -102,7 +102,7 @@ jobs:
 
       - name: Save working directory to environment file (Windows)
         run: echo GIN_DATA_DIR=%cd% >> .env
-        shell: cmd
+        shell: bash
         if: runner.os == 'Windows'
 
       # Display environment file for debugging
@@ -112,7 +112,7 @@ jobs:
 
       - name: Print environment file
         run: type .env
-        shell: cmd
+        shell: bash
         if: runner.os == 'Windows'
 
       # Run pipeline tests

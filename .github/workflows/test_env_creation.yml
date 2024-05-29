@@ -42,7 +42,7 @@ jobs:
 
       - name: Set working directory as environment file (Windows)
         run: echo "CURRENT_WORKING_DIR=%cd%" >> .env
-        shell: cmd
+        shell: bash
         if: runner.os == 'Windows'
 
 
@@ -56,5 +56,5 @@ jobs:
 
       - name: Print environment file
         run: type .env
-        shell: cmd
+        shell: bash
         if: runner.os == 'Windows'
