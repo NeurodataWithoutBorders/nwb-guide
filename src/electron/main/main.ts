@@ -17,7 +17,7 @@ import fs from 'fs';
 
 import './application-menu.js';
 
-import icon from '../renderer/assets/img/logo-guide-draft.png?asset'
+import icon from '../frontend/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
 import preloadUrl from '../preload/preload.js?asset'
 

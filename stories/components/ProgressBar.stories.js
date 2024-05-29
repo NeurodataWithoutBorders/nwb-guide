@@ -1,4 +1,4 @@
-import { ProgressBar } from "../../src/electron/renderer/src/stories/ProgressBar";
+import { ProgressBar } from "../../src/electron/frontend/core/components/ProgressBar";
 
 export default {
     title: "Components/Progress Bar",

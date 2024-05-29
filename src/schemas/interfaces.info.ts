@@ -1,5 +1,5 @@
-import { baseUrl, onServerOpen } from '../electron/renderer/src/server/globals'
-import { isStorybook } from '../electron/renderer/src/dependencies/simple'
+import { baseUrl, onServerOpen } from '../electron/frontend/core/server/globals'
+import { isStorybook } from '../electron/frontend/core/globals'
 
 const values = { interfaces: {} }
 const setReady: any = {}

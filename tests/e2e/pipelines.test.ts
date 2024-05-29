@@ -15,7 +15,7 @@ import examplePipelines from "../../src/example_pipelines.yml";
 
 import paths from "../../src/paths.config.json" assert { type: "json" };
 import { evaluate, initTests } from './utils'
-import { header } from '../../src/electron/renderer/src/stories/forms/utils'
+import { header } from '../../src/electron/frontend/core/components/forms/utils'
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data
 const guideRootPath = join(homedir(), paths.root)

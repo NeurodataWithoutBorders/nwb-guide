@@ -1,4 +1,4 @@
-import { Search } from "../../src/electron/renderer/src/stories/Search";
+import { Search } from "../../src/electron/frontend/core/components/Search";
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/web-components/writing-stories/introduction
 export default {
