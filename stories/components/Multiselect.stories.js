@@ -1,4 +1,4 @@
-import { MultiSelectForm } from "../../src/electron/renderer/src/stories/multiselect/MultiSelectForm.js";
+import { MultiSelectForm } from "../../src/electron/frontend/core/components/multiselect/MultiSelectForm.js";
 
 export default {
     title: "Components/Multiselect Form",
