@@ -102,16 +102,15 @@ jobs:
         run: |
           touch .env
           echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
+          run: cat .env
+
 
       - name: Save working directory to .env (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           touch .env
           echo GIN_TESTING_DATA_DIRECTORY=%CD% >> .env
-
-      - name: Display .env contents
-        run: cat .env
-        shell: bash
+          type .env
 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
