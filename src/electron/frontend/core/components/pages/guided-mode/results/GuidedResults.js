@@ -63,17 +63,16 @@ export class GuidedResultsPage extends Page {
                 all the necessary data.
             </p>
             ${new CodeBlock({
-                text: `from pynwb import NWBHDF5IO, NWBFile, TimeSeries
+                text: `from pynwb import NWBHDF5IO, NWBFile
 
-filename = "${this.#sharedPath()}"
+nwbfile_path= "${this.#sharedPath()}"
 
 # Open the file
-with NWBHDF5IO(filename, "r+") as io:
+with NWBHDF5IO(path=nwbfile_path, mode="r+") as io:
     nwbfile = io.read()
 
     # Adjust the file as needed
     # ...
-
 `,
             })}
             <h5>Related Documentation</h5>
