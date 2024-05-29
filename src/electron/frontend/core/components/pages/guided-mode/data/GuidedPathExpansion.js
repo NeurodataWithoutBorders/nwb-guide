@@ -21,6 +21,8 @@ const propOrder = ["path", "subject_id", "session_id"];
 export async function autocompleteFormatString(path) {
     let notification;
 
+    const interfaceName = path[0];
+
     const { base_directory } = path.reduce((acc, key) => acc[key] ?? {}, this.form.resolved);
 
     const schema = getSchema(path, this.info.globalState.schema.source_data);
@@ -42,7 +44,7 @@ export async function autocompleteFormatString(path) {
     }
 
     const modal = new Modal({
-        header: "Autocomplete Format String",
+        header: `${interfaceName} — Autocomplete Format String`,
     });
 
     const content = document.createElement("div");
@@ -377,73 +379,78 @@ export class GuidedPathExpansionPage extends Page {
             validateOnChange: async (name, parent, parentPath) => {
                 const value = parent[name];
 
-                const baseDir = form.getFormElement([...parentPath, "base_directory"]);
-                if (name === "format_string_path") {
-                    if (value && baseDir && !baseDir.value) {
-                        return [
-                            {
-                                message: html`A base directory must be provided to locate your files.`,
-                                type: "error",
-                            },
-                        ];
-                    }
+                const interfaceName = parentPath.slice(-1)[0];
 
-                    const base_directory = [...parentPath, "base_directory"].reduce(
-                        (acc, key) => acc[key],
-                        this.form.resolved
-                    );
-
-                    if (!base_directory) return true; // Do not calculate if base is not found
-
-                    const entry = { base_directory };
-
-                    if (value.split(".").length > 1) entry.file_path = value;
-                    else entry.folder_path = value;
-
-                    const interfaceName = parentPath.slice(-1)[0];
-
-                    const results = await run(
-                        `neuroconv/locate`,
-                        { [interfaceName]: entry },
-                        { swal: false }
-                    ).catch((error) => {
-                        this.notify(error.message, "error");
-                        throw error;
-                    });
-
-                    const resolved = [];
-
-                    for (let sub in results) {
-                        for (let ses in results[sub]) {
-                            const source_data = results[sub][ses].source_data[interfaceName];
-                            const path = source_data.file_path ?? source_data.folder_path;
-                            resolved.push(path.slice(base_directory.length + 1));
+                if (fs) {
+                    const baseDir = form.getFormElement([...parentPath, "base_directory"]);
+                    if (name === "format_string_path") {
+                        if (value && baseDir && !baseDir.value) {
+                            return [
+                                {
+                                    message: html`A base directory must be provided to locate your files.`,
+                                    type: "error",
+                                },
+                            ];
                         }
-                    }
 
-                    if (resolved.length === 0)
+                        const base_directory = [...parentPath, "base_directory"].reduce(
+                            (acc, key) => acc[key],
+                            this.form.resolved
+                        );
+
+                        if (!base_directory) return true; // Do not calculate if base is not found
+
+                        const entry = { base_directory };
+
+                        if (value.split(".").length > 1) entry.file_path = value;
+                        else entry.folder_path = value;
+
+                        const results = await run(
+                            `neuroconv/locate`,
+                            { [interfaceName]: entry },
+                            { swal: false }
+                        ).catch((error) => {
+                            this.notify(error.message, "error");
+                            throw error;
+                        });
+
+                        const resolved = [];
+
+                        for (let sub in results) {
+                            for (let ses in results[sub]) {
+                                const source_data = results[sub][ses].source_data[interfaceName];
+                                const path = source_data.file_path ?? source_data.folder_path;
+                                resolved.push(path.slice(base_directory.length + 1));
+                            }
+                        }
+
+                        if (resolved.length === 0)
+                            return [
+                                {
+                                    message: html`No source files found using the provided information.`,
+                                    type: "warning",
+                                },
+                            ];
+
                         return [
                             {
-                                message: html`No source files found using the provided information.`,
-                                type: "warning",
+                                message: html` <h4 style="margin: 0;">
+                                        <span style="margin-right: 7px;">✅</span>Source Files Found for
+                                        ${interfaceName}
+                                    </h4>
+                                    <small>${base_directory}</small>
+                                    <small
+                                        >${new List({
+                                            items: resolved.map((path) => {
+                                                return { value: path };
+                                            }),
+                                            editable: false,
+                                        })}</small
+                                    >`,
+                                type: "info",
                             },
                         ];
-
-                    return [
-                        {
-                            message: html`<h4 style="margin: 0;">Source Files Found</h4>
-                                <small>${base_directory}</small>
-                                <small
-                                    >${new List({
-                                        items: resolved.map((path) => {
-                                            return { value: path };
-                                        }),
-                                        editable: false,
-                                    })}</small
-                                >`,
-                            type: "info",
-                        },
-                    ];
+                    }
                 }
             },
         }));
