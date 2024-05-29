@@ -1,4 +1,3 @@
-
 import { app, path, crypto, isElectron } from "../utils/electron.js";
 
 import paths from "../../../paths.config.json" assert { type: "json" };
