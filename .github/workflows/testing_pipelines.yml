@@ -101,7 +101,7 @@ jobs:
         uses: SpicyPizza/create-envfile@v1
         with:
           envkey_GIN_TESTING_DATA_DIRECTORY: ${{ github.workspace }}
-  
+
       # Display environment file for debugging
       - name: Display .env (Unix)
         if: matrix.os != 'windows-latest'
