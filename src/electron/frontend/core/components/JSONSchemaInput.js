@@ -1125,7 +1125,6 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (schema.enum && schema.enum.length) {
-            
             // Use generic selector
             if (schema.strict && schema.search !== true) {
                 return html`

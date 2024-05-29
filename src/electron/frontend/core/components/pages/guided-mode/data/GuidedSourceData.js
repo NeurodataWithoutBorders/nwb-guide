@@ -247,7 +247,7 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         const { subject, session } = getInfoFromId(id);
 
-                        this.dismiss()
+                        this.dismiss();
 
                         const header = document.createElement("div");
                         Object.assign(header.style, { paddingTop: "10px" });
@@ -293,8 +293,11 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                                 const { metadata } = data;
                                 if (Object.keys(metadata).length === 0) {
-                                    this.notify(`<h4 style="margin: 0">Time Alignment Failed</h4><small>Please ensure that all source data is specified.</small>`, "error");
-                                    return false
+                                    this.notify(
+                                        `<h4 style="margin: 0">Time Alignment Failed</h4><small>Please ensure that all source data is specified.</small>`,
+                                        "error"
+                                    );
+                                    return false;
                                 }
 
                                 alignment = new TimeAlignment({
@@ -306,7 +309,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                                 modal.innerHTML = "";
                                 modal.append(alignment);
 
-                                return true
+                                return true;
                             },
                         });
 
