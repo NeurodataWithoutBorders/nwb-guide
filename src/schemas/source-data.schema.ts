@@ -39,7 +39,7 @@ export default function preprocessSourceDataSchema (schema) {
             if (schema.properties.gain) schema.properties.gain.step = null
 
             // Add description to exclude_cluster_groups
-            if (schema.properties.exclude_cluster_groups) schema.properties.exclude_cluster_groups.description = 'Cluster groups to exclude (e.g. "noise" or ["noise", "mua"]).'
+            if (schema.properties.exclude_cluster_groups) schema.properties.exclude_cluster_groups.description = 'Cluster groups to exclude.<br><small><b>Example:</b> "good", "mua"</small>'
 
     })
 
