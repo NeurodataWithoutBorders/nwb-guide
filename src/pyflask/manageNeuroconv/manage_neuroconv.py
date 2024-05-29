@@ -1094,9 +1094,9 @@ def inspect_nwb_folder(url, payload) -> dict:
     request_id = payload.get("request_id", None)
 
     from nwbinspector import load_config
-    from nwbinspector.utils import calculate_number_of_cpu
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from nwbinspector.utils import calculate_number_of_cpu
 
     # Prepare n_jobs
     n_jobs = payload.pop("n_jobs", -2)  # Default to all but one CPU
@@ -1115,7 +1115,6 @@ def inspect_nwb_folder(url, payload) -> dict:
         config=load_config(filepath_or_keyword="dandi"),
         **payload,
     )
-
 
     try:
         messages = inspect_all(url, kwargs)
