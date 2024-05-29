@@ -4,7 +4,7 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils";
+import { merge, sanitize } from "../../utils";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 import { TimeAlignment } from "./alignment/TimeAlignment.js";
@@ -19,6 +19,8 @@ import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils";
 import { Modal } from "../../../Modal";
 import Swal from "sweetalert2";
+
+import { baseUrl } from "../../../../server/globals";
 
 const propsToIgnore = {
     "*": {

@@ -247,8 +247,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
         const patternPropsToRetitle = ["Ophys.Fluorescence", "Ophys.DfOverF", "Ophys.SegmentationImages"];
 
-        console.log("schema", structuredClone(schema), structuredClone(results));
-
         const ophys = schema.properties.Ophys;
         if (ophys) {
             drillSchemaProperties(
