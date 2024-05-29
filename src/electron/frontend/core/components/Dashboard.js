@@ -5,6 +5,9 @@ import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
 import { NavigationSidebar } from "./NavigationSidebar.js";
 
+// Defined by Garrett late in GUIDE development to clearly separate global styles unrelated to SODA (May 20th, 2024)
+import "../../assets/css/custom.css";
+
 // Global styles to apply with the dashboard
 import "../../assets/css/variables.css";
 import "../../assets/css/nativize.css";
@@ -31,7 +34,6 @@ import "../../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 import "../../assets/css/guided.css";
 import { isElectron } from "../../utils/electron.js";
 import { isStorybook, reloadPageToHome } from "../globals.js";
-
 import { getCurrentProjectName, updateAppProgress } from "../progress/index.js";
 
 // import "https://jsuites.net/v4/jsuites.js"
@@ -295,7 +297,12 @@ export class Dashboard extends LitElement {
                 const section = info.section;
 
                 let state = globalState.sections[section];
-                if (!state) state = globalState.sections[section] = { open: false, active: false, pages: {} };
+                if (!state)
+                    state = globalState.sections[section] = {
+                        open: false,
+                        active: false,
+                        pages: {},
+                    };
 
                 let pageState = state.pages[id];
                 if (!pageState)
