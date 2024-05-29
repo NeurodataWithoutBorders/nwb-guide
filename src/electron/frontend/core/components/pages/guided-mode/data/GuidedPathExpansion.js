@@ -230,7 +230,7 @@ export class GuidedPathExpansionPage extends Page {
         },
     };
 
-    beforeSave = async ( ) => {
+    beforeSave = async () => {
         const globalState = this.info.globalState;
         merge({ structure: this.localState }, globalState); // Merge the actual entries into the structure
 
@@ -434,8 +434,10 @@ export class GuidedPathExpansionPage extends Page {
 
                         return [
                             {
-                                message: html`
-                                    <h4 style="margin: 0;"><span style="margin-right: 7px;">✅</span>Source Files Found for ${interfaceName}</h4>
+                                message: html` <h4 style="margin: 0;">
+                                        <span style="margin-right: 7px;">✅</span>Source Files Found for
+                                        ${interfaceName}
+                                    </h4>
                                     <small>${base_directory}</small>
                                     <small
                                         >${new List({
