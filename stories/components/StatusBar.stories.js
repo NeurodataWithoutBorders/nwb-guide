@@ -1,8 +1,8 @@
-import { StatusBar } from "./StatusBar";
+import { StatusBar } from "../../src/electron/renderer/src/stories/status/StatusBar";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import pythonSVG from "../assets/python.svg?raw";
-import webAssetSVG from "../assets/web_asset.svg?raw";
-import wifiSVG from "../assets/wifi.svg?raw";
+import pythonSVG from "../../src/electron/renderer/assets/icons/python.svg?raw";
+import webAssetSVG from "../../src/electron/renderer/assets/icons/web_asset.svg?raw";
+import wifiSVG from "../../src/electron/renderer/assets/icons/wifi.svg?raw";
 
 export default {
     title: "Components/Status Bar",

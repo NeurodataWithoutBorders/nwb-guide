@@ -1,4 +1,4 @@
-import { List } from "./List";
+import { List } from "../../src/electron/renderer/src/stories/List";
 
 export default {
     title: "Components/List",

@@ -28,7 +28,7 @@ export const ready = {
 
 //  Get CPUs
 onServerOpen(async () => {
-    await fetch(new URL("cpus", baseUrl))
+    await fetch(new URL("/system/cpus", baseUrl))
     .then((res) => res.json())
     .then(({ physical, logical }) => {
         const { number_of_jobs, number_of_threads } = additionalSettings as any;
