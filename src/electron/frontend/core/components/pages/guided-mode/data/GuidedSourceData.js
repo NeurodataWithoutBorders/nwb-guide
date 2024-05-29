@@ -1,5 +1,3 @@
-import Swal from "sweetalert2";
-
 import { isStorybook } from "../../../../globals.js";
 
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
