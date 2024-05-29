@@ -12,17 +12,15 @@ export const crypto = require("crypto");
 export const path = require("path");
 
 // Remote Electron Modules
-export const remote = isElectron ? require("@electron/remote") : {}
+export const remote = isElectron ? require("@electron/remote") : {};
 export const app = remote.app;
 
 // Electron Information
-export const port = electron.ipcRenderer ? electron.ipcRenderer.sendSync("get-port") : 4242
-export const SERVER_FILE_PATH = electron.ipcRenderer ? electron.ipcRenderer.sendSync("get-server-file-path") : ""
-
+export const port = electron.ipcRenderer ? electron.ipcRenderer.sendSync("get-port") : 4242;
+export const SERVER_FILE_PATH = electron.ipcRenderer ? electron.ipcRenderer.sendSync("get-server-file-path") : "";
 
 // Link the renderer to the main process
 if (isElectron) {
-
     electron.ipcRenderer.on("fileOpened", (info, filepath) => {
         updateURLParams({ file: filepath });
         const dashboard = document.querySelector("nwb-dashboard");
@@ -36,5 +34,4 @@ if (isElectron) {
     );
 
     console.log("User OS:", os.type(), os.platform(), "version:", os.release());
-
 }
