@@ -54,12 +54,20 @@ export class GuidedResultsPage extends Page {
             <ol style="margin: 10px 0px; padding-top: 0;">
                 ${getStubArray(conversion)
                     .map(({ file }) => {
-                        return { file, id: file.split(path.sep).slice(-1)[0] }
+                        return { file, id: file.split(path.sep).slice(-1)[0] };
                     })
                     .sort((a, b) => a.id.localeCompare(b.id))
-                    .map(({ id, file }) => html`<li><a @click=${() => {
-                        if (ipcRenderer) ipcRenderer.send("showItemInFolder", file);
-                    }}>${id}</a></li>`)}
+                    .map(
+                        ({ id, file }) =>
+                            html`<li>
+                                <a
+                                    @click=${() => {
+                                        if (ipcRenderer) ipcRenderer.send("showItemInFolder", file);
+                                    }}
+                                    >${id}</a
+                                >
+                            </li>`
+                    )}
             </ol>
             <h4>But what about my other data?</h4>
             <p>
