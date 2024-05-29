@@ -247,6 +247,8 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         const { subject, session } = getInfoFromId(id);
 
+                        this.dismiss()
+
                         const header = document.createElement("div");
                         Object.assign(header.style, { paddingTop: "10px" });
                         const h2 = document.createElement("h3");
@@ -258,8 +260,6 @@ export class GuidedSourceDataPage extends ManagedPage {
                         header.append(h2, small);
 
                         const modal = new Modal({ header });
-
-                        document.body.append(modal);
 
                         let alignment;
 
@@ -291,6 +291,12 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     message: "Please wait...",
                                 });
 
+                                const { metadata } = data;
+                                if (Object.keys(metadata).length === 0) {
+                                    this.notify(`<h4 style="margin: 0">Time Alignment Failed</h4><small>Please ensure that all source data is specified.</small>`, "error");
+                                    return false
+                                }
+
                                 alignment = new TimeAlignment({
                                     data,
                                     interfaces: globalState.interfaces,
@@ -299,10 +305,15 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                                 modal.innerHTML = "";
                                 modal.append(alignment);
+
+                                return true
                             },
                         });
 
-                        modal.footer.onClick();
+                        const result = await modal.footer.onClick();
+                        if (!result) return;
+
+                        document.body.append(modal);
 
                         modal.open = true;
                     },
