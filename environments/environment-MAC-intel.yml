@@ -4,13 +4,14 @@ channels:
   - defaults
 dependencies:
   - python = 3.9.18
-  - PyInstaller = 6.3.0
   - nodejs = 18.16.1
   - numcodecs = 0.11.0
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0  # installs jsonschema-specifications
   - pip
   - pip:
+      - setuptools==70.0.0
+      - PyInstaller==6.7.0
       - scipy<1.12.0 # Fix needed for scipy._lib._testutils
       - chardet == 5.1.0
       - configparser == 6.0.0

@@ -1,0 +1,34 @@
+/* Section ------------------ */
+
+.section {
+    height: 100%;
+    width: 100%;
+    margin-right: 0;
+    padding: 15px 50px;
+
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: var(--color-accent);
+    background-color: var(--color-section);
+    transition:
+        visibility 0s 0.12s linear,
+        opacity 0.12s ease-in,
+        transform 0.12s ease-in-out;
+}
+
+nwb-main h3,
+nwb-main p {
+    color: var(--color);
+}
+
+nwb-main h1 {
+    font-size: 20px;
+}
+
+nwb-main h3 {
+    padding-bottom: 30px;
+    font-size: 18px;
+}
