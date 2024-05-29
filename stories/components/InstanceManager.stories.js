@@ -1,5 +1,5 @@
-import { InstanceManager } from "../../src/electron/renderer/src/stories/InstanceManager";
-import { Modal } from "../../src/electron/renderer/src/stories/Modal";
+import { InstanceManager } from "../../src/electron/frontend/core/components/InstanceManager";
+import { Modal } from "../../src/electron/frontend/core/components/Modal";
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/web-components/writing-stories/introduction
 export default {
