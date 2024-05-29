@@ -21,7 +21,7 @@ export const openProgressSwal = (options, callback) => {
     });
 };
 
-export const run = async (url, payload, options = {}) => {
+export const run = async (pathname, payload, options = {}) => {
     let internalSwal;
 
     if (options.swal === false) {
@@ -72,28 +72,38 @@ export const run = async (url, payload, options = {}) => {
         element.insertAdjacentHTML("beforeend", `<hr style="margin-bottom: 0;">`);
     }
 
-    if (!("base" in options)) options.base = "/neuroconv";
-    if (options.base[0] !== "/") options.base = `/${options.base}`;
-
     // Clear private keys from being passed
     payload = sanitize(structuredClone(payload));
 
-    const results = await fetch(`${baseUrl}${options.base || ""}/${url}`, {
+    console.warn("FETCH?");
+    const results = await fetch(new URL(pathname, baseUrl), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         ...(options.fetch ?? {}),
-    }).then((res) => res.json());
+    })
+        .then(async (res) => {
+            const json = await res.json();
+            console.warn("FETCH!", json);
 
-    if (internalSwal) Swal.close();
-
-    if (results?.message) throw new Error(`Request to ${url} failed: ${results.message}`);
+            if (!res.ok) {
+                const message = json.message;
+                const header = `<h4 style="margin: 0;">Request to ${pathname} failed</h4><small>${json.type}</small>`;
+                const text = message.replaceAll("<", "&lt").replaceAll(">", "&gt").trim();
+                throw new Error(`${header}<p>${text}</p>`);
+            }
+            return json;
+        })
+        .finally(() => {
+            console.warn("CANCEL?");
+            if (internalSwal) Swal.close();
+        });
 
     return results || true;
 };
 
 export const runConversion = async (info, options = {}) =>
-    run(`convert`, info, {
+    run(`neuroconv/convert`, info, {
         title: "Running the conversion",
         onError: (results) => {
             if (results.message.includes("already exists")) {
