@@ -64,4 +64,3 @@ jobs:
         run: type .env
         shell: cmd
         if: runner.os == 'Windows'
-
