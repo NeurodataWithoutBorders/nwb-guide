@@ -1,0 +1,67 @@
+name: Test environment creation
+on:
+  workflow_call:
+
+jobs:
+
+  run:
+  
+    name: ${{ matrix.os }} data
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+        include:
+          - os: ubuntu-latest
+            label: environments/environment-Linux.yml
+
+          - os: macos-latest  # Mac arm64 runner
+            label: environments/environment-MAC-apple-silicon.yml
+
+          - os: macos-13  # Mac x64 runner
+            label: environments/environment-MAC-intel.yml
+
+          - os: windows-latest
+            label: environments/environment-Windows.yml
+
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set working directory as environment variable
+        run: echo "CURRENT_WORKING_DIR=$(pwd)" >> $GITHUB_ENV
+        if: runner.os != 'Windows'
+
+      - name: Set working directory as environment variable (Windows)
+        run: echo "CURRENT_WORKING_DIR=%cd%" >> $env:GITHUB_ENV
+        shell: cmd
+        if: runner.os == 'Windows'
+
+      - name: Set working directory as environment file
+        run: echo "CURRENT_WORKING_DIR=$(pwd)" >> .env
+        if: runner.os != 'Windows'
+
+      - name: Set working directory as environment file (Windows)
+        run: echo "CURRENT_WORKING_DIR=%cd%" >> .env
+        shell: cmd
+        if: runner.os == 'Windows'
+      
+      
+      - name: Print working directory
+        run: echo "The current working directory is $CURRENT_WORKING_DIR"
+
+
+      - name: Print environment file
+        run: cat .env
+        if: runner.os != 'Windows'
+
+      - name: Print environment file
+        run: type .env
+        shell: cmd
+        if: runner.os == 'Windows'
+      
