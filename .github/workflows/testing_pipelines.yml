@@ -104,7 +104,7 @@ jobs:
           echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
       - name: Save working directory to .env (Windows)
         if: matrix.os == 'windows-latest'
-        run: echo GIN_TESTING_DATA_DIRECTORY=%CD% >> .env
+        run: echo "GIN_TESTING_DATA_DIRECTORY=%cd%" >> .env
 
       # Display environment file for debugging
       - name: Display .env (Unix)
