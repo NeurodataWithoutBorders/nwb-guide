@@ -335,13 +335,11 @@ export class SettingsPage extends Page {
                         "error"
                     );
 
-                const { pipelines = {} } = examplePipelines;
-
-                const pipelineNames = Object.keys(pipelines);
+                const pipelineNames = Object.keys(examplePipelines);
 
                 const resolved = pipelineNames.reverse().map((name) => {
                     try {
-                        saveNewPipelineFromYaml(name, pipelines[name], testing_data_folder);
+                        saveNewPipelineFromYaml(name, examplePipelines[name], testing_data_folder);
                         return true;
                     } catch (e) {
                         console.error(e);
