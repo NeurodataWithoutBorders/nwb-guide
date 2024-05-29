@@ -1105,7 +1105,7 @@ def inspect_nwb_folder(url, payload) -> dict:
 
     # Organize keyword arguments
     kwargs = dict(
-        n_jobs,
+        n_jobs=n_jobs,
         progress_bar_class=progress_handler.create_progress_subscriber,
         progress_bar_options=dict(additional_metadata=dict(request_id=request_id)),
         ignore=[
