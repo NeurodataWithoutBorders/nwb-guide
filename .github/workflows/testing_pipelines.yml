@@ -101,7 +101,7 @@ jobs:
         if: runner.os != 'Windows'
 
       - name: Save working directory to environment file (Windows)
-        run: echo "GIN_DATA_DIR=%cd%" >> .env
+        run: echo GIN_DATA_DIR=%cd% >> .env
         shell: cmd
         if: runner.os == 'Windows'
 
