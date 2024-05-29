@@ -286,7 +286,7 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     alignment: alignmentInfo,
                                 };
 
-                                const data = await run("alignment", sessionInfo, {
+                                const data = await run("neuroconv/alignment", sessionInfo, {
                                     title: "Checking Alignment",
                                     message: "Please wait...",
                                 });
