@@ -97,10 +97,14 @@ jobs:
           key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
 
       # Save environment variables to .env file
-      - name: Make .env file
-        uses: SpicyPizza/create-envfile@v1
-        with:
-          GIN_TESTING_DATA_DIRECTORY: ${{ github.workspace }}
+      - name: Save working directory to .env (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          touch .env
+          echo "GIN_TESTING_DATA_DIRECTORY=$(pwd)" >> .env
+      - name: Save working directory to .env (Windows)
+        if: matrix.os == 'windows-latest'
+        run: echo GIN_TESTING_DATA_DIRECTORY=%CD% >> .env
 
       # Display environment file for debugging
       - name: Display .env (Unix)
