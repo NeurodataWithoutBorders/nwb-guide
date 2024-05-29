@@ -2,6 +2,9 @@ name: Test environment creation
 on:
   workflow_call:
 
+env:
+  CURRENT_WORKING_DIR: ${{ github.workspace }}
+
 jobs:
 
   run:
@@ -32,15 +35,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Set working directory as environment variable
-        run: echo "CURRENT_WORKING_DIR=$(pwd)" >> $GITHUB_ENV
-        if: runner.os != 'Windows'
-
-      - name: Set working directory as environment variable (Windows)
-        run: echo "CURRENT_WORKING_DIR=%cd%" >> $env:GITHUB_ENV
-        shell: cmd
-        if: runner.os == 'Windows'
 
       - name: Set working directory as environment file
         run: echo "CURRENT_WORKING_DIR=$(pwd)" >> .env
