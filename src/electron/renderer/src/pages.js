@@ -1,4 +1,3 @@
-import { GettingStartedPage } from "./stories/pages/getting-started/GettingStarted";
 import { DocumentationPage } from "./stories/pages/documentation/Documentation";
 import { ContactPage } from "./stories/pages/contact-us/Contact";
 import { GuidedHomePage } from "./stories/pages/guided-mode/GuidedHome";

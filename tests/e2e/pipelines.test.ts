@@ -54,24 +54,26 @@ describe('Run example pipelines', () => {
             folderInput.updateData(testGINPath)
 
             const button = folderInput.nextSibling
-            await button.onClick()
+            const results = await button.onClick()
 
             page.save()
             page.dismiss() // Dismiss any notifications
 
-            return true
+            return results
 
         }, testGINPath)
 
         await sleep(500) // Wait for notification to dismiss
 
-        expect(result).toBe(true)
+        const allPipelineNames = Object.keys(examplePipelines).reverse()
+
+        expect(result).toEqual(allPipelineNames.map(name => { return {name, success: true} }))
 
         await takeScreenshot(join('test-pipelines', 'created'))
 
 
         // Transition back to the conversions page and count pipelines
-        const pipelineNames = await evaluate(async () => {
+        const renderedPipelineNames = await evaluate(async () => {
           const dashboard = document.querySelector('nwb-dashboard')
           dashboard.sidebar.select('/')
           await new Promise(resolve => setTimeout(resolve, 200))
@@ -83,7 +85,7 @@ describe('Run example pipelines', () => {
 
 
         // Assert all the pipelines are present
-        expect(pipelineNames.sort()).toEqual(Object.keys(examplePipelines).map(header).sort())
+        expect(renderedPipelineNames.sort()).toEqual(allPipelineNames.map(header).sort())
 
       })
 

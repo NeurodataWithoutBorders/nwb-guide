@@ -250,20 +250,20 @@ export class SettingsPage extends Page {
                 const resolved = pipelineNames.reverse().map((name) => {
                     try {
                         saveNewPipelineFromYaml(name, examplePipelines[name], testing_data_folder);
-                        return true;
+                        return { name, success: true };
                     } catch (e) {
                         console.error(e);
-                        return name;
+                        return { name, error: e.message };
                     }
                 });
 
-                const nSuccessful = resolved.reduce((acc, v) => (acc += v === true ? 1 : 0), 0);
+                const nSuccessful = resolved.reduce((acc, v) => (acc += v.success === true ? 1 : 0), 0);
                 const nFailed = resolved.length - nSuccessful;
 
                 if (nFailed) {
                     const failDisplay =
                         nFailed === 1
-                            ? `the <b>${resolved.find((v) => typeof v === "string")}</b> pipeline`
+                            ? `the <b>${resolved.find((v) => !v.success).name}</b> pipeline`
                             : `${nFailed} pipelines`;
                     this.#openNotyf(
                         `<h4 style="margin-bottom: 0;">Generated ${nSuccessful} test pipelines.</h4><small>Could not find source data for ${failDisplay}.`,
@@ -275,6 +275,8 @@ export class SettingsPage extends Page {
                         `<h4 style="margin-bottom: 0;">Pipeline Generation Failed</h4><small>Could not find source data for any pipelines.</small>`,
                         "error"
                     );
+
+                return resolved;
             },
         });
 
