@@ -80,114 +80,114 @@ style="margin-right: 30px;"
 `;
 
 const pages = {
-  "/": new GuidedHomePage({
-    label: "Convert",
-    icon: guidedIcon,
-    pages: {
-      details: new GuidedNewDatasetPage({
-        title: "Project Setup",
-        label: "Project details",
-        section: sections[0],
-      }),
+    "/": new GuidedHomePage({
+        label: "Convert",
+        icon: guidedIcon,
+        pages: {
+            details: new GuidedNewDatasetPage({
+                title: "Project Setup",
+                label: "Project details",
+                section: sections[0],
+            }),
 
-      workflow: new GuidedPreform({
-        title: "Pipeline Workflow",
-        label: "Pipeline workflow",
-        section: sections[0],
-      }),
+            workflow: new GuidedPreform({
+                title: "Pipeline Workflow",
+                label: "Pipeline workflow",
+                section: sections[0],
+            }),
 
-      structure: new GuidedStructurePage({
-        title: "Provide Data Formats",
-        label: "Data formats",
-        section: sections[0],
-      }),
+            structure: new GuidedStructurePage({
+                title: "Provide Data Formats",
+                label: "Data formats",
+                section: sections[0],
+            }),
 
-      locate: new GuidedPathExpansionPage({
-        title: "Locate Data",
-        label: "Locate data",
-        section: sections[0],
-      }),
+            locate: new GuidedPathExpansionPage({
+                title: "Locate Data",
+                label: "Locate data",
+                section: sections[0],
+            }),
 
-      subjects: new GuidedSubjectsPage({
-        title: "Subject Metadata",
-        label: "Subject details",
-        section: sections[0],
-      }),
+            subjects: new GuidedSubjectsPage({
+                title: "Subject Metadata",
+                label: "Subject details",
+                section: sections[0],
+            }),
 
-      sourcedata: new GuidedSourceDataPage({
-        title: "Source Data Information",
-        label: "Source data",
-        section: sections[1],
-      }),
+            sourcedata: new GuidedSourceDataPage({
+                title: "Source Data Information",
+                label: "Source data",
+                section: sections[1],
+            }),
 
-      metadata: new GuidedMetadataPage({
-        title: "File Metadata",
-        label: "File metadata",
-        section: sections[1],
-      }),
+            metadata: new GuidedMetadataPage({
+                title: "File Metadata",
+                label: "File metadata",
+                section: sections[1],
+            }),
 
-      inspect: new GuidedInspectorPage({
-        title: "Inspector Report",
-        label: "Validate metadata",
-        section: sections[2],
-        sync: ["preview"],
-      }),
+            inspect: new GuidedInspectorPage({
+                title: "Inspector Report",
+                label: "Validate metadata",
+                section: sections[2],
+                sync: ["preview"],
+            }),
 
-      preview: new GuidedStubPreviewPage({
-        title: "Conversion Preview",
-        label: "Preview NWB files",
-        section: sections[2],
-        sync: ["preview"],
-      }),
+            preview: new GuidedStubPreviewPage({
+                title: "Conversion Preview",
+                label: "Preview NWB files",
+                section: sections[2],
+                sync: ["preview"],
+            }),
 
-      conversion: new GuidedResultsPage({
-        title: "Conversion Review",
-        label: "Review conversion",
-        section: sections[2],
-        sync: ["conversion"],
-      }),
+            conversion: new GuidedResultsPage({
+                title: "Conversion Review",
+                label: "Review conversion",
+                section: sections[2],
+                sync: ["conversion"],
+            }),
 
-      upload: new GuidedUploadPage({
-        title: "DANDI Upload",
-        label: "Upload to DANDI",
-        section: sections[3],
-        sync: ["conversion"],
-      }),
+            upload: new GuidedUploadPage({
+                title: "DANDI Upload",
+                label: "Upload to DANDI",
+                section: sections[3],
+                sync: ["conversion"],
+            }),
 
-      review: new GuidedDandiResultsPage({
-        title: "Upload Review",
-        label: "Review published data",
-        section: sections[3],
-      }),
-    },
-  }),
-  validate: new InspectPage({
-    label: "Validate",
-    icon: inspectIcon,
-  }),
-  explore: new PreviewPage({
-    label: "Explore",
-    icon: neurosiftIcon,
-  }),
-  uploads: new UploadsPage({
-    label: "Upload",
-    icon: uploadIcon,
-  }),
-  docs: new DocumentationPage({
-    label: "Documentation",
-    icon: documentationIcon,
-    group: resourcesGroup,
-  }),
-  contact: new ContactPage({
-    label: "Contact Us",
-    icon: contactIcon,
-    group: resourcesGroup,
-  }),
-  settings: new SettingsPage({
-    label: "Settings",
-    icon: settingsIcon,
-    group: "bottom",
-  }),
+            review: new GuidedDandiResultsPage({
+                title: "Upload Review",
+                label: "Review published data",
+                section: sections[3],
+            }),
+        },
+    }),
+    validate: new InspectPage({
+        label: "Validate",
+        icon: inspectIcon,
+    }),
+    explore: new PreviewPage({
+        label: "Explore",
+        icon: neurosiftIcon,
+    }),
+    uploads: new UploadsPage({
+        label: "Upload",
+        icon: uploadIcon,
+    }),
+    docs: new DocumentationPage({
+        label: "Documentation",
+        icon: documentationIcon,
+        group: resourcesGroup,
+    }),
+    contact: new ContactPage({
+        label: "Contact Us",
+        icon: contactIcon,
+        group: resourcesGroup,
+    }),
+    settings: new SettingsPage({
+        label: "Settings",
+        icon: settingsIcon,
+        group: "bottom",
+    }),
 };
 
 dashboard.pages = pages;
