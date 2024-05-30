@@ -8,6 +8,7 @@ import {
     ENCRYPTION_KEY,
     ENCRYPTION_IV,
 } from "../globals.js";
+
 import { fs, crypto } from "../../utils/electron.js";
 
 import { joinPath, runOnLoad } from "../globals";
@@ -87,8 +88,7 @@ class GlobalAppConfig {
     save() {
         const encoded = encodeObject(this.data);
 
-        if (fs) fs.writeFileSync(this.path, JSON.stringify(encoded, null, 2));
-        else localStorage.setItem(this.path, JSON.stringify(encoded));
+        fs.writeFileSync(this.path, JSON.stringify(encoded, null, 2));
     }
 }
 
@@ -115,7 +115,7 @@ export const save = (page, overrides = {}) => {
 };
 
 export const getEntries = () => {
-    if (fs && !fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if progress folder exists. If not, create it.
+    if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //Check if progress folder exists. If not, create it.
     const progressFiles = fs ? fs.readdirSync(guidedProgressFilePath) : Object.keys(localStorage);
     return progressFiles.filter((path) => path.slice(-5) === ".json");
 };
