@@ -75,7 +75,7 @@ class Metadata(Resource):
 class Convert(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        
+
         log_url = f"{request.url_root}log"
         url = f"{request.url_root}neuroconv/announce/progress"
 
@@ -84,7 +84,8 @@ class Convert(Resource):
             **neuroconv_namespace.payload,
             log_url=log_url,
         )
-        
+
+
 @neuroconv_namespace.route("/alignment")
 class Alignment(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
