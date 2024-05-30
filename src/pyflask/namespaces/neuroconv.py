@@ -15,11 +15,11 @@ from manageNeuroconv import (
     inspect_nwb_folder,
     listen_to_neuroconv_progress_events,
     locate_data,
+    progress_handler,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
     upload_project_to_dandi,
     validate_metadata,
-    progress_handler
 )
 
 neuroconv_namespace = Namespace("neuroconv", description="Neuroconv neuroconv_namespace for the NWB GUIDE.")
