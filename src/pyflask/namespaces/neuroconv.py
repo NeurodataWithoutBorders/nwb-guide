@@ -13,14 +13,14 @@ from manageNeuroconv import (
     inspect_multiple_filesystem_objects,
     inspect_nwb_file,
     inspect_nwb_folder,
-    listen_to_neuroconv_events,
+    listen_to_neuroconv_progress_events,
     locate_data,
+    progress_handler,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
     upload_project_to_dandi,
     validate_metadata,
 )
-from manageNeuroconv.info import announcer
 
 neuroconv_namespace = Namespace("neuroconv", description="Neuroconv neuroconv_namespace for the NWB GUIDE.")
 
@@ -158,17 +158,16 @@ class InspectNWBFile(Resource):
 class InspectNWBFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        url = f"{request.url_root}neuroconv/announce"
+        url = f"{request.url_root}neuroconv/announce/progress"
         return inspect_nwb_folder(url, neuroconv_namespace.payload)
 
 
-@neuroconv_namespace.route("/announce")
+@neuroconv_namespace.route("/announce/progress")
 class InspectNWBFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         data = neuroconv_namespace.payload
-        announcer.announce(data)
-
+        progress_handler.announce(data)
         return True
 
 
@@ -178,7 +177,7 @@ class InspectNWBFolder(Resource):
     def post(self):
         from os.path import isfile
 
-        url = f"{request.url_root}neuroconv/announce"
+        url = f"{request.url_root}neuroconv/announce/progress"
 
         paths = neuroconv_namespace.payload["paths"]
 
@@ -207,9 +206,8 @@ class NWBToHTML(Resource):
 
 
 # Create an events endpoint
-# announcer.announce('test', 'publish')
-@neuroconv_namespace.route("/events", methods=["GET"])
-class Events(Resource):
+@neuroconv_namespace.route("/events/progress", methods=["GET"])
+class ProgressEvents(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def get(self):
-        return Response(listen_to_neuroconv_events(), mimetype="text/event-stream")
+        return Response(listen_to_neuroconv_progress_events(), mimetype="text/event-stream")
