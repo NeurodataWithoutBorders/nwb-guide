@@ -10,9 +10,7 @@
   "scripts": {
     "start": "electron-vite dev --outDir build",
     "postinstall": "electron-builder install-app-deps",
-    "dev": "concurrently -n BE,FE --kill-others \"npm run dev:server\" \"npm run dev:app\"",
-    "dev:app": "vite src/electron/renderer",
-    "dev:server": "cd src/pyflask && python -m flask run --port 4242",
+    "server": "cd src/pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
     "echo": "python -c \"print('hello')\"",
     "build:app": "electron-vite build --outDir build",
@@ -77,7 +75,7 @@
     "win": {
       "asar": false,
       "target": "nsis",
-      "icon": "src/electron/renderer/assets/app-icon/logo-guide-draft.ico",
+      "icon": "src/electron/frontend/assets/app-icon/logo-guide-draft.ico",
       "requestedExecutionLevel": "requireAdministrator"
     },
     "mac": {
@@ -98,7 +96,7 @@
           ]
         }
       ],
-      "icon": "src/electron/renderer/assets/img/logo-guide-draft.png",
+      "icon": "src/electron/frontend/assets/img/logo-guide-draft.png",
       "darkModeSupport": false,
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -114,7 +112,7 @@
     "linux": {
       "asar": true,
       "target": "AppImage",
-      "icon": "src/electron/renderer/assets/img/logo-guide-draft.png",
+      "icon": "src/electron/frontend/assets/img/logo-guide-draft.png",
       "extraResources": [
         {
           "from": "./build/flask/nwb-guide",
@@ -127,7 +125,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/electron/renderer/assets/app-icon/logo-guide-draft.ico"
+      "installerIcon": "src/electron/frontend/assets/app-icon/logo-guide-draft.ico"
     },
     "publish": {
       "provider": "github"

@@ -1,4 +1,4 @@
-import { dashboard } from "../src/electron/renderer/src/pages.js";
+import { dashboard } from "../src/electron/frontend/core/pages.js";
 
 // const options = Object.keys(dashboard.pagesById)
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/electron/renderer/assets/img/logo-guide-draft-transparent-tight.png" width="250" alt="NeuroConv logo"/>
+  <img src="src/electron/frontend/assets/img/logo-guide-draft-transparent-tight.png" width="250" alt="NeuroConv logo"/>
   <h3 align="center">NWB Graphical User Interface for Data Entry</h3>
   <p align="center">
     <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/testing.yml/badge.svg" alt="Full Tests"></a>
