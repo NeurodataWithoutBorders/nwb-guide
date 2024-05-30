@@ -1,4 +1,4 @@
-import { DateTimeSelector } from "./DateTimeSelector";
+import { DateTimeSelector } from "../../src/electron/frontend/core/components/DateTimeSelector";
 
 export default {
     title: "Components/DateTime Selector",
