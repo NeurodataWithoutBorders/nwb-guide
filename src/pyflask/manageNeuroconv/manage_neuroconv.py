@@ -740,14 +740,12 @@ def set_interface_alignment(converter, alignment_info):
 
 def get_interface_alignment(info: dict) -> dict:
 
-    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
-        BaseSortingExtractorInterface,
-    )
-
     from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
         BaseRecordingExtractorInterface,
     )
-
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
 
     alignment_info = info.get("alignment", {})
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
@@ -774,8 +772,6 @@ def get_interface_alignment(info: dict) -> dict:
         else:
             timestamps[name] = []
 
-
-
     # Derive compatible interfaces
     def on_sorting_interface(name, sorting_interface):
         metadata[name]["compatible"] = []
@@ -786,9 +782,9 @@ def get_interface_alignment(info: dict) -> dict:
                 metadata[name]["compatible"].append(sub_name)
             except Exception:
                 pass
-        
+
         map_interfaces(on_recording_interface, converter=converter, to_match=BaseRecordingExtractorInterface)
-                
+
     map_interfaces(on_sorting_interface, converter=converter, to_match=BaseSortingExtractorInterface)
 
     # Return the metadata and timestamps
