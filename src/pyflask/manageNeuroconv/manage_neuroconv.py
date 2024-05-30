@@ -689,7 +689,9 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
 def set_interface_alignment(converter: dict, alignment_info: dict) -> dict:
 
     import numpy as np
-    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
     from neuroconv.tools.testing.mock_interfaces import MockRecordingInterface
 
     errors = {}
@@ -781,7 +783,8 @@ def get_interface_alignment(info: dict) -> dict:
             # But there are very strict conditions from SpikeInterface determining compatibility
             # Those conditions are not easily exposed so we just 'try' to register them and skip on error
             sibling_recording_interfaces = {
-                interface_key: interface for interface_key, interface in converter.data_interface_objects.items()
+                interface_key: interface
+                for interface_key, interface in converter.data_interface_objects.items()
                 if isinstance(interface, BaseRecordingExtractorInterface)
             }
             for recording_interface_key, recording_interface in sibling_recording_interfaces.items():
@@ -853,7 +856,7 @@ def convert_to_nwb(info: dict) -> str:
     converter = instantiate_custom_converter(
         source_data=resolved_source_data,
         interface_class_dict=info["interfaces"],
-        alignment_info=info.get("alignment", dict())
+        alignment_info=info.get("alignment", dict()),
     )
 
     def update_conversion_progress(**kwargs):
