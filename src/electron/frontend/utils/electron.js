@@ -6,7 +6,6 @@ export const isTestEnvironment = globalThis?.process?.env?.VITEST;
 const userAgent = navigator.userAgent.toLowerCase();
 export const isElectron = userAgent.indexOf(" electron/") > -1;
 
-
 const hasNodeAccess = isElectron || isTestEnvironment;
 
 export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
@@ -50,5 +49,4 @@ if (isElectron) {
     electron.ipcRenderer.on(`update-complete`, (_, ...args) => console.log(`[Update]:`, ...args));
 
     electron.ipcRenderer.on(`update-error`, (_, ...args) => console.log(`[Update]:`, ...args));
-
 }

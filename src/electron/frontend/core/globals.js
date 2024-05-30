@@ -4,9 +4,7 @@ import paths from "../../../paths.config.json" assert { type: "json" };
 
 import supportedInterfaces from "../../../supported_interfaces.json" assert { type: "json" };
 
-export {
-    isTestEnvironment
-}
+export { isTestEnvironment };
 
 export const joinPath = (...args) => (path ? path.join(...args) : args.filter((str) => str).join("/"));
 
