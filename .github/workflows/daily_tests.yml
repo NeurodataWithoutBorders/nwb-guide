@@ -58,5 +58,5 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: NeuroConv Daily Test Failure
           to: ${{ secrets.DAILY_FAILURE_EMAIL_LIST }}
-          from: NeuroConv
-          body: "The daily test workflow failed, please check status at https://github.com/catalystneuro/neuroconv/actions/workflows/dailies.yml"
+          from: NWB Guide Daily Tests
+          body: "The daily tests workflow failed, please check status at https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml"
