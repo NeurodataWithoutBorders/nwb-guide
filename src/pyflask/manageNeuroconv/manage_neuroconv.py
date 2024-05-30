@@ -11,12 +11,12 @@ from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Dict, List, Optional, Union
 
-from .info import (
-    CONVERSION_SAVE_FOLDER_PATH,
-    GUIDE_ROOT_FOLDER,
-    STUB_SAVE_FOLDER_PATH,
-    announcer,
-)
+from tqdm_publisher import TQDMProgressHandler
+
+from .info import CONVERSION_SAVE_FOLDER_PATH, GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH
+from .info.sse import format_sse
+
+progress_handler = TQDMProgressHandler()
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 
@@ -859,15 +859,12 @@ def convert_to_nwb(info: dict) -> str:
         alignment_info=info.get("alignment", dict()),
     )
 
-    def update_conversion_progress(**kwargs):
-        announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
-
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
     options = (
         {
             interface: (
-                {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                {"stub_test": info["stub_test"]}
                 if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
                 else {}
             )
@@ -1046,11 +1043,11 @@ def upload_project_to_dandi(
 
 
 # Create an events endpoint
-def listen_to_neuroconv_events():
-    messages = announcer.listen()  # returns a queue.Queue
+def listen_to_neuroconv_progress_events():
+    messages = progress_handler.listen()  # returns a queue.Queue
     while True:
         msg = messages.get()  # blocks until a new message arrives
-        yield msg
+        yield format_sse(msg)
 
 
 def generate_dataset(input_path: str, output_path: str) -> dict:
@@ -1173,9 +1170,7 @@ def inspect_all(url, config):
 
     nwbfile_paths = list(Path(path).rglob("*.nwb"))
 
-    request_id = config.get("request_id")
-    if request_id:
-        config.pop("request_id")
+    request_id = config.pop("request_id", None)
 
     n_jobs = config.get("n_jobs", -2)  # Default to all but one CPU
     n_jobs = calculate_number_of_cpu(requested_cpu=n_jobs)
@@ -1200,7 +1195,7 @@ def inspect_all(url, config):
         # Announce directly
         def on_progress_update(message):
             message["progress_bar_id"] = request_id  # Ensure request_id matches
-            announcer.announce(
+            progress_handler.announce(
                 dict(
                     request_id=request_id,
                     **message,
@@ -1218,7 +1213,6 @@ def inspect_all(url, config):
         i = 0
         for future in inspection_iterable:
             i += 1
-            # on_progress_update(dict(progress_bar_id=request_id, format_dict=dict(total=len(futures), n=i)))
             for message in future.result():
                 messages.append(message)
 
@@ -1228,25 +1222,15 @@ def inspect_all(url, config):
 def inspect_nwb_folder(url, payload) -> dict:
     from pickle import PicklingError
 
-    from nwbinspector import load_config
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
-    kwargs = dict(
-        ignore=[
-            "check_description",
-            "check_data_orientation",
-        ],  # TODO: remove when metadata control is exposed
-        config=load_config(filepath_or_keyword="dandi"),
-        **payload,
-    )
-
     try:
-        messages = inspect_all(url, kwargs)
+        messages = inspect_all(url, payload)
     except PicklingError as exception:
         if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(exception):
-            del kwargs["n_jobs"]
-            messages = inspect_all(url, kwargs)
+            del payload["n_jobs"]
+            messages = inspect_all(url, payload)
         else:
             raise exception
     except Exception as exception:
