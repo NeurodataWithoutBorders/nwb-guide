@@ -21,9 +21,12 @@ import {
     path,
     port,
     fs,
+} from "../../../../utils/electron.js";
+
+import {
     onUpdateAvailable,
     onUpdateProgress,
-} from "../../../../utils/electron.js";
+} from "../../../../utils/auto-update.js";
 
 import saveSVG from "../../../../assets/icons/save.svg?raw";
 import folderSVG from "../../../../assets/icons/folder_open.svg?raw";
