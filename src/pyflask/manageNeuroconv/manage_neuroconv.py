@@ -728,9 +728,7 @@ def set_interface_alignment(converter, alignment_info):
                         interface.register_recording(converter.data_interface_objects[value])
 
                     elif method == "start":
-                        interface.set_aligned_starting_time(
-                            value
-                        )  # For sorting interfaces, an empty array will still be returned
+                        interface.set_aligned_starting_time(value)  # For sorting interfaces, an empty array will still be returned
 
                 except Exception as e:
                     errors[name] = str(e)
@@ -756,11 +754,23 @@ def get_interface_alignment(info: dict) -> dict:
 
     metadata = {}
     timestamps = {}
+
     for name, interface in converter.data_interface_objects.items():
 
         metadata[name] = dict()
 
-        metadata[name]["sorting"] = hasattr(interface, "sorting_extractor")
+        is_sorting = metadata[name]["sorting"] = hasattr(interface, "sorting_extractor")
+
+        if is_sorting:
+            metadata[name]["compatible"] = []
+
+            for sibling_name, sibling_interface in converter.data_interface_objects.items():
+                if sibling_name != name:
+                    try:
+                        interface.register_recording(sibling_interface)
+                        metadata[name]["compatible"].append(sibling_name)
+                    except Exception:
+                        pass
 
         # Run interface.get_timestamps if it has the method
         if hasattr(interface, "get_timestamps"):
@@ -774,22 +784,6 @@ def get_interface_alignment(info: dict) -> dict:
         else:
             timestamps[name] = []
 
-
-
-    # Derive compatible interfaces
-    def on_sorting_interface(name, sorting_interface):
-        metadata[name]["compatible"] = []
-
-        def on_recording_interface(sub_name, recording_interface):
-            try:
-                sorting_interface.register_recording(recording_interface)
-                metadata[name]["compatible"].append(sub_name)
-            except Exception:
-                pass
-        
-        map_interfaces(on_recording_interface, converter=converter, to_match=BaseRecordingExtractorInterface)
-                
-    map_interfaces(on_sorting_interface, converter=converter, to_match=BaseSortingExtractorInterface)
 
     # Return the metadata and timestamps
     return dict(
