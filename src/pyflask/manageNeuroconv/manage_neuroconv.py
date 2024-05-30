@@ -738,14 +738,12 @@ def set_interface_alignment(converter, alignment_info):
 
 def get_interface_alignment(info: dict) -> dict:
 
-    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
-        BaseSortingExtractorInterface,
-    )
-
     from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
         BaseRecordingExtractorInterface,
     )
-
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
 
     alignment_info = info.get("alignment", {})
     converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
