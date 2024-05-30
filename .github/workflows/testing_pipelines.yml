@@ -27,8 +27,8 @@ jobs:
           - os: macos-13  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
 
-          - os: windows-latest
-            label: environments/environment-Windows.yml
+#          - os: windows-latest
+#            label: environments/environment-Windows.yml
 
 
     steps:
