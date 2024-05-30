@@ -1,5 +1,7 @@
 import "./pages.js"
 import { isElectron, electron } from '../utils/electron.js'
+import { isTestEnvironment } from './globals.js'
+
 const { ipcRenderer } = electron;
 
 import { Dashboard } from './components/Dashboard.js'
@@ -54,8 +56,6 @@ async function isOffline() {
 async function isOnline() {
 
   statusBar.items[1].status = true
-
-  const isTestEnvironment = globalThis?.process?.env?.VITEST
 
   if (isTestEnvironment) return
 

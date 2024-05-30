@@ -25,6 +25,8 @@
     "test:app": "vitest run --exclude \"**/pipelines.test.ts\"",
     "test:tutorial": "vitest tutorial",
     "test:pipelines": "vitest pipelines",
+    "test:progress": "vitest progress",
+    "test:metadata": "vitest metadata",
     "test:server": "pytest src/pyflask/tests/ -s -vv",
     "wait5s": "node -e \"setTimeout(() => process.exit(0),5000)\"",
     "test:executable": "concurrently -n EXE,TEST --kill-others --success first \"node tests/testPyinstallerExecutable.js --port 3434 --forever\" \"npm run wait5s && pytest src/pyflask/tests/ -s --target http://localhost:3434\"",

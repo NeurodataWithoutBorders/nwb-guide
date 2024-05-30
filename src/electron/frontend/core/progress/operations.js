@@ -7,17 +7,13 @@ export const remove = (name) => {
     const progressFilePathToDelete = joinPath(guidedProgressFilePath, name + ".json");
 
     //delete the progress file
-    if (fs) {
-        if (fs.existsSync(progressFilePathToDelete)) fs.unlinkSync(progressFilePathToDelete);
-    } else localStorage.removeItem(progressFilePathToDelete);
+    if (fs.existsSync(progressFilePathToDelete)) fs.unlinkSync(progressFilePathToDelete);
 
-    if (fs) {
-        // delete default preview location
-        fs.rmSync(joinPath(previewSaveFolderPath, name), { recursive: true, force: true });
+    // delete default preview location
+    fs.rmSync(joinPath(previewSaveFolderPath, name), { recursive: true, force: true });
 
-        // delete default conversion location
-        fs.rmSync(joinPath(conversionSaveFolderPath, name), { recursive: true, force: true });
-    }
+    // delete default conversion location
+    fs.rmSync(joinPath(conversionSaveFolderPath, name), { recursive: true, force: true });
 
     return true;
 };
