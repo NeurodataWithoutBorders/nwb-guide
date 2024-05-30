@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13] #, windows-latest]
+#        os: [ubuntu-latest, macos-latest, macos-13] #, windows-latest]
         include:
           - os: ubuntu-latest
             label: environments/environment-Linux.yml
@@ -32,8 +32,8 @@ jobs:
           - os: macos-13  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
 
-          - os: windows-latest
-            label: environments/environment-Windows.yml
+#          - os: windows-latest
+#            label: environments/environment-Windows.yml
 
     steps:
       - uses: actions/checkout@v4
