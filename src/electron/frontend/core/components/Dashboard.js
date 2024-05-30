@@ -278,7 +278,9 @@ export class Dashboard extends LitElement {
                 this.main.onTransition(previousId); // Revert back to previous page
                 const hasHTML = /<[^>]*>/.test(e);
                 page.notify(
-                    hasHTML ? e.message : `<h4 style="margin: 0">Fallback to previous page after error occurred</h4><small>${e}</small>`,
+                    hasHTML
+                        ? e.message
+                        : `<h4 style="margin: 0">Fallback to previous page after error occurred</h4><small>${e}</small>`,
                     "error"
                 );
             });
