@@ -4,7 +4,7 @@ from flask import Response, request
 from flask_restx import Namespace, Resource, reqparse
 from manageNeuroconv import (
     autocomplete_format_string,
-    convert_to_nwb,
+    convert_all_to_nwb,
     get_all_converter_info,
     get_all_interface_info,
     get_interface_alignment,
@@ -75,9 +75,16 @@ class Metadata(Resource):
 class Convert(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        return convert_to_nwb(neuroconv_namespace.payload)
+        
+        log_url = f"{request.url_root}log"
+        url = f"{request.url_root}neuroconv/announce/progress"
 
-
+        return convert_all_to_nwb(
+            url,
+            **neuroconv_namespace.payload,
+            log_url=log_url,
+        )
+        
 @neuroconv_namespace.route("/alignment")
 class Alignment(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
