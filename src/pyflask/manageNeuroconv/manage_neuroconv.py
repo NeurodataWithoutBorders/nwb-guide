@@ -732,7 +732,7 @@ def convert_to_nwb(info: dict) -> str:
     options = (
         {
             interface: (
-                {"stub_test": info["stub_test"]}  # , "iter_opts": {"report_hook": update_conversion_progress}}
+                {"stub_test": info["stub_test"]}
                 if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
                 else {}
             )
@@ -911,7 +911,7 @@ def upload_project_to_dandi(
 
 
 # Create an events endpoint
-def listen_to_neuroconv_events():
+def listen_to_neuroconv_progress_events():
     messages = progress_handler.listen()  # returns a queue.Queue
     while True:
         msg = messages.get()  # blocks until a new message arrives

@@ -12,10 +12,11 @@ from .manage_neuroconv import (
     inspect_multiple_filesystem_objects,
     inspect_nwb_file,
     inspect_nwb_folder,
-    listen_to_neuroconv_events,
+    listen_to_neuroconv_progress_events,
     locate_data,
     upload_folder_to_dandi,
     upload_multiple_filesystem_objects_to_dandi,
     upload_project_to_dandi,
     validate_metadata,
+    progress_handler
 )
