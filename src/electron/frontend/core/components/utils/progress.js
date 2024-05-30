@@ -88,7 +88,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
         popup.close();
 
         progressHandler.removeEventListener("message", onProgressMessage);
-    }
+    };
 
     return { ...commonReturnValue, id, close };
 };

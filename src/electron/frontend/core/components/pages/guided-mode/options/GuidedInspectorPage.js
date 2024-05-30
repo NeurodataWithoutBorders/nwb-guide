@@ -146,11 +146,12 @@ export class GuidedInspectorPage extends Page {
                                 "neuroconv/inspect_file",
                                 { nwbfile_path: fileArr[0].info.file, ...options },
                                 { title }
-                            ).catch((error) => {
-                                this.notify(error.message, "error");
-                                return null;
-                            })
-                            .finally(() => closeProgressPopup())
+                            )
+                                .catch((error) => {
+                                    this.notify(error.message, "error");
+                                    return null;
+                                })
+                                .finally(() => closeProgressPopup());
 
                             if (!result) return "Failed to generate inspector report.";
 

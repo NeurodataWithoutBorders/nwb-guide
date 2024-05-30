@@ -160,7 +160,7 @@ export class Page extends LitElement {
         const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
 
         const { close: closeProgressPopup } = swalOpts;
-        const fileConfiguration = []
+        const fileConfiguration = [];
 
         for (let info of toRun) {
             const { subject, session, globalState = this.info.globalState } = info;
@@ -178,7 +178,6 @@ export class Page extends LitElement {
                 metadata: resolveMetadata(subject, session, globalState),
                 source_data: merge(SourceData, sourceDataCopy),
             };
-
 
             const payload = {
                 output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
