@@ -30,9 +30,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       S3_GIN_BUCKET: ${{ secrets.S3_GIN_BUCKET }}
 
-  Temp:
-    uses: ./.github/workflows/test_env_creation.yml
-
   Pipelines:
     needs: Data
     uses: ./.github/workflows/testing_pipelines.yml
