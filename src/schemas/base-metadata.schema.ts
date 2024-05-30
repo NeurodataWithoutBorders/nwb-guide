@@ -1,11 +1,11 @@
-import { serverGlobals, resolve } from '../electron/renderer/src/server/globals'
+import { serverGlobals, resolve } from '../electron/frontend/core/server/globals'
 
-import { header, replaceRefsWithValue } from '../electron/renderer/src/stories/forms/utils'
+import { header, replaceRefsWithValue } from '../electron/frontend/core/components/forms/utils'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
-import { merge } from '../electron/renderer/src/stories/pages/utils'
-import { drillSchemaProperties } from '../electron/renderer/src/stories/pages/guided-mode/data/utils'
+import { merge } from '../electron/frontend/core/components/pages/utils'
+import { drillSchemaProperties } from '../electron/frontend/core/components/pages/guided-mode/data/utils'
 
 const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
 const UV_PROPERTIES = ["gain_to_uV", "offset_to_uV"]

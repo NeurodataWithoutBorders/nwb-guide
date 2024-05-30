@@ -43,12 +43,7 @@ class NeurosiftFileManager(flask_restx.Resource):
         _error_if_not_nwb_file(file_path=file_path)
 
         if not neurosift_file_registry[file_path]:
-            code = 404
-            base_message = server_error_responses(codes=[code])[code]
-            message = f"{base_message}: The base URL has not been exposed for this NWB file."
-            api.abort(code=code, message=message)
-
-            return
+            raise KeyError("The base URL has not been exposed for this NWB file.")
 
         # Decode any URL encoding applied to the file path
         parsed_file_path = urllib.parse.unquote(file_path)
@@ -70,6 +65,5 @@ class NeurosiftFileManager(flask_restx.Resource):
         _error_if_not_nwb_file(file_path=file_path)
 
         neurosift_file_registry[file_path] = True
-        # if neurosift_file_registry[file_path] = True:
-        #     raise ValueError(flask.request.base_url)
+
         return flask.request.base_url
