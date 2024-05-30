@@ -4,8 +4,10 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils";
+import { merge, sanitize } from "../../utils";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
+
+import { TimeAlignment } from "./alignment/TimeAlignment.js";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { header } from "../../../forms/utils";
@@ -17,6 +19,8 @@ import { run } from "../options/utils.js";
 import { getInfoFromId } from "./utils";
 import { Modal } from "../../../Modal";
 import Swal from "sweetalert2";
+
+import { baseUrl } from "../../../../server/globals";
 
 const propsToIgnore = {
     "*": {
@@ -80,7 +84,9 @@ export class GuidedSourceDataPage extends ManagedPage {
                     heightAuto: false,
                     backdrop: "rgba(0,0,0, 0.4)",
                     timerProgressBar: false,
-                    didOpen: () => Swal.showLoading(),
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
                 });
             };
 
@@ -93,21 +99,38 @@ export class GuidedSourceDataPage extends ManagedPage {
                     const info = this.info.globalState.results[subject][session];
 
                     // NOTE: This clears all user-defined results
-                    const result = await run(
-                        `neuroconv/metadata`,
-                        {
-                            source_data: form.resolved, // Use resolved values, including global source data
+                    const result = await fetch(`${baseUrl}/neuroconv/metadata`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            source_data: sanitize(structuredClone(form.resolved)), // Use resolved values, including global source data
                             interfaces: this.info.globalState.interfaces,
-                        },
-                        { swal: false }
-                    ).catch((e) => {
-                        Swal.close();
-                        stillFireSwal = false;
-                        this.notify(e.message, "error");
-                        throw e;
-                    });
+                        }),
+                    })
+                        .then((res) => res.json())
+                        .catch((error) => {
+                            Swal.close();
+                            stillFireSwal = false;
+                            this.notify(`<b>Critical Error:</b> ${error.message}`, "error", 4000);
+                            throw error;
+                        });
+
+                    Swal.close();
 
                     if (isStorybook) return;
+
+                    if (result.message) {
+                        const [type, ...splitText] = result.message.split(":");
+                        const text = splitText.length
+                            ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
+                            : result.traceback
+                              ? `<small><pre>${result.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`
+                              : "";
+
+                        const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
+                        this.notify(message, "error");
+                        throw result;
+                    }
 
                     const { results: metadata, schema } = result;
 
@@ -127,8 +150,6 @@ export class GuidedSourceDataPage extends ManagedPage {
                     schemaGlobal.metadata[subject][session] = schema;
                 })
             );
-
-            Swal.close();
 
             await this.save(undefined, false); // Just save new raw values
 
@@ -205,9 +226,7 @@ export class GuidedSourceDataPage extends ManagedPage {
     }
 
     render() {
-        this.localState = {
-            results: structuredClone(this.info.globalState.results ?? {}),
-        };
+        this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
         this.forms = this.mapSessions(this.createForm, this.localState.results);
 
@@ -223,114 +242,83 @@ export class GuidedSourceDataPage extends ManagedPage {
             instances,
             controls: [
                 {
-                    name: "Check Alignment",
+                    name: "View Temporal Alignment",
                     primary: true,
                     onClick: async (id) => {
                         const { globalState } = this.info;
 
                         const { subject, session } = getInfoFromId(id);
 
-                        const souceCopy = structuredClone(globalState.results[subject][session].source_data);
-
-                        const sessionInfo = {
-                            interfaces: globalState.interfaces,
-                            source_data: merge(globalState.project.SourceData, souceCopy),
-                        };
-
-                        const results = await run("neuroconv/alignment", sessionInfo, {
-                            title: "Checking Alignment",
-                            message: "Please wait...",
-                        });
+                        this.dismiss();
 
                         const header = document.createElement("div");
-                        const h2 = document.createElement("h2");
-                        Object.assign(h2.style, {
-                            marginBottom: "10px",
-                        });
-                        h2.innerText = `Alignment Preview: ${subject}/${session}`;
-                        const warning = document.createElement("small");
-                        warning.innerHTML =
-                            "<b>Warning:</b> This is just a preview. We do not currently have the features implemented to change the alignment of your interfaces.";
-                        header.append(h2, warning);
+                        Object.assign(header.style, { paddingTop: "10px" });
+                        const h2 = document.createElement("h3");
+                        Object.assign(h2.style, { margin: "0px" });
+                        const small = document.createElement("small");
+                        small.innerText = `${subject}/${session}`;
+                        h2.innerText = `Temporal Alignment`;
 
-                        const modal = new Modal({
-                            header,
-                        });
+                        header.append(h2, small);
 
-                        document.body.append(modal);
+                        const modal = new Modal({ header });
 
-                        const content = document.createElement("div");
-                        Object.assign(content.style, {
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "20px",
-                            padding: "20px",
-                        });
+                        let alignment;
 
-                        modal.append(content);
+                        modal.footer = new Button({
+                            label: "Update",
+                            primary: true,
+                            onClick: async () => {
+                                console.log("Submit to backend");
 
-                        const flatTimes = Object.values(results)
-                            .map((interfaceTimestamps) => {
-                                return [interfaceTimestamps[0], interfaceTimestamps.slice(-1)[0]];
-                            })
-                            .flat()
-                            .filter((timestamp) => !isNaN(timestamp));
+                                if (alignment) {
+                                    globalState.project.alignment = alignment.results;
+                                    this.unsavedUpdates = "conversions";
+                                    await this.save();
+                                }
 
-                        const minTime = Math.min(...flatTimes);
-                        const maxTime = Math.max(...flatTimes);
+                                const sourceCopy = structuredClone(globalState.results[subject][session].source_data);
 
-                        const normalizeTime = (time) => (time - minTime) / (maxTime - minTime);
-                        const normalizeTimePct = (time) => `${normalizeTime(time) * 100}%`;
+                                const alignmentInfo =
+                                    globalState.project.alignment ?? (globalState.project.alignment = {});
 
-                        for (let name in results) {
-                            const container = document.createElement("div");
-                            const label = document.createElement("label");
-                            label.innerText = name;
-                            container.append(label);
+                                const sessionInfo = {
+                                    interfaces: globalState.interfaces,
+                                    source_data: merge(globalState.project.SourceData, sourceCopy),
+                                    alignment: alignmentInfo,
+                                };
 
-                            const data = results[name];
-
-                            const barContainer = document.createElement("div");
-                            Object.assign(barContainer.style, {
-                                height: "10px",
-                                width: "100%",
-                                marginTop: "5px",
-                                border: "1px solid lightgray",
-                                position: "relative",
-                            });
-
-                            if (data.length) {
-                                const firstTime = data[0];
-                                const lastTime = data[data.length - 1];
-
-                                label.innerText += ` (${firstTime.toFixed(2)} - ${lastTime.toFixed(2)} sec)`;
-
-                                const firstTimePct = normalizeTimePct(firstTime);
-                                const lastTimePct = normalizeTimePct(lastTime);
-
-                                const width = `calc(${lastTimePct} - ${firstTimePct})`;
-
-                                const bar = document.createElement("div");
-
-                                Object.assign(bar.style, {
-                                    position: "absolute",
-
-                                    left: firstTimePct,
-                                    width: width,
-                                    height: "100%",
-                                    background: "blue",
+                                const data = await run("neuroconv/alignment", sessionInfo, {
+                                    title: "Checking Alignment",
+                                    message: "Please wait...",
                                 });
 
-                                barContainer.append(bar);
-                            } else {
-                                barContainer.style.background =
-                                    "repeating-linear-gradient(45deg, lightgray, lightgray 10px, white 10px, white 20px)";
-                            }
+                                const { metadata } = data;
+                                if (Object.keys(metadata).length === 0) {
+                                    this.notify(
+                                        `<h4 style="margin: 0">Time Alignment Failed</h4><small>Please ensure that all source data is specified.</small>`,
+                                        "error"
+                                    );
+                                    return false;
+                                }
 
-                            container.append(barContainer);
+                                alignment = new TimeAlignment({
+                                    data,
+                                    interfaces: globalState.interfaces,
+                                    results: alignmentInfo,
+                                });
 
-                            content.append(container);
-                        }
+                                modal.innerHTML = "";
+                                modal.append(alignment);
+
+                                return true;
+                            },
+                        });
+
+                        const result = await modal.footer.onClick();
+                        if (!result) return;
+
+                        document.body.append(modal);
 
                         modal.open = true;
                     },
