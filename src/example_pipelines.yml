@@ -16,10 +16,15 @@
 # NOTE: Can also just provide interfaces directly below pipeline name
 
 SpikeGLX-Phy:
-  SpikeGLXRecordingInterface:
-    file_path: ephy_testing_data/spikeglx/Noise4Sam_g0/Noise4Sam_g0_imec0/Noise4Sam_g0_t0.imec0.ap.bin
-  PhySortingInterface:
-    folder_path: ephy_testing_data/phy/phy_example_0
+  metadata:
+    NWBFile:
+      session_start_time: 2024-05-09T00:00 # NOTE: For some reason, required for the CI to pass...
+
+  interfaces:
+    SpikeGLXRecordingInterface:
+      file_path: ephy_testing_data/spikeglx/Noise4Sam_g0/Noise4Sam_g0_imec0/Noise4Sam_g0_t0.imec0.ap.bin
+    PhySortingInterface:
+      folder_path: ephy_testing_data/phy/phy_example_0
 
 
 SpikeGLX_v1_SingleProbe_AP:
