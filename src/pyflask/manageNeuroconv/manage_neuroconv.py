@@ -728,7 +728,9 @@ def set_interface_alignment(converter, alignment_info):
                         interface.register_recording(converter.data_interface_objects[value])
 
                     elif method == "start":
-                        interface.set_aligned_starting_time(value)  # For sorting interfaces, an empty array will still be returned
+                        interface.set_aligned_starting_time(
+                            value
+                        )  # For sorting interfaces, an empty array will still be returned
 
                 except Exception as e:
                     errors[name] = str(e)
@@ -781,7 +783,6 @@ def get_interface_alignment(info: dict) -> dict:
                 timestamps[name] = []
         else:
             timestamps[name] = []
-
 
     # Return the metadata and timestamps
     return dict(
