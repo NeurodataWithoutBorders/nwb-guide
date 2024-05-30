@@ -5,6 +5,7 @@ _build
 dist
 out
 tests/screenshots
+docs/assets/tutorials/test-pipelines
 
 coverage
 
@@ -13,8 +14,7 @@ coverage
 # Ignore node_modules folder
 node_modules
 build/api
-pyflask/ds
-src/Users
+src/pyflask/ds
 semantic
 semantic.json
 .env
@@ -22,7 +22,6 @@ build/
 yarn.lock
 
 *.pyc
-src/.DS_Store
 .DS_Store
 electron-builder.yml
 website/.eslintcache
