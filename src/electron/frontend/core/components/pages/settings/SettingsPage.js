@@ -15,18 +15,9 @@ import { merge, setUndefinedIfNotDeclared } from "../utils";
 import { notyf } from "../../../dependencies.js";
 import { homeDirectory, testDataFolderPath } from "../../../globals.js";
 
-import {
-    SERVER_FILE_PATH,
-    electron,
-    path,
-    port,
-    fs,
-} from "../../../../utils/electron.js";
+import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../../utils/electron.js";
 
-import {
-    onUpdateAvailable,
-    onUpdateProgress,
-} from "../../../../utils/auto-update.js";
+import { onUpdateAvailable, onUpdateProgress } from "../../../../utils/auto-update.js";
 
 import saveSVG from "../../../../assets/icons/save.svg?raw";
 import folderSVG from "../../../../assets/icons/folder_open.svg?raw";
