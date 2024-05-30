@@ -1,15 +1,20 @@
 import { updateURLParams } from "./url.js";
 
+export const isTestEnvironment = globalThis?.process?.env?.VITEST;
+
 const userAgent = navigator.userAgent.toLowerCase();
 export const isElectron = userAgent.indexOf(" electron/") > -1;
+
+
+const hasNodeAccess = isElectron || isTestEnvironment;
 
 export const electron = globalThis.electron ?? {}; // ipcRenderer, remote, shell, etc.
 
 // Node Modules
-export const fs = isElectron && require("fs-extra"); // File System
-export const os = isElectron && require("os");
-export const crypto = isElectron && require("crypto");
-export const path = isElectron && require("path");
+export const fs = hasNodeAccess && require("fs-extra"); // File System
+export const os = hasNodeAccess && require("os");
+export const crypto = hasNodeAccess && require("crypto");
+export const path = hasNodeAccess && require("path");
 
 // Remote Electron Modules
 export const remote = isElectron ? require("@electron/remote") : {};

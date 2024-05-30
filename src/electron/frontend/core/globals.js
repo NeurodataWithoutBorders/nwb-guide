@@ -1,10 +1,12 @@
-import { os, path, crypto, isElectron } from "../utils/electron.js";
+import { os, path, crypto, isElectron, isTestEnvironment } from "../utils/electron.js";
 
 import paths from "../../../paths.config.json" assert { type: "json" };
 
 import supportedInterfaces from "../../../supported_interfaces.json" assert { type: "json" };
 
-export const isTestEnvironment = globalThis?.process?.env?.VITEST;
+export {
+    isTestEnvironment
+}
 
 export const joinPath = (...args) => (path ? path.join(...args) : args.filter((str) => str).join("/"));
 
