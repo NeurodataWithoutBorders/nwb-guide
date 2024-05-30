@@ -5,10 +5,10 @@ on:
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / Pipelines / {os} data'
+    # Will read on PR dashboard as 'Deploy / ExampleDataTests / {os}'
     # Action dashboard identified by 'Deploy'
-    # Requirement settings identified as '{os} data'
-    name: ${{ matrix.os }} data
+    # Requirement settings identified as 'ExampleDataTests / {os}'
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:

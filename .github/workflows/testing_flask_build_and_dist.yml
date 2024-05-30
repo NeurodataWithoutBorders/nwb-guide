@@ -5,10 +5,10 @@ on:
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / Build / {os} flask'
+    # Will read on PR dashboard as 'Deploy / BuildTests / {os}'
     # Action dashboard identified by 'Deploy'
-    # Requirement settings identified as '{os} flask'
-    name: ${{ matrix.os }} flask
+    # Requirement settings identified as 'BuildTests / {os}'
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:

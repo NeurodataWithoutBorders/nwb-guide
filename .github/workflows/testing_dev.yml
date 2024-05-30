@@ -8,10 +8,10 @@ on:
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / Dev / {os} tests'
+    # Will read on PR dashboard as 'Deploy / DevTests / {os}'
     # Action dashboard identified by 'Deploy'
-    # Requirement settings identified as '{os} tests'
-    name: ${{ matrix.os }} tests  # Will read on PR dashboard as 'Deploy / Dev / {os} tests'
+    # Requirement settings identified as 'DevTests / {os}'
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:

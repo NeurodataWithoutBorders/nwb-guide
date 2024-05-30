@@ -10,10 +10,10 @@ on:
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / Live / {os} services'
+    # Will read on PR dashboard as 'Deploy / LiveServices / {os}'
     # Action dashboard identified by 'Deploy'
-    # Requirement settings identified as '{os} services'
-    name: ${{ matrix.os }} services
+    # Requirement settings identified as 'LiveServices / {os}'
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:

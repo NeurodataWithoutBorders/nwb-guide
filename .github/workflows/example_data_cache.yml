@@ -12,10 +12,10 @@ on:
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / Data / {os} cache'
+    # Will read on PR dashboard as 'Deploy / ExampleDataCache / {os}'
     # Action dashboard identified by 'Deploy'
-    # Requirement settings identified as '{os} cache'
-    name: ${{ matrix.os }} cache
+    # Requirement settings identified as 'ExampleDataCache / {os}'
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
