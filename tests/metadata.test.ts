@@ -7,13 +7,12 @@ import baseMetadataSchema from '../src/schemas/base-metadata.schema'
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { tempPropertyKey, textToArray } from '../src/electron/frontend/core/components/forms/utils'
+import { textToArray } from '../src/electron/frontend/core/components/forms/utils'
 import { updateResultsFromSubjects } from '../src/electron/frontend/core/components/pages/guided-mode/setup/utils'
 import { JSONSchemaForm } from '../src/electron/frontend/core/components/JSONSchemaForm'
 
 import { validateOnChange } from "../src/electron/frontend/core/validation/index.js";
 import { SimpleTable } from '../src/electron/frontend/core/components/SimpleTable'
-import { JSONSchemaInput } from '../src/electron/frontend/core/components/JSONSchemaInput.js'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
