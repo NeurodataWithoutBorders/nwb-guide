@@ -1,28 +1,26 @@
-name: Example Pipeline Tests
+name: Dev tests with live services
 on:
-  schedule:
-    - cron: "0 16 * * *"  # Daily at noon EST
-  pull_request:
-
-concurrency:  # Cancel previous workflows on the same pull request
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  CACHE_NUMBER: 2  # increase to reset cache manually
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
+      DANDI_STAGING_API_KEY:
+        required: true
 
 jobs:
-  testing:
-    name: Pipelines on ${{ matrix.os }}
+
+  run:
+    # Will read on PR dashboard as 'Deploy / LiveServices / {os}'
+    # Action dashboard identified by 'Deploy'
+    # Requirement settings identified as 'LiveServices / {os}'
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -l {0}
-
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
             label: environments/environment-Linux.yml
@@ -33,9 +31,8 @@ jobs:
           - os: macos-13  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
 
-          - os: windows-latest
-            label: environments/environment-Windows.yml
-
+#          - os: windows-latest
+#            label: environments/environment-Windows.yml
 
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +61,7 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Create and activate environment
-        run: mamba env update --name nwb-guide --file ${{ matrix.label }}
+        run: mamba env update -n nwb-guide -f ${{ matrix.label }}
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
@@ -74,10 +71,22 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
+      - name: Create env file
+        run: |
+          touch .env
+          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
-        run: npm run test:pipelines
+        run: npm run coverage:app
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:pipelines
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:app
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          fail_ci_if_error: true

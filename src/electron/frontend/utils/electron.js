@@ -1,3 +1,4 @@
+import { registerUpdate, registerUpdateProgress } from "./auto-update.js";
 import { updateURLParams } from "./url.js";
 
 export const isTestEnvironment = globalThis?.process?.env?.VITEST;
@@ -39,4 +40,15 @@ if (isElectron) {
     );
 
     console.log("User OS:", os.type(), os.platform(), "version:", os.release());
+
+    // Update Handling
+    electron.ipcRenderer.on(`checking-for-update`, (_, ...args) => console.log(`[Update]:`, ...args));
+
+    electron.ipcRenderer.on(`update-available`, (_, info) => (info ? registerUpdate(info) : ""));
+
+    electron.ipcRenderer.on(`update-progress`, (_, info) => registerUpdateProgress(info));
+    electron.ipcRenderer.on(`update-complete`, (_, ...args) => console.log(`[Update]:`, ...args));
+
+    electron.ipcRenderer.on(`update-error`, (_, ...args) => console.log(`[Update]:`, ...args));
+
 }

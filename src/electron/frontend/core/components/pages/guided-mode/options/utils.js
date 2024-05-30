@@ -75,7 +75,6 @@ export const run = async (pathname, payload, options = {}) => {
     // Clear private keys from being passed
     payload = sanitize(structuredClone(payload));
 
-    console.warn("FETCH?");
     const results = await fetch(new URL(pathname, baseUrl), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,7 +83,6 @@ export const run = async (pathname, payload, options = {}) => {
     })
         .then(async (res) => {
             const json = await res.json();
-            console.warn("FETCH!", json);
 
             if (!res.ok) {
                 const message = json.message;
@@ -95,7 +93,6 @@ export const run = async (pathname, payload, options = {}) => {
             return json;
         })
         .finally(() => {
-            console.warn("CANCEL?");
             if (internalSwal) Swal.close();
         });
 

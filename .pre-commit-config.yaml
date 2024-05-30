@@ -23,3 +23,10 @@ repos:
     hooks:
     -   id: prettier
         types_or: [css, javascript]
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.2.6
+  hooks:
+  - id: codespell
+    additional_dependencies:
+    - tomli
