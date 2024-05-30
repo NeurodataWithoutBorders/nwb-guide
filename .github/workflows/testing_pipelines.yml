@@ -94,34 +94,19 @@ jobs:
         with:
           path: ./behavior_testing_data
           key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
-
-      - name: Save working directory to environment file
-        run: echo "GIN_DATA_DIR=$(pwd)" >> .env
-        if: runner.os != 'Windows'
-
-      - name: Save working directory to environment file (Windows)
-        run: echo GIN_DATA_DIR=%cd% >> .env
-        shell: bash
-        if: runner.os == 'Windows'
-
-      # Display environment file for debugging
-      - name: Print environment file
-        run: cat .env
-        if: runner.os != 'Windows'
-
-      - name: Print environment file
-        run: type .env
-        shell: bash
-        if: runner.os == 'Windows'
-
+ 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
         run: npm run test:pipelines
+        env:
+          GIN_DATA_DIRECTORY: ${{ github.workspace }}
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:pipelines
+        env:
+          GIN_DATA_DIRECTORY: ${{ github.workspace }}
 
       - name: Archive Pipeline Test Screenshots
         if: always()
