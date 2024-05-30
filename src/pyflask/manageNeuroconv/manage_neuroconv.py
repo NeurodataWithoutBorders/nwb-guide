@@ -340,8 +340,10 @@ def get_all_interface_info() -> dict:
 
 
 # Combine Multiple Interfaces
-def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
+def get_custom_converter(interface_class_dict: dict, alignment_info: Union[dict, None] = None) -> "NWBConverter":
     from neuroconv import NWBConverter, converters, datainterfaces
+
+    alignment_info = alignment_info or dict()
 
     class CustomNWBConverter(NWBConverter):
         data_interface_classes = {
@@ -349,12 +351,22 @@ def get_custom_converter(interface_class_dict: dict):  # -> NWBConverter:
             for custom_name, interface_name in interface_class_dict.items()
         }
 
+        # Handle temporal alignment inside the converter
+        # TODO: this currently works off of cross-scoping injection of `alignment_info` - refactor to be more explicit
+        def temporally_align_data_interfaces(self):
+            set_interface_alignment(self, alignment_info=alignment_info)
+
     return CustomNWBConverter
 
 
-def instantiate_custom_converter(source_data: dict, interface_class_dict: dict):  # -> NWBConverter:
-    CustomNWBConverter = get_custom_converter(interface_class_dict)
-    return CustomNWBConverter(source_data)
+def instantiate_custom_converter(
+    source_data: Dict, interface_class_dict: Dict, alignment_info: Union[Dict, None] = None
+) -> "NWBConverter":
+    alignment_info = alignment_info or dict()
+
+    CustomNWBConverter = get_custom_converter(interface_class_dict=interface_class_dict, alignment_info=alignment_info)
+
+    return CustomNWBConverter(source_data=source_data)
 
 
 def get_source_schema(interface_class_dict: dict) -> dict:
@@ -674,25 +686,141 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     return json.loads(json.dumps(result, cls=InspectorOutputJSONEncoder))
 
 
-def get_interface_alignment(info: dict) -> dict:
-    converter = instantiate_custom_converter(info["source_data"], info["interfaces"])
+def set_interface_alignment(converter: dict, alignment_info: dict) -> dict:
 
-    timestamps = {}
+    import numpy as np
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
+    from neuroconv.tools.testing.mock_interfaces import MockRecordingInterface
+
+    errors = {}
+
     for name, interface in converter.data_interface_objects.items():
-        # Run interface.get_timestamps if it has the method
-        if hasattr(interface, "get_timestamps"):
-            try:
-                interface_timestamps = interface.get_timestamps()
-                if len(interface_timestamps) == 1:
-                    interface_timestamps = interface_timestamps[0]  # Correct for video interface nesting
-                timestamps[name] = interface_timestamps.tolist()
 
-            except Exception:
-                timestamps[name] = []
-        else:
+        interface = converter.data_interface_objects[name]
+        info = alignment_info.get(name, {})
+
+        # Set alignment
+        method = info.get("selected", None)
+        if method is None:
+            continue
+
+        value = info["values"].get(method, None)
+        if value is None:
+            continue
+
+        try:
+            if method == "timestamps":
+
+                # Open the input file for reading
+                # Can be .txt, .csv, .tsv, etc.
+                # But timestamps must be scalars separated by newline characters
+                with open(file=value, mode="r") as io:
+                    aligned_timestamps = np.array([float(line.strip()) for line in io.readlines()])
+
+                # Special case for sorting interfaces; to set timestamps they must have a recording registered
+                must_set_mock_recording = (
+                    isinstance(interface, BaseSortingExtractorInterface)
+                    and not interface.sorting_extractor.has_recording()
+                )
+                if must_set_mock_recording is True:
+                    sorting_extractor = interface.sorting_extractor
+                    sampling_frequency = sorting_extractor.get_sampling_frequency()
+                    end_frame = timestamps_array.shape[0]
+                    mock_recording_interface = MockRecordingInterface(
+                        sampling_frequency=sampling_frequency,
+                        durations=[end_frame / sampling_frequency],
+                        num_channels=1,
+                    )
+                    interface.register_recording(recording_interface=mock_recording_interface)
+
+                interface.set_aligned_timestamps(aligned_timestamps=aligned_timestamps)
+
+            # Special case for sorting interfaces; a recording interface to be converted may be registered/linked
+            elif method == "linked":
+                interface.register_recording(converter.data_interface_objects[value])
+
+            elif method == "start":
+                interface.set_aligned_starting_time(aligned_starting_time=value)
+
+        except Exception as e:
+            errors[name] = str(e)
+
+    return errors
+
+
+def get_interface_alignment(info: dict) -> dict:
+
+    from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
+    from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+        BaseRecordingExtractorInterface,
+    )
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
+
+    alignment_info = info.get("alignment", dict())
+    converter = instantiate_custom_converter(source_data=info["source_data"], interface_class_dict=info["interfaces"])
+
+    errors = set_interface_alignment(converter=converter, alignment_info=alignment_info)
+
+    metadata = dict()
+    timestamps = dict()
+
+    for name, interface in converter.data_interface_objects.items():
+
+        metadata[name] = dict()
+
+        is_sorting = isinstance(interface, BaseSortingExtractorInterface)
+        metadata[name]["sorting"] = is_sorting
+
+        if is_sorting is True:
+            metadata[name]["compatible"] = []
+
+            # If at least one recording and sorting interface is selected on the formats page
+            # Then it is possible the two could be linked (the sorting was applied to the recording)
+            # But there are very strict conditions from SpikeInterface determining compatibility
+            # Those conditions are not easily exposed so we just 'try' to register them and skip on error
+            sibling_recording_interfaces = {
+                interface_key: interface
+                for interface_key, interface in converter.data_interface_objects.items()
+                if isinstance(interface, BaseRecordingExtractorInterface)
+            }
+            for recording_interface_key, recording_interface in sibling_recording_interfaces.items():
+                try:
+                    interface.register_recording(recording_interface=recording_interface)
+                    metadata[name]["compatible"].append(recording_interface_key)
+                except Exception:
+                    pass
+
+        if not isinstance(interface, BaseTemporalAlignmentInterface):
+            timestamps[name] = []
+            continue
+
+        # Note: it is technically possible to have a BaseTemporalAlignmentInterface that has not yet implemented
+        # the `get_timestamps` method; try to get this but skip on error
+        try:
+            interface_timestamps = interface.get_timestamps()
+            if len(interface_timestamps) == 1:
+                interface_timestamps = interface_timestamps[0]
+
+            # Some interfaces, such as video or audio, may return a list of arrays
+            # corresponding to each file of their `file_paths` input
+            # Note: GUIDE only currently supports single files for these interfaces
+            # Thus, unpack only the first array
+            if isinstance(interface_timestamps, list):
+                interface_timestamps = interface_timestamps[0]
+
+            timestamps[name] = interface_timestamps.tolist()
+        except Exception:
             timestamps[name] = []
 
-    return timestamps
+    return dict(
+        metadata=metadata,
+        timestamps=timestamps,
+        errors=errors,
+    )
 
 
 def convert_to_nwb(info: dict) -> str:
@@ -725,7 +853,11 @@ def convert_to_nwb(info: dict) -> str:
         info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
     )
 
-    converter = instantiate_custom_converter(resolved_source_data, info["interfaces"])
+    converter = instantiate_custom_converter(
+        source_data=resolved_source_data,
+        interface_class_dict=info["interfaces"],
+        alignment_info=info.get("alignment", dict()),
+    )
 
     # Assume all interfaces have the same conversion options for now
     available_options = converter.get_conversion_options_schema()
