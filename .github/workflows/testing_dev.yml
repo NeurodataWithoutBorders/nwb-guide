@@ -1,28 +1,24 @@
-name: Dev Tests
+name: Dev tests
 on:
-  schedule:
-    - cron: "0 16 * * *"  # Daily at noon EST
-  pull_request:
-
-concurrency:  # Cancel previous workflows on the same pull request
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  CACHE_NUMBER: 2  # increase to reset cache manually
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
 jobs:
-  testing:
-    name: ${{ matrix.os }}  # Will read on the dashboard as 'Dev Tests / {os}'
+
+  run:
+    # Will read on PR dashboard as 'Deploy / DevTests / {os}'
+    # Action dashboard identified by 'Deploy'
+    # Requirement settings identified as 'DevTests / {os}'
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -l {0}
-
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
             label: environments/environment-Linux.yml
@@ -33,9 +29,8 @@ jobs:
           - os: macos-13  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
 
-          - os: windows-latest
-            label: environments/environment-Windows.yml
-
+#          - os: windows-latest
+#            label: environments/environment-Windows.yml
 
     steps:
       - uses: actions/checkout@v4
@@ -89,7 +84,7 @@ jobs:
           name: test-screenshots-${{ matrix.os }}
           path: docs/assets/tutorials
           retention-days: 1
-
+          overwrite: true
 
 
       - name: Upload coverage reports to Codecov

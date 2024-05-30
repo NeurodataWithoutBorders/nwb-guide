@@ -158,8 +158,10 @@ a[data-toggle="collapse"] {
 
 #main-nav .sidebar-body a {
     font-size: 14px;
-    display: block;
-    line-height: 45px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 15px 0px;
     padding-left: 20px;
     margin-bottom: 5px;
     text-align: left;
@@ -168,6 +170,19 @@ a[data-toggle="collapse"] {
     border: none;
     border-radius: 4px;
     border-left: 4px solid transparent;
+}
+
+[data-update-available] [data-id="settings"] > div {
+    display: flex;
+    flex-direction: column;
+}
+
+[data-update-available] [data-id="settings"] > div::after {
+    content: "Update Available";
+    color: gray;
+    font-size: 70%;
+    font-weight: normal;
+    line-height: 1.5;
 }
 
 #main-nav .sidebar-body svg {
