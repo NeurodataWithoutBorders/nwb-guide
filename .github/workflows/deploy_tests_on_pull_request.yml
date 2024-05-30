@@ -31,5 +31,5 @@ jobs:
       S3_GIN_BUCKET: ${{ secrets.S3_GIN_BUCKET }}
 
   ExampleDataTests:
-    needs: Data
+    needs: ExampleDataCache
     uses: ./.github/workflows/testing_pipelines.yml
