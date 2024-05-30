@@ -1,5 +1,7 @@
-import { isElectron, electron, app, port } from '../../utils/electron.js'
+import { isElectron, electron, app } from '../../utils/electron.js'
 const { ipcRenderer } = electron;
+
+import { isTestEnvironment } from '../globals.js'
 
 import {
   notyf,
@@ -35,7 +37,6 @@ export async function pythonServerOpened() {
 
     if (openPythonStatusNotyf) notyf.dismiss(openPythonStatusNotyf)
 
-    const isTestEnvironment = globalThis?.process?.env?.VITEST
     if (isTestEnvironment) return
 
     openPythonStatusNotyf = notyf.open({
