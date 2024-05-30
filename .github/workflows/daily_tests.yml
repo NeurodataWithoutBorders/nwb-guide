@@ -59,4 +59,4 @@ jobs:
           subject: NeuroConv Daily Test Failure
           to: ${{ secrets.DAILY_FAILURE_EMAIL_LIST }}
           from: NWB Guide Daily Tests
-          body: "The daily tests workflow failed, please check status at https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml"
+          body: "The daily tests workflow failed, please check the status at https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml"
