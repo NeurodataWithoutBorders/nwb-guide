@@ -129,15 +129,18 @@ describe('Run example pipelines', () => {
               try {
                 await dashboard.next()
                 await dashboard.page.rendered
-              } catch (e) { await dashboard.page.to('/') } // Go back to the home page if error
+              } catch (e) { 
+                await dashboard.page.to('/') 
+              } // Go back to the home page if error
 
               return dashboard.page.info.id
             })
 
-            takeScreenshot(join('test-pipelines', 'conversion', pipelineParsed, pageId))
+            await takeScreenshot(join('test-pipelines', 'conversion', pipelineParsed, pageId))
 
             // Stop the pipeline. Conversion page is the last page
             if (pageId === '//conversion') {
+
               pageId = await evaluate(async () => {
                 const dashboard = document.querySelector('nwb-dashboard')
                 await dashboard.page.to('/')
@@ -145,6 +148,7 @@ describe('Run example pipelines', () => {
               })
 
               expect(pageId).toBe('/') // Will break while loop if failed
+              break
             
             }
           }

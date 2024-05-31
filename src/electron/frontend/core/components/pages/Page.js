@@ -136,13 +136,10 @@ export class Page extends LitElement {
         this.unsavedUpdates = true;
 
         // Indicate conversion has run successfully
-        const { desyncedData } = this.info.globalState;
-        if (!desyncedData) this.info.globalState.desyncedData = {};
-
-        if (desyncedData) {
-            desyncedData[key] = false;
-            await this.save({}, false);
-        }
+        let { desyncedData } = this.info.globalState;
+        if (!desyncedData) desyncedData = this.info.globalState.desyncedData = {};
+        desyncedData[key] = false;
+        await this.save({}, false);
     }
 
     async runConversions(conversionOptions = {}, toRun, options = {}) {
