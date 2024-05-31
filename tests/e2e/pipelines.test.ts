@@ -129,8 +129,8 @@ describe('Run example pipelines', () => {
               try {
                 await dashboard.next()
                 await dashboard.page.rendered
-              } catch (e) { 
-                await dashboard.page.to('/') 
+              } catch (e) {
+                await dashboard.page.to('/')
               } // Go back to the home page if error
 
               return dashboard.page.info.id
@@ -149,7 +149,7 @@ describe('Run example pipelines', () => {
 
               expect(pageId).toBe('/') // Will break while loop if failed
               break
-            
+
             }
           }
 
