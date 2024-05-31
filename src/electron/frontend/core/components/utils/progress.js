@@ -88,7 +88,7 @@ export const createProgressPopup = async (options, tqdmCallback) => {
     return { ...commonReturnValue, id, close };
 };
 
-const eventsURL = new URL("/neuroconv/events", baseUrl).href;
+const progressEventsUrl = new URL("/neuroconv/events/progress", baseUrl).href;
 
 class ProgressHandler {
     constructor(props) {
@@ -112,4 +112,4 @@ class ProgressHandler {
     removeEventListener = (...args) => this.source.removeEventListener(...args);
 }
 
-export const progressHandler = new ProgressHandler({ url: eventsURL });
+export const progressHandler = new ProgressHandler({ url: progressEventsUrl });
