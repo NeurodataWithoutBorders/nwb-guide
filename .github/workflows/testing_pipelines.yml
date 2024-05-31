@@ -1,0 +1,118 @@
+name: Example data pipeline Tests
+on:
+  workflow_call:
+
+jobs:
+
+  run:
+    # Will read on PR dashboard as 'Deploy / ExampleDataTests / {os}'
+    # Action dashboard identified by 'Deploy'
+    # Requirement settings identified as 'ExampleDataTests / {os}'
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: environments/environment-Linux.yml
+
+          - os: macos-latest  # Mac arm64 runner
+            label: environments/environment-MAC-apple-silicon.yml
+
+          - os: macos-13  # Mac x64 runner
+            label: environments/environment-MAC-intel.yml
+
+          - os: windows-latest
+            label: environments/environment-Windows.yml
+
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch --prune --unshallow --tags
+
+      # see https://github.com/conda-incubator/setup-miniconda#caching-environments
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: nwb-guide
+          use-mamba: true
+
+      # Setup conda environment from cache
+      - name: Set environment cache date
+        id: get-date
+        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+        shell: bash
+      - name: Cache Conda env
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
+        id: cache
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Create and activate environment
+        run: mamba env update --name nwb-guide --file ${{ matrix.label }}
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install GUIDE
+        run: npm ci --verbose
+
+      # Load example data caches
+      - name: Get ephy_testing_data current head hash
+        id: ephys
+        run: echo "::set-output name=HASH_EPHY_DATASET::$(git ls-remote https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git HEAD | cut -f1)"
+      - name: Cache ephys dataset - ${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
+        uses: actions/cache@v4
+        id: cache-ephys-datasets
+        with:
+          path: ./ephy_testing_data
+          key: ephys-datasets-${{ matrix.os }}-${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
+      - name: Get ophys_testing_data current head hash
+        id: ophys
+        run: echo "::set-output name=HASH_OPHYS_DATASET::$(git ls-remote https://gin.g-node.org/CatalystNeuro/ophys_testing_data.git HEAD | cut -f1)"
+      - name: Cache ophys dataset - ${{ steps.ophys.outputs.HASH_OPHYS_DATASET }}
+        uses: actions/cache@v4
+        id: cache-ophys-datasets
+        with:
+          path: ./ophys_testing_data
+          key: ophys-datasets-${{ matrix.os }}-${{ steps.ophys.outputs.HASH_OPHYS_DATASET }}
+      - name: Get behavior_testing_data current head hash
+        id: behavior
+        run: echo "::set-output name=HASH_BEHAVIOR_DATASET::$(git ls-remote https://gin.g-node.org/CatalystNeuro/behavior_testing_data.git HEAD | cut -f1)"
+      - name: Cache behavior dataset - ${{ steps.behavior.outputs.HASH_BEHAVIOR_DATASET }}
+        uses: actions/cache@v4
+        id: cache-behavior-datasets
+        with:
+          path: ./behavior_testing_data
+          key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
+
+      # Run pipeline tests
+      - if: matrix.os != 'ubuntu-latest'
+        name: Run tests
+        run: npm run test:pipelines
+        env:
+          GIN_DATA_DIRECTORY: ${{ github.workspace }}
+
+      - if: matrix.os == 'ubuntu-latest'
+        name: Run tests with xvfb
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:pipelines
+        env:
+          GIN_DATA_DIRECTORY: ${{ github.workspace }}
+
+      - name: Archive Pipeline Test Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-pipelines-screenshots-${{ matrix.os }}
+          path: docs/assets/tutorials/test-pipelines
+          retention-days: 1
+          overwrite: true

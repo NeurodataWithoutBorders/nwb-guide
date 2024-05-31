@@ -1,19 +1,18 @@
 import { describe, expect, test } from 'vitest'
-import { createResults } from '../src/renderer/src/stories/pages/guided-mode/data/utils'
-import { mapSessions } from '../src/renderer/src/stories/pages/utils'
+import { createResults } from '../src/electron/frontend/core/components/pages/guided-mode/data/utils'
+import { mapSessions } from '../src/electron/frontend/core/components/pages/utils'
 
-import baseMetadataSchema from '../schemas/base-metadata.schema'
+import baseMetadataSchema from '../src/schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { tempPropertyKey, textToArray } from '../src/renderer/src/stories/forms/utils'
-import { updateResultsFromSubjects } from '../src/renderer/src/stories/pages/guided-mode/setup/utils'
-import { JSONSchemaForm } from '../src/renderer/src/stories/JSONSchemaForm'
+import { textToArray } from '../src/electron/frontend/core/components/forms/utils'
+import { updateResultsFromSubjects } from '../src/electron/frontend/core/components/pages/guided-mode/setup/utils'
+import { JSONSchemaForm } from '../src/electron/frontend/core/components/JSONSchemaForm'
 
-import { validateOnChange } from "../src/renderer/src/validation/index.js";
-import { SimpleTable } from '../src/renderer/src/stories/SimpleTable'
-import { JSONSchemaInput } from '../src/renderer/src/stories/JSONSchemaInput.js'
+import { validateOnChange } from "../src/electron/frontend/core/validation/index.js";
+import { SimpleTable } from '../src/electron/frontend/core/components/SimpleTable'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -201,12 +200,13 @@ test('inter-table updates are triggered', async () => {
 
     // Validate that the results are incorrect
     const errors = await form.validate().catch(() => true).catch((e) => e)
-    console.log(errors)
     expect(errors).toBe(true) // Is invalid
 
     // Update the table with the missing electrode group
     const table = form.getFormElement(['Ecephys', 'ElectrodeGroup']) // This is a SimpleTable where rows can be added
-    const row = table.addRow()
+    const idx = await table.addRow()
+
+    const row = table.getRow(idx)
 
     const baseRow = table.getRow(0)
     row.forEach((cell, i) => {
@@ -214,9 +214,12 @@ test('inter-table updates are triggered', async () => {
         else cell.setInput(baseRow[i].value) // Otherwise carry over info
     })
 
-    form.requestUpdate() // Re-render the form to update the table
+    await sleep(1000) // Wait for the ElectrodeGroup table to update properly
+
+    form.requestUpdate() // Re-render the form to update the Electrodes table
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate().then(() => false).catch((e) => true)
+
     expect(hasErrors).toBe(false) // Is valid
 })

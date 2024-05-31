@@ -1,0 +1,62 @@
+name: Daily Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 14 * * *" # Daily at 10am EST
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  DevTests:
+    uses: ./.github/workflows/testing_dev.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  LiveServices:
+    uses: ./.github/workflows/testing_dev_with_live_services.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DANDI_STAGING_API_KEY: ${{ secrets.DANDI_STAGING_API_KEY }}
+
+  BuildTests:
+    uses: ./.github/workflows/testing_flask_build_and_dist.yml
+
+  ExampleDataCache:
+    uses: ./.github/workflows/example_data_cache.yml
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      S3_GIN_BUCKET: ${{ secrets.S3_GIN_BUCKET }}
+
+  ExampleDataTests:
+    needs: ExampleDataCache
+    uses: ./.github/workflows/testing_pipelines.yml
+
+  NotifyOnAnyFailure:
+    runs-on: ubuntu-latest
+    needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
+    if: |
+      ${{
+        always() && (
+        needs.DevTests.result == 'failure'
+        || needs.LiveServices.result == 'failure'
+        || needs.BuildTests.result == 'failure'
+        || needs.ExampleDataCache.result == 'failure'
+        || needs.ExampleDataTests.result == 'failure'
+        )
+      }}
+    steps:
+      - uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: NeuroConv Daily Test Failure
+          to: ${{ secrets.DAILY_FAILURE_EMAIL_LIST }}
+          from: NWB Guide Daily Tests
+          body: "The daily tests workflow failed, please check the status at https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml"

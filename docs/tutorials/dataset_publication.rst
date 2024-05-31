@@ -1,27 +1,20 @@
 Dataset Publication
-=======================================
+===================
 
 For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
 .. note::
-    This tutorial focuses on uploading to the Staging server.
+    Creating an account on DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server.
 
-    **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Staging server with the Main Archive.
+    **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`. You’ll want to publish your `real` data on the main archive, which will require a separate approval but otherwise follows the same workflow defined in this tutorial.
 
-.. note::
-    Gaining access to DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server.
-
-    **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`.
-
-    We’re going to use the Staging server for this tutorial so we don’t crowd the main DANDI Archive with `synthetic` datasets! However, you’ll want to publish your `real` data on the main server—which will require a separate approval process.
-
-    Once you receive notice that your account was approved, you can move on to the next steps.
+    Once your account is approved, you can move on to the next steps.
 
 Workflow Setup
 --------------
 1. Resume the conversion via the **Convert** page
 
-2. Navigate to the **Workflow** page.
+2. Navigate to the **Workflow** page using the navigation sidebar on the left.
 
    a. Specify that you’d like to publish your data to the :dandi-archive:`DANDI Archive <>`.
 
@@ -43,24 +36,21 @@ To get your API key, visit the :dandi-staging:`staging website <>` and click on 
   :align: center
   :alt: DANDI staging API key added
 
-Submit this to the Staging API Key input on the GUIDE.
+Provide this for the Staging API Key value on the GUIDE.
 
 .. figure:: ../assets/tutorials/dandi/api-token-added.png
   :align: center
   :alt: DANDI staging API key added
 
+Press the **Submit** button to save your API key. This will populate the **Dandiset** input with a list of Dandisets associated with your account, which you can search by title or ID.
 
-Once you have specified your Staging API Key, the **Dandiset** input will allow you to select any existing Dandiset associated with your account by ID (e.g., "207698") or name (e.g., "NWB GUIDE Test").
+But what if you don't have any Dandisets to upload to? No problem!
 
-Continue to the next page to trigger your upload to the DANDI Archive.
+Creating a Dandiset
+^^^^^^^^^^^^^^^^^^^
+If you don't already have a Dandiset on the Staging server, you can create one directly from the GUIDE.
 
-.. figure:: ../assets/tutorials/dandi/dandiset-id.png
-  :align: center
-  :alt: DANDI upload page with Dandiset ID specified
-
-Creating a Dandiset from the GUIDE
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you do not already own a Dandiset on staging, you will need to create one. Press the Create New Dandiset button to open a pop-up that guides you through the required fields for Dandiset creation.
+Press the **Create New Dandiset** button to open a pop-up that guides you through the required fields for Dandiset creation.
 
 .. figure:: ../assets/tutorials/dandi/create-dandiset.png
   :align: center
@@ -68,6 +58,15 @@ If you do not already own a Dandiset on staging, you will need to create one. Pr
 
 
 Once this pop-up form is submitted, the Dandiset input will now contain your new Dandiset.
+
+
+.. figure:: ../assets/tutorials/dandi/dandiset-id.png
+  :align: center
+  :alt: DANDI upload page with Dandiset ID specified
+
+
+
+Finally, press the **Upload** button to begin the upload process.
 
 Final Review
 ------------

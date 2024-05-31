@@ -10,7 +10,7 @@ import scipy
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('./paths.config.json', '.'), ('./package.json', '.')]
+datas = [('./src/paths.config.json', '.'), ('./package.json', '.')]
 binaries = []
 hiddenimports = [
     'email_validator',
@@ -53,7 +53,7 @@ block_cipher = None
 
 
 a = Analysis(
-    [f"{Path('pyflask') / 'app.py'}"],
+    [f"{Path('src') / 'pyflask' / 'app.py'}"],
     pathex=[],
     binaries=binaries,
     datas=datas,
