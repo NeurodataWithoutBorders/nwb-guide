@@ -119,6 +119,7 @@ describe('Run example pipelines', () => {
                      await dashboard.next()
                      await dashboard.page.rendered
                      const id = dashboard.page.info.id
+                     takeScreenshot(join('test-pipelines', 'conversion', toMatch, id))
                      if (id === '//conversion') break // Conversion page is the last page
                     } catch (e) {
                       await toHome()
