@@ -118,7 +118,10 @@ describe('Run example pipelines', () => {
           let pageId;
 
           while (pageId !== '/') {
-            pageId = await evaluate(async () => {
+
+            
+
+            const promise = evaluate(async () => {
               const dashboard = document.querySelector('nwb-dashboard')
 
               const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
@@ -135,6 +138,16 @@ describe('Run example pipelines', () => {
 
               return dashboard.page.info.id
             })
+
+            let nImages = 0
+            const intervalId = setInterval(async () => {
+              if (pageId) await takeScreenshot(join('test-pipelines', 'conversion', pipelineParsed, `${pageId}-after-${nImages++}`))
+            }, 1000)
+
+            pageId = await promise.catch(e => {
+              console.error(e)
+            })
+            .finally(() => clearInterval(intervalId))
 
             await takeScreenshot(join('test-pipelines', 'conversion', pipelineParsed, pageId))
 
