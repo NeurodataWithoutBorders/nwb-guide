@@ -140,20 +140,16 @@ export class GuidedInspectorPage extends Page {
                 (async () => {
                     if (fileArr.length <= 1) {
                         this.report = inspector;
-                        
 
                         if (!this.report) {
-
-    
                             const result = await run(
                                 "neuroconv/inspect_file",
                                 { nwbfile_path: fileArr[0].info.file, ...options },
                                 { title }
-                            )
-                            .catch((error) => {
+                            ).catch((error) => {
                                 this.notify(error.message, "error");
                                 return null;
-                            })
+                            });
 
                             if (!result) return "Failed to generate inspector report.";
 
@@ -188,14 +184,14 @@ export class GuidedInspectorPage extends Page {
                             "neuroconv/inspect_folder",
                             { path, ...options, request_id: swalOpts.id },
                             swalOpts
-                        ).catch(async (error) => {
-                            this.notify(error.message, "error");
-                            return null;
-                        })
-                        .finally(() => closeProgressPopup());
+                        )
+                            .catch(async (error) => {
+                                this.notify(error.message, "error");
+                                return null;
+                            })
+                            .finally(() => closeProgressPopup());
 
                         if (!result) return "Failed to generate inspector report.";
-
 
                         this.report = globalState.preview.inspector = {
                             ...result,
