@@ -1012,6 +1012,7 @@ def get_conversion_path_info(info: dict) -> dict:
     return dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory)
 
 
+
 def get_conversion_info(info: dict) -> dict:
     """Function used to organize the required information for conversion."""
 
@@ -1032,26 +1033,10 @@ def get_conversion_info(info: dict) -> dict:
         info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
     )
 
-    converter = instantiate_custom_converter(
-        source_data=resolved_source_data,
-        interface_class_dict=info["interfaces"],
-        alignment_info=info.get("alignment", dict()),
-    )
+    converter = instantiate_custom_converter(resolved_source_data, info["interfaces"])
 
-    # Assume all interfaces have the same conversion options for now
-    available_options = converter.get_conversion_options_schema()
-    options = (
-        {
-            interface: (
-                {"stub_test": info["stub_test"]}
-                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
-                else {}
-            )
-            for interface in info["source_data"]
-        }
-        if run_stub_test
-        else None
-    )
+    def update_conversion_progress(**kwargs):
+        announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
 
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
@@ -1083,49 +1068,29 @@ def get_conversion_info(info: dict) -> dict:
             del ecephys_metadata["Units"]
             del ecephys_metadata["UnitColumns"]
 
-        has_electrodes = "Electrodes" in ecephys_metadata
-        if has_electrodes:
+        shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
-            shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
+        for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+            interface = converter.data_interface_objects[interface_name]
 
-            for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
-                name_split = interface_name.split(" — ")
+            update_recording_properties_from_table_as_json(
+                interface,
+                electrode_table_json=interface_electrode_results,
+                electrode_column_info=shared_electrode_columns,
+            )
 
-                if len(name_split) == 1:
-                    sub_interface = name_split[0]
-                elif len(name_split) == 2:
-                    sub_interface, sub_sub_interface = name_split
+        ecephys_metadata["Electrodes"] = [
+            {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
+        ]
 
-                interface_or_subconverter = converter.data_interface_objects[sub_interface]
-
-                if isinstance(interface_or_subconverter, NWBConverter):
-                    subconverter = interface_or_subconverter
-
-                    update_recording_properties_from_table_as_json(
-                        recording_interface=subconverter.data_interface_objects[sub_sub_interface],
-                        electrode_table_json=interface_electrode_results,
-                        electrode_column_info=shared_electrode_columns,
-                    )
-                else:
-                    interface = interface_or_subconverter
-
-                    update_recording_properties_from_table_as_json(
-                        recording_interface=interface,
-                        electrode_table_json=interface_electrode_results,
-                        electrode_column_info=shared_electrode_columns,
-                    )
-
-            ecephys_metadata["Electrodes"] = [
-                {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
-            ]
-
-            del ecephys_metadata["ElectrodeColumns"]
+        del ecephys_metadata["ElectrodeColumns"]
 
     return (
         converter,
         resolved_metadata,
         path_info,
     )
+
 
 
 def convert_to_nwb(info: dict) -> str:

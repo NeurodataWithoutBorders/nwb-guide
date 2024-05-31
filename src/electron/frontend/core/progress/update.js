@@ -52,8 +52,6 @@ export const updateFile = (projectName, callback) => {
 
     var guidedFilePath = joinPath(guidedProgressFilePath, projectName + ".json");
 
-    console.log(guidedProgressFilePath);
-
     // Save the file through the available mechanisms
     if (!fs.existsSync(guidedProgressFilePath)) fs.mkdirSync(guidedProgressFilePath, { recursive: true }); //create progress folder if one does not exist
     fs.writeFileSync(guidedFilePath, JSON.stringify(data, null, 2));
