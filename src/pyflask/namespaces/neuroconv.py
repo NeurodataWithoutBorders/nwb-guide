@@ -7,6 +7,7 @@ from manageNeuroconv import (
     convert_to_nwb,
     get_all_converter_info,
     get_all_interface_info,
+    get_backend_configuration,
     get_interface_alignment,
     get_metadata_schema,
     get_source_schema,
@@ -20,7 +21,6 @@ from manageNeuroconv import (
     upload_multiple_filesystem_objects_to_dandi,
     upload_project_to_dandi,
     validate_metadata,
-    get_backend_configuration
 )
 
 neuroconv_namespace = Namespace("neuroconv", description="Neuroconv neuroconv_namespace for the NWB GUIDE.")
@@ -92,7 +92,6 @@ class GetBackendConfiguration(Resource):
     def post(self):
         return get_backend_configuration(neuroconv_namespace.payload)
 
-   
 
 validate_parser = neuroconv_namespace.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
