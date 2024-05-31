@@ -174,7 +174,6 @@ export class Main extends LitElement {
     }
 }
 
-
 customElements.get("nwb-main") || customElements.define("nwb-main", Main);
 
 class MainHeader extends LitElement {
@@ -206,7 +205,6 @@ class MainHeader extends LitElement {
 
             const section = sections[info.section];
             if (section) {
-
                 if (config === true || !("header" in page) || !("sections" in page.header)) {
                     const sectionNames = Object.entries(sections)
                         .filter(([name, info]) => !Object.values(info.pages).every((state) => state.skipped))

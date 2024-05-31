@@ -827,7 +827,10 @@ def get_interface_alignment(info: dict) -> dict:
 
 
 def configure_dataset_backends(nwbfile, backend_configuration, configuration=None):
-    from neuroconv.tools.nwb_helpers import get_default_backend_configuration, configure_backend
+    from neuroconv.tools.nwb_helpers import (
+        configure_backend,
+        get_default_backend_configuration,
+    )
 
     PROPS_TO_AVOID = ["full_shape"]
 
@@ -855,7 +858,10 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
 
 def create_file(info: dict) -> dict:
 
-    from neuroconv.tools.nwb_helpers import make_or_load_nwbfile, get_default_backend_configuration
+    from neuroconv.tools.nwb_helpers import (
+        get_default_backend_configuration,
+        make_or_load_nwbfile,
+    )
 
     run_stub_test = info.get("stub_test", False)
     backend_configuration = info.get("configuration")
@@ -898,7 +904,7 @@ def create_file(info: dict) -> dict:
         options = (
             {
                 interface: (
-                    { "stub_test": run_stub_test }
+                    {"stub_test": run_stub_test}
                     if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
                     else {}
                 )
@@ -933,7 +939,10 @@ def get_backend_configuration(info: dict) -> dict:
 
     info["overwrite"] = True  # Always overwrite the file
 
-    from neuroconv.tools.nwb_helpers import make_nwbfile_from_metadata, get_default_backend_configuration
+    from neuroconv.tools.nwb_helpers import (
+        get_default_backend_configuration,
+        make_nwbfile_from_metadata,
+    )
 
     backend_configuration = info.get("configuration", {})
     backend = backend_configuration.get("backend", "hdf5")
@@ -1105,7 +1114,6 @@ def get_conversion_info(info: dict) -> dict:
                         electrode_table_json=interface_electrode_results,
                         electrode_column_info=shared_electrode_columns,
                     )
-
 
             ecephys_metadata["Electrodes"] = [
                 {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns

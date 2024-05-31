@@ -53,8 +53,8 @@ const questions = {
         dependencies: {
             locate_data: {},
         },
-    }, 
-    
+    },
+
     file_format: {
         type: "string",
         enum: ["hdf5", "zarr"],
@@ -82,7 +82,6 @@ const questions = {
         default: true,
     },
 };
-
 
 // -------------------------------------------------------------------------------------------
 // ------------------------ Derived from the above information -------------------------------
@@ -145,7 +144,7 @@ export class GuidedPreform extends Page {
         await this.form.validate();
         this.#setWorkflow();
     };
-    
+
     footer = {
         onNext: async () => {
             await this.save();
@@ -191,8 +190,8 @@ export class GuidedPreform extends Page {
                         dependentParent.removeAttribute(attr);
                         if ("required" in dependent) dependentEl.required = dependent.required;
                         if ("__cached" in dependent) dependentEl.updateData(dependent.__cached);
-                    } 
-                    
+                    }
+
                     // Is set to false
                     else {
                         if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
@@ -225,7 +224,7 @@ export class GuidedPreform extends Page {
                 if (willUpdateFlow) this.updateSections(); // Trigger section changes with new workflow
                 await this.save({}, false); // Save new workflow and section changes
             },
-            
+
             onThrow,
             // groups: [
             //     {

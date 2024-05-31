@@ -13,7 +13,6 @@ function isHTML(str) {
     return Array.from(doc.body.childNodes).some((node) => node.nodeType === 1);
 }
 
-
 export class NavigationSidebar extends LitElement {
     static get styles() {
         return useGlobalStyles(
@@ -67,7 +66,6 @@ export class NavigationSidebar extends LitElement {
             if (isActive) this.#toggleDropdown(sectionName, autoOpenValue);
             else if (info.open === autoOpenValue) this.#toggleDropdown(sectionName, false);
             else this.#toggleDropdown(sectionName, info.open);
-            
         });
 
         if (this.#queue.length) {
