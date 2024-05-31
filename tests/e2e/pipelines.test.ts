@@ -119,7 +119,7 @@ describe('Run example pipelines', () => {
 
           while (pageId !== '/') {
 
-            
+
 
             const promise = evaluate(async () => {
               const dashboard = document.querySelector('nwb-dashboard')
