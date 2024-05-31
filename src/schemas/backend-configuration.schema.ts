@@ -1,17 +1,7 @@
-import { getResourceUsage } from "../src/renderer/src/validation/backend-configuration"
-
-export const getSchema = (schema) => {
-
-
-    const copy = structuredClone(schema)
-
-    return copy
-
-}
+import { getResourceUsage } from "../../src/electron/frontend/core/validation/backend-configuration"
 
 export const resolveBackendResults = (schema, results, itemsize) => {
-    const copy = getSchema(schema)
-
+    const copy = structuredClone(schema)
 
     // results.buffer_shape = results.chunk_shape.map(() => null); // Provide an unspecified buffer shape for now
 

@@ -9,7 +9,7 @@ import { GuidedSubjectsPage } from "./components/pages/guided-mode/setup/GuidedS
 
 import { GuidedSourceDataPage } from "./components/pages/guided-mode/data/GuidedSourceData";
 import { GuidedMetadataPage } from "./components/pages/guided-mode/data/GuidedMetadata";
-import { GuidedBackendConfigurationPage } from "/components/pages/guided-mode/data/GuidedBackendConfiguration";
+import { GuidedBackendConfigurationPage } from "./components/pages/guided-mode/data/GuidedBackendConfiguration";
 
 import { GuidedUploadPage } from "./components/pages/guided-mode/options/GuidedUpload";
 import { GuidedResultsPage } from "./components/pages/guided-mode/results/GuidedResults";
