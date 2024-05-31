@@ -199,9 +199,7 @@ export class Dashboard extends LitElement {
                 page: this.page,
                 sections,
             });
-        }
-
-        else if (header) this.main.header.sections = sections; // Update header sections
+        } else if (header) this.main.header.sections = sections; // Update header sections
 
         return sections;
     }
@@ -263,22 +261,24 @@ export class Dashboard extends LitElement {
 
                     const backwards = previous && previous.info.previous === this.page;
 
-                    return Promise.all(
-                        Object.entries(page.workflow).map(async ([_, state]) => {
-                            if (typeof state.skip === "function" && !backwards) return await state.skip(); // Run skip functions
-                        })
-                    )
-                    
-                    // Skip right over the page if configured as such
-                    .then(async () => {
-                        if (backwards) await this.main.onTransition(-1);
-                        else await this.main.onTransition(1);
-                    });
+                    return (
+                        Promise.all(
+                            Object.entries(page.workflow).map(async ([_, state]) => {
+                                if (typeof state.skip === "function" && !backwards) return await state.skip(); // Run skip functions
+                            })
+                        )
+
+                            // Skip right over the page if configured as such
+                            .then(async () => {
+                                if (backwards) await this.main.onTransition(-1);
+                                else await this.main.onTransition(1);
+                            })
+                    );
                 }
-    
+
                 // Update main to render page
                 this.updateSections({ sidebar: false, main: true });
-    
+
                 if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
             })
 
@@ -307,12 +307,13 @@ export class Dashboard extends LitElement {
                 const section = info.section;
 
                 let state = globalState.sections[section];
-                if (!state) state = globalState.sections[section] = { 
-                    open: undefined, 
-                    active: false, 
-                    pages: {} 
-                };
-                
+                if (!state)
+                    state = globalState.sections[section] = {
+                        open: undefined,
+                        active: false,
+                        pages: {},
+                    };
+
                 let pageState = state.pages[id];
                 if (!pageState)
                     pageState = state.pages[id] = {

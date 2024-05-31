@@ -384,7 +384,6 @@ export class BasicTable extends LitElement {
     };
 
     #readTSV(text) {
-
         let data = text.split("\n").map((row) =>
             row.split("\t").map((v) => {
                 try {

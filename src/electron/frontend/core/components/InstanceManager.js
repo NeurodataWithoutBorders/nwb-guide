@@ -119,8 +119,6 @@ export class InstanceManager extends LitElement {
                 align-items: center;
             }
 
-            
-
             #new-info {
                 align-items: unset;
                 width: 100%;

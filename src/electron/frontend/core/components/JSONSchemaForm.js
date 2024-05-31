@@ -580,8 +580,7 @@ export class JSONSchemaForm extends LitElement {
         }
 
         const allErrors = flaggedInputs
-            .map((inputElement) => Array.from(inputElement.nextElementSibling.children)
-            .map((li) => li.message))
+            .map((inputElement) => Array.from(inputElement.nextElementSibling.children).map((li) => li.message))
             .flat()
             .filter((v) => !!v);
 

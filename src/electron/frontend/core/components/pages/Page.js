@@ -120,25 +120,20 @@ export class Page extends LitElement {
     mapSessions = (callback, data = this.info.globalState.results) => mapSessions(callback, data);
 
     async convert({ preview, ...conversionOptions } = {}, options = {}) {
-        
         const key = preview ? "preview" : "conversion";
 
         delete this.info.globalState[key]; // Clear the preview results
 
         if (preview) {
-
             if (!options.title) options.title = "Running preview conversion on all sessions...";
 
             const stubs = await this.runConversions({ stub_test: true, ...conversionOptions }, undefined, options);
 
             this.info.globalState[key] = { stubs };
-
         } else {
-
             if (!options.title) options.title = "Running all conversions";
 
             this.info.globalState[key] = await this.runConversions(conversionOptions, true, options);
-
         }
 
         this.unsavedUpdates = true;
@@ -153,8 +148,7 @@ export class Page extends LitElement {
         }
     }
 
-async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctionToRun = runConversion) {
-    
+    async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctionToRun = runConversion) {
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
@@ -186,7 +180,7 @@ async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctio
             const { conversion_output_folder, name, SourceData, alignment } = globalState.project;
 
             const sessionResults = globalState.results[subject][session];
-            
+
             const configurationCopy = { ...(sessionResults.configuration ?? {}) };
 
             const sourceDataCopy = structuredClone(sessionResults.source_data);
@@ -221,7 +215,7 @@ async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctio
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                     ...sessionInfo, // source_data and metadata are passed in here
                     ...optsCopy, // Any additional conversion options override the defaults
-                    
+
                     interfaces: globalState.interfaces,
                     alignment,
                 },

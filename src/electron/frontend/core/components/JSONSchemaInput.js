@@ -52,7 +52,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
             ? this.onValidate
                 ? this.onValidate()
                 : this.form?.triggerValidation
-                    ? this.form.triggerValidation(
+                  ? this.form.triggerValidation(
                         name,
                         completePath,
                         false,
@@ -68,7 +68,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
                             },
                         }
                     ) // NOTE: No pattern properties support
-                    : ""
+                  : ""
             : true);
 
         const returnedValue = errors.length ? errors : warnings.length ? warnings : result;
@@ -626,8 +626,8 @@ export class JSONSchemaInput extends LitElement {
             this.onValidate
                 ? this.onValidate()
                 : this.form?.triggerValidation
-                    ? this.form.triggerValidation(name, path, undefined, this, undefined, undefined, hooks)
-                    : "";
+                  ? this.form.triggerValidation(name, path, undefined, this, undefined, undefined, hooks)
+                  : "";
         }, 1000);
     };
 
@@ -640,8 +640,8 @@ export class JSONSchemaInput extends LitElement {
         this.onUpdate
             ? this.onUpdate(value)
             : this.form?.updateData
-                ? this.form.updateData(fullPath, value, forceUpdate)
-                : "";
+              ? this.form.updateData(fullPath, value, forceUpdate)
+              : "";
 
         const path = [...fullPath];
         const name = path.splice(-1)[0];
@@ -656,8 +656,8 @@ export class JSONSchemaInput extends LitElement {
         return this.onValidate
             ? this.onValidate()
             : this.form?.triggerValidation
-                ? this.form.triggerValidation(name, path, undefined, this)
-                : "";
+              ? this.form.triggerValidation(name, path, undefined, this)
+              : "";
     };
 
     updated() {
@@ -673,7 +673,7 @@ export class JSONSchemaInput extends LitElement {
         if (input === null) return null; // Hide rendering
 
         const description = this.description ?? schema.description;
-        
+
         const descriptionHTML = description
             ? html`<p class="guided--text-input-instructions">
                   ${unsafeHTML(capitalize(description))}${[".", "?", "!"].includes(description.slice(-1)[0]) ? "" : "."}
@@ -685,14 +685,18 @@ export class JSONSchemaInput extends LitElement {
                 class="${this.required || this.conditional ? "required" : ""} ${this.conditional ? "conditional" : ""}"
             >
                 ${this.showLabel
-                ? html`<label class="guided--form-label"
+                    ? html`<label class="guided--form-label"
                           >${(schema.title ? unsafeHTML(schema.title) : null) ?? header(this.path.slice(-1)[0])}</label
                       >`
-                : ""}
-            <main>${input}${this.controls && this.controls.length ? html`<div id="controls">${this.controls}</div>` : ""}</main>
-            ${descriptionHTML}
-        </div>
-    `;
+                    : ""}
+                <main>
+                    ${input}${this.controls && this.controls.length
+                        ? html`<div id="controls">${this.controls}</div>`
+                        : ""}
+                </main>
+                ${descriptionHTML}
+            </div>
+        `;
     }
 
     #onThrow = (...args) => (this.onThrow ? this.onThrow(...args) : this.form?.onThrow(...args));
@@ -731,8 +735,8 @@ export class JSONSchemaInput extends LitElement {
             const resolved = value ?? [];
             return resolved
                 ? resolved.map((value) => {
-                    return { value };
-                })
+                      return { value };
+                  })
                 : [];
         }
     }
@@ -811,37 +815,37 @@ export class JSONSchemaInput extends LitElement {
 
         const nestedModalElement = isObject
             ? new JSONSchemaForm({
-                schema: schemaCopy,
-                results: updateTarget,
-                validateEmptyValues: false,
-                onUpdate: (internalPath, value) => {
-                    if (!createNewObject) {
-                        const path = [key, ...internalPath];
-                        this.#updateData(path, value, true); // Live updates
-                    }
-                },
-                renderTable: this.renderTable,
-                onThrow: this.#onThrow,
-            })
+                  schema: schemaCopy,
+                  results: updateTarget,
+                  validateEmptyValues: false,
+                  onUpdate: (internalPath, value) => {
+                      if (!createNewObject) {
+                          const path = [key, ...internalPath];
+                          this.#updateData(path, value, true); // Live updates
+                      }
+                  },
+                  renderTable: this.renderTable,
+                  onThrow: this.#onThrow,
+              })
             : new JSONSchemaForm({
-                schema: {
-                    properties: {
-                        [tempPropertyKey]: {
-                            ...schemaCopy,
-                            title: inputTitle,
-                        },
-                    },
-                    required: [tempPropertyKey],
-                },
-                validateEmptyValues: false,
-                results: updateTarget,
-                onUpdate: (_, value) => {
-                    if (createNewObject) updateTarget[key] = value;
-                    else updateTarget = value;
-                },
-                // renderTable: this.renderTable,
-                // onThrow: this.#onThrow,
-            });
+                  schema: {
+                      properties: {
+                          [tempPropertyKey]: {
+                              ...schemaCopy,
+                              title: inputTitle,
+                          },
+                      },
+                      required: [tempPropertyKey],
+                  },
+                  validateEmptyValues: false,
+                  results: updateTarget,
+                  onUpdate: (_, value) => {
+                      if (createNewObject) updateTarget[key] = value;
+                      else updateTarget = value;
+                  },
+                  // renderTable: this.renderTable,
+                  // onThrow: this.#onThrow,
+              });
 
         div.append(nestedModalElement);
 
@@ -995,7 +999,6 @@ export class JSONSchemaInput extends LitElement {
 
             // Provide default item types
             if (isArray) {
-
                 const hasItemsRef = "items" in schema && "$ref" in schema.items;
                 if (!("items" in schema)) schema.items = {};
                 if (!("type" in schema.items) && !hasItemsRef) {
@@ -1058,7 +1061,6 @@ export class JSONSchemaInput extends LitElement {
                         <div style="margin-bottom: 10px;">${search}</div>
                         ${list}
                     </div>`;
-
                 } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
@@ -1192,7 +1194,6 @@ export class JSONSchemaInput extends LitElement {
 
         // Basic enumeration of properties on a select element
         if (schema.enum && schema.enum.length) {
-
             // Use generic selector
             if (schema.strict && schema.search !== true) {
                 return html`
@@ -1203,13 +1204,13 @@ export class JSONSchemaInput extends LitElement {
                     >
                         <option disabled selected value>${schema.placeholder ?? "Select an option"}</option>
                         ${schema.enum
-                        .sort()
-                        .map(
-                            (item, i) =>
-                                html`<option value=${i} ?selected=${this.value === item}>
+                            .sort()
+                            .map(
+                                (item, i) =>
+                                    html`<option value=${i} ?selected=${this.value === item}>
                                         ${schema.enumLabels?.[item] ?? item}
                                     </option>`
-                        )}
+                            )}
                     </select>
                 `;
             }
@@ -1311,67 +1312,67 @@ export class JSONSchemaInput extends LitElement {
                         .min="${min}"
                         .max="${max}"
                         @input=${(ev) => {
-                        let value = ev.target.value;
-                        let newValue = value;
+                            let value = ev.target.value;
+                            let newValue = value;
 
-                        // const isBlank = value === '';
+                            // const isBlank = value === '';
 
-                        if (isInteger) value = newValue = parseInt(value);
-                        else if (isNumber) value = newValue = parseFloat(value);
+                            if (isInteger) value = newValue = parseInt(value);
+                            else if (isNumber) value = newValue = parseFloat(value);
 
-                        const isStrict = schema.strict ? true : false;
-                        if (isNumber) {
-                            // exclusiveMinimum
-                            if ("exclusiveMinimum" in schema && newValue <= schema.exclusiveMinimum) {
-                                if (isStrict)
-                                    newValue = this.value; // Set back to last value
-                                else newValue = schema.exclusiveMinimum + 1; // (schema.step ?? 1);
+                            const isStrict = schema.strict ? true : false;
+                            if (isNumber) {
+                                // exclusiveMinimum
+                                if ("exclusiveMinimum" in schema && newValue <= schema.exclusiveMinimum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.exclusiveMinimum + 1; // (schema.step ?? 1);
+                                }
+                                // exclusiveMaximum
+                                else if ("exclusiveMaximum" in schema && newValue >= schema.exclusiveMaximum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.exclusiveMaximum - 1; // (schema.step ?? 1);
+                                }
+                                // minimum
+                                else if ("minimum" in schema && newValue < schema.minimum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.minimum;
+                                }
+                                // maximum
+                                else if ("maximum" in schema && newValue > schema.maximum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.maximum;
+                                }
+                                if (isNaN(newValue)) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = undefined;
+                                }
                             }
-                            // exclusiveMaximum
-                            else if ("exclusiveMaximum" in schema && newValue >= schema.exclusiveMaximum) {
-                                if (isStrict)
-                                    newValue = this.value; // Set back to last value
-                                else newValue = schema.exclusiveMaximum - 1; // (schema.step ?? 1);
+
+                            if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
+
+                            // // Do not check pattern if value is empty
+                            // if (schema.pattern && !isBlank) {
+                            //     const regex = new RegExp(schema.pattern)
+                            //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
+                            // }
+
+                            if (isNumber && newValue !== value) {
+                                if (newValue !== undefined) ev.target.value = newValue; // Avoids unnecessary error message
+                                value = newValue;
                             }
-                            // minimum
-                            else if ("minimum" in schema && newValue < schema.minimum) {
-                                if (isStrict)
-                                    newValue = this.value; // Set back to last value
-                                else newValue = schema.minimum;
+
+                            if (isRequiredNumber) {
+                                const nanHandler = ev.target.parentNode.querySelector(".nan-handler");
+                                if (!(newValue && Number.isNaN(newValue))) nanHandler.checked = false;
                             }
-                            // maximum
-                            else if ("maximum" in schema && newValue > schema.maximum) {
-                                if (isStrict)
-                                    newValue = this.value; // Set back to last value
-                                else newValue = schema.maximum;
-                            }
-                            if (isNaN(newValue)) {
-                                if (isStrict)
-                                    newValue = this.value; // Set back to last value
-                                else newValue = undefined;
-                            }
-                        }
 
-                        if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
-
-                        // // Do not check pattern if value is empty
-                        // if (schema.pattern && !isBlank) {
-                        //     const regex = new RegExp(schema.pattern)
-                        //     if (!regex.test(isNaN(newValue) ? value : newValue)) newValue = this.value // revert to last value
-                        // }
-
-                        if (isNumber && newValue !== value) {
-                            if (newValue !== undefined) ev.target.value = newValue; // Avoids unnecessary error message
-                            value = newValue;
-                        }
-
-                        if (isRequiredNumber) {
-                            const nanHandler = ev.target.parentNode.querySelector(".nan-handler");
-                            if (!(newValue && Number.isNaN(newValue))) nanHandler.checked = false;
-                        }
-
-                        this.#updateData(fullPath, value);
-                    }}
+                            this.#updateData(fullPath, value);
+                        }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
                         @keydown=${this.#moveToNextInput}
                     />
@@ -1381,17 +1382,17 @@ export class JSONSchemaInput extends LitElement {
                         type="checkbox"
                         ?checked=${this.value === null}
                         @change=${(ev) => {
-                                const siblingInput = ev.target.parentNode.previousElementSibling;
-                                if (ev.target.checked) {
-                                    this.#updateData(fullPath, null);
-                                    siblingInput.setAttribute("disabled", true);
-                                } else {
-                                    siblingInput.removeAttribute("disabled");
-                                    const ev = new Event("input");
-                                    siblingInput.dispatchEvent(ev);
-                                }
-                                this.#triggerValidation(name, path);
-                            }}
+                            const siblingInput = ev.target.parentNode.previousElementSibling;
+                            if (ev.target.checked) {
+                                this.#updateData(fullPath, null);
+                                siblingInput.setAttribute("disabled", true);
+                            } else {
+                                siblingInput.removeAttribute("disabled");
+                                const ev = new Event("input");
+                                siblingInput.dispatchEvent(ev);
+                            }
+                            this.#triggerValidation(name, path);
+                        }}
                     ></input><span>I Don't Know</span></div>`
                         : ""}
                 `;
