@@ -1012,7 +1012,6 @@ def get_conversion_path_info(info: dict) -> dict:
     return dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory)
 
 
-
 def get_conversion_info(info: dict) -> dict:
     """Function used to organize the required information for conversion."""
 
@@ -1090,7 +1089,6 @@ def get_conversion_info(info: dict) -> dict:
         resolved_metadata,
         path_info,
     )
-
 
 
 def convert_to_nwb(info: dict) -> str:
