@@ -20,7 +20,7 @@ import { getResourceUsage } from "../../../../validation/backend-configuration";
 import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
 import { getInfoFromId } from "./utils.js";
 
-const getBackendConfigurations = (info, options = {}) => run(`configuration`, info, options);
+const getBackendConfigurations = (info, options = {}) => run(`neuroconv/configuration`, info, options);
 
 const itemIgnore = {
     full_shape: true,

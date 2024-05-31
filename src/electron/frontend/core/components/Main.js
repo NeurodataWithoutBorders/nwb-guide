@@ -234,7 +234,7 @@ class MainHeader extends LitElement {
                 ${headerEl}
                 ${this.title
                     ? html`<div
-                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; padding-top: 35px;
+                          style="position: sticky; padding: 0px 50px; top: 0; left: 0; background: white; z-index: 1; padding-top: 35px;"
                       >
                           <div style="display: flex; flex: 1 1 0px; justify-content: space-between; align-items: end;">
                               <div style="line-height: 1em; color: gray;">

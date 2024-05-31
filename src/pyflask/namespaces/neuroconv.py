@@ -20,6 +20,7 @@ from manageNeuroconv import (
     upload_multiple_filesystem_objects_to_dandi,
     upload_project_to_dandi,
     validate_metadata,
+    get_backend_configuration
 )
 
 neuroconv_namespace = Namespace("neuroconv", description="Neuroconv neuroconv_namespace for the NWB GUIDE.")
@@ -84,6 +85,14 @@ class Alignment(Resource):
     def post(self):
         return get_interface_alignment(neuroconv_namespace.payload)
 
+
+@neuroconv_namespace.route("/configuration")
+class GetBackendConfiguration(Resource):
+    @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        return get_backend_configuration(neuroconv_namespace.payload)
+
+   
 
 validate_parser = neuroconv_namespace.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
