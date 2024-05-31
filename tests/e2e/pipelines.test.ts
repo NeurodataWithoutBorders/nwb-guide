@@ -145,7 +145,7 @@ describe('Run example pipelines', () => {
               })
 
               expect(pageId).toBe('/') // Will break while loop if failed
-            
+
             }
           }
 
