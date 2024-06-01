@@ -11,7 +11,7 @@ jobs:
 
   run:
     # Will read on PR dashboard as 'Deploy / LiveServices / {os}'
-    # Action dashboard identified by 'Deploy'
+    # Action dashboard identified by 'Dev tests with live services'
     # Requirement settings identified as 'LiveServices / {os}'
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

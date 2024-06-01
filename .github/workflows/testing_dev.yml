@@ -9,7 +9,7 @@ jobs:
 
   run:
     # Will read on PR dashboard as 'Deploy / DevTests / {os}'
-    # Action dashboard identified by 'Deploy'
+    # Action dashboard identified by 'Dev tests'
     # Requirement settings identified as 'DevTests / {os}'
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
