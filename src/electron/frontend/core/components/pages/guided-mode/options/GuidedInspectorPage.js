@@ -8,13 +8,13 @@ import { electron } from "../../../../../utils/electron.js";
 import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../preview/NWBFilePreview.js";
 const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
-import { run } from "./utils";
+import { run } from "./utils.js";
 import { InspectorList, InspectorLegend } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { getMessageType } from "../../../../validation/index.js";
 
-import { Button } from "../../../Button.js";
+import { Button } from "../../../Button";
 
 import { download } from "../../inspect/utils.js";
 import { createProgressPopup } from "../../../utils/progress.js";
@@ -184,15 +184,14 @@ export class GuidedInspectorPage extends Page {
                             "neuroconv/inspect_folder",
                             { path, ...options, request_id: swalOpts.id },
                             swalOpts
-                        ).catch((error) => {
-                            this.notify(error.message, "error");
-                            closeProgressPopup();
-                            return null;
-                        });
+                        )
+                            .catch(async (error) => {
+                                this.notify(error.message, "error");
+                                return null;
+                            })
+                            .finally(() => closeProgressPopup());
 
                         if (!result) return "Failed to generate inspector report.";
-
-                        closeProgressPopup();
 
                         this.report = globalState.preview.inspector = {
                             ...result,

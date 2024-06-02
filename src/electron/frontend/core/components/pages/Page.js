@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { runConversion } from "./guided-mode/options/utils.js";
+import { run } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 
 import { dismissNotification, notify } from "../../dependencies.js";
@@ -136,13 +136,10 @@ export class Page extends LitElement {
         this.unsavedUpdates = true;
 
         // Indicate conversion has run successfully
-        const { desyncedData } = this.info.globalState;
-        if (!desyncedData) this.info.globalState.desyncedData = {};
-
-        if (desyncedData) {
-            desyncedData[key] = false;
-            await this.save({}, false);
-        }
+        let { desyncedData } = this.info.globalState;
+        if (!desyncedData) desyncedData = this.info.globalState.desyncedData = {};
+        desyncedData[key] = false;
+        await this.save({}, false);
     }
 
     async runConversions(conversionOptions = {}, toRun, options = {}) {
@@ -157,18 +154,10 @@ export class Page extends LitElement {
 
         const results = {};
 
-        const isMultiple = toRun.length > 1;
-
         const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
-        const { close: closeProgressPopup, elements } = swalOpts;
 
-        elements.container.insertAdjacentHTML(
-            "beforeend",
-            `<small><small><b>Note:</b> This may take a while to complete...</small></small><hr style="margin-bottom: 0;">`
-        );
-
-        let completed = 0;
-        elements.progress.format = { n: completed, total: toRun.length };
+        const { close: closeProgressPopup } = swalOpts;
+        const fileConfiguration = [];
 
         for (let info of toRun) {
             const { subject, session, globalState = this.info.globalState } = info;
@@ -187,44 +176,54 @@ export class Page extends LitElement {
                 source_data: merge(SourceData, sourceDataCopy),
             };
 
-            const result = await runConversion(
-                {
-                    output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
-                    project_name: name,
-                    nwbfile_path: file,
-                    overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-                    ...sessionInfo, // source_data and metadata are passed in here
-                    ...conversionOptions, // Any additional conversion options override the defaults
+            const payload = {
+                output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
+                project_name: name,
+                nwbfile_path: file,
+                overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
+                ...sessionInfo, // source_data and metadata are passed in here
+                ...conversionOptions, // Any additional conversion options override the defaults
 
-                    interfaces: globalState.interfaces,
-                    alignment,
-                },
-                swalOpts
-            ).catch((error) => {
-                let message = error.message;
+                interfaces: globalState.interfaces,
+            };
 
-                if (message.includes("The user aborted a request.")) {
-                    this.notify("Conversion was cancelled.", "warning");
-                    throw error;
-                }
-
-                this.notify(message, "error");
-                closeProgressPopup();
-                throw error;
-            });
-
-            completed++;
-            if (isMultiple) {
-                const progressInfo = { n: completed, total: toRun.length };
-                elements.progress.format = progressInfo;
-            }
-
-            const subRef = results[subject] ?? (results[subject] = {});
-            subRef[session] = result;
+            fileConfiguration.push(payload);
         }
 
-        closeProgressPopup();
-        elements.container.style.textAlign = ""; // Clear style update
+        const conversionResults = await run(
+            `neuroconv/convert`,
+            {
+                files: fileConfiguration,
+                max_workers: 2, // TODO: Make this configurable and confirm default value
+                request_id: swalOpts.id,
+            },
+            {
+                title: "Running the conversion",
+                onError: () => "Conversion failed with current metadata. Please try again.",
+                ...swalOpts,
+            }
+        ).catch(async (error) => {
+            let message = error.message;
+
+            if (message.includes("The user aborted a request.")) {
+                this.notify("Conversion was cancelled.", "warning");
+                throw error;
+            }
+
+            this.notify(message, "error");
+            await closeProgressPopup();
+            throw error;
+        });
+
+        conversionResults.forEach((info) => {
+            const { file } = info;
+            const fileName = file.split("/").pop();
+            const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
+            const subRef = results[subject] ?? (results[subject] = {});
+            subRef[session] = info;
+        });
+
+        await closeProgressPopup();
 
         return results;
     }

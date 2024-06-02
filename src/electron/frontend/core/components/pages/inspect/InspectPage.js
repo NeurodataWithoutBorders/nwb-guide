@@ -4,7 +4,6 @@ import { onThrow } from "../../../errors";
 import { Button } from "../../Button.js";
 
 import { run } from "../guided-mode/options/utils.js";
-import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 import { Modal } from "../../Modal";
 import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.js";
 import { InspectorList, InspectorLegend } from "../../preview/inspector/InspectorList.js";
@@ -31,16 +30,15 @@ export class InspectPage extends Page {
         });
 
         const { close: closeProgressPopup } = swalOpts;
-
         const result = await run("neuroconv/inspect", { request_id: swalOpts.id, paths, ...kwargs }, swalOpts).catch(
-            (error) => {
+            async (error) => {
                 this.notify(error.message, "error");
-                closeProgressPopup();
+                await closeProgressPopup();
                 throw error;
             }
         );
 
-        closeProgressPopup();
+        await closeProgressPopup();
 
         if (typeof result === "string") return result;
 

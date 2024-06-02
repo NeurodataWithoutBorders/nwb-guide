@@ -6,6 +6,7 @@ import json
 import math
 import os
 import re
+import traceback
 from datetime import datetime
 from pathlib import Path
 from shutil import copytree, rmtree
@@ -823,153 +824,246 @@ def get_interface_alignment(info: dict) -> dict:
     )
 
 
-def convert_to_nwb(info: dict) -> str:
+def convert_to_nwb(
+    info: dict,
+    log_url=None,
+) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
+    import requests
     from neuroconv import NWBConverter
+    from tqdm_publisher import TQDMProgressSubscriber
+
+    url = info.get("url", None)
+    request_id = info.get("request_id", None)
 
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
     run_stub_test = info.get("stub_test", False)
-
     default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
     default_output_directory = default_output_base / project_name
 
-    run_stub_test = info.get("stub_test", False)
+    try:
 
-    # add a subdirectory to a filepath if stub_test is true
-    resolved_output_base = Path(custom_output_directory) if custom_output_directory else default_output_base
-    resolved_output_directory = resolved_output_base / project_name
-    resolved_output_path = resolved_output_directory / nwbfile_path
+        # add a subdirectory to a filepath if stub_test is true
+        resolved_output_base = Path(custom_output_directory) if custom_output_directory else default_output_base
+        resolved_output_directory = resolved_output_base / project_name
+        resolved_output_path = resolved_output_directory / nwbfile_path
 
-    # Remove symlink placed at the default_output_directory if this will hold real data
-    if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
-        default_output_directory.unlink()
+        # Remove symlink placed at the default_output_directory if this will hold real data
+        if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
+            default_output_directory.unlink()
 
-    resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
+        resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
-    resolved_source_data = replace_none_with_nan(
-        info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
-    )
+        resolved_source_data = replace_none_with_nan(
+            info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
+        )
 
-    converter = instantiate_custom_converter(
-        source_data=resolved_source_data,
-        interface_class_dict=info["interfaces"],
-        alignment_info=info.get("alignment", dict()),
-    )
+        converter = instantiate_custom_converter(
+            source_data=resolved_source_data,
+            interface_class_dict=info["interfaces"],
+            alignment_info=info.get("alignment", dict()),
+        )
 
-    # Assume all interfaces have the same conversion options for now
-    available_options = converter.get_conversion_options_schema()
-    options = (
-        {
-            interface: (
-                {"stub_test": info["stub_test"]}
-                if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
-                else {}
+        def update_conversion_progress(message):
+            update_dict = dict(request_id=request_id, **message)
+            if (url) or not run_stub_test:
+                requests.post(url=url, json=update_dict)
+            else:
+                progress_handler.announce(update_dict)
+
+        progress_bar_options = dict(
+            mininterval=0,
+            on_progress_update=update_conversion_progress,
+        )
+
+        # Assume all interfaces have the same conversion options for now
+        available_options = converter.get_conversion_options_schema()
+        options = {interface: {} for interface in info["source_data"]}
+
+        for interface in options:
+            available_opts = available_options.get("properties").get(interface).get("properties", {})
+
+            # Specify if stub test
+            if run_stub_test:
+                if available_opts.get("stub_test"):
+                    options[interface]["stub_test"] = True
+
+            # Specify if iterator options are available
+            elif available_opts.get("iterator_opts"):
+                options[interface]["iterator_opts"] = dict(
+                    display_progress=True,
+                    progress_bar_class=TQDMProgressSubscriber,
+                    progress_bar_options=progress_bar_options,
+                )
+
+        # Ensure Ophys NaN values are resolved
+        resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
+
+        ecephys_metadata = resolved_metadata.get("Ecephys")
+
+        if ecephys_metadata:
+
+            # Quick fix to remove units
+            has_units = "Units" in ecephys_metadata
+
+            if has_units:
+
+                ## NOTE: Currently do not allow editing units properties
+                # shared_units_columns = ecephys_metadata["UnitColumns"]
+                # for interface_name, interface_unit_results in ecephys_metadata["Units"].items():
+                #     interface = converter.data_interface_objects[interface_name]
+
+                #     update_sorting_properties_from_table_as_json(
+                #         interface,
+                #         unit_table_json=interface_unit_results,
+                #         unit_column_info=shared_units_columns,
+                #     )
+
+                # ecephys_metadata["UnitProperties"] = [
+                #     {"name": entry["name"], "description": entry["description"]} for entry in shared_units_columns
+                # ]
+
+                del ecephys_metadata["Units"]
+                del ecephys_metadata["UnitColumns"]
+
+            has_electrodes = "Electrodes" in ecephys_metadata
+            if has_electrodes:
+
+                shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
+
+                for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+                    name_split = interface_name.split(" — ")
+
+                    if len(name_split) == 1:
+                        sub_interface = name_split[0]
+                    elif len(name_split) == 2:
+                        sub_interface, sub_sub_interface = name_split
+
+                    interface_or_subconverter = converter.data_interface_objects[sub_interface]
+
+                    if isinstance(interface_or_subconverter, NWBConverter):
+                        subconverter = interface_or_subconverter
+
+                        update_recording_properties_from_table_as_json(
+                            recording_interface=subconverter.data_interface_objects[sub_sub_interface],
+                            electrode_table_json=interface_electrode_results,
+                            electrode_column_info=shared_electrode_columns,
+                        )
+                    else:
+                        interface = interface_or_subconverter
+
+                        update_recording_properties_from_table_as_json(
+                            recording_interface=interface,
+                            electrode_table_json=interface_electrode_results,
+                            electrode_column_info=shared_electrode_columns,
+                        )
+
+                ecephys_metadata["Electrodes"] = [
+                    {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
+                ]
+
+                del ecephys_metadata["ElectrodeColumns"]
+
+        # Actually run the conversion
+        converter.run_conversion(
+            metadata=resolved_metadata,
+            nwbfile_path=resolved_output_path,
+            overwrite=info.get("overwrite", False),
+            conversion_options=options,
+        )
+
+        # Create a symlink between the fake data and custom data
+        if not resolved_output_directory == default_output_directory:
+            if default_output_directory.exists():
+                # If default default_output_directory is not a symlink, delete all contents and create a symlink there
+                if not default_output_directory.is_symlink():
+                    rmtree(default_output_directory)
+
+                # If the location is already a symlink, but points to a different output location
+                # remove the existing symlink before creating a new one
+                elif (
+                    default_output_directory.is_symlink()
+                    and default_output_directory.readlink() is not resolved_output_directory
+                ):
+                    default_output_directory.unlink()
+
+            # Create a pointer to the actual conversion outputs
+            if not default_output_directory.exists():
+                os.symlink(resolved_output_directory, default_output_directory)
+
+        return dict(file=str(resolved_output_path))
+
+    except Exception as e:
+        if log_url:
+            requests.post(
+                url=log_url,
+                json=dict(
+                    header=f"Conversion failed for {project_name} — {nwbfile_path} (convert_to_nwb)",
+                    inputs=dict(info=info),
+                    traceback=traceback.format_exc(),
+                    type="error",
+                ),
             )
-            for interface in info["source_data"]
-        }
-        if run_stub_test
-        else None
-    )
 
-    # Ensure Ophys NaN values are resolved
-    resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
+        raise e
 
-    ecephys_metadata = resolved_metadata.get("Ecephys")
 
-    if ecephys_metadata:
+def convert_all_to_nwb(
+    url: str,
+    files: List[dict],
+    request_id: Optional[str],
+    max_workers: int = 1,
+    log_url: Optional[str] = None,
+) -> List[str]:
 
-        # Quick fix to remove units
-        has_units = "Units" in ecephys_metadata
+    from concurrent.futures import ProcessPoolExecutor, as_completed
 
-        if has_units:
+    from tqdm_publisher import TQDMProgressSubscriber
 
-            ## NOTE: Currently do not allow editing units properties
-            # shared_units_columns = ecephys_metadata["UnitColumns"]
-            # for interface_name, interface_unit_results in ecephys_metadata["Units"].items():
-            #     interface = converter.data_interface_objects[interface_name]
+    def on_progress_update(message):
+        message["progress_bar_id"] = request_id  # Ensure request_id matches
+        progress_handler.announce(
+            dict(
+                request_id=request_id,
+                **message,
+            )
+        )
 
-            #     update_sorting_properties_from_table_as_json(
-            #         interface,
-            #         unit_table_json=interface_unit_results,
-            #         unit_column_info=shared_units_columns,
-            #     )
+    futures = []
+    file_paths = []
 
-            # ecephys_metadata["UnitProperties"] = [
-            #     {"name": entry["name"], "description": entry["description"]} for entry in shared_units_columns
-            # ]
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
 
-            del ecephys_metadata["Units"]
-            del ecephys_metadata["UnitColumns"]
+        for file_info in files:
 
-        has_electrodes = "Electrodes" in ecephys_metadata
-        if has_electrodes:
+            futures.append(
+                executor.submit(
+                    convert_to_nwb,
+                    dict(
+                        url=url,
+                        request_id=request_id,
+                        **file_info,
+                    ),
+                    log_url=log_url,
+                )
+            )
 
-            shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
+        inspection_iterable = TQDMProgressSubscriber(
+            iterable=as_completed(futures),
+            desc="Total files converted",
+            total=len(futures),
+            mininterval=0,
+            on_progress_update=on_progress_update,
+        )
 
-            for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
-                name_split = interface_name.split(" — ")
+        for future in inspection_iterable:
+            output_filepath = future.result()
+            file_paths.append(output_filepath)
 
-                if len(name_split) == 1:
-                    sub_interface = name_split[0]
-                elif len(name_split) == 2:
-                    sub_interface, sub_sub_interface = name_split
-
-                interface_or_subconverter = converter.data_interface_objects[sub_interface]
-
-                if isinstance(interface_or_subconverter, NWBConverter):
-                    subconverter = interface_or_subconverter
-
-                    update_recording_properties_from_table_as_json(
-                        recording_interface=subconverter.data_interface_objects[sub_sub_interface],
-                        electrode_table_json=interface_electrode_results,
-                        electrode_column_info=shared_electrode_columns,
-                    )
-                else:
-                    interface = interface_or_subconverter
-
-                    update_recording_properties_from_table_as_json(
-                        recording_interface=interface,
-                        electrode_table_json=interface_electrode_results,
-                        electrode_column_info=shared_electrode_columns,
-                    )
-
-            ecephys_metadata["Electrodes"] = [
-                {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
-            ]
-
-            del ecephys_metadata["ElectrodeColumns"]
-
-    # Actually run the conversion
-    converter.run_conversion(
-        metadata=resolved_metadata,
-        nwbfile_path=resolved_output_path,
-        overwrite=info.get("overwrite", False),
-        conversion_options=options,
-    )
-
-    # Create a symlink between the fake data and custom data
-    if not resolved_output_directory == default_output_directory:
-        if default_output_directory.exists():
-            # If default default_output_directory is not a symlink, delete all contents and create a symlink there
-            if not default_output_directory.is_symlink():
-                rmtree(default_output_directory)
-
-            # If the location is already a symlink, but points to a different output location
-            # remove the existing symlink before creating a new one
-            elif (
-                default_output_directory.is_symlink()
-                and default_output_directory.readlink() is not resolved_output_directory
-            ):
-                default_output_directory.unlink()
-
-        # Create a pointer to the actual conversion outputs
-        if not default_output_directory.exists():
-            os.symlink(resolved_output_directory, default_output_directory)
-
-    return dict(file=str(resolved_output_path))
+        return file_paths
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs) -> list[Path]:
