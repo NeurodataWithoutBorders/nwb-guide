@@ -45,7 +45,6 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
-
         const { preview, project } = this.info.globalState;
 
         return preview.stubs

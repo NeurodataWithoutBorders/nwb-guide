@@ -54,7 +54,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     header = {};
 
     workflow = {
-
         // Ensure conversion is completed when skipped
         backend_configuration: {
             skip: async () => {
@@ -64,7 +63,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 });
             },
         },
-
     };
 
     footer = {
@@ -160,8 +158,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     "*": itemIgnore,
                 },
                 onUpdate: (updatedPath) => {
-
-                    this.unsavedUpdates = "conversions" // Trigger conversion updates
+                    this.unsavedUpdates = "conversions"; // Trigger conversion updates
 
                     const parentPath = updatedPath.slice(0, -1);
                     const form = instance.getFormElement(parentPath);

@@ -249,10 +249,9 @@ export class Dashboard extends LitElement {
         const workflowConfig = page.workflow ?? (page.workflow = {});
         const workflowValues = page.info.globalState?.project?.workflow ?? {};
 
-        Object.entries(workflowValues).forEach(([ key, state = {} ]) => {
-
+        Object.entries(workflowValues).forEach(([key, state = {}]) => {
             const config = workflowConfig[key] ?? (workflowConfig[key] = {});
-            const value = config.value = workflowValues[key];
+            const value = (config.value = workflowValues[key]);
 
             if (state.elements) {
                 const elements = state.elements;
@@ -274,7 +273,6 @@ export class Dashboard extends LitElement {
                 const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
                 if (skipped) {
-
                     if (isStorybook) return; // Do not skip on storybook
 
                     const backwards = previous && previous.info.previous === this.page;
@@ -312,7 +310,7 @@ export class Dashboard extends LitElement {
 
             .finally(() => {
                 if (this.#transitionPromise.value) this.#transitionPromise.trigger(this.main.page); // This ensures calls to page.to() can be properly awaited until the next page is ready
-            })
+            });
     }
 
     // Populate the sections tracked for this page by using the global state as a model
@@ -371,13 +369,15 @@ export class Dashboard extends LitElement {
         if (!active) active = this.activePage; // default to active page
 
         this.main.onTransition = async (transition) => {
-            
-            const promise = this.#transitionPromise.value ?? (this.#transitionPromise.value = new Promise(
-                (resolve) => (this.#transitionPromise.trigger = (v) => {
-                    this.#transitionPromise.value = null; // Reset promise
-                    resolve(v);
-                })
-            ));
+            const promise =
+                this.#transitionPromise.value ??
+                (this.#transitionPromise.value = new Promise(
+                    (resolve) =>
+                        (this.#transitionPromise.trigger = (v) => {
+                            this.#transitionPromise.value = null; // Reset promise
+                            resolve(v);
+                        })
+                ));
 
             if (typeof transition === "number") {
                 const info = this.page.info;
