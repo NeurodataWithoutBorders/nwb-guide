@@ -160,7 +160,8 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     "*": itemIgnore,
                 },
                 onUpdate: (updatedPath) => {
-                    this.unsavedUpdates = true;
+
+                    this.unsavedUpdates = "conversions" // Trigger conversion updates
 
                     const parentPath = updatedPath.slice(0, -1);
                     const form = instance.getFormElement(parentPath);
@@ -178,6 +179,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     // if (name === "chunk_shape") form.inputs["buffer_shape"].schema = { ...form.inputs["buffer_shape"].schema }; // Force schema update
                 },
                 onThrow,
+
                 validateOnChange: async (name, _, path, value) => {
                     const errors = [];
 

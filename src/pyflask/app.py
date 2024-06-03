@@ -107,9 +107,13 @@ class Log(Resource):
         type = payload["type"]
         header = payload["header"]
         inputs = payload["inputs"]
-        traceback = payload["traceback"]
+        traceback = payload.get("traceback", "")
 
-        message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n\n{traceback}\n"
+        message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n"
+        
+        if traceback:
+            message += f"\n{traceback}\n"
+
         selected_logger = getattr(api.logger, type)
         selected_logger(message)
 
