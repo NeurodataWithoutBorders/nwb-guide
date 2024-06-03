@@ -21,7 +21,7 @@ import { extractISOString } from "./DateTimeSelector";
 const isDevelopment = !!import.meta.env;
 
 function resolveDateTime(value) {
-    if (typeof value === "string") return extractISOString(new Date(value), { offset: true })
+    if (typeof value === "string") return extractISOString(new Date(value), { offset: true });
     return value;
 }
 
@@ -1241,7 +1241,6 @@ export class JSONSchemaInput extends LitElement {
                         .min="${min}"
                         .max="${max}"
                         @input=${(ev) => {
-                            
                             let value = ev.target.value;
                             let newValue = value;
 
@@ -1249,7 +1248,7 @@ export class JSONSchemaInput extends LitElement {
 
                             if (isInteger) value = newValue = parseInt(value);
                             else if (isNumber) value = newValue = parseFloat(value);
-                            else if (isDateTime) value = newValue = resolveDateTime(value)
+                            else if (isDateTime) value = newValue = resolveDateTime(value);
 
                             if (isNumber) {
                                 if ("min" in schema && newValue < schema.min) newValue = schema.min;
@@ -1275,7 +1274,7 @@ export class JSONSchemaInput extends LitElement {
                                 const nanHandler = ev.target.parentNode.querySelector(".nan-handler");
                                 if (!(newValue && Number.isNaN(newValue))) nanHandler.checked = false;
                             }
-                            
+
                             this.#updateData(fullPath, value);
                         }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
