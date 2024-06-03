@@ -220,11 +220,6 @@ export class GuidedSourceDataPage extends ManagedPage {
         if (this.#globalModal) this.#globalModal.remove();
     }
 
-    updated() {
-        const dashboard = document.querySelector("nwb-dashboard");
-        const page = dashboard.page;
-    }
-
     render() {
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 

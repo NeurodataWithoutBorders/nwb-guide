@@ -22,9 +22,6 @@ export class Page extends LitElement {
 
     info = { globalState: {} };
 
-    workflow = {
-        file_format: {}, // Populate with file format by default
-    }
 
     constructor(info = {}) {
         super();
@@ -199,8 +196,6 @@ export class Page extends LitElement {
                 delete optsCopy.backend;
             } else {
                 if (typeof optsCopy.configuration === "object") merge(optsCopy.configuration, configurationCopy);
-
-                if (!configurationCopy.backend) configurationCopy.backend = this.workflow.file_format.value; // Provide default
             }
 
             delete optsCopy.configuration;

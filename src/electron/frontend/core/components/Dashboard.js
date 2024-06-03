@@ -245,6 +245,23 @@ export class Dashboard extends LitElement {
 
         this.page.set(toPass, false);
 
+        // Resolve the workflow configuration values before rendering the page
+        const workflowConfig = page.workflow ?? (page.workflow = {});
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+
+        Object.entries(workflowValues).forEach(([ key, state = {} ]) => {
+
+            const config = workflowConfig[key] ?? (workflowConfig[key] = {});
+            const value = config.value = workflowValues[key];
+
+            if (state.elements) {
+                const elements = state.elements;
+                if (value) elements.forEach((el) => el.removeAttribute("hidden"));
+                else elements.forEach((el) => el.setAttribute("hidden", true));
+            }
+        });
+
+        // Ensure that all states are synced to the proper state for this page (e.g. conversions have been run)
         this.page
             .checkSyncState()
             .then(async () => {
@@ -257,6 +274,7 @@ export class Dashboard extends LitElement {
                 const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
                 if (skipped) {
+
                     if (isStorybook) return; // Do not skip on storybook
 
                     const backwards = previous && previous.info.previous === this.page;
@@ -278,8 +296,6 @@ export class Dashboard extends LitElement {
 
                 // Update main to render page
                 this.updateSections({ sidebar: false, main: true });
-
-                if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
             })
 
             .catch((e) => {
@@ -292,7 +308,11 @@ export class Dashboard extends LitElement {
                         : `<h4 style="margin: 0">Fallback to previous page after error occurred</h4><small>${e}</small>`,
                     "error"
                 );
-            });
+            })
+
+            .finally(() => {
+                if (this.#transitionPromise.value) this.#transitionPromise.trigger(this.main.page); // This ensures calls to page.to() can be properly awaited until the next page is ready
+            })
     }
 
     // Populate the sections tracked for this page by using the global state as a model
@@ -351,8 +371,12 @@ export class Dashboard extends LitElement {
         if (!active) active = this.activePage; // default to active page
 
         this.main.onTransition = async (transition) => {
-            const promise = (this.#transitionPromise.value = new Promise(
-                (resolve) => (this.#transitionPromise.trigger = resolve)
+            
+            const promise = this.#transitionPromise.value ?? (this.#transitionPromise.value = new Promise(
+                (resolve) => (this.#transitionPromise.trigger = (v) => {
+                    this.#transitionPromise.value = null; // Reset promise
+                    resolve(v);
+                })
             ));
 
             if (typeof transition === "number") {

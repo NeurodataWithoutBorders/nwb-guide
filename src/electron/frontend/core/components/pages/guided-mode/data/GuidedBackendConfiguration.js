@@ -54,6 +54,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
     header = {};
 
     workflow = {
+
         // Ensure conversion is completed when skipped
         backend_configuration: {
             skip: async () => {
@@ -64,7 +65,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             },
         },
 
-        file_format: {},
     };
 
     footer = {
@@ -286,6 +286,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     const instanceInfo = id
                         .split("/")
                         .reduce((acc, key) => acc[key.split("-").slice(1).join("-")], this.localState.results);
+
                     const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
 
                     return new JSONSchemaInput({
