@@ -60,6 +60,7 @@ const questions = {
     timezone: {
         ...timezoneSchema,
         title: "What timezone is your data in?",
+        required: true,
     },
 
     upload_to_dandi: {
@@ -90,6 +91,11 @@ const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
                 acc[dep].push({ name, ...opts });
             });
     }
+    return acc;
+}, {});
+
+const defaults = Object.entries(questions).reduce((acc, [name, info]) => {
+    acc[name] = info.default;
     return acc;
 }, {});
 
@@ -135,6 +141,12 @@ export class GuidedPreform extends Page {
         const schema = structuredClone(projectWorkflowSchema);
         const projectState = this.info.globalState.project ?? {};
         if (!projectState.workflow) projectState.workflow = {};
+
+        // Set defaults for missing values
+        Object.entries(defaults).forEach(([key, value]) => {
+            if (!(key in projectState.workflow)) projectState.workflow[key] = value;
+        });
+
         this.state = structuredClone(projectState.workflow);
 
         this.form = new JSONSchemaForm({
