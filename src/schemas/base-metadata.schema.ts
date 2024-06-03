@@ -132,7 +132,7 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         strict: false,
         description: 'The species of your subject.'
     }
-    
+
     subjectProps.date_of_birth.minimum = minDate
     subjectProps.date_of_birth.maximum = maxDate
 

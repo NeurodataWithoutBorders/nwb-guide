@@ -3,7 +3,7 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
 
-import timezoneSchema from '../../../../../../../schemas/timezone.schema'
+import timezoneSchema from "../../../../../../../schemas/timezone.schema";
 
 // ------------------------------------------------------------------------------
 // ------------------------ Preform Configuration -------------------------------
