@@ -110,7 +110,7 @@ class Log(Resource):
         traceback = payload.get("traceback", "")
 
         message = f"{header}\n{'-'*len(header)}\n\n{json.dumps(inputs, indent=2)}\n"
-        
+
         if traceback:
             message += f"\n{traceback}\n"
 
