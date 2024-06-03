@@ -827,33 +827,6 @@ def get_interface_alignment(info: dict) -> dict:
     )
 
 
-def configure_dataset_backends(
-    nwbfile, backend: Optional[str] = None, backend_configuration: Optional[dict] = None
-) -> None:
-    from neuroconv.tools.nwb_helpers import (
-        configure_backend,
-        get_default_backend_configuration,
-    )
-
-    PROPS_TO_AVOID = ["full_shape"]
-
-    backend = backend or "hdf5"
-    backend_configuration = backend_configuration or get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
-
-    for dataset_name, dataset_configuration in backend_configuration.items():
-        for key, value in dataset_configuration.items():
-
-            # Avoid setting compression options if unspecified
-            if key == "compression_options" and (value is None or len(value) == 0):
-                setattr(configuration.dataset_configurations[name], key, None)
-
-            # Avoid certain properties passed to the GUIDE
-            elif key not in PROPS_TO_AVOID:
-                setattr(configuration.dataset_configurations[name], key, value)
-
-    configure_backend(nwbfile=nwbfile, backend_configuration=backend_configuration)
-
-
 def create_file(
     info: dict,
     log_url: Optional[str] = None,
