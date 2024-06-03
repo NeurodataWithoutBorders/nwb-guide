@@ -826,37 +826,6 @@ def get_interface_alignment(info: dict) -> dict:
         errors=errors,
     )
 
-
-def configure_dataset_backends(nwbfile, backend_configuration, configuration=None):
-    from neuroconv.tools.nwb_helpers import (
-        configure_backend,
-        get_default_backend_configuration,
-    )
-
-    PROPS_TO_AVOID = ["full_shape"]
-
-    # Default to HDF5 backend configuration
-    if configuration is None:
-        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend="hdf5")
-
-    # Ensure the configuration is a dictionary
-    elif isinstance(configuration, str):
-        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=configuration)
-
-    for name, item in backend_configuration.items():
-        for key, value in item.items():
-
-            # Avoid setting compression options if unspecified
-            if key == "compression_options" and (value is None or len(value) == 0):
-                setattr(configuration.dataset_configurations[name], key, None)
-
-            # Avoid certain properties passed to the GUIDE
-            elif key not in PROPS_TO_AVOID:
-                setattr(configuration.dataset_configurations[name], key, value)
-
-    configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
-
-
 def create_file(
     info: dict,
     log_url: Optional[str] = None,
@@ -932,7 +901,7 @@ def create_file(
             overwrite=overwrite,
             conversion_options=options,
             backend=backend,
-            backend_configuration=extract_backend_configuration(info),
+            backend_configuration=extract_backend_configuration(info)
         )
 
     except Exception as e:
@@ -962,6 +931,7 @@ def extract_backend_configuration(info: dict) -> dict:
     backend_configuration = info.get("configuration", {})
     backend = backend_configuration.get("backend", "hdf5")
     results = backend_configuration.get("results", {}).get(backend, {})
+
 
     converter, metadata, __ = get_conversion_info(info)
 
