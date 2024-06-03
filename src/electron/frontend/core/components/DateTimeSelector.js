@@ -2,24 +2,18 @@ import { LitElement, css } from "lit";
 import { getTimezoneOffset, formatTimezoneOffset } from "../../../../schemas/timezone.schema";
 
 // Function to format the GMT offset
-function formatOffset(date) {
-    let offset = -date.getTimezoneOffset(); // getTimezoneOffset returns the difference in minutes from UTC
-    const sign = offset >= 0 ? "+" : "-";
-    offset = Math.abs(offset);
-    const hours = String(Math.floor(offset / 60)).padStart(2, "0");
-    const minutes = String(offset % 60).padStart(2, "0");
-    return `${sign}${hours}:${minutes}`;
-}
-
 export function extractISOString(
-    date,
+    date = new Date(),
     {
-        // timezone = false,
         offset = false,
+        timezone = undefined
     } = {}
 ) {
+
+    if (typeof date === 'string') date = new Date()
+
     // Extract the GMT offset
-    const offsetMs = getTimezoneOffset(date);
+    const offsetMs = getTimezoneOffset(date, timezone);
     const gmtOffset = formatTimezoneOffset(offsetMs);
 
     // Format the date back to the original format with GMT offset

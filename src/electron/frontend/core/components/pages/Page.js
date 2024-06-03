@@ -10,6 +10,8 @@ import { randomizeElements, mapSessions, merge } from "./utils";
 import { resolveMetadata } from "./guided-mode/data/utils.js";
 import Swal from "sweetalert2";
 import { createProgressPopup } from "../utils/progress.js";
+import { timezoneProperties } from "../../../../../schemas/timezone.schema";
+import { extractISOString } from "../DateTimeSelector.js";
 
 export class Page extends LitElement {
     // static get styles() {
@@ -159,71 +161,93 @@ export class Page extends LitElement {
         const { close: closeProgressPopup } = swalOpts;
         const fileConfiguration = [];
 
-        for (let info of toRun) {
-            const { subject, session, globalState = this.info.globalState } = info;
-            const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
+        try {
 
-            const { conversion_output_folder, name, SourceData, alignment } = globalState.project;
+            for (let info of toRun) {
+                const { subject, session, globalState = this.info.globalState } = info;
+                const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const sessionResults = globalState.results[subject][session];
+                const { conversion_output_folder, name, SourceData, alignment } = globalState.project;
 
-            const sourceDataCopy = structuredClone(sessionResults.source_data);
+                const sessionResults = globalState.results[subject][session];
 
-            // Resolve the correct session info from all of the metadata for this conversion
-            const sessionInfo = {
-                ...sessionResults,
-                metadata: resolveMetadata(subject, session, globalState),
-                source_data: merge(SourceData, sourceDataCopy),
-            };
+                const sourceDataCopy = structuredClone(sessionResults.source_data);
 
-            const payload = {
-                output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
-                project_name: name,
-                nwbfile_path: file,
-                overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-                ...sessionInfo, // source_data and metadata are passed in here
-                ...conversionOptions, // Any additional conversion options override the defaults
+                // Resolve the correct session info from all of the metadata for this conversion
+                const metadata = resolveMetadata(subject, session, globalState)
 
-                interfaces: globalState.interfaces,
-            };
+                // // Add timezone information to relevant metadata
+                // timezoneProperties.forEach(path => {
+                //     const name = path.slice(-1)[0]
+                //     const pathTo = path.slice(0, -1)
+                //     const parent = pathTo.reduce((acc, key) => acc[key], metadata)
+                //     parent[name] = extractISOString(
+                //         parent[name],
+                //         {
+                //             offset: true,
+                //             timezone: this.workflow.timezone
+                //         }
+                //     )
+                // })
 
-            fileConfiguration.push(payload);
-        }
+                const sessionInfo = {
+                    ...sessionResults,
+                    metadata,
+                    source_data: merge(SourceData, sourceDataCopy),
+                };
 
-        const conversionResults = await run(
-            `neuroconv/convert`,
-            {
-                files: fileConfiguration,
-                max_workers: 2, // TODO: Make this configurable and confirm default value
-                request_id: swalOpts.id,
-            },
-            {
-                title: "Running the conversion",
-                onError: () => "Conversion failed with current metadata. Please try again.",
-                ...swalOpts,
+                const payload = {
+                    output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
+                    project_name: name,
+                    nwbfile_path: file,
+                    overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
+                    ...sessionInfo, // source_data and metadata are passed in here
+                    ...conversionOptions, // Any additional conversion options override the defaults
+
+                    interfaces: globalState.interfaces,
+                    alignment
+                };
+
+                fileConfiguration.push(payload);
             }
-        ).catch(async (error) => {
-            let message = error.message;
 
-            if (message.includes("The user aborted a request.")) {
-                this.notify("Conversion was cancelled.", "warning");
+            const conversionResults = await run(
+                `neuroconv/convert`,
+                {
+                    files: fileConfiguration,
+                    max_workers: 2, // TODO: Make this configurable and confirm default value
+                    request_id: swalOpts.id,
+                },
+                {
+                    title: "Running the conversion",
+                    onError: () => "Conversion failed with current metadata. Please try again.",
+                    ...swalOpts,
+                }
+            ).catch(async (error) => {
+                let message = error.message;
+
+                if (message.includes("The user aborted a request.")) {
+                    this.notify("Conversion was cancelled.", "warning");
+                    throw error;
+                }
+
+                this.notify(message, "error");
                 throw error;
-            }
+            });
 
-            this.notify(message, "error");
+            conversionResults.forEach((info) => {
+                const { file } = info;
+                const fileName = file.split("/").pop();
+                const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
+                const subRef = results[subject] ?? (results[subject] = {});
+                subRef[session] = info;
+            });
+
+        } 
+        
+        finally {
             await closeProgressPopup();
-            throw error;
-        });
-
-        conversionResults.forEach((info) => {
-            const { file } = info;
-            const fileName = file.split("/").pop();
-            const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
-            const subRef = results[subject] ?? (results[subject] = {});
-            subRef[session] = info;
-        });
-
-        await closeProgressPopup();
+        }
 
         return results;
     }

@@ -1,11 +1,22 @@
 const timezones = Intl.supportedValuesOf('timeZone');
 
+
+// NOTE: Used before validation and conversion to add timezone information to the data
+export const timezoneProperties = [
+    [ "NWBFile", "session_start_time" ],
+    [ "Subject", "date_of_birth" ]
+]
+
+
 export const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const getTimezoneOffset = (
     date = new Date(),
     timezone = localTimeZone
 ) => {
+
+    if (typeof date === 'string') date = new Date(date)
+
     const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
     const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
     return utcDate.getTime() - tzDate.getTime();
@@ -26,6 +37,8 @@ export function getISODateInTimezone(
     date = new Date(),
     timezone = localTimeZone
 ) {
+
+    if (typeof date === 'string') date = new Date(date)
 
     const offset = getTimezoneOffset(date, timezone)
     const adjustedDate = new Date(date.getTime() - offset);
