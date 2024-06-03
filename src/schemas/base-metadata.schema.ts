@@ -6,6 +6,7 @@ import baseMetadataSchema from './json/base_metadata_schema.json' assert { type:
 
 import { merge } from '../electron/frontend/core/components/pages/utils'
 import { drillSchemaProperties } from '../electron/frontend/core/components/pages/guided-mode/data/utils'
+import { localTimeZone } from './timezone.schema'
 
 const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
 const UV_PROPERTIES = ["gain_to_uV", "offset_to_uV"]
@@ -41,11 +42,17 @@ function getSpeciesInfo(species: any[][] = []) {
 }
 
 
-// Borrowed from https://stackoverflow.com/a/29774197/7290573
-function getCurrentDate() {
-    const date = new Date()
-    const offset = date.getTimezoneOffset();
-    return (new Date(date.getTime() - (offset*60*1000))).toISOString();
+
+function getISODateInTimezone(
+    timezone = localTimeZone
+) {
+    const date = new Date();
+    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+    const offset = utcDate.getTime() - tzDate.getTime();
+
+    const adjustedDate = new Date(date.getTime() - offset);
+    return adjustedDate.toISOString();
 }
 
 
@@ -101,6 +108,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     copy.order = [ "NWBFile", "Subject" ]
 
+    const minDate = "1900-01-01T00:00"
+    const maxDate = getISODateInTimezone().slice(0, -2)
+
+
     // Add unit to weight
     const subjectProps = copy.properties.Subject.properties
     subjectProps.weight.unit = 'kg'
@@ -121,13 +132,18 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         strict: false,
         description: 'The species of your subject.'
     }
-    subjectProps.date_of_birth.minimum = "1900-01-01T00:00"
-    subjectProps.date_of_birth.maximum = getCurrentDate().slice(0, -2)
+    
+    subjectProps.date_of_birth.minimum = minDate
+    subjectProps.date_of_birth.maximum = maxDate
 
     // copy.order = ['NWBFile', 'Subject']
 
-    copy.properties.NWBFile.title = 'General Metadata'
     const nwbProps = copy.properties.NWBFile.properties
+    copy.properties.NWBFile.title = 'General Metadata'
+
+    nwbProps.session_start_time.minimum = minDate
+    nwbProps.session_start_time.maximum = maxDate
+
     nwbProps.keywords.items.description = "Provide a single keyword (e.g. Neural circuits, V1, etc.)"
 
     // Resolve species suggestions

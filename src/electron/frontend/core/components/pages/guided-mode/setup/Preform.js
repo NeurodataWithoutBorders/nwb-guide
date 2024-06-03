@@ -3,6 +3,8 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
 
+import timezoneSchema from '../../../../../../../schemas/timezone.schema'
+
 // ------------------------------------------------------------------------------
 // ------------------------ Preform Configuration -------------------------------
 // ------------------------------------------------------------------------------
@@ -53,6 +55,11 @@ const questions = {
         dependencies: {
             locate_data: {},
         },
+    },
+
+    timezone: {
+        ...timezoneSchema,
+        title: "What timezone is your data in?",
     },
 
     upload_to_dandi: {
