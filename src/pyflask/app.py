@@ -115,6 +115,7 @@ class Log(Resource):
             message += f"\n{traceback}\n"
 
         selected_logger = getattr(api.logger, type)
+        api.logger.info(f"Logging {type} message: {header}")
         selected_logger(message)
 
 
@@ -143,10 +144,10 @@ if __name__ == "__main__":
         )
         log_handler.setFormatter(log_formatter)
 
-        flask_app.logger.addHandler(log_handler)
-        flask_app.logger.setLevel(DEBUG)
+        api.logger.addHandler(log_handler)
+        api.logger.setLevel(DEBUG)
 
-        flask_app.logger.info(f"Logging to {LOG_FILE_PATH}")
+        api.logger.info(f"Logging to {LOG_FILE_PATH}")
 
         # Run the server
         api.logger.info(f"Starting server on port {port}")
