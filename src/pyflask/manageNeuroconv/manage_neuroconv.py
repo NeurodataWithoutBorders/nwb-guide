@@ -865,7 +865,6 @@ def create_file(
     import requests
     from tqdm_publisher import TQDMProgressSubscriber
 
-
     project_name = info.get("project_name")
 
     run_stub_test = info.get("stub_test", False)
@@ -926,7 +925,6 @@ def create_file(
                     progress_bar_options=progress_bar_options,
                 )
 
-
         # Actually run the conversion
         converter.run_conversion(
             metadata=metadata,
@@ -953,7 +951,7 @@ def create_file(
 
 
 def extract_backend_configuration(info: dict) -> dict:
-    
+
     from neuroconv.tools.nwb_helpers import (
         get_default_backend_configuration,
         make_nwbfile_from_metadata,
@@ -971,7 +969,7 @@ def extract_backend_configuration(info: dict) -> dict:
     converter.add_to_nwbfile(nwbfile, metadata=metadata)
 
     configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
-    
+
     for dataset_name, dataset_configuration in results.items():
         for key, value in dataset_configuration.items():
             if key not in PROPS_TO_IGNORE:
@@ -979,7 +977,7 @@ def extract_backend_configuration(info: dict) -> dict:
 
     return configuration
 
-    
+
 def get_backend_configuration(info: dict) -> dict:
 
     import numpy as np
