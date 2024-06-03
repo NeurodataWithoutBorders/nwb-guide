@@ -826,6 +826,7 @@ def get_interface_alignment(info: dict) -> dict:
         errors=errors,
     )
 
+
 def create_file(
     info: dict,
     log_url: Optional[str] = None,
@@ -931,7 +932,6 @@ def update_backend_configuration(info: dict) -> dict:
     info_from_frontend = info.get("configuration", {})
     backend = info_from_frontend.get("backend", "hdf5")
     backend_configuration_from_frontend = info_from_frontend.get("results", {}).get(backend, {})
-
 
     converter, metadata, __ = get_conversion_info(info)
 
