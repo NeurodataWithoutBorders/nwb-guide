@@ -16,19 +16,9 @@ import tippy from "tippy.js";
 import { merge } from "./pages/utils";
 import { OptionalSection } from "./OptionalSection";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
-import { extractISOString } from "./DateTimeSelector";
+import { renderDateTime, resolveDateTime } from "./DateTimeSelector";
 
 const isDevelopment = !!import.meta.env;
-
-function resolveDateTime(value) {
-    if (typeof value === "string") return extractISOString(new Date(value), { offset: true });
-    return value;
-}
-
-function renderDateTime(value) {
-    if (typeof value === "string") return extractISOString(new Date(value));
-    return value;
-}
 
 export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
     const name = fullPath.slice(-1)[0];

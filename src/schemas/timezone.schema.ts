@@ -8,5 +8,6 @@ export default {
     description: "Provide a base timezone for all date and time operations in the GUIDE.",
     default: localTimeZone,
     enum: timezones,
-    strict: true
+    strict: true,
+    search: true
 }

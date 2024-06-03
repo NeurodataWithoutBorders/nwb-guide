@@ -35,6 +35,18 @@ export function extractISOString(
     return formattedDate;
 }
 
+export const renderDateTime = (value) => {
+    if (typeof value === "string") return extractISOString(new Date(value));
+    return value;
+}
+
+export const resolveDateTime = renderDateTime
+// const resolveDateTime = (value) => {
+//     if (typeof value === "string") return extractISOString(new Date(value), { offset: true });
+//     return value;
+// } 
+
+
 export class DateTimeSelector extends LitElement {
     static get styles() {
         return css`
@@ -48,26 +60,35 @@ export class DateTimeSelector extends LitElement {
     // Manually handle value property
     get value() {
         const date = new Date(this.input.value);
-        return extractISOString(date, { offset: true });
+        return resolveDateTime(date);
     }
 
     // Render the date without timezone offset
     set value(newValue) {
-        if (newValue) this.input.value = extractISOString(new Date(newValue));
+        if (newValue) this.input.value = renderDateTime(new Date(newValue));
         else {
             const d = new Date();
             d.setHours(0, 0, 0, 0);
-            this.input.value = extractISOString(d);
+            this.input.value = renderDateTime(d);
         }
     }
 
-    static get properties() {
-        return {
-            min: { type: String, reflect: true },
-            max: { type: String, reflect: true },
-            timezone: { type: String, reflect: true },
-        };
+    get min() {
+        return this.input.min
     }
+
+    set min(value) {
+        this.input.min = value
+    }
+
+    get max() {
+        return this.input.max
+    }
+
+    set max(value) {
+        this.input.max = value
+    }
+
 
     constructor({ value, min, max } = {}) {
         super();
@@ -94,9 +115,6 @@ export class DateTimeSelector extends LitElement {
     }
 
     render() {
-        this.input.min = min;
-        this.input.max = max;
-
         return this.input;
     }
 }
