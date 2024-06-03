@@ -6,7 +6,8 @@ import baseMetadataSchema from './json/base_metadata_schema.json' assert { type:
 
 import { merge } from '../electron/frontend/core/components/pages/utils'
 import { drillSchemaProperties } from '../electron/frontend/core/components/pages/guided-mode/data/utils'
-import { localTimeZone } from './timezone.schema'
+import { getISODateInTimezone } from './timezone.schema'
+
 
 const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
 const UV_PROPERTIES = ["gain_to_uV", "offset_to_uV"]
@@ -39,20 +40,6 @@ function getSpeciesInfo(species: any[][] = []) {
         enum: species.map(arr => getSpeciesNameComponents(arr).name), // Remove common names so this passes the validator
     }
 
-}
-
-
-
-function getISODateInTimezone(
-    timezone = localTimeZone
-) {
-    const date = new Date();
-    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-    const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
-    const offset = utcDate.getTime() - tzDate.getTime();
-
-    const adjustedDate = new Date(date.getTime() - offset);
-    return adjustedDate.toISOString();
 }
 
 

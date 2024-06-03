@@ -1,4 +1,16 @@
 import { LitElement, css } from "lit";
+import { getTimezoneOffset, formatTimezoneOffset } from "../../../../schemas/timezone.schema";
+
+
+// Function to format the GMT offset
+function formatOffset(date) {
+    let offset = -date.getTimezoneOffset(); // getTimezoneOffset returns the difference in minutes from UTC
+    const sign = offset >= 0 ? "+" : "-";
+    offset = Math.abs(offset);
+    const hours = String(Math.floor(offset / 60)).padStart(2, "0");
+    const minutes = String(offset % 60).padStart(2, "0");
+    return `${sign}${hours}:${minutes}`;
+}
 
 export function extractISOString(
     date,
@@ -7,18 +19,10 @@ export function extractISOString(
         offset = false,
     } = {}
 ) {
-    // Function to format the GMT offset
-    function formatOffset(date) {
-        let offset = -date.getTimezoneOffset(); // getTimezoneOffset returns the difference in minutes from UTC
-        const sign = offset >= 0 ? "+" : "-";
-        offset = Math.abs(offset);
-        const hours = String(Math.floor(offset / 60)).padStart(2, "0");
-        const minutes = String(offset % 60).padStart(2, "0");
-        return `${sign}${hours}:${minutes}`;
-    }
 
     // Extract the GMT offset
-    const gmtOffset = formatOffset(date);
+    const offsetMs = getTimezoneOffset(date)
+    const gmtOffset = formatTimezoneOffset(offsetMs)
 
     // Format the date back to the original format with GMT offset
     const year = date.getFullYear();
@@ -29,14 +33,13 @@ export function extractISOString(
     const seconds = String(date.getSeconds()).padStart(2, "0");
 
     // Recreate the ISO string with the GMT offset
-    let formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-    if (offset) formattedDate += gmtOffset;
-
-    return formattedDate;
+    const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    return offset ? formattedDate + gmtOffset : formattedDate;
 }
 
 export const renderDateTime = (value) => {
     if (typeof value === "string") return extractISOString(new Date(value));
+    else if (value instanceof Date) return extractISOString(value)
     return value;
 }
 
@@ -57,53 +60,51 @@ export class DateTimeSelector extends LitElement {
         `;
     }
 
-    // Manually handle value property
     get value() {
         const date = new Date(this.input.value);
-        return resolveDateTime(date);
-    }
+        const resolved = resolveDateTime(date);
 
-    // Render the date without timezone offset
+        console.log(this.input.value, resolved)
+        // return this.input.value;
+        return resolved
+    }
+    
+
     set value(newValue) {
-        if (newValue) this.input.value = renderDateTime(new Date(newValue));
-        else {
-            const d = new Date();
-            d.setHours(0, 0, 0, 0);
-            this.input.value = renderDateTime(d);
-        }
-    }
+        const date = newValue ? new Date(newValue) : new Date()
+        if (!newValue) date.setHours(0, 0, 0, 0);
+        this.input.value = resolveDateTime(date);
 
+    }
     get min() {
-        return this.input.min
+        return this.input.min;
     }
 
-    set min(value) {
-        this.input.min = value
+    set min(newValue) {
+        this.input.min = newValue;
     }
 
     get max() {
-        return this.input.max
+        return this.input.max;
     }
 
-    set max(value) {
-        this.input.max = value
+    set max(newValue) {
+        this.input.max = newValue;
     }
-
 
     constructor({ value, min, max } = {}) {
         super();
         this.input = document.createElement("input");
         this.input.type = "datetime-local";
-
-        this.min = min;
-        this.max = max;
+        this.input.min = min;
+        this.input.max = max;
 
         this.addEventListener("click", () => {
             this.input.focus();
             this.input.showPicker();
         });
 
-        this.value = value;
+        this.value = value ? convertToDateTimeLocalString(value) : value;
     }
 
     focus() {
