@@ -827,7 +827,7 @@ def get_interface_alignment(info: dict) -> dict:
     )
 
 
-def configure_dataset_backends(nwbfile, backend_configuration, configuration=None):
+def configure_dataset_backends(nwbfile, backend: Optional[str] = None, backend_configuration: Optional[dict] = None) -> None:
     from neuroconv.tools.nwb_helpers import (
         configure_backend,
         get_default_backend_configuration,
@@ -835,16 +835,11 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
 
     PROPS_TO_AVOID = ["full_shape"]
 
-    # Default to HDF5 backend configuration
-    if configuration is None:
-        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend="hdf5")
+    backend = backend or "hdf5"
+    backend_configuration = backend_configuration or get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
 
-    # Ensure the configuration is a dictionary
-    elif isinstance(configuration, str):
-        configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=configuration)
-
-    for name, item in backend_configuration.items():
-        for key, value in item.items():
+    for dataset_name, dataset_configuration in backend_configuration.items():
+        for key, value in dataset_configuration.items():
 
             # Avoid setting compression options if unspecified
             if key == "compression_options" and (value is None or len(value) == 0):
@@ -854,7 +849,7 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
             elif key not in PROPS_TO_AVOID:
                 setattr(configuration.dataset_configurations[name], key, value)
 
-    configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
+    configure_backend(nwbfile=nwbfile, backend_configuration=backend_configuration)
 
 
 def create_file(
