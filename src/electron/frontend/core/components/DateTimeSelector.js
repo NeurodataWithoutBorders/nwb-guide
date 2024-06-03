@@ -1,7 +1,6 @@
 import { LitElement, css } from "lit";
 import { getTimezoneOffset, formatTimezoneOffset } from "../../../../schemas/timezone.schema";
 
-
 // Function to format the GMT offset
 function formatOffset(date) {
     let offset = -date.getTimezoneOffset(); // getTimezoneOffset returns the difference in minutes from UTC
@@ -19,10 +18,9 @@ export function extractISOString(
         offset = false,
     } = {}
 ) {
-
     // Extract the GMT offset
-    const offsetMs = getTimezoneOffset(date)
-    const gmtOffset = formatTimezoneOffset(offsetMs)
+    const offsetMs = getTimezoneOffset(date);
+    const gmtOffset = formatTimezoneOffset(offsetMs);
 
     // Format the date back to the original format with GMT offset
     const year = date.getFullYear();
@@ -39,7 +37,7 @@ export function extractISOString(
 
 export const renderDateTime = (value) => {
     if (typeof value === "string") return extractISOString(new Date(value));
-    else if (value instanceof Date) return extractISOString(value)
+    else if (value instanceof Date) return extractISOString(value);
     return value;
 };
 
@@ -63,17 +61,15 @@ export class DateTimeSelector extends LitElement {
         const date = new Date(this.input.value);
         const resolved = resolveDateTime(date);
 
-        console.log(this.input.value, resolved)
+        console.log(this.input.value, resolved);
         // return this.input.value;
-        return resolved
+        return resolved;
     }
-    
 
     set value(newValue) {
-        const date = newValue ? new Date(newValue) : new Date()
+        const date = newValue ? new Date(newValue) : new Date();
         if (!newValue) date.setHours(0, 0, 0, 0);
         this.input.value = resolveDateTime(date);
-
     }
     get min() {
         return this.input.min;
