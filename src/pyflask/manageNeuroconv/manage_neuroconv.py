@@ -858,20 +858,19 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
 
 
 def create_file(
-        info: dict,
-        log_url: Optional[str] = None,
-    ) -> dict:
+    info: dict,
+    log_url: Optional[str] = None,
+) -> dict:
 
     import requests
-    from tqdm_publisher import TQDMProgressSubscriber
-
     from neuroconv.tools.nwb_helpers import (
         get_default_backend_configuration,
         make_or_load_nwbfile,
     )
+    from tqdm_publisher import TQDMProgressSubscriber
 
     project_name = info.get("project_name")
-    
+
     run_stub_test = info.get("stub_test", False)
     backend_configuration = info.get("configuration")
     overwrite = info.get("overwrite", False)
@@ -902,10 +901,7 @@ def create_file(
 
             # Create NWB file with appropriate backend configuration
             with make_or_load_nwbfile(
-                nwbfile_path=nwbfile_path, 
-                metadata=metadata, 
-                overwrite=overwrite, 
-                backend=backend
+                nwbfile_path=nwbfile_path, metadata=metadata, overwrite=overwrite, backend=backend
             ) as nwbfile:
                 converter.add_to_nwbfile(nwbfile, metadata=metadata)
                 configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
@@ -927,7 +923,7 @@ def create_file(
 
             # Assume all interfaces have the same conversion options for now
             available_options = converter.get_conversion_options_schema()
-            options = { interface: {} for interface in info["source_data"] }
+            options = {interface: {} for interface in info["source_data"]}
 
             for interface in options:
                 available_opts = available_options.get("properties").get(interface).get("properties", {})
@@ -944,7 +940,7 @@ def create_file(
                         progress_bar_class=TQDMProgressSubscriber,
                         progress_bar_options=progress_bar_options,
                     )
-                    
+
             # Actually run the conversion
             converter.run_conversion(
                 metadata=metadata,
@@ -952,7 +948,7 @@ def create_file(
                 overwrite=overwrite,
                 conversion_options=options,
             )
-        
+
     except Exception as e:
         if log_url:
             requests.post(
@@ -966,7 +962,6 @@ def create_file(
             )
 
         raise e
-
 
 
 def get_backend_configuration(info: dict) -> dict:
@@ -1155,21 +1150,19 @@ def get_conversion_info(info: dict) -> dict:
         path_info,
     )
 
+
 def convert_to_nwb(
-        info: dict,
-        log_url: Optional[str] = None,
-    ) -> str:
+    info: dict,
+    log_url: Optional[str] = None,
+) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
     path_info = get_conversion_path_info(info)
     output_path = path_info["file"]
     resolved_output_directory = path_info["directory"]
     default_output_directory = path_info["default"]
-        
-    create_file(
-        info,
-        log_url=log_url
-    )
+
+    create_file(info, log_url=log_url)
 
     # Create a symlink between the fake data and custom data
     if not resolved_output_directory == default_output_directory:
@@ -1191,6 +1184,7 @@ def convert_to_nwb(
             os.symlink(resolved_output_directory, default_output_directory)
 
     return dict(file=str(output_path))
+
 
 def convert_all_to_nwb(
     url: str,

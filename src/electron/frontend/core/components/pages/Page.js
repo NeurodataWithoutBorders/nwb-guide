@@ -24,7 +24,7 @@ export class Page extends LitElement {
 
     workflow = {
         file_format: {}, // Populate with file format by default
-    }
+    };
 
     constructor(info = {}) {
         super();
@@ -135,7 +135,6 @@ export class Page extends LitElement {
 
             this.info.globalState[key] = { stubs };
         } else {
-
             if (!options.title) options.title = "Running all conversions";
 
             this.info.globalState[key] = await this.runConversions(conversionOptions, true, options);
@@ -151,7 +150,6 @@ export class Page extends LitElement {
     }
 
     async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctionToRun = null) {
-        
         const hasCustomFunction = !!backendFunctionToRun;
 
         let original = toRun;
@@ -165,7 +163,9 @@ export class Page extends LitElement {
 
         const conversionOutput = {};
 
-        const swalOpts = hasCustomFunction ? options : await createProgressPopup({ title: `Running conversion`, ...options });
+        const swalOpts = hasCustomFunction
+            ? options
+            : await createProgressPopup({ title: `Running conversion`, ...options });
 
         const { close: closeProgressPopup } = swalOpts;
 
@@ -213,21 +213,17 @@ export class Page extends LitElement {
                 ...sessionInfo, // source_data and metadata are passed in here
                 ...optsCopy, // Any additional conversion options override the defaults
                 interfaces: globalState.interfaces,
-                alignment
-            }
+                alignment,
+            };
 
             if (hasCustomFunction) {
-                const result = await backendFunctionToRun(payload, swalOpts) // Already handling Swal popup
+                const result = await backendFunctionToRun(payload, swalOpts); // Already handling Swal popup
                 const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
                 subRef[session] = result;
-            }
-
-            else fileConfiguration.push(payload);
-
+            } else fileConfiguration.push(payload);
         }
 
         if (fileConfiguration.length) {
-                
             const results = await run(
                 `neuroconv/convert`,
                 {
@@ -240,28 +236,28 @@ export class Page extends LitElement {
                     onError: () => "Conversion failed with current metadata. Please try again.",
                     ...swalOpts,
                 }
-            ).catch(async (error) => {
-                let message = error.message;
+            )
+                .catch(async (error) => {
+                    let message = error.message;
 
-                if (message.includes("The user aborted a request.")) {
-                    this.notify("Conversion was cancelled.", "warning");
+                    if (message.includes("The user aborted a request.")) {
+                        this.notify("Conversion was cancelled.", "warning");
+                        throw error;
+                    }
+
+                    this.notify(message, "error");
                     throw error;
-                }
+                })
 
-                this.notify(message, "error");
-                throw error;
-            })
-            
-            .finally(() => closeProgressPopup());
+                .finally(() => closeProgressPopup());
 
             results.forEach((info) => {
                 const { file } = info;
                 const fileName = file.split("/").pop();
-                const [ subject, session ] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
+                const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
                 const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
                 subRef[session] = info;
             });
-
         }
 
         return conversionOutput;
