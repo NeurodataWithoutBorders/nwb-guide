@@ -12,6 +12,14 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
+import { Validator } from "jsonschema";
+import { successHue, warningHue, errorHue } from "./globals";
+import { Button } from "./Button";
+import { extractISOString } from "./DateTimeSelector";
+import { timezoneProperties } from "../../../../schemas/timezone.schema";
+const timezonePropertyPaths = timezoneProperties.map(arr => arr.join('.'))
+
+
 const encode = (str) => {
     try {
         document.querySelector(`#${str}`);
@@ -64,10 +72,6 @@ export const getSchema = (path, schema, base = []) => {
 const additionalPropPattern = "additional";
 
 const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
-
-import { Validator } from "jsonschema";
-import { successHue, warningHue, errorHue } from "./globals";
-import { Button } from "./Button";
 
 var validator = new Validator();
 
@@ -248,6 +252,7 @@ export class JSONSchemaForm extends LitElement {
             dialogOptions: { type: Object, reflect: false },
             globals: { type: Object, reflect: false },
             validateEmptyValues: { type: Boolean, reflect: true },
+            timezone: { type: String, reflect: true}
         };
     }
 
@@ -279,6 +284,8 @@ export class JSONSchemaForm extends LitElement {
         this.schema = props.schema ?? {};
         this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
+
+        this.timezone = props.timezone ?? undefined
 
         this.ignore = props.ignore ?? {};
         this.required = props.required ?? {};
@@ -698,7 +705,7 @@ export class JSONSchemaForm extends LitElement {
             pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
             renderTable: this.renderTable,
             renderCustomHTML: this.renderCustomHTML,
-            showLabel: !("title" in info && !info.title),
+            showLabel: !("title" in info && !info.title)
         });
 
         this.inputs[localPath.join("-")] = interactiveInput;
@@ -902,7 +909,22 @@ export class JSONSchemaForm extends LitElement {
         if (!parent) parent = this.#get(path, this.resolved);
         if (!schema) schema = this.getSchema(localPath);
 
-        const value = parent[name];
+        let value = parent[name];
+
+        const { timezone } = this
+
+        // Validate with timezone awareness
+        const isTimezoneProperty = timezonePropertyPaths.includes(externalPath.join('.'))
+        if (timezone && isTimezoneProperty) {
+            value = extractISOString(
+                value,
+                {
+                    offset: true,
+                    timezone
+                }
+            )
+        }
+        
 
         const skipValidation = this.validateEmptyValues === null && value === undefined;
 
@@ -910,6 +932,8 @@ export class JSONSchemaForm extends LitElement {
 
         // Run validation functions
         const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
+
+        
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
 
         if (valid === null) return null; // Skip validation / data change if the value is null
@@ -1204,6 +1228,8 @@ export class JSONSchemaForm extends LitElement {
                     schema: info,
                     results: { ...nestedResults },
                     globals: this.globals?.[name],
+
+                    timezone: this.timezone,
 
                     controls: this.controls[name],
 

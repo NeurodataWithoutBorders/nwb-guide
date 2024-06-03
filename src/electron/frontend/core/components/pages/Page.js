@@ -176,19 +176,19 @@ export class Page extends LitElement {
                 // Resolve the correct session info from all of the metadata for this conversion
                 const metadata = resolveMetadata(subject, session, globalState)
 
-                // // Add timezone information to relevant metadata
-                // timezoneProperties.forEach(path => {
-                //     const name = path.slice(-1)[0]
-                //     const pathTo = path.slice(0, -1)
-                //     const parent = pathTo.reduce((acc, key) => acc[key], metadata)
-                //     parent[name] = extractISOString(
-                //         parent[name],
-                //         {
-                //             offset: true,
-                //             timezone: this.workflow.timezone
-                //         }
-                //     )
-                // })
+                // Add timezone information to relevant metadata
+                timezoneProperties.forEach(path => {
+                    const name = path.slice(-1)[0]
+                    const pathTo = path.slice(0, -1)
+                    const parent = pathTo.reduce((acc, key) => acc[key], metadata)
+                    parent[name] = extractISOString(
+                        parent[name],
+                        {
+                            offset: true,
+                            timezone: this.workflow.timezone
+                        }
+                    )
+                })
 
                 const sessionInfo = {
                     ...sessionResults,
