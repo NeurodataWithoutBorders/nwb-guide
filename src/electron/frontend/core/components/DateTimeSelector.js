@@ -2,15 +2,8 @@ import { LitElement, css } from "lit";
 import { getTimezoneOffset, formatTimezoneOffset } from "../../../../schemas/timezone.schema";
 
 // Function to format the GMT offset
-export function extractISOString(
-    date = new Date(),
-    {
-        offset = false,
-        timezone = undefined
-    } = {}
-) {
-
-    if (typeof date === 'string') date = new Date()
+export function extractISOString(date = new Date(), { offset = false, timezone = undefined } = {}) {
+    if (typeof date === "string") date = new Date();
 
     // Extract the GMT offset
     const offsetMs = getTimezoneOffset(date, timezone);

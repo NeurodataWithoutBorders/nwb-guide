@@ -279,7 +279,6 @@ export class GuidedMetadataPage extends ManagedPage {
 
         delete results.__generated; // Ignore generated results. NOTE: See if this fails
 
-
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
