@@ -901,7 +901,7 @@ def create_file(
             overwrite=overwrite,
             conversion_options=options,
             backend=backend,
-            backend_configuration=extract_backend_configuration(info)
+            backend_configuration=update_backend_configuration(info),
         )
 
     except Exception as e:
@@ -919,7 +919,7 @@ def create_file(
         raise e
 
 
-def extract_backend_configuration(info: dict) -> dict:
+def update_backend_configuration(info: dict) -> dict:
 
     from neuroconv.tools.nwb_helpers import (
         get_default_backend_configuration,
@@ -928,9 +928,9 @@ def extract_backend_configuration(info: dict) -> dict:
 
     PROPS_TO_IGNORE = ["full_shape"]
 
-    backend_configuration = info.get("configuration", {})
-    backend = backend_configuration.get("backend", "hdf5")
-    results = backend_configuration.get("results", {}).get(backend, {})
+    info_from_frontend = info.get("configuration", {})
+    backend = info_from_frontend.get("backend", "hdf5")
+    backend_configuration_from_frontend = info_from_frontend.get("results", {}).get(backend, {})
 
 
     converter, metadata, __ = get_conversion_info(info)
@@ -938,14 +938,14 @@ def extract_backend_configuration(info: dict) -> dict:
     nwbfile = make_nwbfile_from_metadata(metadata=metadata)
     converter.add_to_nwbfile(nwbfile, metadata=metadata)
 
-    configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
+    backend_configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
 
-    for dataset_name, dataset_configuration in results.items():
+    for dataset_name, dataset_configuration in backend_configuration_from_frontend.items():
         for key, value in dataset_configuration.items():
             if key not in PROPS_TO_IGNORE:
-                setattr(configuration.dataset_configurations[dataset_name], key, value)
+                backend_configuration.dataset_configurations[dataset_name][key] = value
 
-    return configuration
+    return backend_configuration
 
 
 def get_backend_configuration(info: dict) -> dict:
@@ -963,7 +963,7 @@ def get_backend_configuration(info: dict) -> dict:
     info["overwrite"] = True  # Always overwrite the file
 
     backend = info.get("backend", "hdf5")
-    configuration = extract_backend_configuration(info)
+    configuration = update_backend_configuration(info)
 
     def custom_encoder(obj):
         if isinstance(obj, np.ndarray):
