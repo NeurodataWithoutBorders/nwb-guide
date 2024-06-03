@@ -827,7 +827,9 @@ def get_interface_alignment(info: dict) -> dict:
     )
 
 
-def configure_dataset_backends(nwbfile, backend: Optional[str] = None, backend_configuration: Optional[dict] = None) -> None:
+def configure_dataset_backends(
+    nwbfile, backend: Optional[str] = None, backend_configuration: Optional[dict] = None
+) -> None:
     from neuroconv.tools.nwb_helpers import (
         configure_backend,
         get_default_backend_configuration,
