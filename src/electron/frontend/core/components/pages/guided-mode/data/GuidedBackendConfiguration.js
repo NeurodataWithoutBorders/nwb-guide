@@ -20,7 +20,6 @@ import { getResourceUsage } from "../../../../validation/backend-configuration";
 import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
 import { getInfoFromId } from "./utils.js";
 
-
 const itemIgnore = {
     full_shape: true,
     buffer_shape: true,
@@ -39,10 +38,11 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         this.style.height = "100%"; // Fix main section
     }
 
-    getBackendConfigurations = (info, options = {}) => run(`neuroconv/configuration`, info, options).catch(e => {
-        this.notify(e.message, "error");
-        throw e;
-    })
+    getBackendConfigurations = (info, options = {}) =>
+        run(`neuroconv/configuration`, info, options).catch((e) => {
+            this.notify(e.message, "error");
+            throw e;
+        });
 
     beforeSave = () => {
         merge(this.localState, this.info.globalState);
@@ -238,7 +238,12 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
 
     validate = (toRun) => {
         if (!toRun)
-            return this.runConversions({}, true, { title: "Validating backend options" }, this.getBackendConfigurations);
+            return this.runConversions(
+                {},
+                true,
+                { title: "Validating backend options" },
+                this.getBackendConfigurations
+            );
 
         const { subject, session } = toRun;
         return this.runConversions(
