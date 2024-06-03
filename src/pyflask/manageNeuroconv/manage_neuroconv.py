@@ -863,22 +863,22 @@ def create_file(
 ) -> dict:
 
     import requests
-    from neuroconv.tools.nwb_helpers import (
-        get_default_backend_configuration,
-        make_or_load_nwbfile,
-    )
     from tqdm_publisher import TQDMProgressSubscriber
+
 
     project_name = info.get("project_name")
 
     run_stub_test = info.get("stub_test", False)
-    backend_configuration = info.get("configuration")
+
     overwrite = info.get("overwrite", False)
 
+    # Progress update info
     url = info.get("url")
     request_id = info.get("request_id")
 
-    will_configure_backend = backend_configuration is not None and run_stub_test is False
+    # Backend configuration info
+    backend_configuration = info.get("configuration")
+    backend = backend_configuration.get("backend", "hdf5")
 
     converter, metadata, path_info = get_conversion_info(info)
 
@@ -894,60 +894,48 @@ def create_file(
                 else:
                     nwbfile_path.unlink()
 
-        if will_configure_backend:
+        def update_conversion_progress(message):
+            update_dict = dict(request_id=request_id, **message)
+            if url or not run_stub_test:
+                requests.post(url=url, json=update_dict)
+            else:
+                progress_handler.announce(update_dict)
 
-            backend = backend_configuration.get("backend", "hdf5")
-            configuration_values = backend_configuration.get("results", {}).get(backend, {})
+        progress_bar_options = dict(
+            mininterval=0,
+            on_progress_update=update_conversion_progress,
+        )
 
-            # Create NWB file with appropriate backend configuration
-            with make_or_load_nwbfile(
-                nwbfile_path=nwbfile_path, metadata=metadata, overwrite=overwrite, backend=backend
-            ) as nwbfile:
-                converter.add_to_nwbfile(nwbfile, metadata=metadata)
-                configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
-                configure_dataset_backends(nwbfile, configuration_values, configuration)
+        # Assume all interfaces have the same conversion options for now
+        available_options = converter.get_conversion_options_schema()
+        options = {interface: {} for interface in info["source_data"]}
 
-        else:
+        for interface in options:
+            available_opts = available_options.get("properties").get(interface).get("properties", {})
 
-            def update_conversion_progress(message):
-                update_dict = dict(request_id=request_id, **message)
-                if url or not run_stub_test:
-                    requests.post(url=url, json=update_dict)
-                else:
-                    progress_handler.announce(update_dict)
+            # Specify if stub test
+            if run_stub_test:
+                if available_opts.get("stub_test"):
+                    options[interface]["stub_test"] = True
 
-            progress_bar_options = dict(
-                mininterval=0,
-                on_progress_update=update_conversion_progress,
-            )
+            # Specify if iterator options are available
+            elif available_opts.get("iterator_opts"):
+                options[interface]["iterator_opts"] = dict(
+                    display_progress=True,
+                    progress_bar_class=TQDMProgressSubscriber,
+                    progress_bar_options=progress_bar_options,
+                )
 
-            # Assume all interfaces have the same conversion options for now
-            available_options = converter.get_conversion_options_schema()
-            options = {interface: {} for interface in info["source_data"]}
 
-            for interface in options:
-                available_opts = available_options.get("properties").get(interface).get("properties", {})
-
-                # Specify if stub test
-                if run_stub_test:
-                    if available_opts.get("stub_test"):
-                        options[interface]["stub_test"] = True
-
-                # Specify if iterator options are available
-                elif available_opts.get("iterator_opts"):
-                    options[interface]["iterator_opts"] = dict(
-                        display_progress=True,
-                        progress_bar_class=TQDMProgressSubscriber,
-                        progress_bar_options=progress_bar_options,
-                    )
-
-            # Actually run the conversion
-            converter.run_conversion(
-                metadata=metadata,
-                nwbfile_path=nwbfile_path,
-                overwrite=overwrite,
-                conversion_options=options,
-            )
+        # Actually run the conversion
+        converter.run_conversion(
+            metadata=metadata,
+            nwbfile_path=nwbfile_path,
+            overwrite=overwrite,
+            conversion_options=options,
+            backend=backend,
+            backend_configuration=extract_backend_configuration(info),
+        )
 
     except Exception as e:
         if log_url:
@@ -964,6 +952,34 @@ def create_file(
         raise e
 
 
+def extract_backend_configuration(info: dict) -> dict:
+    
+    from neuroconv.tools.nwb_helpers import (
+        get_default_backend_configuration,
+        make_nwbfile_from_metadata,
+    )
+
+    PROPS_TO_IGNORE = ["full_shape"]
+
+    backend_configuration = info.get("configuration", {})
+    backend = backend_configuration.get("backend", "hdf5")
+    results = backend_configuration.get("results", {}).get(backend, {})
+
+    converter, metadata, __ = get_conversion_info(info)
+
+    nwbfile = make_nwbfile_from_metadata(metadata=metadata)
+    converter.add_to_nwbfile(nwbfile, metadata=metadata)
+
+    configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
+    
+    for dataset_name, dataset_configuration in results.items():
+        for key, value in dataset_configuration.items():
+            if key not in PROPS_TO_IGNORE:
+                setattr(configuration.dataset_configurations[dataset_name], key, value)
+
+    return configuration
+
+    
 def get_backend_configuration(info: dict) -> dict:
 
     import numpy as np
@@ -976,30 +992,10 @@ def get_backend_configuration(info: dict) -> dict:
         "dtype",
     ]
 
-    PROPS_TO_IGNORE = ["full_shape"]
-
     info["overwrite"] = True  # Always overwrite the file
 
-    from neuroconv.tools.nwb_helpers import (
-        get_default_backend_configuration,
-        make_nwbfile_from_metadata,
-    )
-
-    backend_configuration = info.get("configuration", {})
-    backend = backend_configuration.get("backend", "hdf5")
-    results = backend_configuration.get("results", {}).get(backend, {})
-
-    # raise ValueError(f"This function is not currently supported. {results}")
-
-    converter, metadata, __ = get_conversion_info(info)
-
-    nwbfile = make_nwbfile_from_metadata(metadata=metadata)
-    converter.add_to_nwbfile(nwbfile, metadata=metadata)
-    configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
-    for dataset_name, dataset_configuration in results.items():
-        for key, value in dataset_configuration.items():
-            if key not in PROPS_TO_IGNORE:
-                setattr(configuration.dataset_configurations[dataset_name], key, value)
+    backend = info.get("backend", "hdf5")
+    configuration = extract_backend_configuration(info)
 
     def custom_encoder(obj):
         if isinstance(obj, np.ndarray):
