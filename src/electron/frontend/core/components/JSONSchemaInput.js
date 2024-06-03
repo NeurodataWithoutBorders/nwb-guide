@@ -16,18 +16,17 @@ import tippy from "tippy.js";
 import { merge } from "./pages/utils";
 import { OptionalSection } from "./OptionalSection";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
+import { extractISOString } from "./DateTimeSelector";
 
 const isDevelopment = !!import.meta.env;
 
-const dateTimeRegex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
-
 function resolveDateTime(value) {
-    if (typeof value === "string") {
-        const match = value.match(dateTimeRegex);
-        if (match) return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}`;
-        return value;
-    }
+    if (typeof value === "string") return extractISOString(new Date(value), { offset: true })
+    return value;
+}
 
+function renderDateTime(value) {
+    if (typeof value === "string") return extractISOString(new Date(value));
     return value;
 }
 
@@ -1226,7 +1225,7 @@ export class JSONSchemaInput extends LitElement {
                     ? "datetime-local"
                     : schema.format ?? (schema.type === "string" ? "text" : schema.type);
 
-                const value = isDateTime ? resolveDateTime(this.value) : this.value;
+                const value = isDateTime ? renderDateTime(this.value) : this.value;
 
                 const { minimum, maximum, exclusiveMax, exclusiveMin } = schema;
                 const min = exclusiveMin ?? minimum;
@@ -1242,6 +1241,7 @@ export class JSONSchemaInput extends LitElement {
                         .min="${min}"
                         .max="${max}"
                         @input=${(ev) => {
+                            
                             let value = ev.target.value;
                             let newValue = value;
 
@@ -1249,6 +1249,7 @@ export class JSONSchemaInput extends LitElement {
 
                             if (isInteger) value = newValue = parseInt(value);
                             else if (isNumber) value = newValue = parseFloat(value);
+                            else if (isDateTime) value = newValue = resolveDateTime(value)
 
                             if (isNumber) {
                                 if ("min" in schema && newValue < schema.min) newValue = schema.min;
@@ -1274,7 +1275,7 @@ export class JSONSchemaInput extends LitElement {
                                 const nanHandler = ev.target.parentNode.querySelector(".nan-handler");
                                 if (!(newValue && Number.isNaN(newValue))) nanHandler.checked = false;
                             }
-
+                            
                             this.#updateData(fullPath, value);
                         }}
                         @change=${(ev) => validateOnChange && this.#triggerValidation(name, path)}
