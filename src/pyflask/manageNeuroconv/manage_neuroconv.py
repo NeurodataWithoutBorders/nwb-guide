@@ -940,10 +940,11 @@ def update_backend_configuration(info: dict) -> dict:
 
     backend_configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
 
-    for dataset_name, dataset_configuration in backend_configuration_from_frontend.items():
+    for location_in_file, dataset_configuration in backend_configuration_from_frontend.items():
         for key, value in dataset_configuration.items():
             if key not in PROPS_TO_IGNORE:
-                backend_configuration.dataset_configurations[dataset_name][key] = value
+                # Pydantic models only allow setting of attributes
+                setattr(backend_configuration.dataset_configurations[location_in_file], key, value)
 
     return backend_configuration
 
