@@ -38,14 +38,13 @@ export function extractISOString(
 export const renderDateTime = (value) => {
     if (typeof value === "string") return extractISOString(new Date(value));
     return value;
-}
+};
 
-export const resolveDateTime = renderDateTime
+export const resolveDateTime = renderDateTime;
 // const resolveDateTime = (value) => {
 //     if (typeof value === "string") return extractISOString(new Date(value), { offset: true });
 //     return value;
-// } 
-
+// }
 
 export class DateTimeSelector extends LitElement {
     static get styles() {
@@ -74,21 +73,20 @@ export class DateTimeSelector extends LitElement {
     }
 
     get min() {
-        return this.input.min
+        return this.input.min;
     }
 
     set min(value) {
-        this.input.min = value
+        this.input.min = value;
     }
 
     get max() {
-        return this.input.max
+        return this.input.max;
     }
 
     set max(value) {
-        this.input.max = value
+        this.input.max = value;
     }
-
 
     constructor({ value, min, max } = {}) {
         super();
