@@ -294,6 +294,9 @@ export class Dashboard extends LitElement {
                     );
                 }
 
+                page.requestUpdate(); // Re-render the page on each load
+
+
                 // Update main to render page
                 this.updateSections({ sidebar: false, main: true });
             })
