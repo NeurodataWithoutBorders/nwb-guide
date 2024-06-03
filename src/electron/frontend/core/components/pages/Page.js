@@ -162,7 +162,6 @@ export class Page extends LitElement {
         const fileConfiguration = [];
 
         try {
-
             for (let info of toRun) {
                 const { subject, session, globalState = this.info.globalState } = info;
                 const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
@@ -174,21 +173,18 @@ export class Page extends LitElement {
                 const sourceDataCopy = structuredClone(sessionResults.source_data);
 
                 // Resolve the correct session info from all of the metadata for this conversion
-                const metadata = resolveMetadata(subject, session, globalState)
+                const metadata = resolveMetadata(subject, session, globalState);
 
                 // Add timezone information to relevant metadata
-                timezoneProperties.forEach(path => {
-                    const name = path.slice(-1)[0]
-                    const pathTo = path.slice(0, -1)
-                    const parent = pathTo.reduce((acc, key) => acc[key], metadata)
-                    parent[name] = extractISOString(
-                        parent[name],
-                        {
-                            offset: true,
-                            timezone: this.workflow.timezone
-                        }
-                    )
-                })
+                timezoneProperties.forEach((path) => {
+                    const name = path.slice(-1)[0];
+                    const pathTo = path.slice(0, -1);
+                    const parent = pathTo.reduce((acc, key) => acc[key], metadata);
+                    parent[name] = extractISOString(parent[name], {
+                        offset: true,
+                        timezone: this.workflow.timezone,
+                    });
+                });
 
                 const sessionInfo = {
                     ...sessionResults,
@@ -205,7 +201,7 @@ export class Page extends LitElement {
                     ...conversionOptions, // Any additional conversion options override the defaults
 
                     interfaces: globalState.interfaces,
-                    alignment
+                    alignment,
                 };
 
                 fileConfiguration.push(payload);
@@ -242,10 +238,7 @@ export class Page extends LitElement {
                 const subRef = results[subject] ?? (results[subject] = {});
                 subRef[session] = info;
             });
-
-        } 
-        
-        finally {
+        } finally {
             await closeProgressPopup();
         }
 
