@@ -29,6 +29,8 @@ export const createProgressPopup = async (options, tqdmCallback) => {
         textAlign: "left",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
+        width: "100%",
         gap: "5px",
     });
     element.append(container);
@@ -74,13 +76,16 @@ export const createProgressPopup = async (options, tqdmCallback) => {
 
     progressHandler.addEventListener("message", onProgressMessage);
 
-    const close = () => {
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const close = async () => {
         if (lastUpdate) {
             // const timeSinceLastUpdate = now - lastUpdate;
             const animationLeft = 1000; // ProgressBar.animationDuration - timeSinceLastUpdate; // Add 100ms to ensure the animation has time to complete
-            if (animationLeft) setTimeout(() => popup.close(), animationLeft);
-            else popup.close();
-        } else popup.close();
+            if (animationLeft) await sleep(animationLeft);
+        }
+
+        popup.close();
 
         progressHandler.removeEventListener("message", onProgressMessage);
     };

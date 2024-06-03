@@ -6,6 +6,7 @@ import json
 import math
 import os
 import re
+import traceback
 from datetime import datetime
 from pathlib import Path
 from shutil import copytree, rmtree
@@ -846,7 +847,7 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
         for key, value in item.items():
 
             # Avoid setting compression options if unspecified
-            if key == "compression_options" and len(value) == 0:
+            if key == "compression_options" and (value is None or len(value) == 0):
                 setattr(configuration.dataset_configurations[name], key, None)
 
             # Avoid certain properties passed to the GUIDE
@@ -856,16 +857,27 @@ def configure_dataset_backends(nwbfile, backend_configuration, configuration=Non
     configure_backend(nwbfile=nwbfile, backend_configuration=configuration)
 
 
-def create_file(info: dict) -> dict:
+def create_file(
+        info: dict,
+        log_url: Optional[str] = None,
+    ) -> dict:
+
+    import requests
+    from tqdm_publisher import TQDMProgressSubscriber
 
     from neuroconv.tools.nwb_helpers import (
         get_default_backend_configuration,
         make_or_load_nwbfile,
     )
 
+    project_name = info.get("project_name")
+    
     run_stub_test = info.get("stub_test", False)
     backend_configuration = info.get("configuration")
     overwrite = info.get("overwrite", False)
+
+    url = info.get("url")
+    request_id = info.get("request_id")
 
     will_configure_backend = backend_configuration is not None and run_stub_test is False
 
@@ -873,54 +885,88 @@ def create_file(info: dict) -> dict:
 
     nwbfile_path = path_info["file"]
 
-    # Delete files manually if using Zarr
-    if overwrite:
-        if nwbfile_path.exists():
-            if nwbfile_path.is_dir():
-                rmtree(nwbfile_path)
-            else:
-                nwbfile_path.unlink()
+    try:
 
-    if will_configure_backend:
+        # Delete files manually if using Zarr
+        if overwrite:
+            if nwbfile_path.exists():
+                if nwbfile_path.is_dir():
+                    rmtree(nwbfile_path)
+                else:
+                    nwbfile_path.unlink()
 
-        backend = backend_configuration.get("backend", "hdf5")
-        configuration_values = backend_configuration.get("results", {}).get(backend, {})
+        if will_configure_backend:
 
-        # Create NWB file with appropriate backend configuration
-        with make_or_load_nwbfile(
-            nwbfile_path=nwbfile_path, metadata=metadata, overwrite=overwrite, backend=backend
-        ) as nwbfile:
-            converter.add_to_nwbfile(nwbfile, metadata=metadata)
-            configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
-            configure_dataset_backends(nwbfile, configuration_values, configuration)
+            backend = backend_configuration.get("backend", "hdf5")
+            configuration_values = backend_configuration.get("results", {}).get(backend, {})
 
-    else:
+            # Create NWB file with appropriate backend configuration
+            with make_or_load_nwbfile(
+                nwbfile_path=nwbfile_path, 
+                metadata=metadata, 
+                overwrite=overwrite, 
+                backend=backend
+            ) as nwbfile:
+                converter.add_to_nwbfile(nwbfile, metadata=metadata)
+                configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
+                configure_dataset_backends(nwbfile, configuration_values, configuration)
 
-        source_data = info.get("source_data", False)
+        else:
 
-        # Assume all interfaces have the same conversion options for now
-        available_options = converter.get_conversion_options_schema()
+            def update_conversion_progress(message):
+                update_dict = dict(request_id=request_id, **message)
+                if url or not run_stub_test:
+                    requests.post(url=url, json=update_dict)
+                else:
+                    progress_handler.announce(update_dict)
 
-        options = (
-            {
-                interface: (
-                    {"stub_test": run_stub_test}
-                    if available_options.get("properties").get(interface).get("properties", {}).get("stub_test")
-                    else {}
-                )
-                for interface in source_data
-            }
-            if run_stub_test
-            else None
-        )
+            progress_bar_options = dict(
+                mininterval=0,
+                on_progress_update=update_conversion_progress,
+            )
 
-        # Actually run the conversion
-        converter.run_conversion(
-            metadata=metadata,
-            nwbfile_path=nwbfile_path,
-            overwrite=overwrite,
-            conversion_options=options,
-        )
+            # Assume all interfaces have the same conversion options for now
+            available_options = converter.get_conversion_options_schema()
+            options = { interface: {} for interface in info["source_data"] }
+
+            for interface in options:
+                available_opts = available_options.get("properties").get(interface).get("properties", {})
+
+                # Specify if stub test
+                if run_stub_test:
+                    if available_opts.get("stub_test"):
+                        options[interface]["stub_test"] = True
+
+                # Specify if iterator options are available
+                elif available_opts.get("iterator_opts"):
+                    options[interface]["iterator_opts"] = dict(
+                        display_progress=True,
+                        progress_bar_class=TQDMProgressSubscriber,
+                        progress_bar_options=progress_bar_options,
+                    )
+                    
+            # Actually run the conversion
+            converter.run_conversion(
+                metadata=metadata,
+                nwbfile_path=nwbfile_path,
+                overwrite=overwrite,
+                conversion_options=options,
+            )
+        
+    except Exception as e:
+        if log_url:
+            requests.post(
+                url=log_url,
+                json=dict(
+                    header=f"Conversion failed for {project_name} — {nwbfile_path} (convert_to_nwb)",
+                    inputs=dict(info=info),
+                    traceback=traceback.format_exc(),
+                    type="error",
+                ),
+            )
+
+        raise e
+
 
 
 def get_backend_configuration(info: dict) -> dict:
@@ -994,13 +1040,10 @@ def get_backend_configuration(info: dict) -> dict:
 def get_conversion_path_info(info: dict) -> dict:
     """Function used to resolve the path details for the conversion."""
 
-    from neuroconv import NWBConverter
-
     nwbfile_path = Path(info["nwbfile_path"])
     custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
     run_stub_test = info.get("stub_test", False)
-
     default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
     default_output_directory = default_output_base / project_name
 
@@ -1015,7 +1058,7 @@ def get_conversion_path_info(info: dict) -> dict:
 def get_conversion_info(info: dict) -> dict:
     """Function used to organize the required information for conversion."""
 
-    nwbfile_path = Path(info["nwbfile_path"])
+    from neuroconv import NWBConverter
 
     path_info = get_conversion_path_info(info)
     resolved_output_path = path_info["file"]
@@ -1032,10 +1075,11 @@ def get_conversion_info(info: dict) -> dict:
         info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
     )
 
-    converter = instantiate_custom_converter(resolved_source_data, info["interfaces"])
-
-    def update_conversion_progress(**kwargs):
-        announcer.announce(dict(**kwargs, nwbfile_path=nwbfile_path), "conversion_progress")
+    converter = instantiate_custom_converter(
+        source_data=resolved_source_data,
+        interface_class_dict=info["interfaces"],
+        alignment_info=info.get("alignment", dict()),
+    )
 
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
@@ -1067,22 +1111,43 @@ def get_conversion_info(info: dict) -> dict:
             del ecephys_metadata["Units"]
             del ecephys_metadata["UnitColumns"]
 
-        shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
+        has_electrodes = "Electrodes" in ecephys_metadata
+        if has_electrodes:
 
-        for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
-            interface = converter.data_interface_objects[interface_name]
+            shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
 
-            update_recording_properties_from_table_as_json(
-                interface,
-                electrode_table_json=interface_electrode_results,
-                electrode_column_info=shared_electrode_columns,
-            )
+            for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+                name_split = interface_name.split(" — ")
 
-        ecephys_metadata["Electrodes"] = [
-            {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
-        ]
+                if len(name_split) == 1:
+                    sub_interface = name_split[0]
+                elif len(name_split) == 2:
+                    sub_interface, sub_sub_interface = name_split
 
-        del ecephys_metadata["ElectrodeColumns"]
+                interface_or_subconverter = converter.data_interface_objects[sub_interface]
+
+                if isinstance(interface_or_subconverter, NWBConverter):
+                    subconverter = interface_or_subconverter
+
+                    update_recording_properties_from_table_as_json(
+                        recording_interface=subconverter.data_interface_objects[sub_sub_interface],
+                        electrode_table_json=interface_electrode_results,
+                        electrode_column_info=shared_electrode_columns,
+                    )
+                else:
+                    interface = interface_or_subconverter
+
+                    update_recording_properties_from_table_as_json(
+                        recording_interface=interface,
+                        electrode_table_json=interface_electrode_results,
+                        electrode_column_info=shared_electrode_columns,
+                    )
+
+            ecephys_metadata["Electrodes"] = [
+                {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
+            ]
+
+            del ecephys_metadata["ElectrodeColumns"]
 
     return (
         converter,
@@ -1090,16 +1155,21 @@ def get_conversion_info(info: dict) -> dict:
         path_info,
     )
 
-
-def convert_to_nwb(info: dict) -> str:
+def convert_to_nwb(
+        info: dict,
+        log_url: Optional[str] = None,
+    ) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
     path_info = get_conversion_path_info(info)
     output_path = path_info["file"]
     resolved_output_directory = path_info["directory"]
     default_output_directory = path_info["default"]
-
-    create_file(info)
+        
+    create_file(
+        info,
+        log_url=log_url
+    )
 
     # Create a symlink between the fake data and custom data
     if not resolved_output_directory == default_output_directory:
@@ -1121,6 +1191,60 @@ def convert_to_nwb(info: dict) -> str:
             os.symlink(resolved_output_directory, default_output_directory)
 
     return dict(file=str(output_path))
+
+def convert_all_to_nwb(
+    url: str,
+    files: List[dict],
+    request_id: Optional[str],
+    max_workers: int = 1,
+    log_url: Optional[str] = None,
+) -> List[str]:
+
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+
+    from tqdm_publisher import TQDMProgressSubscriber
+
+    def on_progress_update(message):
+        message["progress_bar_id"] = request_id  # Ensure request_id matches
+        progress_handler.announce(
+            dict(
+                request_id=request_id,
+                **message,
+            )
+        )
+
+    futures = []
+    file_paths = []
+
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+
+        for file_info in files:
+
+            futures.append(
+                executor.submit(
+                    convert_to_nwb,
+                    dict(
+                        url=url,
+                        request_id=request_id,
+                        **file_info,
+                    ),
+                    log_url=log_url,
+                )
+            )
+
+        inspection_iterable = TQDMProgressSubscriber(
+            iterable=as_completed(futures),
+            desc="Total files converted",
+            total=len(futures),
+            mininterval=0,
+            on_progress_update=on_progress_update,
+        )
+
+        for future in inspection_iterable:
+            output_filepath = future.result()
+            file_paths.append(output_filepath)
+
+        return file_paths
 
 
 def upload_multiple_filesystem_objects_to_dandi(**kwargs) -> list[Path]:

@@ -31,16 +31,28 @@ export class DateTimeSelector extends LitElement {
             this.input.value = convertToDateTimeLocalString(d);
         }
     }
+    get min() {
+        return this.input.min;
+    }
 
-    constructor({ value, schema } = {}) {
+    set min(newValue) {
+        this.input.min = newValue;
+    }
+
+    get max() {
+        return this.input.max;
+    }
+
+    set max(newValue) {
+        this.input.max = newValue;
+    }
+
+    constructor({ value, min, max } = {}) {
         super();
         this.input = document.createElement("input");
         this.input.type = "datetime-local";
-        if (schema) {
-            const { min, max } = schema;
-            if (min) this.input.min = min;
-            if (max) this.input.max = max;
-        }
+        this.input.min = min;
+        this.input.max = max;
 
         this.addEventListener("click", () => {
             this.input.focus();

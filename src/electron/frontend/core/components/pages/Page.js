@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { runConversion } from "./guided-mode/options/utils.js";
+import { run } from "./guided-mode/options/utils.js";
 import { get, save } from "../../progress/index.js";
 
 import { dismissNotification, notify } from "../../dependencies.js";
@@ -21,6 +21,10 @@ export class Page extends LitElement {
     // }
 
     info = { globalState: {} };
+
+    workflow = {
+        file_format: {}, // Populate with file format by default
+    }
 
     constructor(info = {}) {
         super();
@@ -131,6 +135,7 @@ export class Page extends LitElement {
 
             this.info.globalState[key] = { stubs };
         } else {
+
             if (!options.title) options.title = "Running all conversions";
 
             this.info.globalState[key] = await this.runConversions(conversionOptions, true, options);
@@ -139,16 +144,16 @@ export class Page extends LitElement {
         this.unsavedUpdates = true;
 
         // Indicate conversion has run successfully
-        const { desyncedData } = this.info.globalState;
-        if (!desyncedData) this.info.globalState.desyncedData = {};
-
-        if (desyncedData) {
-            desyncedData[key] = false;
-            await this.save({}, false);
-        }
+        let { desyncedData } = this.info.globalState;
+        if (!desyncedData) desyncedData = this.info.globalState.desyncedData = {};
+        desyncedData[key] = false;
+        await this.save({}, false);
     }
 
-    async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctionToRun = runConversion) {
+    async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctionToRun = null) {
+        
+        const hasCustomFunction = !!backendFunctionToRun;
+
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
@@ -158,20 +163,13 @@ export class Page extends LitElement {
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
-        const results = {};
+        const conversionOutput = {};
 
-        const isMultiple = toRun.length > 1;
+        const swalOpts = hasCustomFunction ? options : await createProgressPopup({ title: `Running conversion`, ...options });
 
-        const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
-        const { close: closeProgressPopup, elements } = swalOpts;
+        const { close: closeProgressPopup } = swalOpts;
 
-        elements.container.insertAdjacentHTML(
-            "beforeend",
-            `<small><small><b>Note:</b> This may take a while to complete...</small></small><hr style="margin-bottom: 0;">`
-        );
-
-        let completed = 0;
-        elements.progress.format = { n: completed, total: toRun.length };
+        const fileConfiguration = [];
 
         for (let info of toRun) {
             const { subject, session, globalState = this.info.globalState } = info;
@@ -207,20 +205,42 @@ export class Page extends LitElement {
 
             delete optsCopy.configuration;
 
-            const result = await backendFunctionToRun(
-                {
-                    output_folder: optsCopy.stub_test ? undefined : conversion_output_folder,
-                    project_name: name,
-                    nwbfile_path: file,
-                    overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-                    ...sessionInfo, // source_data and metadata are passed in here
-                    ...optsCopy, // Any additional conversion options override the defaults
+            const payload = {
+                output_folder: optsCopy.stub_test ? undefined : conversion_output_folder,
+                project_name: name,
+                nwbfile_path: file,
+                overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
+                ...sessionInfo, // source_data and metadata are passed in here
+                ...optsCopy, // Any additional conversion options override the defaults
+                interfaces: globalState.interfaces,
+                alignment
+            }
 
-                    interfaces: globalState.interfaces,
-                    alignment,
+            if (hasCustomFunction) {
+                const result = await backendFunctionToRun(payload, swalOpts) // Already handling Swal popup
+                const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
+                subRef[session] = result;
+            }
+
+            else fileConfiguration.push(payload);
+
+        }
+
+        if (fileConfiguration.length) {
+                
+            const results = await run(
+                `neuroconv/convert`,
+                {
+                    files: fileConfiguration,
+                    max_workers: 2, // TODO: Make this configurable and confirm default value
+                    request_id: swalOpts.id,
                 },
-                swalOpts
-            ).catch((error) => {
+                {
+                    title: "Running the conversion",
+                    onError: () => "Conversion failed with current metadata. Please try again.",
+                    ...swalOpts,
+                }
+            ).catch(async (error) => {
                 let message = error.message;
 
                 if (message.includes("The user aborted a request.")) {
@@ -229,24 +249,22 @@ export class Page extends LitElement {
                 }
 
                 this.notify(message, "error");
-                closeProgressPopup();
                 throw error;
+            })
+            
+            .finally(() => closeProgressPopup());
+
+            results.forEach((info) => {
+                const { file } = info;
+                const fileName = file.split("/").pop();
+                const [ subject, session ] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
+                const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
+                subRef[session] = info;
             });
 
-            completed++;
-            if (isMultiple) {
-                const progressInfo = { n: completed, total: toRun.length };
-                elements.progress.format = progressInfo;
-            }
-
-            const subRef = results[subject] ?? (results[subject] = {});
-            subRef[session] = result;
         }
 
-        closeProgressPopup();
-        elements.container.style.textAlign = ""; // Clear style update
-
-        return results;
+        return conversionOutput;
     }
 
     //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.

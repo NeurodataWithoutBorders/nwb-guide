@@ -126,8 +126,10 @@ export class ProgressBar extends LitElement {
 
     render() {
 
-        const percent = this.format.total ? 100 * (this.format.n / this.format.total) : 0;
-        const remaining = this.format.rate && this.format.total ? (this.format.total - this.format.n) / this.format.rate : 0; // Seconds
+        const n = this.format.n > this.format.total ? this.format.total : this.format.n
+        const ratio = n/ this.format.total;
+        const percent = this.format.total ? 100 * ratio : 0;
+        const remaining = this.format.rate && this.format.total ? (this.format.total - n) / this.format.rate : 0; // Seconds
 
         const numerator = this.isBytes ? humanReadableBytes(this.format.n) : this.format.n
         const denominator = this.isBytes ? humanReadableBytes(this.format.total) : this.format.total
