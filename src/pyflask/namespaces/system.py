@@ -21,6 +21,7 @@ class GetCPUInfo(flask_restx.Resource):
 
         return dict(physical=physical, logical=logical)
 
+
 @system_namespace.route("/all_timezones")
 class GetTimezones(flask_restx.Resource):
 
