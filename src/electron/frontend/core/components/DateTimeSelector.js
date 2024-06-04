@@ -29,10 +29,7 @@ export const renderDateTime = (value) => {
 };
 
 export const resolveDateTime = renderDateTime;
-// const resolveDateTime = (value) => {
-//     if (typeof value === "string") return extractISOString(new Date(value), { offset: true });
-//     return value;
-// }
+
 
 export class DateTimeSelector extends LitElement {
     static get styles() {

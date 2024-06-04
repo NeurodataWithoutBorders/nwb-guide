@@ -10,8 +10,6 @@ import { randomizeElements, mapSessions, merge } from "./utils";
 import { resolveMetadata } from "./guided-mode/data/utils.js";
 import Swal from "sweetalert2";
 import { createProgressPopup } from "../utils/progress.js";
-import { timezoneProperties } from "../../../../../schemas/timezone.schema";
-import { extractISOString } from "../DateTimeSelector.js";
 
 export class Page extends LitElement {
     // static get styles() {
@@ -175,21 +173,11 @@ export class Page extends LitElement {
                 // Resolve the correct session info from all of the metadata for this conversion
                 const metadata = resolveMetadata(subject, session, globalState);
 
-                // Add timezone information to relevant metadata
-                timezoneProperties.forEach((path) => {
-                    const name = path.slice(-1)[0];
-                    const pathTo = path.slice(0, -1);
-                    const parent = pathTo.reduce((acc, key) => acc[key], metadata);
-                    parent[name] = extractISOString(parent[name], {
-                        offset: true,
-                        timezone: this.workflow.timezone.value,
-                    });
-                });
-
                 const sessionInfo = {
                     ...sessionResults,
                     metadata,
                     source_data: merge(SourceData, sourceDataCopy),
+                    timezone: this.workflow.timezone.value
                 };
 
                 const payload = {

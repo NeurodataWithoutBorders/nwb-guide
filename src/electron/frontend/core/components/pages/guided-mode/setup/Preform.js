@@ -74,46 +74,60 @@ const questions = {
 // ------------------------ Derived from the above information -------------------------------
 // -------------------------------------------------------------------------------------------
 
-const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
-    acc[name] = [];
+const getSchema = (questions) => {
 
-    const deps = info.dependencies;
+    // Inject latest timezone schema each render
+    questions.timezone = { ...questions.timezone, ...timezoneSchema };
 
-    if (deps) {
-        if (Array.isArray(deps))
-            deps.forEach((dep) => {
-                if (!acc[dep]) acc[dep] = [];
-                acc[dep].push({ name });
-            });
-        else
-            Object.entries(deps).forEach(([dep, opts]) => {
-                if (!acc[dep]) acc[dep] = [];
-                acc[dep].push({ name, ...opts });
-            });
-    }
-    return acc;
-}, {});
+    const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
+        acc[name] = [];
 
-const defaults = Object.entries(questions).reduce((acc, [name, info]) => {
-    acc[name] = info.default;
-    return acc;
-}, {});
+        const deps = info.dependencies;
 
-const required = Object.entries(questions).reduce((acc, [name, info]) => {
-    if (info.required) acc.push(name);
-    return acc;
-}, []);
-
-const projectWorkflowSchema = {
-    type: "object",
-    properties: Object.entries(questions).reduce((acc, [name, info]) => {
-        acc[name] = info;
+        if (deps) {
+            if (Array.isArray(deps))
+                deps.forEach((dep) => {
+                    if (!acc[dep]) acc[dep] = [];
+                    acc[dep].push({ name });
+                });
+            else
+                Object.entries(deps).forEach(([dep, opts]) => {
+                    if (!acc[dep]) acc[dep] = [];
+                    acc[dep].push({ name, ...opts });
+                });
+        }
         return acc;
-    }, {}),
-    order: Object.keys(questions),
-    required,
-    additionalProperties: false,
-};
+    }, {});
+
+    const defaults = Object.entries(questions).reduce((acc, [name, info]) => {
+        acc[name] = info.default;
+        return acc;
+    }, {});
+
+    const required = Object.entries(questions).reduce((acc, [name, info]) => {
+        if (info.required) acc.push(name);
+        return acc;
+    }, []);
+
+    const projectWorkflowSchema = {
+        type: "object",
+        properties: Object.entries(questions).reduce((acc, [name, info]) => {
+            acc[name] = info;
+            return acc;
+        }, {}),
+        order: Object.keys(questions),
+        required,
+        additionalProperties: false,
+    };
+
+    return {
+        schema: structuredClone(projectWorkflowSchema),
+        defaults,
+        dependents
+    }
+
+
+}
 
 // ----------------------------------------------------------------------
 // ------------------------ Preform Class -------------------------------
@@ -144,7 +158,8 @@ export class GuidedPreform extends Page {
     };
 
     updateForm = () => {
-        const schema = structuredClone(projectWorkflowSchema);
+        
+        const { schema, dependents, defaults } = getSchema(questions);
         const projectState = this.info.globalState.project ?? {};
         if (!projectState.workflow) projectState.workflow = {};
 

@@ -380,23 +380,6 @@ export class Dashboard extends LitElement {
                         })
                 ));
 
-            let resolved;
-            promise
-                .then((res) => {
-                    resolved = true;
-                    console.log("Transitioned to", res.info.id);
-                })
-                .catch((e) => {
-                    console.error("SOMETHIG THAPPENED WOTH", res.info.id, e);
-                });
-
-            setTimeout(() => {
-                if (!resolved) {
-                    console.warn("Transition Promise Timed Out", res.info.id);
-                    // this.#transitionPromise.trigger(this.page)
-                }
-            }, 1000);
-
             if (typeof transition === "number") {
                 const info = this.page.info;
                 const sign = Math.sign(transition);

@@ -15,9 +15,6 @@ import { InspectorListItem } from "./preview/inspector/InspectorList";
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
 import { Button } from "./Button";
-import { extractISOString } from "./DateTimeSelector";
-import { timezoneProperties } from "../../../../schemas/timezone.schema";
-const timezonePropertyPaths = timezoneProperties.map((arr) => arr.join("."));
 
 const encode = (str) => {
     try {
@@ -250,8 +247,7 @@ export class JSONSchemaForm extends LitElement {
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
             globals: { type: Object, reflect: false },
-            validateEmptyValues: { type: Boolean, reflect: true },
-            timezone: { type: String, reflect: true },
+            validateEmptyValues: { type: Boolean, reflect: true }
         };
     }
 
@@ -283,8 +279,6 @@ export class JSONSchemaForm extends LitElement {
         this.schema = props.schema ?? {};
         this.results = (props.base ? structuredClone(props.results) : props.results) ?? {}; // Deep clone results in nested forms
         this.globals = props.globals ?? {};
-
-        this.timezone = props.timezone ?? undefined;
 
         this.ignore = props.ignore ?? {};
         this.required = props.required ?? {};
@@ -910,17 +904,6 @@ export class JSONSchemaForm extends LitElement {
 
         let value = parent[name];
 
-        const { timezone } = this;
-
-        // Validate with timezone awareness
-        const isTimezoneProperty = timezonePropertyPaths.includes(externalPath.join("."));
-        if (timezone && isTimezoneProperty) {
-            value = extractISOString(value, {
-                offset: true,
-                timezone,
-            });
-        }
-
         const skipValidation = this.validateEmptyValues === null && value === undefined;
 
         const validateArgs = input.pattern || skipValidation ? [] : [value, schema];
@@ -1222,8 +1205,6 @@ export class JSONSchemaForm extends LitElement {
                     schema: info,
                     results: { ...nestedResults },
                     globals: this.globals?.[name],
-
-                    timezone: this.timezone,
 
                     controls: this.controls[name],
 

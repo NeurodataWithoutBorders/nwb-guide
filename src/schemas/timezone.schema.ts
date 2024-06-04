@@ -1,34 +1,47 @@
-import { header } from "../electron/frontend/core/components/forms/utils";
+import { baseUrl, onServerOpen } from "../electron/frontend/core/server/globals";
+import { isStorybook } from '../electron/frontend/core/globals'
+
+const setReady: any = {}
+
+const createPromise = (prop: string) => new Promise((resolve) => setReady[prop] = resolve)
+
+export const ready = {
+    timezones: createPromise("timezones"),
+    timezone: createPromise("timezone"),
+}
+
+//  Get timezones
+onServerOpen(async () => {
+    await fetch(new URL("/time/timezones", baseUrl))
+    .then((res) => res.json())
+    .then((timezones) => {
+        console.log(timezones);
+        setReady.timezones(timezones)
+    })
+    .catch(() => {
+        if (isStorybook) setReady.timezones([])
+    });
+});
+
+//  Get timezone
+onServerOpen(async () => {
+    await fetch(new URL("/time/timezone", baseUrl))
+    .then((res) => res.json())
+    .then((timezone) => {
+        console.log(timezone);
+        setReady.timezone(timezone)
+    })
+    .catch(() => {
+        if (isStorybook) setReady.timezone(null)
+    });
+});
+
+
 
 
 export const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-export const getTimeZoneName = (timezone, timeZoneName = 'long') => new Date().toLocaleDateString(undefined, {day:'2-digit', timeZone: timezone, timeZoneName }).substring(4)
-
-const timezones = Intl.supportedValuesOf('timeZone');
-if (!timezones.includes(localTimeZone)) timezones.push(localTimeZone); // Add the local timezone if it's not already in the list
-
-const enumCategories = timezones.reduce((acc, timezone) => {
-    const parts = timezone.split("/");
-    const category = parts.length === 1 ? "Other" : parts[0];
-    acc[timezone] = category;
-    return acc;
-}, {});
-
-const enumLabels = timezones.reduce((acc, timezone) => {
-    const parts = timezone.split("/");
-    const nonCategoryParts = parts.slice(1, parts.length - 1);
-    acc[timezone] = header(parts[parts.length - 1]);
-    if (nonCategoryParts.length) acc[timezone] += ` — ${nonCategoryParts.map(str => header(str)).join(", ")}`
-    return acc;
-}, {});
-
-
-const enumKeywords = timezones.reduce((acc, timezone) => {
-    acc[timezone] = [ getTimeZoneName(timezone, 'long'), getTimeZoneName(timezone, 'short') ]
-    return acc;
-}, {});
-
+// export const getTimeZoneName = (timezone, timeZoneName = 'long') => new Date().toLocaleDateString(undefined, {day:'2-digit', timeZone: timezone, timeZoneName }).substring(4)
 
 // NOTE: Used before validation and conversion to add timezone information to the data
 export const timezoneProperties = [
@@ -72,14 +85,39 @@ export function getISODateInTimezone(
 }
 
 
-export default {
+const timezoneSchema = {
     type: "string",
     description: "Provide a base timezone for all date and time operations in the GUIDE.",
+    enum: [ localTimeZone ],
     default: localTimeZone,
-    enum: timezones,
-    enumLabels,
-    enumKeywords,
-    enumCategories,
-    strict: true,
-    search: true
+    strict: true
 }
+
+ready.timezones.then((timezones) => {
+    ready.timezone.then((timezone) => {
+
+        timezoneSchema.strict = true
+        timezoneSchema.search = true
+
+        const filteredTimezones = timezoneSchema.enum = timezones.filter(tz => {
+            return tz.split('/').length > 1 
+            && !tz.toLowerCase().includes('etc/')
+        });
+
+        timezoneSchema.enumLabels = filteredTimezones.reduce((acc, tz) => {
+            const [ region, city ] = tz.split('/')
+            acc[tz] = `${city}, ${region}`
+            return acc
+        })
+
+        timezoneSchema.enumCategories =  filteredTimezones.reduce((acc, tz) => {
+            const [ region ] = tz.split('/')
+            acc[tz] = region
+            return acc
+        })
+
+        timezoneSchema.default = timezone;
+    })
+})
+
+export default timezoneSchema

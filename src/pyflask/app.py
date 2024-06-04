@@ -34,6 +34,7 @@ from namespaces import (
     neurosift_namespace,
     startup_namespace,
     system_namespace,
+    time_namespace,
 )
 
 neurosift_file_registry = collections.defaultdict(bool)
@@ -65,6 +66,7 @@ api.add_namespace(neuroconv_namespace)
 api.add_namespace(data_namespace)
 api.add_namespace(system_namespace)
 api.add_namespace(dandi_namespace)
+api.add_namespace(time_namespace)
 # api.add_namespace(neurosift_namespace)  # TODO: enable later
 api.init_app(flask_app)
 
