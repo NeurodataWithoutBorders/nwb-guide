@@ -14,7 +14,13 @@ from typing import Any, Dict, List, Optional, Union
 
 from tqdm_publisher import TQDMProgressHandler
 
-from .info import CONVERSION_SAVE_FOLDER_PATH, GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, is_packaged, resource_path
+from .info import (
+    CONVERSION_SAVE_FOLDER_PATH,
+    GUIDE_ROOT_FOLDER,
+    STUB_SAVE_FOLDER_PATH,
+    is_packaged,
+    resource_path,
+)
 from .info.sse import format_sse
 
 progress_handler = TQDMProgressHandler()
@@ -1006,7 +1012,7 @@ def convert_to_nwb(
             package_json = json.load(fp=fp)
         app_version = package_json["version"]
         resolved_metadata["NWBFile"]["source_script"] = f"Created using NWB GUIDE v{app_version}"
-        
+
         # Actually run the conversion
         converter.run_conversion(
             metadata=resolved_metadata,
