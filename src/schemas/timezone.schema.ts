@@ -6,7 +6,7 @@ export const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 export const getTimeZoneName = (timezone, timeZoneName = 'long') => new Date().toLocaleDateString(undefined, {day:'2-digit', timeZone: timezone, timeZoneName }).substring(4)
 
 const timezones = Intl.supportedValuesOf('timeZone');
-timezones.push("UTC");
+if (!timezones.includes(localTimeZone)) timezones.push(localTimeZone); // Add the local timezone if it's not already in the list
 
 const enumCategories = timezones.reduce((acc, timezone) => {
     const parts = timezone.split("/");
