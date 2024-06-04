@@ -177,7 +177,6 @@ export class Page extends LitElement {
                     ...sessionResults,
                     metadata,
                     source_data: merge(SourceData, sourceDataCopy),
-                    timezone: this.workflow.timezone.value
                 };
 
                 const payload = {
@@ -187,9 +186,9 @@ export class Page extends LitElement {
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                     ...sessionInfo, // source_data and metadata are passed in here
                     ...conversionOptions, // Any additional conversion options override the defaults
-
                     interfaces: globalState.interfaces,
                     alignment,
+                    timezone: this.workflow.timezone.value
                 };
 
                 fileConfiguration.push(payload);
