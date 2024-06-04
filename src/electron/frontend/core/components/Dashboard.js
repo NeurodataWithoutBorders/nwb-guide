@@ -261,7 +261,6 @@ export class Dashboard extends LitElement {
         });
 
         page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
-        
 
         this.page
             .checkSyncState()
