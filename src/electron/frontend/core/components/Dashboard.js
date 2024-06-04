@@ -273,8 +273,6 @@ export class Dashboard extends LitElement {
 
                 this.updateSections({ sidebar: false, main: true });
 
-                if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
-
                 const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
                 if (skipped) {
@@ -300,7 +298,10 @@ export class Dashboard extends LitElement {
                         : `<h4 style="margin: 0">Fallback to previous page after error occurred</h4><small>${e}</small>`,
                     "error"
                 );
-            });
+            })
+            .finally(() => {
+                if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
+            })
     }
 
     // Populate the sections tracked for this page by using the global state as a model
@@ -359,8 +360,12 @@ export class Dashboard extends LitElement {
         if (!active) active = this.activePage; // default to active page
 
         this.main.onTransition = async (transition) => {
-            const promise = (this.#transitionPromise.value = new Promise(
-                (resolve) => (this.#transitionPromise.trigger = resolve)
+            const promise = this.#transitionPromise.value ?? (this.#transitionPromise.value = new Promise(
+                (resolve) => (this.#transitionPromise.trigger = (value) => {
+                    delete this.#transitionPromise.value;
+                    resolve(value);
+                
+                })
             ));
 
             if (typeof transition === "number") {
