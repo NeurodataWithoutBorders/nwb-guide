@@ -756,8 +756,6 @@ def get_compatible_interfaces(info: dict) -> dict:
     from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
         BaseRecordingExtractorInterface,
     )
-
-
     from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
         BaseSortingExtractorInterface,
     )
@@ -773,7 +771,6 @@ def get_compatible_interfaces(info: dict) -> dict:
         if is_sorting is True:
             compatible[name] = []
 
-
         # If at least one recording and sorting interface is selected on the formats page
         # Then it is possible the two could be linked (the sorting was applied to the recording)
         # But there are very strict conditions from SpikeInterface determining compatibility
@@ -783,7 +780,7 @@ def get_compatible_interfaces(info: dict) -> dict:
             for interface_key, interface in converter.data_interface_objects.items()
             if isinstance(interface, BaseRecordingExtractorInterface)
         }
-        
+
         for recording_interface_key, recording_interface in sibling_recording_interfaces.items():
             try:
                 interface.register_recording(recording_interface=recording_interface)
@@ -793,10 +790,10 @@ def get_compatible_interfaces(info: dict) -> dict:
 
     return compatible
 
+
 def get_interface_alignment(info: dict) -> dict:
 
     from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
-    
     from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
         BaseSortingExtractorInterface,
     )
