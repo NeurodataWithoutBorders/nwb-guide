@@ -1,9 +1,16 @@
 import { header } from "../electron/frontend/core/components/forms/utils";
 
+
+export const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+export const getTimeZoneName = (timezone, timeZoneName = 'long') => new Date().toLocaleDateString(undefined, {day:'2-digit', timeZone: timezone, timeZoneName }).substring(4)
+
 const timezones = Intl.supportedValuesOf('timeZone');
+timezones.push("UTC");
 
 const enumCategories = timezones.reduce((acc, timezone) => {
-    const category = timezone.split("/")[0];
+    const parts = timezone.split("/");
+    const category = parts.length === 1 ? "Other" : parts[0];
     acc[timezone] = category;
     return acc;
 }, {});
@@ -18,7 +25,7 @@ const enumLabels = timezones.reduce((acc, timezone) => {
 
 
 const enumKeywords = timezones.reduce((acc, timezone) => {
-    acc[timezone] = [ timezone ]
+    acc[timezone] = [ getTimeZoneName(timezone, 'long'), getTimeZoneName(timezone, 'short') ]
     return acc;
 }, {});
 
@@ -28,9 +35,6 @@ export const timezoneProperties = [
     [ "NWBFile", "session_start_time" ],
     [ "Subject", "date_of_birth" ]
 ]
-
-
-export const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const getTimezoneOffset = (
     date = new Date(),
