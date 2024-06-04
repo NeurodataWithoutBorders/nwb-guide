@@ -10,6 +10,7 @@
   <p align="center">
      <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/build_and_deploy_mac.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/build_and_deploy_mac.yml/badge.svg" alt="Mac Build"></a>
     <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/build_and_deploy_win.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/build_and_deploy_win.yml/badge.svg" alt="Windows Build"></a>
+    <a href="https://img.shields.io/github/downloads/neurodatawithoutborders/nwb-guide/total.svg"><img src="https://img.shields.io/github/downloads/neurodatawithoutborders/nwb-guide/total.svg" alt="Downloads"></a>
   </p>
   <p align="center">
     <a href="https://github.com/psf/black"><img alt="Python code style: black" src="https://img.shields.io/badge/python_code_style-black-000000.svg"></a>

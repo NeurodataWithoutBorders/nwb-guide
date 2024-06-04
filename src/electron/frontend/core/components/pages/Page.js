@@ -185,6 +185,7 @@ export class Page extends LitElement {
                 ...conversionOptions, // Any additional conversion options override the defaults
 
                 interfaces: globalState.interfaces,
+                alignment,
             };
 
             fileConfiguration.push(payload);
