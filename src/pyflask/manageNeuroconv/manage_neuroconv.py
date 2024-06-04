@@ -846,7 +846,7 @@ def create_file(
     request_id = info.get("request_id")
 
     # Backend configuration info
-    backend_configuration = info.get("configuration")
+    backend_configuration = info.get("configuration", {})
     backend = backend_configuration.get("backend", "hdf5")
 
     converter, metadata, path_info = get_conversion_info(info)
@@ -935,6 +935,9 @@ def update_backend_configuration(info: dict) -> dict:
     info_from_frontend = info.get("configuration", {})
     backend = info_from_frontend.get("backend", "hdf5")
     backend_configuration_from_frontend = info_from_frontend.get("results", {}).get(backend, {})
+
+    if not backend_configuration_from_frontend:
+        return None # Do not provide backend configuration if no customization is present
 
     converter, metadata, __ = get_conversion_info(info)
 
