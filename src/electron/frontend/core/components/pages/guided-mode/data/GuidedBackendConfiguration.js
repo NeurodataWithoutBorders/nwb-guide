@@ -279,7 +279,6 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             instances,
 
             controls: [
-
                 // // NOTE: Removes session-specific control over the backend type since Zarr is not completely supported yet
                 // (id) => {
                 //     const instanceInfo = id
