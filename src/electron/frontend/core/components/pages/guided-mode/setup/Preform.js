@@ -66,6 +66,7 @@ const questions = {
         title: "What file format would you like to use?",
         description: "Choose a default file format for your data.",
         default: "hdf5",
+        ignore: true // NOTE: This ensures that users can only use the default (HDF5) format
     },
 
     backend_configuration: {
@@ -89,6 +90,11 @@ const questions = {
 
 const defaults = Object.entries(questions).reduce((acc, [name, info]) => {
     acc[name] = info.default;
+    return acc;
+}, {});
+
+const ignore = Object.entries(questions).reduce((acc, [name, info]) => {
+    if (info.ignore) acc[name] = true
     return acc;
 }, {});
 
@@ -160,6 +166,7 @@ export class GuidedPreform extends Page {
 
         this.form = new JSONSchemaForm({
             schema,
+            ignore,
             results: this.state,
             validateEmptyValues: false, // Only show errors after submission
             validateOnChange: function (name, parent, path, value) {

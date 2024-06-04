@@ -13,9 +13,8 @@ import { until } from "lit/directives/until.js";
 import { resolve } from "../../../../promises";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
-import { JSONSchemaInput } from "../../../JSONSchemaInput.js";
 
-import { getResourceUsage } from "../../../../validation/backend-configuration";
+import { getResourceUsageBytes } from "../../../../validation/backend-configuration";
 
 import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
 import { getInfoFromId } from "./utils.js";
@@ -183,7 +182,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                     if (name === "chunk_shape") {
                         const input = instance.getFormElement(path).inputs["chunk_shape"];
 
-                        const mbUsage = getResourceUsage(value, itemsizes[path.join("/")], 1e6);
+                        const mbUsage = getResourceUsageBytes(value, itemsizes[path.join("/")], 1e6);
 
                         if (mbUsage > 20)
                             errors.push({
@@ -278,32 +277,35 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             header: "Sessions",
             instanceType: "Session",
             instances,
+
             controls: [
-                (id) => {
-                    const instanceInfo = id
-                        .split("/")
-                        .reduce((acc, key) => acc[key.split("-").slice(1).join("-")], this.localState.results);
 
-                    const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
+                // // NOTE: Removes session-specific control over the backend type since Zarr is not completely supported yet
+                // (id) => {
+                //     const instanceInfo = id
+                //         .split("/")
+                //         .reduce((acc, key) => acc[key.split("-").slice(1).join("-")], this.localState.results);
 
-                    return new JSONSchemaInput({
-                        path: [],
-                        schema: {
-                            type: "string",
-                            placeholder: "Select backend type",
-                            enum: Object.keys(backendMap),
-                            enumLabels: backendMap,
-                            strict: true,
-                        },
-                        value: backend,
-                        onUpdate: async (value) => {
-                            if (instanceInfo.configuration.backend === value) return;
-                            instanceInfo.configuration.backend = value; // Ensure new backend choice is persistent
-                            await this.save();
-                            await this.#update();
-                        },
-                    });
-                },
+                //     const backend = instanceInfo.configuration.backend ?? this.workflow.file_format.value;
+
+                //     return new JSONSchemaInput({
+                //         path: [],
+                //         schema: {
+                //             type: "string",
+                //             placeholder: "Select backend type",
+                //             enum: Object.keys(backendMap),
+                //             enumLabels: backendMap,
+                //             strict: true,
+                //         },
+                //         value: backend,
+                //         onUpdate: async (value) => {
+                //             if (instanceInfo.configuration.backend === value) return;
+                //             instanceInfo.configuration.backend = value; // Ensure new backend choice is persistent
+                //             await this.save();
+                //             await this.#update();
+                //         },
+                //     });
+                // },
                 {
                     name: "Save & Validate",
                     primary: true,

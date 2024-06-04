@@ -14,7 +14,8 @@ export const resolveBackendResults = (schema, results, itemsize) => {
     const { full_shape } = results;
     if (copy.properties.filter_methods) copy.properties.filter_methods.description = "The ordered collection of filtering methods to apply to this dataset prior to compression.<br/><small>Set blank to disable filtering</small>"
     copy.properties.compression_method.description = "The specified compression method to apply to this dataset.<br/><small>Set blank to disable compression</small>"
-    copy.description = `<b>Full Shape:</b> ${full_shape}<br/><b>Source size:</b> ${getResourceUsage(full_shape, itemsize).toFixed(2)} GB`; // This is static
+    delete copy.properties.compression_method.default // Remove gzip as the default compression method
+    copy.description = `<b>Full Shape:</b> ${full_shape.join(' x ')}<br/><b>Source size:</b> ${getResourceUsage(full_shape, itemsize)}`; // This is static
 
     updateSchema(copy, results, itemsize)
 
@@ -28,12 +29,12 @@ const propertiesToUpdate = [
 ]
 
 // const bufferShapeDescription = (value, itemsize) => {
-//     return `Expected RAM usage: ${getResourceUsage(value, itemsize).toFixed(2)} GB.`;
+//     return `Expected RAM usage: ${getResourceUsage(value, itemsize)}.`;
 // }
 
 const chunkShapeDescription = (value, itemsize) => {
     const hasNull = value.includes(null) || value.includes(undefined); // Both null after JSON processing
-    const diskSpaceMessage = hasNull ? 'Disk space usage will be determined automatically' : `Disk space usage per chunk: ${getResourceUsage(value, itemsize, 1e6).toFixed(2)} MB`;
+    const diskSpaceMessage = hasNull ? 'Disk space usage will be determined automatically' : `Disk space usage per chunk: ${getResourceUsage(value, itemsize)}`;
     return `${diskSpaceMessage}<br/><small>Leave blank to auto-specify the axis</small>`;
 }
 
