@@ -12,7 +12,7 @@ export const ready = {
 
 //  Get timezones
 onServerOpen(async () => {
-    await fetch(new URL("/time/timezones", baseUrl))
+    await fetch(new URL("/system/all_timezones", baseUrl))
     .then((res) => res.json())
     .then((timezones) => {
         console.log(timezones);
@@ -25,7 +25,7 @@ onServerOpen(async () => {
 
 //  Get timezone
 onServerOpen(async () => {
-    await fetch(new URL("/time/timezone", baseUrl))
+    await fetch(new URL("/system/local_timezone", baseUrl))
     .then((res) => res.json())
     .then((timezone) => {
         console.log(timezone);

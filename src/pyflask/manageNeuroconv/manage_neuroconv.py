@@ -7,6 +7,7 @@ import math
 import os
 import re
 import traceback
+import zoneinfo
 from datetime import datetime
 from pathlib import Path
 from shutil import copytree, rmtree
@@ -998,13 +999,13 @@ def convert_to_nwb(
                 del ecephys_metadata["ElectrodeColumns"]
 
         # Correct timezone in metadata fields
-        resolved_metadata["NWBFile"]["session_start_time"] = resolved_metadata["NWBFile"]["session_start_time"].replace(
-            tzinfo=zoneinfo.ZoneInfo(info["timezone"])
-        )
+        resolved_metadata["NWBFile"]["session_start_time"] = datetime.fromisoformat(
+            resolved_metadata["NWBFile"]["session_start_time"]
+        ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
         if "date_of_birth" in resolved_metadata["Subject"]:
-            resolved_metadata["Subject"]["date_of_birth"] = resolved_metadata["Subject"]["date_of_birth"].replace(
-                tzinfo=zoneinfo.ZoneInfo(info["timezone"])
-            )
+            resolved_metadata["Subject"]["date_of_birth"] = datetime.fromisoformat(
+                resolved_metadata["Subject"]["date_of_birth"]
+            ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
 
         # Add GUIDE watermark
         package_json_file_path = resource_path("package.json" if is_packaged() else "../../package.json")

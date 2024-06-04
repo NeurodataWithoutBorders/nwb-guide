@@ -1,6 +1,6 @@
 """An API for handling general system information."""
 
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 import flask_restx
 
@@ -25,7 +25,7 @@ class GetCPUInfo(flask_restx.Resource):
 @system_namespace.route("/all_timezones")
 class GetTimezones(flask_restx.Resource):
 
-    @time_namespace.doc(
+    @system_namespace.doc(
         description="Request the available timezones available to the backend.",
     )
     def get(self) -> List[str]:
@@ -37,7 +37,7 @@ class GetTimezones(flask_restx.Resource):
 @system_namespace.route("/local_timezone")
 class GetTimezones(flask_restx.Resource):
 
-    @time_namespace.doc(
+    @system_namespace.doc(
         description="Request the current timezone on the system.",
     )
     def get(self) -> str:
