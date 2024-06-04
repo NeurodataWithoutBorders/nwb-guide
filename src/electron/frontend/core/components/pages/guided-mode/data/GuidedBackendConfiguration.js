@@ -19,8 +19,6 @@ import { getResourceUsageBytes } from "../../../../validation/backend-configurat
 import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
 import { getInfoFromId } from "./utils.js";
 
-const getBackendConfigurations = (info, options = {}) => run(`neuroconv/configuration`, info, options);
-
 const itemIgnore = {
     full_shape: true,
     buffer_shape: true,
@@ -38,6 +36,12 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
         super(...args);
         this.style.height = "100%"; // Fix main section
     }
+
+    getBackendConfigurations = (info, options = {}) =>
+        run(`neuroconv/configuration`, info, options).catch((e) => {
+            this.notify(e.message, "error");
+            throw e;
+        });
 
     beforeSave = () => {
         merge(this.localState, this.info.globalState);
@@ -227,13 +231,18 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
             {
                 title: "Getting backend options",
             },
-            getBackendConfigurations
+            this.getBackendConfigurations
         );
     };
 
     validate = (toRun) => {
         if (!toRun)
-            return this.runConversions({}, true, { title: "Validating backend options" }, getBackendConfigurations);
+            return this.runConversions(
+                {},
+                true,
+                { title: "Validating backend options" },
+                this.getBackendConfigurations
+            );
 
         const { subject, session } = toRun;
         return this.runConversions(
@@ -243,7 +252,7 @@ export class GuidedBackendConfigurationPage extends ManagedPage {
                 title: "Validating backend options",
                 showCancelButton: false,
             },
-            getBackendConfigurations
+            this.getBackendConfigurations
         );
     };
 

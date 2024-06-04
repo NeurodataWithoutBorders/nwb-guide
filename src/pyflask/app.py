@@ -115,6 +115,7 @@ class Log(Resource):
             message += f"\n{traceback}\n"
 
         selected_logger = getattr(api.logger, type)
+        api.logger.info(f"Logging {type} message: {header}")
         selected_logger(message)
 
 
