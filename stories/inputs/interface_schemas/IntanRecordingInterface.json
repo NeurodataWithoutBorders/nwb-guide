@@ -8,11 +8,11 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to either a .rhd or a .rhs file"
                 },
                 "stream_id": {
-                    "type": "string",
-                    "default": "0"
+                    "type": "string"
                 },
                 "verbose": {
                     "type": "boolean",

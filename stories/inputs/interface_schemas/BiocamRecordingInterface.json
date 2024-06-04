@@ -8,7 +8,8 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to the .bwr file."
                 },
                 "verbose": {
                     "type": "boolean",

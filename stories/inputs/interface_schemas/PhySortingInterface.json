@@ -8,7 +8,8 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to the output Phy folder (containing the params.py)."
                 },
                 "exclude_cluster_groups": {
                     "type": "array",

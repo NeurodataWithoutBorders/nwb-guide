@@ -9,11 +9,13 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to the .h5 file output by dlc."
                 },
                 "config_file_path": {
                     "format": "file",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to .yml config file"
                 },
                 "subject_name": {
                     "type": "string",

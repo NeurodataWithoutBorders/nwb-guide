@@ -8,13 +8,15 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to the folder containing Suite2p segmentation data. Should contain 'plane#' subfolder(s)."
                 },
                 "channel_name": {
                     "type": "string"
                 },
                 "plane_name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The name of the plane to load. This interface only loads one plane at a time. Use the full name, e.g. 'plane0'. If this value is omitted, the first plane found will be loaded."
                 },
                 "plane_segmentation_name": {
                     "type": "string"
@@ -22,13 +24,6 @@
                 "verbose": {
                     "type": "boolean",
                     "default": true
-                },
-                "combined": {
-                    "type": "boolean",
-                    "default": false
-                },
-                "plane_no": {
-                    "type": "number"
                 }
             },
             "type": "object",

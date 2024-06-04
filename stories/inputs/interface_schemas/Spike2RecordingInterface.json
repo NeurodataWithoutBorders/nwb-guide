@@ -8,7 +8,7 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "description": "Path to CED data file.",
+                    "description": "Path to .smr or .smrx file.",
                     "type": "string"
                 },
                 "verbose": {

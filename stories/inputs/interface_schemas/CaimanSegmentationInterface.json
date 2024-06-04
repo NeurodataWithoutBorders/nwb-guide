@@ -8,7 +8,8 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to .hdf5 file."
                 },
                 "verbose": {
                     "type": "boolean",

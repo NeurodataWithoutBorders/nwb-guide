@@ -8,7 +8,8 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to Neuralynx directory containing \".nse\", \".ntt\", \".nse\", or \".nev\" files."
                 },
                 "stream_name": {
                     "type": "string"

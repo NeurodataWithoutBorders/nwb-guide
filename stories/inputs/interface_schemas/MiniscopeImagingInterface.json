@@ -8,7 +8,8 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "The main Miniscope folder. The microscope movie files are expected to be in sub folders within the main folder."
                 }
             },
             "type": "object",

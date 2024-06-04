@@ -9,7 +9,7 @@
                 "folder_path": {
                     "format": "directory",
                     "type": "string",
-                    "description": "The path that points to the folder containing the OME-TIF image files."
+                    "description": "The folder containing the OME-TIF image files."
                 },
                 "verbose": {
                     "type": "boolean",

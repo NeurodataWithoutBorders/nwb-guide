@@ -11,6 +11,12 @@
                     "type": "string",
                     "description": "Path to Tiff file."
                 },
+                "channel_name": {
+                    "type": "string"
+                },
+                "plane_name": {
+                    "type": "string"
+                },
                 "fallback_sampling_frequency": {
                     "type": "number"
                 },

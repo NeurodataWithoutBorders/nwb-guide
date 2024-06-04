@@ -8,7 +8,8 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to OpenEphys directory (.continuous or .dat files)."
                 },
                 "stream_name": {
                     "type": "string"
