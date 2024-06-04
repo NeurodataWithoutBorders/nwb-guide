@@ -1,6 +1,6 @@
 """An API for handling general system information."""
 
-from typing import Dict, Union, List
+from typing import Dict, List, Union
 
 import flask_restx
 
