@@ -15,10 +15,7 @@ export const ready = {
 onServerOpen(async () => {
     await fetch(new URL("/system/all_timezones", baseUrl))
     .then((res) => res.json())
-    .then((timezones) => {
-        console.log(timezones);
-        setReady.timezones(timezones)
-    })
+    .then((timezones) => setReady.timezones(timezones))
     .catch(() => {
         if (isStorybook) setReady.timezones([])
     });
@@ -28,10 +25,7 @@ onServerOpen(async () => {
 onServerOpen(async () => {
     await fetch(new URL("/system/local_timezone", baseUrl))
     .then((res) => res.json())
-    .then((timezone) => {
-        console.log(timezone);
-        setReady.timezone(timezone)
-    })
+    .then((timezone) => setReady.timezone(timezone))
     .catch(() => {
         if (isStorybook) setReady.timezone(null)
     });
@@ -122,7 +116,6 @@ ready.timezones.then((timezones) => {
             acc[tz] = region
             return acc
         }, {})
-        console.log(timezone);
 
         timezoneSchema.default = timezone;
     })
