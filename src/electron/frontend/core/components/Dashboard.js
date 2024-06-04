@@ -261,7 +261,7 @@ export class Dashboard extends LitElement {
         });
 
         page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
-
+        // Ensure that all states are synced to the proper state for this page (e.g. conversions have been run)
         this.page
             .checkSyncState()
             .then(async () => {
@@ -271,23 +271,34 @@ export class Dashboard extends LitElement {
                     ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
                     : projectName;
 
-                this.updateSections({ sidebar: false, main: true });
-
                 const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
                 if (skipped) {
                     if (isStorybook) return; // Do not skip on storybook
 
-                    // Run skip functions
-                    Object.entries(page.workflow).forEach(([key, state]) => {
-                        if (typeof state.skip === "function") state.skip();
-                    });
+                    const backwards = previous && previous.info.previous === this.page;
 
-                    // Skip right over the page if configured as such
-                    if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
-                    else await this.page.onTransition(1);
+                    return (
+                        Promise.all(
+                            Object.entries(page.workflow).map(async ([_, state]) => {
+                                if (typeof state.skip === "function" && !backwards) return await state.skip(); // Run skip functions
+                            })
+                        )
+
+                            // Skip right over the page if configured as such
+                            .then(async () => {
+                                if (backwards) await this.main.onTransition(-1);
+                                else await this.main.onTransition(1);
+                            })
+                    );
                 }
+
+                page.requestUpdate(); // Re-render the page on each load
+
+                // Update main to render page
+                this.updateSections({ sidebar: false, main: true });
             })
+
             .catch((e) => {
                 const previousId = previous?.info?.id ?? -1;
                 this.main.onTransition(previousId); // Revert back to previous page
@@ -300,7 +311,7 @@ export class Dashboard extends LitElement {
                 );
             })
             .finally(() => {
-                if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
+                if (this.#transitionPromise.value) this.#transitionPromise.trigger(this.main.page); // This ensures calls to page.to() can be properly awaited until the next page is ready
             });
     }
 
@@ -369,6 +380,23 @@ export class Dashboard extends LitElement {
                             resolve(value);
                         })
                 ));
+
+
+            let resolved;
+            promise.then(res => {
+                resolved = true
+                console.log("Transitioned to", res.info.id);
+            })
+            .catch(e => {
+                console.error('SOMETHIG THAPPENED WOTH', res.info.id, e)
+            })
+
+            setTimeout(() => {
+                if (!resolved) {
+                    console.warn("Transition Promise Timed Out", res.info.id)
+                    // this.#transitionPromise.trigger(this.page)
+                }
+            }, 1000)
 
             if (typeof transition === "number") {
                 const info = this.page.info;
