@@ -895,15 +895,18 @@ def create_file(
                     progress_bar_options=progress_bar_options,
                 )
 
-        # Actually run the conversion
-        converter.run_conversion(
+        run_conversion_kwargs = dict(
             metadata=metadata,
             nwbfile_path=nwbfile_path,
             overwrite=overwrite,
             conversion_options=options,
             backend=backend,
-            backend_configuration=update_backend_configuration(info),
         )
+
+        if not run_stub_test:
+            run_conversion_kwargs.update(dict(backend_configuration=update_backend_configuration(info)))
+
+        converter.run_conversion(**run_conversion_kwargs)
 
     except Exception as e:
         if log_url:
