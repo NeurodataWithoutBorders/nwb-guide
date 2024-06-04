@@ -30,7 +30,6 @@ export const renderDateTime = (value) => {
 
 export const resolveDateTime = renderDateTime;
 
-
 export class DateTimeSelector extends LitElement {
     static get styles() {
         return css`

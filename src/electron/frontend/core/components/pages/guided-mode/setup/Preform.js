@@ -75,7 +75,6 @@ const questions = {
 // -------------------------------------------------------------------------------------------
 
 const getSchema = (questions) => {
-
     // Inject latest timezone schema each render
     questions.timezone = { ...questions.timezone, ...timezoneSchema };
 
@@ -123,11 +122,9 @@ const getSchema = (questions) => {
     return {
         schema: structuredClone(projectWorkflowSchema),
         defaults,
-        dependents
-    }
-
-
-}
+        dependents,
+    };
+};
 
 // ----------------------------------------------------------------------
 // ------------------------ Preform Class -------------------------------
@@ -158,7 +155,6 @@ export class GuidedPreform extends Page {
     };
 
     updateForm = () => {
-        
         const { schema, dependents, defaults } = getSchema(questions);
         const projectState = this.info.globalState.project ?? {};
         if (!projectState.workflow) projectState.workflow = {};

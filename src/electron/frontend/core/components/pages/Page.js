@@ -188,7 +188,7 @@ export class Page extends LitElement {
                     ...conversionOptions, // Any additional conversion options override the defaults
                     interfaces: globalState.interfaces,
                     alignment,
-                    timezone: this.workflow.timezone.value
+                    timezone: this.workflow.timezone.value,
                 };
 
                 fileConfiguration.push(payload);

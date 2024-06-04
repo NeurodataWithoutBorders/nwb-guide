@@ -15,8 +15,9 @@ class GetTimezones(flask_restx.Resource):
     )
     def get(self) -> Union[Dict[str, int], None]:
         from zoneinfo import available_timezones
+
         return list(available_timezones())
-    
+
 
 @time_namespace.route("/timezone")
 class GetTimezones(flask_restx.Resource):
@@ -26,4 +27,5 @@ class GetTimezones(flask_restx.Resource):
     )
     def get(self) -> Union[Dict[str, int], None]:
         from tzlocal import get_localzone
+
         return str(get_localzone())

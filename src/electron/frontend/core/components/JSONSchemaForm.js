@@ -247,7 +247,7 @@ export class JSONSchemaForm extends LitElement {
             dialogType: { type: String, reflect: false },
             dialogOptions: { type: Object, reflect: false },
             globals: { type: Object, reflect: false },
-            validateEmptyValues: { type: Boolean, reflect: true }
+            validateEmptyValues: { type: Boolean, reflect: true },
         };
     }
 

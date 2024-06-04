@@ -100,7 +100,7 @@ ready.timezones.then((timezones) => {
         timezoneSchema.search = true
 
         const filteredTimezones = timezoneSchema.enum = timezones.filter(tz => {
-            return tz.split('/').length > 1 
+            return tz.split('/').length > 1
             && !tz.toLowerCase().includes('etc/')
         });
 

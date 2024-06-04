@@ -870,7 +870,6 @@ def convert_to_nwb(
 
     timezone = info.get("timezone")
 
-
     try:
 
         # add a subdirectory to a filepath if stub_test is true
