@@ -10,7 +10,9 @@ const enumCategories = timezones.reduce((acc, timezone) => {
 
 const enumLabels = timezones.reduce((acc, timezone) => {
     const parts = timezone.split("/");
-    acc[timezone] = `${header(parts[parts.length - 1])}`;
+    const nonCategoryParts = parts.slice(1, parts.length - 1);
+    acc[timezone] = header(parts[parts.length - 1]);
+    if (nonCategoryParts.length) acc[timezone] += ` — ${nonCategoryParts.map(str => header(str)).join(", ")}`
     return acc;
 }, {});
 
