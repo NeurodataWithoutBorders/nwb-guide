@@ -260,10 +260,9 @@ export class Dashboard extends LitElement {
             }
         });
 
-        console.log("Workflow Config", workflowConfig)
+        console.log("Workflow Config", workflowConfig);
 
         page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
-        
 
         this.page
             .checkSyncState()
