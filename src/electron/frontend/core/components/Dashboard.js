@@ -245,6 +245,26 @@ export class Dashboard extends LitElement {
 
         this.page.set(toPass, false);
 
+        // Constrain based on workflow configuration
+        const workflowConfig = page.workflow ?? (page.workflow = {});
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+
+        Object.entries(workflowValues).forEach(([key, value]) => {
+            const config = workflowConfig[key] ?? (workflowConfig[key] = {});
+            config.value = value;
+
+            const { elements } = config;
+            if (elements) {
+                if (value) elements.forEach((el) => el.removeAttribute("hidden"));
+                else elements.forEach((el) => el.setAttribute("hidden", true));
+            }
+        });
+
+        console.log("Workflow Config", workflowConfig)
+
+        page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
+        
+
         this.page
             .checkSyncState()
             .then(async () => {

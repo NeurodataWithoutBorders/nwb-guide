@@ -182,7 +182,7 @@ export class Page extends LitElement {
                     const parent = pathTo.reduce((acc, key) => acc[key], metadata);
                     parent[name] = extractISOString(parent[name], {
                         offset: true,
-                        timezone: this.workflow.timezone,
+                        timezone: this.workflow.timezone.value,
                     });
                 });
 

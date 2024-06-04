@@ -99,6 +99,11 @@ const defaults = Object.entries(questions).reduce((acc, [name, info]) => {
     return acc;
 }, {});
 
+const required = Object.entries(questions).reduce((acc, [name, info]) => {
+    if (info.required) acc.push(name);
+    return acc;
+}, []);
+
 const projectWorkflowSchema = {
     type: "object",
     properties: Object.entries(questions).reduce((acc, [name, info]) => {
@@ -106,6 +111,7 @@ const projectWorkflowSchema = {
         return acc;
     }, {}),
     order: Object.keys(questions),
+    required,
     additionalProperties: false,
 };
 
