@@ -1,5 +1,6 @@
 import { baseUrl, onServerOpen } from "../electron/frontend/core/server/globals";
 import { isStorybook } from '../electron/frontend/core/globals'
+import { header } from "../electron/frontend/core/components/forms/utils";
 
 const setReady: any = {}
 
@@ -105,16 +106,23 @@ ready.timezones.then((timezones) => {
         });
 
         timezoneSchema.enumLabels = filteredTimezones.reduce((acc, tz) => {
-            const [ region, city ] = tz.split('/')
-            acc[tz] = `${city}, ${region}`
+            const [ _, ...other ] = tz.split('/')
+            acc[tz] = other.map(part => header(part)).join(' — ')
             return acc
-        })
+        }, {})
+
+        timezoneSchema.enumKeywords = filteredTimezones.reduce((acc, tz) => {
+            const [ region ] = tz.split('/')
+            acc[tz] = [ header(region) ]
+            return acc
+        }, {})
 
         timezoneSchema.enumCategories =  filteredTimezones.reduce((acc, tz) => {
             const [ region ] = tz.split('/')
             acc[tz] = region
             return acc
-        })
+        }, {})
+        console.log(timezone);
 
         timezoneSchema.default = timezone;
     })
