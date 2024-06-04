@@ -1,4 +1,24 @@
+import { header } from "../electron/frontend/core/components/forms/utils";
+
 const timezones = Intl.supportedValuesOf('timeZone');
+
+const enumCategories = timezones.reduce((acc, timezone) => {
+    const category = timezone.split("/")[0];
+    acc[timezone] = category;
+    return acc;
+}, {});
+
+const enumLabels = timezones.reduce((acc, timezone) => {
+    const parts = timezone.split("/");
+    acc[timezone] = `${header(parts[parts.length - 1])}`;
+    return acc;
+}, {});
+
+
+const enumKeywords = timezones.reduce((acc, timezone) => {
+    acc[timezone] = [ timezone ]
+    return acc;
+}, {});
 
 
 // NOTE: Used before validation and conversion to add timezone information to the data
@@ -51,6 +71,9 @@ export default {
     description: "Provide a base timezone for all date and time operations in the GUIDE.",
     default: localTimeZone,
     enum: timezones,
+    enumLabels,
+    enumKeywords,
+    enumCategories,
     strict: true,
     search: true
 }
