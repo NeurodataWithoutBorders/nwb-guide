@@ -259,8 +259,7 @@ export class Dashboard extends LitElement {
                 else elements.forEach((el) => el.setAttribute("hidden", true));
             }
         });
-
-        page.requestUpdate(); // Ensure the page is re-rendered with new workflow configurations
+        
         // Ensure that all states are synced to the proper state for this page (e.g. conversions have been run)
         this.page
             .checkSyncState()
