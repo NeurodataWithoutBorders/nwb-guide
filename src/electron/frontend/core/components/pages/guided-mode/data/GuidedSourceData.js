@@ -274,8 +274,9 @@ export class GuidedSourceDataPage extends ManagedPage {
                                 if (alignment) {
                                     globalState.project.alignment = alignment.results;
                                     this.unsavedUpdates = "conversions";
-                                    await this.save();
                                 }
+
+                                await this.save();
 
                                 const sourceCopy = structuredClone(globalState.results[subject][session].source_data);
 
@@ -288,12 +289,16 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     alignment: alignmentInfo,
                                 };
 
+                                console.warn("Sending", sessionInfo);
+
                                 const data = await run("neuroconv/alignment", sessionInfo, {
                                     title: "Checking Alignment",
                                     message: "Please wait...",
                                 });
 
                                 const { metadata } = data;
+                                console.warn("GOT", data);
+
                                 if (Object.keys(metadata).length === 0) {
                                     this.notify(
                                         `<h4 style="margin: 0">Time Alignment Failed</h4><small>Please ensure that all source data is specified.</small>`,

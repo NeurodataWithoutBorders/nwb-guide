@@ -751,9 +751,8 @@ def set_interface_alignment(converter: dict, alignment_info: dict) -> dict:
     return errors
 
 
-def get_interface_alignment(info: dict) -> dict:
+def get_compatible_interfaces(info: dict) -> dict:
 
-    from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
     from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
         BaseRecordingExtractorInterface,
     )
@@ -761,8 +760,49 @@ def get_interface_alignment(info: dict) -> dict:
         BaseSortingExtractorInterface,
     )
 
-    alignment_info = info.get("alignment", dict())
     converter = instantiate_custom_converter(source_data=info["source_data"], interface_class_dict=info["interfaces"])
+
+    compatible = {}
+
+    for name, interface in converter.data_interface_objects.items():
+
+        is_sorting = isinstance(interface, BaseSortingExtractorInterface)
+
+        if is_sorting is True:
+            compatible[name] = []
+
+        # If at least one recording and sorting interface is selected on the formats page
+        # Then it is possible the two could be linked (the sorting was applied to the recording)
+        # But there are very strict conditions from SpikeInterface determining compatibility
+        # Those conditions are not easily exposed so we just 'try' to register them and skip on error
+        sibling_recording_interfaces = {
+            interface_key: interface
+            for interface_key, interface in converter.data_interface_objects.items()
+            if isinstance(interface, BaseRecordingExtractorInterface)
+        }
+
+        for recording_interface_key, recording_interface in sibling_recording_interfaces.items():
+            try:
+                interface.register_recording(recording_interface=recording_interface)
+                compatible[name].append(recording_interface_key)
+            except Exception:
+                pass
+
+    return compatible
+
+
+def get_interface_alignment(info: dict) -> dict:
+
+    from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
+    from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+        BaseSortingExtractorInterface,
+    )
+
+    alignment_info = info.get("alignment", dict())
+
+    converter = instantiate_custom_converter(source_data=info["source_data"], interface_class_dict=info["interfaces"])
+
+    compatibility = get_compatible_interfaces(info)
 
     errors = set_interface_alignment(converter=converter, alignment_info=alignment_info)
 
@@ -777,23 +817,7 @@ def get_interface_alignment(info: dict) -> dict:
         metadata[name]["sorting"] = is_sorting
 
         if is_sorting is True:
-            metadata[name]["compatible"] = []
-
-            # If at least one recording and sorting interface is selected on the formats page
-            # Then it is possible the two could be linked (the sorting was applied to the recording)
-            # But there are very strict conditions from SpikeInterface determining compatibility
-            # Those conditions are not easily exposed so we just 'try' to register them and skip on error
-            sibling_recording_interfaces = {
-                interface_key: interface
-                for interface_key, interface in converter.data_interface_objects.items()
-                if isinstance(interface, BaseRecordingExtractorInterface)
-            }
-            for recording_interface_key, recording_interface in sibling_recording_interfaces.items():
-                try:
-                    interface.register_recording(recording_interface=recording_interface)
-                    metadata[name]["compatible"].append(recording_interface_key)
-                except Exception:
-                    pass
+            metadata[name]["compatible"] = compatibility.get(name, None)
 
         if not isinstance(interface, BaseTemporalAlignmentInterface):
             timestamps[name] = []
