@@ -993,15 +993,13 @@ def convert_to_nwb(
                 del ecephys_metadata["ElectrodeColumns"]
 
         # Correct timezone in metadata fields
-        resolved_metadata["NWBFile"]["session_start_time"] = datetime.fromisoformat(resolved_metadata["NWBFile"][
-            "session_start_time"]).replace(
-            tzinfo=zoneinfo.ZoneInfo(info["timezone"])
-        )
+        resolved_metadata["NWBFile"]["session_start_time"] = datetime.fromisoformat(
+            resolved_metadata["NWBFile"]["session_start_time"]
+        ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
         if "date_of_birth" in resolved_metadata["Subject"]:
-            resolved_metadata["Subject"]["date_of_birth"] = datetime.fromisoformat(resolved_metadata["Subject"][
-                                                                                       "date_of_birth"]).replace(
-                tzinfo=zoneinfo.ZoneInfo(info["timezone"])
-            )
+            resolved_metadata["Subject"]["date_of_birth"] = datetime.fromisoformat(
+                resolved_metadata["Subject"]["date_of_birth"]
+            ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
 
         # Actually run the conversion
         converter.run_conversion(
