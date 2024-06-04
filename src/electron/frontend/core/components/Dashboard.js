@@ -301,7 +301,7 @@ export class Dashboard extends LitElement {
             })
             .finally(() => {
                 if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
-            })
+            });
     }
 
     // Populate the sections tracked for this page by using the global state as a model
@@ -360,13 +360,15 @@ export class Dashboard extends LitElement {
         if (!active) active = this.activePage; // default to active page
 
         this.main.onTransition = async (transition) => {
-            const promise = this.#transitionPromise.value ?? (this.#transitionPromise.value = new Promise(
-                (resolve) => (this.#transitionPromise.trigger = (value) => {
-                    delete this.#transitionPromise.value;
-                    resolve(value);
-                
-                })
-            ));
+            const promise =
+                this.#transitionPromise.value ??
+                (this.#transitionPromise.value = new Promise(
+                    (resolve) =>
+                        (this.#transitionPromise.trigger = (value) => {
+                            delete this.#transitionPromise.value;
+                            resolve(value);
+                        })
+                ));
 
             if (typeof transition === "number") {
                 const info = this.page.info;
