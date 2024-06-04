@@ -249,12 +249,12 @@ export class Dashboard extends LitElement {
         const workflowConfig = page.workflow ?? (page.workflow = {});
         const workflowValues = page.info.globalState?.project?.workflow ?? {};
 
-        Object.entries(workflowValues).forEach(([key, state = {}]) => {
+        Object.entries(workflowValues).forEach(([key, value]) => {
             const config = workflowConfig[key] ?? (workflowConfig[key] = {});
-            const value = (config.value = workflowValues[key]);
+            config.value = value;
 
-            if (state.elements) {
-                const elements = state.elements;
+            const { elements } = config;
+            if (elements) {
                 if (value) elements.forEach((el) => el.removeAttribute("hidden"));
                 else elements.forEach((el) => el.setAttribute("hidden", true));
             }
