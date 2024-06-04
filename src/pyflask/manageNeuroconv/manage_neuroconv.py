@@ -868,8 +868,6 @@ def convert_to_nwb(
     default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
     default_output_directory = default_output_base / project_name
 
-    timezone = info.get("timezone")
-
     try:
 
         # add a subdirectory to a filepath if stub_test is true
