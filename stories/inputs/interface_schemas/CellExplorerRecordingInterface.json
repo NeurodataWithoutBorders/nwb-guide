@@ -8,7 +8,7 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "description": "The folder where the session data is located. It should contain a\n`{folder.name}.session.mat` file and the binary files `{folder.name}.dat`\nor `{folder.name}.lfp` for the LFP interface.",
+                    "description": "Folder containing the .session.mat file",
                     "type": "string"
                 },
                 "verbose": {
