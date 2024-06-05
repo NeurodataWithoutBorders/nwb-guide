@@ -647,15 +647,14 @@ def validate_subject_metadata(
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate subject metadata."""
     from pynwb.file import Subject
+    import pytz 
 
     check_function = get_check_function(check_function_name)
 
     if isinstance(subject_metadata.get("date_of_birth"), str):
         subject_metadata["date_of_birth"] = datetime.fromisoformat(subject_metadata["date_of_birth"])
         if timezone is not None:
-            subject_metadata["date_of_birth"] = subject_metadata["date_of_birth"].astimezone(pytz.timezone(timezone))
-
-
+            subject_metadata["date_of_birth"] = subject_metadata["date_of_birth"].replace(tzinfo=pytz.timezone(timezone))
 
     return run_check_function(check_function, Subject(**subject_metadata))
 
@@ -675,8 +674,6 @@ def validate_nwbfile_metadata(
         nwbfile_metadata["session_start_time"] = datetime.fromisoformat(nwbfile_metadata["session_start_time"])
         if timezone is not None:
             nwbfile_metadata["session_start_time"] = nwbfile_metadata["session_start_time"].replace(tzinfo=pytz.timezone(timezone))
-
-        # raise ValueError(f"{original}, {nwbfile_metadata['session_start_time']} ({timezone})")
 
     return run_check_function(check_function, mock_NWBFile(**nwbfile_metadata))
 
