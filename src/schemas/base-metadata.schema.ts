@@ -96,7 +96,11 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
     copy.order = [ "NWBFile", "Subject" ]
 
     const minDate = "1900-01-01T00:00"
-    const maxDate = getISODateInTimezone().slice(0, -2) // Restrict date to current date with timezone awareness
+
+    // Set the maximum at tomorrow
+    const nextDay = new Date()
+    nextDay.setDate(nextDay.getDate() + 1)
+    const maxDate = getISODateInTimezone(nextDay).slice(0, -2) // Restrict date to tomorrow (with timezone awareness)
 
 
     // Add unit to weight
