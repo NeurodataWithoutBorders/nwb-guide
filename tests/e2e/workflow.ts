@@ -28,7 +28,7 @@ export const uploadToDandi = (subdirectory, forceSkip = false) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         const modal = page.globalModal
-        const stagingKeyInput = modal.form.getFormElement(['staging_api_key'])
+        const stagingKeyInput = modal.form.getFormElement(['development_api_key'])
         stagingKeyInput.updateData(dandiAPIToken)
       }, dandiInfo.token)
 
