@@ -32,9 +32,9 @@ from namespaces import (
     data_namespace,
     neuroconv_namespace,
     neurosift_namespace,
+    nwb_inspector_namespace,
     startup_namespace,
     system_namespace,
-    nwb_inspector_namespace,
 )
 
 neurosift_file_registry = collections.defaultdict(bool)

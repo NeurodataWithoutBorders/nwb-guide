@@ -1,14 +1,17 @@
 """An API for handling general system information."""
+
 import os
 from typing import Dict, Union
 
 import flask_restx
 
-nwb_inspector_namespace = flask_restx.Namespace(name="nwb_inspector", description="Handles interactions with the NWB "
-                                                                                  "Inspector.")
+nwb_inspector_namespace = flask_restx.Namespace(
+    name="nwb_inspector", description="Handles interactions with the NWB " "Inspector."
+)
 
 
 # TODO: reroute all frontend calls to the new namespace
+
 
 @nwb_inspector_namespace.route("/inspect")
 class InspectRouter(Resource):
@@ -27,6 +30,7 @@ class InspectRouter(Resource):
                 return inspect_nwb_folder(url, {"path": paths[0], **kwargs})
         else:
             return inspect_multiple_filesystem_objects(progress_url, paths, **kwargs)
+
 
 @nwb_inspector_namespace.route("/inspect_file")
 class InspectNWBFile(Resource):
