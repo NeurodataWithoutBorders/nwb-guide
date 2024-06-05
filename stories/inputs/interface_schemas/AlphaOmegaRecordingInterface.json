@@ -8,7 +8,8 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to the folder of .mpx files."
                 },
                 "verbose": {
                     "type": "boolean",

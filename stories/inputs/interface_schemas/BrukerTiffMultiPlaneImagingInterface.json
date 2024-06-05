@@ -9,7 +9,7 @@
                 "folder_path": {
                     "format": "directory",
                     "type": "string",
-                    "description": "The path that points to the folder containing the Bruker volumetric TIF image files and configuration files."
+                    "description": "The folder that contains the Bruker TIF image files (.ome.tif) and configuration files (.xml, .env)."
                 },
                 "stream_name": {
                     "type": "string"
