@@ -98,7 +98,7 @@ export default async function runWorkflow(name, workflow, identifier) {
     // Advance to general information page
     await toNextPage('details')
 
-    await takeScreenshot(join(identifier, 'info-page'), 300)
+    await takeScreenshot(join(identifier, 'info-page'), 600)
 
     // Fail to advance without name
     await toNextPage('details')
