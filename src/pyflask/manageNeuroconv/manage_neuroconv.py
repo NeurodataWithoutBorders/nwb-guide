@@ -8,7 +8,7 @@ import os
 import re
 import traceback
 import zoneinfo
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Dict, List, Optional, Union
@@ -662,7 +662,7 @@ def validate_subject_metadata(
         subject_metadata["date_of_birth"] = datetime.fromisoformat(subject_metadata["date_of_birth"])
         if timezone is not None:
             subject_metadata["date_of_birth"] = subject_metadata["date_of_birth"].replace(
-                tzinfo=pytz.timezone(timezone)
+                tzinfo=zoneinfo.ZoneInfo(timezone)
             )
 
     return run_check_function(check_function, Subject(**subject_metadata))
@@ -672,7 +672,6 @@ def validate_nwbfile_metadata(
     nwbfile_metadata: dict, check_function_name: str, timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate NWBFile metadata."""
-    import pytz
     from pynwb.testing.mock.file import mock_NWBFile
 
     check_function = get_check_function(check_function_name)
@@ -681,7 +680,7 @@ def validate_nwbfile_metadata(
         nwbfile_metadata["session_start_time"] = datetime.fromisoformat(nwbfile_metadata["session_start_time"])
         if timezone is not None:
             nwbfile_metadata["session_start_time"] = nwbfile_metadata["session_start_time"].replace(
-                tzinfo=pytz.timezone(timezone)
+                tzinfo=zoneinfo.ZoneInfo(timezone)
             )
 
     return run_check_function(check_function, mock_NWBFile(**nwbfile_metadata))
@@ -1579,7 +1578,7 @@ def _format_spikeglx_meta_file(bin_file_path: str) -> str:
 
     meta_structure = f"""acqApLfSy=384,384,1
 appVersion=20190327
-fileCreateTime={datetime.now().isoformat(timespec='seconds')}
+fileCreateTime={(datetime.now() - timedelta(hours=24)).isoformat(timespec='seconds')}
 fileName={bin_file_path}
 fileSHA1={file_sha1}
 fileSizeBytes={file_size}

@@ -37,7 +37,7 @@ import keyIcon from "../../../../assets/icons/key.svg?raw";
 import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
-export async function createDandiset(results = {}) {
+export function createDandiset(results = {}) {
     let notification;
 
     const notify = (message, type) => {
@@ -47,6 +47,7 @@ export async function createDandiset(results = {}) {
 
     const modal = new Modal({
         header: "Create a Dandiset",
+        onClose: () => modal.remove(),
     });
 
     const content = document.createElement("div");
@@ -101,7 +102,7 @@ export async function createDandiset(results = {}) {
 
     modal.onClose = async () => notify("Dandiset was not created.", "error");
 
-    return new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
         const button = new Button({
             label: "Create",
             primary: true,
@@ -165,10 +166,15 @@ export async function createDandiset(results = {}) {
     }).finally(() => {
         modal.remove();
     });
+
+    return {
+        modal,
+        done: promise,
+    };
 }
 
 async function getAPIKey(staging = false) {
-    const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
+    const whichAPIKey = staging ? "development_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let api_key = DANDI?.api_keys?.[whichAPIKey];
 
@@ -180,6 +186,7 @@ async function getAPIKey(staging = false) {
         const modal = new Modal({
             header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
             open: true,
+            onClose: () => modal.remove(),
         });
 
         const input = new JSONSchemaInput({
@@ -357,7 +364,10 @@ export class UploadsPage extends Page {
                 global.data.uploads = {};
                 global.save();
 
-                const modal = new Modal({ open: true });
+                const modal = new Modal({
+                    open: true,
+                    onClose: () => modal.remove(),
+                });
                 modal.header = "DANDI Upload Summary";
                 const summary = new DandiResults({
                     id: globalState.dandiset,
@@ -391,11 +401,14 @@ export class UploadsPage extends Page {
                                 buttonStyles: {
                                     width: "max-content",
                                 },
-                                onClick: async () => {
-                                    await createDandiset.call(this, {
+                                onClick: () => {
+                                    const { modal, done } = createDandiset.call(this, {
                                         title: this.form.resolved.dandiset,
                                     });
-                                    this.requestUpdate();
+
+                                    done.then(() => this.requestUpdate());
+
+                                    return modal;
                                 },
                             }),
                         ],
