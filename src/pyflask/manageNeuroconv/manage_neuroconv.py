@@ -975,7 +975,6 @@ def update_backend_configuration(info: dict) -> dict:
     backend = info_from_frontend.get("backend", "hdf5")
     backend_configuration_from_frontend = info_from_frontend.get("results", {}).get(backend, {})
 
-
     converter, metadata, __ = get_conversion_info(info)
 
     nwbfile = make_nwbfile_from_metadata(metadata=metadata)

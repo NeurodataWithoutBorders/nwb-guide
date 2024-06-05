@@ -165,7 +165,6 @@ export class Page extends LitElement {
 
         const { close: closeProgressPopup } = swalOpts;
 
-
         const fileConfiguration = [];
 
         try {
@@ -233,19 +232,18 @@ export class Page extends LitElement {
                         onError: () => "Conversion failed with current metadata. Please try again.",
                         ...swalOpts,
                     }
-                )
-                    .catch(async (error) => {
-                        let message = error.message;
+                ).catch(async (error) => {
+                    let message = error.message;
 
-                        if (message.includes("The user aborted a request.")) {
-                            this.notify("Conversion was cancelled.", "warning");
-                            throw error;
-                        }
-
-                        this.notify(message, "error");
+                    if (message.includes("The user aborted a request.")) {
+                        this.notify("Conversion was cancelled.", "warning");
                         throw error;
-                    })
-                    
+                    }
+
+                    this.notify(message, "error");
+                    throw error;
+                });
+
                 results.forEach((info) => {
                     const { file } = info;
                     const fileName = file.split("/").pop();
@@ -255,7 +253,7 @@ export class Page extends LitElement {
                 });
             }
         } finally {
-            closeProgressPopup && await closeProgressPopup();
+            closeProgressPopup && (await closeProgressPopup());
         }
 
         return conversionOutput;
