@@ -34,7 +34,7 @@ import keyIcon from "../../../../assets/icons/key.svg?raw";
 import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, getAPIKey } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
-export async function createDandiset(results = {}) {
+export function createDandiset(results = {}) {
     let notification;
 
     const notify = (message, type) => {
@@ -44,6 +44,7 @@ export async function createDandiset(results = {}) {
 
     const modal = new Modal({
         header: "Create a Dandiset",
+        onClose: () => modal.remove(),
     });
 
     const content = document.createElement("div");
@@ -98,7 +99,7 @@ export async function createDandiset(results = {}) {
 
     modal.onClose = async () => notify("Dandiset was not created.", "error");
 
-    return new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
         const button = new Button({
             label: "Create",
             primary: true,
@@ -162,6 +163,11 @@ export async function createDandiset(results = {}) {
     }).finally(() => {
         modal.remove();
     });
+
+    return {
+        modal,
+        done: promise,
+    };
 }
 
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
@@ -278,7 +284,10 @@ export class UploadsPage extends Page {
                 global.data.uploads = {};
                 global.save();
 
-                const modal = new Modal({ open: true });
+                const modal = new Modal({
+                    open: true,
+                    onClose: () => modal.remove(),
+                });
                 modal.header = "DANDI Upload Summary";
                 const summary = new DandiResults({
                     id: globalState.dandiset,
@@ -312,11 +321,14 @@ export class UploadsPage extends Page {
                                 buttonStyles: {
                                     width: "max-content",
                                 },
-                                onClick: async () => {
-                                    await createDandiset.call(this, {
+                                onClick: () => {
+                                    const { modal, done } = createDandiset.call(this, {
                                         title: this.form.resolved.dandiset,
                                     });
-                                    this.requestUpdate();
+
+                                    done.then(() => this.requestUpdate());
+
+                                    return modal;
                                 },
                             }),
                         ],
