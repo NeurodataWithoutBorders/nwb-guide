@@ -17,7 +17,7 @@ Project Structure
 Project Setup
 ^^^^^^^^^^^^^
 
-The Project Setup page will have you define two pieces of information about your pipeline: the **name** and, optionally, the **output location** for your NWB files.
+The Project Setup page will have you define two pieces of information about your pipeline: the **name** and, optionally, the **output location** for your NWB files. We will not be specifying an output location in this tutorial—so your NWB files will be saved to the default location.
 
 You’ll notice that the name property has a red asterisk next to it, which identifies it as a required property.
 
@@ -83,11 +83,11 @@ Data Entry
 
 Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
-On this page, specify the **.ap.bin** (SpikeGLX) file and **phy** folder so that the GUIDE can find this source data to complete the conversion.
+On this page, specify the **phy** folder and **.ap.bin** (SpikeGLX) file so that the GUIDE can find this source data to complete the conversion.
 
-As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/data`` directory, where **~** is the home directory of your system.
+As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/single_session_data`` directory, where **~** is the home directory of your system.
 
-You can either click the file selector to navigate to the file or drag-and-drop into the GUIDE from your file navigator.
+Within each data format accordion, you'll find a file selector that will accept relevant source data. You can either click this to navigate to your files or drag-and-drop into the GUIDE from your file navigator.
 
 .. figure:: ../assets/tutorials/single/sourcedata-page-specified.png
   :align: center
