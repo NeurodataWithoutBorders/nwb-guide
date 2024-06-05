@@ -188,8 +188,7 @@ export class GuidedUploadPage extends Page {
         // Confirm that one api key exists
         promise.then(() => {
             const api_keys = global.data.DANDI?.api_keys;
-            if (!api_keys || !Object.keys(api_keys).length) this.globalModal.open = true;
-            else this.globalModal.remove() // Remove the modal if not needed
+            if (!api_keys || !Object.keys(api_keys).length) this.header.controls[0].onClick() // Add modal and open it
         })
 
         const untilResult = until(promise, html`Loading form contents...`);
