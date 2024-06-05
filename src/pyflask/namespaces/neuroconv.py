@@ -171,7 +171,7 @@ class InspectNWBFolder(Resource):
 
 
 @neuroconv_namespace.route("/announce/progress")
-class InspectNWBFolder(Resource):
+class AnnounceProgress(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         data = neuroconv_namespace.payload
