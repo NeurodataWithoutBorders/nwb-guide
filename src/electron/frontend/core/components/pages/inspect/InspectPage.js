@@ -49,14 +49,12 @@ export class InspectPage extends Page {
         return result;
     };
 
-
     #modal;
 
     disconnectedCallback() {
         super.disconnectedCallback();
         if (this.#modal) this.#modal.remove();
     }
-
 
     showReport = async (value) => {
         if (!value) {
@@ -105,7 +103,7 @@ export class InspectPage extends Page {
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
             controls: [downloadJSONButton, downloadTextButton],
             footer: legend,
-            onClose: () => this.#modal.remove()
+            onClose: () => this.#modal.remove(),
         });
 
         const container = document.createElement("div");

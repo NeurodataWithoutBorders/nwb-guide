@@ -259,12 +259,11 @@ export class SettingsPage extends Page {
             infoIcon.innerHTML = infoSVG;
 
             infoIcon.onclick = () => {
-
                 if (this.#releaseNotesModal) return (this.#releaseNotesModal.open = true);
 
                 const modal = (this.#releaseNotesModal = new Modal({
                     header: `Release Notes`,
-                    onClose: () => modal.remove()
+                    onClose: () => modal.remove(),
                 }));
 
                 const releaseNotes = document.createElement("div");
