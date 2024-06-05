@@ -10,7 +10,6 @@ import timezoneSchema from "../../../../../../../schemas/timezone.schema";
 // ------------------------------------------------------------------------------
 
 const questions = {
-
     timezone: {
         ...timezoneSchema,
         title: "What timezone is your data in?",
@@ -83,7 +82,7 @@ const questions = {
         title: "Will you customize low-level data storage options?",
         description:
             "<span>Dataset chunking, compression, etc.</span><br><small>This also allows you to change file formats per-session</small>",
-        default: false
+        default: false,
     },
 
     upload_to_dandi: {
@@ -130,12 +129,11 @@ const getSchema = (questions) => {
         if (info.required) acc.push(name);
         return acc;
     }, []);
-    
+
     const ignore = Object.entries(questions).reduce((acc, [name, info]) => {
         if (info.ignore) acc[name] = true;
         return acc;
     }, {});
-    
 
     const projectWorkflowSchema = {
         type: "object",
@@ -152,7 +150,7 @@ const getSchema = (questions) => {
         schema: structuredClone(projectWorkflowSchema),
         defaults,
         dependents,
-        ignore
+        ignore,
     };
 };
 

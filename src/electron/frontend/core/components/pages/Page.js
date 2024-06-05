@@ -213,7 +213,6 @@ export class Page extends LitElement {
                     timezone: this.workflow.timezone.value,
                 };
 
-
                 if (hasCustomFunction) {
                     const result = await backendFunctionToRun(payload, swalOpts); // Already handling Swal popup
                     const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
@@ -254,9 +253,7 @@ export class Page extends LitElement {
                     const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
                     subRef[session] = info;
                 });
-
             }
-
         } finally {
             closeProgressPopup && await closeProgressPopup();
         }
