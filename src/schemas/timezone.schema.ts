@@ -1,5 +1,6 @@
 import { baseUrl, onServerOpen } from "../electron/frontend/core/server/globals";
 import { isStorybook } from '../electron/frontend/core/globals'
+import { header } from "../electron/frontend/core/components/forms/utils";
 
 const setReady: any = {}
 
@@ -14,10 +15,7 @@ export const ready = {
 onServerOpen(async () => {
     await fetch(new URL("/system/all_timezones", baseUrl))
     .then((res) => res.json())
-    .then((timezones) => {
-        console.log(timezones);
-        setReady.timezones(timezones)
-    })
+    .then((timezones) => setReady.timezones(timezones))
     .catch(() => {
         if (isStorybook) setReady.timezones([])
     });
@@ -27,10 +25,7 @@ onServerOpen(async () => {
 onServerOpen(async () => {
     await fetch(new URL("/system/local_timezone", baseUrl))
     .then((res) => res.json())
-    .then((timezone) => {
-        console.log(timezone);
-        setReady.timezone(timezone)
-    })
+    .then((timezone) => setReady.timezone(timezone))
     .catch(() => {
         if (isStorybook) setReady.timezone(null)
     });
@@ -105,16 +100,22 @@ ready.timezones.then((timezones) => {
         });
 
         timezoneSchema.enumLabels = filteredTimezones.reduce((acc, tz) => {
-            const [ region, city ] = tz.split('/')
-            acc[tz] = `${city}, ${region}`
+            const [ _, ...other ] = tz.split('/')
+            acc[tz] = other.map(part => header(part)).join(' — ')
             return acc
-        })
+        }, {})
+
+        timezoneSchema.enumKeywords = filteredTimezones.reduce((acc, tz) => {
+            const [ region ] = tz.split('/')
+            acc[tz] = [ header(region) ]
+            return acc
+        }, {})
 
         timezoneSchema.enumCategories =  filteredTimezones.reduce((acc, tz) => {
             const [ region ] = tz.split('/')
             acc[tz] = region
             return acc
-        })
+        }, {})
 
         timezoneSchema.default = timezone;
     })
