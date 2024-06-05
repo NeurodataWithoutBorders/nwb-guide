@@ -875,8 +875,8 @@ def convert_to_nwb(
 ) -> str:
     """Function used to convert the source data to NWB format using the specified metadata."""
 
-    import requests
     import neuroconv
+    import requests
     from tqdm_publisher import TQDMProgressSubscriber
 
     url = info.get("url", None)
