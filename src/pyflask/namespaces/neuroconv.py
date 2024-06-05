@@ -7,6 +7,7 @@ from manageNeuroconv import (
     convert_all_to_nwb,
     get_all_converter_info,
     get_all_interface_info,
+    get_backend_configuration,
     get_interface_alignment,
     get_metadata_schema,
     get_source_schema,
@@ -91,6 +92,13 @@ class Alignment(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         return get_interface_alignment(neuroconv_namespace.payload)
+
+
+@neuroconv_namespace.route("/configuration")
+class GetBackendConfiguration(Resource):
+    @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        return get_backend_configuration(neuroconv_namespace.payload)
 
 
 validate_parser = neuroconv_namespace.parser()

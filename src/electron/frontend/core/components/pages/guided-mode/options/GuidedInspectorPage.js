@@ -47,10 +47,6 @@ export class GuidedInspectorPage extends Page {
         });
     }
 
-    workflow = {
-        multiple_sessions: {},
-    };
-
     headerButtons = [
         new Button({
             label: "JSON",
