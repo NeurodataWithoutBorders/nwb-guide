@@ -1162,8 +1162,7 @@ def get_conversion_info(info: dict) -> dict:
     if "date_of_birth" in resolved_metadata["Subject"]:
         resolved_metadata["Subject"]["date_of_birth"] = datetime.fromisoformat(
             resolved_metadata["Subject"]["date_of_birth"]
-    ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
-
+        ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
 
     return (
         converter,
