@@ -2,7 +2,7 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
-
+import { merge } from "../../utils.js";
 import timezoneSchema from "../../../../../../../schemas/timezone.schema";
 
 // ------------------------------------------------------------------------------
@@ -10,6 +10,12 @@ import timezoneSchema from "../../../../../../../schemas/timezone.schema";
 // ------------------------------------------------------------------------------
 
 const questions = {
+    timezone: {
+        ...timezoneSchema,
+        title: "What timezone is your data in?",
+        required: true,
+    },
+
     multiple_sessions: {
         type: "boolean",
         title: "Will this pipeline be run on multiple sessions?",
@@ -41,7 +47,7 @@ const questions = {
         type: "boolean",
         title: "Would you like to locate the source data programmatically?",
         dependencies: {
-            multiple_sessions: { default: false },
+            multiple_sessions: {},
         },
         default: false,
     },
@@ -57,15 +63,32 @@ const questions = {
         },
     },
 
-    timezone: {
-        ...timezoneSchema,
-        title: "What timezone is your data in?",
-        required: true,
+    file_format: {
+        type: "string",
+        enum: ["hdf5", "zarr"],
+        enumLabels: {
+            hdf5: "HDF5",
+            zarr: "Zarr",
+        },
+        strict: true,
+        title: "What file format would you like to use?",
+        description: "Choose a default file format for your data.",
+        default: "hdf5",
+        ignore: true, // NOTE: This ensures that users can only use the default (HDF5) format
+    },
+
+    backend_configuration: {
+        type: "boolean",
+        title: "Would you like to customize low-level data storage options?",
+
+        description:
+            "<span>Dataset chunking, compression, etc.</span><br><small>This also allows you to change file formats per-session</small>",
+        default: false,
     },
 
     upload_to_dandi: {
         type: "boolean",
-        title: "Would you like to upload your data to DANDI?",
+        title: "Will you publish data on DANDI?",
         default: true,
     },
 };
@@ -92,7 +115,7 @@ const getSchema = (questions) => {
             else
                 Object.entries(deps).forEach(([dep, opts]) => {
                     if (!acc[dep]) acc[dep] = [];
-                    acc[dep].push({ name, ...opts });
+                    acc[dep].push({ name, default: info.default, ...opts });
                 });
         }
         return acc;
@@ -107,6 +130,11 @@ const getSchema = (questions) => {
         if (info.required) acc.push(name);
         return acc;
     }, []);
+
+    const ignore = Object.entries(questions).reduce((acc, [name, info]) => {
+        if (info.ignore) acc[name] = true;
+        return acc;
+    }, {});
 
     const projectWorkflowSchema = {
         type: "object",
@@ -123,6 +151,7 @@ const getSchema = (questions) => {
         schema: structuredClone(projectWorkflowSchema),
         defaults,
         dependents,
+        ignore,
     };
 };
 
@@ -142,9 +171,11 @@ export class GuidedPreform extends Page {
         subtitle: "Answer the following questions to simplify your workflow through the GUIDE",
     };
 
+    #setWorkflow = () => (this.info.globalState.project.workflow = this.state); // NOTE: Defaults already populated
+
     beforeSave = async () => {
         await this.form.validate();
-        this.info.globalState.project.workflow = this.state;
+        this.#setWorkflow();
     };
 
     footer = {
@@ -155,7 +186,7 @@ export class GuidedPreform extends Page {
     };
 
     updateForm = () => {
-        const { schema, dependents, defaults } = getSchema(questions);
+        const { schema, dependents, defaults, ignore } = getSchema(questions);
         const projectState = this.info.globalState.project ?? {};
         if (!projectState.workflow) projectState.workflow = {};
 
@@ -168,6 +199,7 @@ export class GuidedPreform extends Page {
 
         this.form = new JSONSchemaForm({
             schema,
+            ignore,
             results: this.state,
             validateEmptyValues: false, // Only show errors after submission
             validateOnChange: function (name, parent, path, value) {
@@ -193,28 +225,46 @@ export class GuidedPreform extends Page {
                         condition = (v) => dependent.condition.some((condition) => v == condition);
                     else console.warn("Invalid condition", dependent.condition);
 
+                    // Is set to true
                     if (uniformDeps.every(({ name }) => condition(parent[name]))) {
                         dependentParent.removeAttribute(attr);
                         if ("required" in dependent) dependentEl.required = dependent.required;
                         if ("__cached" in dependent) dependentEl.updateData(dependent.__cached);
-                    } else {
+                    }
+
+                    // Is set to false
+                    else {
                         if (dependentEl.value !== undefined) dependent.__cached = dependentEl.value;
                         dependentEl.updateData(dependent.default);
                         dependentParent.setAttribute(attr, true);
                         if ("required" in dependent) dependentEl.required = !dependent.required;
                     }
                 });
-            },
 
-            // Immediately re-render boolean values
-            onUpdate: async (path, value) => {
-                if (typeof value === "boolean") {
-                    this.unsavedUpdates = true;
-                    this.info.globalState.project.workflow = this.state;
-                    this.updateSections(); // Trigger section changes with new workflow
-                    await this.save({}, false); // Save new workflow and section changes
+                const { upload_to_dandi, file_format } = parent;
+
+                // Only check file format because of global re-render
+                if (name === "file_format") {
+                    if (upload_to_dandi === true && file_format === "zarr")
+                        return [
+                            {
+                                type: "error",
+                                message:
+                                    "<h4 style='margin:0;'>Zarr files are not supported by DANDI</h4><span>Please change the file format to HDF5 or disable DANDI upload.</span>",
+                            },
+                        ];
                 }
             },
+
+            // Save all changes
+            onUpdate: async (path, value) => {
+                const willUpdateFlow = typeof value === "boolean";
+                this.unsavedUpdates = true;
+                this.#setWorkflow();
+                if (willUpdateFlow) this.updateSections(); // Trigger section changes with new workflow
+                await this.save({}, false); // Save new workflow and section changes
+            },
+
             onThrow,
             // groups: [
             //     {

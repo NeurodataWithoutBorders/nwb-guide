@@ -43,8 +43,6 @@ export class NestedEditor extends LitElement {
 
         const schema = this.schema
 
-
-        console.log('schema', schema, 'data', data)
         const container = document.createElement('div')
         const input = this.#input = new JSONSchemaInput({
             schema,

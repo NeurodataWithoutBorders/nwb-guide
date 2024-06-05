@@ -581,7 +581,8 @@ export class JSONSchemaForm extends LitElement {
 
         const allErrors = flaggedInputs
             .map((inputElement) => Array.from(inputElement.nextElementSibling.children).map((li) => li.message))
-            .flat();
+            .flat()
+            .filter((v) => !!v);
 
         const nMissingRequired = allErrors.reduce((acc, curr) => {
             return (acc += curr.includes(this.#isARequiredPropertyString) ? 1 : 0);

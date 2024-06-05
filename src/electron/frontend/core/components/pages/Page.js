@@ -119,18 +119,21 @@ export class Page extends LitElement {
 
     mapSessions = (callback, data = this.info.globalState.results) => mapSessions(callback, data);
 
-    async convert({ preview } = {}) {
+    async convert({ preview, ...conversionOptions } = {}, options = {}) {
         const key = preview ? "preview" : "conversion";
 
         delete this.info.globalState[key]; // Clear the preview results
 
         if (preview) {
-            const stubs = await this.runConversions({ stub_test: true }, undefined, {
-                title: "Creating conversion preview for all sessions...",
-            });
+            if (!options.title) options.title = "Running preview conversion on all sessions...";
+
+            const stubs = await this.runConversions({ stub_test: true, ...conversionOptions }, undefined, options);
+
             this.info.globalState[key] = { stubs };
         } else {
-            this.info.globalState[key] = await this.runConversions({}, true, { title: "Running all conversions" });
+            if (!options.title) options.title = "Running all conversions";
+
+            this.info.globalState[key] = await this.runConversions(conversionOptions, true, options);
         }
 
         this.unsavedUpdates = true;
@@ -142,7 +145,9 @@ export class Page extends LitElement {
         await this.save({}, false);
     }
 
-    async runConversions(conversionOptions = {}, toRun, options = {}) {
+    async runConversions(conversionOptions = {}, toRun, options = {}, backendFunctionToRun = null) {
+        const hasCustomFunction = !!backendFunctionToRun;
+
         let original = toRun;
         if (!Array.isArray(toRun)) toRun = this.mapSessions();
 
@@ -152,11 +157,14 @@ export class Page extends LitElement {
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 
-        const results = {};
+        const conversionOutput = {};
 
-        const swalOpts = await createProgressPopup({ title: `Running conversion`, ...options });
+        const swalOpts = hasCustomFunction
+            ? options
+            : await createProgressPopup({ title: `Running conversion`, ...options });
 
         const { close: closeProgressPopup } = swalOpts;
+
         const fileConfiguration = [];
 
         try {
@@ -168,68 +176,87 @@ export class Page extends LitElement {
 
                 const sessionResults = globalState.results[subject][session];
 
+                const configurationCopy = { ...(sessionResults.configuration ?? {}) };
+
                 const sourceDataCopy = structuredClone(sessionResults.source_data);
 
-                // Resolve the correct session info from all of the metadata for this conversion
-                const metadata = resolveMetadata(subject, session, globalState);
+                if (!configurationCopy.backend) configurationCopy.backend = this.workflow.file_format.value;
 
+                // Resolve the correct session info from all of the metadata for this conversion
                 const sessionInfo = {
-                    ...sessionResults,
-                    metadata,
+                    configuration: configurationCopy,
+                    metadata: resolveMetadata(subject, session, globalState),
                     source_data: merge(SourceData, sourceDataCopy),
                 };
 
+                const optsCopy = structuredClone(conversionOptions);
+
+                if (optsCopy.configuration === false) {
+                    delete sessionInfo.configuration; // Skip backend configuration options if specified as such
+                    delete optsCopy.backend;
+                } else {
+                    if (typeof optsCopy.configuration === "object") merge(optsCopy.configuration, configurationCopy);
+                }
+
+                delete optsCopy.configuration;
+
                 const payload = {
-                    output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
+                    output_folder: optsCopy.stub_test ? undefined : conversion_output_folder,
                     project_name: name,
                     nwbfile_path: file,
                     overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
                     ...sessionInfo, // source_data and metadata are passed in here
-                    ...conversionOptions, // Any additional conversion options override the defaults
+                    ...optsCopy, // Any additional conversion options override the defaults
                     interfaces: globalState.interfaces,
                     alignment,
                     timezone: this.workflow.timezone.value,
                 };
 
-                fileConfiguration.push(payload);
+                if (hasCustomFunction) {
+                    const result = await backendFunctionToRun(payload, swalOpts); // Already handling Swal popup
+                    const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
+                    subRef[session] = result;
+                } else fileConfiguration.push(payload);
             }
 
-            const conversionResults = await run(
-                `neuroconv/convert`,
-                {
-                    files: fileConfiguration,
-                    max_workers: 2, // TODO: Make this configurable and confirm default value
-                    request_id: swalOpts.id,
-                },
-                {
-                    title: "Running the conversion",
-                    onError: () => "Conversion failed with current metadata. Please try again.",
-                    ...swalOpts,
-                }
-            ).catch(async (error) => {
-                let message = error.message;
+            if (fileConfiguration.length) {
+                const results = await run(
+                    `neuroconv/convert`,
+                    {
+                        files: fileConfiguration,
+                        max_workers: 2, // TODO: Make this configurable and confirm default value
+                        request_id: swalOpts.id,
+                    },
+                    {
+                        title: "Running the conversion",
+                        onError: () => "Conversion failed with current metadata. Please try again.",
+                        ...swalOpts,
+                    }
+                ).catch(async (error) => {
+                    let message = error.message;
 
-                if (message.includes("The user aborted a request.")) {
-                    this.notify("Conversion was cancelled.", "warning");
+                    if (message.includes("The user aborted a request.")) {
+                        this.notify("Conversion was cancelled.", "warning");
+                        throw error;
+                    }
+
+                    this.notify(message, "error");
                     throw error;
-                }
+                });
 
-                this.notify(message, "error");
-                throw error;
-            });
-
-            conversionResults.forEach((info) => {
-                const { file } = info;
-                const fileName = file.split("/").pop();
-                const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
-                const subRef = results[subject] ?? (results[subject] = {});
-                subRef[session] = info;
-            });
+                results.forEach((info) => {
+                    const { file } = info;
+                    const fileName = file.split("/").pop();
+                    const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
+                    const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
+                    subRef[session] = info;
+                });
+            }
         } finally {
-            await closeProgressPopup();
+            closeProgressPopup && (await closeProgressPopup());
         }
 
-        return results;
+        return conversionOutput;
     }
 
     //   NOTE: Until the shadow DOM is supported in Storybook, we can't use this render function how we'd intend to.
@@ -257,7 +284,7 @@ export class Page extends LitElement {
 
     updateSections = () => {
         const dashboard = document.querySelector("nwb-dashboard");
-        dashboard.updateSections({ sidebar: true, main: true }, this.info.globalState);
+        dashboard.updateSections({ sidebar: true, header: true }, this.info.globalState);
     };
 
     #unsaved = false;

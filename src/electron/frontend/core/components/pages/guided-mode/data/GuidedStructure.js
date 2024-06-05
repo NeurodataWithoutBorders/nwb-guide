@@ -35,6 +35,10 @@ export class GuidedStructurePage extends Page {
             this.searchModal.toggle(false);
         };
 
+        Object.assign(this.addButton.style, {
+            marginTop: "10px",
+        });
+
         this.addButton.innerText = "Add Format";
         this.addButton.onClick = () => {
             this.search.shadowRoot.querySelector("input").focus();

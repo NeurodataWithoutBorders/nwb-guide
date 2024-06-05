@@ -27,7 +27,8 @@
                 "main": "Main Archive"
             },
             "enum": ["main", "staging"],
-            "description": "Which DANDI server to upload to. <br><small><b>Note:</b> The Development Server is recommended for developers, or users learning to use DANDI</small>"
+            "description": "Which DANDI server to upload to. <br><small><b>Note:</b> The Development Server is recommended for developers, or users learning to use DANDI</small>",
+            "strict": true
         },
 
         "description": {
