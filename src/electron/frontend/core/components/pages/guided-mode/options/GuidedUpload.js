@@ -182,7 +182,7 @@ export class GuidedUploadPage extends Page {
                     },
                     onUpdate: () => (this.unsavedUpdates = true),
                     onThrow,
-                    validateOnChange: (...args) => validate.call(this, ...args)
+                    validateOnChange: (...args) => validate.call(this, ...args),
                 }));
             })
             .catch((error) => html`<p>${error}</p>`);

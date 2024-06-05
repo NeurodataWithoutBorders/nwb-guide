@@ -42,7 +42,7 @@ export class DandiResults extends LitElement {
         const type = staging ? "staging" : undefined;
         const api_key = await getAPIKey.call(this, staging);
 
-        const dandiset = await get(this.id, { 
+        const dandiset = await get(this.id, {
             type,
             token: api_key,
         });
