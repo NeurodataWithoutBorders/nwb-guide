@@ -56,7 +56,7 @@ export const uploadToDandi = (subdirectory, forceSkip = false) => {
 
         const page = document.querySelector('nwb-dashboard').page
         page.dismiss() // Dismiss all internal notifications
-        
+
       }, modalId)
 
       await evaluate(async (dandisetId) => {

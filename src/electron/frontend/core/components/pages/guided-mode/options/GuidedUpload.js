@@ -41,7 +41,7 @@ export class GuidedUploadPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
-                    document.body.append(this.globalModal)
+                    document.body.append(this.globalModal);
                     this.globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
                     this.globalModal.open = true;
                 },
@@ -92,7 +92,7 @@ export class GuidedUploadPage extends Page {
                     if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
                 },
             },
-        })
+        });
     }
 
     disconnectedCallback() {
@@ -175,7 +175,7 @@ export class GuidedUploadPage extends Page {
                                     const result = createDandiset.call(this, { title: this.form.resolved.dandiset });
                                     const { modal, done } = result;
                                     done.then(() => this.requestUpdate());
-                                    return modal
+                                    return modal;
                                 },
                             }),
                         ],
@@ -190,8 +190,8 @@ export class GuidedUploadPage extends Page {
         // Confirm that one api key exists
         promise.then(() => {
             const api_keys = global.data.DANDI?.api_keys;
-            if (!api_keys || !Object.keys(api_keys).length) this.header.controls[0].onClick() // Add modal and open it
-        })
+            if (!api_keys || !Object.keys(api_keys).length) this.header.controls[0].onClick(); // Add modal and open it
+        });
 
         const untilResult = until(promise, html`Loading form contents...`);
 

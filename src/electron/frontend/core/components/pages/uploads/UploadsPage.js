@@ -47,7 +47,7 @@ export function createDandiset(results = {}) {
 
     const modal = new Modal({
         header: "Create a Dandiset",
-        onClose: () => modal.remove()
+        onClose: () => modal.remove(),
     });
 
     const content = document.createElement("div");
@@ -170,7 +170,7 @@ export function createDandiset(results = {}) {
     return {
         modal,
         done: promise,
-    }
+    };
 }
 
 async function getAPIKey(staging = false) {
@@ -186,7 +186,7 @@ async function getAPIKey(staging = false) {
         const modal = new Modal({
             header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
             open: true,
-            onClose: () => modal.remove()
+            onClose: () => modal.remove(),
         });
 
         const input = new JSONSchemaInput({
@@ -364,9 +364,9 @@ export class UploadsPage extends Page {
                 global.data.uploads = {};
                 global.save();
 
-                const modal = new Modal({ 
+                const modal = new Modal({
                     open: true,
-                    onClose: () => modal.remove()
+                    onClose: () => modal.remove(),
                 });
                 modal.header = "DANDI Upload Summary";
                 const summary = new DandiResults({
@@ -408,7 +408,7 @@ export class UploadsPage extends Page {
 
                                     done.then(() => this.requestUpdate());
 
-                                    return modal
+                                    return modal;
                                 },
                             }),
                         ],

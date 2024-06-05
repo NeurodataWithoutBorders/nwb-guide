@@ -45,7 +45,7 @@ export async function autocompleteFormatString(path) {
 
     const modal = new Modal({
         header: `${interfaceName} — Autocomplete Format String`,
-        onClose: () => modal.remove()
+        onClose: () => modal.remove(),
     });
 
     const content = document.createElement("div");
