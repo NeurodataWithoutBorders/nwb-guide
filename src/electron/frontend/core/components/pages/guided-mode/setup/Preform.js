@@ -79,7 +79,8 @@ const questions = {
 
     backend_configuration: {
         type: "boolean",
-        title: "Will you customize low-level data storage options?",
+        title: "Would you like to customize low-level data storage options?",
+
         description:
             "<span>Dataset chunking, compression, etc.</span><br><small>This also allows you to change file formats per-session</small>",
         default: false,
