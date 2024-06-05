@@ -15,7 +15,13 @@ from typing import Any, Dict, List, Optional, Union
 
 from tqdm_publisher import TQDMProgressHandler
 
-from .info import CONVERSION_SAVE_FOLDER_PATH, GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH
+from .info import (
+    CONVERSION_SAVE_FOLDER_PATH,
+    GUIDE_ROOT_FOLDER,
+    STUB_SAVE_FOLDER_PATH,
+    is_packaged,
+    resource_path,
+)
 from .info.sse import format_sse
 
 progress_handler = TQDMProgressHandler()
@@ -870,7 +876,7 @@ def create_file(
     info: dict,
     log_url: Optional[str] = None,
 ) -> dict:
-
+    import neuroconv
     import requests
     from tqdm_publisher import TQDMProgressSubscriber
 
@@ -933,6 +939,14 @@ def create_file(
                     progress_bar_class=TQDMProgressSubscriber,
                     progress_bar_options=progress_bar_options,
                 )
+
+        # Add GUIDE watermark
+        package_json_file_path = resource_path("../package.json" if is_packaged() else "../package.json")
+        with open(file=package_json_file_path) as fp:
+            package_json = json.load(fp=fp)
+        app_version = package_json["version"]
+        metadata["NWBFile"]["source_script"] = f"Created using NWB GUIDE v{app_version}"
+        metadata["NWBFile"]["source_script_file_name"] = neuroconv.__file__  # Must be included to be valid
 
         run_conversion_kwargs = dict(
             metadata=metadata,
