@@ -20,17 +20,23 @@ jobs:
         with:
           python-version: "3.10"
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v3
         with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
           activate-environment: nwb-guide
-          environment-file: environments/environment-MAC-apple-silicon.yml
-          auto-activate-base: false
+          use-mamba: true
 
-      - uses: actions/setup-node@v3
+      - name: Create and activate environment
+        run: mamba env update --name nwb-guide --file environments/environment-MAC-apple-silicon.yml
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: 20
 
-      - name: Install package.json modules and their dependencies
+      - name: Install package.json modules and their dependencies (not via `npm ci`)
         run: npm install --verbose
 
       - name: Remove bad sonpy file (might make Spike2 format unusable on Mac - should exclude from selection)
